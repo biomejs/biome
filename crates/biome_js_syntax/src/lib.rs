@@ -5,19 +5,23 @@
 #[macro_use]
 mod generated;
 pub mod assign_ext;
+pub mod binary_like_expression;
 pub mod binding_ext;
 pub mod declaration_ext;
 pub mod directive_ext;
 pub mod export_ext;
 pub mod expr_ext;
+pub mod expression_left_side;
 pub mod file_source;
 pub mod function_ext;
 pub mod identifier_ext;
 pub mod import_ext;
 pub mod jsx_ext;
+pub mod misc_ext;
 pub mod modifier_ext;
 pub mod numbers;
 pub mod parameter_ext;
+pub mod parentheses;
 pub mod static_value;
 pub mod stmt_ext;
 mod syntax_node;
@@ -60,6 +64,15 @@ impl JsSyntaxKind {
     pub const fn is_keyword(self) -> bool {
         (self as u16) <= (JsSyntaxKind::USING_KW as u16)
             && (self as u16) >= (JsSyntaxKind::BREAK_KW as u16)
+    }
+
+    /// Returns `true` for any kind representing a Grit metavariable.
+    #[inline]
+    pub fn is_metavariable(&self) -> bool {
+        matches!(
+            self,
+            JsSyntaxKind::GRIT_METAVARIABLE | JsSyntaxKind::JS_METAVARIABLE
+        )
     }
 
     /// Returns `true` for contextual keywords (excluding strict mode contextual keywords)

@@ -1,10 +1,9 @@
 use crate::prelude::*;
-use biome_formatter::write;
 
-use crate::js::expressions::await_expression::await_or_yield_needs_parens;
-use crate::parentheses::NeedsParentheses;
-use biome_js_syntax::{JsSyntaxKind, JsYieldExpressionFields};
-use biome_js_syntax::{JsSyntaxNode, JsYieldExpression};
+use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsYieldExpression;
+use biome_js_syntax::JsYieldExpressionFields;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsYieldExpression;
@@ -21,13 +20,6 @@ impl FormatNodeRule<JsYieldExpression> for FormatJsYieldExpression {
 
     fn needs_parentheses(&self, item: &JsYieldExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsYieldExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        matches!(parent.kind(), JsSyntaxKind::JS_AWAIT_EXPRESSION)
-            || await_or_yield_needs_parens(parent, self.syntax())
     }
 }
 

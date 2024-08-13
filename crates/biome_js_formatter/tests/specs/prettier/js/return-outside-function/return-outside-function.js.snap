@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/return-outside-function/return-outside-function.js
 ---
-
 # Input
 
 ```js
@@ -49,5 +48,3 @@ return-outside-function.js:1:1 parse ━━━━━━━━━━━━━━�
 ```
     1: return someVeryLongStringA && someVeryLongStringB && someVeryLongStringC && someVeryLongStringD
 ```
-
-

@@ -369,7 +369,7 @@ pub fn generate_type<'a>(
             let current_module = AnyJsDeclaration::from(
                 make::ts_interface_declaration(
                     make::token(T![interface]),
-                    make::ts_identifier_binding(make::ident(name)),
+                    make::ts_identifier_binding(make::ident(name)).into(),
                     make::token(T!['{']),
                     make::ts_type_member_list(members),
                     make::token(T!['}']),
@@ -386,7 +386,7 @@ pub fn generate_type<'a>(
             let current_module = AnyJsDeclaration::from(
                 make::ts_type_alias_declaration(
                     make::token(T![type]),
-                    make::ts_identifier_binding(make::ident(name)),
+                    make::ts_identifier_binding(make::ident(name)).into(),
                     make::token(T![=]),
                     ts_type,
                 )
@@ -456,7 +456,7 @@ pub fn methods() -> [WorkspaceMethod; 20] {
         WorkspaceMethod::of::<SupportsFeatureParams, SupportsFeatureResult>("file_features"),
         workspace_method!(update_settings),
         workspace_method!(register_project_folder),
-        workspace_method!(update_current_project),
+        workspace_method!(update_current_manifest),
         workspace_method!(open_project),
         workspace_method!(open_file),
         workspace_method!(change_file),

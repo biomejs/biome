@@ -1,12 +1,10 @@
-use crate::parentheses::NeedsParentheses;
 use crate::prelude::*;
-use crate::utils::{
-    should_hug_type, union_or_intersection_type_needs_parentheses, FormatTypeMemberSeparator,
-    TsIntersectionOrUnionTypeList,
-};
+use crate::utils::{should_hug_type, FormatTypeMemberSeparator};
+
 use biome_formatter::{format_args, write, Buffer};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::TsUnionTypeFields;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxToken, TsTupleTypeElementList, TsUnionType};
-use biome_js_syntax::{JsSyntaxNode, TsUnionTypeFields};
 use biome_rowan::SyntaxNodeOptionExt;
 
 #[derive(Debug, Clone, Default)]
@@ -152,16 +150,6 @@ impl FormatNodeRule<TsUnionType> for FormatTsUnionType {
             // Suppression applies to first variant
             false
         }
-    }
-}
-
-impl NeedsParentheses for TsUnionType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        union_or_intersection_type_needs_parentheses(
-            self.syntax(),
-            parent,
-            &TsIntersectionOrUnionTypeList::TsUnionTypeVariantList(self.types()),
-        )
     }
 }
 

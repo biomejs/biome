@@ -83,7 +83,7 @@ impl Rule for NoDoubleEquals {
         let text_trimmed = op.text_trimmed();
         let suggestion = if op.kind() == EQ2 { "===" } else { "!==" };
         let description = format!(
-            "Use {suggestion} instead of {text_trimmed}.\n{text_trimmed} is only allowed when comparing against `null`"
+            "Use {suggestion} instead of {text_trimmed}. {text_trimmed} is only allowed when comparing against `null`"
         );
         Some(RuleDiagnostic::new(
             rule_category!(),

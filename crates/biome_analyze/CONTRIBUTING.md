@@ -71,10 +71,11 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    Among the other files, you'll find a file called `use_my_new_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
 
    If you want to create a _CSS_ lint rule, run this script. It will generate a new lint rule in `biome_css_analyze`
+
    ```shell
    just new-css-lintrule useMyRuleName
    ```
-1.
+
 1. The `Ast` query type allows you to query the CST of a program.
 1. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
 1. Implement the `run` function:
@@ -111,6 +112,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 
    It may return zero or one code action.
    Rules can return a code action that can be **safe** or **unsafe**. If a rule returns a code action, you must add `fix_kind` to the macro `declare_lint_rule`.
+
    ```rust
    use biome_analyze::FixKind;
    declare_lint_rule!{
@@ -256,12 +258,12 @@ declare_lint_rule! {
 
 ##### Biome lint rules inspired by other lint rules
 
-If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `Source`, which is an `enum` that contains various variants.
+If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
 If you're implementing a lint rule that matches the behaviour of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
 ```rust
-use biome_analyze::{declare_lint_rule, Source};
+use biome_analyze::{declare_lint_rule, RuleSource};
 
 declare_lint_rule! {
     /// Documentation
@@ -270,15 +272,15 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        source: Source::Eslint("no-debugger"),
+        sources: &[RuleSource::Eslint("no-debugger")],
     }
 }
 ```
 
-If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `SourceKind::Inspired` type.
+If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
 
 ```rust
-use biome_analyze::{declare_lint_rule, Source, SourceKind};
+use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
 
 declare_lint_rule! {
     /// Documentation
@@ -287,12 +289,13 @@ declare_lint_rule! {
         name: "myRuleName",
         language: "js",
         recommended: false,
-        source: Source::Eslint("no-debugger"),
-        source_kind: SourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-debugger")],
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 ```
-By default, `source_kind` is always `SourceKind::Same`.
+
+By default, `source_kind` is always `RuleSourceKind::SameLogic`.
 
 #### Category Macro
 
@@ -333,6 +336,7 @@ When navigating the nodes and tokens of certain nodes, you will notice straight 
 Generally, you will end up navigating the CST inside the `run` function, and this function will usually return an `Option` or a `Vec`.
 
 - If the `run` function returns an `Option`, you're encouraged to transform the `Result` into an `Option` and use the try operator `?`. This will make your coding way easier:
+
   ```rust
   fn run() -> Self::Signals {
     let prev_val = js_object_member.value().ok()?;
@@ -426,6 +430,7 @@ To achieve that you can change Signals type from `Option<()>` to `Vec<()>`.
 This will call the diagnostic/action function for every item of the vec.
 
 Taking previous example and modifying it a bit we can apply diagnostic for each item easily.
+
 ```rust
 impl Rule for ForLoopCountReferences {
     type Query = Semantic<JsForStatement>;
@@ -613,7 +618,7 @@ impl Rule for UseYield {
 
 A swift way to test your rule is to go inside the `biome_js_analyze/src/lib.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
 
-Usually this test is ignored, so remove _comment_ the macro `#[ignore]` macro, change the `let SOURCE` variable to whatever source code you need to test.  Then update the rule filter, and add your rule:
+Usually this test is ignored, so remove _comment_ the macro `#[ignore]` macro, change the `let SOURCE` variable to whatever source code you need to test. Then update the rule filter, and add your rule:
 
 ```rust
 let rule_filter = RuleFilter::Rule("nursery", "useAwesomeTrick");

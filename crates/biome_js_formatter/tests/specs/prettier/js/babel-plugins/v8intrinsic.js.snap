@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/babel-plugins/v8intrinsic.js
 ---
-
 # Input
 
 ```js
@@ -166,5 +165,3 @@ v8intrinsic.js:22:9 parse ━━━━━━━━━━━━━━━━━━
    11: // Invalid code https://github.com/JLHwung/babel/blob/c1a3cbfd65e08b7013fd6f8c62add8cb10b4b169/packages/babel-parser/test/fixtures/v8intrinsic/_errors/not-in-call-expression/options.json
    15: // https://github.com/JLHwung/babel/blob/c1a3cbfd65e08b7013fd6f8c62add8cb10b4b169/packages/babel-parser/test/fixtures/v8intrinsic/_errors/not-in-call-expression/options.json
 ```
-
-

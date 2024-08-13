@@ -55,7 +55,7 @@ impl Rule for NoFlatMapIdentity {
         let flat_map_call = ctx.query();
 
         let flat_map_expression =
-            AnyJsMemberExpression::cast_ref(flat_map_call.callee().ok()?.syntax())?;
+            AnyJsMemberExpression::cast(flat_map_call.callee().ok()?.into_syntax())?;
 
         if flat_map_expression.object().is_err() {
             return None;

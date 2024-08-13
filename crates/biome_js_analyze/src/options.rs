@@ -1,5 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
+use crate::assists;
 use crate::lint;
 
 pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze::Rule>::Options;
@@ -228,6 +229,7 @@ pub type NoUselessConstructor = < lint :: complexity :: no_useless_constructor :
 pub type NoUselessElse =
     <lint::style::no_useless_else::NoUselessElse as biome_analyze::Rule>::Options;
 pub type NoUselessEmptyExport = < lint :: complexity :: no_useless_empty_export :: NoUselessEmptyExport as biome_analyze :: Rule > :: Options ;
+pub type NoUselessEscapeInRegex = < lint :: nursery :: no_useless_escape_in_regex :: NoUselessEscapeInRegex as biome_analyze :: Rule > :: Options ;
 pub type NoUselessFragments =
     <lint::complexity::no_useless_fragments::NoUselessFragments as biome_analyze::Rule>::Options;
 pub type NoUselessLabel =
@@ -252,6 +254,8 @@ pub type NoVoidTypeReturn =
 pub type NoWith = <lint::complexity::no_with::NoWith as biome_analyze::Rule>::Options;
 pub type NoYodaExpression =
     <lint::nursery::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
+pub type OrganizeImports =
+    <assists::source::organize_imports::OrganizeImports as biome_analyze::Rule>::Options;
 pub type UseAdjacentOverloadSignatures = < lint :: nursery :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures as biome_analyze :: Rule > :: Options ;
 pub type UseAltText = <lint::a11y::use_alt_text::UseAltText as biome_analyze::Rule>::Options;
 pub type UseAnchorContent =
@@ -363,6 +367,8 @@ pub type UseThrowOnlyError =
     <lint::nursery::use_throw_only_error::UseThrowOnlyError as biome_analyze::Rule>::Options;
 pub type UseTopLevelRegex =
     <lint::nursery::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
+pub type UseTrimStartEnd =
+    <lint::nursery::use_trim_start_end::UseTrimStartEnd as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =
     <lint::a11y::use_valid_anchor::UseValidAnchor as biome_analyze::Rule>::Options;
 pub type UseValidAriaProps =

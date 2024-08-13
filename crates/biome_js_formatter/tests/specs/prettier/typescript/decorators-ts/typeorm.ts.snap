@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/decorators-ts/typeorm.ts
 ---
-
 # Input
 
 ```ts
@@ -77,5 +76,3 @@ export class Board {
   topics: Topic[];
 }
 ```
-
-

@@ -8,14 +8,15 @@ use crate::cli_options::{CliOptions, CliReporter};
 use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
-use crate::execute::traverse::traverse;
+use crate::execute::traverse::{traverse, TraverseResult};
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
+use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
 use crate::reporter::junit::{JunitReporter, JunitReporterVisitor};
 use crate::reporter::summary::{SummaryReporter, SummaryReporterVisitor};
 use crate::reporter::terminal::{ConsoleReporter, ConsoleReporterVisitor};
 use crate::{CliDiagnostic, CliSession, DiagnosticsPayload, Reporter};
-use biome_configuration::linter::RuleSelector;
+use biome_configuration::analyzer::RuleSelector;
 use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};
@@ -23,9 +24,11 @@ use biome_fs::BiomePath;
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
 };
+use std::borrow::Borrow;
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
+use tracing::info;
 
 /// Useful information during the traversal of files and virtual content
 #[derive(Debug, Clone)]
@@ -37,7 +40,7 @@ pub struct Execution {
     traversal_mode: TraversalMode,
 
     /// The maximum number of diagnostics that can be printed in console
-    max_diagnostics: u16,
+    max_diagnostics: u32,
 }
 
 impl Execution {
@@ -68,6 +71,7 @@ impl Execution {
                 .with_organize_imports()
                 .with_formatter()
                 .with_linter()
+                .with_assists()
                 .build(),
             TraversalMode::Migrate { .. } => FeatureName::empty(),
             TraversalMode::Search { .. } => FeaturesBuilder::new().with_search().build(),
@@ -217,6 +221,8 @@ pub enum ReportMode {
     /// JUnit output
     /// Ref: https://github.com/testmoapp/junitxml?tab=readme-ov-file#basic-junit-xml-structure
     Junit,
+    /// Reports information in the [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool) format.
+    GitLab,
 }
 
 impl Default for ReportMode {
@@ -238,6 +244,7 @@ impl From<CliReporter> for ReportMode {
             CliReporter::JsonPretty => Self::Json { pretty: true },
             CliReporter::GitHub => Self::GitHub,
             CliReporter::Junit => Self::Junit,
+            CliReporter::GitLab => Self::GitLab {},
         }
     }
 }
@@ -281,7 +288,7 @@ impl Execution {
         &self.traversal_mode
     }
 
-    pub(crate) fn get_max_diagnostics(&self) -> u16 {
+    pub(crate) fn get_max_diagnostics(&self) -> u32 {
         self.max_diagnostics
     }
 
@@ -395,7 +402,13 @@ pub fn execute_mode(
     cli_options: &CliOptions,
     paths: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
-    execution.max_diagnostics = cli_options.max_diagnostics;
+    // If a custom reporter was provided, let's lift the limit so users can see all of them
+    execution.max_diagnostics = if cli_options.reporter.is_default() {
+        cli_options.max_diagnostics.into()
+    } else {
+        info!("Removing the limit of --max-diagnostics, because of a reporter different from the default one: {}", cli_options.reporter);
+        u32::MAX
+    };
 
     // don't do any traversal if there's some content coming from stdin
     if let Some(stdin) = execution.as_stdin_file() {
@@ -424,18 +437,22 @@ pub fn execute_mode(
         };
         migrate::run(payload)
     } else {
-        let (summary_result, diagnostics) = traverse(&execution, &mut session, cli_options, paths)?;
+        let TraverseResult {
+            summary,
+            evaluated_paths,
+            diagnostics,
+        } = traverse(&execution, &mut session, cli_options, paths)?;
         let console = session.app.console;
-        let errors = summary_result.errors;
-        let skipped = summary_result.skipped;
-        let processed = summary_result.changed + summary_result.unchanged;
-        let should_exit_on_warnings = summary_result.warnings > 0 && cli_options.error_on_warnings;
+        let errors = summary.errors;
+        let skipped = summary.skipped;
+        let processed = summary.changed + summary.unchanged;
+        let should_exit_on_warnings = summary.warnings > 0 && cli_options.error_on_warnings;
 
         match execution.report_mode {
             ReportMode::Terminal { with_summary } => {
                 if with_summary {
                     let reporter = SummaryReporter {
-                        summary: summary_result,
+                        summary,
                         diagnostics_payload: DiagnosticsPayload {
                             verbose: cli_options.verbose,
                             diagnostic_level: cli_options.diagnostic_level,
@@ -446,13 +463,14 @@ pub fn execute_mode(
                     reporter.write(&mut SummaryReporterVisitor(console))?;
                 } else {
                     let reporter = ConsoleReporter {
-                        summary: summary_result,
+                        summary,
                         diagnostics_payload: DiagnosticsPayload {
                             verbose: cli_options.verbose,
                             diagnostic_level: cli_options.diagnostic_level,
                             diagnostics,
                         },
                         execution: execution.clone(),
+                        evaluated_paths,
                     };
                     reporter.write(&mut ConsoleReporterVisitor(console))?;
                 }
@@ -462,7 +480,7 @@ pub fn execute_mode(
                     <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
                 });
                 let reporter = JsonReporter {
-                    summary: summary_result,
+                    summary,
                     diagnostics: DiagnosticsPayload {
                         verbose: cli_options.verbose,
                         diagnostic_level: cli_options.diagnostic_level,
@@ -470,7 +488,7 @@ pub fn execute_mode(
                     },
                     execution: execution.clone(),
                 };
-                let mut buffer = JsonReporterVisitor::new(summary_result);
+                let mut buffer = JsonReporterVisitor::new(summary);
                 reporter.write(&mut buffer)?;
                 if pretty {
                     let content = serde_json::to_string(&buffer).map_err(|error| {
@@ -508,9 +526,23 @@ pub fn execute_mode(
                 };
                 reporter.write(&mut GithubReporterVisitor(console))?;
             }
+            ReportMode::GitLab => {
+                let reporter = GitLabReporter {
+                    diagnostics: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                reporter.write(&mut GitLabReporterVisitor::new(
+                    console,
+                    session.app.fs.borrow().working_directory(),
+                ))?;
+            }
             ReportMode::Junit => {
                 let reporter = JunitReporter {
-                    summary: summary_result,
+                    summary,
                     diagnostics_payload: DiagnosticsPayload {
                         verbose: cli_options.verbose,
                         diagnostic_level: cli_options.diagnostic_level,

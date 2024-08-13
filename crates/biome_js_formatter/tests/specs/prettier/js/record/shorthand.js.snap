@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/record/shorthand.js
 ---
-
 # Input
 
 ```js
@@ -97,5 +96,3 @@ shorthand.js:2:17 parse ━━━━━━━━━━━━━━━━━━�
   
 
 ```
-
-

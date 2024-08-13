@@ -9,6 +9,7 @@ use biome_test_utils::{
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot, CheckActionType,
 };
+use std::ops::Deref;
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{graphql,json,jsonc}", crate::run_test, "module"}
@@ -27,7 +28,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     if group == "specs" || group == "suppression" {
         panic!("the test file must be placed in the {group}/{rule}/<rule-name>/ directory");
     }
-    if biome_graphql_analyze::metadata()
+    if biome_graphql_analyze::METADATA
+        .deref()
         .find_rule(group, rule)
         .is_none()
     {

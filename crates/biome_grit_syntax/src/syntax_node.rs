@@ -7,11 +7,10 @@
 
 use crate::{GritRoot, GritSyntaxKind};
 use biome_rowan::Language;
-#[cfg(feature = "serde")]
 use serde::Serialize;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
-#[cfg_attr(feature = "serde", derive(Serialize, schemars::JsonSchema))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub struct GritLanguage;
 
 impl Language for GritLanguage {

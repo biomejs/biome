@@ -38,7 +38,7 @@ jobs:
           ref: ${{ steps.sha.outputs.result }}
 
       - name: Install toolchain
-        uses: moonrepo/setup-rust@d8048d4fdff0633123678b093726e6d7c8ad6de5 # v1.2.0
+        uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           channel: stable
           cache-target: release
@@ -49,7 +49,7 @@ jobs:
         run: cargo codspeed build --features codspeed -p xtask_bench
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@a58b84c0b61569a9cbb7cfb378cc849d65cf1ce5 # v2.4.3
+        uses: CodSpeedHQ/action@ce4674c9a7e4628edd2df5a3c8e4fbacc451a21c # v2.4.4
         timeout-minutes: 30
         with:
           run: cargo codspeed run

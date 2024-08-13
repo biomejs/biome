@@ -16,9 +16,7 @@ use biome_rowan::{
     AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
     AstSeparatedListNodesIterator,
 };
-#[cfg(feature = "serde")]
 use serde::ser::SerializeSeq;
-#[cfg(feature = "serde")]
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
@@ -52,7 +50,6 @@ impl GraphqlAlias {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlAlias {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -61,7 +58,7 @@ impl Serialize for GraphqlAlias {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlAliasFields {
     pub value: SyntaxResult<GraphqlLiteralName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -97,7 +94,6 @@ impl GraphqlArgument {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlArgument {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -106,7 +102,7 @@ impl Serialize for GraphqlArgument {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlArgumentFields {
     pub name: SyntaxResult<GraphqlLiteralName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -143,7 +139,6 @@ impl GraphqlArguments {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlArguments {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -152,7 +147,7 @@ impl Serialize for GraphqlArguments {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlArgumentsFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub arguments: GraphqlArgumentList,
@@ -189,7 +184,6 @@ impl GraphqlArgumentsDefinition {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlArgumentsDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -198,7 +192,7 @@ impl Serialize for GraphqlArgumentsDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlArgumentsDefinitionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub arguments: GraphqlArgumentDefinitionList,
@@ -227,7 +221,6 @@ impl GraphqlBooleanValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlBooleanValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -236,7 +229,7 @@ impl Serialize for GraphqlBooleanValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlBooleanValueFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -267,7 +260,6 @@ impl GraphqlDefaultValue {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlDefaultValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -276,7 +268,7 @@ impl Serialize for GraphqlDefaultValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlDefaultValueFields {
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<AnyGraphqlValue>,
@@ -304,7 +296,6 @@ impl GraphqlDescription {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlDescription {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -313,7 +304,7 @@ impl Serialize for GraphqlDescription {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlDescriptionFields {
     pub graphql_string_value: SyntaxResult<GraphqlStringValue>,
 }
@@ -348,7 +339,6 @@ impl GraphqlDirective {
         support::node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlDirective {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -357,7 +347,7 @@ impl Serialize for GraphqlDirective {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlDirectiveFields {
     pub at_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GraphqlNameReference>,
@@ -418,7 +408,6 @@ impl GraphqlDirectiveDefinition {
         support::list(&self.syntax, 8usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlDirectiveDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -427,7 +416,7 @@ impl Serialize for GraphqlDirectiveDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlDirectiveDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub directive_token: SyntaxResult<SyntaxToken>,
@@ -462,7 +451,6 @@ impl GraphqlDirectiveLocation {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlDirectiveLocation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -471,7 +459,7 @@ impl Serialize for GraphqlDirectiveLocation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlDirectiveLocationFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -514,7 +502,6 @@ impl GraphqlEnumTypeDefinition {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlEnumTypeDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -523,7 +510,7 @@ impl Serialize for GraphqlEnumTypeDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlEnumTypeDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub enum_token: SyntaxResult<SyntaxToken>,
@@ -570,7 +557,6 @@ impl GraphqlEnumTypeExtension {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlEnumTypeExtension {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -579,7 +565,7 @@ impl Serialize for GraphqlEnumTypeExtension {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlEnumTypeExtensionFields {
     pub extend_token: SyntaxResult<SyntaxToken>,
     pub enum_token: SyntaxResult<SyntaxToken>,
@@ -610,7 +596,6 @@ impl GraphqlEnumValue {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlEnumValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -619,7 +604,7 @@ impl Serialize for GraphqlEnumValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlEnumValueFields {
     pub value: SyntaxResult<GraphqlLiteralName>,
 }
@@ -654,7 +639,6 @@ impl GraphqlEnumValueDefinition {
         support::list(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlEnumValueDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -663,7 +647,7 @@ impl Serialize for GraphqlEnumValueDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlEnumValueDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub value: SyntaxResult<GraphqlLiteralName>,
@@ -700,7 +684,6 @@ impl GraphqlEnumValuesDefinition {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlEnumValuesDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -709,7 +692,7 @@ impl Serialize for GraphqlEnumValuesDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlEnumValuesDefinitionFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub values: GraphqlEnumValueList,
@@ -754,7 +737,6 @@ impl GraphqlField {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlField {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -763,7 +745,7 @@ impl Serialize for GraphqlField {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlFieldFields {
     pub alias: Option<GraphqlAlias>,
     pub name: SyntaxResult<GraphqlLiteralName>,
@@ -814,7 +796,6 @@ impl GraphqlFieldDefinition {
         support::list(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlFieldDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -823,7 +804,7 @@ impl Serialize for GraphqlFieldDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlFieldDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub name: SyntaxResult<GraphqlLiteralName>,
@@ -863,7 +844,6 @@ impl GraphqlFieldsDefinition {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlFieldsDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -872,7 +852,7 @@ impl Serialize for GraphqlFieldsDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlFieldsDefinitionFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub fields: GraphqlFieldDefinitionList,
@@ -901,7 +881,6 @@ impl GraphqlFloatValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlFloatValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -910,7 +889,7 @@ impl Serialize for GraphqlFloatValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlFloatValueFields {
     pub graphql_float_literal_token: SyntaxResult<SyntaxToken>,
 }
@@ -953,7 +932,6 @@ impl GraphqlFragmentDefinition {
         support::required_node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlFragmentDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -962,7 +940,7 @@ impl Serialize for GraphqlFragmentDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlFragmentDefinitionFields {
     pub fragment_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GraphqlNameBinding>,
@@ -1001,7 +979,6 @@ impl GraphqlFragmentSpread {
         support::list(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlFragmentSpread {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1010,7 +987,7 @@ impl Serialize for GraphqlFragmentSpread {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlFragmentSpreadFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GraphqlNameReference>,
@@ -1047,7 +1024,6 @@ impl GraphqlImplementsInterfaces {
         support::list(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlImplementsInterfaces {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1056,7 +1032,7 @@ impl Serialize for GraphqlImplementsInterfaces {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlImplementsInterfacesFields {
     pub implements_token: SyntaxResult<SyntaxToken>,
     pub amp_token: Option<SyntaxToken>,
@@ -1097,7 +1073,6 @@ impl GraphqlInlineFragment {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlInlineFragment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1106,7 +1081,7 @@ impl Serialize for GraphqlInlineFragment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlInlineFragmentFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub type_condition: Option<GraphqlTypeCondition>,
@@ -1144,7 +1119,6 @@ impl GraphqlInputFieldsDefinition {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlInputFieldsDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1153,7 +1127,7 @@ impl Serialize for GraphqlInputFieldsDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlInputFieldsDefinitionFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub fields: GraphqlInputFieldList,
@@ -1198,7 +1172,6 @@ impl GraphqlInputObjectTypeDefinition {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlInputObjectTypeDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1207,7 +1180,7 @@ impl Serialize for GraphqlInputObjectTypeDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlInputObjectTypeDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub input_token: SyntaxResult<SyntaxToken>,
@@ -1254,7 +1227,6 @@ impl GraphqlInputObjectTypeExtension {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlInputObjectTypeExtension {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1263,7 +1235,7 @@ impl Serialize for GraphqlInputObjectTypeExtension {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlInputObjectTypeExtensionFields {
     pub extend_token: SyntaxResult<SyntaxToken>,
     pub input_token: SyntaxResult<SyntaxToken>,
@@ -1314,7 +1286,6 @@ impl GraphqlInputValueDefinition {
         support::list(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlInputValueDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1323,7 +1294,7 @@ impl Serialize for GraphqlInputValueDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlInputValueDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub name: SyntaxResult<GraphqlLiteralName>,
@@ -1355,7 +1326,6 @@ impl GraphqlIntValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlIntValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1364,7 +1334,7 @@ impl Serialize for GraphqlIntValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlIntValueFields {
     pub graphql_int_literal_token: SyntaxResult<SyntaxToken>,
 }
@@ -1411,7 +1381,6 @@ impl GraphqlInterfaceTypeDefinition {
         support::node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlInterfaceTypeDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1420,7 +1389,7 @@ impl Serialize for GraphqlInterfaceTypeDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlInterfaceTypeDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub interface_token: SyntaxResult<SyntaxToken>,
@@ -1472,7 +1441,6 @@ impl GraphqlInterfaceTypeExtension {
         support::node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlInterfaceTypeExtension {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1481,7 +1449,7 @@ impl Serialize for GraphqlInterfaceTypeExtension {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlInterfaceTypeExtensionFields {
     pub extend_token: SyntaxResult<SyntaxToken>,
     pub interface_token: SyntaxResult<SyntaxToken>,
@@ -1521,7 +1489,6 @@ impl GraphqlListType {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlListType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1530,7 +1497,7 @@ impl Serialize for GraphqlListType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlListTypeFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub element: SyntaxResult<AnyGraphqlType>,
@@ -1567,7 +1534,6 @@ impl GraphqlListValue {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlListValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1576,7 +1542,7 @@ impl Serialize for GraphqlListValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlListValueFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub elements: GraphqlListValueElementList,
@@ -1605,7 +1571,6 @@ impl GraphqlLiteralName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlLiteralName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1614,7 +1579,7 @@ impl Serialize for GraphqlLiteralName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlLiteralNameFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -1641,7 +1606,6 @@ impl GraphqlNameBinding {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlNameBinding {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1650,7 +1614,7 @@ impl Serialize for GraphqlNameBinding {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlNameBindingFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -1677,7 +1641,6 @@ impl GraphqlNameReference {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlNameReference {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1686,7 +1649,7 @@ impl Serialize for GraphqlNameReference {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlNameReferenceFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -1717,7 +1680,6 @@ impl GraphqlNonNullType {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlNonNullType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1726,7 +1688,7 @@ impl Serialize for GraphqlNonNullType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlNonNullTypeFields {
     pub base: SyntaxResult<AnyGraphqlPrimitiveType>,
     pub excl_token: SyntaxResult<SyntaxToken>,
@@ -1754,7 +1716,6 @@ impl GraphqlNullValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlNullValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1763,7 +1724,7 @@ impl Serialize for GraphqlNullValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlNullValueFields {
     pub null_token: SyntaxResult<SyntaxToken>,
 }
@@ -1798,7 +1759,6 @@ impl GraphqlObjectField {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlObjectField {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1807,7 +1767,7 @@ impl Serialize for GraphqlObjectField {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlObjectFieldFields {
     pub name: SyntaxResult<GraphqlLiteralName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -1856,7 +1816,6 @@ impl GraphqlObjectTypeDefinition {
         support::node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlObjectTypeDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1865,7 +1824,7 @@ impl Serialize for GraphqlObjectTypeDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlObjectTypeDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub type_token: SyntaxResult<SyntaxToken>,
@@ -1917,7 +1876,6 @@ impl GraphqlObjectTypeExtension {
         support::node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlObjectTypeExtension {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1926,7 +1884,7 @@ impl Serialize for GraphqlObjectTypeExtension {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlObjectTypeExtensionFields {
     pub extend_token: SyntaxResult<SyntaxToken>,
     pub type_token: SyntaxResult<SyntaxToken>,
@@ -1966,7 +1924,6 @@ impl GraphqlObjectValue {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlObjectValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1975,7 +1932,7 @@ impl Serialize for GraphqlObjectValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlObjectValueFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub members: GraphqlObjectValueMemberList,
@@ -2020,7 +1977,6 @@ impl GraphqlOperationDefinition {
         support::required_node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlOperationDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2029,7 +1985,7 @@ impl Serialize for GraphqlOperationDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlOperationDefinitionFields {
     pub ty: SyntaxResult<GraphqlOperationType>,
     pub name: Option<GraphqlNameBinding>,
@@ -2060,7 +2016,6 @@ impl GraphqlOperationType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlOperationType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2069,7 +2024,7 @@ impl Serialize for GraphqlOperationType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlOperationTypeFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -2104,7 +2059,6 @@ impl GraphqlRoot {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlRoot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2113,7 +2067,7 @@ impl Serialize for GraphqlRoot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub definitions: GraphqlDefinitionList,
@@ -2150,7 +2104,6 @@ impl GraphqlRootOperationTypeDefinition {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlRootOperationTypeDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2159,7 +2112,7 @@ impl Serialize for GraphqlRootOperationTypeDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlRootOperationTypeDefinitionFields {
     pub operation_type: SyntaxResult<GraphqlOperationType>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -2196,7 +2149,6 @@ impl GraphqlRootOperationTypes {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlRootOperationTypes {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2205,7 +2157,7 @@ impl Serialize for GraphqlRootOperationTypes {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlRootOperationTypesFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub root_operation_type: GraphqlRootOperationTypeDefinitionList,
@@ -2246,7 +2198,6 @@ impl GraphqlScalarTypeDefinition {
         support::list(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlScalarTypeDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2255,7 +2206,7 @@ impl Serialize for GraphqlScalarTypeDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlScalarTypeDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub scalar_token: SyntaxResult<SyntaxToken>,
@@ -2297,7 +2248,6 @@ impl GraphqlScalarTypeExtension {
         support::list(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlScalarTypeExtension {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2306,7 +2256,7 @@ impl Serialize for GraphqlScalarTypeExtension {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlScalarTypeExtensionFields {
     pub extend_token: SyntaxResult<SyntaxToken>,
     pub scalar_token: SyntaxResult<SyntaxToken>,
@@ -2348,7 +2298,6 @@ impl GraphqlSchemaDefinition {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlSchemaDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2357,7 +2306,7 @@ impl Serialize for GraphqlSchemaDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlSchemaDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub schema_token: SyntaxResult<SyntaxToken>,
@@ -2399,7 +2348,6 @@ impl GraphqlSchemaExtension {
         support::node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlSchemaExtension {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2408,7 +2356,7 @@ impl Serialize for GraphqlSchemaExtension {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlSchemaExtensionFields {
     pub extend_token: SyntaxResult<SyntaxToken>,
     pub schema_token: SyntaxResult<SyntaxToken>,
@@ -2446,7 +2394,6 @@ impl GraphqlSelectionSet {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlSelectionSet {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2455,7 +2402,7 @@ impl Serialize for GraphqlSelectionSet {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlSelectionSetFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub selections: GraphqlSelectionList,
@@ -2484,7 +2431,6 @@ impl GraphqlStringValue {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlStringValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2493,7 +2439,7 @@ impl Serialize for GraphqlStringValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlStringValueFields {
     pub graphql_string_literal_token: SyntaxResult<SyntaxToken>,
 }
@@ -2524,7 +2470,6 @@ impl GraphqlTypeCondition {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlTypeCondition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2533,7 +2478,7 @@ impl Serialize for GraphqlTypeCondition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlTypeConditionFields {
     pub on_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<GraphqlNameReference>,
@@ -2569,7 +2514,6 @@ impl GraphqlUnionMemberTypes {
         support::list(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlUnionMemberTypes {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2578,7 +2522,7 @@ impl Serialize for GraphqlUnionMemberTypes {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlUnionMemberTypesFields {
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub bitwise_or_token: Option<SyntaxToken>,
@@ -2623,7 +2567,6 @@ impl GraphqlUnionTypeDefinition {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlUnionTypeDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2632,7 +2575,7 @@ impl Serialize for GraphqlUnionTypeDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlUnionTypeDefinitionFields {
     pub description: Option<GraphqlDescription>,
     pub union_token: SyntaxResult<SyntaxToken>,
@@ -2679,7 +2622,6 @@ impl GraphqlUnionTypeExtension {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlUnionTypeExtension {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2688,7 +2630,7 @@ impl Serialize for GraphqlUnionTypeExtension {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlUnionTypeExtensionFields {
     pub extend_token: SyntaxResult<SyntaxToken>,
     pub union_token: SyntaxResult<SyntaxToken>,
@@ -2723,7 +2665,6 @@ impl GraphqlVariableBinding {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlVariableBinding {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2732,7 +2673,7 @@ impl Serialize for GraphqlVariableBinding {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlVariableBindingFields {
     pub dollar_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GraphqlLiteralName>,
@@ -2776,7 +2717,6 @@ impl GraphqlVariableDefinition {
         support::list(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlVariableDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2785,7 +2725,7 @@ impl Serialize for GraphqlVariableDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlVariableDefinitionFields {
     pub variable: SyntaxResult<GraphqlVariableBinding>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -2824,7 +2764,6 @@ impl GraphqlVariableDefinitions {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlVariableDefinitions {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2833,7 +2772,7 @@ impl Serialize for GraphqlVariableDefinitions {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlVariableDefinitionsFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub elements: GraphqlVariableDefinitionList,
@@ -2866,7 +2805,6 @@ impl GraphqlVariableReference {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlVariableReference {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2875,13 +2813,12 @@ impl Serialize for GraphqlVariableReference {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GraphqlVariableReferenceFields {
     pub dollar_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GraphqlLiteralName>,
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGraphqlDefinition {
     AnyGraphqlTypeDefinition(AnyGraphqlTypeDefinition),
     AnyGraphqlTypeExtension(AnyGraphqlTypeExtension),
@@ -2949,8 +2886,7 @@ impl AnyGraphqlDefinition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGraphqlOperationDefinition {
     GraphqlOperationDefinition(GraphqlOperationDefinition),
     GraphqlSelectionSet(GraphqlSelectionSet),
@@ -2969,8 +2905,7 @@ impl AnyGraphqlOperationDefinition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGraphqlPrimitiveType {
     GraphqlListType(GraphqlListType),
     GraphqlNameReference(GraphqlNameReference),
@@ -2989,8 +2924,7 @@ impl AnyGraphqlPrimitiveType {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGraphqlSelection {
     GraphqlBogusSelection(GraphqlBogusSelection),
     GraphqlField(GraphqlField),
@@ -3023,8 +2957,7 @@ impl AnyGraphqlSelection {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGraphqlType {
     AnyGraphqlPrimitiveType(AnyGraphqlPrimitiveType),
     GraphqlBogusType(GraphqlBogusType),
@@ -3050,8 +2983,7 @@ impl AnyGraphqlType {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGraphqlTypeDefinition {
     GraphqlEnumTypeDefinition(GraphqlEnumTypeDefinition),
     GraphqlInputObjectTypeDefinition(GraphqlInputObjectTypeDefinition),
@@ -3100,8 +3032,7 @@ impl AnyGraphqlTypeDefinition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGraphqlTypeExtension {
     GraphqlEnumTypeExtension(GraphqlEnumTypeExtension),
     GraphqlInputObjectTypeExtension(GraphqlInputObjectTypeExtension),
@@ -3150,8 +3081,7 @@ impl AnyGraphqlTypeExtension {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGraphqlValue {
     GraphqlBogusValue(GraphqlBogusValue),
     GraphqlBooleanValue(GraphqlBooleanValue),
@@ -6044,13 +5974,14 @@ impl AstNode for AnyGraphqlDefinition {
                 AnyGraphqlDefinition::GraphqlSelectionSet(GraphqlSelectionSet { syntax })
             }
             _ => {
-                if let Some(any_graphql_type_definition) =
-                    AnyGraphqlTypeDefinition::cast(syntax.clone())
-                {
-                    return Some(AnyGraphqlDefinition::AnyGraphqlTypeDefinition(
-                        any_graphql_type_definition,
-                    ));
-                }
+                let syntax = match AnyGraphqlTypeDefinition::try_cast(syntax) {
+                    Ok(any_graphql_type_definition) => {
+                        return Some(AnyGraphqlDefinition::AnyGraphqlTypeDefinition(
+                            any_graphql_type_definition,
+                        ));
+                    }
+                    Err(syntax) => syntax,
+                };
                 if let Some(any_graphql_type_extension) = AnyGraphqlTypeExtension::cast(syntax) {
                     return Some(AnyGraphqlDefinition::AnyGraphqlTypeExtension(
                         any_graphql_type_extension,
@@ -7220,8 +7151,7 @@ impl std::fmt::Display for GraphqlVariableReference {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GraphqlBogus {
     syntax: SyntaxNode,
 }
@@ -7277,8 +7207,7 @@ impl From<GraphqlBogus> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GraphqlBogusDefinition {
     syntax: SyntaxNode,
 }
@@ -7334,8 +7263,7 @@ impl From<GraphqlBogusDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GraphqlBogusSelection {
     syntax: SyntaxNode,
 }
@@ -7391,8 +7319,7 @@ impl From<GraphqlBogusSelection> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GraphqlBogusType {
     syntax: SyntaxNode,
 }
@@ -7448,8 +7375,7 @@ impl From<GraphqlBogusType> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GraphqlBogusValue {
     syntax: SyntaxNode,
 }
@@ -7545,7 +7471,6 @@ impl AstNode for GraphqlArgumentDefinitionList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlArgumentDefinitionList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7628,7 +7553,6 @@ impl AstNode for GraphqlArgumentList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlArgumentList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7711,7 +7635,6 @@ impl AstNode for GraphqlDefinitionList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlDefinitionList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7794,7 +7717,6 @@ impl AstNode for GraphqlDirectiveList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlDirectiveList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7877,7 +7799,6 @@ impl AstNode for GraphqlDirectiveLocationList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlDirectiveLocationList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7960,7 +7881,6 @@ impl AstNode for GraphqlEnumValueList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlEnumValueList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8043,7 +7963,6 @@ impl AstNode for GraphqlFieldDefinitionList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlFieldDefinitionList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8126,7 +8045,6 @@ impl AstNode for GraphqlImplementsInterfaceList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlImplementsInterfaceList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8209,7 +8127,6 @@ impl AstNode for GraphqlInputFieldList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlInputFieldList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8292,7 +8209,6 @@ impl AstNode for GraphqlListValueElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlListValueElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8375,7 +8291,6 @@ impl AstNode for GraphqlObjectValueMemberList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlObjectValueMemberList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8459,7 +8374,6 @@ impl AstNode for GraphqlRootOperationTypeDefinitionList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlRootOperationTypeDefinitionList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8542,7 +8456,6 @@ impl AstNode for GraphqlSelectionList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlSelectionList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8625,7 +8538,6 @@ impl AstNode for GraphqlUnionMemberTypeList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlUnionMemberTypeList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8708,7 +8620,6 @@ impl AstNode for GraphqlVariableDefinitionList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GraphqlVariableDefinitionList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

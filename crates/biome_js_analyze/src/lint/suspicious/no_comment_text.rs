@@ -1,13 +1,18 @@
+use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyJsxChild, JsxText, TriviaPieceKind, T};
+use biome_js_syntax::{AnyJsxChild, JsSyntaxKind, JsSyntaxToken, JsxText};
 use biome_rowan::{AstNode, BatchMutationExt};
+use regex::Regex;
+use std::sync::LazyLock;
 
-use crate::JsRuleAction;
+static COMMENT_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"//.*|/\*[\s\S]*?\*/").unwrap());
+
 declare_lint_rule! {
     /// Prevent comments from being inserted as text nodes
     ///
@@ -16,23 +21,56 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```jsx,expect_diagnostic
-    /// const a3 = <div>// comment</div>;
+    /// <div>// comment</div>;
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// const a4 = <div>/* comment */</div>;
+    /// <div>/* comment */</div>;
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// const a5 = <div>/** comment */</div>;
+    /// <div>/** comment */</div>;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div>text /* comment */</div>;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div>/* comment */ text</div>;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div>
+    ///     text
+    ///     // comment
+    /// </div>;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div>
+    ///     // comment
+    ///    text
+    /// </div>;
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic
+    /// <div>
+    ///     /* comment */
+    ///     text
+    /// </div>;
     /// ```
     ///
     /// ### Valid
     ///
     /// ```jsx
-    /// const a = <div>{/* comment */}</div>;
-    /// const a1 = <div>{/** comment */}</div>;
-    /// const a2 = <div className={"cls" /* comment */}></div>;
+    /// <>
+    ///    <div>{/* comment */}</div>;
+    ///    <div>{/** comment */}</div>;
+    ///    <div className={"cls" /* comment */}></div>;
+    ///    <div>text {/* comment */}</div>;
+    ///    <div>{/* comment */} text</div>;
+    /// </>
     /// ```
     pub NoCommentText {
         version: "1.0.0",
@@ -53,13 +91,11 @@ impl Rule for NoCommentText {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let n = ctx.query();
         let jsx_value = n.text();
-        let is_single_line_comment = jsx_value.starts_with("//");
-        let is_multi_line_comment = jsx_value.starts_with("/*") && jsx_value.ends_with("*/");
-        if is_single_line_comment || is_multi_line_comment {
-            Some(())
-        } else {
-            None
+        if !COMMENT_REGEX.is_match(&jsx_value) {
+            return None;
         }
+
+        Some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
@@ -77,29 +113,27 @@ impl Rule for NoCommentText {
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
+        let node_text = node.text().to_string();
 
-        let normalized_comment = format!(
-            "/*{}*/",
-            node.text()
-                .trim_start_matches("/**")
-                .trim_start_matches("//")
-                .trim_start_matches("/*")
-                .trim_end_matches("*/")
-        );
+        // Replace the comments with JSX comments
+        let new_jsx_value = COMMENT_REGEX.replace_all(&node_text, |caps: &regex::Captures| {
+            let comment = caps[0].trim();
+            match comment {
+                c if c.starts_with("//") => format!("{{/* {} */}}", c[2..].trim()),
+                c if c.starts_with("/**") => format!("{{/** {} */}}", &c[3..c.len() - 2].trim()),
+                c => format!("{{/* {} */}}", &c[2..c.len() - 2].trim()),
+            }
+        });
 
-        mutation.replace_node(
-            AnyJsxChild::from(node.clone()),
-            AnyJsxChild::from(
-                make::jsx_expression_child(
-                    make::token(T!['{']).with_trailing_trivia([(
-                        TriviaPieceKind::MultiLineComment,
-                        normalized_comment.as_str(),
-                    )]),
-                    make::token(T!['}']),
-                )
-                .build(),
-            ),
-        );
+        // Create a new JSX text node with the new value
+        let new_jsx_text = AnyJsxChild::JsxText(make::jsx_text(JsSyntaxToken::new_detached(
+            JsSyntaxKind::JSX_TEXT,
+            &new_jsx_value,
+            [],
+            [],
+        )));
+
+        mutation.replace_node(AnyJsxChild::from(node.clone()), new_jsx_text);
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,

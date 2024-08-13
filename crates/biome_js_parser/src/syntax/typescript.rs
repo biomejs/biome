@@ -44,7 +44,7 @@ fn parse_ts_identifier_binding(
     ts_identifier_context: TsIdentifierContext,
 ) -> ParsedSyntax {
     parse_identifier(p, TS_IDENTIFIER_BINDING).map(|mut ident| {
-        if ident.kind(p).is_bogus() {
+        if ident.kind(p).is_bogus() || ident.kind(p).is_metavariable() {
             return ident;
         }
 

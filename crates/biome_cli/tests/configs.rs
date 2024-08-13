@@ -18,33 +18,6 @@ pub const CONFIG_FORMAT_JSONC: &str = r#"{
 }
 "#;
 
-pub const CONFIG_INIT_DEFAULT: &str = r#"{
-	"organizeImports": {
-	 	 "enabled": true
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true
-		}
-	}
-}
-"#;
-
-pub const CONFIG_INIT_DEFAULT_WHEN_INSTALLED: &str = r#"{
-	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-    "organizeImports": {
-	 	 "enabled": true
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true
-		}
-	}
-}
-"#;
-
 pub const CONFIG_DISABLED_FORMATTER: &str = r#"{
   "formatter": {
     "enabled": false

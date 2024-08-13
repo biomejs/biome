@@ -31,8 +31,8 @@ declare_lint_rule! {
     /// enable [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/).
     ///
     /// From `v1.9.0`, the rule won't check unused function parameters any more.
-    /// Users should switch to
-    /// [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/)
+    /// If you want to report unused function parameters,
+    /// enable [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/).
     ///
     /// ## Examples
     ///
@@ -277,14 +277,20 @@ impl Rule for NoUnusedVariables {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        if ctx
-            .source_type::<JsFileSource>()
-            .language()
-            .is_definition_file()
-        {
-            // Ignore TypeScript declaration files
-            // This allows ignoring declaration files without any `export`
-            // that implicitly export their members.
+        let model = ctx.model();
+        // A declaration file without exports and imports is a global declaration file.
+        // All types are available in every files of the project.
+        // Thus, it is ok if types are not used locally.
+        //
+        // Note that we don't check if the file has imports.
+        // Indeed, it is a fair assumption to assume that a declaration file without exports,
+        // is certainly a file without imports.
+        let is_global_declaration_file = !model.has_exports()
+            && ctx
+                .source_type::<JsFileSource>()
+                .language()
+                .is_definition_file();
+        if is_global_declaration_file {
             return None;
         }
 
@@ -307,7 +313,6 @@ impl Rule for NoUnusedVariables {
 
         let suggestion = suggested_fix_if_unused(binding)?;
 
-        let model = ctx.model();
         if model.is_exported(binding) {
             return None;
         }

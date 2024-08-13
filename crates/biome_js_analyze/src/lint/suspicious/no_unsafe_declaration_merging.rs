@@ -59,7 +59,10 @@ impl Rule for NoUnsafeDeclarationMerging {
         let ts_interface = ctx.query();
         let model = ctx.model();
         let interface_binding = ts_interface.id().ok()?;
-        let interface_name = interface_binding.name_token().ok()?;
+        let interface_name = interface_binding
+            .as_ts_identifier_binding()?
+            .name_token()
+            .ok()?;
         let scope = model.scope(ts_interface.syntax()).parent()?;
         for binding in scope.bindings() {
             if let Some(AnyJsBindingDeclaration::JsClassDeclaration(class)) =

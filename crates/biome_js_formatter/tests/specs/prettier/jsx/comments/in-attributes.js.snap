@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/comments/in-attributes.js
 ---
-
 # Input
 
 ```js
@@ -82,5 +81,3 @@ info: jsx/comments/in-attributes.js
 <div attr=// comment
 "foo"></div>;
 ```
-
-

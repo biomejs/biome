@@ -113,7 +113,7 @@ fn traverse_binding(
                     return Some(id_binding);
                 }
             }
-            AnyJsBinding::JsBogusBinding(_) => {}
+            AnyJsBinding::JsBogusBinding(_) | AnyJsBinding::JsMetavariable(_) => {}
         },
         AnyJsBindingPattern::JsArrayBindingPattern(inner_binding) => {
             return inner_binding.elements().into_iter().find_map(|element| {
@@ -150,7 +150,9 @@ fn traverse_binding(
                             AnyJsBinding::JsIdentifierBinding(binding) => {
                                 track_binding(&binding, tracked_bindings).then_some(binding)
                             }
-                            AnyJsBinding::JsBogusBinding(_) => None,
+                            AnyJsBinding::JsBogusBinding(_) | AnyJsBinding::JsMetavariable(_) => {
+                                None
+                            }
                         }
                     }
                     AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
@@ -159,9 +161,10 @@ fn traverse_binding(
                         AnyJsBinding::JsIdentifierBinding(id_binding) => {
                             track_binding(&id_binding, tracked_bindings).then_some(id_binding)
                         }
-                        AnyJsBinding::JsBogusBinding(_) => None,
+                        AnyJsBinding::JsBogusBinding(_) | AnyJsBinding::JsMetavariable(_) => None,
                     },
-                    AnyJsObjectBindingPatternMember::JsBogusBinding(_) => None,
+                    AnyJsObjectBindingPatternMember::JsBogusBinding(_)
+                    | AnyJsObjectBindingPatternMember::JsMetavariable(_) => None,
                 }
             })
         }

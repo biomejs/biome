@@ -28,7 +28,7 @@ pub(crate) fn format_with_guard<'ctx>(
                 .guard()
                 .pull_diagnostics(
                     RuleCategoriesBuilder::default().with_syntax().build(),
-                    max_diagnostics.into(),
+                    max_diagnostics,
                     Vec::new(),
                     Vec::new(),
                 )

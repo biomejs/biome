@@ -67,11 +67,11 @@ impl Rule for NoBarrelFile {
         }
         let items = ctx.query().items();
 
-        for i in items {
-            if let Some(export) = JsExport::cast(i.into()) {
+        for item in items {
+            if let Some(export) = JsExport::cast(item.into()) {
                 if let Ok(export_from_clause) = export.export_clause() {
                     if let Some(export_from_clause) =
-                        JsExportFromClause::cast(export_from_clause.clone().into())
+                        JsExportFromClause::cast_ref(export_from_clause.syntax())
                     {
                         if export_from_clause.type_token().is_none() {
                             return Some(export);
@@ -79,7 +79,7 @@ impl Rule for NoBarrelFile {
                     }
 
                     if let Some(export_from_clause) =
-                        JsExportNamedFromClause::cast(export_from_clause.into())
+                        JsExportNamedFromClause::cast(export_from_clause.into_syntax())
                     {
                         if export_from_clause.type_token().is_some() {
                             continue;

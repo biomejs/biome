@@ -1,0 +1,26 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{}
+```
+
+## `check.js`
+
+```js
+
+    export const z = (array) => {
+        array.map((sentence) => sentence.split(" ")).flat();
+        return 0;
+    };
+    
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. Fixed 1 file.
+```

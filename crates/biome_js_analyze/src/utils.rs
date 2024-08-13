@@ -8,38 +8,6 @@ pub mod rename;
 #[cfg(test)]
 pub mod tests;
 
-#[derive(Debug, PartialEq)]
-pub enum EscapeError {
-    EscapeAtEndOfString,
-    InvalidEscapedChar(char),
-}
-
-struct InterpretEscapedString<'a> {
-    s: std::str::Chars<'a>,
-}
-
-impl<'a> Iterator for InterpretEscapedString<'a> {
-    type Item = Result<char, EscapeError>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.s.next().map(|c| match c {
-            '\\' => match self.s.next() {
-                None => Err(EscapeError::EscapeAtEndOfString),
-                Some('n') => Ok('\n'),
-                Some('\\') => Ok('\\'),
-                Some(c) => Err(EscapeError::InvalidEscapedChar(c)),
-            },
-            c => Ok(c),
-        })
-    }
-}
-
-/// unescape
-///
-pub(crate) fn unescape_string(s: &str) -> Result<String, EscapeError> {
-    (InterpretEscapedString { s: s.chars() }).collect()
-}
-
 /// Verifies that both nodes are equal by checking their descendants (nodes included) kinds
 /// and tokens (same kind and inner token text).
 pub(crate) fn is_node_equal(a_node: &JsSyntaxNode, b_node: &JsSyntaxNode) -> bool {

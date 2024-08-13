@@ -1,7 +1,7 @@
 use biome_json_syntax::{JsonMember, JsonMemberList, JsonMemberName, JsonObjectValue};
 use biome_rowan::AstNode;
 
-/// Mathes a JSON member name node against a path
+/// Matches a JSON member name node against a path
 pub fn matches_path(optional_node: Option<&JsonMemberName>, path: &[&str]) -> bool {
     if path.is_empty() {
         return true;
@@ -42,7 +42,7 @@ pub fn matches_path(optional_node: Option<&JsonMemberName>, path: &[&str]) -> bo
                 None
             }
         })
-        .and_then(|p| JsonMember::try_cast(p).ok()?.name().ok());
+        .and_then(|p| JsonMember::cast(p)?.name().ok());
 
     matches_path(optional_parent_node.as_ref(), &path[..path.len() - 1])
 }

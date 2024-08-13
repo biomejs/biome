@@ -1,12 +1,9 @@
+use crate::js::declarations::function_declaration::{FormatFunction, FormatFunctionOptions};
 use crate::prelude::*;
 
-use crate::js::declarations::function_declaration::{FormatFunction, FormatFunctionOptions};
-use crate::parentheses::{
-    is_callee, is_first_in_statement, is_tag, FirstInStatementMode, NeedsParentheses,
-};
-
 use biome_formatter::FormatRuleWithOptions;
-use biome_js_syntax::{JsFunctionExpression, JsSyntaxNode};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsFunctionExpression;
 
 #[derive(Debug, Copy, Clone, Default)]
 pub(crate) struct FormatJsFunctionExpression {
@@ -30,17 +27,6 @@ impl FormatNodeRule<JsFunctionExpression> for FormatJsFunctionExpression {
 
     fn needs_parentheses(&self, item: &JsFunctionExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsFunctionExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        is_callee(self.syntax(), parent)
-            || is_tag(self.syntax(), parent)
-            || is_first_in_statement(
-                self.clone().into(),
-                FirstInStatementMode::ExpressionOrExportDefault,
-            )
     }
 }
 

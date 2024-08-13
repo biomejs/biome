@@ -21,9 +21,16 @@ use tracing_tree::HierarchicalLayer;
 pub(crate) fn start(
     session: CliSession,
     config_path: Option<PathBuf>,
+    log_path: Option<PathBuf>,
+    log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    let did_spawn = rt.block_on(ensure_daemon(false, config_path))?;
+    let did_spawn = rt.block_on(ensure_daemon(
+        false,
+        config_path,
+        log_path,
+        log_file_name_prefix,
+    ))?;
 
     if did_spawn {
         session.app.console.log(markup! {
@@ -65,8 +72,10 @@ pub(crate) fn stop(session: CliSession) -> Result<(), CliDiagnostic> {
 pub(crate) fn run_server(
     stop_on_disconnect: bool,
     config_path: Option<PathBuf>,
+    log_path: Option<PathBuf>,
+    log_file_name_prefix: Option<String>,
 ) -> Result<(), CliDiagnostic> {
-    setup_tracing_subscriber();
+    setup_tracing_subscriber(log_path, log_file_name_prefix);
 
     let rt = Runtime::new()?;
     let factory = ServerFactory::new(stop_on_disconnect);
@@ -95,9 +104,18 @@ pub(crate) fn print_socket() -> Result<(), CliDiagnostic> {
     Ok(())
 }
 
-pub(crate) fn lsp_proxy(config_path: Option<PathBuf>) -> Result<(), CliDiagnostic> {
+pub(crate) fn lsp_proxy(
+    config_path: Option<PathBuf>,
+    log_path: Option<PathBuf>,
+    log_file_name_prefix: Option<String>,
+) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
-    rt.block_on(start_lsp_proxy(&rt, config_path))?;
+    rt.block_on(start_lsp_proxy(
+        &rt,
+        config_path,
+        log_path,
+        log_file_name_prefix,
+    ))?;
 
     Ok(())
 }
@@ -105,8 +123,13 @@ pub(crate) fn lsp_proxy(config_path: Option<PathBuf>) -> Result<(), CliDiagnosti
 /// Start a proxy process.
 /// Receives a process via `stdin` and then copy the content to the LSP socket.
 /// Copy to the process on `stdout` when the LSP responds to a message
-async fn start_lsp_proxy(rt: &Runtime, config_path: Option<PathBuf>) -> Result<(), CliDiagnostic> {
-    ensure_daemon(true, config_path).await?;
+async fn start_lsp_proxy(
+    rt: &Runtime,
+    config_path: Option<PathBuf>,
+    log_path: Option<PathBuf>,
+    log_file_name_prefix: Option<String>,
+) -> Result<(), CliDiagnostic> {
+    ensure_daemon(true, config_path, log_path, log_file_name_prefix).await?;
 
     match open_socket().await? {
         Some((mut owned_read_half, mut owned_write_half)) => {
@@ -148,21 +171,20 @@ async fn start_lsp_proxy(rt: &Runtime, config_path: Option<PathBuf>) -> Result<(
     }
 }
 
-const fn log_file_name_prefix() -> &'static str {
-    "server.log"
-}
+pub(crate) fn read_most_recent_log_file(
+    log_path: Option<PathBuf>,
+    log_file_name_prefix: String,
+) -> io::Result<Option<String>> {
+    let biome_log_path = log_path.unwrap_or(default_biome_log_path());
 
-pub(crate) fn read_most_recent_log_file() -> io::Result<Option<String>> {
-    let logs_dir = biome_log_dir();
-
-    let most_recent = fs::read_dir(logs_dir)?
+    let most_recent = fs::read_dir(biome_log_path)?
         .flatten()
         .filter(|file| file.file_type().map_or(false, |ty| ty.is_file()))
         .filter_map(|file| {
             match file
                 .file_name()
                 .to_str()?
-                .split_once(log_file_name_prefix())
+                .split_once(log_file_name_prefix.as_str())
             {
                 Some((_, date_part)) if date_part.split('-').count() == 4 => Some(file.path()),
                 _ => None,
@@ -176,14 +198,19 @@ pub(crate) fn read_most_recent_log_file() -> io::Result<Option<String>> {
     }
 }
 
-/// Setup the [tracing]-based logging system for the server
+/// Set up the [tracing]-based logging system for the server
 /// The events received by the subscriber are filtered at the `info` level,
 /// then printed using the [HierarchicalLayer] layer, and the resulting text
 /// is written to log files rotated on a hourly basis (in
 /// `biome-logs/server.log.yyyy-MM-dd-HH` files inside the system temporary
 /// directory)
-fn setup_tracing_subscriber() {
-    let file_appender = tracing_appender::rolling::hourly(biome_log_dir(), log_file_name_prefix());
+fn setup_tracing_subscriber(log_path: Option<PathBuf>, log_file_name_prefix: Option<String>) {
+    let biome_log_path = log_path.unwrap_or(biome_fs::ensure_cache_dir().join("biome-logs"));
+    let file_appender = tracing_appender::rolling::hourly(
+        biome_log_path,
+        // The `Option` is required because we have a command called __print-socket that spans a daemon only to retrieve its port
+        log_file_name_prefix.unwrap_or(String::from("server.log")),
+    );
 
     registry()
         .with(
@@ -199,10 +226,14 @@ fn setup_tracing_subscriber() {
         .init();
 }
 
-pub fn biome_log_dir() -> PathBuf {
-    match env::var_os("BIOME_LOG_DIR") {
+pub fn default_biome_log_path() -> PathBuf {
+    match env::var_os("BIOME_LOG_PATH") {
         Some(directory) => PathBuf::from(directory),
-        None => biome_fs::ensure_cache_dir().join("biome-logs"),
+        // TODO: Remove in Biome v2, and use the None part as fallback.
+        None => match env::var_os("BIOME_LOG_DIR") {
+            Some(directory) => PathBuf::from(directory),
+            None => biome_fs::ensure_cache_dir().join("biome-logs"),
+        },
     }
 }
 

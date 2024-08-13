@@ -1,11 +1,9 @@
 use crate::prelude::*;
 use crate::utils::format_class::FormatClass;
-use biome_formatter::{format_args, write};
 
-use crate::parentheses::{
-    is_callee, is_first_in_statement, FirstInStatementMode, NeedsParentheses,
-};
-use biome_js_syntax::{JsClassExpression, JsSyntaxKind, JsSyntaxNode};
+use biome_formatter::{format_args, write};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsClassExpression;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsClassExpression;
@@ -40,17 +38,6 @@ impl FormatNodeRule<JsClassExpression> for FormatJsClassExpression {
     ) -> FormatResult<()> {
         // Formatted as part of `FormatClass`
         Ok(())
-    }
-}
-
-impl NeedsParentheses for JsClassExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        (parent.kind() == JsSyntaxKind::JS_EXTENDS_CLAUSE && !self.decorators().is_empty())
-            || is_callee(self.syntax(), parent)
-            || is_first_in_statement(
-                self.clone().into(),
-                FirstInStatementMode::ExpressionOrExportDefault,
-            )
     }
 }
 

@@ -20,11 +20,8 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```graphql,expect_diagnostic
-    /// query {
-    ///   user {
-    ///     id
-    ///     id
-    ///   }
+    /// query test($v: String, $t: String, $v: String) {
+    ///   id
     /// }
     /// ```
     ///

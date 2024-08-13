@@ -18,11 +18,11 @@ pub struct GritCodeSnippet {
 
 impl CodeSnippet<GritQueryContext> for GritCodeSnippet {
     fn patterns(&self) -> impl Iterator<Item = &Pattern<GritQueryContext>> {
-        TodoIterator { _snippet: self }
+        self.patterns.iter().map(|p| &p.1)
     }
 
     fn dynamic_snippet(&self) -> Option<&DynamicPattern<GritQueryContext>> {
-        todo!()
+        self.dynamic_snippet.as_ref()
     }
 }
 
@@ -53,18 +53,5 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
 impl PatternName for GritCodeSnippet {
     fn name(&self) -> &'static str {
         "CodeSnippet"
-    }
-}
-
-#[derive(Clone)]
-struct TodoIterator<'a> {
-    _snippet: &'a GritCodeSnippet,
-}
-
-impl<'a> Iterator for TodoIterator<'a> {
-    type Item = &'a Pattern<GritQueryContext>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        todo!()
     }
 }

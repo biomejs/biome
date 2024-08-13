@@ -11,5 +11,7 @@ export default function () {
 export function f() {
     const a_var = 0;
     console.log(a_var);
-    return a_var;
+    return {
+        a_var // comment
+    };
 }

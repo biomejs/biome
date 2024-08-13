@@ -147,6 +147,10 @@ impl SemanticModelData {
     pub fn is_exported(&self, range: TextRange) -> bool {
         self.exported.contains(&range.start())
     }
+
+    pub fn has_exports(&self) -> bool {
+        !self.exported.is_empty()
+    }
 }
 
 impl PartialEq for SemanticModelData {
@@ -362,6 +366,11 @@ impl SemanticModel {
         T: CanBeImportedExported,
     {
         node.is_exported(self)
+    }
+
+    /// Returns `true` if the file contains at least one export.
+    pub fn has_exports(&self) -> bool {
+        self.data.has_exports()
     }
 
     /// Returns if the node is imported or is a reference to a binding

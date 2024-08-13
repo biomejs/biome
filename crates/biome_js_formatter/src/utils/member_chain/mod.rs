@@ -77,17 +77,14 @@
 //! to apply a deterministic formatting.
 //! - first group will be the identifier
 //! - the rest of the groups will be  will start StaticMemberExpression followed by the rest of the nodes,
-//! right before the end of the next StaticMemberExpression
+//!     right before the end of the next StaticMemberExpression
 //!
 //! The first group is special, because it holds the reference; it has its own heuristic.
 //! Inside the first group we store the first element of the flattened array, then:
 //!
-//! 1. as many as [biome_js_syntax::JsCallExpression] we can find, this cover cases like
-//! `something()()().then()`;
-//! 2. as many as [biome_js_syntax::JsComputedMemberExpression] we can find, this cover cases like
-//! `something()()[1][3].then()`;
-//! 3. as many as consecutive [biome_js_syntax::JsStaticMemberExpression] or [biome_js_syntax::JsComputedMemberExpression], this cover cases like
-//! `this.items[0].then()`
+//! 1. as many as [biome_js_syntax::JsCallExpression] we can find, this cover cases like `something()()().then()`;
+//! 2. as many as [biome_js_syntax::JsComputedMemberExpression] we can find, this cover cases like `something()()[1][3].then()`;
+//! 3. as many as consecutive [biome_js_syntax::JsStaticMemberExpression] or [biome_js_syntax::JsComputedMemberExpression], this cover cases like `this.items[0].then()`
 //!
 //! The rest of the groups are essentially a sequence of `[StaticMemberExpression , CallExpression]`.
 //! In order to achieve that, we simply start looping through the rest of the flatten items that we haven't seen.

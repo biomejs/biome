@@ -15,9 +15,7 @@ use biome_rowan::{
     AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
     AstSeparatedListNodesIterator,
 };
-#[cfg(feature = "serde")]
 use serde::ser::SerializeSeq;
-#[cfg(feature = "serde")]
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
@@ -55,7 +53,6 @@ impl GritAddOperation {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritAddOperation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -64,7 +61,7 @@ impl Serialize for GritAddOperation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritAddOperationFields {
     pub left: SyntaxResult<AnyGritPattern>,
     pub plus_token: SyntaxResult<SyntaxToken>,
@@ -93,7 +90,6 @@ impl GritAnnotation {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritAnnotation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -102,7 +98,7 @@ impl Serialize for GritAnnotation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritAnnotationFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -137,7 +133,6 @@ impl GritAssignmentAsPattern {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritAssignmentAsPattern {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -146,7 +141,7 @@ impl Serialize for GritAssignmentAsPattern {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritAssignmentAsPatternFields {
     pub container: SyntaxResult<AnyGritContainer>,
     pub eq_token: SyntaxResult<SyntaxToken>,
@@ -175,7 +170,6 @@ impl GritBacktickSnippetLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritBacktickSnippetLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -184,7 +178,7 @@ impl Serialize for GritBacktickSnippetLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritBacktickSnippetLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -211,7 +205,6 @@ impl GritBooleanLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritBooleanLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -220,7 +213,7 @@ impl Serialize for GritBooleanLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritBooleanLiteralFields {
     pub value: SyntaxResult<SyntaxToken>,
 }
@@ -255,7 +248,6 @@ impl GritBracketedPattern {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritBracketedPattern {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -264,7 +256,7 @@ impl Serialize for GritBracketedPattern {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritBracketedPatternFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritPattern>,
@@ -301,7 +293,6 @@ impl GritBracketedPredicate {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritBracketedPredicate {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -310,7 +301,7 @@ impl Serialize for GritBracketedPredicate {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritBracketedPredicateFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub predicate: SyntaxResult<AnyGritPredicate>,
@@ -347,7 +338,6 @@ impl GritBubble {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritBubble {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -356,7 +346,7 @@ impl Serialize for GritBubble {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritBubbleFields {
     pub bubble_token: SyntaxResult<SyntaxToken>,
     pub variables: Option<GritBubbleScope>,
@@ -393,7 +383,6 @@ impl GritBubbleScope {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritBubbleScope {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -402,7 +391,7 @@ impl Serialize for GritBubbleScope {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritBubbleScopeFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub variables: GritVariableList,
@@ -431,7 +420,6 @@ impl GritCodeSnippet {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritCodeSnippet {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -440,7 +428,7 @@ impl Serialize for GritCodeSnippet {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritCodeSnippetFields {
     pub source: SyntaxResult<AnyGritCodeSnippetSource>,
 }
@@ -475,7 +463,6 @@ impl GritCurlyPattern {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritCurlyPattern {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -484,7 +471,7 @@ impl Serialize for GritCurlyPattern {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritCurlyPatternFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritPattern>,
@@ -521,7 +508,6 @@ impl GritCurlyPredicateList {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritCurlyPredicateList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -530,7 +516,7 @@ impl Serialize for GritCurlyPredicateList {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritCurlyPredicateListFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub predicates: GritPredicateList,
@@ -567,7 +553,6 @@ impl GritDivOperation {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritDivOperation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -576,7 +561,7 @@ impl Serialize for GritDivOperation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritDivOperationFields {
     pub left: SyntaxResult<AnyGritPattern>,
     pub slash_token: SyntaxResult<SyntaxToken>,
@@ -605,7 +590,6 @@ impl GritDot {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritDot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -614,7 +598,7 @@ impl Serialize for GritDot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritDotFields {
     pub dot_token: SyntaxResult<SyntaxToken>,
 }
@@ -645,7 +629,6 @@ impl GritDotdotdot {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritDotdotdot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -654,7 +637,7 @@ impl Serialize for GritDotdotdot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritDotdotdotFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub pattern: Option<AnyGritMaybeCurlyPattern>,
@@ -682,7 +665,6 @@ impl GritDoubleLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritDoubleLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -691,7 +673,7 @@ impl Serialize for GritDoubleLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritDoubleLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -722,7 +704,6 @@ impl GritEvery {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritEvery {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -731,7 +712,7 @@ impl Serialize for GritEvery {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritEveryFields {
     pub every_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritMaybeCurlyPattern>,
@@ -771,7 +752,6 @@ impl GritFiles {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritFiles {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -780,7 +760,7 @@ impl Serialize for GritFiles {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritFilesFields {
     pub multifile_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -830,7 +810,6 @@ impl GritFunctionDefinition {
         support::required_node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritFunctionDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -839,7 +818,7 @@ impl Serialize for GritFunctionDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritFunctionDefinitionFields {
     pub function_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GritName>,
@@ -871,7 +850,6 @@ impl GritIntLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritIntLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -880,7 +858,7 @@ impl Serialize for GritIntLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritIntLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -919,7 +897,6 @@ impl GritLanguageDeclaration {
         support::token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritLanguageDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -928,7 +905,7 @@ impl Serialize for GritLanguageDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritLanguageDeclarationFields {
     pub language_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GritLanguageName>,
@@ -966,7 +943,6 @@ impl GritLanguageFlavor {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritLanguageFlavor {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -975,7 +951,7 @@ impl Serialize for GritLanguageFlavor {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritLanguageFlavorFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub flavors: GritLanguageFlavorList,
@@ -1004,7 +980,6 @@ impl GritLanguageFlavorKind {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritLanguageFlavorKind {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1013,7 +988,7 @@ impl Serialize for GritLanguageFlavorKind {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritLanguageFlavorKindFields {
     pub flavor_kind: SyntaxResult<SyntaxToken>,
 }
@@ -1040,7 +1015,6 @@ impl GritLanguageName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritLanguageName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1049,7 +1023,7 @@ impl Serialize for GritLanguageName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritLanguageNameFields {
     pub language_kind: SyntaxResult<SyntaxToken>,
 }
@@ -1080,7 +1054,6 @@ impl GritLanguageSpecificSnippet {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritLanguageSpecificSnippet {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1089,7 +1062,7 @@ impl Serialize for GritLanguageSpecificSnippet {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritLanguageSpecificSnippetFields {
     pub language: SyntaxResult<GritLanguageName>,
     pub snippet_token: SyntaxResult<SyntaxToken>,
@@ -1133,7 +1106,6 @@ impl GritLike {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritLike {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1142,7 +1114,7 @@ impl Serialize for GritLike {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritLikeFields {
     pub like_token: SyntaxResult<SyntaxToken>,
     pub threshold: Option<GritLikeThreshold>,
@@ -1181,7 +1153,6 @@ impl GritLikeThreshold {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritLikeThreshold {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1190,7 +1161,7 @@ impl Serialize for GritLikeThreshold {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritLikeThresholdFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub threshold: SyntaxResult<AnyGritPattern>,
@@ -1231,7 +1202,6 @@ impl GritList {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1240,7 +1210,7 @@ impl Serialize for GritList {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritListFields {
     pub name: Option<GritName>,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
@@ -1282,7 +1252,6 @@ impl GritListAccessor {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritListAccessor {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1291,7 +1260,7 @@ impl Serialize for GritListAccessor {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritListAccessorFields {
     pub list: SyntaxResult<AnyGritListAccessorSubject>,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
@@ -1329,7 +1298,6 @@ impl GritMap {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritMap {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1338,7 +1306,7 @@ impl Serialize for GritMap {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritMapFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub elements: GritMapElementList,
@@ -1375,7 +1343,6 @@ impl GritMapAccessor {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritMapAccessor {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1384,7 +1351,7 @@ impl Serialize for GritMapAccessor {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritMapAccessorFields {
     pub map: SyntaxResult<AnyGritMapAccessorSubject>,
     pub dot_token: SyntaxResult<SyntaxToken>,
@@ -1421,7 +1388,6 @@ impl GritMapElement {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritMapElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1430,7 +1396,7 @@ impl Serialize for GritMapElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritMapElementFields {
     pub key: SyntaxResult<GritName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -1467,7 +1433,6 @@ impl GritModOperation {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritModOperation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1476,7 +1441,7 @@ impl Serialize for GritModOperation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritModOperationFields {
     pub left: SyntaxResult<AnyGritPattern>,
     pub remainder_token: SyntaxResult<SyntaxToken>,
@@ -1513,7 +1478,6 @@ impl GritMulOperation {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritMulOperation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1522,7 +1486,7 @@ impl Serialize for GritMulOperation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritMulOperationFields {
     pub left: SyntaxResult<AnyGritPattern>,
     pub star_token: SyntaxResult<SyntaxToken>,
@@ -1551,7 +1515,6 @@ impl GritName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1560,7 +1523,7 @@ impl Serialize for GritName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritNameFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -1595,7 +1558,6 @@ impl GritNamedArg {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritNamedArg {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1604,7 +1566,7 @@ impl Serialize for GritNamedArg {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritNamedArgFields {
     pub name: SyntaxResult<GritName>,
     pub eq_token: SyntaxResult<SyntaxToken>,
@@ -1633,7 +1595,6 @@ impl GritNegativeIntLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritNegativeIntLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1642,7 +1603,7 @@ impl Serialize for GritNegativeIntLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritNegativeIntLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -1681,7 +1642,6 @@ impl GritNodeLike {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritNodeLike {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1690,7 +1650,7 @@ impl Serialize for GritNodeLike {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritNodeLikeFields {
     pub name: SyntaxResult<GritName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -1720,7 +1680,6 @@ impl GritNot {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritNot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1729,7 +1688,7 @@ impl Serialize for GritNot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritNotFields {
     pub token: SyntaxResult<SyntaxToken>,
 }
@@ -1764,7 +1723,6 @@ impl GritPatternAccumulate {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternAccumulate {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1773,7 +1731,7 @@ impl Serialize for GritPatternAccumulate {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternAccumulateFields {
     pub left: SyntaxResult<AnyGritPattern>,
     pub add_assign_token: SyntaxResult<SyntaxToken>,
@@ -1806,7 +1764,6 @@ impl GritPatternAfter {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternAfter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1815,7 +1772,7 @@ impl Serialize for GritPatternAfter {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternAfterFields {
     pub after_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritPattern>,
@@ -1855,7 +1812,6 @@ impl GritPatternAnd {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternAnd {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1864,7 +1820,7 @@ impl Serialize for GritPatternAnd {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternAndFields {
     pub and_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -1906,7 +1862,6 @@ impl GritPatternAny {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternAny {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1915,7 +1870,7 @@ impl Serialize for GritPatternAny {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternAnyFields {
     pub any_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -1945,7 +1900,6 @@ impl GritPatternArgList {
         support::list(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternArgList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1954,7 +1908,7 @@ impl Serialize for GritPatternArgList {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternArgListFields {
     pub grit_variable_list: GritVariableList,
 }
@@ -1989,7 +1943,6 @@ impl GritPatternAs {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternAs {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1998,7 +1951,7 @@ impl Serialize for GritPatternAs {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternAsFields {
     pub pattern: SyntaxResult<AnyGritPattern>,
     pub as_token: SyntaxResult<SyntaxToken>,
@@ -2031,7 +1984,6 @@ impl GritPatternBefore {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternBefore {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2040,7 +1992,7 @@ impl Serialize for GritPatternBefore {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternBeforeFields {
     pub before_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritPattern>,
@@ -2076,7 +2028,6 @@ impl GritPatternContains {
         support::node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternContains {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2085,7 +2036,7 @@ impl Serialize for GritPatternContains {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternContainsFields {
     pub contains_token: SyntaxResult<SyntaxToken>,
     pub contains: SyntaxResult<AnyGritMaybeCurlyPattern>,
@@ -2118,7 +2069,6 @@ impl GritPatternContainsUntilClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternContainsUntilClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2127,7 +2077,7 @@ impl Serialize for GritPatternContainsUntilClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternContainsUntilClauseFields {
     pub until_token: SyntaxResult<SyntaxToken>,
     pub until: SyntaxResult<AnyGritPattern>,
@@ -2183,7 +2133,6 @@ impl GritPatternDefinition {
         support::required_node(&self.syntax, 7usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2192,7 +2141,7 @@ impl Serialize for GritPatternDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternDefinitionFields {
     pub visibility_token: Option<SyntaxToken>,
     pub pattern_token: SyntaxResult<SyntaxToken>,
@@ -2234,7 +2183,6 @@ impl GritPatternDefinitionBody {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternDefinitionBody {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2243,7 +2191,7 @@ impl Serialize for GritPatternDefinitionBody {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternDefinitionBodyFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub patterns: GritPatternList,
@@ -2276,7 +2224,6 @@ impl GritPatternElseClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternElseClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2285,7 +2232,7 @@ impl Serialize for GritPatternElseClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternElseClauseFields {
     pub else_token: SyntaxResult<SyntaxToken>,
     pub else_pattern: SyntaxResult<AnyGritMaybeCurlyPattern>,
@@ -2333,7 +2280,6 @@ impl GritPatternIfElse {
         support::node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternIfElse {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2342,7 +2288,7 @@ impl Serialize for GritPatternIfElse {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternIfElseFields {
     pub if_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -2378,7 +2324,6 @@ impl GritPatternIncludes {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternIncludes {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2387,7 +2332,7 @@ impl Serialize for GritPatternIncludes {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternIncludesFields {
     pub includes_token: SyntaxResult<SyntaxToken>,
     pub includes: SyntaxResult<AnyGritMaybeCurlyPattern>,
@@ -2423,7 +2368,6 @@ impl GritPatternLimit {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternLimit {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2432,7 +2376,7 @@ impl Serialize for GritPatternLimit {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternLimitFields {
     pub pattern: SyntaxResult<AnyGritPattern>,
     pub limit_token: SyntaxResult<SyntaxToken>,
@@ -2465,7 +2409,6 @@ impl GritPatternMaybe {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternMaybe {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2474,7 +2417,7 @@ impl Serialize for GritPatternMaybe {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternMaybeFields {
     pub maybe_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritMaybeCurlyPattern>,
@@ -2506,7 +2449,6 @@ impl GritPatternNot {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternNot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2515,7 +2457,7 @@ impl Serialize for GritPatternNot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternNotFields {
     pub not: SyntaxResult<GritNot>,
     pub pattern: SyntaxResult<AnyGritPattern>,
@@ -2555,7 +2497,6 @@ impl GritPatternOr {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternOr {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2564,7 +2505,7 @@ impl Serialize for GritPatternOr {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternOrFields {
     pub or_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -2606,7 +2547,6 @@ impl GritPatternOrElse {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternOrElse {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2615,7 +2555,7 @@ impl Serialize for GritPatternOrElse {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternOrElseFields {
     pub orelse_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -2653,7 +2593,6 @@ impl GritPatternWhere {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternWhere {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2662,7 +2601,7 @@ impl Serialize for GritPatternWhere {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPatternWhereFields {
     pub pattern: SyntaxResult<AnyGritPattern>,
     pub where_token: SyntaxResult<SyntaxToken>,
@@ -2699,7 +2638,6 @@ impl GritPredicateAccumulate {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateAccumulate {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2708,7 +2646,7 @@ impl Serialize for GritPredicateAccumulate {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateAccumulateFields {
     pub left: SyntaxResult<GritVariable>,
     pub add_assign_token: SyntaxResult<SyntaxToken>,
@@ -2749,7 +2687,6 @@ impl GritPredicateAnd {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateAnd {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2758,7 +2695,7 @@ impl Serialize for GritPredicateAnd {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateAndFields {
     pub and_token: Option<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -2800,7 +2737,6 @@ impl GritPredicateAny {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateAny {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2809,7 +2745,7 @@ impl Serialize for GritPredicateAny {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateAnyFields {
     pub any_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -2847,7 +2783,6 @@ impl GritPredicateAssignment {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateAssignment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2856,7 +2791,7 @@ impl Serialize for GritPredicateAssignment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateAssignmentFields {
     pub container: SyntaxResult<AnyGritContainer>,
     pub eq_token: SyntaxResult<SyntaxToken>,
@@ -2897,7 +2832,6 @@ impl GritPredicateCall {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateCall {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2906,7 +2840,7 @@ impl Serialize for GritPredicateCall {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateCallFields {
     pub name: SyntaxResult<GritName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -2956,7 +2890,6 @@ impl GritPredicateDefinition {
         support::required_node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateDefinition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2965,7 +2898,7 @@ impl Serialize for GritPredicateDefinition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateDefinitionFields {
     pub predicate_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GritName>,
@@ -3001,7 +2934,6 @@ impl GritPredicateElseClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateElseClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3010,7 +2942,7 @@ impl Serialize for GritPredicateElseClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateElseClauseFields {
     pub else_token: SyntaxResult<SyntaxToken>,
     pub else_predicate: SyntaxResult<AnyGritPredicate>,
@@ -3046,7 +2978,6 @@ impl GritPredicateEqual {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateEqual {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3055,7 +2986,7 @@ impl Serialize for GritPredicateEqual {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateEqualFields {
     pub left: SyntaxResult<GritVariable>,
     pub equality_token: SyntaxResult<SyntaxToken>,
@@ -3092,7 +3023,6 @@ impl GritPredicateGreater {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateGreater {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3101,7 +3031,7 @@ impl Serialize for GritPredicateGreater {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateGreaterFields {
     pub left: SyntaxResult<GritVariable>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
@@ -3138,7 +3068,6 @@ impl GritPredicateGreaterEqual {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateGreaterEqual {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3147,7 +3076,7 @@ impl Serialize for GritPredicateGreaterEqual {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateGreaterEqualFields {
     pub left: SyntaxResult<GritVariable>,
     pub greater_than_equal_token: SyntaxResult<SyntaxToken>,
@@ -3196,7 +3125,6 @@ impl GritPredicateIfElse {
         support::node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateIfElse {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3205,7 +3133,7 @@ impl Serialize for GritPredicateIfElse {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateIfElseFields {
     pub if_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -3245,7 +3173,6 @@ impl GritPredicateLess {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateLess {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3254,7 +3181,7 @@ impl Serialize for GritPredicateLess {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateLessFields {
     pub left: SyntaxResult<GritVariable>,
     pub l_angle_token: SyntaxResult<SyntaxToken>,
@@ -3291,7 +3218,6 @@ impl GritPredicateLessEqual {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateLessEqual {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3300,7 +3226,7 @@ impl Serialize for GritPredicateLessEqual {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateLessEqualFields {
     pub left: SyntaxResult<GritVariable>,
     pub less_than_equal_token: SyntaxResult<SyntaxToken>,
@@ -3337,7 +3263,6 @@ impl GritPredicateMatch {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateMatch {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3346,7 +3271,7 @@ impl Serialize for GritPredicateMatch {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateMatchFields {
     pub left: SyntaxResult<AnyGritPredicateMatchSubject>,
     pub match_token: SyntaxResult<SyntaxToken>,
@@ -3379,7 +3304,6 @@ impl GritPredicateMaybe {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateMaybe {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3388,7 +3312,7 @@ impl Serialize for GritPredicateMaybe {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateMaybeFields {
     pub maybe_token: SyntaxResult<SyntaxToken>,
     pub predicate: SyntaxResult<AnyGritPredicate>,
@@ -3420,7 +3344,6 @@ impl GritPredicateNot {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateNot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3429,7 +3352,7 @@ impl Serialize for GritPredicateNot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateNotFields {
     pub not: SyntaxResult<GritNot>,
     pub predicate: SyntaxResult<AnyGritPredicate>,
@@ -3465,7 +3388,6 @@ impl GritPredicateNotEqual {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateNotEqual {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3474,7 +3396,7 @@ impl Serialize for GritPredicateNotEqual {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateNotEqualFields {
     pub left: SyntaxResult<GritVariable>,
     pub inequality_token: SyntaxResult<SyntaxToken>,
@@ -3515,7 +3437,6 @@ impl GritPredicateOr {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateOr {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3524,7 +3445,7 @@ impl Serialize for GritPredicateOr {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateOrFields {
     pub or_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -3558,7 +3479,6 @@ impl GritPredicateReturn {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateReturn {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3567,7 +3487,7 @@ impl Serialize for GritPredicateReturn {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateReturnFields {
     pub return_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritPattern>,
@@ -3607,7 +3527,6 @@ impl GritPredicateRewrite {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateRewrite {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3616,7 +3535,7 @@ impl Serialize for GritPredicateRewrite {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritPredicateRewriteFields {
     pub left: SyntaxResult<GritVariable>,
     pub annotation: Option<GritAnnotation>,
@@ -3646,7 +3565,6 @@ impl GritRawBacktickSnippetLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritRawBacktickSnippetLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3655,7 +3573,7 @@ impl Serialize for GritRawBacktickSnippetLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritRawBacktickSnippetLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -3682,7 +3600,6 @@ impl GritRegexLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritRegexLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3691,7 +3608,7 @@ impl Serialize for GritRegexLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritRegexLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -3722,7 +3639,6 @@ impl GritRegexPattern {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritRegexPattern {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3731,7 +3647,7 @@ impl Serialize for GritRegexPattern {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritRegexPatternFields {
     pub regex: SyntaxResult<AnyGritRegex>,
     pub variables: Option<GritRegexPatternVariables>,
@@ -3767,7 +3683,6 @@ impl GritRegexPatternVariables {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritRegexPatternVariables {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3776,7 +3691,7 @@ impl Serialize for GritRegexPatternVariables {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritRegexPatternVariablesFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub args: SyntaxResult<GritPatternArgList>,
@@ -3817,7 +3732,6 @@ impl GritRewrite {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritRewrite {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3826,7 +3740,7 @@ impl Serialize for GritRewrite {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritRewriteFields {
     pub left: SyntaxResult<AnyGritPattern>,
     pub annotation: Option<GritAnnotation>,
@@ -3872,7 +3786,6 @@ impl GritRoot {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritRoot {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3881,7 +3794,7 @@ impl Serialize for GritRoot {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub version: Option<AnyGritVersion>,
@@ -3924,7 +3837,6 @@ impl GritSequential {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritSequential {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3933,7 +3845,7 @@ impl Serialize for GritSequential {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritSequentialFields {
     pub sequential_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -3963,7 +3875,6 @@ impl GritSnippetRegexLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritSnippetRegexLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3972,7 +3883,7 @@ impl Serialize for GritSnippetRegexLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritSnippetRegexLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -4003,7 +3914,6 @@ impl GritSome {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritSome {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4012,7 +3922,7 @@ impl Serialize for GritSome {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritSomeFields {
     pub some_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritMaybeCurlyPattern>,
@@ -4040,7 +3950,6 @@ impl GritStringLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritStringLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4049,7 +3958,7 @@ impl Serialize for GritStringLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritStringLiteralFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -4084,7 +3993,6 @@ impl GritSubOperation {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritSubOperation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4093,7 +4001,7 @@ impl Serialize for GritSubOperation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritSubOperationFields {
     pub left: SyntaxResult<AnyGritPattern>,
     pub minus_token: SyntaxResult<SyntaxToken>,
@@ -4122,7 +4030,6 @@ impl GritUndefinedLiteral {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritUndefinedLiteral {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4131,7 +4038,7 @@ impl Serialize for GritUndefinedLiteral {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritUndefinedLiteralFields {
     pub token_token: SyntaxResult<SyntaxToken>,
 }
@@ -4158,7 +4065,6 @@ impl GritUnderscore {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritUnderscore {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4167,7 +4073,7 @@ impl Serialize for GritUnderscore {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritUnderscoreFields {
     pub token_token: SyntaxResult<SyntaxToken>,
 }
@@ -4194,7 +4100,6 @@ impl GritVariable {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritVariable {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4203,7 +4108,7 @@ impl Serialize for GritVariable {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritVariableFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -4246,7 +4151,6 @@ impl GritVersion {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritVersion {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4255,7 +4159,7 @@ impl Serialize for GritVersion {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritVersionFields {
     pub engine_token: SyntaxResult<SyntaxToken>,
     pub biome_token: SyntaxResult<SyntaxToken>,
@@ -4290,7 +4194,6 @@ impl GritWithin {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritWithin {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4299,13 +4202,12 @@ impl Serialize for GritWithin {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct GritWithinFields {
     pub within_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritMaybeCurlyPattern>,
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritCodeSnippetSource {
     GritBacktickSnippetLiteral(GritBacktickSnippetLiteral),
     GritLanguageSpecificSnippet(GritLanguageSpecificSnippet),
@@ -4331,8 +4233,7 @@ impl AnyGritCodeSnippetSource {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritContainer {
     GritBogusContainer(GritBogusContainer),
     GritListAccessor(GritListAccessor),
@@ -4365,8 +4266,7 @@ impl AnyGritContainer {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritDefinition {
     AnyGritPattern(AnyGritPattern),
     GritBogusDefinition(GritBogusDefinition),
@@ -4406,8 +4306,7 @@ impl AnyGritDefinition {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritLanguageDeclaration {
     GritBogusLanguageDeclaration(GritBogusLanguageDeclaration),
     GritLanguageDeclaration(GritLanguageDeclaration),
@@ -4426,8 +4325,7 @@ impl AnyGritLanguageDeclaration {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritLanguageFlavorKind {
     GritBogusLanguageFlavorKind(GritBogusLanguageFlavorKind),
     GritLanguageFlavorKind(GritLanguageFlavorKind),
@@ -4446,8 +4344,7 @@ impl AnyGritLanguageFlavorKind {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritListAccessorSubject {
     AnyGritContainer(AnyGritContainer),
     GritList(GritList),
@@ -4466,8 +4363,7 @@ impl AnyGritListAccessorSubject {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritListIndex {
     AnyGritContainer(AnyGritContainer),
     GritIntLiteral(GritIntLiteral),
@@ -4493,8 +4389,7 @@ impl AnyGritListIndex {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritListPattern {
     AnyGritPattern(AnyGritPattern),
     GritDotdotdot(GritDotdotdot),
@@ -4513,8 +4408,7 @@ impl AnyGritListPattern {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritLiteral {
     GritBogusLiteral(GritBogusLiteral),
     GritBooleanLiteral(GritBooleanLiteral),
@@ -4582,8 +4476,7 @@ impl AnyGritLiteral {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritMapAccessorSubject {
     AnyGritContainer(AnyGritContainer),
     GritMap(GritMap),
@@ -4602,8 +4495,7 @@ impl AnyGritMapAccessorSubject {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritMapElement {
     GritBogusMapElement(GritBogusMapElement),
     GritMapElement(GritMapElement),
@@ -4622,8 +4514,7 @@ impl AnyGritMapElement {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritMapKey {
     GritName(GritName),
     GritVariable(GritVariable),
@@ -4642,8 +4533,7 @@ impl AnyGritMapKey {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritMaybeCurlyPattern {
     AnyGritPattern(AnyGritPattern),
     GritCurlyPattern(GritCurlyPattern),
@@ -4662,8 +4552,7 @@ impl AnyGritMaybeCurlyPattern {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritMaybeNamedArg {
     AnyGritPattern(AnyGritPattern),
     GritBogusNamedArg(GritBogusNamedArg),
@@ -4689,8 +4578,7 @@ impl AnyGritMaybeNamedArg {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritPattern {
     AnyGritLiteral(AnyGritLiteral),
     GritAddOperation(GritAddOperation),
@@ -4968,8 +4856,7 @@ impl AnyGritPattern {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritPredicate {
     GritBogusPredicate(GritBogusPredicate),
     GritBooleanLiteral(GritBooleanLiteral),
@@ -5121,8 +5008,7 @@ impl AnyGritPredicate {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritPredicateMatchSubject {
     AnyGritContainer(AnyGritContainer),
     AnyGritLiteral(AnyGritLiteral),
@@ -5141,8 +5027,7 @@ impl AnyGritPredicateMatchSubject {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritRegex {
     GritRegexLiteral(GritRegexLiteral),
     GritSnippetRegexLiteral(GritSnippetRegexLiteral),
@@ -5161,8 +5046,7 @@ impl AnyGritRegex {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritVersion {
     GritBogusVersion(GritBogusVersion),
     GritVersion(GritVersion),
@@ -11328,11 +11212,14 @@ impl AstNode for AnyGritPredicateMatchSubject {
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if let Some(any_grit_container) = AnyGritContainer::cast(syntax.clone()) {
-            return Some(AnyGritPredicateMatchSubject::AnyGritContainer(
-                any_grit_container,
-            ));
-        }
+        let syntax = match AnyGritContainer::try_cast(syntax) {
+            Ok(any_grit_container) => {
+                return Some(AnyGritPredicateMatchSubject::AnyGritContainer(
+                    any_grit_container,
+                ));
+            }
+            Err(syntax) => syntax,
+        };
         if let Some(any_grit_literal) = AnyGritLiteral::cast(syntax) {
             return Some(AnyGritPredicateMatchSubject::AnyGritLiteral(
                 any_grit_literal,
@@ -12067,8 +11954,7 @@ impl std::fmt::Display for GritWithin {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogus {
     syntax: SyntaxNode,
 }
@@ -12124,8 +12010,7 @@ impl From<GritBogus> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusContainer {
     syntax: SyntaxNode,
 }
@@ -12181,8 +12066,7 @@ impl From<GritBogusContainer> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusDefinition {
     syntax: SyntaxNode,
 }
@@ -12238,8 +12122,7 @@ impl From<GritBogusDefinition> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusLanguageDeclaration {
     syntax: SyntaxNode,
 }
@@ -12295,8 +12178,7 @@ impl From<GritBogusLanguageDeclaration> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusLanguageFlavorKind {
     syntax: SyntaxNode,
 }
@@ -12352,8 +12234,7 @@ impl From<GritBogusLanguageFlavorKind> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusLiteral {
     syntax: SyntaxNode,
 }
@@ -12409,8 +12290,7 @@ impl From<GritBogusLiteral> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusMapElement {
     syntax: SyntaxNode,
 }
@@ -12466,8 +12346,7 @@ impl From<GritBogusMapElement> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusNamedArg {
     syntax: SyntaxNode,
 }
@@ -12523,8 +12402,7 @@ impl From<GritBogusNamedArg> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusPattern {
     syntax: SyntaxNode,
 }
@@ -12580,8 +12458,7 @@ impl From<GritBogusPattern> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusPredicate {
     syntax: SyntaxNode,
 }
@@ -12637,8 +12514,7 @@ impl From<GritBogusPredicate> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct GritBogusVersion {
     syntax: SyntaxNode,
 }
@@ -12734,7 +12610,6 @@ impl AstNode for GritDefinitionList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritDefinitionList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12817,7 +12692,6 @@ impl AstNode for GritLanguageFlavorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritLanguageFlavorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12900,7 +12774,6 @@ impl AstNode for GritListPatternList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritListPatternList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12983,7 +12856,6 @@ impl AstNode for GritMapElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritMapElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13066,7 +12938,6 @@ impl AstNode for GritNamedArgList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritNamedArgList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13149,7 +13020,6 @@ impl AstNode for GritPatternList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPatternList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13232,7 +13102,6 @@ impl AstNode for GritPredicateList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritPredicateList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13315,7 +13184,6 @@ impl AstNode for GritVariableList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for GritVariableList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

@@ -15,9 +15,7 @@ use biome_rowan::{
     AstNodeList, AstNodeListIterator, AstNodeSlotMap, AstSeparatedList,
     AstSeparatedListNodesIterator,
 };
-#[cfg(feature = "serde")]
 use serde::ser::SerializeSeq;
-#[cfg(feature = "serde")]
 use serde::{Serialize, Serializer};
 use std::fmt::{Debug, Formatter};
 #[doc = r" Sentinel value indicating a missing element in a dynamic node, where"]
@@ -47,7 +45,6 @@ impl JsAccessorModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsAccessorModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -56,7 +53,7 @@ impl Serialize for JsAccessorModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsAccessorModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -91,7 +88,6 @@ impl JsArrayAssignmentPattern {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayAssignmentPattern {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -100,7 +96,7 @@ impl Serialize for JsArrayAssignmentPattern {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsArrayAssignmentPatternFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub elements: JsArrayAssignmentPatternElementList,
@@ -133,7 +129,6 @@ impl JsArrayAssignmentPatternElement {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayAssignmentPatternElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -142,7 +137,7 @@ impl Serialize for JsArrayAssignmentPatternElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsArrayAssignmentPatternElementFields {
     pub pattern: SyntaxResult<AnyJsAssignmentPattern>,
     pub init: Option<JsInitializerClause>,
@@ -174,7 +169,6 @@ impl JsArrayAssignmentPatternRestElement {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayAssignmentPatternRestElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -183,7 +177,7 @@ impl Serialize for JsArrayAssignmentPatternRestElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsArrayAssignmentPatternRestElementFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyJsAssignmentPattern>,
@@ -219,7 +213,6 @@ impl JsArrayBindingPattern {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayBindingPattern {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -228,7 +221,7 @@ impl Serialize for JsArrayBindingPattern {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsArrayBindingPatternFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub elements: JsArrayBindingPatternElementList,
@@ -261,7 +254,6 @@ impl JsArrayBindingPatternElement {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayBindingPatternElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -270,7 +262,7 @@ impl Serialize for JsArrayBindingPatternElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsArrayBindingPatternElementFields {
     pub pattern: SyntaxResult<AnyJsBindingPattern>,
     pub init: Option<JsInitializerClause>,
@@ -302,7 +294,6 @@ impl JsArrayBindingPatternRestElement {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayBindingPatternRestElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -311,7 +302,7 @@ impl Serialize for JsArrayBindingPatternRestElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsArrayBindingPatternRestElementFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyJsBindingPattern>,
@@ -347,7 +338,6 @@ impl JsArrayExpression {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -356,7 +346,7 @@ impl Serialize for JsArrayExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsArrayExpressionFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub elements: JsArrayElementList,
@@ -380,7 +370,6 @@ impl JsArrayHole {
         JsArrayHoleFields {}
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayHole {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -389,7 +378,7 @@ impl Serialize for JsArrayHole {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsArrayHoleFields {}
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsArrowFunctionExpression {
@@ -434,7 +423,6 @@ impl JsArrowFunctionExpression {
         support::required_node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrowFunctionExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -443,7 +431,7 @@ impl Serialize for JsArrowFunctionExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsArrowFunctionExpressionFields {
     pub async_token: Option<SyntaxToken>,
     pub type_parameters: Option<TsTypeParameters>,
@@ -483,7 +471,6 @@ impl JsAssignmentExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsAssignmentExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -492,7 +479,7 @@ impl Serialize for JsAssignmentExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsAssignmentExpressionFields {
     pub left: SyntaxResult<AnyJsAssignmentPattern>,
     pub operator_token: SyntaxResult<SyntaxToken>,
@@ -525,7 +512,6 @@ impl JsAwaitExpression {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsAwaitExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -534,7 +520,7 @@ impl Serialize for JsAwaitExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsAwaitExpressionFields {
     pub await_token: SyntaxResult<SyntaxToken>,
     pub argument: SyntaxResult<AnyJsExpression>,
@@ -562,7 +548,6 @@ impl JsBigintLiteralExpression {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsBigintLiteralExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -571,7 +556,7 @@ impl Serialize for JsBigintLiteralExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsBigintLiteralExpressionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -606,7 +591,6 @@ impl JsBinaryExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsBinaryExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -615,7 +599,7 @@ impl Serialize for JsBinaryExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsBinaryExpressionFields {
     pub left: SyntaxResult<AnyJsExpression>,
     pub operator_token: SyntaxResult<SyntaxToken>,
@@ -652,7 +636,6 @@ impl JsBlockStatement {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsBlockStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -661,7 +644,7 @@ impl Serialize for JsBlockStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsBlockStatementFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub statements: JsStatementList,
@@ -690,7 +673,6 @@ impl JsBooleanLiteralExpression {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsBooleanLiteralExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -699,7 +681,7 @@ impl Serialize for JsBooleanLiteralExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsBooleanLiteralExpressionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -734,7 +716,6 @@ impl JsBreakStatement {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsBreakStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -743,7 +724,7 @@ impl Serialize for JsBreakStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsBreakStatementFields {
     pub break_token: SyntaxResult<SyntaxToken>,
     pub label: Option<JsLabel>,
@@ -780,7 +761,6 @@ impl JsCallArguments {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsCallArguments {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -789,7 +769,7 @@ impl Serialize for JsCallArguments {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsCallArgumentsFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub args: JsCallArgumentList,
@@ -830,7 +810,6 @@ impl JsCallExpression {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsCallExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -839,7 +818,7 @@ impl Serialize for JsCallExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsCallExpressionFields {
     pub callee: SyntaxResult<AnyJsExpression>,
     pub optional_chain_token: Option<SyntaxToken>,
@@ -881,7 +860,6 @@ impl JsCaseClause {
         support::list(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsCaseClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -890,7 +868,7 @@ impl Serialize for JsCaseClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsCaseClauseFields {
     pub case_token: SyntaxResult<SyntaxToken>,
     pub test: SyntaxResult<AnyJsExpression>,
@@ -928,7 +906,6 @@ impl JsCatchClause {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsCatchClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -937,7 +914,7 @@ impl Serialize for JsCatchClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsCatchClauseFields {
     pub catch_token: SyntaxResult<SyntaxToken>,
     pub declaration: Option<JsCatchDeclaration>,
@@ -978,7 +955,6 @@ impl JsCatchDeclaration {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsCatchDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -987,7 +963,7 @@ impl Serialize for JsCatchDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsCatchDeclarationFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub binding: SyntaxResult<AnyJsBindingPattern>,
@@ -1053,7 +1029,6 @@ impl JsClassDeclaration {
         support::required_token(&self.syntax, 9usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsClassDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1062,7 +1037,7 @@ impl Serialize for JsClassDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsClassDeclarationFields {
     pub decorators: JsDecoratorList,
     pub abstract_token: Option<SyntaxToken>,
@@ -1134,7 +1109,6 @@ impl JsClassExportDefaultDeclaration {
         support::required_token(&self.syntax, 9usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsClassExportDefaultDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1143,7 +1117,7 @@ impl Serialize for JsClassExportDefaultDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsClassExportDefaultDeclarationFields {
     pub decorators: JsDecoratorList,
     pub abstract_token: Option<SyntaxToken>,
@@ -1211,7 +1185,6 @@ impl JsClassExpression {
         support::required_token(&self.syntax, 8usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsClassExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1220,7 +1193,7 @@ impl Serialize for JsClassExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsClassExpressionFields {
     pub decorators: JsDecoratorList,
     pub class_token: SyntaxResult<SyntaxToken>,
@@ -1267,7 +1240,6 @@ impl JsComputedMemberAssignment {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsComputedMemberAssignment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1276,7 +1248,7 @@ impl Serialize for JsComputedMemberAssignment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsComputedMemberAssignmentFields {
     pub object: SyntaxResult<AnyJsExpression>,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
@@ -1322,7 +1294,6 @@ impl JsComputedMemberExpression {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsComputedMemberExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1331,7 +1302,7 @@ impl Serialize for JsComputedMemberExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsComputedMemberExpressionFields {
     pub object: SyntaxResult<AnyJsExpression>,
     pub optional_chain_token: Option<SyntaxToken>,
@@ -1370,7 +1341,6 @@ impl JsComputedMemberName {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsComputedMemberName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1379,7 +1349,7 @@ impl Serialize for JsComputedMemberName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsComputedMemberNameFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<AnyJsExpression>,
@@ -1424,7 +1394,6 @@ impl JsConditionalExpression {
         support::required_node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsConditionalExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1433,7 +1402,7 @@ impl Serialize for JsConditionalExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsConditionalExpressionFields {
     pub test: SyntaxResult<AnyJsExpression>,
     pub question_mark_token: SyntaxResult<SyntaxToken>,
@@ -1476,7 +1445,6 @@ impl JsConstructorClassMember {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsConstructorClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1485,7 +1453,7 @@ impl Serialize for JsConstructorClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsConstructorClassMemberFields {
     pub modifiers: JsConstructorModifierList,
     pub name: SyntaxResult<JsLiteralMemberName>,
@@ -1523,7 +1491,6 @@ impl JsConstructorParameters {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsConstructorParameters {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1532,7 +1499,7 @@ impl Serialize for JsConstructorParameters {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsConstructorParametersFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameters: JsConstructorParameterList,
@@ -1569,7 +1536,6 @@ impl JsContinueStatement {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsContinueStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1578,7 +1544,7 @@ impl Serialize for JsContinueStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsContinueStatementFields {
     pub continue_token: SyntaxResult<SyntaxToken>,
     pub label: Option<JsLabel>,
@@ -1611,7 +1577,6 @@ impl JsDebuggerStatement {
         support::token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsDebuggerStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1620,7 +1585,7 @@ impl Serialize for JsDebuggerStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsDebuggerStatementFields {
     pub debugger_token: SyntaxResult<SyntaxToken>,
     pub semicolon_token: Option<SyntaxToken>,
@@ -1652,7 +1617,6 @@ impl JsDecorator {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsDecorator {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1661,7 +1625,7 @@ impl Serialize for JsDecorator {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsDecoratorFields {
     pub at_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<AnyJsDecorator>,
@@ -1697,7 +1661,6 @@ impl JsDefaultClause {
         support::list(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsDefaultClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1706,7 +1669,7 @@ impl Serialize for JsDefaultClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsDefaultClauseFields {
     pub default_token: SyntaxResult<SyntaxToken>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -1735,7 +1698,6 @@ impl JsDefaultImportSpecifier {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsDefaultImportSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1744,7 +1706,7 @@ impl Serialize for JsDefaultImportSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsDefaultImportSpecifierFields {
     pub local_name: SyntaxResult<AnyJsBinding>,
 }
@@ -1775,7 +1737,6 @@ impl JsDirective {
         support::token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsDirective {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1784,7 +1745,7 @@ impl Serialize for JsDirective {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsDirectiveFields {
     pub value_token: SyntaxResult<SyntaxToken>,
     pub semicolon_token: Option<SyntaxToken>,
@@ -1836,7 +1797,6 @@ impl JsDoWhileStatement {
         support::token(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsDoWhileStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1845,7 +1805,7 @@ impl Serialize for JsDoWhileStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsDoWhileStatementFields {
     pub do_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<AnyJsStatement>,
@@ -1882,7 +1842,6 @@ impl JsElseClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsElseClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1891,7 +1850,7 @@ impl Serialize for JsElseClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsElseClauseFields {
     pub else_token: SyntaxResult<SyntaxToken>,
     pub alternate: SyntaxResult<AnyJsStatement>,
@@ -1919,7 +1878,6 @@ impl JsEmptyClassMember {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsEmptyClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1928,7 +1886,7 @@ impl Serialize for JsEmptyClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsEmptyClassMemberFields {
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
@@ -1955,7 +1913,6 @@ impl JsEmptyStatement {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsEmptyStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -1964,7 +1921,7 @@ impl Serialize for JsEmptyStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsEmptyStatementFields {
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
@@ -1999,7 +1956,6 @@ impl JsExport {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExport {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2008,7 +1964,7 @@ impl Serialize for JsExport {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportFields {
     pub decorators: JsDecoratorList,
     pub export_token: SyntaxResult<SyntaxToken>,
@@ -2041,7 +1997,6 @@ impl JsExportAsClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportAsClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2050,7 +2005,7 @@ impl Serialize for JsExportAsClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportAsClauseFields {
     pub as_token: SyntaxResult<SyntaxToken>,
     pub exported_name: SyntaxResult<JsLiteralExportName>,
@@ -2086,7 +2041,6 @@ impl JsExportDefaultDeclarationClause {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportDefaultDeclarationClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2095,7 +2049,7 @@ impl Serialize for JsExportDefaultDeclarationClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportDefaultDeclarationClauseFields {
     pub default_token: SyntaxResult<SyntaxToken>,
     pub declaration: SyntaxResult<AnyJsExportDefaultDeclaration>,
@@ -2132,7 +2086,6 @@ impl JsExportDefaultExpressionClause {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportDefaultExpressionClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2141,7 +2094,7 @@ impl Serialize for JsExportDefaultExpressionClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportDefaultExpressionClauseFields {
     pub default_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<AnyJsExpression>,
@@ -2184,7 +2137,7 @@ impl JsExportFromClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 4usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
@@ -2194,7 +2147,6 @@ impl JsExportFromClause {
         support::token(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportFromClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2203,13 +2155,13 @@ impl Serialize for JsExportFromClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportFromClauseFields {
     pub type_token: Option<SyntaxToken>,
     pub star_token: SyntaxResult<SyntaxToken>,
     pub export_as: Option<JsExportAsClause>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
     pub semicolon_token: Option<SyntaxToken>,
 }
@@ -2252,7 +2204,6 @@ impl JsExportNamedClause {
         support::token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportNamedClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2261,7 +2212,7 @@ impl Serialize for JsExportNamedClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportNamedClauseFields {
     pub type_token: Option<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -2310,7 +2261,7 @@ impl JsExportNamedFromClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 4usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 5usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
@@ -2320,7 +2271,6 @@ impl JsExportNamedFromClause {
         support::token(&self.syntax, 7usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportNamedFromClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2329,14 +2279,14 @@ impl Serialize for JsExportNamedFromClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportNamedFromClauseFields {
     pub type_token: Option<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub specifiers: JsExportNamedFromSpecifierList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
     pub semicolon_token: Option<SyntaxToken>,
 }
@@ -2371,7 +2321,6 @@ impl JsExportNamedFromSpecifier {
         support::node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportNamedFromSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2380,7 +2329,7 @@ impl Serialize for JsExportNamedFromSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportNamedFromSpecifierFields {
     pub type_token: Option<SyntaxToken>,
     pub source_name: SyntaxResult<JsLiteralExportName>,
@@ -2413,7 +2362,6 @@ impl JsExportNamedShorthandSpecifier {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportNamedShorthandSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2422,7 +2370,7 @@ impl Serialize for JsExportNamedShorthandSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportNamedShorthandSpecifierFields {
     pub type_token: Option<SyntaxToken>,
     pub name: SyntaxResult<JsReferenceIdentifier>,
@@ -2462,7 +2410,6 @@ impl JsExportNamedSpecifier {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportNamedSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2471,7 +2418,7 @@ impl Serialize for JsExportNamedSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExportNamedSpecifierFields {
     pub type_token: Option<SyntaxToken>,
     pub local_name: SyntaxResult<JsReferenceIdentifier>,
@@ -2505,7 +2452,6 @@ impl JsExpressionSnipped {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExpressionSnipped {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2514,7 +2460,7 @@ impl Serialize for JsExpressionSnipped {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExpressionSnippedFields {
     pub expression: SyntaxResult<AnyJsExpression>,
     pub eof_token: SyntaxResult<SyntaxToken>,
@@ -2546,7 +2492,6 @@ impl JsExpressionStatement {
         support::token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExpressionStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2555,7 +2500,7 @@ impl Serialize for JsExpressionStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExpressionStatementFields {
     pub expression: SyntaxResult<AnyJsExpression>,
     pub semicolon_token: Option<SyntaxToken>,
@@ -2591,7 +2536,6 @@ impl JsExtendsClause {
         support::node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExtendsClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2600,7 +2544,7 @@ impl Serialize for JsExtendsClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsExtendsClauseFields {
     pub extends_token: SyntaxResult<SyntaxToken>,
     pub super_class: SyntaxResult<AnyJsExpression>,
@@ -2633,7 +2577,6 @@ impl JsFinallyClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsFinallyClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2642,7 +2585,7 @@ impl Serialize for JsFinallyClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsFinallyClauseFields {
     pub finally_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<JsBlockStatement>,
@@ -2694,7 +2637,6 @@ impl JsForInStatement {
         support::required_node(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsForInStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2703,7 +2645,7 @@ impl Serialize for JsForInStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsForInStatementFields {
     pub for_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -2764,7 +2706,6 @@ impl JsForOfStatement {
         support::required_node(&self.syntax, 7usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsForOfStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2773,7 +2714,7 @@ impl Serialize for JsForOfStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsForOfStatementFields {
     pub for_token: SyntaxResult<SyntaxToken>,
     pub await_token: Option<SyntaxToken>,
@@ -2839,7 +2780,6 @@ impl JsForStatement {
         support::required_node(&self.syntax, 8usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsForStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2848,7 +2788,7 @@ impl Serialize for JsForStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsForStatementFields {
     pub for_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -2891,7 +2831,6 @@ impl JsForVariableDeclaration {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsForVariableDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2900,7 +2839,7 @@ impl Serialize for JsForVariableDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsForVariableDeclarationFields {
     pub await_token: Option<SyntaxToken>,
     pub kind_token: SyntaxResult<SyntaxToken>,
@@ -2945,7 +2884,6 @@ impl JsFormalParameter {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsFormalParameter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -2954,7 +2892,7 @@ impl Serialize for JsFormalParameter {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsFormalParameterFields {
     pub decorators: JsDecoratorList,
     pub binding: SyntaxResult<AnyJsBindingPattern>,
@@ -2997,7 +2935,6 @@ impl JsFunctionBody {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsFunctionBody {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3006,7 +2943,7 @@ impl Serialize for JsFunctionBody {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsFunctionBodyFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub directives: JsDirectiveList,
@@ -3064,7 +3001,6 @@ impl JsFunctionDeclaration {
         support::required_node(&self.syntax, 7usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsFunctionDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3073,7 +3009,7 @@ impl Serialize for JsFunctionDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsFunctionDeclarationFields {
     pub async_token: Option<SyntaxToken>,
     pub function_token: SyntaxResult<SyntaxToken>,
@@ -3135,7 +3071,6 @@ impl JsFunctionExportDefaultDeclaration {
         support::required_node(&self.syntax, 7usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsFunctionExportDefaultDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3144,7 +3079,7 @@ impl Serialize for JsFunctionExportDefaultDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsFunctionExportDefaultDeclarationFields {
     pub async_token: Option<SyntaxToken>,
     pub function_token: SyntaxResult<SyntaxToken>,
@@ -3206,7 +3141,6 @@ impl JsFunctionExpression {
         support::required_node(&self.syntax, 7usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsFunctionExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3215,7 +3149,7 @@ impl Serialize for JsFunctionExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsFunctionExpressionFields {
     pub async_token: Option<SyntaxToken>,
     pub function_token: SyntaxResult<SyntaxToken>,
@@ -3273,7 +3207,6 @@ impl JsGetterClassMember {
         support::required_node(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsGetterClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3282,7 +3215,7 @@ impl Serialize for JsGetterClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsGetterClassMemberFields {
     pub modifiers: JsMethodModifierList,
     pub get_token: SyntaxResult<SyntaxToken>,
@@ -3335,7 +3268,6 @@ impl JsGetterObjectMember {
         support::required_node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsGetterObjectMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3344,7 +3276,7 @@ impl Serialize for JsGetterObjectMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsGetterObjectMemberFields {
     pub get_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyJsObjectMemberName>,
@@ -3376,7 +3308,6 @@ impl JsIdentifierAssignment {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsIdentifierAssignment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3385,7 +3316,7 @@ impl Serialize for JsIdentifierAssignment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsIdentifierAssignmentFields {
     pub name_token: SyntaxResult<SyntaxToken>,
 }
@@ -3412,7 +3343,6 @@ impl JsIdentifierBinding {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsIdentifierBinding {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3421,7 +3351,7 @@ impl Serialize for JsIdentifierBinding {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsIdentifierBindingFields {
     pub name_token: SyntaxResult<SyntaxToken>,
 }
@@ -3446,7 +3376,6 @@ impl JsIdentifierExpression {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsIdentifierExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3455,7 +3384,7 @@ impl Serialize for JsIdentifierExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsIdentifierExpressionFields {
     pub name: SyntaxResult<JsReferenceIdentifier>,
 }
@@ -3502,7 +3431,6 @@ impl JsIfStatement {
         support::node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsIfStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3511,7 +3439,7 @@ impl Serialize for JsIfStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsIfStatementFields {
     pub if_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -3551,7 +3479,6 @@ impl JsImport {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImport {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3560,7 +3487,7 @@ impl Serialize for JsImport {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportFields {
     pub import_token: SyntaxResult<SyntaxToken>,
     pub import_clause: SyntaxResult<AnyJsImportClause>,
@@ -3601,7 +3528,6 @@ impl JsImportAssertion {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportAssertion {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3610,7 +3536,7 @@ impl Serialize for JsImportAssertion {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportAssertionFields {
     pub assertion_kind: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -3648,7 +3574,6 @@ impl JsImportAssertionEntry {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportAssertionEntry {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3657,7 +3582,7 @@ impl Serialize for JsImportAssertionEntry {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportAssertionEntryFields {
     pub key: SyntaxResult<SyntaxToken>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -3683,14 +3608,13 @@ impl JsImportBareClause {
             assertion: self.assertion(),
         }
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 0usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportBareClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3699,9 +3623,9 @@ impl Serialize for JsImportBareClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportBareClauseFields {
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3731,7 +3655,6 @@ impl JsImportCallExpression {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportCallExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3740,7 +3663,7 @@ impl Serialize for JsImportCallExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportCallExpressionFields {
     pub import_token: SyntaxResult<SyntaxToken>,
     pub arguments: SyntaxResult<JsCallArguments>,
@@ -3781,14 +3704,13 @@ impl JsImportCombinedClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 4usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
         support::node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportCombinedClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3797,13 +3719,13 @@ impl Serialize for JsImportCombinedClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportCombinedClauseFields {
     pub default_specifier: SyntaxResult<JsDefaultImportSpecifier>,
     pub comma_token: SyntaxResult<SyntaxToken>,
     pub specifier: SyntaxResult<AnyJsCombinedSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3838,14 +3760,13 @@ impl JsImportDefaultClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 3usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportDefaultClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3854,12 +3775,12 @@ impl Serialize for JsImportDefaultClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportDefaultClauseFields {
     pub type_token: Option<SyntaxToken>,
     pub default_specifier: SyntaxResult<JsDefaultImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3893,7 +3814,6 @@ impl JsImportMetaExpression {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportMetaExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3902,7 +3822,7 @@ impl Serialize for JsImportMetaExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportMetaExpressionFields {
     pub import_token: SyntaxResult<SyntaxToken>,
     pub dot_token: SyntaxResult<SyntaxToken>,
@@ -3940,14 +3860,13 @@ impl JsImportNamedClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 3usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportNamedClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -3956,12 +3875,12 @@ impl Serialize for JsImportNamedClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportNamedClauseFields {
     pub type_token: Option<SyntaxToken>,
     pub named_specifiers: SyntaxResult<JsNamedImportSpecifiers>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -3996,14 +3915,13 @@ impl JsImportNamespaceClause {
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 3usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
         support::node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportNamespaceClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4012,12 +3930,12 @@ impl Serialize for JsImportNamespaceClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsImportNamespaceClauseFields {
     pub type_token: Option<SyntaxToken>,
     pub namespace_specifier: SyntaxResult<JsNamespaceImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub assertion: Option<JsImportAssertion>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -4051,7 +3969,6 @@ impl JsInExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsInExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4060,7 +3977,7 @@ impl Serialize for JsInExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsInExpressionFields {
     pub property: SyntaxResult<AnyJsInProperty>,
     pub in_token: SyntaxResult<SyntaxToken>,
@@ -4093,7 +4010,6 @@ impl JsInitializerClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsInitializerClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4102,7 +4018,7 @@ impl Serialize for JsInitializerClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsInitializerClauseFields {
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<AnyJsExpression>,
@@ -4138,7 +4054,6 @@ impl JsInstanceofExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsInstanceofExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4147,7 +4062,7 @@ impl Serialize for JsInstanceofExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsInstanceofExpressionFields {
     pub left: SyntaxResult<AnyJsExpression>,
     pub instanceof_token: SyntaxResult<SyntaxToken>,
@@ -4176,7 +4091,6 @@ impl JsLabel {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsLabel {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4185,7 +4099,7 @@ impl Serialize for JsLabel {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsLabelFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -4220,7 +4134,6 @@ impl JsLabeledStatement {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsLabeledStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4229,7 +4142,7 @@ impl Serialize for JsLabeledStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsLabeledStatementFields {
     pub label: SyntaxResult<JsLabel>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -4258,7 +4171,6 @@ impl JsLiteralExportName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsLiteralExportName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4267,7 +4179,7 @@ impl Serialize for JsLiteralExportName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsLiteralExportNameFields {
     pub value: SyntaxResult<SyntaxToken>,
 }
@@ -4294,7 +4206,6 @@ impl JsLiteralMemberName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsLiteralMemberName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4303,7 +4214,7 @@ impl Serialize for JsLiteralMemberName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsLiteralMemberNameFields {
     pub value: SyntaxResult<SyntaxToken>,
 }
@@ -4338,7 +4249,6 @@ impl JsLogicalExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsLogicalExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4347,11 +4257,46 @@ impl Serialize for JsLogicalExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsLogicalExpressionFields {
     pub left: SyntaxResult<AnyJsExpression>,
     pub operator_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyJsExpression>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct JsMetavariable {
+    pub(crate) syntax: SyntaxNode,
+}
+impl JsMetavariable {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> JsMetavariableFields {
+        JsMetavariableFields {
+            value_token: self.value_token(),
+        }
+    }
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for JsMetavariable {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct JsMetavariableFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct JsMethodClassMember {
@@ -4408,7 +4353,6 @@ impl JsMethodClassMember {
         support::required_node(&self.syntax, 8usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsMethodClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4417,7 +4361,7 @@ impl Serialize for JsMethodClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsMethodClassMemberFields {
     pub modifiers: JsMethodModifierList,
     pub async_token: Option<SyntaxToken>,
@@ -4476,7 +4420,6 @@ impl JsMethodObjectMember {
         support::required_node(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsMethodObjectMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4485,7 +4428,7 @@ impl Serialize for JsMethodObjectMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsMethodObjectMemberFields {
     pub async_token: Option<SyntaxToken>,
     pub star_token: Option<SyntaxToken>,
@@ -4534,7 +4477,6 @@ impl JsModule {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsModule {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4543,7 +4485,7 @@ impl Serialize for JsModule {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsModuleFields {
     pub bom_token: Option<SyntaxToken>,
     pub interpreter_token: Option<SyntaxToken>,
@@ -4574,7 +4516,6 @@ impl JsModuleSource {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsModuleSource {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4583,7 +4524,7 @@ impl Serialize for JsModuleSource {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsModuleSourceFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -4610,7 +4551,6 @@ impl JsName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4619,7 +4559,7 @@ impl Serialize for JsName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsNameFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -4658,7 +4598,6 @@ impl JsNamedImportSpecifier {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsNamedImportSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4667,7 +4606,7 @@ impl Serialize for JsNamedImportSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsNamedImportSpecifierFields {
     pub type_token: Option<SyntaxToken>,
     pub name: SyntaxResult<JsLiteralExportName>,
@@ -4705,7 +4644,6 @@ impl JsNamedImportSpecifiers {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsNamedImportSpecifiers {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4714,7 +4652,7 @@ impl Serialize for JsNamedImportSpecifiers {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsNamedImportSpecifiersFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub specifiers: JsNamedImportSpecifierList,
@@ -4751,7 +4689,6 @@ impl JsNamespaceImportSpecifier {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsNamespaceImportSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4760,7 +4697,7 @@ impl Serialize for JsNamespaceImportSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsNamespaceImportSpecifierFields {
     pub star_token: SyntaxResult<SyntaxToken>,
     pub as_token: SyntaxResult<SyntaxToken>,
@@ -4801,7 +4738,6 @@ impl JsNewExpression {
         support::node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsNewExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4810,7 +4746,7 @@ impl Serialize for JsNewExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsNewExpressionFields {
     pub new_token: SyntaxResult<SyntaxToken>,
     pub callee: SyntaxResult<AnyJsExpression>,
@@ -4848,7 +4784,6 @@ impl JsNewTargetExpression {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsNewTargetExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4857,7 +4792,7 @@ impl Serialize for JsNewTargetExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsNewTargetExpressionFields {
     pub new_token: SyntaxResult<SyntaxToken>,
     pub dot_token: SyntaxResult<SyntaxToken>,
@@ -4886,7 +4821,6 @@ impl JsNullLiteralExpression {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsNullLiteralExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4895,7 +4829,7 @@ impl Serialize for JsNullLiteralExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsNullLiteralExpressionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -4922,7 +4856,6 @@ impl JsNumberLiteralExpression {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsNumberLiteralExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4931,7 +4864,7 @@ impl Serialize for JsNumberLiteralExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsNumberLiteralExpressionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -4966,7 +4899,6 @@ impl JsObjectAssignmentPattern {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectAssignmentPattern {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -4975,7 +4907,7 @@ impl Serialize for JsObjectAssignmentPattern {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsObjectAssignmentPatternFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub properties: JsObjectAssignmentPatternPropertyList,
@@ -5016,7 +4948,6 @@ impl JsObjectAssignmentPatternProperty {
         support::node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectAssignmentPatternProperty {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5025,7 +4956,7 @@ impl Serialize for JsObjectAssignmentPatternProperty {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsObjectAssignmentPatternPropertyFields {
     pub member: SyntaxResult<AnyJsObjectMemberName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -5059,7 +4990,6 @@ impl JsObjectAssignmentPatternRest {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectAssignmentPatternRest {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5068,7 +4998,7 @@ impl Serialize for JsObjectAssignmentPatternRest {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsObjectAssignmentPatternRestFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub target: SyntaxResult<AnyJsAssignment>,
@@ -5100,7 +5030,6 @@ impl JsObjectAssignmentPatternShorthandProperty {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectAssignmentPatternShorthandProperty {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5109,7 +5038,7 @@ impl Serialize for JsObjectAssignmentPatternShorthandProperty {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsObjectAssignmentPatternShorthandPropertyFields {
     pub identifier: SyntaxResult<JsIdentifierAssignment>,
     pub init: Option<JsInitializerClause>,
@@ -5145,7 +5074,6 @@ impl JsObjectBindingPattern {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectBindingPattern {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5154,7 +5082,7 @@ impl Serialize for JsObjectBindingPattern {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsObjectBindingPatternFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub properties: JsObjectBindingPatternPropertyList,
@@ -5195,7 +5123,6 @@ impl JsObjectBindingPatternProperty {
         support::node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectBindingPatternProperty {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5204,7 +5131,7 @@ impl Serialize for JsObjectBindingPatternProperty {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsObjectBindingPatternPropertyFields {
     pub member: SyntaxResult<AnyJsObjectMemberName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -5238,7 +5165,6 @@ impl JsObjectBindingPatternRest {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectBindingPatternRest {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5247,7 +5173,7 @@ impl Serialize for JsObjectBindingPatternRest {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsObjectBindingPatternRestFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub binding: SyntaxResult<AnyJsBinding>,
@@ -5279,7 +5205,6 @@ impl JsObjectBindingPatternShorthandProperty {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectBindingPatternShorthandProperty {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5288,7 +5213,7 @@ impl Serialize for JsObjectBindingPatternShorthandProperty {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsObjectBindingPatternShorthandPropertyFields {
     pub identifier: SyntaxResult<AnyJsBinding>,
     pub init: Option<JsInitializerClause>,
@@ -5324,7 +5249,6 @@ impl JsObjectExpression {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5333,7 +5257,7 @@ impl Serialize for JsObjectExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsObjectExpressionFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub members: JsObjectMemberList,
@@ -5370,7 +5294,6 @@ impl JsParameters {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsParameters {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5379,7 +5302,7 @@ impl Serialize for JsParameters {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsParametersFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub items: JsParameterList,
@@ -5416,7 +5339,6 @@ impl JsParenthesizedAssignment {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsParenthesizedAssignment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5425,7 +5347,7 @@ impl Serialize for JsParenthesizedAssignment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsParenthesizedAssignmentFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub assignment: SyntaxResult<AnyJsAssignment>,
@@ -5462,7 +5384,6 @@ impl JsParenthesizedExpression {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsParenthesizedExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5471,7 +5392,7 @@ impl Serialize for JsParenthesizedExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsParenthesizedExpressionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<AnyJsExpression>,
@@ -5504,7 +5425,6 @@ impl JsPostUpdateExpression {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsPostUpdateExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5513,7 +5433,7 @@ impl Serialize for JsPostUpdateExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsPostUpdateExpressionFields {
     pub operand: SyntaxResult<AnyJsAssignment>,
     pub operator_token: SyntaxResult<SyntaxToken>,
@@ -5545,7 +5465,6 @@ impl JsPreUpdateExpression {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsPreUpdateExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5554,7 +5473,7 @@ impl Serialize for JsPreUpdateExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsPreUpdateExpressionFields {
     pub operator_token: SyntaxResult<SyntaxToken>,
     pub operand: SyntaxResult<AnyJsAssignment>,
@@ -5586,7 +5505,6 @@ impl JsPrivateClassMemberName {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsPrivateClassMemberName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5595,7 +5513,7 @@ impl Serialize for JsPrivateClassMemberName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsPrivateClassMemberNameFields {
     pub hash_token: SyntaxResult<SyntaxToken>,
     pub id_token: SyntaxResult<SyntaxToken>,
@@ -5627,7 +5545,6 @@ impl JsPrivateName {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsPrivateName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5636,7 +5553,7 @@ impl Serialize for JsPrivateName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsPrivateNameFields {
     pub hash_token: SyntaxResult<SyntaxToken>,
     pub value_token: SyntaxResult<SyntaxToken>,
@@ -5680,7 +5597,6 @@ impl JsPropertyClassMember {
         support::token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsPropertyClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5689,7 +5605,7 @@ impl Serialize for JsPropertyClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsPropertyClassMemberFields {
     pub modifiers: JsPropertyModifierList,
     pub name: SyntaxResult<AnyJsClassMemberName>,
@@ -5728,7 +5644,6 @@ impl JsPropertyObjectMember {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsPropertyObjectMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5737,7 +5652,7 @@ impl Serialize for JsPropertyObjectMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsPropertyObjectMemberFields {
     pub name: SyntaxResult<AnyJsObjectMemberName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -5766,7 +5681,6 @@ impl JsReferenceIdentifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsReferenceIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5775,7 +5689,7 @@ impl Serialize for JsReferenceIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsReferenceIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -5802,7 +5716,6 @@ impl JsRegexLiteralExpression {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsRegexLiteralExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5811,7 +5724,7 @@ impl Serialize for JsRegexLiteralExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsRegexLiteralExpressionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -5850,7 +5763,6 @@ impl JsRestParameter {
         support::node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsRestParameter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5859,7 +5771,7 @@ impl Serialize for JsRestParameter {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsRestParameterFields {
     pub decorators: JsDecoratorList,
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
@@ -5897,7 +5809,6 @@ impl JsReturnStatement {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsReturnStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5906,7 +5817,7 @@ impl Serialize for JsReturnStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsReturnStatementFields {
     pub return_token: SyntaxResult<SyntaxToken>,
     pub argument: Option<AnyJsExpression>,
@@ -5951,7 +5862,6 @@ impl JsScript {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsScript {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -5960,7 +5870,7 @@ impl Serialize for JsScript {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsScriptFields {
     pub bom_token: Option<SyntaxToken>,
     pub interpreter_token: Option<SyntaxToken>,
@@ -5999,7 +5909,6 @@ impl JsSequenceExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsSequenceExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6008,7 +5917,7 @@ impl Serialize for JsSequenceExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsSequenceExpressionFields {
     pub left: SyntaxResult<AnyJsExpression>,
     pub comma_token: SyntaxResult<SyntaxToken>,
@@ -6061,7 +5970,6 @@ impl JsSetterClassMember {
         support::required_node(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsSetterClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6070,7 +5978,7 @@ impl Serialize for JsSetterClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsSetterClassMemberFields {
     pub modifiers: JsMethodModifierList,
     pub set_token: SyntaxResult<SyntaxToken>,
@@ -6123,7 +6031,6 @@ impl JsSetterObjectMember {
         support::required_node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsSetterObjectMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6132,7 +6039,7 @@ impl Serialize for JsSetterObjectMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsSetterObjectMemberFields {
     pub set_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyJsObjectMemberName>,
@@ -6168,7 +6075,6 @@ impl JsShorthandNamedImportSpecifier {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsShorthandNamedImportSpecifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6177,7 +6083,7 @@ impl Serialize for JsShorthandNamedImportSpecifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsShorthandNamedImportSpecifierFields {
     pub type_token: Option<SyntaxToken>,
     pub local_name: SyntaxResult<AnyJsBinding>,
@@ -6203,7 +6109,6 @@ impl JsShorthandPropertyObjectMember {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsShorthandPropertyObjectMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6212,7 +6117,7 @@ impl Serialize for JsShorthandPropertyObjectMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsShorthandPropertyObjectMemberFields {
     pub name: SyntaxResult<JsReferenceIdentifier>,
 }
@@ -6243,7 +6148,6 @@ impl JsSpread {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsSpread {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6252,7 +6156,7 @@ impl Serialize for JsSpread {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsSpreadFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub argument: SyntaxResult<AnyJsExpression>,
@@ -6292,7 +6196,6 @@ impl JsStaticInitializationBlockClassMember {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsStaticInitializationBlockClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6301,7 +6204,7 @@ impl Serialize for JsStaticInitializationBlockClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsStaticInitializationBlockClassMemberFields {
     pub static_token: SyntaxResult<SyntaxToken>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -6339,7 +6242,6 @@ impl JsStaticMemberAssignment {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsStaticMemberAssignment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6348,7 +6250,7 @@ impl Serialize for JsStaticMemberAssignment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsStaticMemberAssignmentFields {
     pub object: SyntaxResult<AnyJsExpression>,
     pub dot_token: SyntaxResult<SyntaxToken>,
@@ -6385,7 +6287,6 @@ impl JsStaticMemberExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsStaticMemberExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6394,7 +6295,7 @@ impl Serialize for JsStaticMemberExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsStaticMemberExpressionFields {
     pub object: SyntaxResult<AnyJsExpression>,
     pub operator_token: SyntaxResult<SyntaxToken>,
@@ -6423,7 +6324,6 @@ impl JsStaticModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsStaticModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6432,7 +6332,7 @@ impl Serialize for JsStaticModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsStaticModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -6459,7 +6359,6 @@ impl JsStringLiteralExpression {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsStringLiteralExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6468,7 +6367,7 @@ impl Serialize for JsStringLiteralExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsStringLiteralExpressionFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -6495,7 +6394,6 @@ impl JsSuperExpression {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsSuperExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6504,7 +6402,7 @@ impl Serialize for JsSuperExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsSuperExpressionFields {
     pub super_token: SyntaxResult<SyntaxToken>,
 }
@@ -6555,7 +6453,6 @@ impl JsSwitchStatement {
         support::required_token(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsSwitchStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6564,7 +6461,7 @@ impl Serialize for JsSwitchStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsSwitchStatementFields {
     pub switch_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -6597,7 +6494,6 @@ impl JsTemplateChunkElement {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsTemplateChunkElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6606,7 +6502,7 @@ impl Serialize for JsTemplateChunkElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsTemplateChunkElementFields {
     pub template_chunk_token: SyntaxResult<SyntaxToken>,
 }
@@ -6641,7 +6537,6 @@ impl JsTemplateElement {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsTemplateElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6650,7 +6545,7 @@ impl Serialize for JsTemplateElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsTemplateElementFields {
     pub dollar_curly_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<AnyJsExpression>,
@@ -6695,7 +6590,6 @@ impl JsTemplateExpression {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsTemplateExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6704,7 +6598,7 @@ impl Serialize for JsTemplateExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsTemplateExpressionFields {
     pub tag: Option<AnyJsExpression>,
     pub type_arguments: Option<TsTypeArguments>,
@@ -6735,7 +6629,6 @@ impl JsThisExpression {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsThisExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6744,7 +6637,7 @@ impl Serialize for JsThisExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsThisExpressionFields {
     pub this_token: SyntaxResult<SyntaxToken>,
 }
@@ -6779,7 +6672,6 @@ impl JsThrowStatement {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsThrowStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6788,7 +6680,7 @@ impl Serialize for JsThrowStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsThrowStatementFields {
     pub throw_token: SyntaxResult<SyntaxToken>,
     pub argument: SyntaxResult<AnyJsExpression>,
@@ -6829,7 +6721,6 @@ impl JsTryFinallyStatement {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsTryFinallyStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6838,7 +6729,7 @@ impl Serialize for JsTryFinallyStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsTryFinallyStatementFields {
     pub try_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<JsBlockStatement>,
@@ -6876,7 +6767,6 @@ impl JsTryStatement {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsTryStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6885,7 +6775,7 @@ impl Serialize for JsTryStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsTryStatementFields {
     pub try_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<JsBlockStatement>,
@@ -6918,7 +6808,6 @@ impl JsUnaryExpression {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsUnaryExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6927,7 +6816,7 @@ impl Serialize for JsUnaryExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsUnaryExpressionFields {
     pub operator_token: SyntaxResult<SyntaxToken>,
     pub argument: SyntaxResult<AnyJsExpression>,
@@ -6963,7 +6852,6 @@ impl JsVariableDeclaration {
         support::list(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsVariableDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -6972,7 +6860,7 @@ impl Serialize for JsVariableDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsVariableDeclarationFields {
     pub await_token: Option<SyntaxToken>,
     pub kind: SyntaxResult<SyntaxToken>,
@@ -7005,7 +6893,6 @@ impl JsVariableDeclarationClause {
         support::token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsVariableDeclarationClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7014,7 +6901,7 @@ impl Serialize for JsVariableDeclarationClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsVariableDeclarationClauseFields {
     pub declaration: SyntaxResult<JsVariableDeclaration>,
     pub semicolon_token: Option<SyntaxToken>,
@@ -7050,7 +6937,6 @@ impl JsVariableDeclarator {
         support::node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsVariableDeclarator {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7059,7 +6945,7 @@ impl Serialize for JsVariableDeclarator {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsVariableDeclaratorFields {
     pub id: SyntaxResult<AnyJsBindingPattern>,
     pub variable_annotation: Option<AnyTsVariableAnnotation>,
@@ -7092,7 +6978,6 @@ impl JsVariableStatement {
         support::token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsVariableStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7101,7 +6986,7 @@ impl Serialize for JsVariableStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsVariableStatementFields {
     pub declaration: SyntaxResult<JsVariableDeclaration>,
     pub semicolon_token: Option<SyntaxToken>,
@@ -7145,7 +7030,6 @@ impl JsWhileStatement {
         support::required_node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsWhileStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7154,7 +7038,7 @@ impl Serialize for JsWhileStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsWhileStatementFields {
     pub while_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -7201,7 +7085,6 @@ impl JsWithStatement {
         support::required_node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsWithStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7210,7 +7093,7 @@ impl Serialize for JsWithStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsWithStatementFields {
     pub with_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
@@ -7245,7 +7128,6 @@ impl JsYieldArgument {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsYieldArgument {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7254,7 +7136,7 @@ impl Serialize for JsYieldArgument {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsYieldArgumentFields {
     pub star_token: Option<SyntaxToken>,
     pub expression: SyntaxResult<AnyJsExpression>,
@@ -7286,7 +7168,6 @@ impl JsYieldExpression {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsYieldExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7295,7 +7176,7 @@ impl Serialize for JsYieldExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsYieldExpressionFields {
     pub yield_token: SyntaxResult<SyntaxToken>,
     pub argument: Option<JsYieldArgument>,
@@ -7327,7 +7208,6 @@ impl JsxAttribute {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxAttribute {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7336,7 +7216,7 @@ impl Serialize for JsxAttribute {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxAttributeFields {
     pub name: SyntaxResult<AnyJsxAttributeName>,
     pub initializer: Option<JsxAttributeInitializerClause>,
@@ -7368,7 +7248,6 @@ impl JsxAttributeInitializerClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxAttributeInitializerClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7377,7 +7256,7 @@ impl Serialize for JsxAttributeInitializerClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxAttributeInitializerClauseFields {
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub value: SyntaxResult<AnyJsxAttributeValue>,
@@ -7417,7 +7296,6 @@ impl JsxClosingElement {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxClosingElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7426,7 +7304,7 @@ impl Serialize for JsxClosingElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxClosingElementFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub slash_token: SyntaxResult<SyntaxToken>,
@@ -7464,7 +7342,6 @@ impl JsxClosingFragment {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxClosingFragment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7473,7 +7350,7 @@ impl Serialize for JsxClosingFragment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxClosingFragmentFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub slash_token: SyntaxResult<SyntaxToken>,
@@ -7510,7 +7387,6 @@ impl JsxElement {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7519,7 +7395,7 @@ impl Serialize for JsxElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxElementFields {
     pub opening_element: SyntaxResult<JsxOpeningElement>,
     pub children: JsxChildList,
@@ -7556,7 +7432,6 @@ impl JsxExpressionAttributeValue {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxExpressionAttributeValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7565,7 +7440,7 @@ impl Serialize for JsxExpressionAttributeValue {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxExpressionAttributeValueFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<AnyJsExpression>,
@@ -7602,7 +7477,6 @@ impl JsxExpressionChild {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxExpressionChild {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7611,7 +7485,7 @@ impl Serialize for JsxExpressionChild {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxExpressionChildFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub expression: Option<AnyJsExpression>,
@@ -7648,7 +7522,6 @@ impl JsxFragment {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxFragment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7657,7 +7530,7 @@ impl Serialize for JsxFragment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxFragmentFields {
     pub opening_fragment: SyntaxResult<JsxOpeningFragment>,
     pub children: JsxChildList,
@@ -7694,7 +7567,6 @@ impl JsxMemberName {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxMemberName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7703,7 +7575,7 @@ impl Serialize for JsxMemberName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxMemberNameFields {
     pub object: SyntaxResult<AnyJsxObjectName>,
     pub dot_token: SyntaxResult<SyntaxToken>,
@@ -7732,7 +7604,6 @@ impl JsxName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7741,7 +7612,7 @@ impl Serialize for JsxName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxNameFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -7776,7 +7647,6 @@ impl JsxNamespaceName {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxNamespaceName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7785,7 +7655,7 @@ impl Serialize for JsxNamespaceName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxNamespaceNameFields {
     pub namespace: SyntaxResult<JsxName>,
     pub colon_token: SyntaxResult<SyntaxToken>,
@@ -7830,7 +7700,6 @@ impl JsxOpeningElement {
         support::required_token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxOpeningElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7839,7 +7708,7 @@ impl Serialize for JsxOpeningElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxOpeningElementFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyJsxElementName>,
@@ -7874,7 +7743,6 @@ impl JsxOpeningFragment {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxOpeningFragment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7883,7 +7751,7 @@ impl Serialize for JsxOpeningFragment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxOpeningFragmentFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub r_angle_token: SyntaxResult<SyntaxToken>,
@@ -7911,7 +7779,6 @@ impl JsxReferenceIdentifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxReferenceIdentifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7920,7 +7787,7 @@ impl Serialize for JsxReferenceIdentifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxReferenceIdentifierFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -7967,7 +7834,6 @@ impl JsxSelfClosingElement {
         support::required_token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxSelfClosingElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -7976,7 +7842,7 @@ impl Serialize for JsxSelfClosingElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxSelfClosingElementFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyJsxElementName>,
@@ -8020,7 +7886,6 @@ impl JsxSpreadAttribute {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxSpreadAttribute {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8029,7 +7894,7 @@ impl Serialize for JsxSpreadAttribute {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxSpreadAttributeFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
@@ -8071,7 +7936,6 @@ impl JsxSpreadChild {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxSpreadChild {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8080,7 +7944,7 @@ impl Serialize for JsxSpreadChild {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxSpreadChildFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
@@ -8110,7 +7974,6 @@ impl JsxString {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxString {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8119,7 +7982,7 @@ impl Serialize for JsxString {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxStringFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -8144,7 +8007,6 @@ impl JsxTagExpression {
         support::required_node(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxTagExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8153,7 +8015,7 @@ impl Serialize for JsxTagExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxTagExpressionFields {
     pub tag: SyntaxResult<AnyJsxTag>,
 }
@@ -8180,7 +8042,6 @@ impl JsxText {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxText {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8189,7 +8050,7 @@ impl Serialize for JsxText {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct JsxTextFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
@@ -8216,7 +8077,6 @@ impl TsAbstractModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsAbstractModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8225,7 +8085,7 @@ impl Serialize for TsAbstractModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsAbstractModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -8252,7 +8112,6 @@ impl TsAccessibilityModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsAccessibilityModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8261,7 +8120,7 @@ impl Serialize for TsAccessibilityModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsAccessibilityModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -8288,7 +8147,6 @@ impl TsAnyType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsAnyType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8297,7 +8155,7 @@ impl Serialize for TsAnyType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsAnyTypeFields {
     pub any_token: SyntaxResult<SyntaxToken>,
 }
@@ -8332,7 +8190,6 @@ impl TsArrayType {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsArrayType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8341,7 +8198,7 @@ impl Serialize for TsArrayType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsArrayTypeFields {
     pub element_type: SyntaxResult<AnyTsType>,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
@@ -8378,7 +8235,6 @@ impl TsAsAssignment {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsAsAssignment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8387,7 +8243,7 @@ impl Serialize for TsAsAssignment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsAsAssignmentFields {
     pub assignment: SyntaxResult<AnyJsAssignment>,
     pub as_token: SyntaxResult<SyntaxToken>,
@@ -8424,7 +8280,6 @@ impl TsAsExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsAsExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8433,7 +8288,7 @@ impl Serialize for TsAsExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsAsExpressionFields {
     pub expression: SyntaxResult<AnyJsExpression>,
     pub as_token: SyntaxResult<SyntaxToken>,
@@ -8466,7 +8321,6 @@ impl TsAssertsCondition {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsAssertsCondition {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8475,7 +8329,7 @@ impl Serialize for TsAssertsCondition {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsAssertsConditionFields {
     pub is_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -8511,7 +8365,6 @@ impl TsAssertsReturnType {
         support::node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsAssertsReturnType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8520,7 +8373,7 @@ impl Serialize for TsAssertsReturnType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsAssertsReturnTypeFields {
     pub asserts_token: SyntaxResult<SyntaxToken>,
     pub parameter_name: SyntaxResult<AnyTsTypePredicateParameterName>,
@@ -8553,7 +8406,6 @@ impl TsBigintLiteralType {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsBigintLiteralType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8562,7 +8414,7 @@ impl Serialize for TsBigintLiteralType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsBigintLiteralTypeFields {
     pub minus_token: Option<SyntaxToken>,
     pub literal_token: SyntaxResult<SyntaxToken>,
@@ -8590,7 +8442,6 @@ impl TsBigintType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsBigintType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8599,7 +8450,7 @@ impl Serialize for TsBigintType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsBigintTypeFields {
     pub bigint_token: SyntaxResult<SyntaxToken>,
 }
@@ -8626,7 +8477,6 @@ impl TsBooleanLiteralType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsBooleanLiteralType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8635,7 +8485,7 @@ impl Serialize for TsBooleanLiteralType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsBooleanLiteralTypeFields {
     pub literal: SyntaxResult<SyntaxToken>,
 }
@@ -8662,7 +8512,6 @@ impl TsBooleanType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsBooleanType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8671,7 +8520,7 @@ impl Serialize for TsBooleanType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsBooleanTypeFields {
     pub boolean_token: SyntaxResult<SyntaxToken>,
 }
@@ -8710,7 +8559,6 @@ impl TsCallSignatureTypeMember {
         support::token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsCallSignatureTypeMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8719,7 +8567,7 @@ impl Serialize for TsCallSignatureTypeMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsCallSignatureTypeMemberFields {
     pub type_parameters: Option<TsTypeParameters>,
     pub parameters: SyntaxResult<JsParameters>,
@@ -8773,7 +8621,6 @@ impl TsConditionalType {
         support::required_node(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsConditionalType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8782,7 +8629,7 @@ impl Serialize for TsConditionalType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsConditionalTypeFields {
     pub check_type: SyntaxResult<AnyTsType>,
     pub extends_token: SyntaxResult<SyntaxToken>,
@@ -8815,7 +8662,6 @@ impl TsConstModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsConstModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8824,7 +8670,7 @@ impl Serialize for TsConstModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsConstModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -8867,7 +8713,6 @@ impl TsConstructSignatureTypeMember {
         support::token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsConstructSignatureTypeMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8876,7 +8721,7 @@ impl Serialize for TsConstructSignatureTypeMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsConstructSignatureTypeMemberFields {
     pub new_token: SyntaxResult<SyntaxToken>,
     pub type_parameters: Option<TsTypeParameters>,
@@ -8919,7 +8764,6 @@ impl TsConstructorSignatureClassMember {
         support::token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsConstructorSignatureClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8928,7 +8772,7 @@ impl Serialize for TsConstructorSignatureClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsConstructorSignatureClassMemberFields {
     pub modifiers: JsConstructorModifierList,
     pub name: SyntaxResult<JsLiteralMemberName>,
@@ -8978,7 +8822,6 @@ impl TsConstructorType {
         support::required_node(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsConstructorType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -8987,7 +8830,7 @@ impl Serialize for TsConstructorType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsConstructorTypeFields {
     pub abstract_token: Option<SyntaxToken>,
     pub new_token: SyntaxResult<SyntaxToken>,
@@ -9043,7 +8886,6 @@ impl TsDeclareFunctionDeclaration {
         support::token(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsDeclareFunctionDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9052,7 +8894,7 @@ impl Serialize for TsDeclareFunctionDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsDeclareFunctionDeclarationFields {
     pub async_token: Option<SyntaxToken>,
     pub function_token: SyntaxResult<SyntaxToken>,
@@ -9109,7 +8951,6 @@ impl TsDeclareFunctionExportDefaultDeclaration {
         support::token(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsDeclareFunctionExportDefaultDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9118,7 +8959,7 @@ impl Serialize for TsDeclareFunctionExportDefaultDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsDeclareFunctionExportDefaultDeclarationFields {
     pub async_token: Option<SyntaxToken>,
     pub function_token: SyntaxResult<SyntaxToken>,
@@ -9151,7 +8992,6 @@ impl TsDeclareModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsDeclareModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9160,7 +9000,7 @@ impl Serialize for TsDeclareModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsDeclareModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -9191,7 +9031,6 @@ impl TsDeclareStatement {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsDeclareStatement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9200,7 +9039,7 @@ impl Serialize for TsDeclareStatement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsDeclareStatementFields {
     pub declare_token: SyntaxResult<SyntaxToken>,
     pub declaration: SyntaxResult<AnyJsDeclarationClause>,
@@ -9232,7 +9071,6 @@ impl TsDefaultTypeClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsDefaultTypeClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9241,7 +9079,7 @@ impl Serialize for TsDefaultTypeClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsDefaultTypeClauseFields {
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -9273,7 +9111,6 @@ impl TsDefinitePropertyAnnotation {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsDefinitePropertyAnnotation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9282,7 +9119,7 @@ impl Serialize for TsDefinitePropertyAnnotation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsDefinitePropertyAnnotationFields {
     pub excl_token: SyntaxResult<SyntaxToken>,
     pub type_annotation: SyntaxResult<TsTypeAnnotation>,
@@ -9314,7 +9151,6 @@ impl TsDefiniteVariableAnnotation {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsDefiniteVariableAnnotation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9323,7 +9159,7 @@ impl Serialize for TsDefiniteVariableAnnotation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsDefiniteVariableAnnotationFields {
     pub excl_token: SyntaxResult<SyntaxToken>,
     pub type_annotation: SyntaxResult<TsTypeAnnotation>,
@@ -9351,7 +9187,6 @@ impl TsEmptyExternalModuleDeclarationBody {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsEmptyExternalModuleDeclarationBody {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9360,7 +9195,7 @@ impl Serialize for TsEmptyExternalModuleDeclarationBody {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsEmptyExternalModuleDeclarationBodyFields {
     pub semicolon_token: SyntaxResult<SyntaxToken>,
 }
@@ -9407,7 +9242,6 @@ impl TsEnumDeclaration {
         support::required_token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsEnumDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9416,7 +9250,7 @@ impl Serialize for TsEnumDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsEnumDeclarationFields {
     pub const_token: Option<SyntaxToken>,
     pub enum_token: SyntaxResult<SyntaxToken>,
@@ -9452,7 +9286,6 @@ impl TsEnumMember {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsEnumMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9461,7 +9294,7 @@ impl Serialize for TsEnumMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsEnumMemberFields {
     pub name: SyntaxResult<AnyTsEnumMemberName>,
     pub initializer: Option<JsInitializerClause>,
@@ -9501,7 +9334,6 @@ impl TsExportAsNamespaceClause {
         support::token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsExportAsNamespaceClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9510,7 +9342,7 @@ impl Serialize for TsExportAsNamespaceClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsExportAsNamespaceClauseFields {
     pub as_token: SyntaxResult<SyntaxToken>,
     pub namespace_token: SyntaxResult<SyntaxToken>,
@@ -9548,7 +9380,6 @@ impl TsExportAssignmentClause {
         support::token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsExportAssignmentClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9557,7 +9388,7 @@ impl Serialize for TsExportAssignmentClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsExportAssignmentClauseFields {
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub expression: SyntaxResult<AnyJsExpression>,
@@ -9590,7 +9421,6 @@ impl TsExportDeclareClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsExportDeclareClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9599,7 +9429,7 @@ impl Serialize for TsExportDeclareClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsExportDeclareClauseFields {
     pub declare_token: SyntaxResult<SyntaxToken>,
     pub declaration: SyntaxResult<AnyJsDeclarationClause>,
@@ -9631,7 +9461,6 @@ impl TsExtendsClause {
         support::list(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsExtendsClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9640,7 +9469,7 @@ impl Serialize for TsExtendsClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsExtendsClauseFields {
     pub extends_token: SyntaxResult<SyntaxToken>,
     pub types: TsTypeList,
@@ -9669,14 +9498,13 @@ impl TsExternalModuleDeclaration {
     pub fn module_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn body(&self) -> Option<AnyTsExternalModuleDeclarationBody> {
         support::node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsExternalModuleDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9685,10 +9513,10 @@ impl Serialize for TsExternalModuleDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsExternalModuleDeclarationFields {
     pub module_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub body: Option<AnyTsExternalModuleDeclarationBody>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -9719,14 +9547,13 @@ impl TsExternalModuleReference {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn source(&self) -> SyntaxResult<JsModuleSource> {
+    pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
         support::required_node(&self.syntax, 2usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsExternalModuleReference {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9735,11 +9562,11 @@ impl Serialize for TsExternalModuleReference {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsExternalModuleReferenceFields {
     pub require_token: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub source: SyntaxResult<JsModuleSource>,
+    pub source: SyntaxResult<AnyJsModuleSource>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -9777,7 +9604,6 @@ impl TsFunctionType {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsFunctionType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9786,7 +9612,7 @@ impl Serialize for TsFunctionType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsFunctionTypeFields {
     pub type_parameters: Option<TsTypeParameters>,
     pub parameters: SyntaxResult<JsParameters>,
@@ -9840,7 +9666,6 @@ impl TsGetterSignatureClassMember {
         support::token(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsGetterSignatureClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9849,7 +9674,7 @@ impl Serialize for TsGetterSignatureClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsGetterSignatureClassMemberFields {
     pub modifiers: TsMethodSignatureModifierList,
     pub get_token: SyntaxResult<SyntaxToken>,
@@ -9902,7 +9727,6 @@ impl TsGetterSignatureTypeMember {
         support::token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsGetterSignatureTypeMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9911,7 +9735,7 @@ impl Serialize for TsGetterSignatureTypeMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsGetterSignatureTypeMemberFields {
     pub get_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyJsObjectMemberName>,
@@ -9947,7 +9771,6 @@ impl TsGlobalDeclaration {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsGlobalDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9956,7 +9779,7 @@ impl Serialize for TsGlobalDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsGlobalDeclarationFields {
     pub global_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<TsModuleBlock>,
@@ -9984,7 +9807,6 @@ impl TsIdentifierBinding {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsIdentifierBinding {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -9993,7 +9815,7 @@ impl Serialize for TsIdentifierBinding {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsIdentifierBindingFields {
     pub name_token: SyntaxResult<SyntaxToken>,
 }
@@ -10024,7 +9846,6 @@ impl TsImplementsClause {
         support::list(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsImplementsClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10033,7 +9854,7 @@ impl Serialize for TsImplementsClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsImplementsClauseFields {
     pub implements_token: SyntaxResult<SyntaxToken>,
     pub types: TsTypeList,
@@ -10081,7 +9902,6 @@ impl TsImportEqualsDeclaration {
         support::token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsImportEqualsDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10090,7 +9910,7 @@ impl Serialize for TsImportEqualsDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsImportEqualsDeclarationFields {
     pub import_token: SyntaxResult<SyntaxToken>,
     pub type_token: Option<SyntaxToken>,
@@ -10146,7 +9966,6 @@ impl TsImportType {
         support::node(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsImportType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10155,7 +9974,7 @@ impl Serialize for TsImportType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsImportTypeFields {
     pub typeof_token: Option<SyntaxToken>,
     pub import_token: SyntaxResult<SyntaxToken>,
@@ -10192,7 +10011,6 @@ impl TsImportTypeQualifier {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsImportTypeQualifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10201,7 +10019,7 @@ impl Serialize for TsImportTypeQualifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsImportTypeQualifierFields {
     pub dot_token: SyntaxResult<SyntaxToken>,
     pub right: SyntaxResult<AnyTsName>,
@@ -10229,7 +10047,6 @@ impl TsInModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsInModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10238,7 +10055,7 @@ impl Serialize for TsInModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsInModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -10285,7 +10102,6 @@ impl TsIndexSignatureClassMember {
         support::token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsIndexSignatureClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10294,7 +10110,7 @@ impl Serialize for TsIndexSignatureClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsIndexSignatureClassMemberFields {
     pub modifiers: TsIndexSignatureModifierList,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
@@ -10330,7 +10146,6 @@ impl TsIndexSignatureParameter {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsIndexSignatureParameter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10339,7 +10154,7 @@ impl Serialize for TsIndexSignatureParameter {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsIndexSignatureParameterFields {
     pub binding: SyntaxResult<JsIdentifierBinding>,
     pub type_annotation: SyntaxResult<TsTypeAnnotation>,
@@ -10387,7 +10202,6 @@ impl TsIndexSignatureTypeMember {
         support::token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsIndexSignatureTypeMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10396,7 +10210,7 @@ impl Serialize for TsIndexSignatureTypeMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsIndexSignatureTypeMemberFields {
     pub readonly_token: Option<SyntaxToken>,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
@@ -10440,7 +10254,6 @@ impl TsIndexedAccessType {
         support::required_token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsIndexedAccessType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10449,7 +10262,7 @@ impl Serialize for TsIndexedAccessType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsIndexedAccessTypeFields {
     pub object_type: SyntaxResult<AnyTsType>,
     pub l_brack_token: SyntaxResult<SyntaxToken>,
@@ -10487,7 +10300,6 @@ impl TsInferType {
         support::node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsInferType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10496,7 +10308,7 @@ impl Serialize for TsInferType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsInferTypeFields {
     pub infer_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<TsTypeParameterName>,
@@ -10541,7 +10353,6 @@ impl TsInitializedPropertySignatureClassMember {
         support::token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsInitializedPropertySignatureClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10550,7 +10361,7 @@ impl Serialize for TsInitializedPropertySignatureClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsInitializedPropertySignatureClassMemberFields {
     pub modifiers: TsPropertySignatureModifierList,
     pub name: SyntaxResult<AnyJsClassMemberName>,
@@ -10585,7 +10396,6 @@ impl TsInstantiationExpression {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsInstantiationExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10594,7 +10404,7 @@ impl Serialize for TsInstantiationExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsInstantiationExpressionFields {
     pub expression: SyntaxResult<AnyJsExpression>,
     pub arguments: SyntaxResult<TsTypeArguments>,
@@ -10627,7 +10437,7 @@ impl TsInterfaceDeclaration {
     pub fn interface_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn id(&self) -> SyntaxResult<TsIdentifierBinding> {
+    pub fn id(&self) -> SyntaxResult<AnyTsIdentifierBinding> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn type_parameters(&self) -> Option<TsTypeParameters> {
@@ -10646,7 +10456,6 @@ impl TsInterfaceDeclaration {
         support::required_token(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsInterfaceDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10655,10 +10464,10 @@ impl Serialize for TsInterfaceDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsInterfaceDeclarationFields {
     pub interface_token: SyntaxResult<SyntaxToken>,
-    pub id: SyntaxResult<TsIdentifierBinding>,
+    pub id: SyntaxResult<AnyTsIdentifierBinding>,
     pub type_parameters: Option<TsTypeParameters>,
     pub extends_clause: Option<TsExtendsClause>,
     pub l_curly_token: SyntaxResult<SyntaxToken>,
@@ -10692,7 +10501,6 @@ impl TsIntersectionType {
         support::list(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsIntersectionType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10701,7 +10509,7 @@ impl Serialize for TsIntersectionType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsIntersectionTypeFields {
     pub leading_separator_token: Option<SyntaxToken>,
     pub types: TsIntersectionTypeElementList,
@@ -10729,7 +10537,6 @@ impl TsLiteralEnumMemberName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsLiteralEnumMemberName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10738,7 +10545,7 @@ impl Serialize for TsLiteralEnumMemberName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsLiteralEnumMemberNameFields {
     pub value: SyntaxResult<SyntaxToken>,
 }
@@ -10809,7 +10616,6 @@ impl TsMappedType {
         support::required_token(&self.syntax, 11usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsMappedType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10818,7 +10624,7 @@ impl Serialize for TsMappedType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsMappedTypeFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub readonly_modifier: Option<TsMappedTypeReadonlyModifierClause>,
@@ -10860,7 +10666,6 @@ impl TsMappedTypeAsClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsMappedTypeAsClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10869,7 +10674,7 @@ impl Serialize for TsMappedTypeAsClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsMappedTypeAsClauseFields {
     pub as_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -10901,7 +10706,6 @@ impl TsMappedTypeOptionalModifierClause {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsMappedTypeOptionalModifierClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10910,7 +10714,7 @@ impl Serialize for TsMappedTypeOptionalModifierClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsMappedTypeOptionalModifierClauseFields {
     pub operator_token: Option<SyntaxToken>,
     pub question_mark_token: SyntaxResult<SyntaxToken>,
@@ -10942,7 +10746,6 @@ impl TsMappedTypeReadonlyModifierClause {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsMappedTypeReadonlyModifierClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -10951,7 +10754,7 @@ impl Serialize for TsMappedTypeReadonlyModifierClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsMappedTypeReadonlyModifierClauseFields {
     pub operator_token: Option<SyntaxToken>,
     pub readonly_token: SyntaxResult<SyntaxToken>,
@@ -11007,7 +10810,6 @@ impl TsMethodSignatureClassMember {
         support::token(&self.syntax, 7usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsMethodSignatureClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11016,7 +10818,7 @@ impl Serialize for TsMethodSignatureClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsMethodSignatureClassMemberFields {
     pub modifiers: TsMethodSignatureModifierList,
     pub async_token: Option<SyntaxToken>,
@@ -11070,7 +10872,6 @@ impl TsMethodSignatureTypeMember {
         support::token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsMethodSignatureTypeMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11079,7 +10880,7 @@ impl Serialize for TsMethodSignatureTypeMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsMethodSignatureTypeMemberFields {
     pub name: SyntaxResult<AnyJsObjectMemberName>,
     pub optional_token: Option<SyntaxToken>,
@@ -11119,7 +10920,6 @@ impl TsModuleBlock {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsModuleBlock {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11128,7 +10928,7 @@ impl Serialize for TsModuleBlock {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsModuleBlockFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub items: JsModuleItemList,
@@ -11165,7 +10965,6 @@ impl TsModuleDeclaration {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsModuleDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11174,7 +10973,7 @@ impl Serialize for TsModuleDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsModuleDeclarationFields {
     pub module_or_namespace: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyTsModuleName>,
@@ -11219,7 +11018,6 @@ impl TsNamedTupleTypeElement {
         support::required_node(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsNamedTupleTypeElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11228,7 +11026,7 @@ impl Serialize for TsNamedTupleTypeElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsNamedTupleTypeElementFields {
     pub dotdotdot_token: Option<SyntaxToken>,
     pub name: SyntaxResult<JsName>,
@@ -11259,7 +11057,6 @@ impl TsNeverType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsNeverType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11268,7 +11065,7 @@ impl Serialize for TsNeverType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsNeverTypeFields {
     pub never_token: SyntaxResult<SyntaxToken>,
 }
@@ -11299,7 +11096,6 @@ impl TsNonNullAssertionAssignment {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsNonNullAssertionAssignment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11308,7 +11104,7 @@ impl Serialize for TsNonNullAssertionAssignment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsNonNullAssertionAssignmentFields {
     pub assignment: SyntaxResult<AnyJsAssignment>,
     pub excl_token: SyntaxResult<SyntaxToken>,
@@ -11340,7 +11136,6 @@ impl TsNonNullAssertionExpression {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsNonNullAssertionExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11349,7 +11144,7 @@ impl Serialize for TsNonNullAssertionExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsNonNullAssertionExpressionFields {
     pub expression: SyntaxResult<AnyJsExpression>,
     pub excl_token: SyntaxResult<SyntaxToken>,
@@ -11377,7 +11172,6 @@ impl TsNonPrimitiveType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsNonPrimitiveType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11386,7 +11180,7 @@ impl Serialize for TsNonPrimitiveType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsNonPrimitiveTypeFields {
     pub object_token: SyntaxResult<SyntaxToken>,
 }
@@ -11413,7 +11207,6 @@ impl TsNullLiteralType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsNullLiteralType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11422,7 +11215,7 @@ impl Serialize for TsNullLiteralType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsNullLiteralTypeFields {
     pub literal_token: SyntaxResult<SyntaxToken>,
 }
@@ -11453,7 +11246,6 @@ impl TsNumberLiteralType {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsNumberLiteralType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11462,7 +11254,7 @@ impl Serialize for TsNumberLiteralType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsNumberLiteralTypeFields {
     pub minus_token: Option<SyntaxToken>,
     pub literal_token: SyntaxResult<SyntaxToken>,
@@ -11490,7 +11282,6 @@ impl TsNumberType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsNumberType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11499,7 +11290,7 @@ impl Serialize for TsNumberType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsNumberTypeFields {
     pub number_token: SyntaxResult<SyntaxToken>,
 }
@@ -11534,7 +11325,6 @@ impl TsObjectType {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsObjectType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11543,7 +11333,7 @@ impl Serialize for TsObjectType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsObjectTypeFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub members: TsTypeMemberList,
@@ -11576,7 +11366,6 @@ impl TsOptionalPropertyAnnotation {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsOptionalPropertyAnnotation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11585,7 +11374,7 @@ impl Serialize for TsOptionalPropertyAnnotation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsOptionalPropertyAnnotationFields {
     pub question_mark_token: SyntaxResult<SyntaxToken>,
     pub type_annotation: Option<TsTypeAnnotation>,
@@ -11617,7 +11406,6 @@ impl TsOptionalTupleTypeElement {
         support::required_token(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsOptionalTupleTypeElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11626,7 +11414,7 @@ impl Serialize for TsOptionalTupleTypeElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsOptionalTupleTypeElementFields {
     pub ty: SyntaxResult<AnyTsType>,
     pub question_mark_token: SyntaxResult<SyntaxToken>,
@@ -11654,7 +11442,6 @@ impl TsOutModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsOutModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11663,7 +11450,7 @@ impl Serialize for TsOutModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsOutModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -11690,7 +11477,6 @@ impl TsOverrideModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsOverrideModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11699,7 +11485,7 @@ impl Serialize for TsOverrideModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsOverrideModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -11734,7 +11520,6 @@ impl TsParenthesizedType {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsParenthesizedType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11743,7 +11528,7 @@ impl Serialize for TsParenthesizedType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsParenthesizedTypeFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -11780,7 +11565,6 @@ impl TsPredicateReturnType {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsPredicateReturnType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11789,7 +11573,7 @@ impl Serialize for TsPredicateReturnType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsPredicateReturnTypeFields {
     pub parameter_name: SyntaxResult<AnyTsTypePredicateParameterName>,
     pub is_token: SyntaxResult<SyntaxToken>,
@@ -11826,7 +11610,6 @@ impl TsPropertyParameter {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsPropertyParameter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11835,7 +11618,7 @@ impl Serialize for TsPropertyParameter {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsPropertyParameterFields {
     pub decorators: JsDecoratorList,
     pub modifiers: TsPropertyParameterModifierList,
@@ -11876,7 +11659,6 @@ impl TsPropertySignatureClassMember {
         support::token(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsPropertySignatureClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11885,7 +11667,7 @@ impl Serialize for TsPropertySignatureClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsPropertySignatureClassMemberFields {
     pub modifiers: TsPropertySignatureModifierList,
     pub name: SyntaxResult<AnyJsClassMemberName>,
@@ -11931,7 +11713,6 @@ impl TsPropertySignatureTypeMember {
         support::token(&self.syntax, 4usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsPropertySignatureTypeMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11940,7 +11721,7 @@ impl Serialize for TsPropertySignatureTypeMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsPropertySignatureTypeMemberFields {
     pub readonly_token: Option<SyntaxToken>,
     pub name: SyntaxResult<AnyJsObjectMemberName>,
@@ -11979,7 +11760,6 @@ impl TsQualifiedModuleName {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsQualifiedModuleName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -11988,7 +11768,7 @@ impl Serialize for TsQualifiedModuleName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsQualifiedModuleNameFields {
     pub left: SyntaxResult<AnyTsModuleName>,
     pub dot_token: SyntaxResult<SyntaxToken>,
@@ -12025,7 +11805,6 @@ impl TsQualifiedName {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsQualifiedName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12034,7 +11813,7 @@ impl Serialize for TsQualifiedName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsQualifiedNameFields {
     pub left: SyntaxResult<AnyTsName>,
     pub dot_token: SyntaxResult<SyntaxToken>,
@@ -12063,7 +11842,6 @@ impl TsReadonlyModifier {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsReadonlyModifier {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12072,7 +11850,7 @@ impl Serialize for TsReadonlyModifier {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsReadonlyModifierFields {
     pub modifier_token: SyntaxResult<SyntaxToken>,
 }
@@ -12103,7 +11881,6 @@ impl TsReferenceType {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsReferenceType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12112,7 +11889,7 @@ impl Serialize for TsReferenceType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsReferenceTypeFields {
     pub name: SyntaxResult<AnyTsName>,
     pub type_arguments: Option<TsTypeArguments>,
@@ -12144,7 +11921,6 @@ impl TsRestTupleTypeElement {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsRestTupleTypeElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12153,7 +11929,7 @@ impl Serialize for TsRestTupleTypeElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsRestTupleTypeElementFields {
     pub dotdotdot_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -12185,7 +11961,6 @@ impl TsReturnTypeAnnotation {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsReturnTypeAnnotation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12194,7 +11969,7 @@ impl Serialize for TsReturnTypeAnnotation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsReturnTypeAnnotationFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsReturnType>,
@@ -12230,7 +12005,6 @@ impl TsSatisfiesAssignment {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsSatisfiesAssignment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12239,7 +12013,7 @@ impl Serialize for TsSatisfiesAssignment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsSatisfiesAssignmentFields {
     pub assignment: SyntaxResult<AnyJsAssignment>,
     pub satisfies_token: SyntaxResult<SyntaxToken>,
@@ -12276,7 +12050,6 @@ impl TsSatisfiesExpression {
         support::required_node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsSatisfiesExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12285,7 +12058,7 @@ impl Serialize for TsSatisfiesExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsSatisfiesExpressionFields {
     pub expression: SyntaxResult<AnyJsExpression>,
     pub satisfies_token: SyntaxResult<SyntaxToken>,
@@ -12338,7 +12111,6 @@ impl TsSetterSignatureClassMember {
         support::token(&self.syntax, 6usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsSetterSignatureClassMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12347,7 +12119,7 @@ impl Serialize for TsSetterSignatureClassMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsSetterSignatureClassMemberFields {
     pub modifiers: TsMethodSignatureModifierList,
     pub set_token: SyntaxResult<SyntaxToken>,
@@ -12400,7 +12172,6 @@ impl TsSetterSignatureTypeMember {
         support::token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsSetterSignatureTypeMember {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12409,7 +12180,7 @@ impl Serialize for TsSetterSignatureTypeMember {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsSetterSignatureTypeMemberFields {
     pub set_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<AnyJsObjectMemberName>,
@@ -12441,7 +12212,6 @@ impl TsStringLiteralType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsStringLiteralType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12450,7 +12220,7 @@ impl Serialize for TsStringLiteralType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsStringLiteralTypeFields {
     pub literal_token: SyntaxResult<SyntaxToken>,
 }
@@ -12477,7 +12247,6 @@ impl TsStringType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsStringType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12486,7 +12255,7 @@ impl Serialize for TsStringType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsStringTypeFields {
     pub string_token: SyntaxResult<SyntaxToken>,
 }
@@ -12513,7 +12282,6 @@ impl TsSymbolType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsSymbolType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12522,7 +12290,7 @@ impl Serialize for TsSymbolType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsSymbolTypeFields {
     pub symbol_token: SyntaxResult<SyntaxToken>,
 }
@@ -12549,7 +12317,6 @@ impl TsTemplateChunkElement {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTemplateChunkElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12558,7 +12325,7 @@ impl Serialize for TsTemplateChunkElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTemplateChunkElementFields {
     pub template_chunk_token: SyntaxResult<SyntaxToken>,
 }
@@ -12593,7 +12360,6 @@ impl TsTemplateElement {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTemplateElement {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12602,7 +12368,7 @@ impl Serialize for TsTemplateElement {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTemplateElementFields {
     pub dollar_curly_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -12639,7 +12405,6 @@ impl TsTemplateLiteralType {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTemplateLiteralType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12648,7 +12413,7 @@ impl Serialize for TsTemplateLiteralType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTemplateLiteralTypeFields {
     pub l_tick_token: SyntaxResult<SyntaxToken>,
     pub elements: TsTemplateElementList,
@@ -12681,7 +12446,6 @@ impl TsThisParameter {
         support::node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsThisParameter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12690,7 +12454,7 @@ impl Serialize for TsThisParameter {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsThisParameterFields {
     pub this_token: SyntaxResult<SyntaxToken>,
     pub type_annotation: Option<TsTypeAnnotation>,
@@ -12718,7 +12482,6 @@ impl TsThisType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsThisType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12727,7 +12490,7 @@ impl Serialize for TsThisType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsThisTypeFields {
     pub this_token: SyntaxResult<SyntaxToken>,
 }
@@ -12762,7 +12525,6 @@ impl TsTupleType {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTupleType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12771,7 +12533,7 @@ impl Serialize for TsTupleType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTupleTypeFields {
     pub l_brack_token: SyntaxResult<SyntaxToken>,
     pub elements: TsTupleTypeElementList,
@@ -12804,7 +12566,7 @@ impl TsTypeAliasDeclaration {
     pub fn type_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn binding_identifier(&self) -> SyntaxResult<TsIdentifierBinding> {
+    pub fn binding_identifier(&self) -> SyntaxResult<AnyTsIdentifierBinding> {
         support::required_node(&self.syntax, 1usize)
     }
     pub fn type_parameters(&self) -> Option<TsTypeParameters> {
@@ -12820,7 +12582,6 @@ impl TsTypeAliasDeclaration {
         support::token(&self.syntax, 5usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeAliasDeclaration {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12829,10 +12590,10 @@ impl Serialize for TsTypeAliasDeclaration {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeAliasDeclarationFields {
     pub type_token: SyntaxResult<SyntaxToken>,
-    pub binding_identifier: SyntaxResult<TsIdentifierBinding>,
+    pub binding_identifier: SyntaxResult<AnyTsIdentifierBinding>,
     pub type_parameters: Option<TsTypeParameters>,
     pub eq_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -12865,7 +12626,6 @@ impl TsTypeAnnotation {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeAnnotation {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12874,7 +12634,7 @@ impl Serialize for TsTypeAnnotation {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeAnnotationFields {
     pub colon_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -12910,7 +12670,6 @@ impl TsTypeArguments {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeArguments {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12919,7 +12678,7 @@ impl Serialize for TsTypeArguments {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeArgumentsFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub ts_type_argument_list: TsTypeArgumentList,
@@ -12960,7 +12719,6 @@ impl TsTypeAssertionAssignment {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeAssertionAssignment {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -12969,7 +12727,7 @@ impl Serialize for TsTypeAssertionAssignment {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeAssertionAssignmentFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -13011,7 +12769,6 @@ impl TsTypeAssertionExpression {
         support::required_node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeAssertionExpression {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13020,7 +12777,7 @@ impl Serialize for TsTypeAssertionExpression {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeAssertionExpressionFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -13054,7 +12811,6 @@ impl TsTypeConstraintClause {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeConstraintClause {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13063,7 +12819,7 @@ impl Serialize for TsTypeConstraintClause {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeConstraintClauseFields {
     pub extends_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -13095,7 +12851,6 @@ impl TsTypeOperatorType {
         support::required_node(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeOperatorType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13104,7 +12859,7 @@ impl Serialize for TsTypeOperatorType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeOperatorTypeFields {
     pub operator_token: SyntaxResult<SyntaxToken>,
     pub ty: SyntaxResult<AnyTsType>,
@@ -13144,7 +12899,6 @@ impl TsTypeParameter {
         support::node(&self.syntax, 3usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeParameter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13153,7 +12907,7 @@ impl Serialize for TsTypeParameter {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeParameterFields {
     pub modifiers: TsTypeParameterModifierList,
     pub name: SyntaxResult<TsTypeParameterName>,
@@ -13183,7 +12937,6 @@ impl TsTypeParameterName {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeParameterName {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13192,7 +12945,7 @@ impl Serialize for TsTypeParameterName {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeParameterNameFields {
     pub ident_token: SyntaxResult<SyntaxToken>,
 }
@@ -13227,7 +12980,6 @@ impl TsTypeParameters {
         support::required_token(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeParameters {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13236,7 +12988,7 @@ impl Serialize for TsTypeParameters {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeParametersFields {
     pub l_angle_token: SyntaxResult<SyntaxToken>,
     pub items: TsTypeParameterList,
@@ -13273,7 +13025,6 @@ impl TsTypeofType {
         support::node(&self.syntax, 2usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeofType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13282,7 +13033,7 @@ impl Serialize for TsTypeofType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsTypeofTypeFields {
     pub typeof_token: SyntaxResult<SyntaxToken>,
     pub expression_name: SyntaxResult<AnyTsName>,
@@ -13311,7 +13062,6 @@ impl TsUndefinedType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsUndefinedType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13320,7 +13070,7 @@ impl Serialize for TsUndefinedType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsUndefinedTypeFields {
     pub undefined_token: SyntaxResult<SyntaxToken>,
 }
@@ -13351,7 +13101,6 @@ impl TsUnionType {
         support::list(&self.syntax, 1usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsUnionType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13360,7 +13109,7 @@ impl Serialize for TsUnionType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsUnionTypeFields {
     pub leading_separator_token: Option<SyntaxToken>,
     pub types: TsUnionTypeVariantList,
@@ -13388,7 +13137,6 @@ impl TsUnknownType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsUnknownType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13397,7 +13145,7 @@ impl Serialize for TsUnknownType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsUnknownTypeFields {
     pub unknown_token: SyntaxResult<SyntaxToken>,
 }
@@ -13424,7 +13172,6 @@ impl TsVoidType {
         support::required_token(&self.syntax, 0usize)
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsVoidType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -13433,12 +13180,11 @@ impl Serialize for TsVoidType {
         self.as_fields().serialize(serializer)
     }
 }
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Serialize)]
 pub struct TsVoidTypeFields {
     pub void_token: SyntaxResult<SyntaxToken>,
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsArrayAssignmentPatternElement {
     JsArrayAssignmentPatternElement(JsArrayAssignmentPatternElement),
     JsArrayAssignmentPatternRestElement(JsArrayAssignmentPatternRestElement),
@@ -13470,8 +13216,7 @@ impl AnyJsArrayAssignmentPatternElement {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsArrayBindingPatternElement {
     JsArrayBindingPatternElement(JsArrayBindingPatternElement),
     JsArrayBindingPatternRestElement(JsArrayBindingPatternRestElement),
@@ -13499,8 +13244,7 @@ impl AnyJsArrayBindingPatternElement {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsArrayElement {
     AnyJsExpression(AnyJsExpression),
     JsArrayHole(JsArrayHole),
@@ -13526,8 +13270,7 @@ impl AnyJsArrayElement {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsArrowFunctionParameters {
     AnyJsBinding(AnyJsBinding),
     JsParameters(JsParameters),
@@ -13546,8 +13289,7 @@ impl AnyJsArrowFunctionParameters {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsAssignment {
     JsBogusAssignment(JsBogusAssignment),
     JsComputedMemberAssignment(JsComputedMemberAssignment),
@@ -13615,8 +13357,7 @@ impl AnyJsAssignment {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsAssignmentPattern {
     AnyJsAssignment(AnyJsAssignment),
     JsArrayAssignmentPattern(JsArrayAssignmentPattern),
@@ -13642,11 +13383,11 @@ impl AnyJsAssignmentPattern {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsBinding {
     JsBogusBinding(JsBogusBinding),
     JsIdentifierBinding(JsIdentifierBinding),
+    JsMetavariable(JsMetavariable),
 }
 impl AnyJsBinding {
     pub fn as_js_bogus_binding(&self) -> Option<&JsBogusBinding> {
@@ -13661,9 +13402,14 @@ impl AnyJsBinding {
             _ => None,
         }
     }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsBinding::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsBindingPattern {
     AnyJsBinding(AnyJsBinding),
     JsArrayBindingPattern(JsArrayBindingPattern),
@@ -13689,8 +13435,7 @@ impl AnyJsBindingPattern {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsCallArgument {
     AnyJsExpression(AnyJsExpression),
     JsSpread(JsSpread),
@@ -13709,8 +13454,7 @@ impl AnyJsCallArgument {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsClass {
     JsClassDeclaration(JsClassDeclaration),
     JsClassExportDefaultDeclaration(JsClassExportDefaultDeclaration),
@@ -13738,13 +13482,13 @@ impl AnyJsClass {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsClassMember {
     JsBogusMember(JsBogusMember),
     JsConstructorClassMember(JsConstructorClassMember),
     JsEmptyClassMember(JsEmptyClassMember),
     JsGetterClassMember(JsGetterClassMember),
+    JsMetavariable(JsMetavariable),
     JsMethodClassMember(JsMethodClassMember),
     JsPropertyClassMember(JsPropertyClassMember),
     JsSetterClassMember(JsSetterClassMember),
@@ -13779,6 +13523,12 @@ impl AnyJsClassMember {
     pub fn as_js_getter_class_member(&self) -> Option<&JsGetterClassMember> {
         match &self {
             AnyJsClassMember::JsGetterClassMember(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsClassMember::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -13855,11 +13605,11 @@ impl AnyJsClassMember {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsClassMemberName {
     JsComputedMemberName(JsComputedMemberName),
     JsLiteralMemberName(JsLiteralMemberName),
+    JsMetavariable(JsMetavariable),
     JsPrivateClassMemberName(JsPrivateClassMemberName),
 }
 impl AnyJsClassMemberName {
@@ -13875,6 +13625,12 @@ impl AnyJsClassMemberName {
             _ => None,
         }
     }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsClassMemberName::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_js_private_class_member_name(&self) -> Option<&JsPrivateClassMemberName> {
         match &self {
             AnyJsClassMemberName::JsPrivateClassMemberName(item) => Some(item),
@@ -13882,8 +13638,7 @@ impl AnyJsClassMemberName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsCombinedSpecifier {
     JsNamedImportSpecifiers(JsNamedImportSpecifiers),
     JsNamespaceImportSpecifier(JsNamespaceImportSpecifier),
@@ -13902,8 +13657,7 @@ impl AnyJsCombinedSpecifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsConstructorParameter {
     AnyJsFormalParameter(AnyJsFormalParameter),
     JsRestParameter(JsRestParameter),
@@ -13929,8 +13683,7 @@ impl AnyJsConstructorParameter {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsDeclaration {
     JsClassDeclaration(JsClassDeclaration),
     JsFunctionDeclaration(JsFunctionDeclaration),
@@ -14012,8 +13765,7 @@ impl AnyJsDeclaration {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsDeclarationClause {
     JsClassDeclaration(JsClassDeclaration),
     JsFunctionDeclaration(JsFunctionDeclaration),
@@ -14095,8 +13847,7 @@ impl AnyJsDeclarationClause {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsDecorator {
     JsBogusExpression(JsBogusExpression),
     JsCallExpression(JsCallExpression),
@@ -14136,8 +13887,7 @@ impl AnyJsDecorator {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsExportClause {
     AnyJsDeclarationClause(AnyJsDeclarationClause),
     JsExportDefaultDeclarationClause(JsExportDefaultDeclarationClause),
@@ -14209,8 +13959,7 @@ impl AnyJsExportClause {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsExportDefaultDeclaration {
     JsClassExportDefaultDeclaration(JsClassExportDefaultDeclaration),
     JsFunctionExportDefaultDeclaration(JsFunctionExportDefaultDeclaration),
@@ -14251,8 +14000,7 @@ impl AnyJsExportDefaultDeclaration {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsExportNamedSpecifier {
     JsExportNamedShorthandSpecifier(JsExportNamedShorthandSpecifier),
     JsExportNamedSpecifier(JsExportNamedSpecifier),
@@ -14273,8 +14021,7 @@ impl AnyJsExportNamedSpecifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsExpression {
     AnyJsLiteralExpression(AnyJsLiteralExpression),
     JsArrayExpression(JsArrayExpression),
@@ -14294,6 +14041,7 @@ pub enum AnyJsExpression {
     JsInExpression(JsInExpression),
     JsInstanceofExpression(JsInstanceofExpression),
     JsLogicalExpression(JsLogicalExpression),
+    JsMetavariable(JsMetavariable),
     JsNewExpression(JsNewExpression),
     JsNewTargetExpression(JsNewTargetExpression),
     JsObjectExpression(JsObjectExpression),
@@ -14423,6 +14171,12 @@ impl AnyJsExpression {
             _ => None,
         }
     }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsExpression::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_js_new_expression(&self) -> Option<&JsNewExpression> {
         match &self {
             AnyJsExpression::JsNewExpression(item) => Some(item),
@@ -14538,8 +14292,7 @@ impl AnyJsExpression {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsForInOrOfInitializer {
     AnyJsAssignmentPattern(AnyJsAssignmentPattern),
     JsForVariableDeclaration(JsForVariableDeclaration),
@@ -14558,8 +14311,7 @@ impl AnyJsForInOrOfInitializer {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsForInitializer {
     AnyJsExpression(AnyJsExpression),
     JsVariableDeclaration(JsVariableDeclaration),
@@ -14578,8 +14330,7 @@ impl AnyJsForInitializer {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsFormalParameter {
     JsBogusParameter(JsBogusParameter),
     JsFormalParameter(JsFormalParameter),
@@ -14598,8 +14349,7 @@ impl AnyJsFormalParameter {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsFunction {
     JsArrowFunctionExpression(JsArrowFunctionExpression),
     JsFunctionDeclaration(JsFunctionDeclaration),
@@ -14634,8 +14384,7 @@ impl AnyJsFunction {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsFunctionBody {
     AnyJsExpression(AnyJsExpression),
     JsFunctionBody(JsFunctionBody),
@@ -14654,8 +14403,7 @@ impl AnyJsFunctionBody {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsImportAssertionEntry {
     JsBogusImportAssertionEntry(JsBogusImportAssertionEntry),
     JsImportAssertionEntry(JsImportAssertionEntry),
@@ -14674,8 +14422,7 @@ impl AnyJsImportAssertionEntry {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsImportClause {
     JsImportBareClause(JsImportBareClause),
     JsImportCombinedClause(JsImportCombinedClause),
@@ -14715,8 +14462,7 @@ impl AnyJsImportClause {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsInProperty {
     AnyJsExpression(AnyJsExpression),
     JsPrivateName(JsPrivateName),
@@ -14735,8 +14481,7 @@ impl AnyJsInProperty {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsLiteralExpression {
     JsBigintLiteralExpression(JsBigintLiteralExpression),
     JsBooleanLiteralExpression(JsBooleanLiteralExpression),
@@ -14783,8 +14528,7 @@ impl AnyJsLiteralExpression {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsMethodModifier {
     JsDecorator(JsDecorator),
     JsStaticModifier(JsStaticModifier),
@@ -14817,8 +14561,7 @@ impl AnyJsMethodModifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsModuleItem {
     AnyJsStatement(AnyJsStatement),
     JsExport(JsExport),
@@ -14844,13 +14587,38 @@ impl AnyJsModuleItem {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyJsModuleSource {
+    JsMetavariable(JsMetavariable),
+    JsModuleSource(JsModuleSource),
+}
+impl AnyJsModuleSource {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsModuleSource::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_module_source(&self) -> Option<&JsModuleSource> {
+        match &self {
+            AnyJsModuleSource::JsModuleSource(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsName {
+    JsMetavariable(JsMetavariable),
     JsName(JsName),
     JsPrivateName(JsPrivateName),
 }
 impl AnyJsName {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsName::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_js_name(&self) -> Option<&JsName> {
         match &self {
             AnyJsName::JsName(item) => Some(item),
@@ -14864,8 +14632,7 @@ impl AnyJsName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsNamedImportSpecifier {
     JsBogusNamedImportSpecifier(JsBogusNamedImportSpecifier),
     JsNamedImportSpecifier(JsNamedImportSpecifier),
@@ -14893,8 +14660,7 @@ impl AnyJsNamedImportSpecifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsObjectAssignmentPatternMember {
     JsBogusAssignment(JsBogusAssignment),
     JsObjectAssignmentPatternProperty(JsObjectAssignmentPatternProperty),
@@ -14935,10 +14701,10 @@ impl AnyJsObjectAssignmentPatternMember {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsObjectBindingPatternMember {
     JsBogusBinding(JsBogusBinding),
+    JsMetavariable(JsMetavariable),
     JsObjectBindingPatternProperty(JsObjectBindingPatternProperty),
     JsObjectBindingPatternRest(JsObjectBindingPatternRest),
     JsObjectBindingPatternShorthandProperty(JsObjectBindingPatternShorthandProperty),
@@ -14947,6 +14713,12 @@ impl AnyJsObjectBindingPatternMember {
     pub fn as_js_bogus_binding(&self) -> Option<&JsBogusBinding> {
         match &self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsObjectBindingPatternMember::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -14973,8 +14745,7 @@ impl AnyJsObjectBindingPatternMember {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsObjectMember {
     JsBogusMember(JsBogusMember),
     JsGetterObjectMember(JsGetterObjectMember),
@@ -15030,11 +14801,11 @@ impl AnyJsObjectMember {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsObjectMemberName {
     JsComputedMemberName(JsComputedMemberName),
     JsLiteralMemberName(JsLiteralMemberName),
+    JsMetavariable(JsMetavariable),
 }
 impl AnyJsObjectMemberName {
     pub fn as_js_computed_member_name(&self) -> Option<&JsComputedMemberName> {
@@ -15049,9 +14820,14 @@ impl AnyJsObjectMemberName {
             _ => None,
         }
     }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsObjectMemberName::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsParameter {
     AnyJsFormalParameter(AnyJsFormalParameter),
     JsRestParameter(JsRestParameter),
@@ -15077,8 +14853,7 @@ impl AnyJsParameter {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsPropertyModifier {
     JsAccessorModifier(JsAccessorModifier),
     JsDecorator(JsDecorator),
@@ -15125,8 +14900,7 @@ impl AnyJsPropertyModifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsRoot {
     JsExpressionSnipped(JsExpressionSnipped),
     JsModule(JsModule),
@@ -15152,8 +14926,7 @@ impl AnyJsRoot {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsStatement {
     JsBlockStatement(JsBlockStatement),
     JsBogusStatement(JsBogusStatement),
@@ -15382,8 +15155,7 @@ impl AnyJsStatement {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsSwitchClause {
     JsCaseClause(JsCaseClause),
     JsDefaultClause(JsDefaultClause),
@@ -15402,8 +15174,7 @@ impl AnyJsSwitchClause {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsTemplateElement {
     JsTemplateChunkElement(JsTemplateChunkElement),
     JsTemplateElement(JsTemplateElement),
@@ -15422,8 +15193,7 @@ impl AnyJsTemplateElement {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxAttribute {
     JsxAttribute(JsxAttribute),
     JsxSpreadAttribute(JsxSpreadAttribute),
@@ -15442,8 +15212,7 @@ impl AnyJsxAttribute {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxAttributeName {
     JsxName(JsxName),
     JsxNamespaceName(JsxNamespaceName),
@@ -15462,8 +15231,7 @@ impl AnyJsxAttributeName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxAttributeValue {
     AnyJsxTag(AnyJsxTag),
     JsxExpressionAttributeValue(JsxExpressionAttributeValue),
@@ -15489,8 +15257,7 @@ impl AnyJsxAttributeValue {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxChild {
     JsxElement(JsxElement),
     JsxExpressionChild(JsxExpressionChild),
@@ -15537,8 +15304,7 @@ impl AnyJsxChild {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxElementName {
     JsxMemberName(JsxMemberName),
     JsxName(JsxName),
@@ -15571,8 +15337,7 @@ impl AnyJsxElementName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxName {
     JsxName(JsxName),
     JsxNamespaceName(JsxNamespaceName),
@@ -15591,8 +15356,7 @@ impl AnyJsxName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxObjectName {
     JsxMemberName(JsxMemberName),
     JsxNamespaceName(JsxNamespaceName),
@@ -15618,8 +15382,7 @@ impl AnyJsxObjectName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyJsxTag {
     JsxElement(JsxElement),
     JsxFragment(JsxFragment),
@@ -15645,8 +15408,7 @@ impl AnyJsxTag {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsEnumMemberName {
     JsComputedMemberName(JsComputedMemberName),
     TsLiteralEnumMemberName(TsLiteralEnumMemberName),
@@ -15665,8 +15427,7 @@ impl AnyTsEnumMemberName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsExternalModuleDeclarationBody {
     TsEmptyExternalModuleDeclarationBody(TsEmptyExternalModuleDeclarationBody),
     TsModuleBlock(TsModuleBlock),
@@ -15689,8 +15450,26 @@ impl AnyTsExternalModuleDeclarationBody {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyTsIdentifierBinding {
+    JsMetavariable(JsMetavariable),
+    TsIdentifierBinding(TsIdentifierBinding),
+}
+impl AnyTsIdentifierBinding {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyTsIdentifierBinding::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_ts_identifier_binding(&self) -> Option<&TsIdentifierBinding> {
+        match &self {
+            AnyTsIdentifierBinding::TsIdentifierBinding(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsIndexSignatureModifier {
     JsStaticModifier(JsStaticModifier),
     TsReadonlyModifier(TsReadonlyModifier),
@@ -15709,8 +15488,7 @@ impl AnyTsIndexSignatureModifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsMethodSignatureModifier {
     JsDecorator(JsDecorator),
     JsStaticModifier(JsStaticModifier),
@@ -15750,16 +15528,15 @@ impl AnyTsMethodSignatureModifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsModuleName {
-    TsIdentifierBinding(TsIdentifierBinding),
+    AnyTsIdentifierBinding(AnyTsIdentifierBinding),
     TsQualifiedModuleName(TsQualifiedModuleName),
 }
 impl AnyTsModuleName {
-    pub fn as_ts_identifier_binding(&self) -> Option<&TsIdentifierBinding> {
+    pub fn as_any_ts_identifier_binding(&self) -> Option<&AnyTsIdentifierBinding> {
         match &self {
-            AnyTsModuleName::TsIdentifierBinding(item) => Some(item),
+            AnyTsModuleName::AnyTsIdentifierBinding(item) => Some(item),
             _ => None,
         }
     }
@@ -15770,8 +15547,7 @@ impl AnyTsModuleName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsModuleReference {
     AnyTsName(AnyTsName),
     TsExternalModuleReference(TsExternalModuleReference),
@@ -15790,8 +15566,7 @@ impl AnyTsModuleReference {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsName {
     JsReferenceIdentifier(JsReferenceIdentifier),
     TsQualifiedName(TsQualifiedName),
@@ -15810,8 +15585,7 @@ impl AnyTsName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsPropertyAnnotation {
     TsDefinitePropertyAnnotation(TsDefinitePropertyAnnotation),
     TsOptionalPropertyAnnotation(TsOptionalPropertyAnnotation),
@@ -15837,8 +15611,7 @@ impl AnyTsPropertyAnnotation {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsPropertyParameterModifier {
     TsAccessibilityModifier(TsAccessibilityModifier),
     TsOverrideModifier(TsOverrideModifier),
@@ -15864,8 +15637,7 @@ impl AnyTsPropertyParameterModifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsPropertySignatureAnnotation {
     TsOptionalPropertyAnnotation(TsOptionalPropertyAnnotation),
     TsTypeAnnotation(TsTypeAnnotation),
@@ -15884,8 +15656,7 @@ impl AnyTsPropertySignatureAnnotation {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsPropertySignatureModifier {
     JsAccessorModifier(JsAccessorModifier),
     JsDecorator(JsDecorator),
@@ -15946,8 +15717,7 @@ impl AnyTsPropertySignatureModifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsReturnType {
     AnyTsType(AnyTsType),
     TsAssertsReturnType(TsAssertsReturnType),
@@ -15973,8 +15743,7 @@ impl AnyTsReturnType {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsTemplateElement {
     TsTemplateChunkElement(TsTemplateChunkElement),
     TsTemplateElement(TsTemplateElement),
@@ -15993,8 +15762,7 @@ impl AnyTsTemplateElement {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsTupleTypeElement {
     AnyTsType(AnyTsType),
     TsNamedTupleTypeElement(TsNamedTupleTypeElement),
@@ -16027,9 +15795,9 @@ impl AnyTsTupleTypeElement {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsType {
+    JsMetavariable(JsMetavariable),
     TsAnyType(TsAnyType),
     TsArrayType(TsArrayType),
     TsBigintLiteralType(TsBigintLiteralType),
@@ -16067,6 +15835,12 @@ pub enum AnyTsType {
     TsVoidType(TsVoidType),
 }
 impl AnyTsType {
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyTsType::JsMetavariable(item) => Some(item),
+            _ => None,
+        }
+    }
     pub fn as_ts_any_type(&self) -> Option<&TsAnyType> {
         match &self {
             AnyTsType::TsAnyType(item) => Some(item),
@@ -16278,8 +16052,7 @@ impl AnyTsType {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsTypeMember {
     JsBogusMember(JsBogusMember),
     TsCallSignatureTypeMember(TsCallSignatureTypeMember),
@@ -16340,8 +16113,7 @@ impl AnyTsTypeMember {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsTypeParameterModifier {
     TsConstModifier(TsConstModifier),
     TsInModifier(TsInModifier),
@@ -16367,8 +16139,7 @@ impl AnyTsTypeParameterModifier {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsTypePredicateParameterName {
     JsReferenceIdentifier(JsReferenceIdentifier),
     TsThisType(TsThisType),
@@ -16387,8 +16158,7 @@ impl AnyTsTypePredicateParameterName {
         }
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyTsVariableAnnotation {
     TsDefiniteVariableAnnotation(TsDefiniteVariableAnnotation),
     TsTypeAnnotation(TsTypeAnnotation),
@@ -20515,6 +20285,47 @@ impl From<JsLogicalExpression> for SyntaxNode {
 }
 impl From<JsLogicalExpression> for SyntaxElement {
     fn from(n: JsLogicalExpression) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for JsMetavariable {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(JS_METAVARIABLE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == JS_METAVARIABLE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for JsMetavariable {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("JsMetavariable")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
+            .finish()
+    }
+}
+impl From<JsMetavariable> for SyntaxNode {
+    fn from(n: JsMetavariable) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<JsMetavariable> for SyntaxElement {
+    fn from(n: JsMetavariable) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -30026,12 +29837,21 @@ impl From<JsIdentifierBinding> for AnyJsBinding {
         AnyJsBinding::JsIdentifierBinding(node)
     }
 }
+impl From<JsMetavariable> for AnyJsBinding {
+    fn from(node: JsMetavariable) -> AnyJsBinding {
+        AnyJsBinding::JsMetavariable(node)
+    }
+}
 impl AstNode for AnyJsBinding {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        JsBogusBinding::KIND_SET.union(JsIdentifierBinding::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = JsBogusBinding::KIND_SET
+        .union(JsIdentifierBinding::KIND_SET)
+        .union(JsMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_BOGUS_BINDING | JS_IDENTIFIER_BINDING)
+        matches!(
+            kind,
+            JS_BOGUS_BINDING | JS_IDENTIFIER_BINDING | JS_METAVARIABLE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -30039,6 +29859,7 @@ impl AstNode for AnyJsBinding {
             JS_IDENTIFIER_BINDING => {
                 AnyJsBinding::JsIdentifierBinding(JsIdentifierBinding { syntax })
             }
+            JS_METAVARIABLE => AnyJsBinding::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -30047,12 +29868,14 @@ impl AstNode for AnyJsBinding {
         match self {
             AnyJsBinding::JsBogusBinding(it) => &it.syntax,
             AnyJsBinding::JsIdentifierBinding(it) => &it.syntax,
+            AnyJsBinding::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsBinding::JsBogusBinding(it) => it.syntax,
             AnyJsBinding::JsIdentifierBinding(it) => it.syntax,
+            AnyJsBinding::JsMetavariable(it) => it.syntax,
         }
     }
 }
@@ -30061,6 +29884,7 @@ impl std::fmt::Debug for AnyJsBinding {
         match self {
             AnyJsBinding::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
             AnyJsBinding::JsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsBinding::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -30069,6 +29893,7 @@ impl From<AnyJsBinding> for SyntaxNode {
         match n {
             AnyJsBinding::JsBogusBinding(it) => it.into(),
             AnyJsBinding::JsIdentifierBinding(it) => it.into(),
+            AnyJsBinding::JsMetavariable(it) => it.into(),
         }
     }
 }
@@ -30316,6 +30141,11 @@ impl From<JsGetterClassMember> for AnyJsClassMember {
         AnyJsClassMember::JsGetterClassMember(node)
     }
 }
+impl From<JsMetavariable> for AnyJsClassMember {
+    fn from(node: JsMetavariable) -> AnyJsClassMember {
+        AnyJsClassMember::JsMetavariable(node)
+    }
+}
 impl From<JsMethodClassMember> for AnyJsClassMember {
     fn from(node: JsMethodClassMember) -> AnyJsClassMember {
         AnyJsClassMember::JsMethodClassMember(node)
@@ -30377,6 +30207,7 @@ impl AstNode for AnyJsClassMember {
         .union(JsConstructorClassMember::KIND_SET)
         .union(JsEmptyClassMember::KIND_SET)
         .union(JsGetterClassMember::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsMethodClassMember::KIND_SET)
         .union(JsPropertyClassMember::KIND_SET)
         .union(JsSetterClassMember::KIND_SET)
@@ -30395,6 +30226,7 @@ impl AstNode for AnyJsClassMember {
                 | JS_CONSTRUCTOR_CLASS_MEMBER
                 | JS_EMPTY_CLASS_MEMBER
                 | JS_GETTER_CLASS_MEMBER
+                | JS_METAVARIABLE
                 | JS_METHOD_CLASS_MEMBER
                 | JS_PROPERTY_CLASS_MEMBER
                 | JS_SETTER_CLASS_MEMBER
@@ -30420,6 +30252,7 @@ impl AstNode for AnyJsClassMember {
             JS_GETTER_CLASS_MEMBER => {
                 AnyJsClassMember::JsGetterClassMember(JsGetterClassMember { syntax })
             }
+            JS_METAVARIABLE => AnyJsClassMember::JsMetavariable(JsMetavariable { syntax }),
             JS_METHOD_CLASS_MEMBER => {
                 AnyJsClassMember::JsMethodClassMember(JsMethodClassMember { syntax })
             }
@@ -30479,6 +30312,7 @@ impl AstNode for AnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(it) => &it.syntax,
             AnyJsClassMember::JsEmptyClassMember(it) => &it.syntax,
             AnyJsClassMember::JsGetterClassMember(it) => &it.syntax,
+            AnyJsClassMember::JsMetavariable(it) => &it.syntax,
             AnyJsClassMember::JsMethodClassMember(it) => &it.syntax,
             AnyJsClassMember::JsPropertyClassMember(it) => &it.syntax,
             AnyJsClassMember::JsSetterClassMember(it) => &it.syntax,
@@ -30498,6 +30332,7 @@ impl AstNode for AnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(it) => it.syntax,
             AnyJsClassMember::JsEmptyClassMember(it) => it.syntax,
             AnyJsClassMember::JsGetterClassMember(it) => it.syntax,
+            AnyJsClassMember::JsMetavariable(it) => it.syntax,
             AnyJsClassMember::JsMethodClassMember(it) => it.syntax,
             AnyJsClassMember::JsPropertyClassMember(it) => it.syntax,
             AnyJsClassMember::JsSetterClassMember(it) => it.syntax,
@@ -30519,6 +30354,7 @@ impl std::fmt::Debug for AnyJsClassMember {
             AnyJsClassMember::JsConstructorClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsEmptyClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsGetterClassMember(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsClassMember::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsMethodClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsPropertyClassMember(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMember::JsSetterClassMember(it) => std::fmt::Debug::fmt(it, f),
@@ -30544,6 +30380,7 @@ impl From<AnyJsClassMember> for SyntaxNode {
             AnyJsClassMember::JsConstructorClassMember(it) => it.into(),
             AnyJsClassMember::JsEmptyClassMember(it) => it.into(),
             AnyJsClassMember::JsGetterClassMember(it) => it.into(),
+            AnyJsClassMember::JsMetavariable(it) => it.into(),
             AnyJsClassMember::JsMethodClassMember(it) => it.into(),
             AnyJsClassMember::JsPropertyClassMember(it) => it.into(),
             AnyJsClassMember::JsSetterClassMember(it) => it.into(),
@@ -30574,6 +30411,11 @@ impl From<JsLiteralMemberName> for AnyJsClassMemberName {
         AnyJsClassMemberName::JsLiteralMemberName(node)
     }
 }
+impl From<JsMetavariable> for AnyJsClassMemberName {
+    fn from(node: JsMetavariable) -> AnyJsClassMemberName {
+        AnyJsClassMemberName::JsMetavariable(node)
+    }
+}
 impl From<JsPrivateClassMemberName> for AnyJsClassMemberName {
     fn from(node: JsPrivateClassMemberName) -> AnyJsClassMemberName {
         AnyJsClassMemberName::JsPrivateClassMemberName(node)
@@ -30583,11 +30425,15 @@ impl AstNode for AnyJsClassMemberName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsComputedMemberName::KIND_SET
         .union(JsLiteralMemberName::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsPrivateClassMemberName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            JS_COMPUTED_MEMBER_NAME | JS_LITERAL_MEMBER_NAME | JS_PRIVATE_CLASS_MEMBER_NAME
+            JS_COMPUTED_MEMBER_NAME
+                | JS_LITERAL_MEMBER_NAME
+                | JS_METAVARIABLE
+                | JS_PRIVATE_CLASS_MEMBER_NAME
         )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
@@ -30598,6 +30444,7 @@ impl AstNode for AnyJsClassMemberName {
             JS_LITERAL_MEMBER_NAME => {
                 AnyJsClassMemberName::JsLiteralMemberName(JsLiteralMemberName { syntax })
             }
+            JS_METAVARIABLE => AnyJsClassMemberName::JsMetavariable(JsMetavariable { syntax }),
             JS_PRIVATE_CLASS_MEMBER_NAME => {
                 AnyJsClassMemberName::JsPrivateClassMemberName(JsPrivateClassMemberName { syntax })
             }
@@ -30609,6 +30456,7 @@ impl AstNode for AnyJsClassMemberName {
         match self {
             AnyJsClassMemberName::JsComputedMemberName(it) => &it.syntax,
             AnyJsClassMemberName::JsLiteralMemberName(it) => &it.syntax,
+            AnyJsClassMemberName::JsMetavariable(it) => &it.syntax,
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => &it.syntax,
         }
     }
@@ -30616,6 +30464,7 @@ impl AstNode for AnyJsClassMemberName {
         match self {
             AnyJsClassMemberName::JsComputedMemberName(it) => it.syntax,
             AnyJsClassMemberName::JsLiteralMemberName(it) => it.syntax,
+            AnyJsClassMemberName::JsMetavariable(it) => it.syntax,
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => it.syntax,
         }
     }
@@ -30625,6 +30474,7 @@ impl std::fmt::Debug for AnyJsClassMemberName {
         match self {
             AnyJsClassMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMemberName::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsClassMemberName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -30634,6 +30484,7 @@ impl From<AnyJsClassMemberName> for SyntaxNode {
         match n {
             AnyJsClassMemberName::JsComputedMemberName(it) => it.into(),
             AnyJsClassMemberName::JsLiteralMemberName(it) => it.into(),
+            AnyJsClassMemberName::JsMetavariable(it) => it.into(),
             AnyJsClassMemberName::JsPrivateClassMemberName(it) => it.into(),
         }
     }
@@ -31742,6 +31593,11 @@ impl From<JsLogicalExpression> for AnyJsExpression {
         AnyJsExpression::JsLogicalExpression(node)
     }
 }
+impl From<JsMetavariable> for AnyJsExpression {
+    fn from(node: JsMetavariable) -> AnyJsExpression {
+        AnyJsExpression::JsMetavariable(node)
+    }
+}
 impl From<JsNewExpression> for AnyJsExpression {
     fn from(node: JsNewExpression) -> AnyJsExpression {
         AnyJsExpression::JsNewExpression(node)
@@ -31857,6 +31713,7 @@ impl AstNode for AnyJsExpression {
         .union(JsInExpression::KIND_SET)
         .union(JsInstanceofExpression::KIND_SET)
         .union(JsLogicalExpression::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsNewExpression::KIND_SET)
         .union(JsNewTargetExpression::KIND_SET)
         .union(JsObjectExpression::KIND_SET)
@@ -31895,6 +31752,7 @@ impl AstNode for AnyJsExpression {
             | JS_IN_EXPRESSION
             | JS_INSTANCEOF_EXPRESSION
             | JS_LOGICAL_EXPRESSION
+            | JS_METAVARIABLE
             | JS_NEW_EXPRESSION
             | JS_NEW_TARGET_EXPRESSION
             | JS_OBJECT_EXPRESSION
@@ -31959,6 +31817,7 @@ impl AstNode for AnyJsExpression {
             JS_LOGICAL_EXPRESSION => {
                 AnyJsExpression::JsLogicalExpression(JsLogicalExpression { syntax })
             }
+            JS_METAVARIABLE => AnyJsExpression::JsMetavariable(JsMetavariable { syntax }),
             JS_NEW_EXPRESSION => AnyJsExpression::JsNewExpression(JsNewExpression { syntax }),
             JS_NEW_TARGET_EXPRESSION => {
                 AnyJsExpression::JsNewTargetExpression(JsNewTargetExpression { syntax })
@@ -32034,6 +31893,7 @@ impl AstNode for AnyJsExpression {
             AnyJsExpression::JsInExpression(it) => &it.syntax,
             AnyJsExpression::JsInstanceofExpression(it) => &it.syntax,
             AnyJsExpression::JsLogicalExpression(it) => &it.syntax,
+            AnyJsExpression::JsMetavariable(it) => &it.syntax,
             AnyJsExpression::JsNewExpression(it) => &it.syntax,
             AnyJsExpression::JsNewTargetExpression(it) => &it.syntax,
             AnyJsExpression::JsObjectExpression(it) => &it.syntax,
@@ -32075,6 +31935,7 @@ impl AstNode for AnyJsExpression {
             AnyJsExpression::JsInExpression(it) => it.syntax,
             AnyJsExpression::JsInstanceofExpression(it) => it.syntax,
             AnyJsExpression::JsLogicalExpression(it) => it.syntax,
+            AnyJsExpression::JsMetavariable(it) => it.syntax,
             AnyJsExpression::JsNewExpression(it) => it.syntax,
             AnyJsExpression::JsNewTargetExpression(it) => it.syntax,
             AnyJsExpression::JsObjectExpression(it) => it.syntax,
@@ -32119,6 +31980,7 @@ impl std::fmt::Debug for AnyJsExpression {
             AnyJsExpression::JsInExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsInstanceofExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsLogicalExpression(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsExpression::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsNewExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsNewTargetExpression(it) => std::fmt::Debug::fmt(it, f),
             AnyJsExpression::JsObjectExpression(it) => std::fmt::Debug::fmt(it, f),
@@ -32162,6 +32024,7 @@ impl From<AnyJsExpression> for SyntaxNode {
             AnyJsExpression::JsInExpression(it) => it.into(),
             AnyJsExpression::JsInstanceofExpression(it) => it.into(),
             AnyJsExpression::JsLogicalExpression(it) => it.into(),
+            AnyJsExpression::JsMetavariable(it) => it.into(),
             AnyJsExpression::JsNewExpression(it) => it.into(),
             AnyJsExpression::JsNewTargetExpression(it) => it.into(),
             AnyJsExpression::JsObjectExpression(it) => it.into(),
@@ -33092,6 +32955,71 @@ impl From<AnyJsModuleItem> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsMetavariable> for AnyJsModuleSource {
+    fn from(node: JsMetavariable) -> AnyJsModuleSource {
+        AnyJsModuleSource::JsMetavariable(node)
+    }
+}
+impl From<JsModuleSource> for AnyJsModuleSource {
+    fn from(node: JsModuleSource) -> AnyJsModuleSource {
+        AnyJsModuleSource::JsModuleSource(node)
+    }
+}
+impl AstNode for AnyJsModuleSource {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsMetavariable::KIND_SET.union(JsModuleSource::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JS_METAVARIABLE | JS_MODULE_SOURCE)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyJsModuleSource::JsMetavariable(JsMetavariable { syntax }),
+            JS_MODULE_SOURCE => AnyJsModuleSource::JsModuleSource(JsModuleSource { syntax }),
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyJsModuleSource::JsMetavariable(it) => &it.syntax,
+            AnyJsModuleSource::JsModuleSource(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyJsModuleSource::JsMetavariable(it) => it.syntax,
+            AnyJsModuleSource::JsModuleSource(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyJsModuleSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyJsModuleSource::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsModuleSource::JsModuleSource(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyJsModuleSource> for SyntaxNode {
+    fn from(n: AnyJsModuleSource) -> SyntaxNode {
+        match n {
+            AnyJsModuleSource::JsMetavariable(it) => it.into(),
+            AnyJsModuleSource::JsModuleSource(it) => it.into(),
+        }
+    }
+}
+impl From<AnyJsModuleSource> for SyntaxElement {
+    fn from(n: AnyJsModuleSource) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<JsMetavariable> for AnyJsName {
+    fn from(node: JsMetavariable) -> AnyJsName {
+        AnyJsName::JsMetavariable(node)
+    }
+}
 impl From<JsName> for AnyJsName {
     fn from(node: JsName) -> AnyJsName {
         AnyJsName::JsName(node)
@@ -33104,12 +33032,15 @@ impl From<JsPrivateName> for AnyJsName {
 }
 impl AstNode for AnyJsName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = JsName::KIND_SET.union(JsPrivateName::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = JsMetavariable::KIND_SET
+        .union(JsName::KIND_SET)
+        .union(JsPrivateName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_NAME | JS_PRIVATE_NAME)
+        matches!(kind, JS_METAVARIABLE | JS_NAME | JS_PRIVATE_NAME)
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyJsName::JsMetavariable(JsMetavariable { syntax }),
             JS_NAME => AnyJsName::JsName(JsName { syntax }),
             JS_PRIVATE_NAME => AnyJsName::JsPrivateName(JsPrivateName { syntax }),
             _ => return None,
@@ -33118,12 +33049,14 @@ impl AstNode for AnyJsName {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyJsName::JsMetavariable(it) => &it.syntax,
             AnyJsName::JsName(it) => &it.syntax,
             AnyJsName::JsPrivateName(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyJsName::JsMetavariable(it) => it.syntax,
             AnyJsName::JsName(it) => it.syntax,
             AnyJsName::JsPrivateName(it) => it.syntax,
         }
@@ -33132,6 +33065,7 @@ impl AstNode for AnyJsName {
 impl std::fmt::Debug for AnyJsName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyJsName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsName::JsName(it) => std::fmt::Debug::fmt(it, f),
             AnyJsName::JsPrivateName(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -33140,6 +33074,7 @@ impl std::fmt::Debug for AnyJsName {
 impl From<AnyJsName> for SyntaxNode {
     fn from(n: AnyJsName) -> SyntaxNode {
         match n {
+            AnyJsName::JsMetavariable(it) => it.into(),
             AnyJsName::JsName(it) => it.into(),
             AnyJsName::JsPrivateName(it) => it.into(),
         }
@@ -33364,6 +33299,11 @@ impl From<JsBogusBinding> for AnyJsObjectBindingPatternMember {
         AnyJsObjectBindingPatternMember::JsBogusBinding(node)
     }
 }
+impl From<JsMetavariable> for AnyJsObjectBindingPatternMember {
+    fn from(node: JsMetavariable) -> AnyJsObjectBindingPatternMember {
+        AnyJsObjectBindingPatternMember::JsMetavariable(node)
+    }
+}
 impl From<JsObjectBindingPatternProperty> for AnyJsObjectBindingPatternMember {
     fn from(node: JsObjectBindingPatternProperty) -> AnyJsObjectBindingPatternMember {
         AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(node)
@@ -33382,6 +33322,7 @@ impl From<JsObjectBindingPatternShorthandProperty> for AnyJsObjectBindingPattern
 impl AstNode for AnyJsObjectBindingPatternMember {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsBogusBinding::KIND_SET
+        .union(JsMetavariable::KIND_SET)
         .union(JsObjectBindingPatternProperty::KIND_SET)
         .union(JsObjectBindingPatternRest::KIND_SET)
         .union(JsObjectBindingPatternShorthandProperty::KIND_SET);
@@ -33389,6 +33330,7 @@ impl AstNode for AnyJsObjectBindingPatternMember {
         matches!(
             kind,
             JS_BOGUS_BINDING
+                | JS_METAVARIABLE
                 | JS_OBJECT_BINDING_PATTERN_PROPERTY
                 | JS_OBJECT_BINDING_PATTERN_REST
                 | JS_OBJECT_BINDING_PATTERN_SHORTHAND_PROPERTY
@@ -33398,6 +33340,9 @@ impl AstNode for AnyJsObjectBindingPatternMember {
         let res = match syntax.kind() {
             JS_BOGUS_BINDING => {
                 AnyJsObjectBindingPatternMember::JsBogusBinding(JsBogusBinding { syntax })
+            }
+            JS_METAVARIABLE => {
+                AnyJsObjectBindingPatternMember::JsMetavariable(JsMetavariable { syntax })
             }
             JS_OBJECT_BINDING_PATTERN_PROPERTY => {
                 AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(
@@ -33421,6 +33366,7 @@ impl AstNode for AnyJsObjectBindingPatternMember {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => &it.syntax,
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => &it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => &it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => &it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
@@ -33431,6 +33377,7 @@ impl AstNode for AnyJsObjectBindingPatternMember {
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => it.syntax,
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => it.syntax,
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
@@ -33443,6 +33390,7 @@ impl std::fmt::Debug for AnyJsObjectBindingPatternMember {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => {
                 std::fmt::Debug::fmt(it, f)
             }
@@ -33459,6 +33407,7 @@ impl From<AnyJsObjectBindingPatternMember> for SyntaxNode {
     fn from(n: AnyJsObjectBindingPatternMember) -> SyntaxNode {
         match n {
             AnyJsObjectBindingPatternMember::JsBogusBinding(it) => it.into(),
+            AnyJsObjectBindingPatternMember::JsMetavariable(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternRest(it) => it.into(),
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(it) => {
@@ -33619,12 +33568,21 @@ impl From<JsLiteralMemberName> for AnyJsObjectMemberName {
         AnyJsObjectMemberName::JsLiteralMemberName(node)
     }
 }
+impl From<JsMetavariable> for AnyJsObjectMemberName {
+    fn from(node: JsMetavariable) -> AnyJsObjectMemberName {
+        AnyJsObjectMemberName::JsMetavariable(node)
+    }
+}
 impl AstNode for AnyJsObjectMemberName {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        JsComputedMemberName::KIND_SET.union(JsLiteralMemberName::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = JsComputedMemberName::KIND_SET
+        .union(JsLiteralMemberName::KIND_SET)
+        .union(JsMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_COMPUTED_MEMBER_NAME | JS_LITERAL_MEMBER_NAME)
+        matches!(
+            kind,
+            JS_COMPUTED_MEMBER_NAME | JS_LITERAL_MEMBER_NAME | JS_METAVARIABLE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -33634,6 +33592,7 @@ impl AstNode for AnyJsObjectMemberName {
             JS_LITERAL_MEMBER_NAME => {
                 AnyJsObjectMemberName::JsLiteralMemberName(JsLiteralMemberName { syntax })
             }
+            JS_METAVARIABLE => AnyJsObjectMemberName::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -33642,12 +33601,14 @@ impl AstNode for AnyJsObjectMemberName {
         match self {
             AnyJsObjectMemberName::JsComputedMemberName(it) => &it.syntax,
             AnyJsObjectMemberName::JsLiteralMemberName(it) => &it.syntax,
+            AnyJsObjectMemberName::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsObjectMemberName::JsComputedMemberName(it) => it.syntax,
             AnyJsObjectMemberName::JsLiteralMemberName(it) => it.syntax,
+            AnyJsObjectMemberName::JsMetavariable(it) => it.syntax,
         }
     }
 }
@@ -33656,6 +33617,7 @@ impl std::fmt::Debug for AnyJsObjectMemberName {
         match self {
             AnyJsObjectMemberName::JsComputedMemberName(it) => std::fmt::Debug::fmt(it, f),
             AnyJsObjectMemberName::JsLiteralMemberName(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsObjectMemberName::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -33664,6 +33626,7 @@ impl From<AnyJsObjectMemberName> for SyntaxNode {
         match n {
             AnyJsObjectMemberName::JsComputedMemberName(it) => it.into(),
             AnyJsObjectMemberName::JsLiteralMemberName(it) => it.into(),
+            AnyJsObjectMemberName::JsMetavariable(it) => it.into(),
         }
     }
 }
@@ -35277,6 +35240,68 @@ impl From<AnyTsExternalModuleDeclarationBody> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsMetavariable> for AnyTsIdentifierBinding {
+    fn from(node: JsMetavariable) -> AnyTsIdentifierBinding {
+        AnyTsIdentifierBinding::JsMetavariable(node)
+    }
+}
+impl From<TsIdentifierBinding> for AnyTsIdentifierBinding {
+    fn from(node: TsIdentifierBinding) -> AnyTsIdentifierBinding {
+        AnyTsIdentifierBinding::TsIdentifierBinding(node)
+    }
+}
+impl AstNode for AnyTsIdentifierBinding {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        JsMetavariable::KIND_SET.union(TsIdentifierBinding::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, JS_METAVARIABLE | TS_IDENTIFIER_BINDING)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyTsIdentifierBinding::JsMetavariable(JsMetavariable { syntax }),
+            TS_IDENTIFIER_BINDING => {
+                AnyTsIdentifierBinding::TsIdentifierBinding(TsIdentifierBinding { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyTsIdentifierBinding::JsMetavariable(it) => &it.syntax,
+            AnyTsIdentifierBinding::TsIdentifierBinding(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyTsIdentifierBinding::JsMetavariable(it) => it.syntax,
+            AnyTsIdentifierBinding::TsIdentifierBinding(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyTsIdentifierBinding {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyTsIdentifierBinding::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
+            AnyTsIdentifierBinding::TsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyTsIdentifierBinding> for SyntaxNode {
+    fn from(n: AnyTsIdentifierBinding) -> SyntaxNode {
+        match n {
+            AnyTsIdentifierBinding::JsMetavariable(it) => it.into(),
+            AnyTsIdentifierBinding::TsIdentifierBinding(it) => it.into(),
+        }
+    }
+}
+impl From<AnyTsIdentifierBinding> for SyntaxElement {
+    fn from(n: AnyTsIdentifierBinding) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl From<JsStaticModifier> for AnyTsIndexSignatureModifier {
     fn from(node: JsStaticModifier) -> AnyTsIndexSignatureModifier {
         AnyTsIndexSignatureModifier::JsStaticModifier(node)
@@ -35453,11 +35478,6 @@ impl From<AnyTsMethodSignatureModifier> for SyntaxElement {
         node.into()
     }
 }
-impl From<TsIdentifierBinding> for AnyTsModuleName {
-    fn from(node: TsIdentifierBinding) -> AnyTsModuleName {
-        AnyTsModuleName::TsIdentifierBinding(node)
-    }
-}
 impl From<TsQualifiedModuleName> for AnyTsModuleName {
     fn from(node: TsQualifiedModuleName) -> AnyTsModuleName {
         AnyTsModuleName::TsQualifiedModuleName(node)
@@ -35466,39 +35486,47 @@ impl From<TsQualifiedModuleName> for AnyTsModuleName {
 impl AstNode for AnyTsModuleName {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        TsIdentifierBinding::KIND_SET.union(TsQualifiedModuleName::KIND_SET);
+        AnyTsIdentifierBinding::KIND_SET.union(TsQualifiedModuleName::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, TS_IDENTIFIER_BINDING | TS_QUALIFIED_MODULE_NAME)
+        match kind {
+            TS_QUALIFIED_MODULE_NAME => true,
+            k if AnyTsIdentifierBinding::can_cast(k) => true,
+            _ => false,
+        }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            TS_IDENTIFIER_BINDING => {
-                AnyTsModuleName::TsIdentifierBinding(TsIdentifierBinding { syntax })
-            }
             TS_QUALIFIED_MODULE_NAME => {
                 AnyTsModuleName::TsQualifiedModuleName(TsQualifiedModuleName { syntax })
             }
-            _ => return None,
+            _ => {
+                if let Some(any_ts_identifier_binding) = AnyTsIdentifierBinding::cast(syntax) {
+                    return Some(AnyTsModuleName::AnyTsIdentifierBinding(
+                        any_ts_identifier_binding,
+                    ));
+                }
+                return None;
+            }
         };
         Some(res)
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyTsModuleName::TsIdentifierBinding(it) => &it.syntax,
             AnyTsModuleName::TsQualifiedModuleName(it) => &it.syntax,
+            AnyTsModuleName::AnyTsIdentifierBinding(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyTsModuleName::TsIdentifierBinding(it) => it.syntax,
             AnyTsModuleName::TsQualifiedModuleName(it) => it.syntax,
+            AnyTsModuleName::AnyTsIdentifierBinding(it) => it.into_syntax(),
         }
     }
 }
 impl std::fmt::Debug for AnyTsModuleName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyTsModuleName::TsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
+            AnyTsModuleName::AnyTsIdentifierBinding(it) => std::fmt::Debug::fmt(it, f),
             AnyTsModuleName::TsQualifiedModuleName(it) => std::fmt::Debug::fmt(it, f),
         }
     }
@@ -35506,7 +35534,7 @@ impl std::fmt::Debug for AnyTsModuleName {
 impl From<AnyTsModuleName> for SyntaxNode {
     fn from(n: AnyTsModuleName) -> SyntaxNode {
         match n {
-            AnyTsModuleName::TsIdentifierBinding(it) => it.into(),
+            AnyTsModuleName::AnyTsIdentifierBinding(it) => it.into(),
             AnyTsModuleName::TsQualifiedModuleName(it) => it.into(),
         }
     }
@@ -36277,6 +36305,11 @@ impl From<AnyTsTupleTypeElement> for SyntaxElement {
         node.into()
     }
 }
+impl From<JsMetavariable> for AnyTsType {
+    fn from(node: JsMetavariable) -> AnyTsType {
+        AnyTsType::JsMetavariable(node)
+    }
+}
 impl From<TsAnyType> for AnyTsType {
     fn from(node: TsAnyType) -> AnyTsType {
         AnyTsType::TsAnyType(node)
@@ -36454,7 +36487,8 @@ impl From<TsVoidType> for AnyTsType {
 }
 impl AstNode for AnyTsType {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = TsAnyType::KIND_SET
+    const KIND_SET: SyntaxKindSet<Language> = JsMetavariable::KIND_SET
+        .union(TsAnyType::KIND_SET)
         .union(TsArrayType::KIND_SET)
         .union(TsBigintLiteralType::KIND_SET)
         .union(TsBigintType::KIND_SET)
@@ -36492,7 +36526,8 @@ impl AstNode for AnyTsType {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            TS_ANY_TYPE
+            JS_METAVARIABLE
+                | TS_ANY_TYPE
                 | TS_ARRAY_TYPE
                 | TS_BIGINT_LITERAL_TYPE
                 | TS_BIGINT_TYPE
@@ -36531,6 +36566,7 @@ impl AstNode for AnyTsType {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
+            JS_METAVARIABLE => AnyTsType::JsMetavariable(JsMetavariable { syntax }),
             TS_ANY_TYPE => AnyTsType::TsAnyType(TsAnyType { syntax }),
             TS_ARRAY_TYPE => AnyTsType::TsArrayType(TsArrayType { syntax }),
             TS_BIGINT_LITERAL_TYPE => {
@@ -36584,6 +36620,7 @@ impl AstNode for AnyTsType {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
+            AnyTsType::JsMetavariable(it) => &it.syntax,
             AnyTsType::TsAnyType(it) => &it.syntax,
             AnyTsType::TsArrayType(it) => &it.syntax,
             AnyTsType::TsBigintLiteralType(it) => &it.syntax,
@@ -36623,6 +36660,7 @@ impl AstNode for AnyTsType {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
+            AnyTsType::JsMetavariable(it) => it.syntax,
             AnyTsType::TsAnyType(it) => it.syntax,
             AnyTsType::TsArrayType(it) => it.syntax,
             AnyTsType::TsBigintLiteralType(it) => it.syntax,
@@ -36664,6 +36702,7 @@ impl AstNode for AnyTsType {
 impl std::fmt::Debug for AnyTsType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AnyTsType::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyTsType::TsAnyType(it) => std::fmt::Debug::fmt(it, f),
             AnyTsType::TsArrayType(it) => std::fmt::Debug::fmt(it, f),
             AnyTsType::TsBigintLiteralType(it) => std::fmt::Debug::fmt(it, f),
@@ -36705,6 +36744,7 @@ impl std::fmt::Debug for AnyTsType {
 impl From<AnyTsType> for SyntaxNode {
     fn from(n: AnyTsType) -> SyntaxNode {
         match n {
+            AnyTsType::JsMetavariable(it) => it.into(),
             AnyTsType::TsAnyType(it) => it.into(),
             AnyTsType::TsArrayType(it) => it.into(),
             AnyTsType::TsBigintLiteralType(it) => it.into(),
@@ -37270,6 +37310,11 @@ impl std::fmt::Display for AnyJsModuleItem {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for AnyJsModuleSource {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for AnyJsName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -37376,6 +37421,11 @@ impl std::fmt::Display for AnyTsEnumMemberName {
     }
 }
 impl std::fmt::Display for AnyTsExternalModuleDeclarationBody {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for AnyTsIdentifierBinding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -37901,6 +37951,11 @@ impl std::fmt::Display for JsLiteralMemberName {
     }
 }
 impl std::fmt::Display for JsLogicalExpression {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for JsMetavariable {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -38895,8 +38950,7 @@ impl std::fmt::Display for TsVoidType {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogus {
     syntax: SyntaxNode,
 }
@@ -38952,8 +39006,7 @@ impl From<JsBogus> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogusAssignment {
     syntax: SyntaxNode,
 }
@@ -39009,8 +39062,7 @@ impl From<JsBogusAssignment> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogusBinding {
     syntax: SyntaxNode,
 }
@@ -39066,8 +39118,7 @@ impl From<JsBogusBinding> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogusExpression {
     syntax: SyntaxNode,
 }
@@ -39123,8 +39174,7 @@ impl From<JsBogusExpression> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogusImportAssertionEntry {
     syntax: SyntaxNode,
 }
@@ -39180,8 +39230,7 @@ impl From<JsBogusImportAssertionEntry> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogusMember {
     syntax: SyntaxNode,
 }
@@ -39237,8 +39286,7 @@ impl From<JsBogusMember> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogusNamedImportSpecifier {
     syntax: SyntaxNode,
 }
@@ -39294,8 +39342,7 @@ impl From<JsBogusNamedImportSpecifier> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogusParameter {
     syntax: SyntaxNode,
 }
@@ -39351,8 +39398,7 @@ impl From<JsBogusParameter> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct JsBogusStatement {
     syntax: SyntaxNode,
 }
@@ -39408,8 +39454,7 @@ impl From<JsBogusStatement> for SyntaxElement {
         n.syntax.into()
     }
 }
-#[derive(Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(Serialize))]
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub struct TsBogusType {
     syntax: SyntaxNode,
 }
@@ -39506,7 +39551,6 @@ impl AstNode for JsArrayAssignmentPatternElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayAssignmentPatternElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -39589,7 +39633,6 @@ impl AstNode for JsArrayBindingPatternElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayBindingPatternElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -39672,7 +39715,6 @@ impl AstNode for JsArrayElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsArrayElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -39755,7 +39797,6 @@ impl AstNode for JsCallArgumentList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsCallArgumentList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -39838,7 +39879,6 @@ impl AstNode for JsClassMemberList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsClassMemberList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -39921,7 +39961,6 @@ impl AstNode for JsConstructorModifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsConstructorModifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40004,7 +40043,6 @@ impl AstNode for JsConstructorParameterList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsConstructorParameterList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40087,7 +40125,6 @@ impl AstNode for JsDecoratorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsDecoratorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40170,7 +40207,6 @@ impl AstNode for JsDirectiveList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsDirectiveList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40253,7 +40289,6 @@ impl AstNode for JsExportNamedFromSpecifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportNamedFromSpecifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40336,7 +40371,6 @@ impl AstNode for JsExportNamedSpecifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsExportNamedSpecifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40419,7 +40453,6 @@ impl AstNode for JsImportAssertionEntryList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsImportAssertionEntryList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40502,7 +40535,6 @@ impl AstNode for JsMethodModifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsMethodModifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40585,7 +40617,6 @@ impl AstNode for JsModuleItemList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsModuleItemList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40668,7 +40699,6 @@ impl AstNode for JsNamedImportSpecifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsNamedImportSpecifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40752,7 +40782,6 @@ impl AstNode for JsObjectAssignmentPatternPropertyList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectAssignmentPatternPropertyList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40836,7 +40865,6 @@ impl AstNode for JsObjectBindingPatternPropertyList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectBindingPatternPropertyList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -40919,7 +40947,6 @@ impl AstNode for JsObjectMemberList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsObjectMemberList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41002,7 +41029,6 @@ impl AstNode for JsParameterList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsParameterList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41085,7 +41111,6 @@ impl AstNode for JsPropertyModifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsPropertyModifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41168,7 +41193,6 @@ impl AstNode for JsStatementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsStatementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41251,7 +41275,6 @@ impl AstNode for JsSwitchCaseList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsSwitchCaseList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41334,7 +41357,6 @@ impl AstNode for JsTemplateElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsTemplateElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41417,7 +41439,6 @@ impl AstNode for JsVariableDeclaratorList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsVariableDeclaratorList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41500,7 +41521,6 @@ impl AstNode for JsxAttributeList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxAttributeList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41583,7 +41603,6 @@ impl AstNode for JsxChildList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for JsxChildList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41666,7 +41685,6 @@ impl AstNode for TsEnumMemberList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsEnumMemberList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41749,7 +41767,6 @@ impl AstNode for TsIndexSignatureModifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsIndexSignatureModifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41832,7 +41849,6 @@ impl AstNode for TsIntersectionTypeElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsIntersectionTypeElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41915,7 +41931,6 @@ impl AstNode for TsMethodSignatureModifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsMethodSignatureModifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -41998,7 +42013,6 @@ impl AstNode for TsPropertyParameterModifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsPropertyParameterModifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -42081,7 +42095,6 @@ impl AstNode for TsPropertySignatureModifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsPropertySignatureModifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -42164,7 +42177,6 @@ impl AstNode for TsTemplateElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTemplateElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -42247,7 +42259,6 @@ impl AstNode for TsTupleTypeElementList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTupleTypeElementList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -42330,7 +42341,6 @@ impl AstNode for TsTypeArgumentList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeArgumentList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -42413,7 +42423,6 @@ impl AstNode for TsTypeList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -42496,7 +42505,6 @@ impl AstNode for TsTypeMemberList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeMemberList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -42579,7 +42587,6 @@ impl AstNode for TsTypeParameterList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeParameterList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -42662,7 +42669,6 @@ impl AstNode for TsTypeParameterModifierList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsTypeParameterModifierList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -42745,7 +42751,6 @@ impl AstNode for TsUnionTypeVariantList {
         self.syntax_list.into_node()
     }
 }
-#[cfg(feature = "serde")]
 impl Serialize for TsUnionTypeVariantList {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

@@ -8,7 +8,7 @@ impl FormatRule<AnyTsModuleName> for FormatAnyTsModuleName {
     type Context = JsFormatContext;
     fn fmt(&self, node: &AnyTsModuleName, f: &mut JsFormatter) -> FormatResult<()> {
         match node {
-            AnyTsModuleName::TsIdentifierBinding(node) => node.format().fmt(f),
+            AnyTsModuleName::AnyTsIdentifierBinding(node) => node.format().fmt(f),
             AnyTsModuleName::TsQualifiedModuleName(node) => node.format().fmt(f),
         }
     }

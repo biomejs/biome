@@ -1,15 +1,22 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
-use crate::ts::expressions::as_expression::TsAsOrSatisfiesExpression;
-use biome_js_syntax::{JsSyntaxNode, TsSatisfiesExpression};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::TsSatisfiesExpression;
+
+use super::as_expression::format_as_or_satisfies_expression;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsSatisfiesExpression;
 
 impl FormatNodeRule<TsSatisfiesExpression> for FormatTsSatisfiesExpression {
     fn fmt_fields(&self, node: &TsSatisfiesExpression, f: &mut JsFormatter) -> FormatResult<()> {
-        TsAsOrSatisfiesExpression::from(node.clone()).fmt(f)
+        format_as_or_satisfies_expression(
+            f,
+            node.syntax(),
+            node.expression(),
+            node.satisfies_token()?,
+            node.ty()?,
+        )
     }
 
     fn needs_parentheses(&self, item: &TsSatisfiesExpression) -> bool {
@@ -17,15 +24,8 @@ impl FormatNodeRule<TsSatisfiesExpression> for FormatTsSatisfiesExpression {
     }
 }
 
-impl NeedsParentheses for TsSatisfiesExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        TsAsOrSatisfiesExpression::from(self.clone()).needs_parentheses_with_parent(parent)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-
     use crate::{assert_needs_parentheses, assert_not_needs_parentheses};
     use biome_js_syntax::{JsFileSource, TsSatisfiesExpression};
 

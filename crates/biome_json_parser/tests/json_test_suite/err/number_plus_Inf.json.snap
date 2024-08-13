@@ -1,0 +1,75 @@
+---
+source: crates/biome_json_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```json
+[+Inf]
+```
+
+
+## AST
+
+```
+JsonRoot {
+    bom_token: missing (optional),
+    value: JsonArrayValue {
+        l_brack_token: L_BRACK@0..1 "[" [] [],
+        elements: JsonArrayElementList [
+            JsonBogusValue {
+                items: [
+                    ERROR_TOKEN@1..2 "+" [] [],
+                ],
+            },
+            missing separator,
+            JsonBogusValue {
+                items: [
+                    IDENT@2..5 "Inf" [] [],
+                ],
+            },
+        ],
+        r_brack_token: R_BRACK@5..6 "]" [] [],
+    },
+    eof_token: EOF@6..6 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JSON_ROOT@0..6
+  0: (empty)
+  1: JSON_ARRAY_VALUE@0..6
+    0: L_BRACK@0..1 "[" [] []
+    1: JSON_ARRAY_ELEMENT_LIST@1..5
+      0: JSON_BOGUS_VALUE@1..2
+        0: ERROR_TOKEN@1..2 "+" [] []
+      1: (empty)
+      2: JSON_BOGUS_VALUE@2..5
+        0: IDENT@2..5 "Inf" [] []
+    2: R_BRACK@5..6 "]" [] []
+  2: EOF@6..6 "" [] []
+
+```
+
+## Diagnostics
+
+```
+number_plus_Inf.json:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `+`
+  
+  > 1 │ [+Inf]
+      │  ^
+  
+number_plus_Inf.json:1:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `Inf`
+  
+  > 1 │ [+Inf]
+      │   ^^^
+  
+  i Remove Inf
+  
+```

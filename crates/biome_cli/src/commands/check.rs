@@ -6,6 +6,7 @@ use crate::execute::VcsTargeted;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_configuration::analyzer::assists::PartialAssistsConfiguration;
 use biome_configuration::{
     organize_imports::PartialOrganizeImports, PartialConfiguration, PartialFormatterConfiguration,
     PartialLinterConfiguration,
@@ -36,6 +37,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
+    pub(crate) assists_enabled: Option<bool>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
@@ -60,6 +62,7 @@ pub(crate) fn check(
         organize_imports_enabled,
         formatter_enabled,
         since,
+        assists_enabled,
         staged,
         changed,
     } = payload;
@@ -146,6 +149,14 @@ pub(crate) fn check(
 
     if organize_imports_enabled.is_some() {
         organize_imports.enabled = organize_imports_enabled;
+    }
+
+    let assists = fs_configuration
+        .assists
+        .get_or_insert_with(PartialAssistsConfiguration::default);
+
+    if assists_enabled.is_some() {
+        assists.enabled = assists_enabled;
     }
 
     if let Some(mut configuration) = configuration {

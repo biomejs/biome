@@ -1,10 +1,10 @@
 use super::*;
 use biome_js_syntax::{
     JsArrowFunctionExpression, JsConstructorClassMember, JsFunctionDeclaration,
-    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsLanguage,
-    JsMethodClassMember, JsMethodObjectMember, JsSetterClassMember, JsSetterObjectMember,
+    JsFunctionExpression, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
+    JsMethodObjectMember, JsSetterClassMember, JsSetterObjectMember,
 };
-use biome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast};
+use biome_rowan::{AstNode, SyntaxNodeCast};
 use std::rc::Rc;
 
 /// Marker trait that groups all "AstNode" that have closure
@@ -32,7 +32,7 @@ macro_rules! SyntaxTextRangeHasClosureAstNode {
         }
 
         impl AnyHasClosureNode {
-            pub fn from_node(node: &SyntaxNode<JsLanguage>) -> Option<AnyHasClosureNode> {
+            pub fn from_node(node: &JsSyntaxNode) -> Option<AnyHasClosureNode> {
                 match node.kind() {
                     $(
                     JsSyntaxKind::$kind => node
@@ -93,7 +93,7 @@ impl Capture {
     }
 
     /// Returns the reference node of the capture
-    pub fn node(&self) -> &SyntaxNode<JsLanguage> {
+    pub fn node(&self) -> &JsSyntaxNode {
         &self.node
     }
 

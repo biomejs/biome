@@ -14,9 +14,10 @@ version              = "0.0.0"
 proc-macro = true
 
 [dependencies]
-case             = "1.0.0"
-globwalk         = "0.9.1"
-proc-macro-error = "1.0.4"
-proc-macro2      = { workspace = true }
-quote            = "1.0.14"
-syn              = "2.0.59"
+biome_string_case = { workspace = true }
+case              = "1.0.0"
+globwalk          = "0.9.1"
+proc-macro-error  = "1.0.4"
+proc-macro2       = { workspace = true }
+quote             = "1.0.14"
+syn               = "2.0.59"
