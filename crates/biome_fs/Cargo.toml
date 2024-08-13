@@ -15,7 +15,7 @@ version              = "0.5.7"
 [dependencies]
 biome_diagnostics = { workspace = true }
 crossbeam         = { workspace = true }
-directories       = "5.0.1"
+directories       = { workspace = true }
 indexmap          = { workspace = true }
 oxc_resolver      = { workspace = true }
 parking_lot       = { version = "0.12.3", features = ["arc_lock"] }

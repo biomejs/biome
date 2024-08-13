@@ -13,10 +13,12 @@ use biome_service::workspace::{
     RageEntry, RageParams, RageResult, RegisterProjectFolderParams, UnregisterProjectFolderParams,
 };
 use biome_service::{workspace, DynRef, Workspace};
+use directories::UserDirs;
 use futures::future::ready;
 use futures::FutureExt;
 use rustc_hash::FxHashMap;
 use serde_json::json;
+use std::env;
 use std::panic::RefUnwindSafe;
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -560,7 +562,11 @@ impl ServerFactory {
     }
 
     pub fn create(&self, config_path: Option<PathBuf>) -> ServerConnection {
-        self.create_with_fs(config_path, DynRef::Owned(Box::<OsFileSystem>::default()))
+        let base_path = UserDirs::new()
+            .map(|dir| dir.home_dir().to_path_buf())
+            .or(env::current_dir().ok());
+        let fs = OsFileSystem::new().with_working_directory(base_path);
+        self.create_with_fs(config_path, DynRef::Owned(Box::new(fs)))
     }
 
     /// Create a new [ServerConnection] from this factory

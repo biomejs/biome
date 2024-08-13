@@ -866,7 +866,9 @@ fn fs_error_dereferenced_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(root_path.clone()),
+        )),
         &mut console,
         Args::from([("lint"), root_path.display().to_string().as_str()].as_slice()),
     );
@@ -910,7 +912,9 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(root_path.clone()),
+        )),
         &mut console,
         Args::from([("lint"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -956,7 +960,9 @@ fn fs_error_infinite_symlink_expansion_to_files() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(root_path.clone()),
+        )),
         &mut console,
         Args::from([("lint"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -1137,7 +1143,9 @@ fn fs_files_ignore_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(root_path.clone()),
+        )),
         &mut console,
         Args::from(
             [
@@ -1189,7 +1197,9 @@ fn include_files_in_subdir() {
         .unwrap();
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(root_path.clone()),
+        )),
         &mut console,
         Args::from([("lint"), root_path.display().to_string().as_str()].as_slice()),
     );
@@ -1247,7 +1257,9 @@ fn include_files_in_symlinked_subdir() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(subroot_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(subroot_path.clone()),
+        )),
         &mut console,
         Args::from([("lint"), subroot_path.display().to_string().as_str()].as_slice()),
     );
@@ -1307,7 +1319,9 @@ fn ignore_file_in_subdir_in_symlinked_dir() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(subroot_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(subroot_path.clone()),
+        )),
         &mut console,
         Args::from([("lint"), subroot_path.display().to_string().as_str()].as_slice()),
     );

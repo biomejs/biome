@@ -51,8 +51,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   - `--log-path`: a directory where to store the daemon logs. The commands also accepts the environment variable `BIOME_LOG_PATH`.
   - `--log-prefix-name`: a prefix that's added to the file name of the logs. It defaults to `server.log`. The commands also accepts the environment variable `BIOME_LOG_PREFIX_NAME`.
 
-  @Contributed by @ematipico
-   
+  Contributed by @ematipico
+
 
 #### Enhancements
 
@@ -105,6 +105,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#3577](https://github.com/biomejs/biome/issues/3577), where the update of the configuration file was resulting in the creation of a new internal project. Contributed by @ematipico
+
+#### Enhancements
+
+- When an LSP is not able to provide a [`rootUri` or a `workspaceFolders`](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#initialize), the Biome LSP will use the **user home directory** as working directory.
+  The user home directory differs based on the OS:
+
+  | Platform | 	Value                 | 	Example         |
+  |----------|------------------------|------------------|
+  | Linux    | 	`$HOME`	              | `/home/alice`    |
+  | macOS    | 	`$HOME`               | `/home/alice`    |
+  | Windows  | 	`{FOLDERID_Profile}`	 | `C:\Users\Alice` |
+
+  If the LSP can't retrieve the user directory, it will fall back to the root directory.
+
+  Contributed by @ematipico
 
 ### Formatter
 

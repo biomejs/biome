@@ -901,6 +901,7 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_text_edit",
+ "directories",
  "futures",
  "rustc-hash 1.1.0",
  "serde",

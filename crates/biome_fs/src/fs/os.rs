@@ -28,15 +28,20 @@ pub struct OsFileSystem {
 }
 
 impl OsFileSystem {
-    pub fn new(working_directory: PathBuf) -> Self {
+    pub fn new() -> Self {
         Self {
-            working_directory: Some(working_directory),
+            working_directory: None,
             configuration_resolver: AssertUnwindSafe(Resolver::new(ResolveOptions {
                 condition_names: vec!["node".to_string(), "import".to_string()],
                 extensions: vec![".json".to_string(), ".jsonc".to_string()],
                 ..ResolveOptions::default()
             })),
         }
+    }
+
+    pub fn with_working_directory(mut self, working_directory: impl Into<Option<PathBuf>>) -> Self {
+        self.working_directory = working_directory.into();
+        self
     }
 }
 

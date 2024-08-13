@@ -23,6 +23,7 @@ biome_fs            = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_service       = { workspace = true }
 biome_text_edit     = { workspace = true }
+directories         = { workspace = true }
 futures             = "0.3.30"
 rustc-hash          = { workspace = true }
 serde               = { workspace = true, features = ["derive"] }

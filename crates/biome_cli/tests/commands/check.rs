@@ -840,7 +840,9 @@ fn fs_error_dereferenced_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(root_path.clone()),
+        )),
         &mut console,
         Args::from([("check"), root_path.display().to_string().as_str()].as_slice()),
     );
@@ -884,7 +886,9 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(root_path.clone()),
+        )),
         &mut console,
         Args::from([("check"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -930,7 +934,9 @@ fn fs_error_infinite_symlink_expansion_to_files() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(root_path.clone()),
+        )),
         &mut console,
         Args::from([("check"), (root_path.display().to_string().as_str())].as_slice()),
     );
@@ -1110,7 +1116,9 @@ fn fs_files_ignore_symlink() {
     }
 
     let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+        DynRef::Owned(Box::new(
+            OsFileSystem::new().with_working_directory(root_path.clone()),
+        )),
         &mut console,
         Args::from(
             [
