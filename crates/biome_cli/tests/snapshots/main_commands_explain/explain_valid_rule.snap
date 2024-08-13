@@ -52,6 +52,18 @@ and the [the noopener documentation](https://html.spec.whatwg.org/multipage/link
 ```jsx
 <a href='http://external.link' target='_blank' rel="noopener" {...props}>child</a>
 ```
-```
 
+## Options
+
+Use the options to allow specific domains to use `target="_blank"` without `rel="noreferrer"`.
+
+```json
+{
+"//": "...",
+"options": {
+"allowDomains": ["example.com", "example.org"]
+}
+}
+```
+```
 

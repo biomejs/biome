@@ -51,6 +51,7 @@ declare_lint_rule! {
     /// ```jsx
     /// <a href='http://external.link' target='_blank' rel="noopener" {...props}>child</a>
     /// ```
+    ///
     /// ## Options
     ///
     /// Use the options to allow specific domains to use `target="_blank"` without `rel="noreferrer"`.
