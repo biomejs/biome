@@ -52,7 +52,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   - `--log-prefix-name`: a prefix that's added to the file name of the logs. It defaults to `server.log`. The commands also accepts the environment variable `BIOME_LOG_PREFIX_NAME`.
 
   @Contributed by @ematipico
-   
+
 
 #### Enhancements
 
@@ -87,6 +87,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - `biome lint --write` now takes `--only` and `--skip` into account ([#3470](https://github.com/biomejs/biome/issues/3470)). Contributed by @Conaclos
 - Fix [#3368](https://github.com/biomejs/biome/issues/3368), now the reporter `github` tracks the diagnostics that belong to formatting and organize imports. Contributed by @ematipico
+- Fix [#3545](https://github.com/biomejs/biome/issues/3545), display a warning, 'Avoid using unnecessary Fragment,' when a Fragment contains only one child element that is placed on a new line. Contributed by @satojin219
 
 ### Configuration
 
