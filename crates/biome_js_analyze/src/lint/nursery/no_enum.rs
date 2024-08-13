@@ -10,11 +10,26 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```ts,expect_diagnostic
     /// enum Foo {
     ///     BAR = 'bar'
+    ///     BAZ = 'baz'
     /// }
     /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```ts
+    /// const Foo {
+    ///     BAR: 'bar',
+    ///     BAZ: 'baz',
+    /// }
+    /// ```
+    ///
+    /// ```ts
+    /// type Foo = 'bar' | 'baz'
+    /// ```
+    ///
     ///
     pub NoEnum {
         version: "next",
@@ -44,7 +59,7 @@ impl Rule for NoEnum {
                 },
             )
             .note(markup! {
-                "Usage of "<Emphasis>"enum"</Emphasis>" is disallowed."
+                "Prefer using JavaScript objects or TypeScript unions over enums."
             }),
         )
     }

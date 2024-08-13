@@ -23,7 +23,7 @@ invalid.ts:1:1 lint/nursery/noEnum ━━━━━━━━━━━━━━━
       │ ^
     4 │ 
   
-  i Usage of enum is disallowed.
+  i Prefer using JavaScript objects or TypeScript unions over enums.
   
 
 ```
