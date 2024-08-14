@@ -679,6 +679,7 @@ The documentation needs to adhere to the following rules:
 - The **first** paragraph of the documentation is used as brief description of the rule, and it **must** be written in one single line. Breaking the paragraph in multiple lines will break the table content of the rules page.
 - The next paragraphs can be used to further document the rule with as many details as you see fit.
 - The documentation must have a `## Examples` header, followed by two headers: `### Invalid` and `### Valid`. `### Invalid` must go first because we need to show when the rule is triggered.
+- Rule options if any, must be documented in the `## Options` section.
 - Each code block must have a _language_ defined.
 - When adding _invalid_ snippets in the `### Invalid` section, you must use the `expect_diagnostic` code block property. We use this property to generate a diagnostic and attach it to the snippet. A snippet **must emit only ONE diagnostic**.
 - When adding _valid_ snippets in the `### Valid` section, you can use one single snippet.
