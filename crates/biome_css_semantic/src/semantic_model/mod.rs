@@ -68,7 +68,6 @@ mod tests {
         let root = parse.tree();
         let model = super::semantic_model(&root);
         let rule = model.rules().first().unwrap();
-
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
         assert_eq!(rule.children.len(), 1);
@@ -124,13 +123,11 @@ mod tests {
 
     #[test]
     fn debug() {
-        let parse = parse_css(
-            r#"[a="b"i], [ a="b"i], [ a ="b"i], [ a = "b"i], [ a = "b" i], [ a = "b" i ] {}"#,
-            CssParserOptions::default(),
-        );
+        let parse = parse_css(r#":root {--foo: red}"#, CssParserOptions::default());
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
         dbg!(&model.rules());
+        dbg!(&model.global_css_variables());
     }
 }

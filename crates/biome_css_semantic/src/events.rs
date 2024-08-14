@@ -20,13 +20,19 @@ pub enum SemanticEvent {
     PropertyDeclaration {
         property: CssProperty,
         value: CssValue,
+        range: TextRange,
     },
+    /// Indicates the start of a `:root` selector
+    RootSelectorStart,
+    /// Indicates the end of a `:root` selector
+    RootSelectorEnd,
 }
 
 #[derive(Default, Debug)]
 pub struct SemanticEventExtractor {
     stash: VecDeque<SemanticEvent>,
     current_rule_stack: Vec<TextRange>,
+    in_root_selector: bool,
 }
 
 impl SemanticEventExtractor {
@@ -51,7 +57,7 @@ impl SemanticEventExtractor {
                 self.stash.push_back(SemanticEvent::RuleStart(range));
                 self.current_rule_stack.push(range);
             }
-            kind if kind == CSS_SELECTOR_LIST || kind == CSS_SUB_SELECTOR_LIST => {
+            CSS_SELECTOR_LIST => {
                 node.children()
                     .filter_map(AnyCssSelector::cast)
                     .for_each(|s| self.process_selector(s));
@@ -74,6 +80,7 @@ impl SemanticEventExtractor {
                                 value: value.text_trimmed().to_string(),
                                 range: value.text_range(),
                             },
+                            range: node.text_range(),
                         });
                     }
                 }
@@ -93,7 +100,11 @@ impl SemanticEventExtractor {
                 }
             }
             AnyCssSelector::CssCompoundSelector(selector) => {
-                self.add_selector_event(selector.text().to_string(), selector.range());
+                if selector.text() == ":root" {
+                    self.stash.push_back(SemanticEvent::RootSelectorStart);
+                    self.in_root_selector = true;
+                }
+                self.add_selector_event(selector.text().to_string(), selector.range())
             }
             _ => {}
         }
@@ -114,6 +125,10 @@ impl SemanticEventExtractor {
         ) {
             self.current_rule_stack.pop();
             self.stash.push_back(SemanticEvent::RuleEnd);
+            if self.in_root_selector {
+                self.stash.push_back(SemanticEvent::RootSelectorEnd);
+                self.in_root_selector = false;
+            }
         }
     }
 

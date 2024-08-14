@@ -33,6 +33,10 @@ impl SemanticModel {
     pub fn rules(&self) -> &[Rule] {
         &self.data.rules
     }
+
+    pub fn global_css_variables(&self) -> &FxHashMap<String, CssVariable> {
+        &self.data.global_css_variables
+    }
 }
 
 /// Contains the internal data of a `SemanticModel`.
@@ -79,7 +83,7 @@ pub struct Rule {
 }
 
 /// Represents a CSS declaration (property-value pair).
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Declaration {
     /// The property name.
     pub property: CssProperty,
@@ -87,32 +91,23 @@ pub struct Declaration {
     pub value: CssValue,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CssProperty {
     pub name: String,
     pub range: TextRange,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CssValue {
     pub value: String,
     pub range: TextRange,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CssVariable {
     pub name: CssProperty,
     pub value: CssValue,
     pub range: TextRange,
-    pub source: CssVariableSource,
-}
-
-#[derive(Debug)]
-pub enum CssVariableSource {
-    /// :root
-    Root,
-    /// @property
-    AtProperty,
 }
 
 /// Represents a CSS selector.

@@ -11,6 +11,7 @@ pub struct SemanticModelBuilder {
     rules: Vec<Rule>,
     global_css_variables: FxHashMap<String, CssVariable>,
     current_rule_stack: Vec<Rule>,
+    in_root_selector: bool,
 }
 
 impl SemanticModelBuilder {
@@ -21,6 +22,7 @@ impl SemanticModelBuilder {
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
             global_css_variables: FxHashMap::default(),
+            in_root_selector: false,
         }
     }
 
@@ -79,12 +81,36 @@ impl SemanticModelBuilder {
                     });
                 }
             }
-            SemanticEvent::PropertyDeclaration { property, value } => {
+            SemanticEvent::PropertyDeclaration {
+                ref property,
+                ref value,
+                range,
+            } => {
                 if let Some(current_rule) = self.current_rule_stack.last_mut() {
-                    current_rule
-                        .declarations
-                        .push(Declaration { property, value });
+                    if self.in_root_selector {
+                        let key = &property.name;
+                        if key.starts_with("--") {
+                            self.global_css_variables.insert(
+                                key.to_string(),
+                                CssVariable {
+                                    name: property.clone(),
+                                    value: value.clone(),
+                                    range,
+                                },
+                            );
+                        }
+                    }
+                    current_rule.declarations.push(Declaration {
+                        property: property.clone(),
+                        value: value.clone(),
+                    });
                 }
+            }
+            SemanticEvent::RootSelectorStart => {
+                self.in_root_selector = true;
+            }
+            SemanticEvent::RootSelectorEnd => {
+                self.in_root_selector = false;
             }
         }
     }
