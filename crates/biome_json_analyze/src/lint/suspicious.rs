@@ -2,13 +2,13 @@
 
 use biome_analyze::declare_lint_group;
 
-pub mod no_duplicate_json_keys;
+pub mod no_duplicate_object_keys;
 
 declare_lint_group! {
-    pub Nursery {
-        name : "nursery" ,
+    pub Suspicious {
+        name : "suspicious" ,
         rules : [
-            self :: no_duplicate_json_keys :: NoDuplicateJsonKeys ,
+            self :: no_duplicate_object_keys :: NoDuplicateObjectKeys ,
         ]
      }
 }

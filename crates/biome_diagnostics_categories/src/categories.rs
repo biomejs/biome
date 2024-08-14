@@ -120,7 +120,6 @@ define_categories! {
     "lint/nursery/noDuplicateAtImportRules": "https://biomejs.dev/linter/rules/no-duplicate-at-import-rules",
     "lint/nursery/noDuplicateElseIf": "https://biomejs.dev/linter/rules/no-duplicate-else-if",
     "lint/nursery/noDuplicateFontNames": "https://biomejs.dev/linter/rules/no-font-family-duplicate-names",
-    "lint/nursery/noDuplicateJsonKeys": "https://biomejs.dev/linter/rules/no-duplicate-json-keys",
     "lint/nursery/noDuplicateSelectorsKeyframeBlock": "https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block",
     "lint/nursery/noDuplicatedFields": "https://biomejs.dev/linter/rules/no-duplicated-fields",
     "lint/nursery/noDynamicNamespaceImportAccess": "https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access",

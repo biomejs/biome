@@ -1168,10 +1168,6 @@ export interface Nursery {
 	 */
 	noDuplicateFontNames?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow two keys with the same name inside a JSON object.
-	 */
-	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
@@ -1716,9 +1712,9 @@ export interface Suspicious {
 	 */
 	noDuplicateJsxProps?: RuleConfiguration_for_Null;
 	/**
-	 * Prevents object literals having more than one property declaration for the same name.
+	 * Disallow two keys with the same name inside objects.
 	 */
-	noDuplicateObjectKeys?: RuleFixConfiguration_for_Null;
+	noDuplicateObjectKeys?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate function parameter name.
 	 */
@@ -2681,7 +2677,6 @@ export type Category =
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
-	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
