@@ -1,7 +1,7 @@
 name: 📝 Formatter bug report
 description: Report a bug or regression of the formatter
 title: "📝 <TITLE>"
-labels: ["S-To triage"]
+labels: [ "S-To triage" ]
 body:
   - type: markdown
     attributes:
@@ -45,8 +45,7 @@ body:
         You can also use the [playground](https://biomejs.dev/playground/) to share code snippets.
         This is useful to reproduce the issue.
 
-        If you can't use the playground, use our official [CBS template](https://codesandbox.io/p/sandbox/biome-starter-cbs-rky6zq).
-        Fork it and share a reproduction.
+        If you can't use the playground, use `npm create @biomejs/biome-reproduction` to quickly create a repository.
       placeholder: https://biomejs.dev/playground/...
     validations:
       required: true
