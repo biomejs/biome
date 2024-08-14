@@ -562,7 +562,7 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_redundant_alt.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
-        "jsx-a11y/interactive-support-focus" => {
+        "jsx-a11y/interactive-supports-focus" => {
             if !options.include_nursery {
                 return false;
             }
@@ -1052,7 +1052,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
-        "no-sparse-array" => {
+        "no-sparse-arrays" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.no_sparse_array.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
