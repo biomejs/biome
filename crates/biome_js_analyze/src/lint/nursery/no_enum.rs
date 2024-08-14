@@ -6,6 +6,9 @@ use biome_rowan::AstNode;
 declare_lint_rule! {
     /// Disallow TypeScript enum.
     ///
+    /// TypeScript enums are not a type-level extension of JavaScript like type annotations or definitions.
+    /// Enums will get compiled into JavaScript code, which can increase bundle size and cause side-effects in the codebase.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -23,7 +26,7 @@ declare_lint_rule! {
     /// const Foo {
     ///     BAR: 'bar',
     ///     BAZ: 'baz',
-    /// }
+    /// } as const
     /// ```
     ///
     /// ```ts
