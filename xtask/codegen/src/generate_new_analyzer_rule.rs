@@ -318,14 +318,14 @@ use biome_rowan::AstNode;
     /// ### Invalid
     ///
     /// ```graphql,expect_diagnostic
-    /// p {{}}
+    /// quer {{}}
     /// ```
     ///
     /// ### Valid
     ///
     /// ```graphql
-    /// p {{
-    ///   color: red;
+    /// query {{
+    ///   field
     /// }}
     /// ```
     ///
