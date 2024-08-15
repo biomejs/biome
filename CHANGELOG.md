@@ -261,6 +261,27 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noBlankTarget](https://biomejs.dev/linter/rules/no-blank-target) now supports an array of allowed domains.
+
+  The following configuration allows `example.com` and `example.org` as blank targets.
+
+  ```json
+  "linter": {
+    "rules": {
+      "a11y": {
+        "noBlankTarget": {
+        "level": "error",
+          "options": {
+             "allowDomains": ["example.com", "example.org"]
+            }
+          }
+        }
+      }
+    }
+  ```
+
+  Contributed by @Jayllyz
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
