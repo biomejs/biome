@@ -397,6 +397,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add an `ignoreNull` option for [noDoubleEquals](https://biomejs.dev/linter/rules/no-double-equals/). Contributed by @peaBerberian.
 
+- The rule `noDuplicateObjectKeys` now works for JSON and JSONC files. Contributed by @ematipico
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
