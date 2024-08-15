@@ -1215,7 +1215,7 @@ pub struct Complexity {
     pub no_this_in_static: Option<RuleFixConfiguration<biome_js_analyze::options::NoThisInStatic>>,
     #[doc = "Disallow unnecessary catch clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_useless_catch: Option<RuleConfiguration<biome_js_analyze::options::NoUselessCatch>>,
+    pub no_useless_catch: Option<RuleFixConfiguration<biome_js_analyze::options::NoUselessCatch>>,
     #[doc = "Disallow unnecessary constructors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_useless_constructor:
