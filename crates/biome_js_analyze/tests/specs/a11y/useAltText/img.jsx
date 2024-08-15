@@ -54,4 +54,6 @@
   <img aria-labelledby="id1" />
   <img aria-hidden />
   <img aria-hidden={true} />
+  <img alt={altText || "alt"} {...props} />
+  <img alt={altText} {...props} />
 </>;

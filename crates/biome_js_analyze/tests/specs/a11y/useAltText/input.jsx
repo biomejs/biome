@@ -26,4 +26,6 @@
   <input type="image" alt="This is descriptive!" />
   <input type="image" alt={altText} />
   <Input type="image" />
+  <input alt={altText || "alt"} {...props} />
+  <input alt={altText} {...props} />
 </>;

@@ -10,6 +10,7 @@
   <object aria-label={undefined} />
   <object aria-labelledby={undefined} />
   <object aria-hidden={undefined} />
+  <object {...props} />
 </>;
 
 //valid
@@ -22,5 +23,6 @@
   <object>Foo</object>
   <object><p>This is descriptive!</p></object>
   <Object />
-  <object title="An object" />
+  <object aria-label={"bar"} {...props} />
+  <object title={"bar"} {...props} />
 </>;

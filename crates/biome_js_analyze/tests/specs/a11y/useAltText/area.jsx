@@ -25,4 +25,6 @@
   <area alt="This is descriptive!" />
   <area alt={altText} />
   <Area />
+  <area alt={altText || "alt"} {...props} />
+  <area alt={altText} {...props} />
 </>;
