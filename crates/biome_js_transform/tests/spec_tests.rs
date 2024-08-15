@@ -10,6 +10,7 @@ use biome_test_utils::{
     write_transformation_snapshot,
 };
 
+use std::ops::Deref;
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc}", crate::run_test, "module"}
@@ -26,7 +27,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     if rule == "specs" {
         panic!("the test file must be placed in the {rule}/<group-name>/<rule-name>/ directory");
     }
-    if biome_js_transform::metadata()
+    if biome_js_transform::METADATA
+        .deref()
         .find_rule("transformations", rule)
         .is_none()
     {
@@ -43,7 +45,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let extension = input_file.extension().unwrap_or_default();
 
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
     let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
@@ -158,10 +160,7 @@ fn check_transformation(
     assert_eq!(new_tree.to_string(), output);
 
     if has_bogus_nodes_or_empty_slots(&new_tree) {
-        panic!(
-            "modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {}",
-            new_tree
-        )
+        panic!("modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}")
     }
 
     // Checks the returned tree contains no missing children node

@@ -1,0 +1,13 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: duplicateVariable
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "2:1-2:13",
+        "6:1-6:21",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

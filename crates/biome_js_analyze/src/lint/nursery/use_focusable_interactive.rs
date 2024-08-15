@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_aria::AriaRoles;
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttributeValue};
@@ -6,7 +6,7 @@ use biome_rowan::AstNode;
 
 use crate::services::aria::Aria;
 
-declare_rule! {
+declare_lint_rule! {
     /// Elements with an interactive role and interaction handlers must be focusable.
     ///
     /// HTML elements with interactive roles must have `tabIndex` defined to ensure they are
@@ -41,7 +41,7 @@ declare_rule! {
         version: "1.8.0",
         name: "useFocusableInteractive",
         language: "jsx",
-        sources: &[RuleSource::EslintJsxA11y("interactive-support-focus")],
+        sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus")],
         recommended: true,
     }
 }
@@ -61,6 +61,7 @@ impl Rule for UseFocusableInteractive {
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
         let aria_roles = ctx.aria_roles();
         let attributes = ctx.extract_attributes(&node.attributes());
+        let attributes = ctx.convert_all_attribute_values(attributes);
 
         if aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes) {
             let role_attribute = node.find_attribute_by_name("role");

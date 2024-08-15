@@ -178,7 +178,7 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                     let tok = match self {
                         #(#punctuation => #punctuation_strings,)*
                         #(#full_keywords => #all_keyword_to_strings,)*
-                        YAML_STRING_LITERAL => "string literal",
+                        YAML_STRING_VALUE => "string value",
                         _ => return None,
                     };
                     Some(tok)

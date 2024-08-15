@@ -257,23 +257,22 @@ impl CssComposesPropertyValueBuilder {
         ))
     }
 }
-pub fn css_compound_selector(sub_selectors: CssSubSelectorList) -> CssCompoundSelectorBuilder {
+pub fn css_compound_selector(
+    nesting_selectors: CssNestedSelectorList,
+    sub_selectors: CssSubSelectorList,
+) -> CssCompoundSelectorBuilder {
     CssCompoundSelectorBuilder {
+        nesting_selectors,
         sub_selectors,
-        nesting_selector_token: None,
         simple_selector: None,
     }
 }
 pub struct CssCompoundSelectorBuilder {
+    nesting_selectors: CssNestedSelectorList,
     sub_selectors: CssSubSelectorList,
-    nesting_selector_token: Option<SyntaxToken>,
     simple_selector: Option<AnyCssSimpleSelector>,
 }
 impl CssCompoundSelectorBuilder {
-    pub fn with_nesting_selector_token(mut self, nesting_selector_token: SyntaxToken) -> Self {
-        self.nesting_selector_token = Some(nesting_selector_token);
-        self
-    }
     pub fn with_simple_selector(mut self, simple_selector: AnyCssSimpleSelector) -> Self {
         self.simple_selector = Some(simple_selector);
         self
@@ -282,8 +281,7 @@ impl CssCompoundSelectorBuilder {
         CssCompoundSelector::unwrap_cast(SyntaxNode::new_detached(
             CssSyntaxKind::CSS_COMPOUND_SELECTOR,
             [
-                self.nesting_selector_token
-                    .map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Node(self.nesting_selectors.into_syntax())),
                 self.simple_selector
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.sub_selectors.into_syntax())),
@@ -1124,6 +1122,12 @@ impl CssMediaTypeQueryBuilder {
         ))
     }
 }
+pub fn css_metavariable(value_token: SyntaxToken) -> CssMetavariable {
+    CssMetavariable::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_METAVARIABLE,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn css_named_namespace_prefix(name: CssIdentifier) -> CssNamedNamespacePrefix {
     CssNamedNamespacePrefix::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_NAMED_NAMESPACE_PREFIX,
@@ -1202,6 +1206,12 @@ pub fn css_nested_qualified_rule(
             Some(SyntaxElement::Node(prelude.into_syntax())),
             Some(SyntaxElement::Node(block.into_syntax())),
         ],
+    ))
+}
+pub fn css_nested_selector(amp_token: SyntaxToken) -> CssNestedSelector {
+    CssNestedSelector::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NESTED_SELECTOR,
+        [Some(SyntaxElement::Token(amp_token))],
     ))
 }
 pub fn css_nth_offset(sign_token: SyntaxToken, value: CssNumber) -> CssNthOffset {
@@ -2048,6 +2058,41 @@ impl CssTypeSelectorBuilder {
         ))
     }
 }
+pub fn css_unicode_codepoint(value_token: SyntaxToken) -> CssUnicodeCodepoint {
+    CssUnicodeCodepoint::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNICODE_CODEPOINT,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn css_unicode_range(prefix_token: SyntaxToken, value: AnyCssUnicodeValue) -> CssUnicodeRange {
+    CssUnicodeRange::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNICODE_RANGE,
+        [
+            Some(SyntaxElement::Token(prefix_token)),
+            Some(SyntaxElement::Node(value.into_syntax())),
+        ],
+    ))
+}
+pub fn css_unicode_range_interval(
+    start: CssUnicodeCodepoint,
+    minus_token: SyntaxToken,
+    end: CssUnicodeCodepoint,
+) -> CssUnicodeRangeInterval {
+    CssUnicodeRangeInterval::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNICODE_RANGE_INTERVAL,
+        [
+            Some(SyntaxElement::Node(start.into_syntax())),
+            Some(SyntaxElement::Token(minus_token)),
+            Some(SyntaxElement::Node(end.into_syntax())),
+        ],
+    ))
+}
+pub fn css_unicode_range_wildcard(value_token: SyntaxToken) -> CssUnicodeRangeWildcard {
+    CssUnicodeRangeWildcard::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_UNICODE_RANGE_WILDCARD,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
 pub fn css_universal_namespace_prefix(star_token: SyntaxToken) -> CssUniversalNamespacePrefix {
     CssUniversalNamespacePrefix::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_UNIVERSAL_NAMESPACE_PREFIX,
@@ -2503,6 +2548,18 @@ where
         }),
     ))
 }
+pub fn css_nested_selector_list<I>(items: I) -> CssNestedSelectorList
+where
+    I: IntoIterator<Item = CssNestedSelector>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssNestedSelectorList::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_NESTED_SELECTOR_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn css_page_at_rule_item_list<I>(items: I) -> CssPageAtRuleItemList
 where
     I: IntoIterator<Item = AnyCssPageAtRuleItem>,
@@ -2927,6 +2984,16 @@ where
 {
     CssBogusSubSelector::unwrap_cast(SyntaxNode::new_detached(
         CssSyntaxKind::CSS_BOGUS_SUB_SELECTOR,
+        slots,
+    ))
+}
+pub fn css_bogus_unicode_range_value<I>(slots: I) -> CssBogusUnicodeRangeValue
+where
+    I: IntoIterator<Item = Option<SyntaxElement>>,
+    I::IntoIter: ExactSizeIterator,
+{
+    CssBogusUnicodeRangeValue::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_BOGUS_UNICODE_RANGE_VALUE,
         slots,
     ))
 }

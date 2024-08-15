@@ -2,11 +2,11 @@ use crate::globals::is_js_global;
 
 use crate::services::semantic::SemanticServices;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow assignments to native objects and read-only global variables.
     ///
     /// _JavaScript environments contain numerous built-in global variables, such as `window` in browsers and `process` in _Node.js.
@@ -63,7 +63,7 @@ impl Rule for NoGlobalAssign {
                 let text = identifier.to_string();
                 let is_global_var = is_js_global(text.as_str());
                 if is_global_var {
-                    result.push(*global_ref.range());
+                    result.push(global_ref.range());
                 }
             }
         }

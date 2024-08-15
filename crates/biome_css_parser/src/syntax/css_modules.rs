@@ -10,7 +10,7 @@ pub(crate) const CSS_MODULES_SCOPE_SET: TokenSet<CssSyntaxKind> = token_set![T![
 ///
 /// This function returns an error diagnostic indicating that the `:local` or `:global` pseudo-classes
 /// are not standard CSS features. It also provides a hint on how to enable
-/// parsing of these pseudo-classes by setting the `css_modules` option to `true`
+/// parsing of these pseudo-classes by setting the `css.parser.cssModules` option to `true`
 /// in the configuration file.
 pub(crate) fn local_or_global_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder(
@@ -18,7 +18,7 @@ pub(crate) fn local_or_global_not_allowed(p: &CssParser, range: TextRange) -> Pa
         range,
     )
         .with_hint(
-            "You can enable `:local` and `:global` pseudo-class parsing by setting the `css_modules` option to `true` in your configuration file.",
+            "You can enable `:local` and `:global` pseudo-class parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.",
         )
 }
 
@@ -30,14 +30,14 @@ pub(crate) fn expected_any_css_module_scope(p: &CssParser, range: TextRange) -> 
 ///
 /// This function returns an error diagnostic indicating that the `composes` declaration
 /// is not a standard CSS feature. It also provides a hint on how to enable parsing of the
-/// `composes` declaration by setting the `css_modules` option to `true` in the configuration file.
+/// `composes` declaration by setting the `css.parser.cssModules` option to `true` in the configuration file.
 pub(crate) fn composes_not_allowed(p: &CssParser, range: TextRange) -> ParseDiagnostic {
     p.err_builder(
         "`composes` declaration is not a standard CSS feature.",
         range,
     )
         .with_hint(
-            "You can enable `composes` declaration parsing by setting the `css_modules` option to `true` in your configuration file.",
+            "You can enable `composes` declaration parsing by setting the `css.parser.cssModules` option to `true` in your configuration file.",
         )
 }
 

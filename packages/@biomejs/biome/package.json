@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/biome",
-  "version": "1.8.1",
+  "version": "1.8.3",
   "bin": {
     "biome": "bin/biome"
   },
@@ -41,14 +41,17 @@
     "type": "opencollective",
     "url": "https://opencollective.com/biome"
   },
+  "publishConfig": {
+    "provenance": true
+  },
   "optionalDependencies": {
-    "@biomejs/cli-win32-x64": "1.8.1",
-    "@biomejs/cli-win32-arm64": "1.8.1",
-    "@biomejs/cli-darwin-x64": "1.8.1",
-    "@biomejs/cli-darwin-arm64": "1.8.1",
-    "@biomejs/cli-linux-x64": "1.8.1",
-    "@biomejs/cli-linux-arm64": "1.8.1",
-    "@biomejs/cli-linux-x64-musl": "1.8.1",
-    "@biomejs/cli-linux-arm64-musl": "1.8.1"
+    "@biomejs/cli-win32-x64": "1.8.3",
+    "@biomejs/cli-win32-arm64": "1.8.3",
+    "@biomejs/cli-darwin-x64": "1.8.3",
+    "@biomejs/cli-darwin-arm64": "1.8.3",
+    "@biomejs/cli-linux-x64": "1.8.3",
+    "@biomejs/cli-linux-arm64": "1.8.3",
+    "@biomejs/cli-linux-x64-musl": "1.8.3",
+    "@biomejs/cli-linux-arm64-musl": "1.8.3"
   }
 }

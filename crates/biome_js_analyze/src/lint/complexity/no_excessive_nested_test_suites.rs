@@ -1,12 +1,12 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
+    context::RuleContext, declare_lint_rule, AddVisitor, Phases, QueryMatch, Queryable, Rule,
     RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsLanguage, JsStaticMemberExpression};
 use biome_rowan::{AstNode, Language, SyntaxNode, SyntaxNodeOptionExt, TextRange, WalkEvent};
 
-declare_rule! {
+declare_lint_rule! {
     /// This rule enforces a maximum depth to nested `describe()` in test files.
     ///
     /// To improve code clarity in your tests, the rule limits nested `describe` to 5.
@@ -152,6 +152,10 @@ fn is_member(call: &JsCallExpression) -> bool {
         .parent()
         .kind()
         .map_or(false, JsStaticMemberExpression::can_cast)
+        || call
+            .callee()
+            .map(|callee| callee.syntax().kind())
+            .map_or(false, JsStaticMemberExpression::can_cast)
 }
 
 // Declare a query match struct type containing a JavaScript function node

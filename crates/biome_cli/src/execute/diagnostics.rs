@@ -29,6 +29,17 @@ pub(crate) struct CIOrganizeImportsDiffDiagnostic {
     #[advice]
     pub(crate) diff: ContentDiffAdvice,
 }
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    category = "assists",
+    message = "Applied assists differs from the output"
+)]
+pub(crate) struct CIAssistsDiffDiagnostic {
+    #[location(resource)]
+    pub(crate) file_name: String,
+    #[advice]
+    pub(crate) diff: ContentDiffAdvice,
+}
 
 #[derive(Debug, Diagnostic)]
 #[diagnostic(
@@ -50,6 +61,19 @@ pub(crate) struct FormatDiffDiagnostic {
 	message = "Import statements could be sorted:"
 )]
 pub(crate) struct OrganizeImportsDiffDiagnostic {
+    #[location(resource)]
+    pub(crate) file_name: String,
+    #[advice]
+    pub(crate) diff: ContentDiffAdvice,
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    category = "assists",
+    severity = Error,
+    message = "Not all assists were applied:"
+)]
+pub(crate) struct AssistsDiffDiagnostic {
     #[location(resource)]
     pub(crate) file_name: String,
     #[advice]
@@ -102,6 +126,10 @@ pub(crate) struct UnhandledDiagnostic;
 #[derive(Debug, Diagnostic)]
 #[diagnostic(category = "parse", message = "Skipped file with syntax errors")]
 pub(crate) struct SkippedDiagnostic;
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(category = "search", severity = Information)]
+pub(crate) struct SearchDiagnostic;
 
 /// Extension trait for turning [Display]-able error types into [TraversalError]
 pub(crate) trait ResultExt {

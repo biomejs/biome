@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/export/blank-line-between-specifiers.js
 ---
-
 # Input
 
 ```js
@@ -77,5 +76,3 @@ export {
   baz2,
 };
 ```
-
-

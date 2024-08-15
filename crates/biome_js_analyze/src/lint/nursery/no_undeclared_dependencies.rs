@@ -1,10 +1,10 @@
 use crate::services::manifest::Manifest;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::AnyJsImportSpecifierLike;
+use biome_js_syntax::AnyJsImportLike;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of dependencies that aren't specified in the `package.json`.
     ///
     /// Indirect dependencies will trigger the rule because they aren't declared in the `package.json`. This means that if package `@org/foo` has a dependency on `lodash`, and then you use
@@ -41,7 +41,7 @@ declare_rule! {
 }
 
 impl Rule for NoUndeclaredDependencies {
-    type Query = Manifest<AnyJsImportSpecifierLike>;
+    type Query = Manifest<AnyJsImportLike>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();

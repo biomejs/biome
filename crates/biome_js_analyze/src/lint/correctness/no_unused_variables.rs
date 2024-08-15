@@ -2,7 +2,7 @@ use crate::JsRuleAction;
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions};
 use biome_analyze::RuleSource;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
@@ -17,7 +17,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt, Direction, SyntaxResult};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unused variables.
     ///
     /// There is an exception to this rule:
@@ -31,8 +31,8 @@ declare_rule! {
     /// enable [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/).
     ///
     /// From `v1.9.0`, the rule won't check unused function parameters any more.
-    /// Users should switch to
-    /// [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/)
+    /// If you want to report unused function parameters,
+    /// enable [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/).
     ///
     /// ## Examples
     ///
@@ -175,7 +175,8 @@ fn suggested_fix_if_unused(binding: &AnyJsIdentifierBinding) -> Option<Suggested
         | AnyJsBindingDeclaration::JsClassExpression(_)
         | AnyJsBindingDeclaration::JsFunctionExpression(_)
         | AnyJsBindingDeclaration::TsIndexSignatureParameter(_)
-        | AnyJsBindingDeclaration::TsMappedType(_) => None,
+        | AnyJsBindingDeclaration::TsMappedType(_)
+        | AnyJsBindingDeclaration::TsEnumMember(_) => None,
 
         // Some parameters are ok to not be used
         AnyJsBindingDeclaration::JsArrowFunctionExpression(_) => {
@@ -276,18 +277,28 @@ impl Rule for NoUnusedVariables {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        if ctx
-            .source_type::<JsFileSource>()
-            .language()
-            .is_definition_file()
-        {
-            // Ignore TypeScript declaration files
-            // This allows ignoring declaration files without any `export`
-            // that implicitly export their members.
+        let model = ctx.model();
+        // A declaration file without exports and imports is a global declaration file.
+        // All types are available in every files of the project.
+        // Thus, it is ok if types are not used locally.
+        //
+        // Note that we don't check if the file has imports.
+        // Indeed, it is a fair assumption to assume that a declaration file without exports,
+        // is certainly a file without imports.
+        let is_global_declaration_file = !model.has_exports()
+            && ctx
+                .source_type::<JsFileSource>()
+                .language()
+                .is_definition_file();
+        if is_global_declaration_file {
             return None;
         }
 
         let binding = ctx.query();
+        if matches!(binding, AnyJsIdentifierBinding::TsLiteralEnumMemberName(_)) {
+            // Enum members can be unused.
+            return None;
+        }
 
         if binding.name_token().ok()?.text_trimmed().starts_with('_') {
             return None;
@@ -302,7 +313,6 @@ impl Rule for NoUnusedVariables {
 
         let suggestion = suggested_fix_if_unused(binding)?;
 
-        let model = ctx.model();
         if model.is_exported(binding) {
             return None;
         }
@@ -423,9 +433,12 @@ impl Rule for NoUnusedVariables {
                     AnyJsIdentifierBinding::TsTypeParameterName(binding) => {
                         binding.ident_token().ok()?
                     }
+                    AnyJsIdentifierBinding::TsLiteralEnumMemberName(_) => {
+                        return None;
+                    }
                 };
                 let name_trimmed = name.text_trimmed();
-                let new_name = format!("_{}", name_trimmed);
+                let new_name = format!("_{name_trimmed}");
 
                 let model = ctx.model();
                 mutation.rename_node_declaration(model, binding, &new_name);

@@ -15,21 +15,16 @@ use biome_diagnostics::Error;
 use biome_json_syntax::JsonLanguage;
 use biome_rowan::{BatchMutation, SyntaxToken};
 use std::convert::Infallible;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 
 /// Return the static [MetadataRegistry] for the JS analyzer rules
-pub fn metadata() -> &'static MetadataRegistry {
-    lazy_static::lazy_static! {
-        static ref METADATA: MetadataRegistry = {
-            let mut metadata = MetadataRegistry::default();
-            visit_migration_registry(&mut metadata);
-            metadata
-        };
-    }
-
-    &METADATA
-}
+static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
+    let mut metadata = MetadataRegistry::default();
+    visit_migration_registry(&mut metadata);
+    metadata
+});
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
@@ -84,7 +79,7 @@ where
         }
     }
     let mut analyzer = Analyzer::new(
-        metadata(),
+        METADATA.deref(),
         InspectMatcher::new(migration_registry, inspect_matcher),
         |_| -> Vec<Result<_, Infallible>> { unreachable!() },
         Box::new(TestAction),

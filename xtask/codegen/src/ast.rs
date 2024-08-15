@@ -140,16 +140,16 @@ fn check_unions(unions: &[AstEnumSrc]) {
                     union_queue.extend(&current_union.variants);
                 } else {
                     // We either have a circular dependency or 2 variants referencing the same type
-                    println!("{}", stack_string);
+                    println!("{stack_string}");
                     panic!("Variant '{variant}' used twice or circular dependency");
                 }
             } else {
                 // The variant isn't another enum
                 // stack_string.push_str(&format!());
-                write!(stack_string, "\nBASE-VAR CHECK : {}", variant).unwrap();
+                write!(stack_string, "\nBASE-VAR CHECK : {variant}").unwrap();
                 if !union_set.insert(variant) {
                     // The variant already used
-                    println!("{}", stack_string);
+                    println!("{stack_string}");
                     panic!("Variant '{variant}' used twice");
                 }
             }
@@ -335,7 +335,7 @@ fn clean_token_name(grammar: &Grammar, token: &Token) -> String {
     // that can't be recognized by [quote].
     // Hence, they need to be decorated with single quotes.
     if "[]{}()`".contains(&name) {
-        name = format!("'{}'", name);
+        name = format!("'{name}'");
     }
     name
 }
@@ -388,7 +388,7 @@ fn handle_rule(
         }
 
         Rule::Rep(_) => {
-            panic!("Create a list node for *many* children {:?}", label);
+            panic!("Create a list node for *many* children {label:?}");
         }
         Rule::Opt(rule) => {
             handle_rule(fields, grammar, rule, label, true, false);
@@ -398,8 +398,7 @@ fn handle_rule(
             // within an Opt, like `(A | B)?`. For those, make a new Rule.
             if optional {
                 panic!(
-                    "Alternates cannot be nested within an optional Rule. Use a new Node to contain the alternate {:?}",
-                    label
+                    "Alternates cannot be nested within an optional Rule. Use a new Node to contain the alternate {label:?}"
                 );
             }
             for rule in rules {
@@ -474,7 +473,7 @@ fn handle_comma_list<'a>(grammar: &'a Grammar, rules: &[Rule]) -> Option<CommaLi
 
     let separator_name = match comma {
         Rule::Token(token) => &grammar[*token].name,
-        _ => panic!("The separator in rule {:?} must be a token", rules),
+        _ => panic!("The separator in rule {rules:?} must be a token"),
     };
 
     Some(CommaList {

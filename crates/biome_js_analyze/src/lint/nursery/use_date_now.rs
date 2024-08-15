@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -14,7 +14,7 @@ use crate::JsRuleAction;
 
 use super::use_explicit_length_check::does_node_needs_space_before_child;
 
-declare_rule! {
+declare_lint_rule! {
     /// Use `Date.now()` to get the number of milliseconds since the Unix Epoch.
     ///
     /// `Date.now()` is more readable than `new Date().getTime()` and its variants,
@@ -80,7 +80,7 @@ impl Rule for UseDateNow {
 
     fn diagnostic(_: &RuleContext<Self>, (node, kind): &Self::State) -> Option<RuleDiagnostic> {
         let message = match kind {
-            UseDateNowIssueKind::ReplaceMethod(method) => format!("new Date().{}", method),
+            UseDateNowIssueKind::ReplaceMethod(method) => format!("new Date().{method}"),
             UseDateNowIssueKind::ReplaceConstructor => "new Date()".to_string(),
             UseDateNowIssueKind::ReplaceNumberConstructor => "Number(new Date())".to_string(),
         };
@@ -195,8 +195,7 @@ fn get_new_date_issue(expr: &JsNewExpression) -> Option<(AnyJsExpression, UseDat
         return None;
     }
 
-    let parent = &get_parent_without_parenthesis(expr.syntax())?;
-
+    let parent = get_parent_without_parenthesis(expr.syntax())?;
     match parent {
         AnyJsExpression::JsBinaryExpression(binary_expr) => {
             let operator = binary_expr.operator().ok()?;
@@ -224,7 +223,7 @@ fn get_new_date_issue(expr: &JsNewExpression) -> Option<(AnyJsExpression, UseDat
                     | JsAssignmentOperator::RemainderAssign
                     | JsAssignmentOperator::ExponentAssign
             ) {
-                let any_expr = AnyJsExpression::cast_ref(expr.right().ok()?.syntax())?;
+                let any_expr = AnyJsExpression::cast(expr.right().ok()?.into_syntax())?;
 
                 return Some((any_expr, UseDateNowIssueKind::ReplaceConstructor));
             }
@@ -235,13 +234,13 @@ fn get_new_date_issue(expr: &JsNewExpression) -> Option<(AnyJsExpression, UseDat
             let operator = unary_expr.operator().ok()?;
 
             let syntax = match operator {
-                JsUnaryOperator::Plus => unary_expr.syntax(),
-                JsUnaryOperator::Minus => expr.syntax(),
+                JsUnaryOperator::Plus => unary_expr.into_syntax(),
+                JsUnaryOperator::Minus => expr.syntax().clone(),
                 _ => return None,
             };
 
             Some((
-                AnyJsExpression::cast_ref(syntax)?,
+                AnyJsExpression::cast(syntax)?,
                 UseDateNowIssueKind::ReplaceConstructor,
             ))
         }
@@ -259,7 +258,7 @@ fn get_new_date_issue(expr: &JsNewExpression) -> Option<(AnyJsExpression, UseDat
 
             if call_name == "Number" || call_name == "BigInt" {
                 return Some((
-                    AnyJsExpression::cast_ref(call_expr.syntax())?,
+                    AnyJsExpression::cast(call_expr.into_syntax())?,
                     UseDateNowIssueKind::ReplaceNumberConstructor,
                 ));
             }

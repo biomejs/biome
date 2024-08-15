@@ -7,13 +7,12 @@ use biome_analyze::{
     SuppressionKind,
 };
 use biome_aria::{AriaProperties, AriaRoles};
-use biome_diagnostics::{category, Diagnostic, Error as DiagnosticError};
+use biome_diagnostics::{category, Error as DiagnosticError};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_project::PackageJson;
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
-use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use std::{borrow::Cow, error::Error};
+use std::ops::Deref;
+use std::sync::{Arc, LazyLock};
 
 mod assists;
 mod ast_utils;
@@ -32,18 +31,11 @@ pub use crate::services::control_flow::ControlFlowGraph;
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;
 
-/// Return the static [MetadataRegistry] for the JS analyzer rules
-pub fn metadata() -> &'static MetadataRegistry {
-    lazy_static::lazy_static! {
-        static ref METADATA: MetadataRegistry = {
-            let mut metadata = MetadataRegistry::default();
-            visit_registry(&mut metadata);
-            metadata
-        };
-    }
-
-    &METADATA
-}
+pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
+    let mut metadata = MetadataRegistry::default();
+    visit_registry(&mut metadata);
+    metadata
+});
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
@@ -118,7 +110,7 @@ where
     }
 
     let mut analyzer = Analyzer::new(
-        metadata(),
+        METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
         parse_linter_suppression_comment,
         Box::new(JsSuppressionAction),
@@ -131,9 +123,7 @@ where
 
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(Arc::new(AriaProperties));
-    if let Some(manifest) = manifest {
-        services.insert_service(Arc::new(manifest));
-    }
+    services.insert_service(Arc::new(manifest));
     services.insert_service(source_type);
     (
         analyzer.run(AnalyzerContext {
@@ -172,65 +162,10 @@ where
     )
 }
 
-/// Series of errors encountered when running rules on a file
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub enum RuleError {
-    /// The rule with the specified name replaced the root of the file with a node that is not a valid root for that language.
-    ReplacedRootWithNonRootError {
-        rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
-    },
-}
-
-impl Diagnostic for RuleError {}
-
-impl std::fmt::Display for RuleError {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            RuleError::ReplacedRootWithNonRootError {
-                rule_name: Some((group, rule)),
-            } => {
-                std::write!(
-                    fmt,
-                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
-                )
-            }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
-                std::write!(
-                    fmt,
-                    "a code action replaced the root of the file with a non-root node."
-                )
-            }
-        }
-    }
-}
-
-impl biome_console::fmt::Display for RuleError {
-    fn fmt(&self, fmt: &mut biome_console::fmt::Formatter) -> std::io::Result<()> {
-        match self {
-            RuleError::ReplacedRootWithNonRootError {
-                rule_name: Some((group, rule)),
-            } => {
-                std::write!(
-                    fmt,
-                    "the rule '{group}/{rule}' replaced the root of the file with a non-root node."
-                )
-            }
-            RuleError::ReplacedRootWithNonRootError { rule_name: None } => {
-                std::write!(
-                    fmt,
-                    "a code action replaced the root of the file with a non-root node."
-                )
-            }
-        }
-    }
-}
-
-impl Error for RuleError {}
-
 #[cfg(test)]
 mod tests {
     use biome_analyze::options::RuleOptions;
-    use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter, RuleKey};
+    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter, RuleKey};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{markup, Markup};
     use biome_diagnostics::category;
@@ -238,6 +173,7 @@ mod tests {
     use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
     use biome_js_parser::{parse, JsParserOptions};
     use biome_js_syntax::{JsFileSource, TextRange, TextSize};
+    use biome_project::{Dependencies, PackageJson};
     use std::slice;
 
     use crate::lint::correctness::use_exhaustive_dependencies::{Hook, HooksOptions};
@@ -256,7 +192,7 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"<div class={`px-2 foo p-4 bar ${variable}`}/>"#;
+        const SOURCE: &str = r#"import buffer from "buffer"; "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
@@ -268,13 +204,15 @@ mod tests {
             dependencies_index: Some(1),
             stable_result: StableHookResult::None,
         };
-        let rule_filter = RuleFilter::Rule("nursery", "useSortedClasses");
+        let rule_filter = RuleFilter::Rule("style", "useNodejsImportProtocol");
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
             RuleOptions::new(HooksOptions { hooks: vec![hook] }, None),
         );
 
+        let mut dependencies = Dependencies::default();
+        dependencies.add("buffer", "latest");
         analyze(
             &parsed.tree(),
             AnalysisFilter {
@@ -283,7 +221,10 @@ mod tests {
             },
             &options,
             JsFileSource::tsx(),
-            None,
+            Some(PackageJson {
+                dependencies,
+                ..Default::default()
+            }),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());
@@ -451,7 +392,7 @@ mod tests {
         );
 
         let filter = AnalysisFilter {
-            categories: RuleCategories::SYNTAX,
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
             ..AnalysisFilter::default()
         };
 

@@ -1,0 +1,81 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 424
+expression: content
+---
+## `biome.json`
+
+```json
+{ "linter": { "enabled": true } }
+```
+
+## `.eslintrc`
+
+```eslintrc
+{
+        "ignorePatterns": [
+            "**/*.test.js", // trailing comma amd comment
+        ],
+        "globals": {
+            "var1": "writable",
+            "var2": "readonly"
+        },
+        "rules": {
+            "dot-notation": 0,
+            "default-param-last": "off",
+            "eqeqeq": "warn",
+            "getter-return": [2,
+                // support unknown options
+                { "allowImplicit": true }
+            ],
+            "no-eval": 1,
+            "no-extra-label": ["error"]
+        },
+        "overrides": [{
+            "files": ["bin/*.js", "lib/*.js"],
+            "excludedFiles": "*.test.js",
+            "rules": {
+                "eqeqeq": ["off"]
+            }
+        }],
+        "unknownField": "ignored"
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1    │ - {·"linter":·{·"enabled":·true·}·}
+       1 │ + {
+       2 │ + → "linter":·{
+       3 │ + → → "enabled":·true,
+       4 │ + → → "rules":·{
+       5 │ + → → → "recommended":·false,
+       6 │ + → → → "complexity":·{·"noUselessLabel":·"error",·"useLiteralKeys":·"off"·},
+       7 │ + → → → "security":·{·"noGlobalEval":·"warn"·},
+       8 │ + → → → "style":·{·"useDefaultParameterLast":·"off"·},
+       9 │ + → → → "suspicious":·{·"noDoubleEquals":·"warn",·"useGetterReturn":·"error"·}
+      10 │ + → → },
+      11 │ + → → "ignore":·["**/*.test.js"]
+      12 │ + → },
+      13 │ + → "javascript":·{·"globals":·["var2",·"var1"]·},
+      14 │ + → "overrides":·[
+      15 │ + → → {
+      16 │ + → → → "ignore":·["*.test.js"],
+      17 │ + → → → "include":·["bin/*.js",·"lib/*.js"],
+      18 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
+      19 │ + → → }
+      20 │ + → ]
+      21 │ + }
+      22 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```

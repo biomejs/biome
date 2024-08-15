@@ -1,9 +1,9 @@
 use crate::prelude::*;
-use biome_formatter::write;
 
-use crate::parentheses::NeedsParentheses;
+use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsRegexLiteralExpression;
 use biome_js_syntax::JsRegexLiteralExpressionFields;
-use biome_js_syntax::{JsRegexLiteralExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsRegexLiteralExpression;
@@ -44,16 +44,5 @@ impl FormatNodeRule<JsRegexLiteralExpression> for FormatJsRegexLiteralExpression
 
     fn needs_parentheses(&self, item: &JsRegexLiteralExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsRegexLiteralExpression {
-    #[inline(always)]
-    fn needs_parentheses(&self) -> bool {
-        false
-    }
-    #[inline(always)]
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
-        false
     }
 }

@@ -1,0 +1,15 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"a11y": {
+				"noBlankTarget": {
+					"level": "error",
+					"options": {
+						"allowDomains": ["test.com", "www.myurl.com"]
+					}
+				}
+			}
+		}
+	}
+}

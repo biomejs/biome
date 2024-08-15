@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 84
+expression: issue_3545.jsx
+---
+# Input
+```jsx
+// https://github.com/biomejs/biome/issues/3545
+<>
+	<Component />
+</>;
+
+```
+
+# Diagnostics
+```
+issue_3545.jsx:2:1 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid using unnecessary Fragment.
+  
+    1 │ // https://github.com/biomejs/biome/issues/3545
+  > 2 │ <>
+      │ ^^
+  > 3 │ 	<Component />
+  > 4 │ </>;
+      │ ^^^
+    5 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    1 1 │   // https://github.com/biomejs/biome/issues/3545
+    2   │ - <>
+    3   │ - → <Component·/>
+    4   │ - </>;
+      2 │ + <Component·/>;
+    5 3 │   
+  
+
+```

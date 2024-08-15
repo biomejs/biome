@@ -1,13 +1,19 @@
 // Generated file, do not edit by hand, see `xtask/codegen`
 import type { Transport } from "./transport";
 export interface SupportsFeatureParams {
-	features: FeatureName[];
+	features: FeatureName;
 	path: BiomePath;
 }
-export type FeatureName = "Format" | "Lint" | "OrganizeImports" | "Search";
+export type FeatureName = FeatureKind[];
 export interface BiomePath {
 	path: string;
 }
+export type FeatureKind =
+	| "Format"
+	| "Lint"
+	| "OrganizeImports"
+	| "Search"
+	| "Assists";
 export interface SupportsFeatureResult {
 	reason?: SupportKind;
 }
@@ -32,6 +38,10 @@ export interface PartialConfiguration {
 	 */
 	$schema?: string;
 	/**
+	 * Specific configuration for assists
+	 */
+	assists?: PartialAssistsConfiguration;
+	/**
 	 * Specific configuration for the Css language
 	 */
 	css?: PartialCssConfiguration;
@@ -47,6 +57,10 @@ export interface PartialConfiguration {
 	 * The configuration of the formatter
 	 */
 	formatter?: PartialFormatterConfiguration;
+	/**
+	 * Specific configuration for the GraphQL language
+	 */
+	graphql?: PartialGraphqlConfiguration;
 	/**
 	 * Specific configuration for the JavaScript language
 	 */
@@ -72,10 +86,32 @@ export interface PartialConfiguration {
 	 */
 	vcs?: PartialVcsConfiguration;
 }
+export interface PartialAssistsConfiguration {
+	/**
+	 * Whether Biome should fail in CLI if the assists were not applied to the code.
+	 */
+	actions?: Actions;
+	/**
+	 * Whether Biome should enable assists via LSP.
+	 */
+	enabled?: boolean;
+	/**
+	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
+	 */
+	ignore?: StringSet;
+	/**
+	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 */
+	include?: StringSet;
+}
 /**
  * Options applied to CSS files
  */
 export interface PartialCssConfiguration {
+	/**
+	 * CSS assists options
+	 */
+	assists?: PartialCssAssists;
 	/**
 	 * CSS formatter options
 	 */
@@ -119,6 +155,10 @@ export interface PartialFormatterConfiguration {
 	 * The attribute position style in HTMLish languages. By default auto.
 	 */
 	attributePosition?: AttributePosition;
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -139,7 +179,7 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * The indent style.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation, 2 by default
 	 */
@@ -152,11 +192,29 @@ export interface PartialFormatterConfiguration {
 	 * What's the max width of a line. Defaults to 80.
 	 */
 	lineWidth?: LineWidth;
+	/**
+	 * Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
+	 */
+	useEditorconfig?: boolean;
+}
+/**
+ * Options applied to GraphQL files
+ */
+export interface PartialGraphqlConfiguration {
+	/**
+	 * GraphQL formatter options
+	 */
+	formatter?: PartialGraphqlFormatter;
+	linter?: PartialGraphqlLinter;
 }
 /**
  * A set of options applied to the JavaScript files
  */
 export interface PartialJavascriptConfiguration {
+	/**
+	 * Assists options
+	 */
+	assists?: PartialJavascriptAssists;
 	/**
 	 * Formatting options
 	 */
@@ -185,6 +243,10 @@ If defined here, they should not emit diagnostics.
  * Options applied to JSON files
  */
 export interface PartialJsonConfiguration {
+	/**
+	 * Assists options
+	 */
+	assists?: PartialJsonAssists;
 	/**
 	 * Formatting options
 	 */
@@ -258,6 +320,18 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 */
 	useIgnoreFile?: boolean;
 }
+export interface Actions {
+	source?: Source;
+}
+/**
+ * Options that changes how the CSS assists behaves
+ */
+export interface PartialCssAssists {
+	/**
+	 * Control the assists for CSS files.
+	 */
+	enabled?: boolean;
+}
 /**
  * Options that changes how the CSS formatter behaves
  */
@@ -269,7 +343,7 @@ export interface PartialCssFormatter {
 	/**
 	 * The indent style applied to CSS (and its super languages) files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
 	 */
@@ -292,7 +366,7 @@ export interface PartialCssFormatter {
  */
 export interface PartialCssLinter {
 	/**
-	 * Control the linter for CSS (and its super languages) files.
+	 * Control the linter for CSS files.
 	 */
 	enabled?: boolean;
 }
@@ -310,8 +384,9 @@ export interface PartialCssParser {
 	cssModules?: boolean;
 }
 export type AttributePosition = "auto" | "multiline";
+export type BracketSpacing = boolean;
 export type IndentWidth = number;
-export type PlainIndentStyle = "tab" | "space";
+export type IndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
@@ -319,6 +394,57 @@ export type LineEnding = "lf" | "crlf" | "cr";
 The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
+/**
+ * Options that changes how the GraphQL formatter behaves
+ */
+export interface PartialGraphqlFormatter {
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
+	/**
+	 * Control the formatter for GraphQL files.
+	 */
+	enabled?: boolean;
+	/**
+	 * The indent style applied to GraphQL files.
+	 */
+	indentStyle?: IndentStyle;
+	/**
+	 * The size of the indentation applied to GraphQL files. Default to 2.
+	 */
+	indentWidth?: IndentWidth;
+	/**
+	 * The type of line ending applied to GraphQL files.
+	 */
+	lineEnding?: LineEnding;
+	/**
+	 * What's the max width of a line applied to GraphQL files. Defaults to 80.
+	 */
+	lineWidth?: LineWidth;
+	/**
+	 * The type of quotes used in GraphQL code. Defaults to double.
+	 */
+	quoteStyle?: QuoteStyle;
+}
+/**
+ * Options that changes how the GraphQL linter behaves
+ */
+export interface PartialGraphqlLinter {
+	/**
+	 * Control the formatter for GraphQL files.
+	 */
+	enabled?: boolean;
+}
+/**
+ * Linter options specific to the JavaScript linter
+ */
+export interface PartialJavascriptAssists {
+	/**
+	 * Control the linter for JavaScript (and its super languages) files.
+	 */
+	enabled?: boolean;
+}
 /**
  * Formatting options specific to the JavaScript files
  */
@@ -338,7 +464,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * Whether to insert spaces around brackets in object literals. Defaults to true.
 	 */
-	bracketSpacing?: boolean;
+	bracketSpacing?: BracketSpacing;
 	/**
 	 * Control the formatter for JavaScript (and its super languages) files.
 	 */
@@ -350,7 +476,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 	 */
@@ -413,6 +539,15 @@ These decorators belong to an old proposal, and they are subject to change.
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
 }
+/**
+ * Linter options specific to the JSON linter
+ */
+export interface PartialJsonAssists {
+	/**
+	 * Control the linter for JSON (and its super languages) files.
+	 */
+	enabled?: boolean;
+}
 export interface PartialJsonFormatter {
 	/**
 	 * Control the formatter for JSON (and its super languages) files.
@@ -425,7 +560,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
@@ -493,6 +628,10 @@ export interface OverridePattern {
 	 */
 	formatter?: OverrideFormatterConfiguration;
 	/**
+	 * Specific configuration for the Graphql language
+	 */
+	graphql?: PartialGraphqlConfiguration;
+	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
 	ignore?: StringSet;
@@ -518,6 +657,15 @@ export interface OverridePattern {
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type VcsClientKind = "git";
+/**
+ * A list of rules that belong to this group
+ */
+export interface Source {
+	/**
+	 * Sorts the keys of a JSON object in natural order
+	 */
+	useSortedKeys?: RuleAssistConfiguration;
+}
 export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
@@ -554,7 +702,7 @@ export interface A11y {
 	/**
 	 * Disallow target="_blank" attribute without rel="noreferrer"
 	 */
-	noBlankTarget?: RuleFixConfiguration_for_Null;
+	noBlankTarget?: RuleFixConfiguration_for_AllowDomainOptions;
 	/**
 	 * Enforces that no distracting elements are used.
 	 */
@@ -1003,6 +1151,14 @@ export interface Nursery {
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
+	 * No duplicated fields in GraphQL operations.
+	 */
+	noDuplicatedFields?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow accessing namespace imports dynamically.
+	 */
+	noDynamicNamespaceImportAccess?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow CSS empty blocks.
 	 */
 	noEmptyBlock?: RuleConfiguration_for_Null;
@@ -1011,13 +1167,25 @@ export interface Nursery {
 	 */
 	noEvolvingTypes?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow exporting an imported variable.
+	 */
+	noExportedImports?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow invalid !important within keyframe declarations
 	 */
 	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow non-standard direction values for linear gradient functions.
+	 */
+	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of @import at-rules in invalid positions.
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
+	/**
+	 * Disallows the use of irregular whitespace characters.
+	 */
+	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce that a label element or component has a text label and an associated input.
 	 */
@@ -1038,6 +1206,10 @@ export interface Nursery {
 	 * Disallow shorthand properties that override related longhand properties.
 	 */
 	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
+	 */
+	noStaticElementInteractions?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the use of String.slice() over String.substr() and String.substring().
 	 */
@@ -1079,6 +1251,10 @@ export interface Nursery {
 	 */
 	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary escape sequence in regular expression literals.
+	 */
+	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary concatenation of string or template literals.
 	 */
 	noUselessStringConcat?: RuleFixConfiguration_for_Null;
@@ -1086,6 +1262,10 @@ export interface Nursery {
 	 * Disallow initializing variables to undefined.
 	 */
 	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow use of @value rule in css modules.
+	 */
+	noValueAtRule?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of yoda expressions.
 	 */
@@ -1103,6 +1283,10 @@ export interface Nursery {
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
+	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
+	 */
+	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallows invalid named grid areas in CSS Grid Layouts.
 	 */
 	useConsistentGridAreas?: RuleConfiguration_for_Null;
@@ -1114,6 +1298,10 @@ export interface Nursery {
 	 * Require the default clause in switch statements.
 	 */
 	useDefaultSwitchClause?: RuleConfiguration_for_Null;
+	/**
+	 * Require specifying the reason argument when using @deprecated directive
+	 */
+	useDeprecatedReason?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce passing a message value when creating a built-in error.
 	 */
@@ -1133,7 +1321,7 @@ export interface Nursery {
 	/**
 	 * Enforce file extensions for relative imports.
 	 */
-	useImportExtensions?: RuleFixConfiguration_for_Null;
+	useImportExtensions?: RuleFixConfiguration_for_UseImportExtensionsOptions;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1151,6 +1339,10 @@ export interface Nursery {
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
 	/**
+	 * Enforce the use of the directive "use strict" in script files.
+	 */
+	useStrictMode?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require new when throwing an error.
 	 */
 	useThrowNewError?: RuleFixConfiguration_for_Null;
@@ -1162,6 +1354,10 @@ export interface Nursery {
 	 * Require regex literals to be declared at the top level.
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
+	 */
+	useTrimStartEnd?: RuleFixConfiguration_for_Null;
 	/**
 	 * Use valid values for the autocomplete attribute on input elements.
 	 */
@@ -1644,6 +1840,10 @@ export interface OverrideFormatterConfiguration {
 	 * The attribute position style.
 	 */
 	attributePosition?: AttributePosition;
+	/**
+	 * Whether to insert spaces around brackets in object literals. Defaults to true.
+	 */
+	bracketSpacing?: BracketSpacing;
 	enabled?: boolean;
 	/**
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
@@ -1656,7 +1856,7 @@ export interface OverrideFormatterConfiguration {
 	/**
 	 * The indent style.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation, 2 by default
 	 */
@@ -1686,9 +1886,13 @@ export interface OverrideOrganizeImportsConfiguration {
 	 */
 	enabled?: boolean;
 }
+export type RuleAssistConfiguration = "on" | "off";
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
+export type RuleFixConfiguration_for_AllowDomainOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_AllowDomainOptions;
 export type RuleConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_Null;
@@ -1710,6 +1914,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleFixConfiguration_for_UseImportExtensionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseImportExtensionsOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -1742,6 +1949,20 @@ export interface RuleWithFixOptions_for_Null {
 	 * Rule's options
 	 */
 	options: null;
+}
+export interface RuleWithFixOptions_for_AllowDomainOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: AllowDomainOptions;
 }
 export interface RuleWithOptions_for_Null {
 	/**
@@ -1816,6 +2037,20 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 * Rule's options
 	 */
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseImportExtensionsOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -1893,6 +2128,12 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
  * Used to identify the kind of code action emitted by a rule
  */
 export type FixKind = "none" | "safe" | "unsafe";
+export interface AllowDomainOptions {
+	/**
+	 * List of domains to allow `target="_blank"` without `rel="noreferrer"`
+	 */
+	allowDomains: string[];
+}
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
 	ignoreNonDom: boolean;
@@ -1941,6 +2182,12 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+}
+export interface UseImportExtensionsOptions {
+	/**
+	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
+	 */
+	suggestedExtensions: {};
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -2154,7 +2401,8 @@ export type DocumentFileSource =
 	| "Unknown"
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
-	| { Css: CssFileSource };
+	| { Css: CssFileSource }
+	| { Graphql: GraphqlFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -2171,6 +2419,9 @@ export interface JsonFileSource {
 }
 export interface CssFileSource {
 	variant: CssVariant;
+}
+export interface GraphqlFileSource {
+	variant: GraphqlVariant;
 }
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
@@ -2193,6 +2444,10 @@ export type LanguageVersion = "ES2022" | "ESNext";
 Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
 	 */
 export type CssVariant = "Standard";
+/**
+ * The style of GraphQL contained in the file.
+ */
+export type GraphqlVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
@@ -2370,18 +2625,23 @@ export type Category =
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
+	| "lint/nursery/noDuplicatedFields"
+	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEvolvingTypes"
+	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noImportantInKeyframe"
+	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
+	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noShorthandPropertyOverrides"
+	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
-	| "lint/nursery/noTypeOnlyImportAttributes"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
@@ -2391,27 +2651,34 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
+	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
+	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
+	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentGridAreas"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
+	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useErrorMessage"
 	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
+	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNumberToFixedDigitsArgument"
 	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
+	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useThrowNewError"
 	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
+	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
@@ -2518,13 +2785,18 @@ export type Category =
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
-	| "assists/nursery/useSortedKeys"
+	| "assists/source/useSortedKeys"
+	| "syntax/nursery/noTypeOnlyImportAttributes"
+	| "syntax/correctness/noSuperWithoutExtends"
+	| "syntax/correctness/noInitializerWithDefinite"
+	| "syntax/correctness/noDuplicatePrivateClassMembers"
 	| "files/missingHandler"
 	| "format"
 	| "check"
 	| "ci"
 	| "configuration"
 	| "organizeImports"
+	| "assists"
 	| "migrate"
 	| "deserialize"
 	| "project"
@@ -2533,9 +2805,6 @@ export type Category =
 	| "internalError/fs"
 	| "internalError/panic"
 	| "parse"
-	| "parse/noSuperWithoutExtends"
-	| "parse/noInitializerWithDefinite"
-	| "parse/noDuplicatePrivateClassMembers"
 	| "lint"
 	| "lint/a11y"
 	| "lint/complexity"
@@ -2644,8 +2913,10 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
+	only: RuleCode[];
 	path: BiomePath;
-	range: TextRange;
+	range?: TextRange;
+	skip: RuleCode[];
 }
 export interface PullActionsResult {
 	actions: CodeAction[];
@@ -2730,8 +3001,11 @@ export interface FormatOnTypeParams {
 }
 export interface FixFileParams {
 	fix_file_mode: FixFileMode;
+	only: RuleCode[];
 	path: BiomePath;
+	rule_categories: RuleCategories;
 	should_format: boolean;
+	skip: RuleCode[];
 }
 /**
  * Which fixes should be applied during the analyzing phase
@@ -2787,7 +3061,7 @@ export interface Workspace {
 	registerProjectFolder(
 		params: RegisterProjectFolderParams,
 	): Promise<ProjectKey>;
-	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
+	updateCurrentManifest(params: UpdateProjectParams): Promise<void>;
 	openProject(params: OpenProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
@@ -2821,8 +3095,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		registerProjectFolder(params) {
 			return transport.request("biome/register_project_folder", params);
 		},
-		updateCurrentProject(params) {
-			return transport.request("biome/update_current_project", params);
+		updateCurrentManifest(params) {
+			return transport.request("biome/update_current_manifest", params);
 		},
 		openProject(params) {
 			return transport.request("biome/open_project", params);

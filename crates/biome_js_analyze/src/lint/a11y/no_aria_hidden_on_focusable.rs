@@ -1,12 +1,13 @@
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that aria-hidden="true" is not set on focusable elements.
     ///
     /// `aria-hidden="true"` can be used to hide purely decorative content from screen reader users.
@@ -68,6 +69,7 @@ impl Rule for NoAriaHiddenOnFocusable {
             let attr_text = attr_static_val.text();
 
             let attributes = ctx.extract_attributes(&node.attributes());
+            let attributes = ctx.convert_all_attribute_values(attributes);
 
             if attr_text == "false" {
                 return None;

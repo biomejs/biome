@@ -50,9 +50,7 @@ pub trait RegistryVisitor<L: Language> {
     /// Record the rule `R` to this visitor
     fn record_rule<R>(&mut self)
     where
-        R: Rule + 'static,
-        R::Query: Queryable<Language = L>,
-        <R::Query as Queryable>::Output: Clone;
+        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static;
 }
 
 /// Stores metadata information for all the rules in the registry, sorted
@@ -85,9 +83,7 @@ impl MetadataRegistry {
 impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
     fn record_rule<R>(&mut self)
     where
-        R: Rule + 'static,
-        R::Query: Queryable<Language = L>,
-        <R::Query as Queryable>::Output: Clone,
+        R: Rule<Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         self.insert_rule(<R::Group as RuleGroup>::NAME, R::METADATA.name);
     }
@@ -99,7 +95,7 @@ impl<L: Language> RegistryVisitor<L> for MetadataRegistry {
 /// we have:
 /// - Syntax Phase: No services are offered, thus its rules can be run immediately;
 /// - Semantic Phase: Offers the semantic model, thus these rules can only run
-/// after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
+///     after the "SemanticModel" is ready, which demands a whole transverse of the parsed tree.
 pub struct RuleRegistry<L: Language> {
     /// Holds a collection of rules for each phase.
     phase_rules: [PhaseRules<L>; 2],
@@ -165,10 +161,7 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
     /// Add the rule `R` to the list of rules stores in this registry instance
     fn record_rule<R>(&mut self)
     where
-        R: Rule + 'static,
-        <R as Rule>::Options: Default,
-        R::Query: Queryable<Language = L>,
-        <R::Query as Queryable>::Output: Clone,
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         if !self.filter.match_rule::<R>() {
             return;
@@ -214,7 +207,7 @@ impl<L: Language + Default + 'static> RegistryVisitor<L> for RuleRegistryBuilder
                     .entry(key)
                     .or_insert_with(|| TypeRules::TypeRules { rules: Vec::new() })
                 else {
-                    unreachable!("the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally ca used by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
+                    unreachable!("the query type has already been registered as a SyntaxRules instead of a TypeRules, this is generally caused by an implementation of `Queryable::key` returning a `QueryKey::TypeId` with the type ID of `SyntaxNode`")
                 };
 
                 rules.push(rule);
@@ -384,10 +377,7 @@ type RuleExecutor<L> = fn(&mut MatchQueryParams<L>, &mut RuleState<L>) -> Result
 impl<L: Language + Default> RegistryRule<L> {
     fn new<R>(state_index: usize) -> Self
     where
-        R: Rule + 'static,
-        <R as Rule>::Options: Default,
-        R::Query: Queryable<Language = L> + 'static,
-        <R::Query as Queryable>::Output: Clone,
+        R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
     {
         /// Generic implementation of RuleExecutor for any rule type R
         fn run<R>(
@@ -395,10 +385,7 @@ impl<L: Language + Default> RegistryRule<L> {
             state: &mut RuleState<RuleLanguage<R>>,
         ) -> Result<(), Error>
         where
-            R: Rule + 'static,
-            R::Query: 'static,
-            <R::Query as Queryable>::Output: Clone,
-            <R as Rule>::Options: Default,
+            R: Rule<Options: Default, Query: Queryable<Output: Clone>> + 'static,
         {
             if let Some(node) = params.query.downcast_ref::<SyntaxNode<RuleLanguage<R>>>() {
                 if state.suppressions.inner.contains(node) {

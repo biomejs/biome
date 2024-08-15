@@ -27,6 +27,8 @@ use biome_js_syntax::JsSyntaxKind::*;
 use biome_js_syntax::{JsSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
 
+use super::metavariable::parse_metavariable;
+
 // test js object_expr
 // let a = {};
 // let b = {foo,}
@@ -355,6 +357,7 @@ fn parse_setter_object_member(p: &mut JsParser) -> ParsedSyntax {
 pub(crate) fn parse_object_member_name(p: &mut JsParser) -> ParsedSyntax {
     match p.cur() {
         T!['['] => parse_computed_member_name(p),
+        t if t.is_metavariable() => parse_metavariable(p),
         _ => parse_literal_member_name(p),
     }
 }
@@ -410,6 +413,10 @@ pub(super) fn parse_literal_member_name(p: &mut JsParser) -> ParsedSyntax {
         }
         t if t.is_keyword() => {
             p.bump_remap(T![ident]);
+        }
+        t if t.is_metavariable() => {
+            m.abandon(p);
+            return parse_metavariable(p);
         }
         _ => {
             m.abandon(p);

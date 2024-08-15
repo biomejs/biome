@@ -4,32 +4,36 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Table of Contents
 
-* [Asking questions, making proposals](#asking-questions-making-proposals)
-* [Reporting bugs](#reporting-bugs)
-* [Getting Started](#getting-started)
-* [Install the required tools](#install-the-required-tools)
-* [Testing](#testing)
-  + [Debugging](#debugging)
-* [Checks](#checks)
-* [Crates development](#crates-development)
-  + [Analyzers and lint rules](#analyzers-and-lint-rules)
-  + [Parser](#parser)
-  + [Formatter](#formatter)
-* [Crate dependencies](#crate-dependencies)
-* [Node.js development](#nodejs-development)
-  + [Translations](#translations)
-* [Commit messages](#commit-messages)
-* [Creating pull requests](#creating-pull-requests)
-  + [Changelog](#changelog)
-    - [Writing a changelog line](#writing-a-changelog-line)
-  + [Documentation](#documentation)
-  + [Versioning](#versioning)
-* [Releasing](#releasing)
-* [Resources](#resources)
-* [Current Members](#current-members)
-  + [Lead team](#lead-team)
-  + [Core Contributors team](#core-contributors-team)
-  + [Maintainers team](#maintainers-team)
+- [🚀 Contributing](#-contributing)
+  - [Table of Contents](#table-of-contents)
+  - [Asking questions, making proposals](#asking-questions-making-proposals)
+  - [Reporting bugs](#reporting-bugs)
+  - [Getting Started](#getting-started)
+  - [Install the required tools](#install-the-required-tools)
+  - [Testing](#testing)
+    - [Debugging](#debugging)
+  - [Checks](#checks)
+  - [Crates development](#crates-development)
+    - [Create new crates](#create-new-crates)
+    - [Analyzers and lint rules](#analyzers-and-lint-rules)
+    - [Parser](#parser)
+    - [Formatter](#formatter)
+  - [Crate dependencies](#crate-dependencies)
+  - [Node.js development](#nodejs-development)
+    - [Translations](#translations)
+  - [Commit messages](#commit-messages)
+  - [Creating pull requests](#creating-pull-requests)
+    - [Changelog](#changelog)
+      - [Writing a changelog line](#writing-a-changelog-line)
+    - [Documentation](#documentation)
+    - [Versioning](#versioning)
+  - [Releasing](#releasing)
+  - [Resources](#resources)
+  - [Current Members](#current-members)
+    - [Lead team](#lead-team)
+    - [Core Contributors team](#core-contributors-team)
+    - [Maintainers team](#maintainers-team)
+    - [Past Maintainers](#past-maintainers)
 
 ## Asking questions, making proposals
 
@@ -89,7 +93,6 @@ just install-tools
 This command will install:
 - `cargo-binstall`, to install binary extensions for `cargo`.
 - `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
-- `cargo-nextest`, a `cargo` extension to for optionally running tests faster.
 - `taplo-cli`, a small tool for formatting TOML files.
 - `wasm-pack` and `wasm-tools` for managing the WASM build of Biome.
 
@@ -425,12 +428,14 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 ### Maintainers team
 
+- [Carson McManus @dyc3](https://github.com/dyc3)
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
+- [Yusuke Abe @chansuke](https://github.com/chansuke)
 - [Zheyu Zhang @ah-yu](https://github.com/ah-yu)
 
 ### Past Maintainers

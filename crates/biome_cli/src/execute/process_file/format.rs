@@ -4,9 +4,9 @@ use crate::execute::process_file::{
     DiffKind, FileResult, FileStatus, Message, SharedTraversalOptions,
 };
 use crate::execute::TraversalMode;
+use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Error, Severity};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
-use biome_service::workspace::RuleCategories;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 use tracing::debug;
@@ -27,8 +27,8 @@ pub(crate) fn format_with_guard<'ctx>(
             let diagnostics_result = workspace_file
                 .guard()
                 .pull_diagnostics(
-                    RuleCategories::SYNTAX,
-                    max_diagnostics.into(),
+                    RuleCategoriesBuilder::default().with_syntax().build(),
+                    max_diagnostics,
                     Vec::new(),
                     Vec::new(),
                 )

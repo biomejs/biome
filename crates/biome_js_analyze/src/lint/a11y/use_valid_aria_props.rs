@@ -1,13 +1,13 @@
 use crate::services::aria::Aria;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::JsxAttribute;
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Ensures that ARIA properties `aria-*` are all valid.
     ///
     /// ## Examples

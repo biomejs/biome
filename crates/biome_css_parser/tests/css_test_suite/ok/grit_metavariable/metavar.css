@@ -1,0 +1,15 @@
+.foo {
+    color: µcolor;
+}
+
+.foo {
+    µbar
+}
+
+.foo {
+    @media µbaz {}
+}
+
+µqux {}
+
+µ... {}

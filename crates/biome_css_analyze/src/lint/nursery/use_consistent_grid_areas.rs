@@ -1,11 +1,13 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
 use biome_rowan::{TextRange, TokenText};
 
 use rustc_hash::FxHashSet;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallows invalid named grid areas in CSS Grid Layouts.
     ///
     /// For a named grid area to be valid, all strings must define:

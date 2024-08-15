@@ -10,13 +10,13 @@ use crate::{
 use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
     PartialCssFormatter, PartialFilesConfiguration, PartialFormatterConfiguration,
-    PartialJavascriptFormatter, PartialJsonFormatter,
+    PartialGraphqlFormatter, PartialJavascriptFormatter, PartialJsonFormatter,
 };
 use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+    load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
@@ -27,6 +27,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) javascript_formatter: Option<PartialJavascriptFormatter>,
     pub(crate) json_formatter: Option<PartialJsonFormatter>,
     pub(crate) css_formatter: Option<PartialCssFormatter>,
+    pub(crate) graphql_formatter: Option<PartialGraphqlFormatter>,
     pub(crate) formatter_configuration: Option<PartialFormatterConfiguration>,
     pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
@@ -57,6 +58,7 @@ pub(crate) fn format(
         fix,
         mut json_formatter,
         css_formatter,
+        graphql_formatter,
         since,
         staged,
         changed,
@@ -78,33 +80,46 @@ pub(crate) fn format(
         session.app.console,
         cli_options.verbose,
     )?;
-    // let fs = &session.app.fs;
-    // let (editorconfig, editorconfig_diagnostics) = {
-    //     let search_path = loaded_configuration
-    //         .directory_path
-    //         .clone()
-    //         .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-    //     load_editorconfig(fs, search_path)?
-    // };
-    // for diagnostic in editorconfig_diagnostics {
-    //     session.app.console.error(markup! {
-    //         {PrintDiagnostic::simple(&diagnostic)}
-    //     })
-    // }
 
     resolve_manifest(&session)?;
+
+    let editorconfig_search_path = loaded_configuration.directory_path.clone();
     let LoadedConfiguration {
-        mut configuration,
+        configuration: biome_configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
-    // let mut configuration = if let Some(mut configuration) = editorconfig {
-    //     // this makes biome configuration take precedence over editorconfig configuration
-    //     configuration.merge_with(biome_configuration);
-    //     configuration
-    // } else {
-    //     biome_configuration
-    // };
+
+    let should_use_editorconfig = formatter_configuration
+        .as_ref()
+        .and_then(|f| f.use_editorconfig)
+        .unwrap_or(
+            biome_configuration
+                .formatter
+                .as_ref()
+                .and_then(|f| f.use_editorconfig)
+                .unwrap_or_default(),
+        );
+    let mut fs_configuration = if should_use_editorconfig {
+        let (editorconfig, editorconfig_diagnostics) = {
+            let search_path = editorconfig_search_path.unwrap_or_else(|| {
+                let fs = &session.app.fs;
+                fs.working_directory().unwrap_or_default()
+            });
+            load_editorconfig(&session.app.fs, search_path)?
+        };
+        for diagnostic in editorconfig_diagnostics {
+            session.app.console.error(markup! {
+                {PrintDiagnostic::simple(&diagnostic)}
+            })
+        }
+        editorconfig.unwrap_or_default()
+    } else {
+        Default::default()
+    };
+    // this makes biome configuration take precedence over editorconfig configuration
+    fs_configuration.merge_with(biome_configuration);
+    let mut configuration = fs_configuration;
 
     // TODO: remove in biome 2.0
     let console = &mut *session.app.console;
@@ -183,6 +198,11 @@ pub(crate) fn format(
         let css = configuration.css.get_or_insert_with(Default::default);
         css.formatter.merge_with(css_formatter);
     }
+    if graphql_formatter.is_some() {
+        let graphql = configuration.graphql.get_or_insert_with(Default::default);
+        graphql.formatter.merge_with(graphql_formatter);
+    }
+
     if javascript_formatter.is_some() {
         let javascript = configuration
             .javascript

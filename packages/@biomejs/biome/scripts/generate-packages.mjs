@@ -58,9 +58,11 @@ function copyBinaryToNativePackage(platform, arch) {
 	);
 	const binaryTarget = resolve(packageRoot, `biome${ext}`);
 
-	console.log(`Copy binary ${binaryTarget}`);
-	fs.copyFileSync(binarySource, binaryTarget);
-	fs.chmodSync(binaryTarget, 0o755);
+	if (fs.existsSync(binaryTarget)) {
+		console.log(`Copy binary ${binaryTarget}`);
+		fs.copyFileSync(binarySource, binaryTarget);
+		fs.chmodSync(binaryTarget, 0o755);
+	}
 }
 
 function updateWasmPackage(target) {

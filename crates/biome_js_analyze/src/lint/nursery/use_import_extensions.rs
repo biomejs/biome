@@ -1,16 +1,22 @@
+use rustc_hash::FxHashMap;
+use serde::{Deserialize, Serialize};
 use std::path::{Component, Path};
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
-use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsLanguage};
-use biome_rowan::{BatchMutationExt, SyntaxToken};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxToken};
+use biome_rowan::BatchMutationExt;
 
 use crate::JsRuleAction;
 
-declare_rule! {
+#[cfg(feature = "schemars")]
+use schemars::JsonSchema;
+
+declare_lint_rule! {
     /// Enforce file extensions for relative imports.
     ///
     /// Browsers and Node.js do not natively support importing files without extensions. This rule
@@ -64,6 +70,42 @@ declare_rule! {
     /// ```js
     /// require("./foo.js");
     /// ```
+    ///
+    /// ### Options
+    ///
+    /// Use the options to specify the correct import extensions for your project based on the linted
+    /// file extension. These mappings will override the rule's default logic.
+    ///
+    /// Currently, Biome determines the import extension based on the inspected file extension.
+    /// The `suggestedExtensions` option works as a map, where the key is the source file extension
+    /// and the value should provide two possible mappings for imports:
+    ///
+    ///  - `module` is used for module imports that start with a lower-case character, e.g. `foo.js`
+    ///  - `component` is used for component files that start with an upper-case character, e.g. `Foo.jsx` (which is a common convention for React JSX)
+    ///
+    /// For example, if you want `.ts` files to import other modules as `.js` (or `.jsx`), you should
+    /// configure the following options in your Biome config:
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "suggestedExtensions": {
+    ///             "ts": {
+    ///                 "module": "js",
+    ///                 "component": "jsx"
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// :::caution
+    /// Mainly, this is a temporary workaround that allows Biome to propose correct import extensions
+    /// for TypeScript projects that use ES Modules. TypeScript requires you to specify imports to
+    /// the actual files used in runtime: `.js` or `.mjs` (see more here: https://github.com/microsoft/TypeScript/issues/49083#issuecomment-1435399267).
+    /// :::
+    ///
     /// ## Caveats
     ///
     /// If you are using TypeScript, TypeScript version 5.0 and later is required, also make sure to enable
@@ -82,18 +124,39 @@ declare_rule! {
     }
 }
 
+#[derive(Clone, Debug, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct UseImportExtensionsOptions {
+    /// A map of custom import extension mappings, where the key is the inspected file extension,
+    /// and the value is a pair of `module` extension and `component` import extension
+    pub suggested_extensions: FxHashMap<String, SuggestedExtensionMapping>,
+}
+
+#[derive(Debug, Clone, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct SuggestedExtensionMapping {
+    /// Extension that should be used for module imports
+    pub module: String,
+    /// Extension that should be used for component file imports
+    pub component: String,
+}
+
 impl Rule for UseImportExtensions {
-    type Query = Ast<AnyJsImportSpecifierLike>;
+    type Query = Ast<AnyJsImportLike>;
     type State = UseImportExtensionsState;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = Box<UseImportExtensionsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
         let file_ext = ctx.file_path().extension().and_then(|ext| ext.to_str())?;
 
-        get_extensionless_import(file_ext, node)
+        let custom_suggested_imports = &ctx.options().suggested_extensions;
+
+        get_extensionless_import(file_ext, node, custom_suggested_imports)
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -140,12 +203,13 @@ impl Rule for UseImportExtensions {
 
 pub struct UseImportExtensionsState {
     suggestion: Option<(String, String)>,
-    module_name_token: SyntaxToken<JsLanguage>,
+    module_name_token: JsSyntaxToken,
 }
 
 fn get_extensionless_import(
     file_ext: &str,
-    node: &AnyJsImportSpecifierLike,
+    node: &AnyJsImportLike,
+    custom_suggested_imports: &FxHashMap<String, SuggestedExtensionMapping>,
 ) -> Option<UseImportExtensionsState> {
     let module_name_token = node.module_name_token()?;
     let module_path = inner_string_text(&module_name_token);
@@ -172,7 +236,7 @@ fn get_extensionless_import(
         });
     }
 
-    let import_ext = resolve_import_extension(file_ext, path);
+    let import_ext = resolve_import_extension(file_ext, path, custom_suggested_imports);
 
     let mut path_parts = module_path.text().split('/');
     let mut is_index_file = false;
@@ -210,12 +274,12 @@ fn get_extensionless_import(
     });
 
     let part = if is_index_file {
-        format!("index.{}", import_ext)
+        format!("index.{import_ext}")
     } else {
         // fold always adds trailing slash, so we need to remove it.
         new_path.pop();
 
-        format!(".{}", import_ext)
+        format!(".{import_ext}")
     };
 
     new_path.push_str(&part);
@@ -226,18 +290,27 @@ fn get_extensionless_import(
     })
 }
 
-fn resolve_import_extension<'a>(file_ext: &str, path: &Path) -> &'a str {
-    // TODO. This is not very accurate. We should use file system access to determine the file type.
-    let (potential_ext, potential_component_ext) = match file_ext {
-        "ts" | "tsx" | "astro" => ("ts", "tsx"),
-        "mts" => ("mts", "tsx"),
-        "mjs" => ("mjs", "jsx"),
-        "cjs" => ("cjs", "jsx"),
-        "cts" => ("cts", "tsx"),
-        // Unlikely that these frameworks would import tsx file.
-        "svelte" | "vue" => ("ts", "ts"),
-        _ => ("js", "jsx"),
-    };
+fn resolve_import_extension<'a>(
+    file_ext: &str,
+    path: &Path,
+    custom_suggested_imports: &'a FxHashMap<String, SuggestedExtensionMapping>,
+) -> &'a str {
+    let (potential_ext, potential_component_ext): (&str, &str) =
+        if let Some(custom_mapping) = custom_suggested_imports.get(file_ext) {
+            (&custom_mapping.module, &custom_mapping.component)
+        } else {
+            // TODO. This is not very accurate. We should use file system access to determine the file type.
+            match file_ext {
+                "ts" | "tsx" | "astro" => ("ts", "tsx"),
+                "mts" => ("mts", "tsx"),
+                "mjs" => ("mjs", "jsx"),
+                "cjs" => ("cjs", "jsx"),
+                "cts" => ("cts", "tsx"),
+                // Unlikely that these frameworks would import tsx file.
+                "svelte" | "vue" => ("ts", "ts"),
+                _ => ("js", "jsx"),
+            }
+        };
 
     let maybe_is_component = path
         .file_stem()

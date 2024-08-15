@@ -2,20 +2,20 @@ use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_i
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make::{
-    js_expression_statement, js_string_literal_expression, jsx_expression_child, jsx_string,
-    jsx_string_literal, jsx_tag_expression, token, JsxExpressionChildBuilder,
+    js_string_literal_expression, jsx_expression_child, jsx_string, jsx_string_literal,
+    jsx_tag_expression, token, JsxExpressionChildBuilder,
 };
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage,
-    JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
-    JsxFragment, JsxTagExpression, JsxText, T,
+    AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsParenthesizedExpression, JsSyntaxKind,
+    JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxFragment, JsxTagExpression, JsxText,
+    T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unnecessary fragments
     ///
     /// ## Examples
@@ -135,12 +135,11 @@ impl Rule for NoUselessFragments {
                                 if JsxExpressionAttributeValue::can_cast(parent.kind()) {
                                     in_jsx_attr_expr = true;
                                 }
-                                if let Some(parenthesized_expression) =
-                                    JsParenthesizedExpression::cast_ref(&parent)
-                                {
-                                    parenthesized_expression.syntax().parent()
-                                } else {
-                                    Some(parent)
+                                match JsParenthesizedExpression::try_cast(parent) {
+                                    Ok(parenthesized_expression) => {
+                                        parenthesized_expression.syntax().parent()
+                                    }
+                                    Err(parent) => Some(parent),
                                 }
                             })
                             .map_or(false, |parent| {
@@ -162,14 +161,48 @@ impl Rule for NoUselessFragments {
                 let child_list = fragment.children();
 
                 if !parents_where_fragments_must_be_preserved {
-                    match child_list.first() {
-                        Some(first) if child_list.len() == 1 => {
-                            if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
-                                return None;
+                    let mut significant_children = 0;
+                    let mut first_significant_child = None;
+
+                    for child in child_list.iter() {
+                        match child.syntax().kind() {
+                            JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
+                            | JsSyntaxKind::JSX_ELEMENT
+                            | JsSyntaxKind::JSX_EXPRESSION_CHILD
+                            | JsSyntaxKind::JSX_FRAGMENT => {
+                                significant_children += 1;
+                                if first_significant_child.is_none() {
+                                    first_significant_child = Some(child);
+                                }
                             }
-                            Some(NoUselessFragmentsState::Child(first))
+                            JsSyntaxKind::JSX_TEXT => {
+                                if !child.syntax().text().to_string().trim().is_empty() {
+                                    significant_children += 1;
+                                    if first_significant_child.is_none() {
+                                        first_significant_child = Some(child);
+                                    }
+                                }
+                            }
+                            _ => {}
                         }
-                        None => Some(NoUselessFragmentsState::Empty),
+                        if significant_children > 1 {
+                            break;
+                        }
+                    }
+
+                    match significant_children {
+                        0 => Some(NoUselessFragmentsState::Empty),
+                        1 => {
+                            if let Some(first) = first_significant_child {
+                                if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
+                                    None
+                                } else {
+                                    Some(NoUselessFragmentsState::Child(first))
+                                }
+                            } else {
+                                None
+                            }
+                        }
                         _ => None,
                     }
                 } else {
@@ -255,7 +288,18 @@ impl Rule for NoUselessFragments {
                 None => parent.into_syntax(),
             };
 
-            let child = node.children().first();
+            let child = node
+                .children()
+                .iter()
+                .find(|child| match child.syntax().kind() {
+                    JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
+                    | JsSyntaxKind::JSX_ELEMENT
+                    | JsSyntaxKind::JSX_EXPRESSION_CHILD
+                    | JsSyntaxKind::JSX_FRAGMENT => true,
+                    JsSyntaxKind::JSX_TEXT => !child.syntax().text().to_string().trim().is_empty(),
+                    _ => false,
+                });
+
             if let Some(child) = child {
                 let new_node = match child {
                     AnyJsxChild::JsxElement(node) => {
@@ -294,13 +338,9 @@ impl Rule for NoUselessFragments {
                                 .into_syntax()
                             })
                         } else {
-                            child.expression().map(|expression| {
-                                if let AnyJsExpression::JsIdentifierExpression(node) = expression {
-                                    node.into_syntax()
-                                } else {
-                                    js_expression_statement(expression).build().into_syntax()
-                                }
-                            })
+                            child
+                                .expression()
+                                .map(|expression| expression.into_syntax())
                         }
                     }
 

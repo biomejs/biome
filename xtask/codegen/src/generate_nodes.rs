@@ -1,11 +1,5 @@
-use crate::css_kinds_src::CSS_KINDS_SRC;
-use crate::graphql_kind_src::GRAPHQL_KINDS_SRC;
-use crate::grit_kinds_src::GRIT_KINDS_SRC;
-use crate::html_kinds_src::HTML_KINDS_SRC;
-use crate::js_kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind, JS_KINDS_SRC};
-use crate::json_kinds_src::JSON_KINDS_SRC;
+use crate::js_kinds_src::{AstNodeSrc, AstSrc, Field, TokenKind};
 use crate::language_kind::LanguageKind;
-use crate::yaml_kinds_src::YAML_KINDS_SRC;
 use biome_string_case::Case;
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
@@ -266,17 +260,16 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         #(#methods)*
                     }
 
-                    #[cfg(feature = "serde")]
-                        impl Serialize for #name {
-                            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-                            where
-                            S: Serializer,
-                            {
-                                self.as_fields().serialize(serializer)
-                            }
+                    impl Serialize for #name {
+                        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+                        where
+                        S: Serializer,
+                        {
+                            self.as_fields().serialize(serializer)
+                        }
                     }
 
-                    #[cfg_attr(feature = "serde", derive(Serialize))]
+                    #[derive(Serialize)]
                     pub struct #slots_name {
                         #( pub #slot_fields, )*
                     }
@@ -422,12 +415,15 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                     let variant_name = format_ident!("{}", en);
                     let variable_name = format_ident!("{}", Case::Snake.convert(en.as_str()));
                     (
-                        // cast() code
+                        // try_cast() code
                         if i != variant_of_variants.len() - 1 {
                             quote! {
-                            if let Some(#variable_name) = #variant_name::cast(syntax.clone()) {
+                            let syntax = match #variant_name::try_cast(syntax) {
+                                Ok(#variable_name) => {
                                     return Some(#name::#variant_name(#variable_name));
-                            }}
+                                }
+                                Err(syntax) => syntax,
+                            };}
                         } else {
                             // if this is the last variant, do not clone syntax
                             quote! {
@@ -540,8 +536,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             (
                 quote! {
                     // #[doc = #doc]
-                    #[derive(Clone, PartialEq, Eq, Hash)]
-                    #[cfg_attr(feature = "serde", derive(Serialize))]
+                    #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
                     pub enum #name {
                         #(#variants_for_union),*
                     }
@@ -645,8 +640,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         let kind = format_ident!("{}", Case::Constant.convert(bogus_name));
 
         quote! {
-            #[derive(Clone, PartialEq, Eq, Hash)]
-            #[cfg_attr(feature = "serde", derive(Serialize))]
+            #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
             pub struct #ident {
                 syntax: SyntaxNode
             }
@@ -759,11 +753,10 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             }
         };
 
-        let padded_name = format!("{} ", name);
+        let padded_name = format!("{name} ");
 
         let list_impl = if list.separator.is_some() {
             quote! {
-                #[cfg(feature = "serde")]
                 impl Serialize for #list_name {
                     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
                         where
@@ -815,7 +808,6 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             }
         } else {
             quote! {
-                #[cfg(feature = "serde")]
                 impl Serialize for #list_name {
                     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
                         where
@@ -888,9 +880,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
     let language = language_kind.language();
 
     let serde_import = quote! {
-        #[cfg(feature = "serde")]
         use serde::{Serialize, Serializer};
-        #[cfg(feature = "serde")]
         use serde::ser::SerializeSeq;
     };
 
@@ -963,15 +953,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 pub(crate) fn token_kind_to_code(name: &str, language_kind: LanguageKind) -> TokenStream {
     let kind_variant_name = Case::Constant.convert(name);
 
-    let kind_source = match language_kind {
-        LanguageKind::Js => JS_KINDS_SRC,
-        LanguageKind::Css => CSS_KINDS_SRC,
-        LanguageKind::Json => JSON_KINDS_SRC,
-        LanguageKind::Grit => GRIT_KINDS_SRC,
-        LanguageKind::Html => HTML_KINDS_SRC,
-        LanguageKind::Graphql => GRAPHQL_KINDS_SRC,
-        LanguageKind::Yaml => YAML_KINDS_SRC,
-    };
+    let kind_source = language_kind.kinds();
     if kind_source.literals.contains(&kind_variant_name.as_str())
         || kind_source.tokens.contains(&kind_variant_name.as_str())
     {

@@ -11,6 +11,8 @@ use crate::parser::CssParser;
 use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::parse_declaration_or_rule_list_block;
 use crate::syntax::parse_error::{expected_any_rule, expected_non_css_wide_keyword_identifier};
+use crate::syntax::property::color::{is_at_color, parse_color};
+use crate::syntax::property::unicode_range::{is_at_unicode_range, parse_unicode_range};
 use crate::syntax::property::{is_at_any_property, parse_any_property};
 use crate::syntax::selector::is_nth_at_selector;
 use crate::syntax::selector::relative_selector::{is_at_relative_selector, RelativeSelectorList};
@@ -247,6 +249,26 @@ fn parse_declaration_important(p: &mut CssParser) -> ParsedSyntax {
 }
 
 #[inline]
+fn is_at_metavariable(p: &mut CssParser) -> bool {
+    p.at(GRIT_METAVARIABLE)
+}
+
+#[inline]
+fn is_nth_at_metavariable(p: &mut CssParser, n: usize) -> bool {
+    p.nth_at(n, GRIT_METAVARIABLE)
+}
+
+#[inline]
+fn parse_metavariable(p: &mut CssParser) -> ParsedSyntax {
+    if !is_at_metavariable(p) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(GRIT_METAVARIABLE);
+    Present(m.complete(p, CSS_METAVARIABLE))
+}
+
+#[inline]
 pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
     is_at_any_function(p)
         || is_at_identifier(p)
@@ -257,6 +279,7 @@ pub(crate) fn is_at_any_value(p: &mut CssParser) -> bool {
         || is_at_ratio(p)
         || is_at_color(p)
         || is_at_bracketed_value(p)
+        || is_at_metavariable(p)
 }
 
 #[inline]
@@ -265,6 +288,8 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
         parse_any_function(p)
     } else if is_at_dashed_identifier(p) {
         parse_dashed_identifier(p)
+    } else if is_at_unicode_range(p) {
+        parse_unicode_range(p)
     } else if is_at_identifier(p) {
         parse_regular_identifier(p)
     } else if p.at(CSS_STRING_LITERAL) {
@@ -279,24 +304,11 @@ pub(crate) fn parse_any_value(p: &mut CssParser) -> ParsedSyntax {
         parse_color(p)
     } else if is_at_bracketed_value(p) {
         parse_bracketed_value(p)
+    } else if is_at_metavariable(p) {
+        parse_metavariable(p)
     } else {
         Absent
     }
-}
-
-#[inline]
-pub(crate) fn is_at_color(p: &mut CssParser) -> bool {
-    p.at(T![#])
-}
-#[inline]
-pub(crate) fn parse_color(p: &mut CssParser) -> ParsedSyntax {
-    if !is_at_color(p) {
-        return Absent;
-    }
-    let m = p.start();
-    p.bump_with_context(T![#], CssLexContext::Color);
-    p.expect(CSS_COLOR_LITERAL);
-    Present(m.complete(p, CSS_COLOR))
 }
 
 struct CssComponentValueList;

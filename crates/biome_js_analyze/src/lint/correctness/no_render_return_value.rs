@@ -1,12 +1,12 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsCallExpression, JsExpressionStatement};
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Prevent the usage of the return value of `React.render`.
     ///
     /// > `ReactDOM.render()` currently returns a reference to the root `ReactComponent` instance. However, using this return value is legacy

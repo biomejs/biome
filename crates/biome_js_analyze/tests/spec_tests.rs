@@ -2,13 +2,15 @@ use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilt
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
+use biome_project::PackageType;
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, load_manifest, parse_test_path, register_leak_checker,
     scripts_from_json, write_analyzer_snapshot, CheckActionType,
 };
+use std::ops::Deref;
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
@@ -27,7 +29,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     if group == "specs" || group == "suppression" {
         panic!("the test file must be placed in the {group}/{rule}/<rule-name>/ directory");
     }
-    if biome_js_analyze::metadata()
+    if biome_js_analyze::METADATA
+        .deref()
         .find_rule(group, rule)
         .is_none()
     {
@@ -44,7 +47,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let extension = input_file.extension().unwrap_or_default();
 
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
     let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
@@ -92,20 +95,29 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
-    source_type: JsFileSource,
+    mut source_type: JsFileSource,
     filter: AnalysisFilter,
     file_name: &str,
     input_file: &Path,
     check_action_type: CheckActionType,
     parser_options: JsParserOptions,
 ) -> usize {
+    let mut diagnostics = Vec::new();
+    let mut code_fixes = Vec::new();
+    let manifest = load_manifest(input_file, &mut diagnostics);
+
+    if let Some(manifest) = &manifest {
+        if manifest.r#type == Some(PackageType::Commonjs) &&
+            // At the moment we treat JS and JSX at the same way
+            (source_type.file_extension() == "js" || source_type.file_extension() == "jsx" )
+        {
+            source_type.set_module_kind(ModuleKind::Script)
+        }
+    }
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
-    let mut diagnostics = Vec::new();
-    let mut code_fixes = Vec::new();
     let options = create_analyzer_options(input_file, &mut diagnostics);
-    let manifest = load_manifest(input_file, &mut diagnostics);
 
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, source_type, manifest, |event| {
@@ -204,10 +216,7 @@ fn check_code_action(
     assert_eq!(new_tree.to_string(), output);
 
     if has_bogus_nodes_or_empty_slots(&new_tree) {
-        panic!(
-            "modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {}",
-            new_tree
-        )
+        panic!("modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}")
     }
 
     // Checks the returned tree contains no missing children node
@@ -236,7 +245,7 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         }
     };
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let (group, rule) = parse_test_path(input_file);
 

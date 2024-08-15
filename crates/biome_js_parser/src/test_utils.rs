@@ -39,10 +39,7 @@ where
     let has_missing_children = debug_tree.contains("missing (required)");
 
     if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!(
-            "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",
-            syntax
-        )
+        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
     }
 
     if !program.has_errors() && !has_missing_children {

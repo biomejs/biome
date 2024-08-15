@@ -4,7 +4,6 @@ use biome_diagnostics::console::markup;
 use biome_diagnostics::termcolor;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_rowan::SyntaxNode;
-use biome_service::settings::ServiceLanguage;
 
 /// Perform a second pass of formatting on a file, printing a diff if the
 /// output doesn't match the input
@@ -18,7 +17,7 @@ where
     file_name: &'a str,
 
     language: &'a L,
-    options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
+    format_language: L::FormatLanguage,
 }
 
 impl<'a, L> CheckReformat<'a, L>
@@ -31,7 +30,7 @@ where
         file_name: &'a str,
 
         language: &'a L,
-        options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
+        format_language: L::FormatLanguage,
     ) -> Self {
         CheckReformat {
             root,
@@ -39,7 +38,7 @@ where
             file_name,
 
             language,
-            options,
+            format_language,
         }
     }
 
@@ -68,17 +67,22 @@ where
             )
         }
 
-        let formatted = self
+        let formatted = match self
             .language
-            .format_node(self.options.clone(), &re_parse.syntax())
-            .unwrap();
+            .format_node(self.format_language.clone(), &re_parse.syntax())
+        {
+            Ok(formatted) => formatted,
+            Err(err) => {
+                panic!("failed to format: {}", err);
+            }
+        };
 
         let printed = formatted.print().unwrap();
 
         if self.text != printed.as_code() {
             let input_format_element = self
                 .language
-                .format_node(self.options.clone(), self.root)
+                .format_node(self.format_language.clone(), self.root)
                 .unwrap();
             let pretty_input_ir = format!("{}", formatted.into_document());
             let pretty_reformat_ir = format!("{}", input_format_element.into_document());

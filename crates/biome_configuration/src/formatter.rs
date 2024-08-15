@@ -1,6 +1,8 @@
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{
+    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -15,6 +17,10 @@ pub struct FormatterConfiguration {
     #[partial(bpaf(hide))]
     pub enabled: bool,
 
+    #[partial(bpaf(long("use-editorconfig"), argument("true|false"), optional))]
+    /// Use any `.editorconfig` files to configure the formatter. Configuration in `biome.json` will override `.editorconfig` configuration. Default: false.
+    pub use_editorconfig: bool,
+
     /// Stores whether formatting should be allowed to proceed if a given file
     /// has syntax errors
     #[partial(bpaf(hide))]
@@ -22,7 +28,7 @@ pub struct FormatterConfiguration {
 
     /// The indent style.
     #[partial(bpaf(long("indent-style"), argument("tab|space"), optional))]
-    pub indent_style: PlainIndentStyle,
+    pub indent_style: IndentStyle,
 
     /// The size of the indentation, 2 by default (deprecated, use `indent-width`)
     #[partial(bpaf(long("indent-size"), argument("NUMBER"), optional))]
@@ -44,6 +50,10 @@ pub struct FormatterConfiguration {
     /// The attribute position style in HTMLish languages. By default auto.
     #[partial(bpaf(long("attribute-position"), argument("multiline|auto"), optional))]
     pub attribute_position: AttributePosition,
+
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    #[partial(bpaf(long("bracket-spacing"), argument("true|false"), optional))]
+    pub bracket_spacing: BracketSpacing,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
@@ -71,8 +81,10 @@ impl PartialFormatterConfiguration {
             line_ending: self.line_ending.unwrap_or_default(),
             line_width: self.line_width.unwrap_or_default(),
             attribute_position: self.attribute_position.unwrap_or_default(),
+            bracket_spacing: self.bracket_spacing.unwrap_or_default(),
             ignore: self.ignore.clone().unwrap_or_default(),
             include: self.include.clone().unwrap_or_default(),
+            use_editorconfig: self.use_editorconfig.unwrap_or_default(),
         }
     }
 }
@@ -84,12 +96,15 @@ impl Default for FormatterConfiguration {
             format_with_errors: false,
             indent_size: IndentWidth::default(),
             indent_width: IndentWidth::default(),
-            indent_style: PlainIndentStyle::default(),
+            indent_style: IndentStyle::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             attribute_position: AttributePosition::default(),
+            bracket_spacing: Default::default(),
             ignore: Default::default(),
             include: Default::default(),
+            // TODO: Biome 2.0: change to true
+            use_editorconfig: Default::default(),
         }
     }
 }
@@ -100,39 +115,5 @@ impl FromStr for FormatterConfiguration {
 
     fn from_str(_s: &str) -> Result<Self, Self::Err> {
         Ok(Self::default())
-    }
-}
-
-impl From<PlainIndentStyle> for IndentStyle {
-    fn from(value: PlainIndentStyle) -> Self {
-        match value {
-            PlainIndentStyle::Tab => IndentStyle::Tab,
-            PlainIndentStyle::Space => IndentStyle::Space,
-        }
-    }
-}
-
-#[derive(
-    Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize,
-)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase")]
-pub enum PlainIndentStyle {
-    /// Tab
-    #[default]
-    Tab,
-    /// Space
-    Space,
-}
-
-impl FromStr for PlainIndentStyle {
-    type Err = &'static str;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "tab" => Ok(PlainIndentStyle::Tab),
-            "space" => Ok(PlainIndentStyle::Space),
-            _ => Err("Unsupported value for this option"),
-        }
     }
 }

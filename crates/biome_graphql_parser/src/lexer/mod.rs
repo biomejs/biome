@@ -302,7 +302,7 @@ impl<'src> GraphqlLexer<'src> {
             b"ENUM_VALUE" => ENUM_VALUE_KW,
             b"INPUT_OBJECT" => INPUT_OBJECT_KW,
             b"INPUT_FIELD_DEFINITION" => INPUT_FIELD_DEFINITION_KW,
-            _ => GRAPHQL_NAME,
+            _ => T![ident],
         }
     }
 
@@ -312,7 +312,7 @@ impl<'src> GraphqlLexer<'src> {
 
         let char = self.current_char_unchecked();
         let err = ParseDiagnostic::new(
-            format!("unexpected character `{}`", char),
+            format!("unexpected character `{char}`"),
             self.text_position()..self.text_position() + char.text_len(),
         );
         self.diagnostics.push(err);

@@ -1,7 +1,7 @@
 use crate::react::hooks::*;
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_deserialize::{non_empty, DeserializableValidator, DeserializationDiagnostic};
 use biome_deserialize_macros::Deserializable;
@@ -19,7 +19,7 @@ use std::collections::BTreeMap;
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce all dependencies are correctly specified in a React hook.
     ///
     /// This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin), and it's meant to target projects that uses React.
@@ -467,21 +467,44 @@ fn capture_needs_to_be_in_the_dependency_list(
     match decl.parent_binding_pattern_declaration().unwrap_or(decl) {
         // These declarations are always stable
         AnyJsBindingDeclaration::JsClassDeclaration(_)
+        | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
+        | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
         | AnyJsBindingDeclaration::TsEnumDeclaration(_)
         | AnyJsBindingDeclaration::TsTypeAliasDeclaration(_)
         | AnyJsBindingDeclaration::TsInterfaceDeclaration(_)
         | AnyJsBindingDeclaration::TsModuleDeclaration(_)
         | AnyJsBindingDeclaration::TsInferType(_)
         | AnyJsBindingDeclaration::TsMappedType(_)
-        | AnyJsBindingDeclaration::TsTypeParameter(_) => false,
-        // Function declarations are unstable if ...
+        | AnyJsBindingDeclaration::TsTypeParameter(_)
+        | AnyJsBindingDeclaration::TsEnumMember(_) => false,
+        // Function declarations are stable if ...
         AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
             let declaration_range = declaration.syntax().text_range();
 
-            // ... they are declared inside the component function
-            component_function_range
+            // ... they are declared outside of the component function
+            if component_function_range
                 .intersect(declaration_range)
-                .map_or(false, |range| !range.is_empty())
+                .map_or(true, TextRange::is_empty)
+            {
+                return false;
+            }
+
+            // ... they are recursively used by the binding being created:
+            //
+            // function MyRecursiveElement() {
+            // 	 const children = useMemo(() => <MyRecursiveElement />, []);
+            // 	 return <div>{children}</div>;
+            // }
+            //
+            if capture
+                .node()
+                .ancestors()
+                .any(|ancestor| &ancestor == declaration.syntax())
+            {
+                return false;
+            }
+
+            true
         }
         // Variable declarators are stable if ...
         AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
@@ -536,8 +559,6 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::JsFunctionExpression(_)
         | AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
         | AnyJsBindingDeclaration::JsClassExpression(_)
-        | AnyJsBindingDeclaration::JsClassExportDefaultDeclaration(_)
-        | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_)
         | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
         | AnyJsBindingDeclaration::JsCatchDeclaration(_) => true,
 
@@ -636,34 +657,35 @@ fn determine_unstable_dependency(
     }
 }
 
-fn into_member_vec(node: &JsSyntaxNode) -> Vec<String> {
+fn into_member_iter(node: &JsSyntaxNode) -> impl Iterator<Item = String> {
     let mut vec = vec![];
     let mut next = Some(node.clone());
 
-    while let Some(node) = &next {
-        match AnyJsMemberExpression::cast_ref(node) {
-            Some(member_expr) => {
+    while let Some(node) = next {
+        match AnyJsMemberExpression::try_cast(node) {
+            Ok(member_expr) => {
                 let member_name = member_expr
                     .member_name()
                     .and_then(|it| it.as_string_constant().map(|it| it.to_owned()));
                 if let Some(member_name) = member_name {
-                    vec.insert(0, member_name);
+                    vec.push(member_name);
                 }
                 next = member_expr.object().ok().map(AstNode::into_syntax);
             }
-            None => {
-                vec.insert(0, node.text_trimmed().to_string());
+            Err(node) => {
+                vec.push(node.text_trimmed().to_string());
                 break;
             }
         }
     }
 
-    vec
+    // elemnsts are inserted in reverse, thus we have to reverse the iteration.
+    vec.into_iter().rev()
 }
 
 fn compare_member_depth(a: &JsSyntaxNode, b: &JsSyntaxNode) -> (bool, bool) {
-    let mut a_member_iter = into_member_vec(a).into_iter();
-    let mut b_member_iter = into_member_vec(b).into_iter();
+    let mut a_member_iter = into_member_iter(a);
+    let mut b_member_iter = into_member_iter(b);
 
     loop {
         let a_member = a_member_iter.next();

@@ -1,11 +1,9 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
-
-use biome_diagnostics::category;
+use biome_analyze::{context::RuleContext, declare_syntax_rule, Ast, Rule, RuleDiagnostic};
 use biome_js_syntax::{AnyJsClassMember, JsClassMemberList, TextRange};
 use biome_rowan::AstNode;
 use rustc_hash::{FxHashMap, FxHashSet};
 
-declare_rule! {
+declare_syntax_rule! {
     /// Catch a `SyntaxError` when defining duplicate private class members.
     ///
     /// ## Examples
@@ -79,9 +77,9 @@ impl Rule for NoDuplicatePrivateClassMembers {
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let (member_name, range) = state;
         let diagnostic = RuleDiagnostic::new(
-            category!("parse/noDuplicatePrivateClassMembers"),
+            rule_category!(),
             range,
-            format!("Duplicate private class member {:?}", member_name),
+            format!("Duplicate private class member {member_name:?}"),
         );
 
         Some(diagnostic)

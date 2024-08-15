@@ -282,9 +282,9 @@ impl JsxAttributeList {
 
     pub fn find_by_name(&self, name_to_lookup: &str) -> SyntaxResult<Option<JsxAttribute>> {
         let attribute = self.iter().find_map(|attribute| {
-            let attribute = JsxAttribute::cast_ref(attribute.syntax())?;
+            let attribute = JsxAttribute::cast(attribute.into_syntax())?;
             let name = attribute.name().ok()?;
-            let name = JsxName::cast_ref(name.syntax())?;
+            let name = JsxName::cast(name.into_syntax())?;
             if name.value_token().ok()?.text_trimmed() == name_to_lookup {
                 Some(attribute)
             } else {
@@ -454,7 +454,7 @@ impl AnyJsxChild {
             }
             AnyJsxChild::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;
-                let jsx_element = AnyJsxElement::cast(opening_element.syntax().clone())?;
+                let jsx_element = AnyJsxElement::cast(opening_element.into_syntax())?;
 
                 // We don't check if a component (e.g. <Text aria-hidden />) is using the `aria-hidden` property,
                 // since we don't have enough information about how the property is used.
@@ -462,7 +462,7 @@ impl AnyJsxChild {
                     || !jsx_element.has_truthy_attribute("aria-hidden")
             }
             AnyJsxChild::JsxSelfClosingElement(element) => {
-                let jsx_element = AnyJsxElement::cast(element.syntax().clone())?;
+                let jsx_element = AnyJsxElement::unwrap_cast(element.syntax().clone());
                 jsx_element.is_custom_component()
                     || !jsx_element.has_truthy_attribute("aria-hidden")
             }

@@ -1,7 +1,7 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 use crate::services::semantic::Semantic;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunction, AnyJsMemberExpression, AnyJsTemplateElement,
@@ -11,7 +11,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Discourage the usage of Array index in keys.
     ///
     /// > We don’t recommend using indexes for keys if the order of items may change.
@@ -263,7 +263,7 @@ fn is_array_method_index(
     call_expression: &JsCallExpression,
 ) -> Option<bool> {
     let member_expression =
-        AnyJsMemberExpression::cast_ref(call_expression.callee().ok()?.syntax())?;
+        AnyJsMemberExpression::cast(call_expression.callee().ok()?.into_syntax())?;
     let name = member_expression.member_name()?;
     let name = name.text();
     if matches!(

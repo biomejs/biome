@@ -11,6 +11,7 @@ impl FormatRule<AnyCssSelector> for FormatAnyCssSelector {
             AnyCssSelector::CssBogusSelector(node) => node.format().fmt(f),
             AnyCssSelector::CssComplexSelector(node) => node.format().fmt(f),
             AnyCssSelector::CssCompoundSelector(node) => node.format().fmt(f),
+            AnyCssSelector::CssMetavariable(node) => node.format().fmt(f),
         }
     }
 }

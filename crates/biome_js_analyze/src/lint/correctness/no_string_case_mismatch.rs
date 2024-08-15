@@ -1,5 +1,7 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::*;
@@ -7,7 +9,7 @@ use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationEx
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow comparison of expressions modifying the string case with non-compliant value.
     ///
     /// ## Examples
@@ -182,7 +184,7 @@ impl StringCase {
             return None;
         }
         let callee = call.callee().ok()?;
-        let member_expr = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+        let member_expr = AnyJsMemberExpression::cast(callee.into_syntax())?;
         let member_name = member_expr.member_name()?;
         let member_name = member_name.text();
         if member_name == "toLowerCase" {

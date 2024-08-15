@@ -1,10 +1,10 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsCaseClause, JsDefaultClause};
 use biome_rowan::{AstNode, Direction};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce default clauses in switch statements to be last
     ///
     /// A switch statement can optionally have a default clause.

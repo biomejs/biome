@@ -1,6 +1,7 @@
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_aria::{roles::AriaRoleDefinition, AriaRoles};
 use biome_console::markup;
@@ -9,7 +10,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce explicit `role` property is not the same as implicit/default role property on an element.
     ///
     /// ## Examples
@@ -69,9 +70,10 @@ impl Rule for NoRedundantRoles {
         let aria_roles = ctx.aria_roles();
 
         let (element_name, attributes) = get_element_name_and_attributes(node)?;
-        let attribute_name_to_values = ctx.extract_attributes(&attributes)?;
-        let implicit_role =
-            aria_roles.get_implicit_role(&element_name, &attribute_name_to_values)?;
+        let attribute_name_to_values = ctx.extract_attributes(&attributes);
+        let attribute_name_to_values = ctx.convert_all_attribute_values(attribute_name_to_values);
+        let attr = attribute_name_to_values?;
+        let implicit_role = aria_roles.get_implicit_role(&element_name, &attr)?;
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?;

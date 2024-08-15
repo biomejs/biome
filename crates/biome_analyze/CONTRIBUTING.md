@@ -60,27 +60,29 @@ New rules **must** be placed inside the `nursery` group. This group is meant as 
 >
 > If you aren't familiar with Biome's APIs, this is an option that you have. If you decide to use this option, you should make sure to describe your plan in an issue.
 
-Let's say we want to create a new rule called `myRuleName`, which uses the semantic model.
+Let's say we want to create a new **lint** rule called `useMyRuleName`, follow these steps:
 
 1. Run the command
 
    ```shell
-   just new-js-lintrule myRuleName
+   just new-js-lintrule useMyRuleName
    ```
-   The script will create a new **lint** rule for the _JavaScript_ language, inside the `biome_js_analyze`
+   The script will generate a bunch of files for the _JavaScript_ language, inside the `biome_js_analyze` crate.
+   Among the other files, you'll find a file called `use_my_new_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
 
    If you want to create a _CSS_ lint rule, run this script. It will generate a new lint rule in `biome_css_analyze`
+
    ```shell
-   just new-css-lintrule myRuleName
+   just new-css-lintrule useMyRuleName
    ```
 
-1. The `CST` query type allows you to query the CST of a program.
+1. The `Ast` query type allows you to query the CST of a program.
 1. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
 1. Implement the `run` function:
 
    This function is called every time the analyzer finds a match for the query specified by the rule, and may return zero or more "signals".
 
-1. Implement the `diagnostic` function. Follow the [pillars](#explain-a-rule-to-the-user):
+1. Implement the `diagnostic` function. Follow the [pillars](#explain-a-rule-to-the-user) when writing the message of a diagnostic:
 
    ```rust
    impl Rule for UseAwesomeTricks {
@@ -96,22 +98,30 @@ Let's say we want to create a new rule called `myRuleName`, which uses the seman
    ```rust
    impl Rule for UseAwesomeTricks {
        // .. code
-       fn action(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {}
+       fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+         let mut mutation = ctx.root().mutation();
+         Some(JsRuleAction::new(
+           ActionCategory::QuickFix,
+           ctx.metadata().applicability(),
+           markup! { "<MESSAGE>" }.to_owned(),
+           mutation,
+         ))
+       }
    }
    ```
 
    It may return zero or one code action.
-   Rules can return a code action that can be **safe** or **unsafe**. If a rule returns a code action, you must add `fix_kind` to the macro `declare_rule`.
+   Rules can return a code action that can be **safe** or **unsafe**. If a rule returns a code action, you must add `fix_kind` to the macro `declare_lint_rule`.
+
    ```rust
    use biome_analyze::FixKind;
-   declare_rule!{
+   declare_lint_rule!{
      fix_kind: FixKind::Safe,
    }
    ```
    When returning a code action, you must pass the `category` and the `applicability` fields.
    `category` must be `ActionCategory::QuickFix`.
-   `applicability` is either `Applicability:MaybeIncorrect` or `Applicability:Always`.
-   `Applicability:Always` must only be used when the code transformation is safe.
+   `applicability` is derived from the metadata [`fix_kind`](#code-action).
    In other words, the code transformation should always result in code that doesn't change the behavior of the logic.
    In the case of `noVar`, it is not always safe to turn `var` to `const` or `let`.
 
@@ -186,8 +196,6 @@ impl Rule for MyRule {
     type State = Fix;
     type Signals = Vec<Self::State>;
     type Options = MyRuleOptions;
-
-    ...
 }
 ```
 
@@ -228,16 +236,16 @@ pub enum Behavior {
 Below, there are many tips and guidelines on how to create a lint rule using Biome infrastructure.
 
 
-#### `declare_rule`
+#### `declare_lint_rule`
 
 This macro is used to declare an analyzer rule type, and implement the [RuleMeta] trait for it.
 
 The macro itself expects the following syntax:
 
 ```rust
-use biome_analyze::declare_rule;
+use biome_analyze::declare_lint_rule;
 
-declare_rule! {
+declare_lint_rule! {
     /// Documentation
     pub(crate) ExampleRule {
         version: "next",
@@ -250,47 +258,48 @@ declare_rule! {
 
 ##### Biome lint rules inspired by other lint rules
 
-If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `Source`, which is an `enum` that contains various variants.
+If a **lint** rule is inspired by an existing rule from other ecosystems (ESLint, ESLint plugins, clippy, etc.), you can add a new metadata to the macro called `source`. Its value is `&'static [RuleSource]`, which is a reference to a slice of `RuleSource` elements, each representing a different source.
 
 If you're implementing a lint rule that matches the behaviour of the ESLint rule `no-debugger`, you'll use the variant `::ESLint` and pass the name of the rule:
 
 ```rust
-use biome_analyze::{declare_rule, Source};
+use biome_analyze::{declare_lint_rule, RuleSource};
 
-declare_rule! {
+declare_lint_rule! {
     /// Documentation
     pub(crate) ExampleRule {
         version: "next",
         name: "myRuleName",
         language: "js",
         recommended: false,
-        source: Source::Eslint("no-debugger"),
+        sources: &[RuleSource::Eslint("no-debugger")],
     }
 }
 ```
 
-If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `SourceKind::Inspired` type.
+If the rule you're implementing has a different behaviour or option, you can add the `source_kind` metadata and use the `RuleSourceKind::Inspired` type. If there are multiple sources, we assume that each source has the same `source_kind`.
 
 ```rust
-use biome_analyze::{declare_rule, Source, SourceKind};
+use biome_analyze::{declare_lint_rule, RuleSource, RuleSourceKind};
 
-declare_rule! {
+declare_lint_rule! {
     /// Documentation
     pub(crate) ExampleRule {
         version: "next",
         name: "myRuleName",
         language: "js",
         recommended: false,
-        source: Source::Eslint("no-debugger"),
-        source_kind: SourceKind::Inspired,
+        sources: &[RuleSource::Eslint("no-debugger")],
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 ```
-By default, `source_kind` is always `SourceKind::Same`.
+
+By default, `source_kind` is always `RuleSourceKind::SameLogic`.
 
 #### Category Macro
 
-Declaring a rule using `declare_rule!` will cause a new `rule_category!`
+Declaring a rule using `declare_lint_rule!` will cause a new `rule_category!`
 macro to be declared in the surrounding module. This macro can be used to
 refer to the corresponding diagnostic category for this lint rule, if it
 has one. Using this macro instead of getting the category for a diagnostic
@@ -299,7 +308,7 @@ injecting the category at compile time and checking that it is correctly
 registered to the `biome_diagnostics` library.
 
 ```rust
-declare_rule! {
+declare_lint_rule! {
     /// Documentation
     pub(crate) ExampleRule {
         version: "next",
@@ -327,6 +336,7 @@ When navigating the nodes and tokens of certain nodes, you will notice straight 
 Generally, you will end up navigating the CST inside the `run` function, and this function will usually return an `Option` or a `Vec`.
 
 - If the `run` function returns an `Option`, you're encouraged to transform the `Result` into an `Option` and use the try operator `?`. This will make your coding way easier:
+
   ```rust
   fn run() -> Self::Signals {
     let prev_val = js_object_member.value().ok()?;
@@ -413,6 +423,48 @@ impl Rule for ForLoopCountReferences {
 }
 ```
 
+#### Multiple signals
+
+Some rules require you to find all possible cases upfront in `run` function.
+To achieve that you can change Signals type from `Option<()>` to `Vec<()>`.
+This will call the diagnostic/action function for every item of the vec.
+
+Taking previous example and modifying it a bit we can apply diagnostic for each item easily.
+
+```rust
+impl Rule for ForLoopCountReferences {
+    type Query = Semantic<JsForStatement>;
+    type State = TextRange;
+    type Signals = Vec<Self::State>; // Replaced Option with Vec
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let node = ctx.query();
+
+        let model = ctx.model();
+
+        ...
+
+        // Get all write references
+        let write_references = binding.all_writes(model);
+
+        // Find all places where variable is being written to and get node ranges
+        let write_ranges = write_references.into_iter().map(|write| {
+            let syntax = write.syntax();
+            let range = syntax.text_range();
+
+            Some(range)
+        }).collect::<Vec<_>>();
+
+        write_ranges
+    }
+
+    fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+        // This will be called for each vector item
+    }
+}
+```
+
 #### Code action
 
 A rule can implement a code action. A code action provides to the final user the option to fix or change their code.
@@ -422,9 +474,9 @@ In a lint rule, for example, it signals an opportunity for the user to fix the d
 First, you have to add a new metadata called `fix_kind`, its value is the `FixKind`.
 
 ```rust
-use biome_analyze::{declare_rule, FixKind};
+use biome_analyze::{declare_lint_rule, FixKind};
 
-declare_rule! {
+declare_lint_rule! {
     /// Documentation
     pub(crate) ExampleRule {
         version: "next",
@@ -566,7 +618,7 @@ impl Rule for UseYield {
 
 A swift way to test your rule is to go inside the `biome_js_analyze/src/lib.rs` file (this will change based on where you're implementing the rule) and modify the `quick_test` function.
 
-Usually this test is ignored, so remove _comment_ the macro `#[ignore]` macro, change the `let SOURCE` variable to whatever source code you need to test.  Then update the rule filter, and add your rule:
+Usually this test is ignored, so remove _comment_ the macro `#[ignore]` macro, change the `let SOURCE` variable to whatever source code you need to test. Then update the rule filter, and add your rule:
 
 ```rust
 let rule_filter = RuleFilter::Rule("nursery", "useAwesomeTrick");
@@ -627,19 +679,20 @@ The documentation needs to adhere to the following rules:
 - The **first** paragraph of the documentation is used as brief description of the rule, and it **must** be written in one single line. Breaking the paragraph in multiple lines will break the table content of the rules page.
 - The next paragraphs can be used to further document the rule with as many details as you see fit.
 - The documentation must have a `## Examples` header, followed by two headers: `### Invalid` and `### Valid`. `### Invalid` must go first because we need to show when the rule is triggered.
+- Rule options if any, must be documented in the `## Options` section.
 - Each code block must have a _language_ defined.
 - When adding _invalid_ snippets in the `### Invalid` section, you must use the `expect_diagnostic` code block property. We use this property to generate a diagnostic and attach it to the snippet. A snippet **must emit only ONE diagnostic**.
 - When adding _valid_ snippets in the `### Valid` section, you can use one single snippet.
 - You can use the code block property `ignore` to tell the code generation script to **not generate a diagnostic for an invalid snippet**.
-- Update the `language` field in the `declare_rule!` macro to the language the rule primarily applies to.
+- Update the `language` field in the `declare_lint_rule!` macro to the language the rule primarily applies to.
   - If your rule applies to any JavaScript, you can leave it as `js`.
   - If your rule only makes sense in a specific JavaScript dialect, you should set it to `jsx`, `ts`, or `tsx`, whichever is most appropriate.
 
 Here's an example of how the documentation could look like:
 
 ```rust
-use biome_analyze::declare_rule;
-declare_rule! {
+use biome_analyze::declare_lint_rule;
+declare_lint_rule! {
     /// Disallow the use of `var`.
     ///
     /// _ES2015_ allows to create variables with block scope instead of function scope
@@ -707,9 +760,9 @@ of deprecation can be multiple.
 In order to do, the macro allows adding additional field to add the reason for deprecation
 
 ```rust
-use biome_analyze::declare_rule;
+use biome_analyze::declare_lint_rule;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of `var`.
     ///
     /// ## Examples

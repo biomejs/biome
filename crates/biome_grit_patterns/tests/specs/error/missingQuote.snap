@@ -1,0 +1,26 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: invalidQuery
+---
+ErrorSnapshotResult {
+    diagnostics: [
+        ParseDiagnostic {
+            span: Some(
+                0..2,
+            ),
+            message: Missing closing quote,
+            advice: ParserAdvice {
+                advice_list: [
+                    Detail(
+                        ParserAdviceDetail {
+                            message: "file ends here",
+                            span: Some(
+                                2..2,
+                            ),
+                        },
+                    ),
+                ],
+            },
+        },
+    ],
+}

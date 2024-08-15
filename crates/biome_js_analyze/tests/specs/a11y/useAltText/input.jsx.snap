@@ -15,6 +15,8 @@ expression: input.jsx
   <input type="image" aria-label={undefined} />
   <input type="image" aria-labelledby="" />
   <input type="image" aria-labelledby={undefined} />
+  <input type="image" aria-hidden={false} />
+  <input type="image" aria-hidden={undefined} />
 </>;
 
 // valid
@@ -24,6 +26,8 @@ expression: input.jsx
   <input type="foo" />
   <input type="image" aria-label="foo" />
   <input type="image" aria-labelledby="id1" />
+  <input type="image" aria-hidden />
+  <input type="image" aria-hidden={true} />
   <input type="image" alt="" />
   <input type="image" alt="This is descriptive!" />
   <input type="image" alt={altText} />
@@ -47,6 +51,8 @@ input.jsx:3:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -63,6 +69,8 @@ input.jsx:4:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
     6 │   <input type="image">Foo</input>
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -81,6 +89,8 @@ input.jsx:5:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -97,6 +107,8 @@ input.jsx:6:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
     8 │   <input type="image" aria-label="" />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -115,6 +127,8 @@ input.jsx:7:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -131,6 +145,8 @@ input.jsx:8:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
     10 │   <input type="image" aria-labelledby="" />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -149,6 +165,8 @@ input.jsx:9:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
   
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
 
 ```
 
@@ -162,9 +180,11 @@ input.jsx:10:3 lint/a11y/useAltText ━━━━━━━━━━━━━━�
   > 10 │   <input type="image" aria-labelledby="" />
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     11 │   <input type="image" aria-labelledby={undefined} />
-    12 │ </>;
+    12 │   <input type="image" aria-hidden={false} />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
@@ -178,12 +198,50 @@ input.jsx:11:3 lint/a11y/useAltText ━━━━━━━━━━━━━━�
     10 │   <input type="image" aria-labelledby="" />
   > 11 │   <input type="image" aria-labelledby={undefined} />
        │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    12 │ </>;
-    13 │ 
+    12 │   <input type="image" aria-hidden={false} />
+    13 │   <input type="image" aria-hidden={undefined} />
   
   i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
   
 
 ```
 
+```
+input.jsx:12:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    10 │   <input type="image" aria-labelledby="" />
+    11 │   <input type="image" aria-labelledby={undefined} />
+  > 12 │   <input type="image" aria-hidden={false} />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │   <input type="image" aria-hidden={undefined} />
+    14 │ </>;
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```
+
+```
+input.jsx:13:3 lint/a11y/useAltText ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Provide a text alternative through the alt, aria-label or aria-labelledby attribute
+  
+    11 │   <input type="image" aria-labelledby={undefined} />
+    12 │   <input type="image" aria-hidden={false} />
+  > 13 │   <input type="image" aria-hidden={undefined} />
+       │   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ </>;
+    15 │ 
+  
+  i Meaningful alternative text on elements helps users relying on screen readers to understand content's purpose within a page.
+  
+  i If the content is decorative, redundant, or obscured, consider hiding it from assistive technologies with the aria-hidden attribute.
+  
+
+```

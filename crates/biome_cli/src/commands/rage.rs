@@ -1,12 +1,17 @@
 use biome_configuration::{ConfigurationPathHint, Rules};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{fmt, markup, ConsoleExt, HorizontalLine, Markup, Padding, SOFT_LINE};
+use biome_console::{
+    fmt, markup, ConsoleExt, DebugDisplay, DebugDisplayOption, HorizontalLine, KeyValuePair,
+    Padding, SOFT_LINE,
+};
 use biome_diagnostics::termcolor::{ColorChoice, WriteColor};
 use biome_diagnostics::{termcolor, PrintDescription};
+use biome_flags::biome_env;
 use biome_fs::FileSystem;
 use biome_service::configuration::{load_configuration, LoadedConfiguration};
 use biome_service::workspace::{client, RageEntry, RageParams};
 use biome_service::{DynRef, Workspace};
+use std::path::PathBuf;
 use std::{env, io, ops::Deref};
 use tokio::runtime::Runtime;
 
@@ -25,6 +30,8 @@ pub(crate) fn rage(
         .buffer()
         .supports_color();
 
+    let biome_env = biome_env();
+
     session.app.console.log(markup!("CLI:\n"
     {KeyValuePair("Version", markup!({VERSION}))}
     {KeyValuePair("Color support", markup!({DebugDisplay(terminal_supports_colors)}))}
@@ -32,9 +39,8 @@ pub(crate) fn rage(
     {Section("Platform")}
     {KeyValuePair("CPU Architecture", markup!({std::env::consts::ARCH}))}
     {KeyValuePair("OS", markup!({std::env::consts::OS}))}
-
     {Section("Environment")}
-    {EnvVarOs("BIOME_LOG_DIR")}
+    {biome_env}
     {EnvVarOs("NO_COLOR")}
     {EnvVarOs("TERM")}
     {EnvVarOs("JS_RUNTIME_VERSION")}
@@ -112,7 +118,7 @@ impl Display for RunningRomeServer {
         };
 
         for version in versions {
-            if version == biome_service::VERSION {
+            if version == biome_configuration::VERSION {
                 let runtime = Runtime::new()?;
                 match service::open_transport(runtime) {
                     Ok(None) => {
@@ -217,6 +223,7 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Line ending", markup!({DebugDisplay(formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplay(formatter_configuration.line_width.value())}))}
                             {KeyValuePair("Attribute position", markup!({DebugDisplay(formatter_configuration.attribute_position)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DebugDisplay(formatter_configuration.bracket_spacing)}))}
                             {KeyValuePair("Ignore", markup!({DebugDisplay(formatter_configuration.ignore.iter().collect::<Vec<_>>())}))}
                             {KeyValuePair("Include", markup!({DebugDisplay(formatter_configuration.include.iter().collect::<Vec<_>>())}))}
                         ).fmt(fmt)?;
@@ -231,14 +238,14 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Trailing commas", markup!({DebugDisplay(javascript_formatter_configuration.trailing_commas)}))}
                             {KeyValuePair("Semicolons", markup!({DebugDisplay(javascript_formatter_configuration.semicolons)}))}
                             {KeyValuePair("Arrow parentheses", markup!({DebugDisplay(javascript_formatter_configuration.arrow_parentheses)}))}
-                            {KeyValuePair("Bracket spacing", markup!({DebugDisplay(javascript_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(javascript_formatter_configuration.bracket_spacing)}))}
                             {KeyValuePair("Bracket same line", markup!({DebugDisplay(javascript_formatter_configuration.bracket_same_line)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(javascript_formatter_configuration.quote_style)}))}
                             {KeyValuePair("Indent style", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_style)}))}
                             {KeyValuePair("Indent width", markup!({DebugDisplayOption(javascript_formatter_configuration.indent_width)}))}
                             {KeyValuePair("Line ending", markup!({DebugDisplayOption(javascript_formatter_configuration.line_ending)}))}
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(javascript_formatter_configuration.line_width.map(|lw| lw.value()))}))}
-                            {KeyValuePair("Attribute position", markup!({DebugDisplay(javascript_formatter_configuration.attribute_position)}))}
+                            {KeyValuePair("Attribute position", markup!({DebugDisplayOption(javascript_formatter_configuration.attribute_position)}))}
                         )
                         .fmt(fmt)?;
 
@@ -265,6 +272,19 @@ impl Display for RageConfiguration<'_, '_> {
                             {KeyValuePair("Line width", markup!({DebugDisplayOption(css_formatter_configuration.line_width)}))}
                             {KeyValuePair("Quote style", markup!({DebugDisplay(css_formatter_configuration.quote_style)}))}
                         ).fmt(fmt)?;
+
+                        let graphql_formatter_configuration =
+                            configuration.get_graphql_formatter_configuration();
+                        markup! (
+                            {Section("GraphQL Formatter")}
+                            {KeyValuePair("Enabled", markup!({DebugDisplayOption(graphql_formatter_configuration.enabled)}))}
+                            {KeyValuePair("Indent style", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_style)}))}
+                            {KeyValuePair("Indent width", markup!({DebugDisplayOption(graphql_formatter_configuration.indent_width)}))}
+                            {KeyValuePair("Line ending", markup!({DebugDisplayOption(graphql_formatter_configuration.line_ending)}))}
+                            {KeyValuePair("Line width", markup!({DebugDisplayOption(graphql_formatter_configuration.line_width)}))}
+                            {KeyValuePair("Bracket spacing", markup!({DebugDisplayOption(graphql_formatter_configuration.bracket_spacing)}))}
+                            {KeyValuePair("Quote style", markup!({DebugDisplayOption(graphql_formatter_configuration.quote_style)}))}
+                        ).fmt(fmt)?;
                     }
 
                     // Print linter configuration if --linter option is true
@@ -274,11 +294,13 @@ impl Display for RageConfiguration<'_, '_> {
                         let javascript_linter = configuration.get_javascript_linter_configuration();
                         let json_linter = configuration.get_json_linter_configuration();
                         let css_linter = configuration.get_css_linter_configuration();
+                        let graphq_linter = configuration.get_graphql_linter_configuration();
                         markup! (
                             {Section("Linter")}
                             {KeyValuePair("JavaScript enabled", markup!({DebugDisplay(javascript_linter.enabled)}))}
                             {KeyValuePair("JSON enabled", markup!({DebugDisplay(json_linter.enabled)}))}
                             {KeyValuePair("CSS enabled", markup!({DebugDisplay(css_linter.enabled)}))}
+                            {KeyValuePair("GraphQL enabled", markup!({DebugDisplayOption(graphq_linter.enabled)}))}
                             {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or_default())}))}
                             {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or_default())}))}
                             {RageConfigurationLintRules("Enabled rules",linter_configuration)}
@@ -315,33 +337,6 @@ impl Display for RageConfigurationLintRules<'_> {
     }
 }
 
-struct DebugDisplay<T>(T);
-
-impl<T> Display for DebugDisplay<T>
-where
-    T: std::fmt::Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        write!(f, "{:?}", self.0)
-    }
-}
-
-struct DebugDisplayOption<T>(Option<T>);
-
-impl<T> Display for DebugDisplayOption<T>
-where
-    T: std::fmt::Debug,
-{
-    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        if let Some(value) = &self.0 {
-            markup!({ DebugDisplay(value) }).fmt(fmt)?;
-        } else {
-            markup!(<Dim>"unset"</Dim>).fmt(fmt)?;
-        }
-        Ok(())
-    }
-}
-
 struct EnvVarOs(&'static str);
 
 impl fmt::Display for EnvVarOs {
@@ -362,30 +357,17 @@ impl Display for Section<'_> {
     }
 }
 
-struct KeyValuePair<'a>(&'a str, Markup<'a>);
-
-impl Display for KeyValuePair<'_> {
-    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let KeyValuePair(key, value) = self;
-        write!(fmt, "  {key}:")?;
-
-        let padding_width = 30usize.saturating_sub(key.len() + 1);
-
-        for _ in 0..padding_width {
-            fmt.write_str(" ")?;
-        }
-
-        value.fmt(fmt)?;
-
-        fmt.write_str("\n")
-    }
-}
-
 struct BiomeServerLog;
 
 impl Display for BiomeServerLog {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        if let Ok(Some(log)) = read_most_recent_log_file() {
+        if let Ok(Some(log)) = read_most_recent_log_file(
+            biome_env().biome_log_path.value().map(PathBuf::from),
+            biome_env()
+                .biome_log_prefix
+                .value()
+                .unwrap_or("server.log".to_string()),
+        ) {
             markup!("\n"<Emphasis><Underline>"Biome Server Log:"</Underline></Emphasis>"
 
 "<Warn>"\u{26a0} Please review the content of the log file before sharing it publicly as it may contain sensitive information:

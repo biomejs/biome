@@ -1,13 +1,12 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use crate::services::aria::{Aria, AttributeValue};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{JsxOpeningElement, JsxSelfClosingElement};
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 use serde::{Deserialize, Serialize};
 
-use crate::services::aria::Aria;
-
-declare_rule! {
+declare_lint_rule! {
     /// Use valid values for the `autocomplete` attribute on `input` elements.
     ///
     /// The HTML autocomplete attribute only accepts specific predefined values.
@@ -165,7 +164,18 @@ impl Rule for UseValidAutocomplete {
                 let _initializer = autocomplete.initializer()?;
                 let extract_attrs = ctx.extract_attributes(&attributes)?;
                 let autocomplete_values = extract_attrs.get("autocomplete")?;
-                if is_valid_autocomplete(autocomplete_values)? {
+                if autocomplete_values
+                    .first()
+                    .map_or(false, |v| matches!(v, AttributeValue::DynamicValue(_)))
+                {
+                    return None;
+                }
+
+                let autocomplete_values = ctx.convert_attribute_values(autocomplete_values.clone());
+
+                if autocomplete_values.first() == Some(&"none".to_string())
+                    || is_valid_autocomplete(&autocomplete_values)?
+                {
                     return None;
                 }
                 Some(autocomplete.range())
@@ -181,7 +191,18 @@ impl Rule for UseValidAutocomplete {
                 let _initializer = autocomplete.initializer()?;
                 let extract_attrs = ctx.extract_attributes(&attributes)?;
                 let autocomplete_values = extract_attrs.get("autocomplete")?;
-                if is_valid_autocomplete(autocomplete_values)? {
+                if autocomplete_values
+                    .first()
+                    .map_or(false, |v| matches!(v, AttributeValue::DynamicValue(_)))
+                {
+                    return None;
+                }
+
+                let autocomplete_values = ctx.convert_attribute_values(autocomplete_values.clone());
+
+                if autocomplete_values.first() == Some(&"none".to_string())
+                    || is_valid_autocomplete(&autocomplete_values)?
+                {
                     return None;
                 }
                 Some(autocomplete.range())

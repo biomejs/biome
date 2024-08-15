@@ -1,6 +1,7 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -10,7 +11,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow `new` operators with global non-constructor functions.
     ///
     /// Some global functions cannot be called using the new operator and

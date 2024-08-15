@@ -1,11 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsPropertyModifier, JsPropertyClassMember, JsRegexLiteralExpression};
 use biome_rowan::{AstNode, AstNodeList};
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
-declare_rule! {
+declare_lint_rule! {
     /// Require regex literals to be declared at the top level.
     ///
     /// This rule is useful to avoid performance issues when using regex literals inside functions called many times (hot paths). Regex literals create a new RegExp object when they are evaluated. (See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp) By declaring them at the top level, this overhead can be avoided.
@@ -64,23 +64,30 @@ impl Rule for UseTopLevelRegex {
         if flags.contains('g') || flags.contains('y') {
             return None;
         }
-        let found_all_allowed = regex.syntax().ancestors().all(|node| {
-            if let Some(node) = AnyJsControlFlowRoot::cast_ref(&node) {
-                matches!(
-                    node,
-                    AnyJsControlFlowRoot::JsStaticInitializationBlockClassMember(_)
-                        | AnyJsControlFlowRoot::TsModuleDeclaration(_)
-                        | AnyJsControlFlowRoot::JsModule(_)
-                        | AnyJsControlFlowRoot::JsScript(_)
-                )
-            } else if let Some(node) = JsPropertyClassMember::cast_ref(&node) {
-                node.modifiers()
-                    .iter()
-                    .any(|modifier| matches!(modifier, AnyJsPropertyModifier::JsStaticModifier(_)))
-            } else {
-                true
-            }
-        });
+        let found_all_allowed =
+            regex
+                .syntax()
+                .ancestors()
+                .all(|node| match AnyJsControlFlowRoot::try_cast(node) {
+                    Ok(node) => {
+                        matches!(
+                            node,
+                            AnyJsControlFlowRoot::JsStaticInitializationBlockClassMember(_)
+                                | AnyJsControlFlowRoot::TsModuleDeclaration(_)
+                                | AnyJsControlFlowRoot::JsModule(_)
+                                | AnyJsControlFlowRoot::JsScript(_)
+                        )
+                    }
+                    Err(node) => {
+                        if let Some(node) = JsPropertyClassMember::cast(node) {
+                            node.modifiers().iter().any(|modifier| {
+                                matches!(modifier, AnyJsPropertyModifier::JsStaticModifier(_))
+                            })
+                        } else {
+                            true
+                        }
+                    }
+                });
         if found_all_allowed {
             None
         } else {

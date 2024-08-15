@@ -1,13 +1,13 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::RuleSource;
-use biome_analyze::{declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsConstructorClassMember, JsReturnStatement};
 use biome_rowan::AstNode;
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow returning a value from a `constructor`.
     ///
     /// Returning a value from a `constructor` of a class is a possible error.

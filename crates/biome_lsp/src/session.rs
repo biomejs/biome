@@ -1,13 +1,14 @@
 use crate::converters::{negotiated_encoding, PositionEncoding, WideEncoding};
+use crate::diagnostics::LspError;
 use crate::documents::Document;
 use crate::extension_settings::ExtensionSettings;
 use crate::extension_settings::CONFIGURATION_SECTION;
 use crate::utils;
 use anyhow::Result;
-use biome_analyze::RuleCategories;
+use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
-use biome_diagnostics::PrintDescription;
+use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
 use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
@@ -260,13 +261,13 @@ impl Session {
     /// Get a [`Document`] matching the provided [`lsp_types::Url`]
     ///
     /// If document does not exist, result is [WorkspaceError::NotFound]
-    pub(crate) fn document(&self, url: &lsp_types::Url) -> Result<Document, WorkspaceError> {
+    pub(crate) fn document(&self, url: &lsp_types::Url) -> Result<Document, Error> {
         self.documents
             .read()
             .unwrap()
             .get(url)
             .cloned()
-            .ok_or_else(WorkspaceError::not_found)
+            .ok_or_else(|| WorkspaceError::not_found().with_file_path(url.to_string()))
     }
 
     /// Set the [`Document`] for the provided [`lsp_types::Url`]
@@ -298,7 +299,7 @@ impl Session {
     /// them to the client. Called from [`handlers::text_document`] when a file's
     /// contents changes.
     #[tracing::instrument(level = "trace", skip_all, fields(url = display(&url), diagnostic_count), err)]
-    pub(crate) async fn update_diagnostics(&self, url: lsp_types::Url) -> Result<()> {
+    pub(crate) async fn update_diagnostics(&self, url: lsp_types::Url) -> Result<(), LspError> {
         let biome_path = self.file_path(&url)?;
         let doc = self.document(&url)?;
         if self.configuration_status().is_error() && !self.notified_broken_configuration() {
@@ -310,24 +311,25 @@ impl Session {
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             features: FeaturesBuilder::new()
                 .with_linter()
+                .with_assists()
                 .with_organize_imports()
                 .build(),
             path: biome_path.clone(),
         })?;
 
         let diagnostics: Vec<Diagnostic> = {
-            let mut categories = RuleCategories::SYNTAX;
+            let mut categories = RuleCategoriesBuilder::default().with_syntax();
             if self.configuration_status().is_loaded() {
                 if file_features.supports_lint() {
-                    categories |= RuleCategories::LINT
+                    categories = categories.with_lint();
                 }
                 if file_features.supports_organize_imports() {
-                    categories |= RuleCategories::ACTION
+                    categories = categories.with_action();
                 }
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
                 path: biome_path.clone(),
-                categories,
+                categories: categories.build(),
                 max_diagnostics: u64::MAX,
                 only: Vec::new(),
                 skip: Vec::new(),
@@ -490,7 +492,8 @@ impl Session {
                         directory_path: configuration_path,
                         ..
                     } = loaded_configuration;
-                    info!("Loaded workspace setting");
+                    info!("Configuration loaded successfully from disk.");
+                    info!("Update workspace settings.");
                     let fs = &self.fs;
 
                     let result =
@@ -498,23 +501,29 @@ impl Session {
 
                     match result {
                         Ok((vcs_base_path, gitignore_matches)) => {
-                            if let ConfigurationPathHint::FromWorkspace(path) = &base_path {
-                                // We don't need the key
-                                let _ = self.workspace.register_project_folder(
-                                    RegisterProjectFolderParams {
-                                        path: Some(path.clone()),
-                                        // This is naive, but we don't know if the user has a file already open or not, so we register every project as the current one.
-                                        // The correct one is actually set when the LSP calls `textDocument/didOpen`
-                                        set_as_current_workspace: true,
-                                    },
-                                );
-                            } else {
-                                let _ = self.workspace.register_project_folder(
-                                    RegisterProjectFolderParams {
-                                        path: fs.working_directory(),
-                                        set_as_current_workspace: true,
-                                    },
-                                );
+                            let register_result =
+                                if let ConfigurationPathHint::FromWorkspace(path) = &base_path {
+                                    // We don't need the key
+                                    self.workspace
+                                        .register_project_folder(RegisterProjectFolderParams {
+                                            path: Some(path.clone()),
+                                            // This is naive, but we don't know if the user has a file already open or not, so we register every project as the current one.
+                                            // The correct one is actually set when the LSP calls `textDocument/didOpen`
+                                            set_as_current_workspace: true,
+                                        })
+                                        .err()
+                                } else {
+                                    self.workspace
+                                        .register_project_folder(RegisterProjectFolderParams {
+                                            path: fs.working_directory(),
+                                            set_as_current_workspace: true,
+                                        })
+                                        .err()
+                                };
+                            if let Some(error) = register_result {
+                                error!("Failed to register the project folder: {}", error);
+                                self.client.log_message(MessageType::ERROR, &error).await;
+                                return ConfigurationStatus::Error;
                             }
                             let result = self.workspace.update_settings(UpdateSettingsParams {
                                 workspace_directory: fs.working_directory(),
@@ -571,7 +580,7 @@ impl Session {
                         }
                         let result = self
                             .workspace
-                            .update_current_project(UpdateProjectParams { path: biome_path });
+                            .update_current_manifest(UpdateProjectParams { path: biome_path });
                         if let Err(err) = result {
                             error!("{}", err);
                         }

@@ -1,7 +1,7 @@
 pub(crate) mod array;
 mod assignment_like;
-mod binary_like_expression;
 mod conditional;
+mod format_binary_like_expression;
 pub mod string_utils;
 
 pub(crate) mod format_class;
@@ -10,7 +10,7 @@ pub(crate) mod format_node_without_comments;
 pub(crate) mod function_body;
 pub mod jsx;
 pub(crate) mod member_chain;
-mod object;
+pub(crate) mod object;
 mod object_like;
 mod object_pattern_like;
 #[cfg(test)]
@@ -20,30 +20,22 @@ mod typescript;
 
 use crate::context::trailing_commas::FormatTrailingCommas;
 use crate::context::Semicolons;
-use crate::parentheses::is_callee;
-pub(crate) use crate::parentheses::resolve_left_most_expression;
 use crate::prelude::*;
 pub(crate) use assignment_like::{
     with_assignment_layout, AnyJsAssignmentLike, AssignmentLikeLayout,
 };
-pub(crate) use binary_like_expression::{
-    needs_binary_like_parentheses, AnyJsBinaryLikeExpression, AnyJsBinaryLikeLeftExpression,
-};
 use biome_formatter::{format_args, write, Buffer};
-use biome_js_syntax::JsSyntaxToken;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsStatement, JsCallExpression, JsInitializerClause, JsLanguage, Modifier,
 };
+use biome_js_syntax::{JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::{AstNode, AstNodeList};
 use biome_text_size::TextSize;
 pub(crate) use conditional::{AnyJsConditional, ConditionalJsxChain};
 pub(crate) use object_like::JsObjectLike;
 pub(crate) use object_pattern_like::JsObjectPatternLike;
 pub(crate) use string_utils::*;
-pub(crate) use typescript::{
-    is_object_like_type, should_hug_type, union_or_intersection_type_needs_parentheses,
-    TsIntersectionOrUnionTypeList,
-};
+pub(crate) use typescript::{is_object_like_type, should_hug_type};
 
 /// Tests if expression is a long curried call
 ///
@@ -56,7 +48,11 @@ pub(crate) fn is_long_curried_call(expression: Option<&JsCallExpression>) -> boo
             if let (Ok(arguments), Ok(parent_arguments)) =
                 (expression.arguments(), parent_call.arguments())
             {
-                return is_callee(expression.syntax(), parent_call.syntax())
+                let is_callee = matches!(
+                    parent_call.syntax().kind(),
+                    JsSyntaxKind::JS_CALL_EXPRESSION | JsSyntaxKind::JS_NEW_EXPRESSION
+                );
+                return is_callee
                     && arguments.args().len() > parent_arguments.args().len()
                     && !parent_arguments.args().is_empty();
             }

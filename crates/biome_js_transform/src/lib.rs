@@ -12,19 +12,14 @@ use biome_diagnostics::Error;
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_rowan::{BatchMutation, SyntaxToken};
 use std::convert::Infallible;
+use std::ops::Deref;
+use std::sync::LazyLock;
 
-/// Return the static [MetadataRegistry] for the JS analyzer rules
-pub fn metadata() -> &'static MetadataRegistry {
-    lazy_static::lazy_static! {
-        static ref METADATA: MetadataRegistry = {
-            let mut metadata = MetadataRegistry::default();
-            visit_transformation_registry(&mut metadata);
-            metadata
-        };
-    }
-
-    &METADATA
-}
+pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
+    let mut metadata = MetadataRegistry::default();
+    visit_transformation_registry(&mut metadata);
+    metadata
+});
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
@@ -76,7 +71,7 @@ where
         }
     }
     let mut analyzer = Analyzer::new(
-        metadata(),
+        METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
         |_| -> Vec<Result<_, Infallible>> { unreachable!() },
         Box::new(TestAction),
@@ -120,7 +115,7 @@ pub(crate) type JsBatchMutation = BatchMutation<JsLanguage>;
 
 #[cfg(test)]
 mod tests {
-    use biome_analyze::{AnalyzerOptions, Never, RuleCategories, RuleFilter};
+    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
     use biome_js_parser::{parse, JsParserOptions};
     use biome_js_syntax::JsFileSource;
     use std::slice;
@@ -140,7 +135,9 @@ mod tests {
         transform(
             &parsed.tree(),
             AnalysisFilter {
-                categories: RuleCategories::TRANSFORMATION,
+                categories: RuleCategoriesBuilder::default()
+                    .with_transformation()
+                    .build(),
                 enabled_rules: Some(slice::from_ref(&rule_filter)),
                 ..AnalysisFilter::default()
             },

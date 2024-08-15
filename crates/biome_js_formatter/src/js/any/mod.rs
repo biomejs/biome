@@ -32,6 +32,7 @@ pub(crate) mod in_property;
 pub(crate) mod literal_expression;
 pub(crate) mod method_modifier;
 pub(crate) mod module_item;
+pub(crate) mod module_source;
 pub(crate) mod name;
 pub(crate) mod named_import_specifier;
 pub(crate) mod object_assignment_pattern_member;

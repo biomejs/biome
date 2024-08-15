@@ -1,11 +1,13 @@
 use std::ops::Range;
 
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::JsRegexLiteralExpression;
 use biome_rowan::{TextRange, TextSize};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow empty character classes in regular expression literals.
     ///
     /// Empty character classes don't match anything.

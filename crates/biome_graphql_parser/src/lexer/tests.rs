@@ -85,12 +85,7 @@ fn losslessness(string: String) -> bool {
     });
     let token_ranges = receiver
         .recv_timeout(Duration::from_secs(2))
-        .unwrap_or_else(|_| {
-            panic!(
-                "Lexer is infinitely recursing with this code: ->{}<-",
-                string
-            )
-        });
+        .unwrap_or_else(|_| panic!("Lexer is infinitely recursing with this code: ->{string}<-"));
 
     let mut new_str = String::with_capacity(string.len());
     let mut idx = TextSize::from(0);
@@ -311,31 +306,31 @@ fn comment() {
 fn name() {
     assert_lex! {
         r#"asciiIdentifier"#,
-        GRAPHQL_NAME:15,
+        IDENT:15,
     }
 
     assert_lex! {
         r#"with_underscore_here"#,
-        GRAPHQL_NAME:20,
+        IDENT:20,
     }
 
     assert_lex! {
         r#"with_unicodeà"#,
-        GRAPHQL_NAME:12,
+        IDENT:12,
         ERROR_TOKEN:2,
     }
 
     assert_lex! {
         r#"ᨀwith_unicodeàç"#,
         ERROR_TOKEN:3,
-        GRAPHQL_NAME:12,
+        IDENT:12,
         ERROR_TOKEN:2,
         ERROR_TOKEN:2,
     }
 
     assert_lex! {
         r#"field }"#,
-        GRAPHQL_NAME:5,
+        IDENT:5,
         WHITESPACE:1,
         R_CURLY:1,
     }

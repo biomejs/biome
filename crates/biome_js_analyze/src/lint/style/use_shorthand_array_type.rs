@@ -1,16 +1,16 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyTsType, JsSyntaxKind, JsSyntaxToken, TsReferenceType, TsTypeArguments, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPiece};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, SyntaxNodeOptionExt, TriviaPiece};
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// When expressing array types, this rule promotes the usage of `T[]` shorthand instead of `Array<T>`.
     ///
     /// ## Examples
@@ -73,12 +73,19 @@ impl Rule for UseShorthandArrayType {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let type_arguments = node.type_arguments()?;
+        let array_kind = get_array_kind_by_reference(node)?;
 
-        match get_array_kind_by_reference(node) {
-            Some(array_kind) => convert_to_array_type(&type_arguments, array_kind),
-            None => None,
+        // Ignore `Array` in the `extends` and `implements` clauses.
+        let parent = node
+            .syntax()
+            .ancestors()
+            .skip(1)
+            .find(|ancestor| ancestor.kind() != JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION);
+        if parent.kind() == Some(JsSyntaxKind::TS_TYPE_LIST) {
+            return None;
         }
+
+        convert_to_array_type(&node.type_arguments()?, array_kind)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {

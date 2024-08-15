@@ -1,8 +1,8 @@
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    Deserialized, Text, VisitableType,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, Deserialized, Text,
 };
 use biome_json_syntax::JsonLanguage;
 use biome_text_size::TextRange;
@@ -18,6 +18,7 @@ pub struct PackageJson {
     pub peer_dependencies: Dependencies,
     pub optional_dependencies: Dependencies,
     pub license: Option<(String, TextRange)>,
+    pub r#type: Option<PackageType>,
 }
 
 impl Manifest for PackageJson {
@@ -39,12 +40,28 @@ impl Dependencies {
     pub fn contains(&self, specifier: &str) -> bool {
         self.0.contains_key(specifier)
     }
+
+    pub fn add(&mut self, dependency: impl Into<String>, version: impl Into<Version>) {
+        self.0.insert(dependency.into(), version.into());
+    }
 }
 
 #[derive(Debug, Clone)]
 pub enum Version {
     SemVer(node_semver::Version),
     Literal(String),
+}
+
+impl From<&str> for Version {
+    fn from(value: &str) -> Self {
+        Self::Literal(value.to_string())
+    }
+}
+
+impl From<String> for Version {
+    fn from(value: String) -> Self {
+        Self::Literal(value)
+    }
 }
 
 impl Deserializable for PackageJson {
@@ -61,7 +78,7 @@ struct PackageJsonVisitor;
 impl DeserializationVisitor for PackageJsonVisitor {
     type Output = PackageJson;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,
@@ -116,6 +133,9 @@ impl DeserializationVisitor for PackageJsonVisitor {
                         result.optional_dependencies = deps;
                     }
                 }
+                "type" => {
+                    result.r#type = Deserializable::deserialize(&value, &key_text, diagnostics);
+                }
                 _ => {
                     // each package can add their own field, so we should ignore any extraneous key
                     // and only deserialize the ones that Biome deems important
@@ -138,4 +158,11 @@ impl Deserializable for Version {
             Err(_) => Some(Version::Literal(value.text().to_string())),
         }
     }
+}
+
+#[derive(Debug, Default, Clone, Eq, PartialEq, biome_deserialize_macros::Deserializable)]
+pub enum PackageType {
+    #[default]
+    Module,
+    Commonjs,
 }

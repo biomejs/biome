@@ -1,3 +1,4 @@
+mod assists;
 mod check;
 mod format;
 mod lint;
@@ -10,7 +11,7 @@ use crate::execute::traverse::TraversalOptions;
 use crate::execute::TraversalMode;
 use biome_diagnostics::{category, DiagnosticExt, DiagnosticTags, Error};
 use biome_fs::BiomePath;
-use biome_service::workspace::{FeatureName, SupportKind, SupportsFeatureParams};
+use biome_service::workspace::{FeatureKind, SupportKind, SupportsFeatureParams};
 use check::check_file;
 use format::format;
 use lint::lint;
@@ -18,7 +19,6 @@ use search::search;
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::path::Path;
-
 #[derive(Debug)]
 pub(crate) enum FileStatus {
     /// File changed and it was a success
@@ -72,6 +72,7 @@ impl Message {
 pub(crate) enum DiffKind {
     Format,
     OrganizeImports,
+    Assists,
 }
 
 impl<D> From<D> for Message
@@ -131,7 +132,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             .workspace
             .file_features(SupportsFeatureParams {
                 path: biome_path,
-                features: ctx.execution.to_features(),
+                features: ctx.execution.to_feature(),
             })
             .with_file_path_and_code_and_tags(
                 path.display().to_string(),
@@ -150,8 +151,8 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
 
         // then we pick the specific features for this file
         let unsupported_reason = match ctx.execution.traversal_mode() {
-            TraversalMode::Check { .. } => file_features
-                .support_kind_for(&FeatureName::Lint)
+            TraversalMode::Check { .. } | TraversalMode::CI { .. } => file_features
+                .support_kind_for(&FeatureKind::Lint)
                 .and_then(|support_kind| {
                     if support_kind.is_not_enabled() {
                         Some(support_kind)
@@ -161,7 +162,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
                 })
                 .and(
                     file_features
-                        .support_kind_for(&FeatureName::Format)
+                        .support_kind_for(&FeatureKind::Format)
                         .and_then(|support_kind| {
                             if support_kind.is_not_enabled() {
                                 Some(support_kind)
@@ -172,7 +173,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
                 )
                 .and(
                     file_features
-                        .support_kind_for(&FeatureName::OrganizeImports)
+                        .support_kind_for(&FeatureKind::OrganizeImports)
                         .and_then(|support_kind| {
                             if support_kind.is_not_enabled() {
                                 Some(support_kind)
@@ -181,41 +182,10 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
                             }
                         }),
                 ),
-            TraversalMode::CI { .. } => file_features
-                .support_kind_for(&FeatureName::Lint)
-                .and_then(|support_kind| {
-                    if support_kind.is_not_enabled() {
-                        Some(support_kind)
-                    } else {
-                        None
-                    }
-                })
-                .and(
-                    file_features
-                        .support_kind_for(&FeatureName::Format)
-                        .and_then(|support_kind| {
-                            if support_kind.is_not_enabled() {
-                                Some(support_kind)
-                            } else {
-                                None
-                            }
-                        }),
-                )
-                .and(
-                    file_features
-                        .support_kind_for(&FeatureName::OrganizeImports)
-                        .and_then(|support_kind| {
-                            if support_kind.is_not_enabled() {
-                                Some(support_kind)
-                            } else {
-                                None
-                            }
-                        }),
-                ),
-            TraversalMode::Format { .. } => file_features.support_kind_for(&FeatureName::Format),
-            TraversalMode::Lint { .. } => file_features.support_kind_for(&FeatureName::Lint),
+            TraversalMode::Format { .. } => file_features.support_kind_for(&FeatureKind::Format),
+            TraversalMode::Lint { .. } => file_features.support_kind_for(&FeatureKind::Lint),
             TraversalMode::Migrate { .. } => None,
-            TraversalMode::Search { .. } => file_features.support_kind_for(&FeatureName::Search),
+            TraversalMode::Search { .. } => file_features.support_kind_for(&FeatureKind::Search),
         };
 
         if let Some(reason) = unsupported_reason {

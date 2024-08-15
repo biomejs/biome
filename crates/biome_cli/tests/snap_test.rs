@@ -8,18 +8,17 @@ use biome_fs::{ConfigName, FileSystemExt, MemoryFileSystem};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_formatter::format_node;
 use biome_json_parser::{parse_json, JsonParserOptions};
-use lazy_static::lazy_static;
 use regex::Regex;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::env::{current_exe, temp_dir};
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf, MAIN_SEPARATOR};
+use std::sync::LazyLock;
 
-lazy_static! {
-    static ref TIME_REGEX: Regex = Regex::new("\\s[0-9]+[mµn]?s\\.").unwrap();
-    static ref TIME_JUNIT_REGEX: Regex = Regex::new("time=\\\"[.0-9]+\\\"").unwrap();
-}
+static TIME_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new("\\s[0-9]+[mµn]?s\\.").unwrap());
+static TIME_JUNIT_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new("time=\\\"[.0-9]+\\\"").unwrap());
 
 #[derive(Default)]
 struct InMessages {
@@ -92,7 +91,7 @@ impl CliSnapshot {
                 let redacted_content =
                     redact_snapshot(file_content).unwrap_or(String::new().into());
 
-                let _ = write!(content, "## `{}`\n\n", redacted_name);
+                let _ = write!(content, "## `{redacted_name}`\n\n");
                 let _ = write!(content, "```{extension}");
                 content.push('\n');
                 content.push_str(&redacted_content);

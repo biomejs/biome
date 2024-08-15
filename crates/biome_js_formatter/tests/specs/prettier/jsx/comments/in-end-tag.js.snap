@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: jsx/comments/in-end-tag.js
 ---
-
 # Input
 
 ```js
@@ -137,5 +136,3 @@ a>;
   // line
 >;
 ```
-
-

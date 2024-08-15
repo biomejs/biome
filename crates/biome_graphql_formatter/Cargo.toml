@@ -1,0 +1,39 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome's GraphQL formatter"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_graphql_formatter"
+repository.workspace = true
+version              = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+biome_diagnostics    = { workspace = true }
+biome_formatter      = { workspace = true }
+biome_graphql_syntax = { workspace = true }
+biome_rowan          = { workspace = true }
+biome_suppression    = { workspace = true }
+
+[dev-dependencies]
+biome_configuration  = { path = "../biome_configuration" }
+biome_formatter_test = { path = "../biome_formatter_test" }
+biome_fs             = { path = "../biome_fs" }
+biome_graphql_parser = { path = "../biome_graphql_parser" }
+biome_parser         = { path = "../biome_parser" }
+biome_service        = { path = "../biome_service" }
+countme              = { workspace = true, features = ["enable"] }
+serde                = { workspace = true, features = ["derive"] }
+serde_json           = { workspace = true }
+tests_macros         = { path = "../tests_macros" }
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true
+
+[lints]
+workspace = true

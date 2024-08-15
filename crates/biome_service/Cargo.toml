@@ -27,6 +27,10 @@ biome_diagnostics        = { workspace = true }
 biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_fs                 = { workspace = true, features = ["serde"] }
+biome_graphql_analyze    = { workspace = true }
+biome_graphql_formatter  = { workspace = true }
+biome_graphql_parser     = { workspace = true }
+biome_graphql_syntax     = { workspace = true }
 biome_grit_patterns      = { workspace = true }
 biome_js_analyze         = { workspace = true }
 biome_js_factory         = { workspace = true, optional = true }
@@ -44,10 +48,10 @@ biome_rowan              = { workspace = true, features = ["serde"] }
 biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true }
 dashmap                  = { workspace = true }
+enumflags2               = { workspace = true, features = ["serde"] }
 getrandom                = { workspace = true, features = ["js"] }
 ignore                   = { workspace = true }
 indexmap                 = { workspace = true, features = ["serde"] }
-lazy_static              = { workspace = true }
 oxc_resolver             = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
@@ -56,6 +60,7 @@ serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true, features = ["raw_value"] }
 slotmap                  = { workspace = true, features = ["serde"] }
 tracing                  = { workspace = true, features = ["attributes", "log"] }
+
 [features]
 schema = [
   "dep:schemars",
@@ -65,6 +70,7 @@ schema = [
   "biome_text_edit/schemars",
   "biome_json_syntax/schema",
   "biome_css_syntax/schema",
+  "biome_graphql_syntax/schema",
 ]
 
 [dev-dependencies]

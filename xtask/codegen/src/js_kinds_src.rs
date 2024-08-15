@@ -178,6 +178,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "COMMENT",
         "MULTILINE_COMMENT",
         "JS_SHEBANG",
+        "GRIT_METAVARIABLE",
     ],
     nodes: &[
         "JS_MODULE",
@@ -470,6 +471,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "TS_ENUM_DECLARATION",
         "TS_ENUM_MEMBER_LIST",
         "TS_ENUM_MEMBER",
+        "TS_LITERAL_ENUM_MEMBER_NAME",
         "TS_IMPORT_EQUALS_DECLARATION",
         "TS_EXTERNAL_MODULE_REFERENCE",
         "TS_DECLARE_FUNCTION_DECLARATION",
@@ -509,7 +511,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JSX_SPREAD_CHILD",
         "JSX_STRING",
         // Grit metavariable
-        "JS_GRIT_METAVARIABLE",
+        "JS_METAVARIABLE",
         // bogus nodes JS
         "JS_BOGUS",
         "JS_BOGUS_EXPRESSION",
@@ -574,6 +576,7 @@ pub struct AstListSeparatorConfiguration {
 
 #[derive(Debug)]
 pub struct AstNodeSrc {
+    #[allow(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -607,6 +610,7 @@ pub enum Field {
 
 #[derive(Debug, Clone)]
 pub struct AstEnumSrc {
+    #[allow(dead_code)]
     pub documentation: Vec<String>,
     pub name: String,
     // pub traits: Vec<String>,
@@ -683,6 +687,7 @@ impl Field {
                     ("$", LanguageKind::Graphql) => "dollar",
                     ("~=", _) => "whitespace_like",
                     (",", _) => "comma",
+                    ("---", LanguageKind::Yaml) => "dashdashdash",
                     _ => name,
                 };
 

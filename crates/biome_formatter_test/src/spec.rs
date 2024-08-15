@@ -6,11 +6,11 @@ use biome_configuration::PartialConfiguration;
 use biome_console::EnvConsole;
 use biome_deserialize::json::deserialize_from_str;
 use biome_diagnostics::print_diagnostic_to_string;
-use biome_formatter::{FormatOptions, Printed};
+use biome_formatter::{FormatLanguage, FormatOptions, Printed};
 use biome_fs::BiomePath;
 use biome_parser::AnyParse;
 use biome_rowan::{TextRange, TextSize};
-use biome_service::settings::{ServiceLanguage, Settings};
+use biome_service::settings::Settings;
 use biome_service::workspace::{
     DocumentFileSource, FeaturesBuilder, RegisterProjectFolderParams, SupportsFeatureParams,
     UpdateSettingsParams,
@@ -122,7 +122,7 @@ where
     test_file: SpecTestFile<'a>,
     test_directory: PathBuf,
     language: L,
-    options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
+    format_language: L::FormatLanguage,
 }
 
 impl<'a, L> SpecSnapshot<'a, L>
@@ -133,7 +133,7 @@ where
         test_file: SpecTestFile<'a>,
         test_directory: &str,
         language: L,
-        options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
+        format_language: L::FormatLanguage,
     ) -> Self {
         let test_directory = PathBuf::from(test_directory);
 
@@ -141,14 +141,14 @@ where
             test_file,
             test_directory,
             language,
-            options,
+            format_language,
         }
     }
 
     fn formatted(
         &self,
         parsed: &AnyParse,
-        options: <L::ServiceLanguage as ServiceLanguage>::FormatOptions,
+        format_language: L::FormatLanguage,
     ) -> (String, Printed) {
         let has_errors = parsed.has_errors();
         let syntax = parsed.syntax();
@@ -157,7 +157,7 @@ where
 
         let result = match range {
             (Some(start), Some(end)) => self.language.format_range(
-                options.clone(),
+                format_language.clone(),
                 &syntax,
                 TextRange::new(
                     TextSize::try_from(start).unwrap(),
@@ -166,7 +166,7 @@ where
             ),
             _ => self
                 .language
-                .format_node(options.clone(), &syntax)
+                .format_node(format_language.clone(), &syntax)
                 .map(|formatted| formatted.print().unwrap()),
         };
         let formatted = result.expect("formatting failed");
@@ -201,7 +201,7 @@ where
                         output_code,
                         self.test_file.file_name(),
                         &self.language,
-                        options,
+                        format_language,
                     );
                     check_reformat.check_reformat();
                 }
@@ -223,14 +223,14 @@ where
 
         let parsed = self.language.parse(self.test_file.input_code());
 
-        let (output_code, printed) = self.formatted(&parsed, self.options.clone());
+        let (output_code, printed) = self.formatted(&parsed, self.format_language.clone());
 
-        let max_width = self.options.line_width().value() as usize;
+        let max_width = self.format_language.options().line_width().value() as usize;
 
         snapshot_builder = snapshot_builder
             .with_output_and_options(
                 SnapshotOutput::new(&output_code).with_index(1),
-                self.options.clone(),
+                self.format_language.options().clone(),
             )
             .with_unimplemented(&printed)
             .with_lines_exceeding_max_width(&output_code, max_width);
@@ -257,13 +257,13 @@ where
                 panic!("Configuration is invalid");
             }
 
-            let options = self
+            let format_language = self
                 .language
-                .to_options(&settings, &DocumentFileSource::from_path(input_file));
+                .to_format_language(&settings, &DocumentFileSource::from_path(input_file));
 
-            let (mut output_code, printed) = self.formatted(&parsed, options.clone());
+            let (mut output_code, printed) = self.formatted(&parsed, format_language.clone());
 
-            let max_width = options.line_width().value() as usize;
+            let max_width = format_language.options().line_width().value() as usize;
 
             // There are some logs that print different line endings, and we can't snapshot those
             // otherwise we risk automatically having them replaced with LF by git.
@@ -276,7 +276,10 @@ where
                 .replace(CR_PATTERN, "<CR>\n");
 
             snapshot_builder = snapshot_builder
-                .with_output_and_options(SnapshotOutput::new(&output_code).with_index(1), options)
+                .with_output_and_options(
+                    SnapshotOutput::new(&output_code).with_index(1),
+                    format_language.options(),
+                )
                 .with_unimplemented(&printed)
                 .with_lines_exceeding_max_width(&output_code, max_width);
         }

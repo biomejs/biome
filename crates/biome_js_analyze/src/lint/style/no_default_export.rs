@@ -1,9 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::AnyJsExportClause;
 use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow default exports.
     ///
     /// Default exports cannot be easily discovered inside an editor:

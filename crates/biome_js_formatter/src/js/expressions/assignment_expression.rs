@@ -1,17 +1,9 @@
 use crate::prelude::*;
 use crate::utils::AnyJsAssignmentLike;
 
-use crate::parentheses::{
-    is_arrow_function_body, is_first_in_statement, FirstInStatementMode, NeedsParentheses,
-};
 use biome_formatter::write;
-
-use biome_js_syntax::{
-    AnyJsAssignmentPattern, AnyJsForInitializer, JsArrowFunctionExpression, JsAssignmentExpression,
-    JsComputedMemberName, JsExpressionStatement, JsForStatement, JsSequenceExpression,
-    JsSyntaxKind, JsSyntaxNode,
-};
-use biome_rowan::{match_ast, AstNode};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsAssignmentExpression;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsAssignmentExpression;
@@ -23,81 +15,6 @@ impl FormatNodeRule<JsAssignmentExpression> for FormatJsAssignmentExpression {
 
     fn needs_parentheses(&self, item: &JsAssignmentExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsAssignmentExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        match_ast! {
-            match parent {
-                JsAssignmentExpression(_) => false,
-                // `[a = b]`
-                JsComputedMemberName(_) => false,
-
-                JsArrowFunctionExpression(_) => {
-                    is_arrow_function_body(self.syntax(), parent)
-                },
-
-                JsForStatement(for_statement) => {
-                     let is_initializer = match for_statement.initializer() {
-                        Some(AnyJsForInitializer::AnyJsExpression(expression)) => {
-                            expression.syntax() == self.syntax()
-                        }
-                        None | Some(_) => false,
-                    };
-
-                    let is_update = for_statement
-                        .update()
-                        .map(AstNode::into_syntax)
-                        .as_ref()
-                        == Some(self.syntax());
-
-                    !(is_initializer || is_update)
-                },
-                JsExpressionStatement(_) => {
-                    // Parenthesize `{ a } = { a: 5 }`
-                    is_first_in_statement(
-                        self.clone().into(),
-                        FirstInStatementMode::ExpressionStatementOrArrow,
-                    ) && matches!(
-                        self.left(),
-                        Ok(AnyJsAssignmentPattern::JsObjectAssignmentPattern(_))
-                    )
-                },
-                JsSequenceExpression(_) => {
-                     let mut child = parent.clone();
-
-                    for ancestor in parent.ancestors().skip(1) {
-                        match ancestor.kind() {
-                            JsSyntaxKind::JS_SEQUENCE_EXPRESSION
-                            | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION => child = ancestor,
-                            JsSyntaxKind::JS_FOR_STATEMENT => {
-                                let for_statement = JsForStatement::unwrap_cast(ancestor);
-
-                                let is_initializer = match for_statement.initializer() {
-                                    Some(AnyJsForInitializer::AnyJsExpression(expression)) => {
-                                        expression.syntax() == &child
-                                    }
-                                    None | Some(_) => false,
-                                };
-
-                                let is_update =
-                                    for_statement.update().map(AstNode::into_syntax).as_ref()
-                                        == Some(&child);
-
-                                return !(is_initializer || is_update);
-                            }
-                            _ => break,
-                        }
-                    }
-
-                    true
-                },
-                _ => {
-                    true
-                }
-            }
-        }
     }
 }
 

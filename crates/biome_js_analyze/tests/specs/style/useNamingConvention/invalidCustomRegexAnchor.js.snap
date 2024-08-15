@@ -1,0 +1,47 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustomRegexAnchor.js
+---
+# Input
+```jsx
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"rules": {
+			"style": {
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+                        "conventions": [
+							{
+								"selector": {
+									"kind": "const"
+								},
+								"match": "(.*?)[$]?",
+								"formats": ["camelCase"]
+							}
+                        ]
+					}
+				}
+			}
+		}
+	}
+}
+
+```
+
+# Diagnostics
+```
+invalidCustomRegexAnchor.options:14:18 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Anchors `^` and `$` are not supported. They are implciitly present.
+  
+    12 │ 									"kind": "const"
+    13 │ 								},
+  > 14 │ 								"match": "(.*?)$",
+       │ 								         ^^^^^^^^
+    15 │ 								"formats": ["camelCase"]
+    16 │ 							}
+  
+
+```

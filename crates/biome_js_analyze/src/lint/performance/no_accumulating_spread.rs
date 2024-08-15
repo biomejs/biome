@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -9,7 +9,7 @@ use biome_rowan::{AstNode, AstSeparatedList};
 
 use crate::services::semantic::Semantic;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of spread (`...`) syntax on accumulators.
     ///
     /// Spread syntax allows an iterable to be expanded into its individual elements.
@@ -127,7 +127,7 @@ fn is_known_accumulator(node: &JsSpread, model: &SemanticModel) -> Option<bool> 
     }
 
     let callee = call_expression.callee().ok()?;
-    let member_expression = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+    let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
 
     // We only care about `.reduce` and `.reduceRight`.
     let member_name = member_expression.member_name()?;

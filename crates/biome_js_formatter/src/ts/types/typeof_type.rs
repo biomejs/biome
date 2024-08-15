@@ -1,11 +1,8 @@
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
 use biome_formatter::write;
-use biome_js_syntax::{
-    JsSyntaxKind, JsSyntaxNode, TsIndexedAccessType, TsTypeofType, TsTypeofTypeFields,
-};
-use biome_rowan::AstNode;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::{TsTypeofType, TsTypeofTypeFields};
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsTypeofType;
@@ -31,30 +28,6 @@ impl FormatNodeRule<TsTypeofType> for FormatTsTypeofType {
 
     fn needs_parentheses(&self, item: &TsTypeofType) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsTypeofType {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        match parent.kind() {
-            JsSyntaxKind::TS_ARRAY_TYPE => true,
-            // Typeof operators are parenthesized when used as an object type in an indexed access
-            // to avoid ambiguity of precedence, as it's higher than the JS equivalent:
-            // ```typescript
-            // const array = [1, 2, 3]
-            // type T = typeof array[0]; // => number
-            // type T2 = (typeof array)[0]; // => number
-            // const J1 = typeof array[0]; // => 'number'
-            // const J2 = (typeof array)[0]; // => 'o', because `typeof array` is 'object'
-            // ```
-            JsSyntaxKind::TS_INDEXED_ACCESS_TYPE => {
-                let indexed = TsIndexedAccessType::unwrap_cast(parent.clone());
-                // The typeof operator only needs parens if it's the object of the indexed access.
-                // If it's the index_type, then the braces already act as the visual precedence.
-                indexed.object_type().map(AstNode::into_syntax).as_ref() == Ok(self.syntax())
-            }
-            _ => false,
-        }
     }
 }
 

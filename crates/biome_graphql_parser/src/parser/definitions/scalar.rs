@@ -1,8 +1,8 @@
 use crate::parser::{
     directive::DirectiveList,
-    parse_description,
+    parse_binding, parse_description,
     parse_error::{expected_directive, expected_name},
-    parse_name, GraphqlParser,
+    parse_reference, GraphqlParser,
 };
 use biome_graphql_syntax::{GraphqlSyntaxKind::*, T};
 use biome_parser::{
@@ -18,7 +18,7 @@ pub(crate) fn parse_scalar_type_definition(p: &mut GraphqlParser) -> ParsedSynta
 
     p.bump(T![scalar]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_binding(p).or_add_diagnostic(p, expected_name);
     DirectiveList.parse_list(p);
 
     Present(m.complete(p, GRAPHQL_SCALAR_TYPE_DEFINITION))
@@ -32,7 +32,7 @@ pub(crate) fn parse_scalar_type_extension(p: &mut GraphqlParser) -> ParsedSyntax
     p.bump(T![extend]);
     p.bump(T![scalar]);
 
-    parse_name(p).or_add_diagnostic(p, expected_name);
+    parse_reference(p).or_add_diagnostic(p, expected_name);
     let pos = p.source().position();
     DirectiveList.parse_list(p);
     let directive_empty = p.source().position() == pos;

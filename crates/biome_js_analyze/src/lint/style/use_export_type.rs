@@ -1,7 +1,7 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
-    RuleSourceKind,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -11,7 +11,7 @@ use biome_rowan::{
     TriviaPieceKind,
 };
 
-declare_rule! {
+declare_lint_rule! {
     /// Promotes the use of `export type` for types.
     ///
     /// _TypeScript_ allows specifying a `type` marker on an `export` to indicate that the `export` doesn't exist at runtime.
@@ -86,7 +86,12 @@ impl Rule for UseExportType {
         }
         let mut exports_only_types = true;
         let mut specifiers_requiring_type_marker = Vec::new();
-        for specifier in export_named_clause.specifiers() {
+        let specifiers = export_named_clause.specifiers();
+        if specifiers.is_empty() {
+            // Don't report `export {}`
+            return None;
+        }
+        for specifier in specifiers {
             let Ok((ref_name, specifier)) =
                 specifier.and_then(|specifier| Ok((specifier.local_name()?, specifier)))
             else {

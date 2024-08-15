@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow to use unnecessary callback on `flatMap`.
     ///
     /// To achieve the same result (flattening an array) more concisely and efficiently, you should use `flat` instead.
@@ -55,7 +55,7 @@ impl Rule for NoFlatMapIdentity {
         let flat_map_call = ctx.query();
 
         let flat_map_expression =
-            AnyJsMemberExpression::cast_ref(flat_map_call.callee().ok()?.syntax())?;
+            AnyJsMemberExpression::cast(flat_map_call.callee().ok()?.into_syntax())?;
 
         if flat_map_expression.object().is_err() {
             return None;

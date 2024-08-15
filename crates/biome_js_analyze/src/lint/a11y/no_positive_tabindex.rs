@@ -2,7 +2,7 @@ use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_factory::make::{jsx_string, jsx_string_literal};
@@ -14,7 +14,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Prevent the usage of positive integers on `tabIndex` property
     ///
     /// Avoid positive `tabIndex` property values to synchronize the flow of the page with keyboard tab order.
@@ -138,12 +138,11 @@ impl Rule for NoPositiveTabindex {
             }
             TabindexProp::JsPropertyObjectMember(js_object_member) => {
                 let expression = js_object_member.value().ok()?;
-                let expression_syntax_node = expression.syntax();
+                let range = expression.range();
                 let expression_value =
-                    AnyNumberLikeExpression::cast_ref(expression_syntax_node)?.value()?;
-
+                    AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
                 if !is_tabindex_valid(&expression_value) {
-                    return Some(expression_syntax_node.text_trimmed_range());
+                    return Some(range);
                 }
             }
         }
@@ -214,7 +213,7 @@ fn attribute_has_valid_tabindex(jsx_any_attribute_value: &AnyJsxAttributeValue) 
         AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
             let expression = value.expression().ok()?;
             let expression_value =
-                AnyNumberLikeExpression::cast_ref(expression.syntax())?.value()?;
+                AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
 
             Some(is_tabindex_valid(&expression_value))
         }

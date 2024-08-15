@@ -68,11 +68,11 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-
+::error title=organizeImports,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Import statements differs from the output
 ```
 
 ```block
-
+::error title=format,file=main.ts,line=1,endLine=1,col=2,endColumn=2::File content differs from formatting output
 ```
 
 ```block
@@ -100,9 +100,9 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-
+::error title=organizeImports,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Import statements differs from the output
 ```
 
 ```block
-
+::error title=format,file=index.ts,line=1,endLine=1,col=2,endColumn=2::File content differs from formatting output
 ```

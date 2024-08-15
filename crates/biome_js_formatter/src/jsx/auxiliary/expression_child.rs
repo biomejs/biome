@@ -2,8 +2,8 @@ use crate::jsx::attribute::expression_attribute_value::should_inline_jsx_express
 use crate::prelude::*;
 use crate::prelude::{format_args, write};
 
-use crate::utils::AnyJsBinaryLikeExpression;
 use biome_formatter::{CstFormatContext, FormatResult};
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{AnyJsExpression, JsxExpressionChild, JsxExpressionChildFields};
 
 #[derive(Debug, Clone, Default)]

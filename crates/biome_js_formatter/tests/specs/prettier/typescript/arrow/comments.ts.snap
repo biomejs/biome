@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/arrow/comments.ts
 ---
-
 # Input
 
 ```ts
@@ -48,5 +47,3 @@ const fn2 = () => {
 
 // foo
 ```
-
-

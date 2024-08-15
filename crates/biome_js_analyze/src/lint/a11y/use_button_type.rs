@@ -1,7 +1,7 @@
 use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsxElementName, JsCallExpression, JsxAttribute, JsxOpeningElement, JsxSelfClosingElement,
@@ -9,7 +9,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforces the usage of the attribute `type` for the element `button`
     ///
     /// ## Examples

@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -9,7 +9,7 @@ use biome_rowan::{trim_leading_trivia_pieces, AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce the use of `while` loops instead of `for` loops when the initializer and update expressions are not needed.
     ///
     /// ## Examples

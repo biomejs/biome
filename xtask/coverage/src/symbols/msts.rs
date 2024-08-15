@@ -93,23 +93,21 @@ impl TestCase for SymbolsMicrosoftTestCase {
                 // We do the same below because TS classifies some string literals as symbols and we also
                 // filter them below.
                 match x {
-                    SemanticEvent::DeclarationFound { .. }
-                    | SemanticEvent::Read { .. }
-                    | SemanticEvent::HoistedRead { .. }
-                    | SemanticEvent::Write { .. }
-                    | SemanticEvent::HoistedWrite { .. }
-                    | SemanticEvent::UnresolvedReference { .. } => {
-                        let name = &code[x.range()];
-                        !name.contains('\"') && !name.contains('\'')
+                    SemanticEvent::DeclarationFound { range, .. }
+                    | SemanticEvent::Read { range, .. }
+                    | SemanticEvent::HoistedRead { range, .. }
+                    | SemanticEvent::Write { range, .. }
+                    | SemanticEvent::HoistedWrite { range, .. }
+                    | SemanticEvent::UnresolvedReference { range, .. } => {
+                        let name = &code[*range];
+                        !name.contains('\"') && !name.contains('\'') &&
+                        // Ignore the current event if one was already processed for the same range.
+                        prev_starts.insert(range.start())
                     }
                     SemanticEvent::ScopeStarted { .. }
                     | SemanticEvent::ScopeEnded { .. }
-                    | SemanticEvent::Exported { .. } => false,
+                    | SemanticEvent::Export { .. } => false,
                 }
-            })
-            .filter(|x| {
-                // Ignore the current event if one was already processed for the same range.
-                prev_starts.insert(x.range().start())
             })
             .collect();
         actual.sort_by_key(|x| x.range().start());
@@ -139,7 +137,7 @@ impl TestCase for SymbolsMicrosoftTestCase {
 
             if let Some(actual) = actual {
                 let name = &code[actual.range()].trim();
-                write!(debug_text, "[{}]", name).unwrap();
+                write!(debug_text, "[{name}]").unwrap();
             }
 
             match (expected, actual) {

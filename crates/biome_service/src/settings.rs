@@ -1,24 +1,28 @@
 use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
+use biome_configuration::analyzer::assists::AssistsConfiguration;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, CssConfiguration, FilesConfiguration,
-    FormatterConfiguration, JavascriptConfiguration, JsonConfiguration, LinterConfiguration,
+    push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
+    JavascriptConfiguration, LinterConfiguration, OverrideAssistsConfiguration,
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
     OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
-    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle, Rules,
+    PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_deserialize::{Merge, StringSet};
 use biome_diagnostics::Category;
-use biome_formatter::{AttributePosition, IndentStyle, IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{
+    AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
+};
 use biome_fs::BiomePath;
-use biome_js_analyze::metadata;
+use biome_graphql_formatter::context::GraphqlFormatOptions;
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, JsLanguage};
@@ -29,6 +33,7 @@ use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use indexmap::IndexSet;
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::sync::RwLockWriteGuard;
 use std::{
@@ -56,6 +61,10 @@ pub struct WorkspaceSettings {
 }
 
 impl WorkspaceSettings {
+    pub fn get_current_project_key(&self) -> ProjectKey {
+        self.current_project
+    }
+
     /// Retrieves the settings of the current workspace folder
     pub fn get_current_settings(&self) -> Option<&Settings> {
         trace!("Current key {:?}", self.current_project);
@@ -158,8 +167,10 @@ pub struct Settings {
     pub languages: LanguageListSettings,
     /// Filesystem settings for the workspace
     pub files: FilesSettings,
-    /// Analyzer settings
+    /// Import sorting settings
     pub organize_imports: OrganizeImportsSettings,
+    /// Assists settings
+    pub assists: AssistsSettings,
     /// overrides
     pub override_settings: OverrideSettings,
 }
@@ -188,6 +199,14 @@ impl Settings {
                 to_linter_settings(working_directory.clone(), LinterConfiguration::from(linter))?;
         }
 
+        // assists part
+        if let Some(assists) = configuration.assists {
+            self.assists = to_assists_settings(
+                working_directory.clone(),
+                AssistsConfiguration::from(assists),
+            )?;
+        }
+
         // Filesystem settings
         if let Some(files) = to_file_settings(
             working_directory.clone(),
@@ -211,11 +230,15 @@ impl Settings {
         }
         // json settings
         if let Some(json) = configuration.json {
-            self.languages.json = JsonConfiguration::from(json).into();
+            self.languages.json = json.into();
         }
         // css settings
         if let Some(css) = configuration.css {
-            self.languages.css = CssConfiguration::from(css).into();
+            self.languages.css = css.into();
+        }
+        // graphql settings
+        if let Some(graphql) = configuration.graphql {
+            self.languages.graphql = graphql.into();
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
@@ -278,6 +301,11 @@ impl Settings {
         &self.organize_imports
     }
 
+    /// Retrieves the settings of the organize imports
+    pub fn assists(&self) -> &AssistsSettings {
+        &self.assists
+    }
+
     /// It retrieves the severity based on the `code` of the rule and the current configuration.
     ///
     /// The code of the has the following pattern: `{group}/{rule_name}`.
@@ -295,12 +323,39 @@ impl Settings {
         }
     }
 
-    /// Returns rules taking overrides into account.
-    pub fn as_rules(&self, path: &Path) -> Option<Cow<Rules>> {
+    /// Returns linter rules taking overrides into account.
+    pub fn as_linter_rules(
+        &self,
+        path: &Path,
+    ) -> Option<Cow<biome_configuration::analyzer::linter::Rules>> {
         let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.rules.as_ref();
+            if let Some(pattern_rules) = pattern_rules {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    result = if let Some(mut result) = result.take() {
+                        // Override rules
+                        result.to_mut().merge_with(pattern_rules.clone());
+                        Some(result)
+                    } else {
+                        Some(Cow::Borrowed(pattern_rules))
+                    };
+                }
+            }
+        }
+        result
+    }
+
+    /// Returns assists rules taking overrides into account.
+    pub fn as_assists_rules(
+        &self,
+        path: &Path,
+    ) -> Option<Cow<biome_configuration::analyzer::assists::Actions>> {
+        let mut result = self.assists.actions.as_ref().map(Cow::Borrowed);
+        let overrides = &self.override_settings;
+        for pattern in overrides.patterns.iter() {
+            let pattern_rules = pattern.assists.actions.as_ref();
             if let Some(pattern_rules) = pattern_rules {
                 if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                     result = if let Some(mut result) = result.take() {
@@ -330,6 +385,7 @@ pub struct FormatSettings {
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
     pub attribute_position: Option<AttributePosition>,
+    pub bracket_spacing: Option<BracketSpacing>,
     /// List of ignore paths/files
     pub ignored_files: Matcher,
     /// List of included paths/files
@@ -346,6 +402,7 @@ impl Default for FormatSettings {
             line_ending: Some(LineEnding::default()),
             line_width: Some(LineWidth::default()),
             attribute_position: Some(AttributePosition::default()),
+            bracket_spacing: Some(BracketSpacing::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         }
@@ -364,6 +421,8 @@ pub struct OverrideFormatSettings {
     pub indent_width: Option<IndentWidth>,
     pub line_ending: Option<LineEnding>,
     pub line_width: Option<LineWidth>,
+    pub bracket_spacing: Option<BracketSpacing>,
+    pub attribute_position: Option<AttributePosition>,
 }
 
 /// Linter settings for the entire workspace
@@ -373,7 +432,7 @@ pub struct LinterSettings {
     pub enabled: bool,
 
     /// List of rules
-    pub rules: Option<Rules>,
+    pub rules: Option<biome_configuration::analyzer::linter::Rules>,
 
     /// List of ignored paths/files to match
     pub ignored_files: Matcher,
@@ -386,7 +445,7 @@ impl Default for LinterSettings {
     fn default() -> Self {
         Self {
             enabled: true,
-            rules: Some(Rules::default()),
+            rules: Some(biome_configuration::analyzer::linter::Rules::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         }
@@ -400,7 +459,7 @@ pub struct OverrideLinterSettings {
     pub enabled: Option<bool>,
 
     /// List of rules
-    pub rules: Option<Rules>,
+    pub rules: Option<biome_configuration::analyzer::linter::Rules>,
 }
 
 /// Linter settings for the entire workspace
@@ -426,11 +485,48 @@ impl Default for OrganizeImportsSettings {
     }
 }
 
-/// Linter settings for the entire workspace
+/// Organize imports settings for the entire workspace
 #[derive(Debug, Default)]
 pub struct OverrideOrganizeImportsSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
+}
+
+/// Linter settings for the entire workspace
+#[derive(Debug)]
+pub struct AssistsSettings {
+    /// Enabled by default
+    pub enabled: bool,
+
+    /// List of rules
+    pub actions: Option<biome_configuration::analyzer::assists::Actions>,
+
+    /// List of ignored paths/files to match
+    pub ignored_files: Matcher,
+
+    /// List of included paths/files to match
+    pub included_files: Matcher,
+}
+
+impl Default for AssistsSettings {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            actions: Default::default(),
+            included_files: Matcher::empty(),
+            ignored_files: Matcher::empty(),
+        }
+    }
+}
+
+/// Assists settings for the entire workspace
+#[derive(Debug, Default)]
+pub struct OverrideAssistsSettings {
+    /// Enabled by default
+    pub enabled: Option<bool>,
+
+    /// List of rules
+    pub actions: Option<biome_configuration::analyzer::assists::Actions>,
 }
 
 /// Static map of language names to language-specific settings
@@ -439,6 +535,7 @@ pub struct LanguageListSettings {
     pub javascript: LanguageSettings<JsLanguage>,
     pub json: LanguageSettings<JsonLanguage>,
     pub css: LanguageSettings<CssLanguage>,
+    pub graphql: LanguageSettings<GraphqlLanguage>,
 }
 
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
@@ -452,10 +549,11 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.trailing_commas = Some(formatter.trailing_commas);
         language_setting.formatter.semicolons = Some(formatter.semicolons);
         language_setting.formatter.arrow_parentheses = Some(formatter.arrow_parentheses);
-        language_setting.formatter.bracket_spacing = Some(formatter.bracket_spacing.into());
         language_setting.formatter.bracket_same_line = Some(formatter.bracket_same_line.into());
         language_setting.formatter.enabled = Some(formatter.enabled);
         language_setting.formatter.line_width = formatter.line_width;
+        language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
+        language_setting.formatter.attribute_position = formatter.attribute_position;
         language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
         language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
         language_setting.parser.parse_class_parameter_decorators =
@@ -469,37 +567,74 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
     }
 }
 
-impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
-    fn from(json: JsonConfiguration) -> Self {
+impl From<PartialJsonConfiguration> for LanguageSettings<JsonLanguage> {
+    fn from(json: PartialJsonConfiguration) -> Self {
         let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
 
-        language_setting.parser.allow_comments = json.parser.allow_comments;
-        language_setting.parser.allow_trailing_commas = json.parser.allow_trailing_commas;
-        language_setting.formatter.trailing_commas = json.formatter.trailing_commas;
-        language_setting.formatter.enabled = Some(json.formatter.enabled);
-        language_setting.formatter.line_width = json.formatter.line_width;
-        language_setting.formatter.indent_width = json.formatter.indent_width.map(Into::into);
-        language_setting.formatter.indent_style = json.formatter.indent_style.map(Into::into);
-        language_setting.linter.enabled = Some(json.linter.enabled);
+        if let Some(parser) = json.parser {
+            language_setting.parser.allow_comments = parser.allow_comments;
+            language_setting.parser.allow_trailing_commas = parser.allow_trailing_commas;
+        }
+        if let Some(formatter) = json.formatter {
+            language_setting.formatter.trailing_commas = formatter.trailing_commas;
+            language_setting.formatter.enabled = formatter.enabled;
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+        }
+        if let Some(linter) = json.linter {
+            language_setting.linter.enabled = linter.enabled;
+        }
 
         language_setting
     }
 }
 
-impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
-    fn from(css: CssConfiguration) -> Self {
+impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
+    fn from(css: PartialCssConfiguration) -> Self {
         let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
 
-        language_setting.parser.allow_wrong_line_comments = css.parser.allow_wrong_line_comments;
-        language_setting.parser.css_modules = css.parser.css_modules;
+        if let Some(parser) = css.parser {
+            language_setting.parser.allow_wrong_line_comments = parser.allow_wrong_line_comments;
+            language_setting.parser.css_modules = parser.css_modules;
+        }
+        if let Some(formatter) = css.formatter {
+            // TODO: change RHS to `formatter.enabled` when css formatting is enabled by default
+            language_setting.formatter.enabled = Some(formatter.enabled.unwrap_or_default());
+            language_setting.formatter.indent_width = formatter.indent_width;
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.line_ending = formatter.line_ending;
+            language_setting.formatter.quote_style = formatter.quote_style;
+        }
+        if let Some(linter) = css.linter {
+            // TODO: change RHS to `linter.enabled` when css linting is enabled by default
+            language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
+        }
 
-        language_setting.formatter.enabled = Some(css.formatter.enabled);
-        language_setting.formatter.indent_width = css.formatter.indent_width;
-        language_setting.formatter.indent_style = css.formatter.indent_style.map(Into::into);
-        language_setting.formatter.line_width = css.formatter.line_width;
-        language_setting.formatter.line_ending = css.formatter.line_ending;
-        language_setting.formatter.quote_style = Some(css.formatter.quote_style);
-        language_setting.linter.enabled = Some(css.linter.enabled);
+        language_setting
+    }
+}
+
+impl From<PartialGraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
+    fn from(graphql: PartialGraphqlConfiguration) -> Self {
+        let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
+
+        if let Some(formatter) = graphql.formatter {
+            // TODO: change RHS to `formatter.enabled` when graphql formatting is enabled by default
+            language_setting.formatter.enabled = Some(formatter.enabled.unwrap_or_default());
+            language_setting.formatter.indent_width = formatter.indent_width;
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.line_ending = formatter.line_ending;
+            language_setting.formatter.quote_style = formatter.quote_style;
+            language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
+        }
+
+        if let Some(linter) = graphql.linter {
+            // TODO: change RHS to `linter.enabled` when graphql linting is enabled by default
+            language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
+        }
 
         language_setting
     }
@@ -828,6 +963,20 @@ impl OverrideSettings {
         options
     }
 
+    /// It scans the current override rules and return the formatting options that of the first override is matched
+    pub fn to_override_graphql_format_options(
+        &self,
+        path: &Path,
+        mut options: GraphqlFormatOptions,
+    ) -> GraphqlFormatOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_graphql_format_options(&mut options);
+            }
+        }
+        options
+    }
+
     pub fn to_override_js_parser_options(
         &self,
         path: &Path,
@@ -877,7 +1026,26 @@ impl OverrideSettings {
         for pattern in self.patterns.iter() {
             if !pattern.exclude.matches_path(path) && pattern.include.matches_path(path) {
                 if let Some(rules) = pattern.linter.rules.as_ref() {
-                    push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_js_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_json_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_css_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_graphql_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
                 }
             }
         }
@@ -922,6 +1090,19 @@ impl OverrideSettings {
             None
         })
     }
+
+    /// Scans the overrides and checks if there's an override that disable the assists for `path`
+    pub fn assists_disabled(&self, path: &Path) -> Option<bool> {
+        // Reverse the traversal as only the last override takes effect
+        self.patterns.iter().rev().find_map(|pattern| {
+            if let Some(enabled) = pattern.assists.enabled {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    return Some(!enabled);
+                }
+            }
+            None
+        })
+    }
 }
 
 #[derive(Debug, Default)]
@@ -934,6 +1115,8 @@ pub struct OverrideSettingPattern {
     pub linter: OverrideLinterSettings,
     /// Linter settings applied to all files in the workspace
     pub organize_imports: OverrideOrganizeImportsSettings,
+    /// Linter settings applied to all files in the workspace
+    pub assists: OverrideAssistsSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
 
@@ -944,8 +1127,9 @@ pub struct OverrideSettingPattern {
     pub(crate) cached_js_format_options: RwLock<FxHashMap<JsFileSource, JsFormatOptions>>,
     pub(crate) cached_json_format_options: RwLock<Option<JsonFormatOptions>>,
     pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
+    pub(crate) cached_graphql_format_options: RwLock<Option<GraphqlFormatOptions>>,
     pub(crate) cached_js_parser_options: RwLock<Option<JsParserOptions>>,
-    pub(crate) cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
+    pub(crate) _cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
     pub(crate) cached_css_parser_options: RwLock<Option<CssParserOptions>>,
 }
 impl OverrideSettingPattern {
@@ -989,13 +1173,16 @@ impl OverrideSettingPattern {
         if let Some(arrow_parentheses) = js_formatter.arrow_parentheses {
             options.set_arrow_parentheses(arrow_parentheses);
         }
-        if let Some(bracket_spacing) = js_formatter.bracket_spacing {
+        if let Some(bracket_spacing) = js_formatter.bracket_spacing.or(formatter.bracket_spacing) {
             options.set_bracket_spacing(bracket_spacing);
         }
         if let Some(bracket_same_line) = js_formatter.bracket_same_line {
             options.set_bracket_same_line(bracket_same_line);
         }
-        if let Some(attribute_position) = js_formatter.attribute_position {
+        if let Some(attribute_position) = js_formatter
+            .attribute_position
+            .or(formatter.attribute_position)
+        {
             options.set_attribute_position(attribute_position);
         }
 
@@ -1071,6 +1258,45 @@ impl OverrideSettingPattern {
         }
     }
 
+    fn apply_overrides_to_graphql_format_options(&self, options: &mut GraphqlFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_graphql_format_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+        }
+
+        let graphql_formatter = &self.languages.graphql.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_style) = graphql_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = graphql_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_ending) = graphql_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = graphql_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+        if let Some(bracket_spacing) = graphql_formatter
+            .bracket_spacing
+            .or(formatter.bracket_spacing)
+        {
+            options.set_bracket_spacing(bracket_spacing);
+        }
+        if let Some(quote_style) = graphql_formatter.quote_style {
+            options.set_quote_style(quote_style);
+        }
+
+        if let Ok(mut writeonly_cache) = self.cached_graphql_format_options.write() {
+            let options = options.clone();
+            let _ = writeonly_cache.insert(options);
+        }
+    }
+
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
         if let Ok(readonly_cache) = self.cached_js_parser_options.read() {
             if let Some(cached_options) = readonly_cache.as_ref() {
@@ -1090,21 +1316,14 @@ impl OverrideSettingPattern {
     }
 
     fn apply_overrides_to_json_parser_options(&self, options: &mut JsonParserOptions) {
-        if let Ok(readonly_cache) = self.cached_json_parser_options.read() {
-            if let Some(cached_options) = readonly_cache.as_ref() {
-                *options = *cached_options;
-                return;
-            }
-        }
-
+        // these options are no longer cached because it was causing incorrect override behavior, see #3260
         let json_parser = &self.languages.json.parser;
 
-        options.allow_trailing_commas = json_parser.allow_trailing_commas;
-        options.allow_comments = json_parser.allow_comments;
-
-        if let Ok(mut writeonly_cache) = self.cached_json_parser_options.write() {
-            let options = *options;
-            let _ = writeonly_cache.insert(options);
+        if let Some(allow_comments) = json_parser.allow_comments {
+            options.allow_comments = allow_comments;
+        }
+        if let Some(allow_trailing_commas) = json_parser.allow_trailing_commas {
+            options.allow_trailing_commas = allow_trailing_commas;
         }
     }
 
@@ -1118,8 +1337,12 @@ impl OverrideSettingPattern {
 
         let css_parser = &self.languages.css.parser;
 
-        options.allow_wrong_line_comments = css_parser.allow_wrong_line_comments;
-        options.css_modules = css_parser.css_modules;
+        if let Some(allow_wrong_line_comments) = css_parser.allow_wrong_line_comments {
+            options.allow_wrong_line_comments = allow_wrong_line_comments;
+        }
+        if let Some(css_modules) = css_parser.css_modules {
+            options.css_modules = css_modules;
+        }
 
         if let Ok(mut writeonly_cache) = self.cached_css_parser_options.write() {
             let options = *options;
@@ -1168,12 +1391,14 @@ fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, Workspa
             .map_err(|err| {
                 BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
                     message: err.to_string(),
+                    file_path: path.to_str().map(|s| s.to_string()),
                 })
             })?;
     }
     let gitignore = gitignore_builder.build().map_err(|err| {
         BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
             message: err.to_string(),
+            file_path: path.to_str().map(|s| s.to_string()),
         })
     })?;
     Ok(gitignore)
@@ -1218,12 +1443,12 @@ pub fn to_override_settings(
                 format_with_errors: formatter
                     .format_with_errors
                     .unwrap_or(current_settings.formatter.format_with_errors),
-                indent_style: formatter
-                    .indent_style
-                    .map(|indent_style| indent_style.into()),
+                indent_style: formatter.indent_style,
                 indent_width: formatter.indent_width,
                 line_ending: formatter.line_ending,
                 line_width: formatter.line_width,
+                bracket_spacing: formatter.bracket_spacing,
+                attribute_position: formatter.attribute_position,
             })
             .unwrap_or_default();
         let linter = pattern
@@ -1243,11 +1468,14 @@ pub fn to_override_settings(
         let javascript = pattern.javascript.take().unwrap_or_default();
         let json = pattern.json.take().unwrap_or_default();
         let css = pattern.css.take().unwrap_or_default();
+        let graphql = pattern.graphql.take().unwrap_or_default();
         languages.javascript =
             to_javascript_language_settings(javascript, &current_settings.languages.javascript);
 
         languages.json = to_json_language_settings(json, &current_settings.languages.json);
         languages.css = to_css_language_settings(css, &current_settings.languages.css);
+        languages.graphql =
+            to_graphql_language_settings(graphql, &current_settings.languages.graphql);
 
         let pattern_setting = OverrideSettingPattern {
             include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
@@ -1278,7 +1506,7 @@ fn to_javascript_language_settings(
         formatter.trailing_commas.or(formatter.trailing_comma);
     language_setting.formatter.semicolons = formatter.semicolons;
     language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
-    language_setting.formatter.bracket_spacing = formatter.bracket_spacing.map(Into::into);
+    language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
     language_setting.formatter.bracket_same_line = formatter.bracket_same_line.map(Into::into);
     language_setting.formatter.enabled = formatter.enabled;
     language_setting.formatter.line_width = formatter.line_width;
@@ -1326,13 +1554,11 @@ fn to_json_language_settings(
 
     let parser = conf.parser.take().unwrap_or_default();
     let parent_parser = &parent_settings.parser;
-    language_setting.parser.allow_comments = parser
-        .allow_comments
-        .unwrap_or(parent_parser.allow_comments);
+    language_setting.parser.allow_comments = parser.allow_comments.or(parent_parser.allow_comments);
 
     language_setting.parser.allow_trailing_commas = parser
         .allow_trailing_commas
-        .unwrap_or(parent_parser.allow_trailing_commas);
+        .or(parent_parser.allow_trailing_commas);
 
     language_setting
 }
@@ -1355,8 +1581,26 @@ fn to_css_language_settings(
     let parent_parser = &parent_settings.parser;
     language_setting.parser.allow_wrong_line_comments = parser
         .allow_wrong_line_comments
-        .unwrap_or(parent_parser.allow_wrong_line_comments);
-    language_setting.parser.css_modules = parser.css_modules.unwrap_or(parent_parser.css_modules);
+        .or(parent_parser.allow_wrong_line_comments);
+    language_setting.parser.css_modules = parser.css_modules.or(parent_parser.css_modules);
+
+    language_setting
+}
+
+fn to_graphql_language_settings(
+    mut conf: PartialGraphqlConfiguration,
+    _parent_settings: &LanguageSettings<GraphqlLanguage>,
+) -> LanguageSettings<GraphqlLanguage> {
+    let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
+    let formatter = conf.formatter.take().unwrap_or_default();
+
+    language_setting.formatter.enabled = formatter.enabled;
+    language_setting.formatter.line_width = formatter.line_width;
+    language_setting.formatter.line_ending = formatter.line_ending;
+    language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
+    language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+    language_setting.formatter.quote_style = formatter.quote_style;
+    language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
 
     language_setting
 }
@@ -1365,10 +1609,7 @@ pub fn to_format_settings(
     working_directory: Option<PathBuf>,
     conf: FormatterConfiguration,
 ) -> Result<FormatSettings, WorkspaceError> {
-    let indent_style = match conf.indent_style {
-        PlainIndentStyle::Tab => IndentStyle::Tab,
-        PlainIndentStyle::Space => IndentStyle::Space,
-    };
+    let indent_style = conf.indent_style;
     let indent_width = conf.indent_width;
 
     Ok(FormatSettings {
@@ -1379,6 +1620,7 @@ pub fn to_format_settings(
         line_width: Some(conf.line_width),
         format_with_errors: conf.format_with_errors,
         attribute_position: Some(conf.attribute_position),
+        bracket_spacing: Some(conf.bracket_spacing),
         ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
         included_files: to_matcher(working_directory, Some(&conf.include))?,
     })
@@ -1389,8 +1631,8 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
 
     fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {
         let indent_style = match conf.indent_style {
-            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
-            Some(PlainIndentStyle::Space) => IndentStyle::Space,
+            Some(IndentStyle::Tab) => IndentStyle::Tab,
+            Some(IndentStyle::Space) => IndentStyle::Space,
             None => IndentStyle::default(),
         };
         let indent_width = conf
@@ -1406,6 +1648,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             line_ending: conf.line_ending,
             line_width: conf.line_width,
             attribute_position: Some(AttributePosition::default()),
+            bracket_spacing: Some(BracketSpacing::default()),
             format_with_errors: conf.format_with_errors.unwrap_or_default(),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
@@ -1432,6 +1675,31 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             rules: conf.rules,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
+        })
+    }
+}
+
+pub fn to_assists_settings(
+    working_directory: Option<PathBuf>,
+    conf: AssistsConfiguration,
+) -> Result<AssistsSettings, WorkspaceError> {
+    Ok(AssistsSettings {
+        enabled: conf.enabled,
+        actions: Some(conf.actions),
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
+    })
+}
+
+impl TryFrom<OverrideAssistsConfiguration> for AssistsSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideAssistsConfiguration) -> Result<Self, Self::Error> {
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            actions: conf.rules,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         })

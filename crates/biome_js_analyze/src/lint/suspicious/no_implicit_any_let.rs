@@ -1,8 +1,8 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow use of implicit `any` type on variable declarations.
     ///
     /// TypeScript variable declaration without any type annotation and initialization have the `any` type.
@@ -49,11 +49,9 @@ impl Rule for NoImplicitAnyLet {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>().language();
-        let is_ts_source = source_type.is_typescript();
         let node = ctx.query();
-        let is_declaration = source_type.is_definition_file();
 
-        if node.is_const() || is_declaration || !is_ts_source {
+        if source_type.is_definition_file() || !source_type.is_typescript() || node.is_const() {
             return None;
         }
 

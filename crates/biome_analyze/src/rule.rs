@@ -92,6 +92,8 @@ pub enum RuleSource {
     Clippy(&'static str),
     /// Rules from [Eslint](https://eslint.org/)
     Eslint(&'static str),
+    /// Rules from [GraphQL-ESLint](https://github.com/dimaMachina/graphql-eslint)
+    EslintGraphql(&'static str),
     /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
     EslintImport(&'static str),
     /// Rules from [Eslint Plugin Import Access](https://github.com/uhyo/eslint-plugin-import-access)
@@ -135,6 +137,7 @@ impl std::fmt::Display for RuleSource {
         match self {
             Self::Clippy(_) => write!(f, "Clippy"),
             Self::Eslint(_) => write!(f, "ESLint"),
+            Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
@@ -181,6 +184,7 @@ impl RuleSource {
         match self {
             Self::Clippy(rule_name)
             | Self::Eslint(rule_name)
+            | Self::EslintGraphql(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
             | Self::EslintJest(rule_name)
@@ -202,6 +206,7 @@ impl RuleSource {
     pub fn to_namespaced_rule_name(&self) -> String {
         match self {
             Self::Clippy(rule_name) | Self::Eslint(rule_name) => (*rule_name).to_string(),
+            Self::EslintGraphql(rule_name) => format!("graphql/{rule_name}"),
             Self::EslintImport(rule_name) => format!("import/{rule_name}"),
             Self::EslintImportAccess(rule_name) => format!("import-access/{rule_name}"),
             Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
@@ -224,6 +229,7 @@ impl RuleSource {
         match self {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
+            Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
@@ -352,7 +358,7 @@ pub trait RuleMeta {
 /// ```rust,ignore
 ///use biome_analyze::declare_rule;
 ///
-/// declare_rule! {
+/// declare_lint_rule! {
 ///     /// Documentation
 ///     pub(crate) ExampleRule {
 ///         version: "1.0.0",
@@ -365,8 +371,91 @@ pub trait RuleMeta {
 /// Check [crate](module documentation) for a better
 /// understanding of how the macro works
 #[macro_export]
-macro_rules! declare_rule {
+macro_rules! declare_lint_rule {
     ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
+        version: $version:literal,
+        name: $name:tt,
+        language: $language:literal,
+        $( $key:ident: $value:expr, )*
+    } ) => {
+
+        biome_analyze::declare_rule!(
+            $( #[doc = $doc] )*
+            $vis $id {
+                version: $version,
+                name: $name,
+                language: $language,
+                $( $key: $value, )*
+            }
+        );
+
+        // Declare a new `rule_category!` macro in the module context that
+        // expands to the category of this rule
+        // This is implemented by calling the `group_category!` macro from the
+        // parent module (that should be declared by a call to `declare_group!`)
+        // and providing it with the name of this rule as a string literal token
+        #[allow(unused_macros)]
+        macro_rules! rule_category {
+            () => { super::group_category!( $name ) };
+        }
+    };
+}
+
+/// This macro is used to declare an analyzer rule type, and implement the
+//  [RuleMeta] trait for it
+///  # Example
+///
+/// The macro itself expect the following syntax:
+///
+/// ```rust,ignore
+///use biome_analyze::declare_syntax_rule;
+///
+/// declare_syntax_rule! {
+///     /// Documentation
+///     pub(crate) ExampleRule {
+///         version: "1.0.0",
+///         name: "ruleName",
+///         recommended: false,
+///     }
+/// }
+/// ```
+///
+/// Check [crate](module documentation) for a better
+/// understanding of how the macro works
+#[macro_export]
+macro_rules! declare_syntax_rule {
+    ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
+        version: $version:literal,
+        name: $name:tt,
+        language: $language:literal,
+        $( $key:ident: $value:expr, )*
+    } ) => {
+
+        biome_analyze::declare_rule!(
+            $( #[doc = $doc] )*
+            $vis $id {
+                version: $version,
+                name: $name,
+                language: $language,
+                $( $key: $value, )*
+            }
+        );
+
+        // Declare a new `rule_category!` macro in the module context that
+        // expands to the category of this rule
+        // This is implemented by calling the `group_category!` macro from the
+        // parent module (that should be declared by a call to `declare_group!`)
+        // and providing it with the name of this rule as a string literal token
+        #[allow(unused_macros)]
+        macro_rules! rule_category {
+            () => { super::group_category!( $name ) };
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! declare_rule {
+        ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
         version: $version:literal,
         name: $name:tt,
         language: $language:literal,
@@ -380,15 +469,53 @@ macro_rules! declare_rule {
             const METADATA: $crate::RuleMetadata =
                 $crate::RuleMetadata::new($version, $name, concat!( $( $doc, "\n", )* ), $language) $( .$key($value) )*;
         }
+    }
+}
 
-        // Declare a new `rule_category!` macro in the module context that
-        // expands to the category of this rule
-        // This is implemented by calling the `group_category!` macro from the
-        // parent module (that should be declared by a call to `declare_group!`)
-        // and providing it with the name of this rule as a string literal token
+/// This macro is used to declare an analyzer rule type, and implement the
+//  [RuleMeta] trait for it
+///  # Example
+///
+/// The macro itself expect the following syntax:
+///
+/// ```rust,ignore
+///use biome_analyze::declare_refactor_rule;
+///
+/// declare_refactor_rule! {
+///     /// Documentation
+///     pub(crate) ExampleRule {
+///         version: "1.0.0",
+///         name: "ruleName",
+///         recommended: false,
+///     }
+/// }
+/// ```
+///
+/// Check [crate](module documentation) for a better
+/// understanding of how the macro works
+#[macro_export]
+macro_rules! declare_source_rule {
+    ( $( #[doc = $doc:literal] )+ $vis:vis $id:ident {
+        version: $version:literal,
+        name: $name:tt,
+        language: $language:literal,
+        $( $key:ident: $value:expr, )*
+    } ) => {
+        biome_analyze::declare_rule!(
+            $( #[doc = $doc] )*
+            $vis $id {
+                version: $version,
+                name: $name,
+                language: $language,
+                fix_kind: biome_analyze::FixKind::None,
+                $( $key: $value, )*
+            }
+        );
+
+        /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[allow(unused_macros)]
-        macro_rules! rule_category {
-            () => { super::group_category!( $name ) };
+        macro_rules! rule_action_category {
+            () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(concat!($language, ".", $name) )))  };
         }
     };
 }
@@ -471,6 +598,43 @@ macro_rules! declare_assists_group {
         #[allow(unused_macros)]
         macro_rules! group_category {
             ( $rule_name:tt ) => { $crate::category_concat!( "assists", $name, $rule_name ) };
+        }
+
+        // Re-export the macro for child modules, so `declare_rule!` can access
+        // the category of its parent group by using the `super` module
+        pub(self) use group_category;
+    };
+}
+
+/// This macro is used by the codegen script to declare an analyzer rule group,
+/// and implement the [RuleGroup] trait for it
+#[macro_export]
+macro_rules! declare_syntax_group {
+    ( $vis:vis $id:ident { name: $name:tt, rules: [ $( $( $rule:ident )::* , )* ] } ) => {
+        $vis enum $id {}
+
+        impl $crate::RuleGroup for $id {
+            type Language = <( $( $( $rule )::* , )* ) as $crate::GroupLanguage>::Language;
+            type Category = super::Category;
+
+            const NAME: &'static str = $name;
+
+            fn record_rules<V: $crate::RegistryVisitor<Self::Language> + ?Sized>(registry: &mut V) {
+                $( registry.record_rule::<$( $rule )::*>(); )*
+            }
+        }
+
+        pub(self) use $id as Group;
+
+        // Declare a `group_category!` macro in the context of this module (and
+        // all its children). This macro takes the name of a rule as a string
+        // literal token and expands to the category of the lint rule with this
+        // name within this group.
+        // This is implemented by calling the `category_concat!` macro with the
+        // "lint" prefix, the name of this group, and the rule name argument
+        #[allow(unused_macros)]
+        macro_rules! group_category {
+            ( $rule_name:tt ) => { $crate::category_concat!( "syntax", $name, $rule_name ) };
         }
 
         // Re-export the macro for child modules, so `declare_rule!` can access
@@ -704,7 +868,7 @@ pub trait Rule: RuleMeta + Sized {
                 <Self::Group as RuleGroup>::NAME,
                 Self::METADATA.name
             );
-            let suppression_text = format!("biome-ignore {}", rule_category);
+            let suppression_text = format!("biome-ignore {rule_category}");
             let root = ctx.root();
             let token = root.syntax().token_at_offset(text_range.start());
             let mut mutation = root.begin();

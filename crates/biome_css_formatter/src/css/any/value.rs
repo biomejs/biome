@@ -15,9 +15,11 @@ impl FormatRule<AnyCssValue> for FormatAnyCssValue {
             AnyCssValue::CssCustomIdentifier(node) => node.format().fmt(f),
             AnyCssValue::CssDashedIdentifier(node) => node.format().fmt(f),
             AnyCssValue::CssIdentifier(node) => node.format().fmt(f),
+            AnyCssValue::CssMetavariable(node) => node.format().fmt(f),
             AnyCssValue::CssNumber(node) => node.format().fmt(f),
             AnyCssValue::CssRatio(node) => node.format().fmt(f),
             AnyCssValue::CssString(node) => node.format().fmt(f),
+            AnyCssValue::CssUnicodeRange(node) => node.format().fmt(f),
         }
     }
 }

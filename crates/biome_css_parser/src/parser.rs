@@ -29,6 +29,10 @@ pub struct CssParserOptions {
     /// Enables parsing of CSS Modules specific features.
     /// Defaults to `false`.
     pub css_modules: bool,
+
+    /// Enables parsing of Grit metavariables.
+    /// Defaults to `false`.
+    pub grit_metavariables: bool,
 }
 
 impl CssParserOptions {
@@ -44,9 +48,20 @@ impl CssParserOptions {
         self
     }
 
+    /// Enables parsing of Grit metavariables.
+    pub fn allow_metavariables(mut self) -> Self {
+        self.grit_metavariables = true;
+        self
+    }
+
     /// Checks if parsing of CSS Modules features is disabled.
     pub fn is_css_modules_disabled(&self) -> bool {
         !self.css_modules
+    }
+
+    /// Checks if parsing of Grit metavariables is enabled.
+    pub fn is_metavariable_enabled(&self) -> bool {
+        self.grit_metavariables
     }
 }
 
@@ -66,12 +81,10 @@ impl<'source> CssParser<'source> {
 
     /// Re-lexes the current token in the specified context. Returns the kind
     /// of the re-lexed token (can be the same as before if the context doesn't make a difference for the current token)
-    #[allow(dead_code)] //TODO remote this once we actually don't use it
     pub fn re_lex(&mut self, context: CssReLexContext) -> CssSyntaxKind {
         self.source_mut().re_lex(context)
     }
 
-    #[allow(dead_code)] //TODO remove this allow once we actually use it
     pub(crate) fn state(&self) -> &CssParserState {
         &self.state
     }

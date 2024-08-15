@@ -8,6 +8,19 @@ export type CandidateRule = Array<
 		rule: unknown,
 	]
 >;
+
+export type ConfigVariant = {
+	name: string;
+	isArbitrary: boolean;
+	values: string[];
+	hasDash: boolean;
+	selectors: unknown;
+};
+
 export type TailwindContext = {
 	candidateRuleMap: Map<string, CandidateRule>;
+	offsets: {
+		variantOffsets: Map<string, bigint>;
+	};
+	getVariants: () => ConfigVariant[];
 };

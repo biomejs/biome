@@ -1,7 +1,0 @@
-class Foo {
-  public a;
-  private b;
-  protected c;
-  public d;
-  public e;
-}

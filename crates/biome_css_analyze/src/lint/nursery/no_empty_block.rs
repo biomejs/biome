@@ -1,9 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::stmt_ext::CssBlockLike;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow CSS empty blocks.
     ///
     /// By default, it will allow empty blocks with comments inside.
@@ -45,7 +47,7 @@ declare_rule! {
         name: "noEmptyBlock",
         language: "css",
         recommended: true,
-        sources: &[RuleSource::Stylelint("no-empty-block")],
+        sources: &[RuleSource::Stylelint("block-no-empty")],
     }
 }
 

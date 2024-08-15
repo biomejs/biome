@@ -1,6 +1,7 @@
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_aria::AriaRoles;
 use biome_console::markup;
@@ -10,7 +11,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that `tabIndex` is not assigned to non-interactive HTML elements.
     ///
     /// When using the tab key to navigate a webpage, limit it to interactive elements.
@@ -111,6 +112,7 @@ impl Rule for NoNoninteractiveTabindex {
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
         let aria_roles = ctx.aria_roles();
         let attributes = ctx.extract_attributes(&node.attributes());
+        let attributes = ctx.convert_all_attribute_values(attributes);
 
         if aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes) {
             let tabindex_attribute = node.find_attribute_by_name("tabIndex")?;
@@ -193,7 +195,7 @@ fn attribute_has_negative_tabindex(
         AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
             let expression = value.expression().ok()?;
             let expression_value =
-                AnyNumberLikeExpression::cast_ref(expression.syntax())?.value()?;
+                AnyNumberLikeExpression::cast(expression.into_syntax())?.value()?;
             Some(is_negative_tabindex(&expression_value))
         }
         _ => None,

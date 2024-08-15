@@ -59,6 +59,7 @@ CssBogusDocumentMatcher = SyntaxElement*
 CssBogusFontFamilyName = SyntaxElement*
 CssBogusCustomIdentifier = SyntaxElement*
 CssBogusKeyframesName = SyntaxElement*
+CssBogusUnicodeRangeValue = SyntaxElement*
 
 CssRoot =
 	bom: 'UNICODE_BOM'?
@@ -95,6 +96,7 @@ AnyCssSelector =
 	CssComplexSelector
 	| CssCompoundSelector
 	| CssBogusSelector
+	| CssMetavariable
 
 // div a {}
 // ^^^^^
@@ -110,9 +112,17 @@ CssComplexSelector =
 // a.class {}
 // ^^^^^^^
 CssCompoundSelector =
-	nesting_selector: '&'?
+	nesting_selectors: CssNestedSelectorList
 	simple_selector: AnyCssSimpleSelector?
 	sub_selectors: CssSubSelectorList
+
+// .class {
+// &&&&&&&.class {}
+// ^^^^^^^
+// }
+CssNestedSelectorList = CssNestedSelector*
+CssNestedSelector =
+	'&'
 
 CssSubSelectorList = AnyCssSubSelector*
 
@@ -432,6 +442,7 @@ AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
 	| CssBogus
+	| CssMetavariable
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1000,6 +1011,7 @@ AnyCssMediaQuery =
 	CssMediaConditionQuery
 	| AnyCssMediaTypeQuery
 	| CssBogusMediaQuery
+	| CssMetavariable
 
 // @media screen, (width > 500px), print {}
 // 				        ^^^^^^^^^^^^^^^
@@ -1614,6 +1626,8 @@ AnyCssValue =
 	| AnyCssFunction
 	| CssColor
 	| CssBracketedValue
+	| CssUnicodeRange
+	| CssMetavariable
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1745,6 +1759,33 @@ AnyCssCustomIdentifier =
 	CssCustomIdentifier
 	| CssBogusCustomIdentifier
 
+// https://drafts.csswg.org/css-fonts/#unicode-range-desc
+// https://www.w3.org/TR/css-syntax-3/#typedef-urange
+// <urange> =
+// u '+' <ident-token> '?'* |
+// u <dimension-token> '?'* |
+// u <number-token> '?'* |
+// u <number-token> <dimension-token> |
+// u <number-token> <number-token> |
+// u '+' '?'+
+// unicode-range: U+000-49F, U+2000-27FF, U+2900-2BFF, U+1D400-1D7FF, U+ff??;
+// 							  ^^^^^^^^^  ^^^^^^^^^^^  ^^^^^^^^^^^  ^^^^^^^^^^^^^  ^^^^^^
+CssUnicodeRange =
+	prefix: 'U+'
+	value: AnyCssUnicodeValue
+
+AnyCssUnicodeValue =
+	CssUnicodeCodepoint
+	| CssUnicodeRangeWildcard
+	| CssUnicodeRangeInterval
+	| CssBogusUnicodeRangeValue
+
+CssUnicodeRangeInterval =
+	start: CssUnicodeCodepoint
+	'-'
+	end: CssUnicodeCodepoint
+
+
 // Any identifier. Case insensitve, used for standard property names, values, type selectors, etc.
 CssIdentifier = value: 'ident'
 // Any non-standard identifier. Case sensitive, used for class names, ids, etc. Custom identifiers
@@ -1755,4 +1796,9 @@ CssCustomIdentifier = value: 'ident'
 CssDashedIdentifier = value: 'ident'
 CssString = value: 'css_string_literal'
 CssNumber = value: 'css_number_literal'
+CssUnicodeCodepoint = value: 'css_unicode_codepoint_literal'
+CssUnicodeRangeWildcard = value: 'css_unicode_range_wildcard_literal'
 CssUrlValueRaw = value: 'css_url_value_raw_literal'
+
+// https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
+CssMetavariable = value: 'grit_metavariable'

@@ -1,16 +1,16 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::make::js_variable_declarator_list;
-use biome_js_syntax::{JsLanguage, JsVariableDeclarator, JsVariableStatement};
-use biome_rowan::{chain_trivia_pieces, SyntaxToken, SyntaxTriviaPiece};
+use biome_js_syntax::{JsLanguage, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement};
+use biome_rowan::{chain_trivia_pieces, SyntaxTriviaPiece};
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow initializing variables to `undefined`.
     ///
     /// A variable that is declared and not initialized to any value automatically gets the value of `undefined`.
@@ -147,7 +147,7 @@ impl Rule for NoUselessUndefinedInitialization {
 
         // Save the separators too
         let separators_syntax = declarators.clone().into_syntax();
-        let separators: Vec<SyntaxToken<JsLanguage>> = separators_syntax.tokens().collect();
+        let separators: Vec<JsSyntaxToken> = separators_syntax.tokens().collect();
 
         let new_declaration = current_declaration.clone().with_initializer(None);
         let new_declarators: Vec<JsVariableDeclarator> = declarators

@@ -79,10 +79,26 @@ impl BiomeDiagnostic {
     ) -> Self {
         Self::InvalidIgnorePattern(InvalidIgnorePattern {
             message: format!(
-                "Couldn't parse the {}, reason: {}",
+                "Couldn't parse the pattern \"{}\". Reason: {}",
                 pattern.into(),
                 reason.into()
             ),
+            file_path: None,
+        })
+    }
+
+    pub fn new_invalid_ignore_pattern_with_path(
+        pattern: impl Into<String>,
+        reason: impl Into<String>,
+        file_path: Option<impl Into<String>>,
+    ) -> Self {
+        Self::InvalidIgnorePattern(InvalidIgnorePattern {
+            message: format!(
+                "Couldn't parse the pattern \"{}\". Reason: {}",
+                pattern.into(),
+                reason.into()
+            ),
+            file_path: file_path.map(|f| f.into()),
         })
     }
 
@@ -161,6 +177,9 @@ pub struct InvalidIgnorePattern {
     #[message]
     #[description]
     pub message: String,
+
+    #[location(resource)]
+    pub file_path: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -230,6 +249,8 @@ pub enum EditorConfigDiagnostic {
     Incompatible(InconpatibleDiagnostic),
     /// A glob pattern that biome doesn't support.
     UnknownGlobPattern(UnknownGlobPatternDiagnostic),
+    /// A glob pattern that contains invalid syntax.
+    InvalidGlobPattern(InvalidGlobPatternDiagnostic),
 }
 
 impl EditorConfigDiagnostic {
@@ -246,6 +267,15 @@ impl EditorConfigDiagnostic {
         Self::UnknownGlobPattern(UnknownGlobPatternDiagnostic {
             message: MessageAndDescription::from(
                 markup! { "This glob pattern is incompatible with biome: "{pattern.into()}}
+                    .to_owned(),
+            ),
+        })
+    }
+
+    pub fn invalid_glob_pattern(pattern: impl Into<String>, reason: impl Into<String>) -> Self {
+        Self::InvalidGlobPattern(InvalidGlobPatternDiagnostic {
+            message: MessageAndDescription::from(
+                markup! { "This glob pattern is invalid: "{pattern.into()}" Reason: "{reason.into()}}
                     .to_owned(),
             ),
         })
@@ -281,6 +311,17 @@ pub struct InconpatibleDiagnostic {
     severity = Warning,
 )]
 pub struct UnknownGlobPatternDiagnostic {
+    #[message]
+    #[description]
+    pub message: MessageAndDescription,
+}
+
+#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[diagnostic(
+    category = "configuration",
+    severity = Error,
+)]
+pub struct InvalidGlobPatternDiagnostic {
     #[message]
     #[description]
     pub message: MessageAndDescription,

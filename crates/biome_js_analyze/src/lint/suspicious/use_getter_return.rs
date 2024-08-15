@@ -1,12 +1,12 @@
 use crate::ControlFlowGraph;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_control_flow::{builder::ROOT_BLOCK_ID, ExceptionHandlerKind, InstructionKind};
 use biome_js_syntax::{JsGetterClassMember, JsGetterObjectMember, JsReturnStatement};
 use biome_rowan::{AstNode, NodeOrToken, TextRange};
 use roaring::RoaringBitmap;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce `get` methods to always return a value.
     ///
     /// ## Examples
@@ -113,8 +113,8 @@ impl Rule for UseGetterReturn {
                         }
                     }
                     InstructionKind::Return => {
-                        if let Some(NodeOrToken::Node(ref node)) = instruction.node {
-                            if let Some(ref return_stmt) = JsReturnStatement::cast_ref(node) {
+                        if let Some(NodeOrToken::Node(node)) = &instruction.node {
+                            if let Some(return_stmt) = JsReturnStatement::cast_ref(node) {
                                 if return_stmt.argument().is_none() {
                                     invalid_returns.push(InvalidGetterReturn::EmptyReturn(
                                         return_stmt.range(),

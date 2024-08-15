@@ -676,7 +676,7 @@ async fn pull_diagnostics() -> Result<()> {
                     }),
                     source: Some(String::from("biome")),
                     message: String::from(
-                        "Use === instead of ==.\n== is only allowed when comparing against `null`",
+                        "Use === instead of ==. == is only allowed when comparing against `null`",
                     ),
                     related_information: Some(vec![lsp::DiagnosticRelatedInformation {
                         location: lsp::Location {
@@ -750,7 +750,7 @@ async fn pull_diagnostics_of_syntax_rules() -> Result<()> {
                     },
                     severity: Some(lsp::DiagnosticSeverity::ERROR),
                     code: Some(lsp::NumberOrString::String(String::from(
-                        "parse/noDuplicatePrivateClassMembers",
+                        "syntax/correctness/noDuplicatePrivateClassMembers",
                     ))),
                     code_description: None,
                     source: Some(String::from("biome")),
@@ -820,7 +820,7 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
                     }),
                     source: Some(String::from("biome")),
                     message: String::from(
-                        "Use === instead of ==.\n== is only allowed when comparing against `null`",
+                        "Use === instead of ==. == is only allowed when comparing against `null`",
                     ),
                     related_information: Some(vec![lsp::DiagnosticRelatedInformation {
                         location: lsp::Location {

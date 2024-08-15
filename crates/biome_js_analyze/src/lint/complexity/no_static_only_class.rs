@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsClass, AnyJsClassMember, JsGetterClassMember, JsMethodClassMember, JsPropertyClassMember,
@@ -8,7 +10,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{AstNode, AstNodeList};
 
-declare_rule! {
+declare_lint_rule! {
     /// This rule reports when a class has no non-static members, such as for a class used exclusively as a static namespace.
     ///
     /// Users who come from a [OOP](https://en.wikipedia.org/wiki/Object-oriented_programming) paradigm may wrap their utility functions in an extra class,
@@ -151,8 +153,9 @@ impl Rule for NoStaticOnlyClass {
             .members()
             .iter()
             .filter_map(|member| match member {
-                AnyJsClassMember::JsBogusMember(_) => None,
-                AnyJsClassMember::JsEmptyClassMember(_) => None,
+                AnyJsClassMember::JsBogusMember(_)
+                | AnyJsClassMember::JsMetavariable(_)
+                | AnyJsClassMember::JsEmptyClassMember(_) => None,
                 AnyJsClassMember::JsConstructorClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static
                 AnyJsClassMember::TsConstructorSignatureClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static
                 AnyJsClassMember::JsGetterClassMember(m) => Some(m.has_static_modifier()),

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/prettier-ignore/issue-14238.ts
 ---
-
 # Input
 
 ```ts
@@ -38,5 +37,3 @@ export const foo =
   bar as Baz
 ).qux;
 ```
-
-

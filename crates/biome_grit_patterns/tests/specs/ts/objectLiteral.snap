@@ -1,0 +1,12 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: objectLiteral
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "3:15-6:6",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

@@ -1,0 +1,181 @@
+---
+source: crates/biome_css_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```css
+.formTable tbody td {
+	border-left: 1px # solid;
+}
+
+```
+
+
+## AST
+
+```
+CssRoot {
+    bom_token: missing (optional),
+    rules: CssRuleList [
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssComplexSelector {
+                    left: CssComplexSelector {
+                        left: CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [],
+                            simple_selector: missing (optional),
+                            sub_selectors: CssSubSelectorList [
+                                CssClassSelector {
+                                    dot_token: DOT@0..1 "." [] [],
+                                    name: CssCustomIdentifier {
+                                        value_token: IDENT@1..10 "formTable" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                        combinator: CSS_SPACE_LITERAL@10..11 " " [] [],
+                        right: CssCompoundSelector {
+                            nesting_selectors: CssNestedSelectorList [],
+                            simple_selector: CssTypeSelector {
+                                namespace: missing (optional),
+                                ident: CssIdentifier {
+                                    value_token: IDENT@11..16 "tbody" [] [],
+                                },
+                            },
+                            sub_selectors: CssSubSelectorList [],
+                        },
+                    },
+                    combinator: CSS_SPACE_LITERAL@16..17 " " [] [],
+                    right: CssCompoundSelector {
+                        nesting_selectors: CssNestedSelectorList [],
+                        simple_selector: CssTypeSelector {
+                            namespace: missing (optional),
+                            ident: CssIdentifier {
+                                value_token: IDENT@17..20 "td" [] [Whitespace(" ")],
+                            },
+                        },
+                        sub_selectors: CssSubSelectorList [],
+                    },
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@20..21 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@21..34 "border-left" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@34..36 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@36..37 "1" [] [],
+                                        unit_token: IDENT@37..40 "px" [] [Whitespace(" ")],
+                                    },
+                                    CssColor {
+                                        hash_token: HASH@40..42 "#" [] [Whitespace(" ")],
+                                        value_token: missing (required),
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@42..47 "solid" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@47..48 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@48..50 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@50..51 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: CSS_ROOT@0..51
+  0: (empty)
+  1: CSS_RULE_LIST@0..50
+    0: CSS_QUALIFIED_RULE@0..50
+      0: CSS_SELECTOR_LIST@0..20
+        0: CSS_COMPLEX_SELECTOR@0..20
+          0: CSS_COMPLEX_SELECTOR@0..16
+            0: CSS_COMPOUND_SELECTOR@0..10
+              0: CSS_NESTED_SELECTOR_LIST@0..0
+              1: (empty)
+              2: CSS_SUB_SELECTOR_LIST@0..10
+                0: CSS_CLASS_SELECTOR@0..10
+                  0: DOT@0..1 "." [] []
+                  1: CSS_CUSTOM_IDENTIFIER@1..10
+                    0: IDENT@1..10 "formTable" [] []
+            1: CSS_SPACE_LITERAL@10..11 " " [] []
+            2: CSS_COMPOUND_SELECTOR@11..16
+              0: CSS_NESTED_SELECTOR_LIST@11..11
+              1: CSS_TYPE_SELECTOR@11..16
+                0: (empty)
+                1: CSS_IDENTIFIER@11..16
+                  0: IDENT@11..16 "tbody" [] []
+              2: CSS_SUB_SELECTOR_LIST@16..16
+          1: CSS_SPACE_LITERAL@16..17 " " [] []
+          2: CSS_COMPOUND_SELECTOR@17..20
+            0: CSS_NESTED_SELECTOR_LIST@17..17
+            1: CSS_TYPE_SELECTOR@17..20
+              0: (empty)
+              1: CSS_IDENTIFIER@17..20
+                0: IDENT@17..20 "td" [] [Whitespace(" ")]
+            2: CSS_SUB_SELECTOR_LIST@20..20
+      1: CSS_DECLARATION_OR_RULE_BLOCK@20..50
+        0: L_CURLY@20..21 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@21..48
+          0: CSS_DECLARATION_WITH_SEMICOLON@21..48
+            0: CSS_DECLARATION@21..47
+              0: CSS_GENERIC_PROPERTY@21..47
+                0: CSS_IDENTIFIER@21..34
+                  0: IDENT@21..34 "border-left" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@34..36 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@36..47
+                  0: CSS_REGULAR_DIMENSION@36..40
+                    0: CSS_NUMBER_LITERAL@36..37 "1" [] []
+                    1: IDENT@37..40 "px" [] [Whitespace(" ")]
+                  1: CSS_COLOR@40..42
+                    0: HASH@40..42 "#" [] [Whitespace(" ")]
+                    1: (empty)
+                  2: CSS_IDENTIFIER@42..47
+                    0: IDENT@42..47 "solid" [] []
+              1: (empty)
+            1: SEMICOLON@47..48 ";" [] []
+        2: R_CURLY@48..50 "}" [Newline("\n")] []
+  2: EOF@50..51 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+color_error.css:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a color but instead found '#'.
+  
+    1 │ .formTable tbody td {
+  > 2 │ 	border-left: 1px # solid;
+      │ 	                 ^
+    3 │ }
+    4 │ 
+  
+  i Expected a color here.
+  
+    1 │ .formTable tbody td {
+  > 2 │ 	border-left: 1px # solid;
+      │ 	                 ^
+    3 │ }
+    4 │ 
+  
+  i Ensure the color is specified in a valid hexadecimal format. Examples: #000, #000f, #ffffff, #ffffffff
+  
+```

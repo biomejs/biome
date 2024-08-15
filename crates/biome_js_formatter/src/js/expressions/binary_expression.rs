@@ -1,8 +1,8 @@
 use crate::prelude::*;
-use crate::utils::{needs_binary_like_parentheses, AnyJsBinaryLikeExpression};
 
-use crate::parentheses::NeedsParentheses;
-use biome_js_syntax::{JsBinaryExpression, JsSyntaxNode};
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsBinaryExpression;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsBinaryExpression;
@@ -18,12 +18,6 @@ impl FormatNodeRule<JsBinaryExpression> for FormatJsBinaryExpression {
 
     fn needs_parentheses(&self, item: &JsBinaryExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsBinaryExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        needs_binary_like_parentheses(&AnyJsBinaryLikeExpression::from(self.clone()), parent)
     }
 }
 

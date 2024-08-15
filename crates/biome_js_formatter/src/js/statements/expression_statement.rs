@@ -1,7 +1,9 @@
-use crate::parentheses::{get_expression_left_side, AnyJsExpressionLeftSide, NeedsParentheses};
 use crate::prelude::*;
 use crate::utils::FormatStatementSemicolon;
+
 use biome_formatter::{write, CstFormatContext};
+use biome_js_syntax::expression_left_side::AnyJsExpressionLeftSide;
+use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{
     AnyJsAssignment, AnyJsAssignmentPattern, AnyJsExpression, JsExpressionStatement, JsSyntaxKind,
     JsUnaryOperator,
@@ -146,7 +148,7 @@ fn needs_semicolon(node: &JsExpressionStatement) -> bool {
             return true;
         }
 
-        expression = match get_expression_left_side(&current) {
+        expression = match current.left_expression() {
             Some(inner) => Some(inner),
             None => return false,
         };

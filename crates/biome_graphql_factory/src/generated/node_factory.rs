@@ -7,7 +7,7 @@ use biome_graphql_syntax::{
     GraphqlSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn graphql_alias(value: GraphqlName, colon_token: SyntaxToken) -> GraphqlAlias {
+pub fn graphql_alias(value: GraphqlLiteralName, colon_token: SyntaxToken) -> GraphqlAlias {
     GraphqlAlias::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_ALIAS,
         [
@@ -17,7 +17,7 @@ pub fn graphql_alias(value: GraphqlName, colon_token: SyntaxToken) -> GraphqlAli
     ))
 }
 pub fn graphql_argument(
-    name: GraphqlName,
+    name: GraphqlLiteralName,
     colon_token: SyntaxToken,
     value: AnyGraphqlValue,
 ) -> GraphqlArgument {
@@ -81,7 +81,10 @@ pub fn graphql_description(graphql_string_value: GraphqlStringValue) -> GraphqlD
         ))],
     ))
 }
-pub fn graphql_directive(at_token: SyntaxToken, name: GraphqlName) -> GraphqlDirectiveBuilder {
+pub fn graphql_directive(
+    at_token: SyntaxToken,
+    name: GraphqlNameReference,
+) -> GraphqlDirectiveBuilder {
     GraphqlDirectiveBuilder {
         at_token,
         name,
@@ -90,7 +93,7 @@ pub fn graphql_directive(at_token: SyntaxToken, name: GraphqlName) -> GraphqlDir
 }
 pub struct GraphqlDirectiveBuilder {
     at_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     arguments: Option<GraphqlArguments>,
 }
 impl GraphqlDirectiveBuilder {
@@ -113,7 +116,7 @@ impl GraphqlDirectiveBuilder {
 pub fn graphql_directive_definition(
     directive_token: SyntaxToken,
     at_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     on_token: SyntaxToken,
     locations: GraphqlDirectiveLocationList,
 ) -> GraphqlDirectiveDefinitionBuilder {
@@ -132,7 +135,7 @@ pub fn graphql_directive_definition(
 pub struct GraphqlDirectiveDefinitionBuilder {
     directive_token: SyntaxToken,
     at_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     on_token: SyntaxToken,
     locations: GraphqlDirectiveLocationList,
     description: Option<GraphqlDescription>,
@@ -186,7 +189,7 @@ pub fn graphql_directive_location(value_token_token: SyntaxToken) -> GraphqlDire
 }
 pub fn graphql_enum_type_definition(
     enum_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
 ) -> GraphqlEnumTypeDefinitionBuilder {
     GraphqlEnumTypeDefinitionBuilder {
@@ -199,7 +202,7 @@ pub fn graphql_enum_type_definition(
 }
 pub struct GraphqlEnumTypeDefinitionBuilder {
     enum_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
     description: Option<GraphqlDescription>,
     enum_values: Option<GraphqlEnumValuesDefinition>,
@@ -231,7 +234,7 @@ impl GraphqlEnumTypeDefinitionBuilder {
 pub fn graphql_enum_type_extension(
     extend_token: SyntaxToken,
     enum_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
 ) -> GraphqlEnumTypeExtensionBuilder {
     GraphqlEnumTypeExtensionBuilder {
@@ -245,7 +248,7 @@ pub fn graphql_enum_type_extension(
 pub struct GraphqlEnumTypeExtensionBuilder {
     extend_token: SyntaxToken,
     enum_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
     enum_values: Option<GraphqlEnumValuesDefinition>,
 }
@@ -268,14 +271,14 @@ impl GraphqlEnumTypeExtensionBuilder {
         ))
     }
 }
-pub fn graphql_enum_value(graphql_name: GraphqlName) -> GraphqlEnumValue {
+pub fn graphql_enum_value(value: GraphqlLiteralName) -> GraphqlEnumValue {
     GraphqlEnumValue::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_ENUM_VALUE,
-        [Some(SyntaxElement::Node(graphql_name.into_syntax()))],
+        [Some(SyntaxElement::Node(value.into_syntax()))],
     ))
 }
 pub fn graphql_enum_value_definition(
-    value: GraphqlEnumValue,
+    value: GraphqlLiteralName,
     directives: GraphqlDirectiveList,
 ) -> GraphqlEnumValueDefinitionBuilder {
     GraphqlEnumValueDefinitionBuilder {
@@ -285,7 +288,7 @@ pub fn graphql_enum_value_definition(
     }
 }
 pub struct GraphqlEnumValueDefinitionBuilder {
-    value: GraphqlEnumValue,
+    value: GraphqlLiteralName,
     directives: GraphqlDirectiveList,
     description: Option<GraphqlDescription>,
 }
@@ -320,7 +323,10 @@ pub fn graphql_enum_values_definition(
         ],
     ))
 }
-pub fn graphql_field(name: GraphqlName, directives: GraphqlDirectiveList) -> GraphqlFieldBuilder {
+pub fn graphql_field(
+    name: GraphqlLiteralName,
+    directives: GraphqlDirectiveList,
+) -> GraphqlFieldBuilder {
     GraphqlFieldBuilder {
         name,
         directives,
@@ -330,7 +336,7 @@ pub fn graphql_field(name: GraphqlName, directives: GraphqlDirectiveList) -> Gra
     }
 }
 pub struct GraphqlFieldBuilder {
-    name: GraphqlName,
+    name: GraphqlLiteralName,
     directives: GraphqlDirectiveList,
     alias: Option<GraphqlAlias>,
     arguments: Option<GraphqlArguments>,
@@ -366,7 +372,7 @@ impl GraphqlFieldBuilder {
     }
 }
 pub fn graphql_field_definition(
-    name: GraphqlName,
+    name: GraphqlLiteralName,
     colon_token: SyntaxToken,
     ty: AnyGraphqlType,
     directives: GraphqlDirectiveList,
@@ -381,7 +387,7 @@ pub fn graphql_field_definition(
     }
 }
 pub struct GraphqlFieldDefinitionBuilder {
-    name: GraphqlName,
+    name: GraphqlLiteralName,
     colon_token: SyntaxToken,
     ty: AnyGraphqlType,
     directives: GraphqlDirectiveList,
@@ -435,7 +441,7 @@ pub fn graphql_float_value(graphql_float_literal_token: SyntaxToken) -> GraphqlF
 }
 pub fn graphql_fragment_definition(
     fragment_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     type_condition: GraphqlTypeCondition,
     directives: GraphqlDirectiveList,
     selection_set: GraphqlSelectionSet,
@@ -453,7 +459,7 @@ pub fn graphql_fragment_definition(
 }
 pub fn graphql_fragment_spread(
     dotdotdot_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
 ) -> GraphqlFragmentSpread {
     GraphqlFragmentSpread::unwrap_cast(SyntaxNode::new_detached(
@@ -548,7 +554,7 @@ pub fn graphql_input_fields_definition(
 }
 pub fn graphql_input_object_type_definition(
     input_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
 ) -> GraphqlInputObjectTypeDefinitionBuilder {
     GraphqlInputObjectTypeDefinitionBuilder {
@@ -561,7 +567,7 @@ pub fn graphql_input_object_type_definition(
 }
 pub struct GraphqlInputObjectTypeDefinitionBuilder {
     input_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
     description: Option<GraphqlDescription>,
     input_fields: Option<GraphqlInputFieldsDefinition>,
@@ -593,7 +599,7 @@ impl GraphqlInputObjectTypeDefinitionBuilder {
 pub fn graphql_input_object_type_extension(
     extend_token: SyntaxToken,
     input_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
 ) -> GraphqlInputObjectTypeExtensionBuilder {
     GraphqlInputObjectTypeExtensionBuilder {
@@ -607,7 +613,7 @@ pub fn graphql_input_object_type_extension(
 pub struct GraphqlInputObjectTypeExtensionBuilder {
     extend_token: SyntaxToken,
     input_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
     input_fields: Option<GraphqlInputFieldsDefinition>,
 }
@@ -631,7 +637,7 @@ impl GraphqlInputObjectTypeExtensionBuilder {
     }
 }
 pub fn graphql_input_value_definition(
-    name: GraphqlName,
+    name: GraphqlLiteralName,
     colon_token: SyntaxToken,
     ty: AnyGraphqlType,
     directives: GraphqlDirectiveList,
@@ -646,7 +652,7 @@ pub fn graphql_input_value_definition(
     }
 }
 pub struct GraphqlInputValueDefinitionBuilder {
-    name: GraphqlName,
+    name: GraphqlLiteralName,
     colon_token: SyntaxToken,
     ty: AnyGraphqlType,
     directives: GraphqlDirectiveList,
@@ -686,7 +692,7 @@ pub fn graphql_int_value(graphql_int_literal_token: SyntaxToken) -> GraphqlIntVa
 }
 pub fn graphql_interface_type_definition(
     interface_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
 ) -> GraphqlInterfaceTypeDefinitionBuilder {
     GraphqlInterfaceTypeDefinitionBuilder {
@@ -700,7 +706,7 @@ pub fn graphql_interface_type_definition(
 }
 pub struct GraphqlInterfaceTypeDefinitionBuilder {
     interface_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
     description: Option<GraphqlDescription>,
     implements: Option<GraphqlImplementsInterfaces>,
@@ -739,7 +745,7 @@ impl GraphqlInterfaceTypeDefinitionBuilder {
 pub fn graphql_interface_type_extension(
     extend_token: SyntaxToken,
     interface_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
 ) -> GraphqlInterfaceTypeExtensionBuilder {
     GraphqlInterfaceTypeExtensionBuilder {
@@ -754,7 +760,7 @@ pub fn graphql_interface_type_extension(
 pub struct GraphqlInterfaceTypeExtensionBuilder {
     extend_token: SyntaxToken,
     interface_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
     implements: Option<GraphqlImplementsInterfaces>,
     fields: Option<GraphqlFieldsDefinition>,
@@ -812,16 +818,22 @@ pub fn graphql_list_value(
         ],
     ))
 }
-pub fn graphql_name(value_token: SyntaxToken) -> GraphqlName {
-    GraphqlName::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_NAME,
+pub fn graphql_literal_name(value_token: SyntaxToken) -> GraphqlLiteralName {
+    GraphqlLiteralName::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_LITERAL_NAME,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn graphql_named_type(name: GraphqlName) -> GraphqlNamedType {
-    GraphqlNamedType::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_NAMED_TYPE,
-        [Some(SyntaxElement::Node(name.into_syntax()))],
+pub fn graphql_name_binding(value_token: SyntaxToken) -> GraphqlNameBinding {
+    GraphqlNameBinding::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_NAME_BINDING,
+        [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn graphql_name_reference(value_token: SyntaxToken) -> GraphqlNameReference {
+    GraphqlNameReference::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_NAME_REFERENCE,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn graphql_non_null_type(
@@ -843,7 +855,7 @@ pub fn graphql_null_value(null_token: SyntaxToken) -> GraphqlNullValue {
     ))
 }
 pub fn graphql_object_field(
-    name: GraphqlName,
+    name: GraphqlLiteralName,
     colon_token: SyntaxToken,
     value: AnyGraphqlValue,
 ) -> GraphqlObjectField {
@@ -858,7 +870,7 @@ pub fn graphql_object_field(
 }
 pub fn graphql_object_type_definition(
     type_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
 ) -> GraphqlObjectTypeDefinitionBuilder {
     GraphqlObjectTypeDefinitionBuilder {
@@ -872,7 +884,7 @@ pub fn graphql_object_type_definition(
 }
 pub struct GraphqlObjectTypeDefinitionBuilder {
     type_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
     description: Option<GraphqlDescription>,
     implements: Option<GraphqlImplementsInterfaces>,
@@ -911,7 +923,7 @@ impl GraphqlObjectTypeDefinitionBuilder {
 pub fn graphql_object_type_extension(
     extend_token: SyntaxToken,
     type_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
 ) -> GraphqlObjectTypeExtensionBuilder {
     GraphqlObjectTypeExtensionBuilder {
@@ -926,7 +938,7 @@ pub fn graphql_object_type_extension(
 pub struct GraphqlObjectTypeExtensionBuilder {
     extend_token: SyntaxToken,
     type_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
     implements: Option<GraphqlImplementsInterfaces>,
     fields: Option<GraphqlFieldsDefinition>,
@@ -987,11 +999,11 @@ pub struct GraphqlOperationDefinitionBuilder {
     ty: GraphqlOperationType,
     directives: GraphqlDirectiveList,
     selection_set: GraphqlSelectionSet,
-    name: Option<GraphqlName>,
+    name: Option<GraphqlNameBinding>,
     variables: Option<GraphqlVariableDefinitions>,
 }
 impl GraphqlOperationDefinitionBuilder {
-    pub fn with_name(mut self, name: GraphqlName) -> Self {
+    pub fn with_name(mut self, name: GraphqlNameBinding) -> Self {
         self.name = Some(name);
         self
     }
@@ -1054,7 +1066,7 @@ impl GraphqlRootBuilder {
 pub fn graphql_root_operation_type_definition(
     operation_type: GraphqlOperationType,
     colon_token: SyntaxToken,
-    named_type: GraphqlNamedType,
+    named_type: GraphqlNameReference,
 ) -> GraphqlRootOperationTypeDefinition {
     GraphqlRootOperationTypeDefinition::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_ROOT_OPERATION_TYPE_DEFINITION,
@@ -1081,7 +1093,7 @@ pub fn graphql_root_operation_types(
 }
 pub fn graphql_scalar_type_definition(
     scalar_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
 ) -> GraphqlScalarTypeDefinitionBuilder {
     GraphqlScalarTypeDefinitionBuilder {
@@ -1093,7 +1105,7 @@ pub fn graphql_scalar_type_definition(
 }
 pub struct GraphqlScalarTypeDefinitionBuilder {
     scalar_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
     description: Option<GraphqlDescription>,
 }
@@ -1118,7 +1130,7 @@ impl GraphqlScalarTypeDefinitionBuilder {
 pub fn graphql_scalar_type_extension(
     extend_token: SyntaxToken,
     scalar_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
 ) -> GraphqlScalarTypeExtension {
     GraphqlScalarTypeExtension::unwrap_cast(SyntaxNode::new_detached(
@@ -1226,7 +1238,10 @@ pub fn graphql_string_value(graphql_string_literal_token: SyntaxToken) -> Graphq
         [Some(SyntaxElement::Token(graphql_string_literal_token))],
     ))
 }
-pub fn graphql_type_condition(on_token: SyntaxToken, ty: GraphqlNamedType) -> GraphqlTypeCondition {
+pub fn graphql_type_condition(
+    on_token: SyntaxToken,
+    ty: GraphqlNameReference,
+) -> GraphqlTypeCondition {
     GraphqlTypeCondition::unwrap_cast(SyntaxNode::new_detached(
         GraphqlSyntaxKind::GRAPHQL_TYPE_CONDITION,
         [
@@ -1269,7 +1284,7 @@ impl GraphqlUnionMemberTypesBuilder {
 }
 pub fn graphql_union_type_definition(
     union_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
 ) -> GraphqlUnionTypeDefinitionBuilder {
     GraphqlUnionTypeDefinitionBuilder {
@@ -1282,7 +1297,7 @@ pub fn graphql_union_type_definition(
 }
 pub struct GraphqlUnionTypeDefinitionBuilder {
     union_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameBinding,
     directives: GraphqlDirectiveList,
     description: Option<GraphqlDescription>,
     union_members: Option<GraphqlUnionMemberTypes>,
@@ -1314,7 +1329,7 @@ impl GraphqlUnionTypeDefinitionBuilder {
 pub fn graphql_union_type_extension(
     extend_token: SyntaxToken,
     union_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
 ) -> GraphqlUnionTypeExtensionBuilder {
     GraphqlUnionTypeExtensionBuilder {
@@ -1328,7 +1343,7 @@ pub fn graphql_union_type_extension(
 pub struct GraphqlUnionTypeExtensionBuilder {
     extend_token: SyntaxToken,
     union_token: SyntaxToken,
-    name: GraphqlName,
+    name: GraphqlNameReference,
     directives: GraphqlDirectiveList,
     union_members: Option<GraphqlUnionMemberTypes>,
 }
@@ -1351,9 +1366,12 @@ impl GraphqlUnionTypeExtensionBuilder {
         ))
     }
 }
-pub fn graphql_variable(dollar_token: SyntaxToken, name: GraphqlName) -> GraphqlVariable {
-    GraphqlVariable::unwrap_cast(SyntaxNode::new_detached(
-        GraphqlSyntaxKind::GRAPHQL_VARIABLE,
+pub fn graphql_variable_binding(
+    dollar_token: SyntaxToken,
+    name: GraphqlLiteralName,
+) -> GraphqlVariableBinding {
+    GraphqlVariableBinding::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_VARIABLE_BINDING,
         [
             Some(SyntaxElement::Token(dollar_token)),
             Some(SyntaxElement::Node(name.into_syntax())),
@@ -1361,7 +1379,7 @@ pub fn graphql_variable(dollar_token: SyntaxToken, name: GraphqlName) -> Graphql
     ))
 }
 pub fn graphql_variable_definition(
-    variable: GraphqlVariable,
+    variable: GraphqlVariableBinding,
     colon_token: SyntaxToken,
     ty: AnyGraphqlType,
     directives: GraphqlDirectiveList,
@@ -1375,7 +1393,7 @@ pub fn graphql_variable_definition(
     }
 }
 pub struct GraphqlVariableDefinitionBuilder {
-    variable: GraphqlVariable,
+    variable: GraphqlVariableBinding,
     colon_token: SyntaxToken,
     ty: AnyGraphqlType,
     directives: GraphqlDirectiveList,
@@ -1411,6 +1429,18 @@ pub fn graphql_variable_definitions(
             Some(SyntaxElement::Token(l_paren_token)),
             Some(SyntaxElement::Node(elements.into_syntax())),
             Some(SyntaxElement::Token(r_paren_token)),
+        ],
+    ))
+}
+pub fn graphql_variable_reference(
+    dollar_token: SyntaxToken,
+    name: GraphqlLiteralName,
+) -> GraphqlVariableReference {
+    GraphqlVariableReference::unwrap_cast(SyntaxNode::new_detached(
+        GraphqlSyntaxKind::GRAPHQL_VARIABLE_REFERENCE,
+        [
+            Some(SyntaxElement::Token(dollar_token)),
+            Some(SyntaxElement::Node(name.into_syntax())),
         ],
     ))
 }
@@ -1515,7 +1545,7 @@ pub fn graphql_implements_interface_list<I, S>(
     separators: S,
 ) -> GraphqlImplementsInterfaceList
 where
-    I: IntoIterator<Item = GraphqlNamedType>,
+    I: IntoIterator<Item = GraphqlNameReference>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = GraphqlSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -1598,7 +1628,7 @@ where
 }
 pub fn graphql_union_member_type_list<I, S>(items: I, separators: S) -> GraphqlUnionMemberTypeList
 where
-    I: IntoIterator<Item = GraphqlNamedType>,
+    I: IntoIterator<Item = GraphqlNameReference>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = GraphqlSyntaxToken>,
     S::IntoIter: ExactSizeIterator,

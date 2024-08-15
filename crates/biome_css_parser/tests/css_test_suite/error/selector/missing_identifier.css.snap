@@ -2,7 +2,6 @@
 source: crates/biome_css_parser/tests/spec_test.rs
 expression: snapshot
 ---
-
 ## Input
 
 ```css
@@ -20,7 +19,7 @@ CssRoot {
         CssQualifiedRule {
             prelude: CssSelectorList [
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssClassSelector {
@@ -31,7 +30,7 @@ CssRoot {
                 },
                 COMMA@2..4 "," [] [Whitespace(" ")],
                 CssCompoundSelector {
-                    nesting_selector_token: missing (optional),
+                    nesting_selectors: CssNestedSelectorList [],
                     simple_selector: missing (optional),
                     sub_selectors: CssSubSelectorList [
                         CssIdSelector {
@@ -61,7 +60,7 @@ CssRoot {
     0: CSS_QUALIFIED_RULE@0..8
       0: CSS_SELECTOR_LIST@0..6
         0: CSS_COMPOUND_SELECTOR@0..2
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@0..0
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@0..2
             0: CSS_CLASS_SELECTOR@0..2
@@ -69,7 +68,7 @@ CssRoot {
               1: (empty)
         1: COMMA@2..4 "," [] [Whitespace(" ")]
         2: CSS_COMPOUND_SELECTOR@4..6
-          0: (empty)
+          0: CSS_NESTED_SELECTOR_LIST@4..4
           1: (empty)
           2: CSS_SUB_SELECTOR_LIST@4..6
             0: CSS_ID_SELECTOR@4..6
@@ -115,5 +114,3 @@ missing_identifier.css:1:7 parse ━━━━━━━━━━━━━━━�
     2 │ 
   
 ```
-
-

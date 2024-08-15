@@ -1,5 +1,5 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_js_syntax::{
     AnyJsClassMemberName, JsClassMemberList, JsGetterClassMember, JsMethodClassMember,
     JsPropertyClassMember, JsSetterClassMember, JsStaticModifier, JsSyntaxList, TextRange,
@@ -8,7 +8,7 @@ use biome_rowan::{declare_node_union, AstNode};
 use biome_rowan::{AstNodeList, TokenText};
 use rustc_hash::{FxHashMap, FxHashSet};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow duplicate class members.
     ///
     /// If there are declarations of the same name among class members,
@@ -189,20 +189,20 @@ impl Rule for NoDuplicateClassMembers {
         let node = ctx.query();
         node.into_iter()
             .filter_map(|member| {
-                let member_definition = AnyClassMemberDefinition::cast_ref(member.syntax())?;
-                let member_name_node = member_definition.name()?;
+                let member = AnyClassMemberDefinition::cast(member.into_syntax())?;
+                let member_name_node = member.name()?;
                 let member_state = MemberState {
                     name: get_member_name(&member_name_node)?.to_string(),
-                    is_static: is_static_member(member_definition.modifiers_list()),
+                    is_static: is_static_member(member.modifiers_list()),
                 };
 
-                let member_type = member_definition.member_type();
+                let member_type = member.member_type();
                 if let Some(stored_members) = defined_members.get_mut(&member_state) {
                     if stored_members.contains(&MemberType::Normal)
                         || stored_members.contains(&member_type)
                         || member_type == MemberType::Normal
                     {
-                        return Some(member_definition);
+                        return Some(member);
                     } else {
                         stored_members.insert(member_type);
                     }

@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/module-blocks/module-blocks.js
 ---
-
 # Input
 
 ```js
@@ -716,5 +715,3 @@ module-blocks.js:38:16 parse ━━━━━━━━━━━━━━━━━
   
 
 ```
-
-

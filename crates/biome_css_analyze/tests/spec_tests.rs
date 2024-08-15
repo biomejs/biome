@@ -9,6 +9,7 @@ use biome_test_utils::{
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker, scripts_from_json,
     write_analyzer_snapshot, CheckActionType,
 };
+use std::ops::Deref;
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{css,json,jsonc}", crate::run_test, "module"}
@@ -27,7 +28,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     if group == "specs" || group == "suppression" {
         panic!("the test file must be placed in the {group}/{rule}/<rule-name>/ directory");
     }
-    if biome_css_analyze::metadata()
+    if biome_css_analyze::METADATA
+        .deref()
         .find_rule(group, rule)
         .is_none()
     {
@@ -43,8 +45,17 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let mut snapshot = String::new();
     let extension = input_file.extension().unwrap_or_default();
 
+    let parser_options = if file_name.ends_with(".module.css") {
+        CssParserOptions {
+            css_modules: true,
+            ..CssParserOptions::default()
+        }
+    } else {
+        CssParserOptions::default()
+    };
+
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
     let quantity_diagnostics = if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze_and_snap(
@@ -55,7 +66,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 file_name,
                 input_file,
                 CheckActionType::Lint,
-                CssParserOptions::default(),
+                parser_options,
             );
         }
 
@@ -72,7 +83,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             file_name,
             input_file,
             CheckActionType::Lint,
-            CssParserOptions::default(),
+            parser_options,
         )
     };
 
@@ -184,10 +195,7 @@ fn check_code_action(
     assert_eq!(new_tree.to_string(), output);
 
     if has_bogus_nodes_or_empty_slots(&new_tree) {
-        panic!(
-            "modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {}",
-            new_tree
-        )
+        panic!("modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}")
     }
 
     // Checks the returned tree contains no missing children node
@@ -200,13 +208,13 @@ fn check_code_action(
     assert_errors_are_absent(re_parse.tree().syntax(), re_parse.diagnostics(), path);
 }
 
-pub(crate) fn _run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
+pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
 
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let (group, rule) = parse_test_path(input_file);
 

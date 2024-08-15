@@ -34,8 +34,12 @@ pub enum YamlSyntaxKind {
     DOC_START,
     DOC_END,
     NULL_KW,
-    YAML_STRING_LITERAL,
-    YAML_SCALAR,
+    YAML_STRING_VALUE,
+    YAML_NUMBER_VALUE,
+    YAML_BOOLEAN_VALUE,
+    YAML_NULL_VALUE,
+    YAML_BLOCK_VALUE,
+    YAML_IDENTIFIER,
     NEWLINE,
     WHITESPACE,
     IDENT,
@@ -43,7 +47,16 @@ pub enum YamlSyntaxKind {
     YAML_ROOT,
     YAML_DOCUMENT_LIST,
     YAML_DOCUMENT,
-    YAML_CONTENT_LIST,
+    YAML_ARRAY_INLINE,
+    YAML_ARRAY_INLINE_LIST,
+    YAML_OBJECT,
+    YAML_OBJECT_MEMBER,
+    YAML_OBJECT_MEMBER_LIST,
+    YAML_ARRAY,
+    YAML_ARRAY_ITEM,
+    YAML_ARRAY_ITEM_LIST,
+    YAML_BLOCK_LITERAL,
+    YAML_BLOCK_FOLDED,
     YAML_BOGUS,
     YAML_BOGUS_VALUE,
     #[doc(hidden)]
@@ -61,13 +74,17 @@ impl YamlSyntaxKind {
     }
     pub const fn is_literal(self) -> bool {
         match self {
-            YAML_STRING_LITERAL | YAML_SCALAR => true,
+            YAML_STRING_VALUE | YAML_NUMBER_VALUE | YAML_BOOLEAN_VALUE | YAML_NULL_VALUE
+            | YAML_BLOCK_VALUE | YAML_IDENTIFIER => true,
             _ => false,
         }
     }
     pub const fn is_list(self) -> bool {
         match self {
-            YAML_DOCUMENT_LIST | YAML_CONTENT_LIST => true,
+            YAML_DOCUMENT_LIST
+            | YAML_ARRAY_INLINE_LIST
+            | YAML_OBJECT_MEMBER_LIST
+            | YAML_ARRAY_ITEM_LIST => true,
             _ => false,
         }
     }
@@ -101,7 +118,7 @@ impl YamlSyntaxKind {
             DOC_START => "---",
             DOC_END => "...",
             NULL_KW => "null",
-            YAML_STRING_LITERAL => "string literal",
+            YAML_STRING_VALUE => "string value",
             _ => return None,
         };
         Some(tok)

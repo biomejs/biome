@@ -121,6 +121,17 @@ let foo = {a, b};
 const {a, b} = foo;
 "#;
 
+const APPLY_BRACKET_SPACING_BEFORE_GRAPHQL: &str = r#"{
+	field_value(
+		object_value: {key: "value"}
+	)
+}"#;
+
+const APPLY_BRACKET_SPACING_AFTER_GRAPHQL: &str = r#"{
+	field_value(object_value: {key: "value"})
+}
+"#;
+
 const APPLY_BRACKET_SAME_LINE_BEFORE: &str = r#"<Foo
 	className={style}
 	reallyLongAttributeName1={longComplexValue}
@@ -3763,6 +3774,45 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "should_error_if_unchanged_files_only_with_changed_flag",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn applies_custom_bracket_spacing_for_graphql() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("file.graphql");
+    fs.insert(
+        file_path.into(),
+        APPLY_BRACKET_SPACING_BEFORE_GRAPHQL.as_bytes(),
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--bracket-spacing"),
+                ("false"),
+                ("--write"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, file_path, APPLY_BRACKET_SPACING_AFTER_GRAPHQL);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "applies_custom_bracket_spacing_graphql",
         fs,
         console,
         result,

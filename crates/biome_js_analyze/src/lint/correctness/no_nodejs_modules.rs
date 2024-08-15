@@ -1,10 +1,12 @@
 use crate::globals::is_node_builtin_module;
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike};
 use biome_rowan::TextRange;
 
-declare_rule! {
+declare_lint_rule! {
     /// Forbid the use of Node.js builtin modules.
     ///
     /// This can be useful for client-side web projects that don't have access to those modules.
@@ -36,7 +38,7 @@ declare_rule! {
 }
 
 impl Rule for NoNodejsModules {
-    type Query = Ast<AnyJsImportSpecifierLike>;
+    type Query = Ast<AnyJsImportLike>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();

@@ -52,6 +52,7 @@ use std::slice::Iter;
 
 use super::function::LineBreak;
 use super::js_parse_error::unexpected_body_inside_ambient_context;
+use super::metavariable::{is_at_metavariable, parse_metavariable};
 use super::typescript::ts_parse_error::{self, unexpected_abstract_member_with_body};
 use super::typescript::{
     expect_ts_index_signature_member, is_at_ts_index_signature_member, MemberParent,
@@ -253,8 +254,7 @@ fn parse_class(p: &mut JsParser, kind: ClassKind, decorator_list: ParsedSyntax) 
             if TypeScript.is_supported(p) && is_reserved_type_name(text) {
                 let err = p
                     .err_builder(format!(
-                            "`{}` cannot be used as a class name because it is already reserved as a type",
-                            text
+                            "`{text}` cannot be used as a class name because it is already reserved as a type"
                         ),id.range(p), );
 
                 p.error(err);
@@ -518,6 +518,10 @@ impl ParseNodeList for ClassMembersList {
 //  static async *foo() {}
 // }
 fn parse_class_member(p: &mut JsParser, inside_abstract_class: bool) -> ParsedSyntax {
+    if is_at_metavariable(p) {
+        return parse_metavariable(p);
+    }
+
     let member_marker = p.start();
     // test js class_empty_element
     // class foo { ;;;;;;;;;; get foo() {};;;;}
@@ -2065,7 +2069,7 @@ impl ClassMemberModifiers {
     /// or by iterating over all modifiers and keeping track of the modifier it has seen).
     fn get_first_range_unchecked(&self, kind: ModifierKind) -> TextRange {
         self.get_first_range(kind)
-            .unwrap_or_else(|| panic!("Expected modifier of kind {:?} to be present", kind))
+            .unwrap_or_else(|| panic!("Expected modifier of kind {kind:?} to be present"))
     }
 
     fn is_empty(&self) -> bool {
@@ -2106,7 +2110,7 @@ impl ClassMemberModifiers {
                 self.list_marker.undo_completion(p).abandon(p);
                 return false;
             }
-            t => panic!("Unknown member kind {:?}", t),
+            t => panic!("Unknown member kind {t:?}"),
         };
 
         self.list_marker.change_kind(p, list_kind);

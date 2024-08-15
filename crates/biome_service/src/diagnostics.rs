@@ -1,16 +1,18 @@
 use crate::workspace::DocumentFileSource;
+use biome_analyze::RuleError;
 use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiagnostic};
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
+use biome_css_parser::ParseDiagnostic;
 use biome_diagnostics::{
-    category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, Severity, Visit,
+    category, Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory,
+    MessageAndDescription, Severity, Visit,
 };
 use biome_formatter::{FormatError, PrintError};
 use biome_fs::{BiomePath, FileSystemDiagnostic};
 use biome_grit_patterns::CompileError;
 use biome_js_analyze::utils::rename::RenameError;
-use biome_js_analyze::RuleError;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::ffi::OsStr;
@@ -323,12 +325,29 @@ impl Diagnostic for SourceFileNotSupported {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Diagnostic)]
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
 pub enum SearchError {
     /// An invalid pattern was given
-    PatternCompilationError(CompileError),
+    PatternCompilationError(PatternCompilationError),
     /// No pattern with the given ID
     InvalidPattern(InvalidPattern),
+    /// Error while executing the search query.
+    QueryError(QueryDiagnostic),
+}
+
+#[derive(Debug, Deserialize, Diagnostic, Serialize)]
+pub struct PatternCompilationError {
+    #[message]
+    #[description]
+    message: MessageAndDescription,
+}
+
+impl From<ParseDiagnostic> for PatternCompilationError {
+    fn from(diagnostic: ParseDiagnostic) -> Self {
+        Self {
+            message: diagnostic.message,
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
@@ -340,6 +359,34 @@ pub enum SearchError {
     )
 )]
 pub struct InvalidPattern;
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct QueryDiagnostic(pub String);
+
+impl Diagnostic for QueryDiagnostic {
+    fn category(&self) -> Option<&'static Category> {
+        Some(category!("search"))
+    }
+
+    fn severity(&self) -> Severity {
+        Severity::Error
+    }
+
+    fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
+        fmt.write_str("Error executing the Grit query")
+    }
+
+    fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.write_str(&self.0)
+    }
+
+    fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        visitor.record_log(
+            LogCategory::Info,
+            &markup! { "Please consult "<Hyperlink href="https://docs.grit.io/language/syntax">"the official grit syntax page"</Hyperlink>"." }
+        )
+    }
+}
 
 pub fn extension_error(path: &BiomePath) -> WorkspaceError {
     let file_source = DocumentFileSource::from_path(path);
@@ -427,7 +474,15 @@ impl From<VcsDiagnostic> for WorkspaceError {
 
 impl From<CompileError> for WorkspaceError {
     fn from(value: CompileError) -> Self {
-        Self::SearchError(SearchError::PatternCompilationError(value))
+        match value {
+            CompileError::ParsePatternError(diagnostic) => Self::SearchError(
+                SearchError::PatternCompilationError(PatternCompilationError::from(diagnostic)),
+            ),
+            // FIXME: This really needs proper diagnostics
+            _ => Self::SearchError(SearchError::QueryError(QueryDiagnostic(format!(
+                "{value:?}"
+            )))),
+        }
     }
 }
 

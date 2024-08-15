@@ -29,5 +29,10 @@ regex                = { workspace = true }
 rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 
+[dev-dependencies]
+biome_test_utils = { path = "../biome_test_utils" }
+insta            = { workspace = true }
+tests_macros     = { path = "../tests_macros" }
+
 [lints]
 workspace = true

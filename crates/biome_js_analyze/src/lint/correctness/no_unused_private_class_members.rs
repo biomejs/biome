@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -16,7 +16,7 @@ use rustc_hash::FxHashSet;
 
 use crate::{utils::is_node_equal, JsRuleAction};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow unused private class members
     ///
     /// Private class members that are declared and not used anywhere in the code are most likely an error due to incomplete refactoring.
@@ -265,22 +265,22 @@ impl AnyMember {
                     AnyJsClassMember::JsGetterClassMember(member) => member
                         .modifiers()
                         .iter()
-                        .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                        .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                         .any(|accessibility| accessibility.is_private()),
                     AnyJsClassMember::JsMethodClassMember(member) => member
                         .modifiers()
                         .iter()
-                        .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                        .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                         .any(|accessibility| accessibility.is_private()),
                     AnyJsClassMember::JsPropertyClassMember(member) => member
                         .modifiers()
                         .iter()
-                        .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                        .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                         .any(|accessibility| accessibility.is_private()),
                     AnyJsClassMember::JsSetterClassMember(member) => member
                         .modifiers()
                         .iter()
-                        .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                        .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                         .any(|accessibility| accessibility.is_private()),
                     _ => false,
                 };
@@ -291,7 +291,7 @@ impl AnyMember {
                 param
                     .modifiers()
                     .iter()
-                    .filter_map(|x| TsAccessibilityModifier::cast_ref(x.syntax()))
+                    .filter_map(|x| TsAccessibilityModifier::cast(x.into_syntax()))
                     .any(|accessibility| accessibility.is_private()),
             ),
         }

@@ -7,7 +7,7 @@ use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::kind_src::KindsSrc;
 use crate::yaml_kinds_src::YAML_KINDS_SRC;
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::quote;
+use quote::{format_ident, quote};
 use std::str::FromStr;
 
 pub const LANGUAGE_PREFIXES: [&str; 9] = [
@@ -62,123 +62,58 @@ impl FromStr for LanguageKind {
             "html" => Ok(LanguageKind::Html),
             "yaml" => Ok(LanguageKind::Yaml),
             _ => Err(format!(
-                "Language {} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html`, `yaml` or yml",
-                kind
+                "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html` or `yaml`"
             )),
         }
     }
 }
 
+/// A helper macro to make it easier to define functions that return tokens for a specific language kind.
+macro_rules! define_language_kind_function {
+    ([$($kind:ident),*],$func:ident,$out:expr) => {
+        pub(crate) fn $func(&self) -> TokenStream {
+            match self {
+                $( LanguageKind::$kind => {
+                    // HACK: workaround for $kind$out adding an extra space between the two
+                    let ident = format_ident!("{}{}", stringify!($kind), stringify!($out));
+                    quote! { #ident }
+                },)*
+            }
+        }
+    }
+}
+
+/// A helper macro to define functions for each language kind to make it slightly less tedious to add new languages.
+macro_rules! define_language_kind_functions {
+    ([$($kind:ident),*]) => {
+        define_language_kind_function!([$($kind),*], syntax_kind, SyntaxKind);
+        define_language_kind_function!([$($kind),*], syntax_factory, SyntaxFactory);
+        define_language_kind_function!([$($kind),*], syntax_node, SyntaxNode);
+        define_language_kind_function!([$($kind),*], syntax_element, SyntaxElement);
+        define_language_kind_function!([$($kind),*], syntax_token, SyntaxToken);
+        define_language_kind_function!([$($kind),*], syntax_element_children, SyntaxElementChildren);
+        define_language_kind_function!([$($kind),*], syntax_list, SyntaxList);
+        define_language_kind_function!([$($kind),*], language, Language);
+    }
+}
+
 impl LanguageKind {
+    define_language_kind_functions!([Js, Css, Json, Graphql, Grit, Html, Yaml]);
+
     pub(crate) fn syntax_crate_ident(&self) -> Ident {
         Ident::new(self.syntax_crate_name().as_str(), Span::call_site())
     }
 
-    pub(crate) fn syntax_kind(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxKind },
-            LanguageKind::Css => quote! { CssSyntaxKind },
-            LanguageKind::Json => quote! { JsonSyntaxKind },
-            LanguageKind::Graphql => quote! { GraphqlSyntaxKind },
-            LanguageKind::Grit => quote! { GritSyntaxKind },
-            LanguageKind::Html => quote! { HtmlSyntaxKind },
-            LanguageKind::Yaml => quote! { YamlSyntaxKind },
-        }
-    }
-    pub(crate) fn syntax_factory(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxFactory },
-            LanguageKind::Css => quote! { CssSyntaxFactory },
-            LanguageKind::Json => quote! { JsonSyntaxFactory },
-            LanguageKind::Graphql => quote! { GraphqlSyntaxFactory },
-            LanguageKind::Grit => quote! { GritSyntaxFactory },
-            LanguageKind::Html => quote! { HtmlSyntaxFactory },
-            LanguageKind::Yaml => quote! { YamlSyntaxFactory },
-        }
-    }
-
-    pub(crate) fn syntax_node(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxNode },
-            LanguageKind::Css => quote! { CssSyntaxNode },
-            LanguageKind::Json => quote! { JsonSyntaxNode },
-            LanguageKind::Graphql => quote! { GraphqlSyntaxNode },
-            LanguageKind::Grit => quote! { GritSyntaxNode },
-            LanguageKind::Html => quote! { HtmlSyntaxNode },
-            LanguageKind::Yaml => quote! { YamlSyntaxNode },
-        }
-    }
-
-    pub(crate) fn syntax_element(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxElement },
-            LanguageKind::Css => quote! { CssSyntaxElement },
-            LanguageKind::Json => quote! { JsonSyntaxElement },
-            LanguageKind::Graphql => quote! { GraphqlSyntaxElement },
-            LanguageKind::Grit => quote! { GritSyntaxElement },
-            LanguageKind::Html => quote! { HtmlSyntaxElement },
-            LanguageKind::Yaml => quote! { YamlSyntaxElement },
-        }
-    }
-
-    pub(crate) fn syntax_token(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxToken },
-            LanguageKind::Css => quote! { CssSyntaxToken },
-            LanguageKind::Json => quote! { JsonSyntaxToken },
-            LanguageKind::Graphql => quote! { GraphqlSyntaxToken },
-            LanguageKind::Grit => quote! { GritSyntaxToken },
-            LanguageKind::Html => quote! { HtmlSyntaxToken },
-            LanguageKind::Yaml => quote! { YamlSyntaxToken },
-        }
-    }
-
-    pub(crate) fn syntax_element_children(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxElementChildren },
-            LanguageKind::Css => quote! { CssSyntaxElementChildren },
-            LanguageKind::Json => quote! { JsonSyntaxElementChildren },
-            LanguageKind::Graphql => quote! { GraphqlSyntaxElementChildren },
-            LanguageKind::Grit => quote! { GritSyntaxElementChildren },
-            LanguageKind::Html => quote! { HtmlSyntaxElementChildren },
-            LanguageKind::Yaml => quote! { YamlSyntaxElementChildren },
-        }
-    }
-
-    pub(crate) fn syntax_list(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsSyntaxList },
-            LanguageKind::Css => quote! { CssSyntaxList },
-            LanguageKind::Json => quote! { JsonSyntaxList },
-            LanguageKind::Graphql => quote! { GraphqlSyntaxList },
-            LanguageKind::Grit => quote! { GritSyntaxList },
-            LanguageKind::Html => quote! { HtmlSyntaxList },
-            LanguageKind::Yaml => quote! { YamlSyntaxList },
-        }
-    }
-
-    pub(crate) fn language(&self) -> TokenStream {
-        match self {
-            LanguageKind::Js => quote! { JsLanguage },
-            LanguageKind::Css => quote! { CssLanguage },
-            LanguageKind::Json => quote! { JsonLanguage },
-            LanguageKind::Graphql => quote! { GraphqlLanguage },
-            LanguageKind::Grit => quote! { GritLanguage },
-            LanguageKind::Html => quote! { HtmlLanguage },
-            LanguageKind::Yaml => quote! { YamlLanguage },
-        }
-    }
-
     pub fn formatter_crate_name(&self) -> String {
-        format!("biome_{}_formatter", self)
+        format!("biome_{self}_formatter")
     }
 
     pub fn syntax_crate_name(&self) -> String {
-        format!("biome_{}_syntax", self)
+        format!("biome_{self}_syntax")
     }
 
     pub fn factory_crate_name(&self) -> String {
-        format!("biome_{}_factory", self)
+        format!("biome_{self}_factory")
     }
 
     pub fn kinds(&self) -> KindsSrc {

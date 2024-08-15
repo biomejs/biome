@@ -1,12 +1,12 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportSpecifierLike, JsSyntaxKind, JsSyntaxToken};
+use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::BatchMutationExt;
 
-declare_rule! {
+declare_lint_rule! {
     /// Promotes the usage of `node:assert/strict` over `node:assert`.
     ///
     /// If you prefer stricter assertions when using the Node.js assertion module, the package `node:assert/strict` exposes a set of alias for stricter assertions.
@@ -35,7 +35,7 @@ declare_rule! {
 }
 
 impl Rule for UseNodeAssertStrict {
-    type Query = Ast<AnyJsImportSpecifierLike>;
+    type Query = Ast<AnyJsImportLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = ();

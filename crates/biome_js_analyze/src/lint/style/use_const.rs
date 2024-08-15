@@ -3,7 +3,8 @@ use crate::{
     JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 
@@ -12,7 +13,7 @@ use biome_js_semantic::{ReferencesExtensions, Scope, SemanticModel, SemanticScop
 use biome_js_syntax::*;
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Require `const` declarations for variables that are only assigned once.
     ///
     /// Variables that are initialized and never reassigned and
@@ -314,7 +315,7 @@ fn with_object_binding_pat_identifiers(
                 P::JsObjectBindingPatternShorthandProperty(p) => p
                     .identifier()
                     .map_or(false, |it| with_binding_identifier(it, f)),
-                P::JsBogusBinding(_) => false,
+                P::JsBogusBinding(_) | P::JsMetavariable(_) => false,
             }
         })
 }
@@ -343,7 +344,7 @@ fn with_binding_identifier(
 ) -> bool {
     match binding {
         AnyJsBinding::JsIdentifierBinding(id) => f(id),
-        AnyJsBinding::JsBogusBinding(_) => false,
+        AnyJsBinding::JsBogusBinding(_) | AnyJsBinding::JsMetavariable(_) => false,
     }
 }
 

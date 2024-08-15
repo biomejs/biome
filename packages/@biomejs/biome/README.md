@@ -25,12 +25,14 @@
 [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
 
-
 </div>
 
+<!-- Insert new entries lexicographically by language code.
+     For example given below is the same order as these files appear on page:
+     https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
 <div align="center">
 
-English | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md)
+[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | English | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
 
 </div>
 
@@ -128,6 +130,9 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
       <td align="center" valign="middle">
         <a href="https://l2beat.com/" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://www.phoenixlabs.dev/" target="_blank"><img src="https://images.opencollective.com/phoenix-labs/2824ed4/logo/100.png?height=100" height="100"></a>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -148,6 +153,12 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
       </td>
       <td align="center" valign="middle">
         <a href="https://coderabbit.ai/" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://forge42.dev/" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://transloadit.com/" target="_blank"><img src="https://avatars.githubusercontent.com/u/125754?s=200&v=4" width="80"></a>
       </td>
     </tr>
   </tbody>

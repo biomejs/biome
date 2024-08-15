@@ -230,10 +230,8 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
                     match c {
                         '\t' => fmt.write_str("\t")?,
                         _ => {
-                            if let Some(width) = c.width() {
-                                for _ in 0..width {
-                                    fmt.write_str(" ")?;
-                                }
+                            for _ in 0..char_width(c) {
+                                fmt.write_str(" ")?;
                             }
                         }
                     }
@@ -254,6 +252,75 @@ pub(super) fn print_frame(fmt: &mut fmt::Formatter<'_>, location: Location<'_>) 
     fmt.write_str("\n")
 }
 
+pub(super) fn print_highlighted_frame(
+    fmt: &mut fmt::Formatter<'_>,
+    location: Location<'_>,
+) -> io::Result<()> {
+    let Some(span) = location.span else {
+        return Ok(());
+    };
+    let Some(source_code) = location.source_code else {
+        return Ok(());
+    };
+
+    // TODO: instead of calculating lines for every match,
+    // check if the Grit engine is able to pull them out
+    let source = SourceFile::new(source_code);
+
+    let start = source.location(span.start())?;
+    let end = source.location(span.end())?;
+
+    let match_line_start = start.line_number;
+    let match_line_end = end.line_number.saturating_add(1);
+
+    for line_index in IntoIter::new(match_line_start..match_line_end) {
+        let current_range = source.line_range(line_index.to_zero_indexed());
+        let current_range = match current_range {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+
+        let current_text = source_code.text[current_range].trim_end_matches(['\r', '\n']);
+
+        let is_first_line = line_index == start.line_number;
+        let is_last_line = line_index == end.line_number;
+
+        let start_index_relative_to_line =
+            span.start().max(current_range.start()) - current_range.start();
+        let end_index_relative_to_line =
+            span.end().min(current_range.end()) - current_range.start();
+
+        let marker = if is_first_line && is_last_line {
+            TextRange::new(start_index_relative_to_line, end_index_relative_to_line)
+        } else if is_last_line {
+            let start_index: u32 = current_text.text_len().into();
+
+            let safe_start_index =
+                start_index.saturating_sub(current_text.trim_start().text_len().into());
+
+            TextRange::new(TextSize::from(safe_start_index), end_index_relative_to_line)
+        } else {
+            TextRange::new(start_index_relative_to_line, current_text.text_len())
+        };
+
+        fmt.write_markup(markup! {
+            <Emphasis>{format_args!("{line_index} \u{2502} ")}</Emphasis>
+        })?;
+
+        let start_range = &current_text[0..marker.start().into()];
+        let highlighted_range = &current_text[marker.start().into()..marker.end().into()];
+        let end_range = &current_text[marker.end().into()..current_text.text_len().into()];
+
+        write!(fmt, "{start_range}")?;
+        fmt.write_markup(markup! { <Emphasis><Info>{highlighted_range}</Info></Emphasis> })?;
+        write!(fmt, "{end_range}")?;
+
+        writeln!(fmt)?;
+    }
+
+    Ok(())
+}
+
 /// Calculate the length of the string representation of `value`
 pub(super) fn calculate_print_width(mut value: OneIndexed) -> NonZeroUsize {
     // SAFETY: Constant is being initialized with a non-zero value
@@ -269,20 +336,35 @@ pub(super) fn calculate_print_width(mut value: OneIndexed) -> NonZeroUsize {
     width
 }
 
+/// Compute the unicode display width of a string, with the width of tab
+/// characters set to [TAB_WIDTH] and the width of control characters set to 0
+pub(super) fn text_width(text: &str) -> usize {
+    text.chars().map(char_width).sum()
+}
+
 /// We need to set a value here since we have no way of knowing what the user's
 /// preferred tab display width is, so this is set to `2` to match how tab
 /// characters are printed by [print_invisibles]
 const TAB_WIDTH: usize = 2;
 
-/// Compute the unicode display width of a string, with the width of tab
-/// characters set to [TAB_WIDTH] and the width of control characters set to 0
-pub(super) fn text_width(text: &str) -> usize {
-    text.chars()
-        .map(|char| match char {
-            '\t' => TAB_WIDTH,
-            _ => char.width().unwrap_or(0),
-        })
-        .sum()
+/// Some esoteric space characters don't return a width using `char.width()`, so
+/// we need to assume a fixed length for them
+const ESOTERIC_SPACE_WIDTH: usize = 1;
+
+/// Return the width of characters, treating whitespace characters in the way
+/// we need to properly display it
+pub(super) fn char_width(char: char) -> usize {
+    match char {
+        '\t' => TAB_WIDTH,
+        '\u{c}' => ESOTERIC_SPACE_WIDTH,
+        '\u{b}' => ESOTERIC_SPACE_WIDTH,
+        '\u{85}' => ESOTERIC_SPACE_WIDTH,
+        '\u{feff}' => ESOTERIC_SPACE_WIDTH,
+        '\u{180e}' => ESOTERIC_SPACE_WIDTH,
+        '\u{200b}' => ESOTERIC_SPACE_WIDTH,
+        '\u{3000}' => ESOTERIC_SPACE_WIDTH,
+        _ => char.width().unwrap_or(0),
+    }
 }
 
 pub(super) struct PrintInvisiblesOptions {
@@ -393,14 +475,31 @@ pub(super) fn print_invisibles(
 
 fn show_invisible_char(char: char) -> Option<&'static str> {
     match char {
-        ' ' => Some("\u{b7}"),      // Middle Dot
-        '\r' => Some("\u{240d}"),   // Carriage Return Symbol
-        '\n' => Some("\u{23ce}"),   // Return Symbol
-        '\t' => Some("\u{2192} "),  // Rightwards Arrow
-        '\0' => Some("\u{2400}"),   // Null Symbol
-        '\x0b' => Some("\u{240b}"), // Vertical Tabulation Symbol
-        '\x08' => Some("\u{232b}"), // Backspace Symbol
-        '\x0c' => Some("\u{21a1}"), // Downards Two Headed Arrow
+        ' ' => Some("\u{b7}"),          // Middle Dot
+        '\r' => Some("\u{240d}"),       // Carriage Return Symbol
+        '\n' => Some("\u{23ce}"),       // Return Symbol
+        '\t' => Some("\u{2192} "),      // Rightwards Arrow
+        '\0' => Some("\u{2400}"),       // Null Symbol
+        '\x0b' => Some("\u{240b}"),     // Vertical Tabulation Symbol
+        '\x08' => Some("\u{232b}"),     // Backspace Symbol
+        '\x0c' => Some("\u{21a1}"),     // Downwards Two Headed Arrow
+        '\u{85}' => Some("\u{2420}"),   // Space Symbol
+        '\u{a0}' => Some("\u{2420}"),   // Space Symbol
+        '\u{1680}' => Some("\u{2420}"), // Space Symbol
+        '\u{2000}' => Some("\u{2420}"), // Space Symbol
+        '\u{2001}' => Some("\u{2420}"), // Space Symbol
+        '\u{2002}' => Some("\u{2420}"), // Space Symbol
+        '\u{2003}' => Some("\u{2420}"), // Space Symbol
+        '\u{2004}' => Some("\u{2420}"), // Space Symbol
+        '\u{2005}' => Some("\u{2420}"), // Space Symbol
+        '\u{2006}' => Some("\u{2420}"), // Space Symbol
+        '\u{2007}' => Some("\u{2420}"), // Space Symbol
+        '\u{2008}' => Some("\u{2420}"), // Space Symbol
+        '\u{2009}' => Some("\u{2420}"), // Space Symbol
+        '\u{200a}' => Some("\u{2420}"), // Space Symbol
+        '\u{202f}' => Some("\u{2420}"), // Space Symbol
+        '\u{205f}' => Some("\u{2420}"), // Space Symbol
+        '\u{3000}' => Some("\u{2420}"), // Space Symbol
         _ => None,
     }
 }

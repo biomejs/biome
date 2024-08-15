@@ -1,6 +1,6 @@
 use crate::services::semantic::SemanticServices;
 use biome_analyze::{
-    context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
@@ -15,7 +15,7 @@ use biome_deserialize::{DeserializableValue, DeserializationDiagnostic};
 use schemars::JsonSchema;
 use smallvec::SmallVec;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce naming conventions for JavaScript and TypeScript filenames.
     ///
     /// Enforcing [naming conventions](https://en.wikipedia.org/wiki/Naming_convention_(programming)) helps to keep the codebase consistent.
@@ -29,12 +29,15 @@ declare_rule! {
     /// The convention of prefixing a filename with a plus sign is used by
     /// [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
     ///
+    /// Also, the rule supports dynamic route syntaxes of [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments), [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index), [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route), and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters).
+    /// For example `[...slug].js` and `[[...slug]].js` are valid filenames.
+    ///
     /// By default, the rule ensures that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`],
     /// or equal to the name of one export in the file.
     ///
     /// ## Ignoring some files
     ///
-    /// Sometimes you want to completly ignore some files.
+    /// Sometimes you want to completely ignore some files.
     /// Biome ignore comments cannot be used because the rule applies on filenames not file contents.
     /// To ignore files, you can use [`overrides`](https://biomejs.dev/reference/configuration/#overrides).
     /// If you want to ignore all files in the `test` directory, then you can disable the rule for those files only:
@@ -126,32 +129,73 @@ impl Rule for UseFilenamingConvention {
         if options.require_ascii && !file_name.is_ascii() {
             return Some(FileNamingConventionState::Ascii);
         }
-        let allowed_cases = options.filename_cases.cases();
-        let mut splitted = file_name.split('.');
-        let name = splitted.next()?;
-        let name = if name.is_empty() {
-            // The filename starts with a dot
-            splitted.next()?
-        } else if let Some(stripped_name) = name.strip_prefix('+') {
-            // Support [Sveltekit](https://kit.svelte.dev/docs/routing#page) and
-            // [Vike](https://vike.dev/route) routing conventions
-            // where page name starts with `+`.
-            stripped_name
+        let first_char = file_name.bytes().next()?;
+        let (name, mut extensions) = if matches!(first_char, b'(' | b'[') {
+            // Support [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments),
+            // [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index),
+            // [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route),
+            // and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters)
+            // dynamic routes. Some examples:
+            //
+            // - `(slug).js`
+            // - `[slug].js`
+            // - `[[slug]].js`
+            // - `[...slug].js`
+            // - `[[...slug]].js`
+            let count = if file_name.starts_with("[[") { 2 } else { 1 };
+            let to_split = if first_char != b'(' && file_name[count..].starts_with("...") {
+                &file_name[count + 3..]
+            } else {
+                &file_name[count..]
+            };
+            let mut split = to_split.split('.');
+            let Some(name) = split.next() else {
+                return Some(FileNamingConventionState::Filename);
+            };
+            let ends = if count == 2 {
+                "]]"
+            } else if first_char == b'[' {
+                "]"
+            } else {
+                ")"
+            };
+            if !name.ends_with(ends)
+                || !name[..name.len() - count]
+                    .chars()
+                    .all(|c| c.is_alphanumeric())
+            {
+                return Some(FileNamingConventionState::Filename);
+            }
+            ("", split)
         } else {
-            name
+            // Support UNIX hidden files (filenames starting with a dot).
+            //
+            // Support [Sveltekit](https://kit.svelte.dev/docs/routing#page) and
+            // [Vike](https://vike.dev/route) routing conventions where page name starts with `+`.
+            let file_name = if matches!(first_char, b'.' | b'+') {
+                &file_name[1..]
+            } else {
+                file_name
+            };
+            let mut split = file_name.split('.');
+            let Some(name) = split.next().filter(|name| !name.is_empty()) else {
+                return Some(FileNamingConventionState::Filename);
+            };
+            (name, split)
         };
         // Check extension case
-        for extension in splitted {
-            let case = Case::identify(extension, true);
-            if case != Case::Lower {
-                return Some(FileNamingConventionState::Extension);
-            }
+        if extensions.any(|extension| Case::identify(extension, true) != Case::Lower) {
+            return Some(FileNamingConventionState::Extension);
+        }
+        if name.is_empty() {
+            return None;
         }
         // Check filename case
+        let allowed_cases = options.filename_cases.cases();
         if !allowed_cases.is_empty() {
             let trimmed_name = name.trim_matches('_');
             let case = Case::identify(trimmed_name, options.strict_case);
-            if allowed_cases.contains(case) {
+            if (allowed_cases | Case::Uni).contains(case) {
                 return None;
             }
         }
@@ -198,11 +242,11 @@ impl Rule for UseFilenamingConvention {
                         .collect::<SmallVec<[_; 3]>>()
                         .join(" or ")
                 };
-                let mut splitted = file_name.split('.');
-                let name = splitted.next()?;
+                let mut split = file_name.split('.');
+                let name = split.next()?;
                 let name = if name.is_empty() {
                     // The filename starts with a dot
-                    splitted.next()?
+                    split.next()?
                 } else if let Some(stripped_name) = name.strip_prefix('+') {
                     stripped_name
                 } else {

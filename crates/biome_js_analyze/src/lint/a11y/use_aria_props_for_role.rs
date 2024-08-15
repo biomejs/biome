@@ -1,12 +1,12 @@
 use crate::services::aria::Aria;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::JsxAttribute;
 use biome_rowan::AstNode;
 
-declare_rule! {
+declare_lint_rule! {
     /// Enforce that elements with ARIA roles must have all required ARIA attributes for that role.
     ///
     /// ## Examples
@@ -60,7 +60,7 @@ impl UseAriaPropsForRoleState {
         }
         self.attribute.as_ref().map(|(attribute, role_name)| {
             let joined_attributes = &self.missing_aria_props.join(", ");
-            let description = format!("The element with the {role_name} ARIA role does not have the required ARIA attributes: {}.", joined_attributes);
+            let description = format!("The element with the {role_name} ARIA role does not have the required ARIA attributes: {joined_attributes}.");
             RuleDiagnostic::new(
                 rule_category!(),
                 attribute.range(),

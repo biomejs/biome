@@ -1,7 +1,8 @@
 use std::{cmp::Ordering, str::FromStr};
 
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
@@ -13,7 +14,7 @@ use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::{services::semantic::Semantic, JsRuleAction};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of `Math.min` and `Math.max` to clamp a value where the result itself is constant.
     ///
     /// ## Examples
@@ -146,7 +147,7 @@ fn get_math_min_or_max_call(
     model: &SemanticModel,
 ) -> Option<MathMinOrMaxCall> {
     let callee = call_expression.callee().ok()?.omit_parentheses();
-    let member_expr = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+    let member_expr = AnyJsMemberExpression::cast(callee.into_syntax())?;
 
     let member_name = member_expr.member_name()?;
     let member_name = member_name.text();

@@ -1,16 +1,16 @@
 use biome_analyze::{
-    context::RuleContext, declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
 use biome_diagnostics::Applicability;
 use biome_js_factory::make;
-use biome_js_syntax::{AnyTsType, JsLanguage, JsSyntaxKind, TsConditionalType, TsVoidType, T};
-use biome_rowan::{AstNode, BatchMutationExt, SyntaxNode};
+use biome_js_syntax::{AnyTsType, JsSyntaxKind, JsSyntaxNode, TsConditionalType, TsVoidType, T};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::JsRuleAction;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow `void` type outside of generic or return types.
     ///
     /// `void` in TypeScript refers to a function return that is meant to be ignored.
@@ -115,7 +115,7 @@ impl Rule for NoConfusingVoidType {
     }
 }
 
-fn decide_void_type_context(node: &SyntaxNode<JsLanguage>) -> Option<VoidTypeContext> {
+fn decide_void_type_context(node: &JsSyntaxNode) -> Option<VoidTypeContext> {
     for parent in node.parent()?.ancestors() {
         match parent.kind() {
             JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => {

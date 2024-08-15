@@ -1,0 +1,44 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: existingGroupWithExistingRule.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noExcessiveNestedTestSuites": "warn"
+      },
+      "complexity": {
+        "noExcessiveNestedTestSuites": "error"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+existingGroupWithExistingRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been promoted to complexity/noExcessiveNestedTestSuites.
+  
+    3 │     "rules": {
+    4 │       "nursery": {
+  > 5 │         "noExcessiveNestedTestSuites": "warn"
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │       },
+    7 │       "complexity": {
+  
+  i Unsafe fix: Remove the stale rule from the nursery group.
+  
+     3  3 │       "rules": {
+     4  4 │         "nursery": {
+     5    │ - ········"noExcessiveNestedTestSuites":·"warn"
+     6  5 │         },
+     7  6 │         "complexity": {
+  
+
+```

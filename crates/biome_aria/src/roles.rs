@@ -1019,7 +1019,10 @@ impl<'a> AriaRoles {
             "code" => &CodeRole as &dyn AriaRoleDefinition,
             "datalist" => &ListBoxRole as &dyn AriaRoleDefinition,
             "del" => &DeletionRole as &dyn AriaRoleDefinition,
+            "dd" => &DefinitionRole as &dyn AriaRoleDefinition,
+            "dt" => &TermRole as &dyn AriaRoleDefinition,
             "dfn" => &TermRole as &dyn AriaRoleDefinition,
+            "mark" => &MarkRole as &dyn AriaRoleDefinition,
             "dialog" => &DialogRole as &dyn AriaRoleDefinition,
             "em" => &EmphasisRole as &dyn AriaRoleDefinition,
             "figure" => &FigureRole as &dyn AriaRoleDefinition,
@@ -1035,6 +1038,7 @@ impl<'a> AriaRoles {
             "nav" => &NavigationRole as &dyn AriaRoleDefinition,
             "ul" | "ol" => &ListRole as &dyn AriaRoleDefinition,
             "li" => &ListItemRole as &dyn AriaRoleDefinition,
+            "option" => &OptionRole as &dyn AriaRoleDefinition,
             "optgroup" => &GroupRole as &dyn AriaRoleDefinition,
             "output" => &StatusRole as &dyn AriaRoleDefinition,
             "p" => &ParagraphRole as &dyn AriaRoleDefinition,
@@ -1047,6 +1051,16 @@ impl<'a> AriaRoles {
             "table" => &TableRole as &dyn AriaRoleDefinition,
             "textarea" => &TextboxRole as &dyn AriaRoleDefinition,
             "tr" => &RowRole as &dyn AriaRoleDefinition,
+            // cell if a descendant of a <table> element,
+            // but this crate does not support checking a descendant of an element.
+            //
+            // ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td
+            "td" => &CellRole as &dyn AriaRoleDefinition,
+            // <th> element is able to be a rowheader, columnheader,
+            // but this crate does not support checking a descendant of an element.
+            //
+            // ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
+            "th" => &RowHeaderRole as &dyn AriaRoleDefinition,
             "time" => &TimeRole as &dyn AriaRoleDefinition,
             "address" | "details" | "fieldset" => &GroupRole as &dyn AriaRoleDefinition,
             "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => &HeadingRole as &dyn AriaRoleDefinition,
@@ -1115,7 +1129,7 @@ impl<'a> AriaRoles {
                 }
             }
             "b" | "bdi" | "bdo" | "body" | "data" | "div" | "hgroup" | "i" | "q" | "samp"
-            | "small" | "span" | "u" => &GenericRole as &dyn AriaRoleDefinition,
+            | "small" | "span" | "u" | "pre" => &GenericRole as &dyn AriaRoleDefinition,
             "header" | "footer" => {
                 // This crate does not support checking a descendant of an element.
                 // header (maybe BannerRole): https://www.w3.org/WAI/ARIA/apg/patterns/landmarks/examples/banner.html
@@ -1295,6 +1309,44 @@ impl<'a> AriaRoles {
         };
 
         role_candidate.concepts_by_role()
+    }
+
+    pub fn is_not_static_element(
+        &self,
+        element_name: &str,
+        attributes: &FxHashMap<String, Vec<String>>,
+    ) -> bool {
+        if match element_name {
+            // embedded content
+            // ref: https://html.spec.whatwg.org/multipage/semantics.html#embedded-content
+            "canvas" | "embed" | "iframe" | "video" | "audio" => true,
+            // metadata content
+            // ref: https://html.spec.whatwg.org/multipage/semantics.html#document-metadata
+            "meta" | "link" | "base" | "title" | "basefont" | "head" => false,
+            // scripting content
+            // ref: https://html.spec.whatwg.org/multipage/semantics.html#scripting-content
+            "script" | "noscript" | "template" | "style" => false,
+            // No corresponding role
+            "dl" | "label" | "legend" | "ruby" | "pre" | "figcaption" | "br" => true,
+            _ => false,
+        } {
+            return true;
+        }
+
+        // if the element has a interactive role, it is considered interactive.
+        let role_name = attributes
+            .get("role")
+            .and_then(|role| role.first())
+            .map_or_else(
+                || self.get_implicit_role(element_name, attributes),
+                |r| self.get_role(r),
+            );
+
+        match role_name.map(|role| role.type_name()) {
+            Some("biome_aria::roles::PresentationRole" | "biome_aria::roles::GenericRole") => false,
+            Some(_) => true,
+            None => false,
+        }
     }
 }
 

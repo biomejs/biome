@@ -1,5 +1,5 @@
 use biome_configuration::{PartialConfiguration, PartialCssConfiguration, PartialCssFormatter};
-use biome_css_formatter::context::CssFormatOptions;
+use biome_css_formatter::{context::CssFormatOptions, CssFormatLanguage};
 use biome_formatter_test::spec::{SpecSnapshot, SpecTestFile};
 use biome_service::workspace::UpdateSettingsParams;
 use std::path::Path;
@@ -51,7 +51,12 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     let options = CssFormatOptions::default();
     let language = language::CssTestFormatLanguage::default();
 
-    let snapshot = SpecSnapshot::new(test_file, test_directory, language, options);
+    let snapshot = SpecSnapshot::new(
+        test_file,
+        test_directory,
+        language,
+        CssFormatLanguage::new(options),
+    );
 
     snapshot.test()
 }

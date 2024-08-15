@@ -1,12 +1,14 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_factory::make::{ident, js_name};
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, AnyJsName, JsCallExpression};
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
-declare_rule! {
+declare_lint_rule! {
     /// Promotes the use of `.flatMap()` when `map().flat()` are used together.
     ///
     /// ## Examples
@@ -68,7 +70,7 @@ impl Rule for UseFlatMap {
             }
         }
         let flat_member_expression =
-            AnyJsMemberExpression::cast_ref(flat_call.callee().ok()?.syntax())?;
+            AnyJsMemberExpression::cast(flat_call.callee().ok()?.into_syntax())?;
         if flat_member_expression.member_name()?.text() == "flat" {
             let Ok(AnyJsExpression::JsCallExpression(map_call)) = flat_member_expression.object()
             else {
@@ -76,7 +78,7 @@ impl Rule for UseFlatMap {
             };
             let map_call_arguments = map_call.arguments().ok()?.args();
             let map_member_expression =
-                AnyJsMemberExpression::cast_ref(map_call.callee().ok()?.syntax())?;
+                AnyJsMemberExpression::cast(map_call.callee().ok()?.into_syntax())?;
             if map_member_expression.member_name()?.text() == "map" && map_call_arguments.len() == 1
             {
                 return Some(map_call);

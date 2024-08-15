@@ -1,0 +1,82 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: graphql/definitions/object_extension.graphql
+---
+# Input
+
+```graphql
+extend		 type Story {
+
+
+  isHiddenLocally:			 Boolean
+}
+
+extend
+
+	type User			 @addedDirective
+
+extend type
+
+		User implements
+Character
+
+extend type User
+
+		implements Character
+
+	@deprecated
+
+extend type
+
+	User
+@deprecated {
+  name:String
+
+
+}
+
+extend type
+	User implements
+
+	Character
+@deprecated {
+  name:String
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Quote style: Double Quotes
+-----
+
+```graphql
+extend type Story {
+	isHiddenLocally: Boolean
+}
+
+extend type User @addedDirective
+
+extend type User implements Character
+
+extend type User implements Character @deprecated
+
+extend type User @deprecated {
+	name: String
+}
+
+extend type User implements Character @deprecated {
+	name: String
+}
+```

@@ -31,6 +31,7 @@ mod assignment_compiler;
 mod auto_wrap;
 mod before_compiler;
 mod bubble_compiler;
+mod call_compiler;
 mod container_compiler;
 mod contains_compiler;
 mod divide_compiler;
@@ -49,8 +50,10 @@ mod match_compiler;
 mod maybe_compiler;
 mod modulo_compiler;
 mod multiply_compiler;
+mod node_like_compiler;
 mod not_compiler;
 mod or_compiler;
+mod predicate_call_compiler;
 mod predicate_compiler;
 mod predicate_return_compiler;
 mod rewrite_compiler;
@@ -62,8 +65,6 @@ mod subtract_compiler;
 mod variable_compiler;
 mod where_compiler;
 mod within_compiler;
-
-use std::collections::BTreeMap;
 
 use self::{
     accumulate_compiler::AccumulateCompiler, add_compiler::AddCompiler,
@@ -81,19 +82,13 @@ use self::{
     subtract_compiler::SubtractCompiler, variable_compiler::VariableCompiler,
     where_compiler::WhereCompiler, within_compiler::WithinCompiler,
 };
-use crate::{
-    grit_context::GritQueryContext,
-    grit_node_patterns::{GritLeafNodePattern, GritNodeArg, GritNodePattern},
-    grit_target_node::{GritSyntaxSlot, GritTargetNode, GritTargetToken},
-    CompileError, GritTargetLanguage,
-};
+use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::{AnyGritMaybeCurlyPattern, AnyGritPattern, GritSyntaxKind};
 use biome_rowan::AstNode as _;
-use grit_pattern_matcher::pattern::{
-    is_reserved_metavariable, DynamicPattern, DynamicSnippet, DynamicSnippetPart, List, Pattern,
-    RegexLike, RegexPattern, Variable,
-};
-use grit_util::{traverse, AstNode, ByteRange, GritMetaValue, Language, Order};
+use grit_pattern_matcher::pattern::{DynamicPattern, DynamicSnippet, DynamicSnippetPart, Pattern};
+use node_like_compiler::NodeLikeCompiler;
+
+pub(crate) use self::auto_wrap::auto_wrap_pattern;
 
 pub(crate) struct PatternCompiler;
 
@@ -167,7 +162,9 @@ impl PatternCompiler {
             AnyGritPattern::GritMulOperation(node) => Ok(Pattern::Multiply(Box::new(
                 MultiplyCompiler::from_node(node, context)?,
             ))),
-            AnyGritPattern::GritNodeLike(_) => todo!(),
+            AnyGritPattern::GritNodeLike(node) => {
+                NodeLikeCompiler::from_node_with_rhs(node, context, is_rhs)
+            }
             AnyGritPattern::GritPatternAccumulate(node) => Ok(Pattern::Accumulate(Box::new(
                 AccumulateCompiler::from_node(node, context)?,
             ))),
@@ -226,7 +223,7 @@ impl PatternCompiler {
             ))),
             AnyGritPattern::GritUnderscore(_) => Ok(Pattern::Underscore),
             AnyGritPattern::GritVariable(node) => Ok(Pattern::Variable(
-                VariableCompiler::from_node(node, context)?,
+                VariableCompiler::from_node(node, context),
             )),
             AnyGritPattern::GritWithin(node) => Ok(Pattern::Within(Box::new(
                 WithinCompiler::from_node(node, context)?,
@@ -234,265 +231,6 @@ impl PatternCompiler {
             AnyGritPattern::GritBogusPattern(_) => Err(CompileError::UnexpectedKind(
                 GritSyntaxKind::GRIT_BOGUS_PATTERN.into(),
             )),
-        }
-    }
-}
-
-impl PatternCompiler {
-    pub(crate) fn from_snippet_node(
-        node: GritTargetNode,
-        context_range: ByteRange,
-        context: &mut NodeCompilationContext,
-        is_rhs: bool,
-    ) -> Result<Pattern<GritQueryContext>, CompileError> {
-        let snippet_start = node.text().char_at(0.into()).unwrap_or_default() as usize;
-        let ranges = metavariable_ranges(&node, &context.compilation.lang);
-        let range_map = metavariable_range_mapping(ranges, snippet_start);
-
-        fn node_to_pattern(
-            node: GritTargetNode,
-            context_range: ByteRange,
-            range_map: &BTreeMap<ByteRange, ByteRange>,
-            context: &mut NodeCompilationContext,
-            is_rhs: bool,
-        ) -> anyhow::Result<Pattern<GritQueryContext>, CompileError> {
-            let metavariable =
-                metavariable_descendent(&node, context_range, range_map, context, is_rhs)?;
-            if let Some(metavariable) = metavariable {
-                return Ok(metavariable);
-            }
-
-            let kind = node.kind();
-            if !node.has_children() {
-                if let Some(token) = node.first_token() {
-                    let content = token.text();
-                    if context
-                        .compilation
-                        .lang
-                        .replaced_metavariable_regex()
-                        .is_match(content)
-                    {
-                        let regex =
-                            implicit_metavariable_regex(&token, context_range, range_map, context)?;
-                        if let Some(regex) = regex {
-                            return Ok(Pattern::Regex(Box::new(regex)));
-                        }
-                    }
-
-                    return Ok(Pattern::AstLeafNode(GritLeafNodePattern::new(
-                        kind, content,
-                    )));
-                }
-            }
-
-            let args: Vec<GritNodeArg> = node
-                .slots()
-                // TODO: Implement filtering for disregarded snippet fields.
-                // Implementing this will make it more convenient to match
-                // CST nodes without needing to match all the trivia in the
-                // snippet.
-                .map(|slot| {
-                    let mut nodes_list: Vec<Pattern<GritQueryContext>> = match &slot {
-                        GritSyntaxSlot::Node(node) => node
-                            .children()
-                            .map(|n| node_to_pattern(n, context_range, range_map, context, is_rhs))
-                            .collect::<Result<_, CompileError>>()?,
-                        _ => Vec::new(),
-                    };
-                    if !slot.contains_list() {
-                        Ok(GritNodeArg::new(
-                            slot.index(),
-                            nodes_list
-                                .pop()
-                                .unwrap_or(Pattern::Dynamic(DynamicPattern::Snippet(
-                                    DynamicSnippet {
-                                        parts: vec![DynamicSnippetPart::String(String::new())],
-                                    },
-                                ))),
-                        ))
-                    } else if nodes_list.len() == 1
-                        && matches!(
-                            nodes_list.first(),
-                            Some(Pattern::Variable(_) | Pattern::Underscore)
-                        )
-                    {
-                        Ok(GritNodeArg::new(slot.index(), nodes_list.pop().unwrap()))
-                    } else {
-                        Ok(GritNodeArg::new(
-                            slot.index(),
-                            Pattern::List(Box::new(List::new(nodes_list))),
-                        ))
-                    }
-                })
-                .collect::<Result<_, CompileError>>()?;
-            Ok(Pattern::AstNode(Box::new(GritNodePattern { kind, args })))
-        }
-        node_to_pattern(node, context_range, &range_map, context, is_rhs)
-    }
-}
-
-fn implicit_metavariable_regex(
-    token: &GritTargetToken,
-    context_range: ByteRange,
-    range_map: &BTreeMap<ByteRange, ByteRange>,
-    context: &mut NodeCompilationContext,
-) -> Result<Option<RegexPattern<GritQueryContext>>, CompileError> {
-    let source = token.text();
-    let capture_string = "(.*)";
-    let uncapture_string = ".*";
-    let variable_regex = context.compilation.lang.replaced_metavariable_regex();
-    let mut last = 0;
-    let mut regex_string = String::new();
-    let mut variables: Vec<Variable> = vec![];
-    for m in variable_regex.find_iter(source) {
-        regex_string.push_str(&regex::escape(&source[last..m.start()]));
-        let range = ByteRange::new(m.start(), m.end());
-        last = range.end;
-        let name = m.as_str();
-        let variable = text_to_var(name, range, context_range, range_map, context)?;
-        match variable {
-            SnippetValues::Dots => return Ok(None),
-            SnippetValues::Underscore => regex_string.push_str(uncapture_string),
-            SnippetValues::Variable(var) => {
-                regex_string.push_str(capture_string);
-                variables.push(var);
-            }
-        }
-    }
-
-    if last < source.len() {
-        regex_string.push_str(&regex::escape(&source[last..]));
-    }
-    let regex = regex_string.to_string();
-    let regex = RegexLike::Regex(regex);
-    Ok(Some(RegexPattern::new(regex, variables)))
-}
-
-fn metavariable_descendent(
-    node: &GritTargetNode,
-    context_range: ByteRange,
-    range_map: &BTreeMap<ByteRange, ByteRange>,
-    context: &mut NodeCompilationContext,
-    is_rhs: bool,
-) -> Result<Option<Pattern<GritQueryContext>>, CompileError> {
-    let Some(token) = node.first_token() else {
-        return Ok(None);
-    };
-    if !context.compilation.lang.is_metavariable(node) {
-        return Ok(None);
-    }
-
-    let name = token.text();
-    if is_reserved_metavariable(name, Some(&context.compilation.lang)) && !is_rhs {
-        return Err(CompileError::ReservedMetavariable(
-            name.trim_start_matches(context.compilation.lang.metavariable_prefix_substitute())
-                .to_string(),
-        ));
-    }
-
-    let range = node.byte_range();
-    text_to_var(name, range, context_range, range_map, context).map(|s| Some(s.into()))
-}
-
-fn metavariable_ranges(node: &GritTargetNode, lang: &GritTargetLanguage) -> Vec<ByteRange> {
-    let cursor = node.walk();
-    traverse(cursor, Order::Pre)
-        .flat_map(|child| {
-            if lang.is_metavariable(&child) {
-                vec![child.byte_range()]
-            } else {
-                node_sub_variables(&child, lang)
-            }
-        })
-        .collect()
-}
-
-// assumes that metavariable substitute is 1 byte larger than the original. eg.
-// len(µ) = 2 bytes, len($) = 1 byte
-fn metavariable_range_mapping(
-    mut ranges: Vec<ByteRange>,
-    snippet_offset: usize,
-) -> BTreeMap<ByteRange, ByteRange> {
-    // assumes metavariable ranges do not enclose one another
-    ranges.sort_by_key(|r| r.start);
-
-    let mut byte_offset = snippet_offset;
-    let mut map = BTreeMap::new();
-    for range in ranges {
-        let start_byte = range.start - byte_offset;
-        if !cfg!(target_arch = "wasm32") {
-            byte_offset += 1;
-        }
-
-        let end_byte = range.end - byte_offset;
-        let new_range = ByteRange::new(start_byte, end_byte);
-        map.insert(range, new_range);
-    }
-
-    map
-}
-
-fn node_sub_variables(node: &GritTargetNode, lang: &impl Language) -> Vec<ByteRange> {
-    let mut ranges = vec![];
-    if node.has_children() {
-        return ranges;
-    }
-
-    let Some(token) = node.first_token() else {
-        return ranges;
-    };
-
-    let source = token.text();
-    let variable_regex = lang.replaced_metavariable_regex();
-    for m in variable_regex.find_iter(source) {
-        let var_range = ByteRange::new(m.start(), m.end());
-        let start_byte = node.start_byte() as usize;
-        let end_byte = node.end_byte() as usize;
-        if var_range.start >= start_byte && var_range.end <= end_byte {
-            ranges.push(var_range);
-        }
-    }
-
-    ranges
-}
-
-enum SnippetValues {
-    Dots,
-    Underscore,
-    Variable(Variable),
-}
-
-impl From<SnippetValues> for Pattern<GritQueryContext> {
-    fn from(value: SnippetValues) -> Self {
-        match value {
-            SnippetValues::Dots => Pattern::Dots,
-            SnippetValues::Underscore => Pattern::Underscore,
-            SnippetValues::Variable(v) => Pattern::Variable(v),
-        }
-    }
-}
-
-fn text_to_var(
-    name: &str,
-    range: ByteRange,
-    context_range: ByteRange,
-    range_map: &BTreeMap<ByteRange, ByteRange>,
-    context: &mut NodeCompilationContext,
-) -> Result<SnippetValues, CompileError> {
-    let name = context
-        .compilation
-        .lang
-        .snippet_metavariable_to_grit_metavariable(name)
-        .ok_or_else(|| CompileError::MetavariableNotFound(name.to_string()))?;
-    match name {
-        GritMetaValue::Dots => Ok(SnippetValues::Dots),
-        GritMetaValue::Underscore => Ok(SnippetValues::Underscore),
-        GritMetaValue::Variable(name) => {
-            let range = *range_map
-                .get(&range)
-                .ok_or_else(|| CompileError::InvalidMetavariableRange(range))?;
-            let var = context.register_variable(name, range + context_range.start)?;
-            Ok(SnippetValues::Variable(var))
         }
     }
 }

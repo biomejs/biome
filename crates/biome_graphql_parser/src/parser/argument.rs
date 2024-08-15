@@ -1,4 +1,3 @@
-use crate::parser::{parse_name, GraphqlParser};
 use biome_graphql_syntax::{
     GraphqlSyntaxKind::{self, *},
     T,
@@ -12,7 +11,9 @@ use super::{
     directive::is_at_directive,
     is_nth_at_name,
     parse_error::{expected_argument, expected_value},
+    parse_literal_name,
     value::parse_value,
+    GraphqlParser,
 };
 
 struct ArgumentListParseRecovery;
@@ -76,7 +77,7 @@ fn parse_argument(p: &mut GraphqlParser) -> ParsedSyntax {
     let m = p.start();
 
     // name is checked for in `is_at_name`
-    parse_name(p).ok();
+    parse_literal_name(p).ok();
     p.expect(T![:]);
     parse_value(p).or_add_diagnostic(p, expected_value);
 
@@ -91,9 +92,6 @@ pub(crate) fn is_at_argument_list_end(p: &mut GraphqlParser<'_>) -> bool {
     p.at(T![')'])
     // at the start af a new arguments list
     || p.at(T!['('])
-    // at a selection set or body of a definition
-    || p.at(T!['{'])
-    || p.at(T!['}'])
     // at the start of a new directive
     || is_at_directive(p)
     // if we can't find any of the above, we can't be sure if we're outside of

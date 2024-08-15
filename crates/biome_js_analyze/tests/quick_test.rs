@@ -7,6 +7,7 @@ use biome_test_utils::{
     code_fix_to_string, create_analyzer_options, diagnostic_to_string, load_manifest,
     parse_test_path, scripts_from_json,
 };
+use std::ops::Deref;
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
@@ -24,7 +25,8 @@ fn run_test() {
     if group == "specs" || group == "suppression" {
         panic!("the test file must be placed in the {group}/{rule}/<rule-name>/ directory");
     }
-    if biome_js_analyze::metadata()
+    if biome_js_analyze::METADATA
+        .deref()
         .find_rule(group, rule)
         .is_none()
     {
@@ -40,7 +42,7 @@ fn run_test() {
     let extension = input_file.extension().unwrap_or_default();
 
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
     if let Some(scripts) = scripts_from_json(extension, &input_code) {
         for script in scripts {
             analyze(

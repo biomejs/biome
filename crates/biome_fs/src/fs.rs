@@ -4,8 +4,10 @@ use biome_diagnostics::{Error, Severity};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
 use oxc_resolver::{Resolution, ResolveError};
+use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
+use std::fmt::{Debug, Display, Formatter};
+use std::hash::{Hash, Hasher};
 use std::panic::RefUnwindSafe;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -297,14 +299,21 @@ impl<T: ?Sized> FileSystemExt for T where T: FileSystem {}
 type BoxedTraversal<'fs, 'scope> = Box<dyn FnOnce(&dyn TraversalScope<'scope>) + Send + 'fs>;
 
 pub trait TraversalScope<'scope> {
-    /// Spawn a new filesystem read task
+    /// Spawn a new filesystem read task.
     ///
-    /// If the provided path exists and is a file, then the [`handle_file`](TraversalContext::handle_file)
+    /// If the provided path exists and is a file, then the [`handle_file`](TraversalContext::handle_path)
     /// method of the provided [TraversalContext] will be called. If it's a
     /// directory, it will be recursively traversed and all the files the
-    /// [`can_handle`](TraversalContext::can_handle) method of the context
+    /// [TraversalContext::can_handle] method of the context
     /// returns true for will be handled as well
-    fn spawn(&self, context: &'scope dyn TraversalContext, path: PathBuf);
+    fn evaluate(&self, context: &'scope dyn TraversalContext, path: PathBuf);
+
+    /// Spawn a new filesystem read task.
+    ///
+    /// It's assumed that the provided already exist and was already evaluated via [TraversalContext::can_handle].
+    ///
+    /// This method will call [TraversalContext::handle_path].
+    fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf);
 }
 
 pub trait TraversalContext: Sync {
@@ -323,7 +332,68 @@ pub trait TraversalContext: Sync {
 
     /// This method will be called by the traversal for each file it finds
     /// where [TraversalContext::can_handle] returned true
-    fn handle_file(&self, path: &Path);
+    fn handle_path(&self, path: &Path);
+
+    /// This method will be called by the traversal for each file it finds
+    /// where [TraversalContext::store_path] returned true
+    fn store_path(&self, path: &Path);
+
+    /// Returns the paths that should be handled
+    fn evaluated_paths(&self) -> FxHashSet<EvaluatedPath>;
+}
+
+#[derive(Debug, Eq, Clone)]
+pub struct EvaluatedPath {
+    path: PathBuf,
+    is_fixed: bool,
+}
+
+impl PartialEq for EvaluatedPath {
+    fn eq(&self, other: &Self) -> bool {
+        self.path.eq(&other.path)
+    }
+}
+
+impl Hash for EvaluatedPath {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.path.hash(state)
+    }
+}
+
+impl EvaluatedPath {
+    pub fn new_evaluated(path: impl Into<PathBuf>) -> Self {
+        Self {
+            path: path.into(),
+            is_fixed: true,
+        }
+    }
+
+    pub fn is_fixed(&self) -> bool {
+        self.is_fixed
+    }
+
+    pub fn as_path(&self) -> &Path {
+        self.path.as_path()
+    }
+
+    pub fn to_path_buf(&self) -> PathBuf {
+        self.path.clone()
+    }
+}
+
+impl AsRef<Path> for EvaluatedPath {
+    fn as_ref(&self) -> &Path {
+        self.as_path()
+    }
+}
+
+impl<T: Into<PathBuf>> From<T> for EvaluatedPath {
+    fn from(value: T) -> Self {
+        Self {
+            path: value.into(),
+            is_fixed: false,
+        }
+    }
 }
 
 impl<T> FileSystem for Arc<T>
@@ -437,7 +507,7 @@ impl Advices for ErrorKind {
         match self {
 			ErrorKind::CantReadFile(path) => visitor.record_log(
 		        LogCategory::Error,
-			    &format!("Biome can't read the following file, maybe for permissions reasons or it doesn't exist: {}", path)
+			    &format!("Biome can't read the following file, maybe for permissions reasons or it doesn't exist: {path}")
 			),
 
             ErrorKind::UnknownFileType => visitor.record_log(
@@ -446,11 +516,11 @@ impl Advices for ErrorKind {
             ),
             ErrorKind::DereferencedSymlink(path) => visitor.record_log(
                 LogCategory::Info,
-                &format!("Biome encountered a file system entry that is a broken symbolic link: {}", path),
+                &format!("Biome encountered a file system entry that is a broken symbolic link: {path}"),
             ),
             ErrorKind::DeeplyNestedSymlinkExpansion(path) => visitor.record_log(
                 LogCategory::Error,
-                &format!("Biome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle: {}", path),
+                &format!("Biome encountered a file system entry with too many nested symbolic links, possibly forming an infinite cycle: {path}"),
             ),
         }
     }

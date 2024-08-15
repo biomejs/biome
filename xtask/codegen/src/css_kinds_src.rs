@@ -43,6 +43,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         ("~=", "TILDE_EQ"),
         ("-->", "CDC"),
         ("<!--", "CDO"),
+        ("U+", "UNICODE"),
     ],
     keywords: &[
         "media",
@@ -260,6 +261,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         // Similarly, `<percentage>` also disallows spaces, so this token
         // represents a number immediately preceding a `%`.
         "CSS_PERCENTAGE_VALUE",
+        "CSS_UNICODE_CODEPOINT_LITERAL",
+        "CSS_UNICODE_RANGE_WILDCARD_LITERAL",
     ],
     tokens: &[
         "ERROR_TOKEN",
@@ -268,6 +271,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "WHITESPACE",
         "COMMENT",
         "MULTILINE_COMMENT",
+        "GRIT_METAVARIABLE",
     ],
     nodes: &[
         "CSS_ROOT",
@@ -317,6 +321,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_COMPLEX_SELECTOR",
         "CSS_COMPOUND_SELECTOR",
         "CSS_SUB_SELECTOR_LIST",
+        "CSS_NESTED_SELECTOR_LIST",
+        "CSS_NESTED_SELECTOR",
         "CSS_ID_SELECTOR",
         "CSS_CLASS_SELECTOR",
         "CSS_TYPE_SELECTOR",
@@ -362,6 +368,10 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BORDER",
         "CSS_BRACKETED_VALUE",
         "CSS_BRACKETED_VALUE_LIST",
+        "CSS_UNICODE_RANGE",
+        "CSS_UNICODE_CODEPOINT",
+        "CSS_UNICODE_RANGE_WILDCARD",
+        "CSS_UNICODE_RANGE_INTERVAL",
         // At rule nodes
         "CSS_AT_RULE",
         "CSS_CHARSET_AT_RULE",
@@ -495,5 +505,8 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_BOGUS_FONT_FAMILY_NAME",
         "CSS_BOGUS_CUSTOM_IDENTIFIER",
         "CSS_BOGUS_KEYFRAMES_NAME",
+        "CSS_BOGUS_UNICODE_RANGE_VALUE",
+        // Grit metavariable
+        "CSS_METAVARIABLE",
     ],
 };

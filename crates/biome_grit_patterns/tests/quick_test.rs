@@ -1,42 +1,36 @@
 use biome_grit_parser::parse_grit;
-use biome_grit_patterns::{GritQuery, GritTargetLanguage, GritTree, JsTargetLanguage};
-use biome_js_parser::{parse_module, JsParserOptions};
+use biome_grit_patterns::{GritQuery, GritTargetFile, GritTargetLanguage, JsTargetLanguage};
+use biome_js_parser::{parse, JsParserOptions};
+use biome_js_syntax::JsFileSource;
 
-// Use this test to quickly execute a Grit query against an source snippet.
+// Use this test to quickly execute a Grit query against a source snippet.
 #[ignore]
 #[test]
 fn test_query() {
-    let parse_grit_result = parse_grit("`console.log('hello')`");
+    let parse_grit_result = parse_grit("`foo.$x && foo.$x()`");
     if !parse_grit_result.diagnostics().is_empty() {
-        println!(
-            "Diagnostics from parsing query:\n{:?}",
-            parse_grit_result.diagnostics()
-        );
+        panic!("Cannot parse query:\n{:?}", parse_grit_result.diagnostics());
     }
 
     let query = GritQuery::from_node(
         parse_grit_result.tree(),
+        None,
         GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
     )
     .expect("could not construct query");
 
-    let parse_js_result = parse_module(
-        r#"
-function hello() {
-    console
-        .log("hello");
-}
-"#,
-        JsParserOptions::default(),
-    );
-    if !parse_js_result.diagnostics().is_empty() {
-        println!(
-            "Diagnostics from parsing JS snippet:\n{:?}",
-            parse_js_result.diagnostics()
-        );
+    if !query.diagnostics.is_empty() {
+        println!("Diagnostics from compiling query:\n{:?}", query.diagnostics);
     }
 
-    query
-        .execute(&GritTree::new(parse_js_result.syntax().into()))
-        .expect("could not execute query");
+    let body = r#"foo.bar && foo.bar();
+"#;
+
+    let file = GritTargetFile {
+        path: "test.js".into(),
+        parse: parse(body, JsFileSource::tsx(), JsParserOptions::default()).into(),
+    };
+    let results = query.execute(file).expect("could not execute query");
+
+    println!("Results: {results:?}");
 }

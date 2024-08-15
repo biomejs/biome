@@ -9,24 +9,40 @@ use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct ManifestServices {
-    pub(crate) manifest: Arc<PackageJson>,
+    pub(crate) manifest: Arc<Option<PackageJson>>,
 }
 
 impl ManifestServices {
     pub(crate) fn is_dependency(&self, specifier: &str) -> bool {
-        self.manifest.dependencies.contains(specifier)
+        self.manifest
+            .as_ref()
+            .as_ref()
+            .map(|pkg| pkg.dependencies.contains(specifier))
+            .unwrap_or_default()
     }
 
     pub(crate) fn is_dev_dependency(&self, specifier: &str) -> bool {
-        self.manifest.dev_dependencies.contains(specifier)
+        self.manifest
+            .as_ref()
+            .as_ref()
+            .map(|pkg| pkg.dev_dependencies.contains(specifier))
+            .unwrap_or_default()
     }
 
     pub(crate) fn is_peer_dependency(&self, specifier: &str) -> bool {
-        self.manifest.peer_dependencies.contains(specifier)
+        self.manifest
+            .as_ref()
+            .as_ref()
+            .map(|pkg| pkg.peer_dependencies.contains(specifier))
+            .unwrap_or_default()
     }
 
     pub(crate) fn is_optional_dependency(&self, specifier: &str) -> bool {
-        self.manifest.optional_dependencies.contains(specifier)
+        self.manifest
+            .as_ref()
+            .as_ref()
+            .map(|pkg| pkg.optional_dependencies.contains(specifier))
+            .unwrap_or_default()
     }
 }
 
@@ -35,7 +51,7 @@ impl FromServices for ManifestServices {
         rule_key: &RuleKey,
         services: &ServiceBag,
     ) -> biome_diagnostics::Result<Self, MissingServicesDiagnostic> {
-        let manifest: &Arc<PackageJson> = services.get_service().ok_or_else(|| {
+        let manifest: &Arc<Option<PackageJson>> = services.get_service().ok_or_else(|| {
             MissingServicesDiagnostic::new(rule_key.rule_name(), &["PackageJson"])
         })?;
 

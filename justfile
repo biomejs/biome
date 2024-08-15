@@ -11,12 +11,12 @@ alias qt := test-quick
 # Installs the tools needed to develop
 install-tools:
 	cargo install cargo-binstall
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools knope
+	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools knope
 
 # Upgrades the tools needed to develop
 upgrade-tools:
 	cargo install cargo-binstall --force
-	cargo binstall cargo-insta cargo-nextest taplo-cli wasm-pack wasm-tools knope --force
+	cargo binstall cargo-insta taplo-cli wasm-pack wasm-tools knope --force
 
 # Generate all files across crates and tools. You rarely want to use it locally.
 gen-all:
@@ -79,6 +79,12 @@ new-css-lintrule rulename:
   cargo run -p xtask_codegen -- new-lintrule --kind=css --category=lint --name={{rulename}}
   just gen-lint
 
+# Creates a new css lint rule in the given path, with the given name. Name has to be camel case.
+new-graphql-lintrule rulename:
+  cargo run -p xtask_codegen -- new-lintrule --kind=graphql --category=lint --name={{rulename}}
+  just gen-lint
+
+
 # Promotes a rule from the nursery group to a new group
 promote-rule rulename group:
 	cargo run -p xtask_codegen -- promote-rule --name={{rulename}} --group={{group}}
@@ -103,11 +109,11 @@ _touch file:
 
 # Run tests of all crates
 test:
-	cargo nextest run --no-fail-fast
+	cargo test run --no-fail-fast
 
 # Run tests for the crate passed as argument e.g. just test-create biome_cli
 test-crate name:
-	cargo nextest run -E 'package({{name}})' --no-fail-fast
+	cargo test run -p {{name}} --no-fail-fast
 
 # Run doc tests
 test-doc:
@@ -118,9 +124,11 @@ test-lintrule name:
   just _touch crates/biome_js_analyze/tests/spec_tests.rs
   just _touch crates/biome_json_analyze/tests/spec_tests.rs
   just _touch crates/biome_css_analyze/tests/spec_tests.rs
+  just _touch crates/biome_graphql_analyze/tests/spec_tests.rs
   cargo test -p biome_js_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_json_analyze -- {{snakecase(name)}} --show-output
   cargo test -p biome_css_analyze -- {{snakecase(name)}} --show-output
+  cargo test -p biome_graphql_analyze -- {{snakecase(name)}} --show-output
 
 # Tests a lint rule. The name of the rule needs to be camel case
 test-transformation name:

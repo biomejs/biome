@@ -1,9 +1,9 @@
 use crate::services::semantic::SemanticServices;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::TextRange;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow the use of `arguments`.
     ///
     /// ## Examples
@@ -47,8 +47,7 @@ impl Rule for NoArguments {
         for unresolved_reference in model.all_unresolved_references() {
             let name = unresolved_reference.syntax().text_trimmed();
             if name == "arguments" {
-                let range = unresolved_reference.range();
-                found_arguments.push(*range);
+                found_arguments.push(unresolved_reference.range());
             }
         }
 

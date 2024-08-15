@@ -1,11 +1,13 @@
-use biome_analyze::{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsDeclaration, JsFileSource, JsStatementList, JsSyntaxKind};
 use biome_rowan::AstNode;
 
 use crate::services::control_flow::AnyJsControlFlowRoot;
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow `function` and `var` declarations that are accessible outside their block.
     ///
     /// A `var` is accessible in the whole body of the nearest root (function, module, script, static block).

@@ -110,7 +110,7 @@ impl FileSystem for OsFileSystem {
             // R: renamed
             // Source: https://git-scm.com/docs/git-diff#Documentation/git-diff.txt---diff-filterACDMRTUXB82308203
             .arg("--diff-filter=ACMR")
-            .arg(format!("{}...HEAD", base))
+            .arg(format!("{base}...HEAD"))
             .output()?;
 
         Ok(String::from_utf8_lossy(&output.stdout)
@@ -197,7 +197,7 @@ impl<'scope> OsTraversalScope<'scope> {
 }
 
 impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
-    fn spawn(&self, ctx: &'scope dyn TraversalContext, path: PathBuf) {
+    fn evaluate(&self, ctx: &'scope dyn TraversalContext, path: PathBuf) {
         let file_type = match path.metadata() {
             Ok(meta) => meta.file_type(),
             Err(err) => {
@@ -208,6 +208,12 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
             }
         };
         handle_any_file(&self.scope, ctx, path, file_type, None);
+    }
+
+    fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf) {
+        self.scope.spawn(move |_| {
+            context.handle_path(&path);
+        });
     }
 }
 
@@ -346,7 +352,7 @@ fn handle_any_file<'scope>(
 
     if file_type.is_file() {
         scope.spawn(move |_| {
-            ctx.handle_file(&path);
+            ctx.store_path(&path);
         });
         return;
     }

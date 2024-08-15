@@ -3231,6 +3231,42 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsLogicalExpression {
         )
     }
 }
+impl FormatRule<biome_js_syntax::JsMetavariable>
+    for crate::js::auxiliary::metavariable::FormatJsMetavariable
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(&self, node: &biome_js_syntax::JsMetavariable, f: &mut JsFormatter) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::JsMetavariable>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsMetavariable {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::JsMetavariable,
+        crate::js::auxiliary::metavariable::FormatJsMetavariable,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::js::auxiliary::metavariable::FormatJsMetavariable::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsMetavariable {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::JsMetavariable,
+        crate::js::auxiliary::metavariable::FormatJsMetavariable,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::auxiliary::metavariable::FormatJsMetavariable::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::JsMethodClassMember>
     for crate::js::classes::method_class_member::FormatJsMethodClassMember
 {
@@ -8154,6 +8190,46 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::TsIntersectionType {
         )
     }
 }
+impl FormatRule<biome_js_syntax::TsLiteralEnumMemberName>
+    for crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName
+{
+    type Context = JsFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_js_syntax::TsLiteralEnumMemberName,
+        f: &mut JsFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_js_syntax::TsLiteralEnumMemberName>::fmt(self, node, f)
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::TsLiteralEnumMemberName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::TsLiteralEnumMemberName,
+        crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::TsLiteralEnumMemberName {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::TsLiteralEnumMemberName,
+        crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::ts::objects::literal_enum_member_name::FormatTsLiteralEnumMemberName::default(),
+        )
+    }
+}
 impl FormatRule<biome_js_syntax::TsMappedType>
     for crate::ts::types::mapped_type::FormatTsMappedType
 {
@@ -12528,6 +12604,33 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleItem {
         )
     }
 }
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleSource {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AnyJsModuleSource,
+        crate::js::any::module_source::FormatAnyJsModuleSource,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::js::any::module_source::FormatAnyJsModuleSource::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsModuleSource {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AnyJsModuleSource,
+        crate::js::any::module_source::FormatAnyJsModuleSource,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::js::any::module_source::FormatAnyJsModuleSource::default(),
+        )
+    }
+}
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsName {
     type Format<'a> =
         FormatRefWithRule<'a, biome_js_syntax::AnyJsName, crate::js::any::name::FormatAnyJsName>;
@@ -13006,6 +13109,33 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsxTag {
         FormatOwnedWithRule::new(self, crate::jsx::any::tag::FormatAnyJsxTag::default())
     }
 }
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsEnumMemberName {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AnyTsEnumMemberName,
+        crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsEnumMemberName {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AnyTsEnumMemberName,
+        crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::ts::any::enum_member_name::FormatAnyTsEnumMemberName::default(),
+        )
+    }
+}
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsExternalModuleDeclarationBody {
     type Format<'a> = FormatRefWithRule<
         'a,
@@ -13025,6 +13155,33 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsExternalModuleDeclara
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule :: new (self , crate :: ts :: any :: external_module_declaration_body :: FormatAnyTsExternalModuleDeclarationBody :: default ())
+    }
+}
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsIdentifierBinding {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_js_syntax::AnyTsIdentifierBinding,
+        crate::ts::any::identifier_binding::FormatAnyTsIdentifierBinding,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::ts::any::identifier_binding::FormatAnyTsIdentifierBinding::default(),
+        )
+    }
+}
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyTsIdentifierBinding {
+    type Format = FormatOwnedWithRule<
+        biome_js_syntax::AnyTsIdentifierBinding,
+        crate::ts::any::identifier_binding::FormatAnyTsIdentifierBinding,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::ts::any::identifier_binding::FormatAnyTsIdentifierBinding::default(),
+        )
     }
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::AnyTsIndexSignatureModifier {

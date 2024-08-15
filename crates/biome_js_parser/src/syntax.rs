@@ -15,6 +15,7 @@ pub mod expr;
 mod function;
 mod js_parse_error;
 mod jsx;
+mod metavariable;
 mod module;
 mod object;
 mod pattern;

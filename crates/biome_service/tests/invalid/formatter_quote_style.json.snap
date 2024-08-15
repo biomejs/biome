@@ -16,14 +16,13 @@ formatter_quote_style.json:3:9 deserialize ━━━━━━━━━━━━�
   i Known keys:
   
   - enabled
+  - useEditorconfig
   - formatWithErrors
   - indentStyle
   - indentWidth
   - lineEnding
   - lineWidth
   - attributePosition
+  - bracketSpacing
   - ignore
   - include
-  
-
-

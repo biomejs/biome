@@ -1,4 +1,4 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-pub mod nursery;
-::biome_analyze::declare_category! { pub Assists { kind : Action , groups : [self :: nursery :: Nursery ,] } }
+pub mod source;
+::biome_analyze::declare_category! { pub Assists { kind : Action , groups : [self :: source :: Source ,] } }

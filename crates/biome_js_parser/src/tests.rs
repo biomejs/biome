@@ -70,7 +70,7 @@ fn try_parse(path: &str, text: &str, options: JsParserOptions) -> Parse<AnyJsRoo
 
         parse
     });
-    assert!(res.is_ok(), "Trying to parse `{}` panicked", path);
+    assert!(res.is_ok(), "Trying to parse `{path}` panicked");
     res.unwrap()
 }
 
@@ -150,7 +150,7 @@ fn run_and_expect_errors(path: &str, _: &str, _: &str, _: &str) {
         )
         .unwrap();
     }
-    write!(actual, "--\n{}", text).unwrap();
+    write!(actual, "--\n{text}").unwrap();
 
     let path = path.with_extension("rast");
     expect_file![path].assert_eq(&actual)
@@ -214,13 +214,13 @@ pub fn jsroot_display_text_and_trimmed() {
     let root = parse_module(code, JsParserOptions::default());
     let syntax = root.syntax();
 
-    assert_eq!(format!("{}", syntax), code);
+    assert_eq!(format!("{syntax}"), code);
 
     let syntax_text = syntax.text();
-    assert_eq!(format!("{}", syntax_text), code);
+    assert_eq!(format!("{syntax_text}"), code);
 
     let syntax_text = syntax.text_trimmed();
-    assert_eq!(format!("{}", syntax_text), code.trim());
+    assert_eq!(format!("{syntax_text}"), code.trim());
 }
 
 #[test]
@@ -419,9 +419,6 @@ pub fn quick_test() {
     dbg!(&syntax, root.diagnostics(), root.has_errors());
 
     if has_bogus_nodes_or_empty_slots(&syntax) {
-        panic!(
-            "modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {}",
-            syntax
-        )
+        panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
     }
 }

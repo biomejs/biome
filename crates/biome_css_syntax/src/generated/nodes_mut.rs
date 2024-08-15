@@ -262,10 +262,10 @@ impl CssComposesPropertyValue {
     }
 }
 impl CssCompoundSelector {
-    pub fn with_nesting_selector_token(self, element: Option<SyntaxToken>) -> Self {
+    pub fn with_nesting_selectors(self, element: CssNestedSelectorList) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
     pub fn with_simple_selector(self, element: Option<AnyCssSimpleSelector>) -> Self {
@@ -1319,6 +1319,14 @@ impl CssMediaTypeQuery {
         )
     }
 }
+impl CssMetavariable {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssNamedNamespacePrefix {
     pub fn with_name(self, element: CssIdentifier) -> Self {
         Self::unwrap_cast(
@@ -1378,6 +1386,14 @@ impl CssNestedQualifiedRule {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssNestedSelector {
+    pub fn with_amp_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }
@@ -2378,6 +2394,56 @@ impl CssTypeSelector {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssUnicodeCodepoint {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl CssUnicodeRange {
+    pub fn with_prefix_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_value(self, element: AnyCssUnicodeValue) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssUnicodeRangeInterval {
+    pub fn with_start(self, element: CssUnicodeCodepoint) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_end(self, element: CssUnicodeCodepoint) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl CssUnicodeRangeWildcard {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
 }

@@ -25,13 +25,13 @@ jobs:
 
     steps:
       - name: Checkout PR Branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Support longpaths
         run: git config core.longpaths true
 
       - name: Checkout PR Branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           submodules: recursive
 
@@ -39,7 +39,7 @@ jobs:
         uses: ./.github/actions/free-disk-space
 
       - name: Install toolchain
-        uses: moonrepo/setup-rust@d8048d4fdff0633123678b093726e6d7c8ad6de5 # v1.2.0
+        uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           cache-target: release
           cache-base: main
@@ -52,7 +52,7 @@ jobs:
         run: cargo coverage --json > new_results.json
 
       - name: Checkout main Branch
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         with:
           clean: false
           ref: main

@@ -1,0 +1,185 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+<>
+	<TestComponent onClick={doFoo} />
+	<Button onClick={doFoo} />
+	<Button onClick={doFoo} />
+	<div />
+	<div className="foo" />
+	<div className="foo" {...props} />
+	<div onClick={() => void 0} aria-hidden />
+	<div onClick={() => void 0} aria-hidden={true} />
+	<div onClick={null} />
+	<input type="button" onClick={() => void 0} />
+	<input type="checkbox" onClick={() => void 0} />
+	<input type="color" onClick={() => void 0} />
+	<input type="date" onClick={() => void 0} />
+	<input type="datetime" onClick={() => void 0} />
+	<input type="datetime-local" onClick={() => void 0} />
+	<input type="email" onClick={() => void 0} />
+	<input type="file" onClick={() => void 0} />
+	<input type="hidden" onClick={() => void 0} />
+	<input type="image" onClick={() => void 0} />
+	<input type="month" onClick={() => void 0} />
+	<input type="number" onClick={() => void 0} />
+	<input type="password" onClick={() => void 0} />
+	<input type="radio" onClick={() => void 0} />
+	<input type="range" onClick={() => void 0} />
+	<input type="reset" onClick={() => void 0} />
+	<input type="search" onClick={() => void 0} />
+	<input type="submit" onClick={() => void 0} />
+	<input type="tel" onClick={() => void 0} />
+	<input type="text" onClick={() => void 0} />
+	<input type="time" onClick={() => void 0} />
+	<input type="url" onClick={() => void 0} />
+	<input type="week" onClick={() => void 0} />
+	<button onClick={() => void 0} className="foo" />
+	<datalist onClick={() => {}} />
+	<option onClick={() => void 0} className="foo" />
+	<select onClick={() => void 0} className="foo" />
+	<textarea onClick={() => void 0} className="foo" />
+	<a onClick={() => void 0} href="http://x.y.z" />
+	<a onClick={() => void 0} href="http://x.y.z" tabIndex="0" />
+	<audio onClick={() => {}} />
+	<form onClick={() => {}} />
+	<form onSubmit={() => {}} />
+
+	<div role="button" onClick={() => {}} />
+	<div role="checkbox" onClick={() => {}} />
+	<div role="combobox" onClick={() => {}} />
+	<div role="gridcell" onClick={() => {}} />
+	<div role="link" onClick={() => {}} />
+	<div role="menuitem" onClick={() => {}} />
+	<div role="menuitemcheckbox" onClick={() => {}} />
+	<div role="menuitemradio" onClick={() => {}} />
+	<div role="option" onClick={() => {}} />
+	<div role="radio" onClick={() => {}} />
+	<div role="searchbox" onClick={() => {}} />
+	<div role="slider" onClick={() => {}} />
+	<div role="spinbutton" onClick={() => {}} />
+	<div role="switch" onClick={() => {}} />
+	<div role="tab" onClick={() => {}} />
+	<div role="textbox" onClick={() => {}} />
+	<div onCopy={() => {}} />
+	<div onCut={() => {}} />
+	<div onPaste={() => {}} />
+	<div onCompositionEnd={() => {}} />
+	<div onCompositionStart={() => {}} />
+	<div onCompositionUpdate={() => {}} />
+	<div onChange={() => {}} />
+	<div onInput={() => {}} />
+	<div onSubmit={() => {}} />
+	<div onSelect={() => {}} />
+	<div onTouchCancel={() => {}} />
+	<div onTouchEnd={() => {}} />
+	<div onTouchMove={() => {}} />
+	<div onTouchStart={() => {}} />
+	<div onScroll={() => {}} />
+	<div onWheel={() => {}} />
+	<div onAbort={() => {}} />
+	<div onCanPlay={() => {}} />
+	<div onCanPlayThrough={() => {}} />
+	<div onDurationChange={() => {}} />
+	<div onEmptied={() => {}} />
+	<div onEncrypted={() => {}} />
+	<div onEnded={() => {}} />
+	<div onError={() => {}} />
+	<div onLoadedData={() => {}} />
+	<div onLoadedMetadata={() => {}} />
+	<div onLoadStart={() => {}} />
+	<div onPause={() => {}} />
+	<div onPlay={() => {}} />
+	<div onPlaying={() => {}} />
+	<div onProgress={() => {}} />
+	<div onRateChange={() => {}} />
+	<div onSeeked={() => {}} />
+	<div onSeeking={() => {}} />
+	<div onStalled={() => {}} />
+	<div onSuspend={() => {}} />
+	<div onTimeUpdate={() => {}} />
+	<div onVolumeChange={() => {}} />
+	<div onWaiting={() => {}} />
+	<div onLoad={() => {}} />
+	<div onError={() => {}} />
+	<div onAnimationStart={() => {}} />
+	<div onAnimationEnd={() => {}} />
+	<div onAnimationIteration={() => {}} />
+	<div onTransitionEnd={() => {}} />
+
+	{/* HTML elements with an inherent, non-interactive role */}
+	<address onClick={() => {}} />
+	<article onClick={() => {}} />
+	<article onDblClick={() => void 0} />
+	<aside onClick={() => {}} />
+	<blockquote onClick={() => {}} />
+	<br onClick={() => {}} />
+	<canvas onClick={() => {}} />
+	<caption onClick={() => {}} />
+	<code onClick={() => {}} />
+	<details onClick={() => {}} />
+	<dd onClick={() => {}} />
+	<del onClick={() => {}} />
+	<dfn onClick={() => {}} />
+	
+	<dl onClick={() => {}} />
+	<dt onClick={() => {}} />
+	<em onClick={() => {}} />
+	<embed onClick={() => {}} />
+	<fieldset onClick={() => {}} />
+	<figcaption onClick={() => {}} />
+	<figure onClick={() => {}} />
+	<h1 onClick={() => {}} />
+	<h2 onClick={() => {}} />
+	<h3 onClick={() => {}} />
+	<h4 onClick={() => {}} />
+	<h5 onClick={() => {}} />
+	<h6 onClick={() => {}} />
+	<hr onClick={() => {}} />
+	<html onClick={() => {}} />
+	<iframe onClick={() => {}} />
+	<img onClick={() => {}} />
+	<ins onClick={() => {}} />
+	<label onClick={() => {}} />
+	<legend onClick={() => {}} />
+	<li onClick={() => {}} />
+	<main onClick={() => void 0} />
+	<mark onClick={() => {}} />
+	<menu onClick={() => {}} />
+	<meter onClick={() => {}} />
+	<nav onClick={() => {}} />
+	<ol onClick={() => {}} />
+	<optgroup onClick={() => {}} />
+	<output onClick={() => {}} />
+	<p onClick={() => {}} />
+	<pre onClick={() => {}} />
+	<progress onClick={() => {}} />
+	<ruby onClick={() => {}} />
+	<section onClick={() => {}} aria-label="Aa" />
+	<section onClick={() => {}} aria-labelledby="js_1" />
+	<strong onClick={() => {}} />
+	<sub onClick={() => {}} />
+	<sup onClick={() => {}} />
+	<table onClick={() => {}} />
+	<tbody onClick={() => {}} />
+	<tfoot onClick={() => {}} />
+	<th onClick={() => {}} />
+	<thead onClick={() => {}} />
+	<time onClick={() => {}} />
+	<tr onClick={() => {}} />
+	<video onClick={() => {}} />
+	<ul onClick={() => {}} />
+
+	{/* HTML elements attributed with a non-interactive role */}
+	<div role="listbox" onClick={() => {}} />
+	<div role="progressbar" onClick={() => {}} />
+	<div role="row" onClick={() => {}} />
+	<div role="separator" onClick={() => {}} />
+	<div role="scrollbar" onClick={() => {}} />
+	<td onClick={() => { }} />
+</>;
+
+```

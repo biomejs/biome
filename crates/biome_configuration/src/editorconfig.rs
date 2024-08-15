@@ -11,16 +11,14 @@
 
 use std::{collections::HashMap, str::FromStr};
 
-use biome_deserialize::StringSet;
 use biome_diagnostics::{adapters::IniError, Error};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth};
-use indexmap::IndexSet;
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use serde::{Deserialize, Deserializer};
 
 use crate::{
     diagnostics::{EditorConfigDiagnostic, ParseFailedDiagnostic},
     OverrideFormatterConfiguration, OverridePattern, Overrides, PartialConfiguration,
-    PartialFormatterConfiguration, PlainIndentStyle,
+    PartialFormatterConfiguration,
 };
 
 pub fn parse_str(s: &str) -> Result<EditorConfig, EditorConfigDiagnostic> {
@@ -50,13 +48,24 @@ impl EditorConfig {
             formatter: self.options.remove("*").map(|o| o.to_biome()),
             ..Default::default()
         };
+        let mut errors = vec![];
         let overrides: Vec<_> = self
             .options
             .into_iter()
-            .map(|(k, v)| OverridePattern {
-                include: Some(StringSet::new(IndexSet::from([k]))),
-                formatter: Some(v.to_biome_override()),
-                ..Default::default()
+            .map(|(k, v)| {
+                let patterns = match expand_unknown_glob_patterns(&k) {
+                    Ok(patterns) => patterns.into_iter().map(hack_convert_double_star).collect(),
+                    Err(err) => {
+                        errors.push(err);
+                        vec![k]
+                    }
+                };
+
+                OverridePattern {
+                    include: Some(patterns.into_iter().collect()),
+                    formatter: Some(v.to_biome_override()),
+                    ..Default::default()
+                }
             })
             .collect();
         config.overrides = Some(Overrides(overrides));
@@ -65,15 +74,7 @@ impl EditorConfig {
     }
 
     fn validate(&self) -> Vec<EditorConfigDiagnostic> {
-        let mut errors: Vec<_> = self.options.values().flat_map(|o| o.validate()).collect();
-
-        // biome doesn't currently support all the glob patterns that .editorconfig does
-        errors.extend(
-            self.options
-                .keys()
-                .filter(|k| k.contains('{') || k.contains('}'))
-                .map(|pattern| EditorConfigDiagnostic::unknown_glob_pattern(pattern.clone())),
-        );
+        let errors: Vec<_> = self.options.values().flat_map(|o| o.validate()).collect();
 
         errors
     }
@@ -82,7 +83,7 @@ impl EditorConfig {
 #[derive(Debug, Clone, Deserialize, Default)]
 #[serde(default)]
 pub struct EditorConfigOptions {
-    indent_style: Option<PlainIndentStyle>,
+    indent_style: Option<IndentStyle>,
     #[serde(deserialize_with = "deserialize_optional_indent_width_from_string")]
     indent_size: Option<IndentWidth>,
     end_of_line: Option<LineEnding>,
@@ -170,6 +171,160 @@ where
         .map(Some)
 }
 
+/// Turn an unknown glob pattern into a list of known glob patterns. This is part of a hack to support all editorconfig patterns.
+///
+/// TODO: remove in biome 2.0
+fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConfigDiagnostic> {
+    struct Variants {
+        /// index of the { character
+        start: usize,
+        /// index of the } character
+        end: usize,
+        variants: Option<VariantType>,
+    }
+
+    impl Variants {
+        fn new(start: usize) -> Self {
+            Self {
+                start,
+                end: start,
+                variants: None,
+            }
+        }
+
+        fn parse_to_variants(&mut self, s: &str) -> Result<(), EditorConfigDiagnostic> {
+            let s = s.trim_start_matches('{').trim_end_matches('}');
+            if s.contains("..") {
+                let mut parts = s.split("..");
+                let start = parts.next().ok_or_else(|| {
+                    EditorConfigDiagnostic::invalid_glob_pattern(
+                        s,
+                        "Range pattern must have exactly two parts",
+                    )
+                })?;
+                let end = parts.next().ok_or_else(|| {
+                    EditorConfigDiagnostic::invalid_glob_pattern(
+                        s,
+                        "Range pattern must have exactly two parts",
+                    )
+                })?;
+                if parts.next().is_some() {
+                    return Err(EditorConfigDiagnostic::invalid_glob_pattern(
+                        s,
+                        "Range pattern must have exactly two parts",
+                    ));
+                }
+
+                let start = start.parse().map_err(|err| {
+                    EditorConfigDiagnostic::invalid_glob_pattern(
+                        s,
+                        format!("Error parsing the start of the range: {err}"),
+                    )
+                })?;
+                let end = end.parse().map_err(|err| {
+                    EditorConfigDiagnostic::invalid_glob_pattern(
+                        s,
+                        format!("Error parsing the end of the range: {err}"),
+                    )
+                })?;
+                self.variants = Some(VariantType::Range((start, end)));
+            } else {
+                self.variants = Some(VariantType::List(
+                    s.split(',').map(|s| s.to_string()).collect(),
+                ));
+            }
+
+            Ok(())
+        }
+
+        fn variants(&self) -> Vec<String> {
+            match &self.variants {
+                Some(VariantType::List(ref list)) => list.clone(),
+                Some(VariantType::Range((start, end))) => {
+                    let mut variants = vec![];
+                    for i in *start..=*end {
+                        variants.push(i.to_string());
+                    }
+                    variants
+                }
+                None => vec![],
+            }
+        }
+    }
+
+    enum VariantType {
+        List(Vec<String>),
+        Range((i64, i64)),
+    }
+
+    let mut all_variants = vec![];
+    let mut current_variants = None;
+    for (i, c) in pattern.chars().enumerate() {
+        match c {
+            '{' => {
+                if current_variants.is_none() {
+                    current_variants = Some(Variants::new(i));
+                } else {
+                    // TODO: error, recursive brace expansion is not supported
+                }
+            }
+            '}' => {
+                if let Some(mut v) = current_variants.take() {
+                    v.end = i;
+                    v.parse_to_variants(&pattern[v.start..=v.end])?;
+                    all_variants.push(v);
+                }
+            }
+            _ => {}
+        }
+    }
+
+    if all_variants.is_empty() {
+        return Ok(vec![pattern.to_string()]);
+    }
+
+    let mut expanded_patterns = vec![];
+    for variants in all_variants.iter().rev() {
+        if expanded_patterns.is_empty() {
+            for variant in &variants.variants() {
+                let mut pattern = pattern.to_string();
+                pattern.replace_range(variants.start..=variants.end, variant);
+                expanded_patterns.push(pattern);
+            }
+        } else {
+            let mut new_patterns = vec![];
+            for existing in &expanded_patterns {
+                for variant in &variants.variants() {
+                    let mut pattern = existing.clone();
+                    pattern.replace_range(variants.start..=variants.end, variant);
+                    new_patterns.push(pattern);
+                }
+            }
+            expanded_patterns = new_patterns;
+        }
+    }
+
+    Ok(expanded_patterns)
+}
+
+/// The EditorConfig spec allows for patterns like `**.yml`, which is not supported by biome. This function corrects such patterns so that they can be parsed by biome's glob parser.
+fn hack_convert_double_star(pattern: impl Into<String>) -> String {
+    pattern
+        .into()
+        .split('/')
+        .map(|component| {
+            if component == "**" {
+                component.to_string()
+            } else if component.contains("**") {
+                component.replace("**", "**/*")
+            } else {
+                component.to_string()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("/")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -234,7 +389,7 @@ max_line_length = 80
         let (conf, _) = conf.to_biome();
         let conf = conf.expect("Failed to convert editorconfig to biome");
         let formatter = conf.formatter.expect("Formatter not set");
-        assert_eq!(formatter.indent_style, Some(PlainIndentStyle::Space));
+        assert_eq!(formatter.indent_style, Some(IndentStyle::Space));
         assert_eq!(formatter.indent_width.unwrap().value(), 4);
         assert_eq!(formatter.line_ending, Some(LineEnding::Crlf));
         assert_eq!(formatter.line_width.map(|v| v.value()), Some(80));
@@ -256,20 +411,57 @@ insert_final_newline = false
     }
 
     #[test]
-    fn should_emit_diagnostic_glob_pattern() {
-        let input = r#"
-root = true
+    fn should_expand_glob_pattern_list() {
+        let pattern = "package.json";
+        let mut expanded =
+            expand_unknown_glob_patterns(pattern).expect("Failed to expand glob pattern");
+        expanded.sort();
+        assert_eq!(expanded, vec!["package.json"]);
 
-[{package.json,.travis.yml}]
-indent_style = space
-"#;
+        let pattern = "{package.json,.travis.yml}";
+        let mut expanded =
+            expand_unknown_glob_patterns(pattern).expect("Failed to expand glob pattern");
+        expanded.sort();
+        assert_eq!(expanded, vec![".travis.yml", "package.json"]);
+    }
 
-        let conf = parse_str(input).expect("Failed to parse editorconfig");
-        let (_, errors) = conf.to_biome();
-        assert_eq!(errors.len(), 1);
-        assert!(matches!(
-            errors[0],
-            EditorConfigDiagnostic::UnknownGlobPattern(_)
-        ));
+    #[test]
+    fn should_expand_glob_pattern_list_2() {
+        let pattern = "**/{foo,bar}.{test,spec}.js";
+        let mut expanded =
+            expand_unknown_glob_patterns(pattern).expect("Failed to expand glob pattern");
+        expanded.sort();
+        assert_eq!(
+            expanded,
+            vec![
+                "**/bar.spec.js",
+                "**/bar.test.js",
+                "**/foo.spec.js",
+                "**/foo.test.js",
+            ]
+        );
+    }
+
+    #[test]
+    fn should_expand_glob_pattern_range() {
+        let pattern = "**/bar.{1..4}.js";
+        let mut expanded =
+            expand_unknown_glob_patterns(pattern).expect("Failed to expand glob pattern");
+        expanded.sort();
+        assert_eq!(
+            expanded,
+            vec!["**/bar.1.js", "**/bar.2.js", "**/bar.3.js", "**/bar.4.js",]
+        );
+    }
+
+    #[test]
+    fn should_correct_double_star() {
+        let pattern = "**.yml";
+        let corrected = hack_convert_double_star(pattern);
+        assert_eq!(corrected, "**/*.yml",);
+
+        let pattern = "**/*.yml";
+        let corrected = hack_convert_double_star(pattern);
+        assert_eq!(corrected, "**/*.yml",);
     }
 }

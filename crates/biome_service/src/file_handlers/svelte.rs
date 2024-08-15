@@ -14,22 +14,19 @@ use biome_js_parser::{parse_js_with_cache, JsParserOptions};
 use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
-use lazy_static::lazy_static;
 use regex::{Match, Regex};
+use std::sync::LazyLock;
 use tracing::debug;
 
-use super::parse_lang_from_script_opening_tag;
+use super::{parse_lang_from_script_opening_tag, SearchCapabilities};
 
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct SvelteFileHandler;
 
-lazy_static! {
-    // https://regex101.com/r/E4n4hh/6
-    pub static ref SVELTE_FENCE: Regex = Regex::new(
-        r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#
-    )
-    .unwrap();
-}
+// https://regex101.com/r/E4n4hh/6
+pub static SVELTE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
+});
 
 impl SvelteFileHandler {
     /// It extracts the JavaScript/TypeScript code contained in the script block of a Svelte file
@@ -106,6 +103,8 @@ impl ExtensionHandler for SvelteFileHandler {
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
             },
+            // TODO: We should be able to search JS portions already
+            search: SearchCapabilities { search: None },
         }
     }
 }
@@ -123,15 +122,9 @@ fn parse(
     debug!("Parsing file with language {:?}", file_source);
 
     let parse = parse_js_with_cache(script, file_source, JsParserOptions::default(), cache);
-    let root = parse.syntax();
-    let diagnostics = parse.into_diagnostics();
 
     ParseResult {
-        any_parse: AnyParse::new(
-            // SAFETY: the parser should always return a root node
-            root.as_send().unwrap(),
-            diagnostics,
-        ),
+        any_parse: parse.into(),
         language: Some(file_source.into()),
     }
 }

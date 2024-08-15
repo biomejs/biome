@@ -1,6 +1,6 @@
 mod package_json;
 
-pub use crate::node_js_project::package_json::PackageJson;
+pub use crate::node_js_project::package_json::{Dependencies, PackageJson, PackageType};
 use crate::{Manifest, Project, ProjectAnalyzeDiagnostic, ProjectAnalyzeResult, LICENSE_LIST};
 use biome_json_syntax::JsonRoot;
 use biome_rowan::Language;

@@ -1,9 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/range/issue-7082.js
 ---
-
 # Input
 
 ```js
@@ -33,5 +31,3 @@ export const Button = styled.button`
 color: blue;
 `;
 ```
-
-

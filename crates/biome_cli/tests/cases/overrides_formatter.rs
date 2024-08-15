@@ -671,3 +671,63 @@ fn takes_last_formatter_enabled_into_account() {
         result,
     ));
 }
+
+#[test]
+fn does_not_override_well_known_special_files_when_config_override_is_present() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "overrides": [
+                {
+                    "include": [
+                        "**/*.json"
+                    ],
+                    "formatter": { "enabled": false }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let tsconfig = Path::new("tsconfig.json");
+    fs.insert(
+        tsconfig.into(),
+        r#"{
+    // This is a comment
+    "compilerOptions": {},
+}"#,
+    );
+
+    let other_json = Path::new("other.json");
+    fs.insert(
+        other_json.into(),
+        r#"{
+    "asta": ["lorem", "ipsum", "first", "second"]
+}"#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "check",
+                other_json.as_os_str().to_str().unwrap(),
+                tsconfig.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "does_not_override_well_known_special_files_when_config_override_is_present",
+        fs,
+        console,
+        result,
+    ));
+}

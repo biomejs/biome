@@ -27,7 +27,7 @@ name = "serde"
 test = true
 
 [dependencies]
-backtrace                    = "0.3.72"
+backtrace                    = "0.3.73"
 biome_console                = { workspace = true, features = ["serde_markup"] }
 biome_diagnostics_categories = { workspace = true, features = ["serde"] }
 biome_diagnostics_macros     = { workspace = true }
@@ -49,7 +49,7 @@ schema = ["schemars", "biome_text_edit/schemars", "biome_diagnostics_categories/
 
 [dev-dependencies]
 serde_json = { workspace = true }
-trybuild   = "1.0.96"
+trybuild   = "1.0.99"
 
 [lints]
 workspace = true

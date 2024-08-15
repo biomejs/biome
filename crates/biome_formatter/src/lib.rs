@@ -7,10 +7,10 @@
 //!
 //! * [Format]: Implemented by objects that can be formatted.
 //! * [FormatRule]: Rule that knows how to format an object of another type. Necessary in the situation where
-//!  it's necessary to implement [Format] on an object from another crate. This module defines the
-//!  [FormatRefWithRule] and [FormatOwnedWithRule] structs to pass an item with its corresponding rule.
+//!     it's necessary to implement [Format] on an object from another crate. This module defines the
+//!     [FormatRefWithRule] and [FormatOwnedWithRule] structs to pass an item with its corresponding rule.
 //! * [FormatWithRule] implemented by objects that know how to format another type. Useful for implementing
-//!  some reusable formatting logic inside of this module if the type itself doesn't implement [Format]
+//!     some reusable formatting logic inside of this module if the type itself doesn't implement [Format]
 //!
 //! ## Formatting Macros
 //!
@@ -44,6 +44,7 @@ mod verbatim;
 use crate::formatter::Formatter;
 use crate::group_id::UniqueGroupIdBuilder;
 use crate::prelude::TagKind;
+use std::fmt;
 use std::fmt::{Debug, Display};
 
 use crate::builders::syntax_token_cow_slice;
@@ -76,15 +77,14 @@ pub use source_map::{TransformSourceMap, TransformSourceMapBuilder};
 use std::marker::PhantomData;
 use std::num::ParseIntError;
 use std::str::FromStr;
-use std::u8;
 use token::string::Quote;
 
-#[derive(Debug, Eq, PartialEq, Clone, Copy, Hash)]
+#[derive(Debug, Default, Clone, Copy, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
-#[derive(Default)]
 pub enum IndentStyle {
     /// Tab
     #[default]
@@ -112,10 +112,10 @@ impl FromStr for IndentStyle {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "tab" | "Tabs" => Ok(Self::Tab),
-            "space" | "Spaces" => Ok(Self::Space),
+            "tab" => Ok(Self::Tab),
+            "space" => Ok(Self::Space),
             // TODO: replace this error with a diagnostic
-            _ => Err("Value not supported for IndentStyle"),
+            _ => Err("Unsupported value for this option"),
         }
     }
 }
@@ -285,7 +285,7 @@ impl biome_console::fmt::Display for IndentWidth {
 impl Display for IndentWidth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let value = self.value();
-        f.write_str(&std::format!("{}", value))
+        f.write_str(&std::format!("{value}"))
     }
 }
 
@@ -364,7 +364,7 @@ impl biome_console::fmt::Display for LineWidth {
 impl Display for LineWidth {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let value = self.value();
-        f.write_str(&std::format!("{}", value))
+        f.write_str(&std::format!("{value}"))
     }
 }
 
@@ -496,22 +496,7 @@ impl QuoteStyle {
         }
     }
 
-    pub fn as_string(&self) -> &str {
-        match self {
-            QuoteStyle::Double => "\"",
-            QuoteStyle::Single => "'",
-        }
-    }
-
-    /// Returns the quote, prepended with a backslash (escaped)
-    pub fn as_escaped(&self) -> &str {
-        match self {
-            QuoteStyle::Double => "\\\"",
-            QuoteStyle::Single => "\\'",
-        }
-    }
-
-    pub fn as_bytes(&self) -> u8 {
+    pub fn as_byte(&self) -> u8 {
         self.as_char() as u8
     }
 
@@ -563,6 +548,54 @@ impl From<QuoteStyle> for Quote {
         match quote {
             QuoteStyle::Double => Self::Double,
             QuoteStyle::Single => Self::Single,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct BracketSpacing(bool);
+
+impl BracketSpacing {
+    /// Return the boolean value for this [BracketSpacing]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl Default for BracketSpacing {
+    fn default() -> Self {
+        Self(true)
+    }
+}
+
+impl From<bool> for BracketSpacing {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for BracketSpacing {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{}", self.value())
+    }
+}
+
+impl FromStr for BracketSpacing {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = bool::from_str(s);
+
+        match value {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for BracketSpacing. Supported values are 'true' and 'false'.",
+            ),
         }
     }
 }
@@ -632,6 +665,9 @@ pub trait FormatOptions {
     /// The attribute position.
     fn attribute_position(&self) -> AttributePosition;
 
+    /// Whether to insert spaces around brackets in object literals. Defaults to true.
+    fn bracket_spacing(&self) -> BracketSpacing;
+
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
 }
@@ -674,13 +710,14 @@ impl FormatContext for SimpleFormatContext {
     }
 }
 
-#[derive(Debug, Default, Eq, PartialEq)]
+#[derive(Debug, Default, Eq, PartialEq, Copy, Clone)]
 pub struct SimpleFormatOptions {
     pub indent_style: IndentStyle,
     pub indent_width: IndentWidth,
     pub line_width: LineWidth,
     pub line_ending: LineEnding,
     pub attribute_position: AttributePosition,
+    pub bracket_spacing: BracketSpacing,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -704,6 +741,10 @@ impl FormatOptions for SimpleFormatOptions {
         self.attribute_position
     }
 
+    fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
+
     fn as_print_options(&self) -> PrinterOptions {
         PrinterOptions::default()
             .with_indent_style(self.indent_style)
@@ -711,6 +752,13 @@ impl FormatOptions for SimpleFormatOptions {
             .with_print_width(self.line_width.into())
             .with_line_ending(self.line_ending)
             .with_attribute_position(self.attribute_position)
+            .with_bracket_spacing(self.bracket_spacing)
+    }
+}
+
+impl Display for SimpleFormatOptions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt::Debug::fmt(self, f)
     }
 }
 

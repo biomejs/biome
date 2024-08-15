@@ -14,21 +14,21 @@ JsModule {
                 l_curly_token: L_CURLY@15..17 "{" [] [Whitespace(" ")],
                 members: TsEnumMemberList [
                     TsEnumMember {
-                        name: JsLiteralMemberName {
+                        name: TsLiteralEnumMemberName {
                             value: IDENT@17..18 "X" [] [],
                         },
                         initializer: missing (optional),
                     },
                     COMMA@18..20 "," [] [Whitespace(" ")],
                     TsEnumMember {
-                        name: JsLiteralMemberName {
+                        name: TsLiteralEnumMemberName {
                             value: IDENT@20..21 "Y" [] [],
                         },
                         initializer: missing (optional),
                     },
                     COMMA@21..23 "," [] [Whitespace(" ")],
                     TsEnumMember {
-                        name: JsLiteralMemberName {
+                        name: TsLiteralEnumMemberName {
                             value: IDENT@23..25 "Z" [] [Whitespace(" ")],
                         },
                         initializer: missing (optional),
@@ -48,21 +48,21 @@ JsModule {
                 l_curly_token: L_CURLY@48..50 "{" [] [Whitespace(" ")],
                 members: TsEnumMemberList [
                     TsEnumMember {
-                        name: JsLiteralMemberName {
+                        name: TsLiteralEnumMemberName {
                             value: IDENT@50..51 "X" [] [],
                         },
                         initializer: missing (optional),
                     },
                     COMMA@51..53 "," [] [Whitespace(" ")],
                     TsEnumMember {
-                        name: JsLiteralMemberName {
+                        name: TsLiteralEnumMemberName {
                             value: IDENT@53..54 "Y" [] [],
                         },
                         initializer: missing (optional),
                     },
                     COMMA@54..56 "," [] [Whitespace(" ")],
                     TsEnumMember {
-                        name: JsLiteralMemberName {
+                        name: TsLiteralEnumMemberName {
                             value: IDENT@56..58 "Z" [] [Whitespace(" ")],
                         },
                         initializer: missing (optional),
@@ -90,17 +90,17 @@ JsModule {
         3: L_CURLY@15..17 "{" [] [Whitespace(" ")]
         4: TS_ENUM_MEMBER_LIST@17..25
           0: TS_ENUM_MEMBER@17..18
-            0: JS_LITERAL_MEMBER_NAME@17..18
+            0: TS_LITERAL_ENUM_MEMBER_NAME@17..18
               0: IDENT@17..18 "X" [] []
             1: (empty)
           1: COMMA@18..20 "," [] [Whitespace(" ")]
           2: TS_ENUM_MEMBER@20..21
-            0: JS_LITERAL_MEMBER_NAME@20..21
+            0: TS_LITERAL_ENUM_MEMBER_NAME@20..21
               0: IDENT@20..21 "Y" [] []
             1: (empty)
           3: COMMA@21..23 "," [] [Whitespace(" ")]
           4: TS_ENUM_MEMBER@23..25
-            0: JS_LITERAL_MEMBER_NAME@23..25
+            0: TS_LITERAL_ENUM_MEMBER_NAME@23..25
               0: IDENT@23..25 "Z" [] [Whitespace(" ")]
             1: (empty)
         5: R_CURLY@25..26 "}" [] []
@@ -114,17 +114,17 @@ JsModule {
         3: L_CURLY@48..50 "{" [] [Whitespace(" ")]
         4: TS_ENUM_MEMBER_LIST@50..58
           0: TS_ENUM_MEMBER@50..51
-            0: JS_LITERAL_MEMBER_NAME@50..51
+            0: TS_LITERAL_ENUM_MEMBER_NAME@50..51
               0: IDENT@50..51 "X" [] []
             1: (empty)
           1: COMMA@51..53 "," [] [Whitespace(" ")]
           2: TS_ENUM_MEMBER@53..54
-            0: JS_LITERAL_MEMBER_NAME@53..54
+            0: TS_LITERAL_ENUM_MEMBER_NAME@53..54
               0: IDENT@53..54 "Y" [] []
             1: (empty)
           3: COMMA@54..56 "," [] [Whitespace(" ")]
           4: TS_ENUM_MEMBER@56..58
-            0: JS_LITERAL_MEMBER_NAME@56..58
+            0: TS_LITERAL_ENUM_MEMBER_NAME@56..58
               0: IDENT@56..58 "Z" [] [Whitespace(" ")]
             1: (empty)
         5: R_CURLY@58..59 "}" [] []

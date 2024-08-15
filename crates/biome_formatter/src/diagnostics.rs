@@ -55,7 +55,9 @@ impl From<SyntaxError> for FormatError {
 impl From<&SyntaxError> for FormatError {
     fn from(syntax_error: &SyntaxError) -> Self {
         match syntax_error {
-            SyntaxError::MissingRequiredChild => FormatError::SyntaxError,
+            SyntaxError::MissingRequiredChild | SyntaxError::UnexpectedMetavariable => {
+                FormatError::SyntaxError
+            }
         }
     }
 }
@@ -235,7 +237,7 @@ impl Diagnostic for PrintError {
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         match self {
             PrintError::InvalidDocument(inner) => {
-                let inner = format!("{}", inner);
+                let inner = format!("{inner}");
                 fmt.write_markup(markup! {
                     "Invalid document: "{{inner}}
                 })

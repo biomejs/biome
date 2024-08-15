@@ -1,6 +1,6 @@
 use crate::react::{is_react_call_api, ReactLibrary};
 use crate::services::semantic::Semantic;
-use biome_analyze::{context::RuleContext, declare_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
@@ -11,7 +11,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, AstSeparatedList, TextRange};
 
-declare_rule! {
+declare_lint_rule! {
     /// Disallow missing key props in iterators/collection literals.
     ///
     /// Warn if an element that likely requires a key prop--namely, one present in an array literal or an arrow function expression.
@@ -193,6 +193,7 @@ fn handle_function_body(
         .as_ref()
         .and_then(|ret| {
             let returned_value = ret.argument()?;
+            let returned_value = unwrap_parenthesis(returned_value)?;
             Some(ReactComponentExpression::can_cast(
                 returned_value.syntax().kind(),
             ))
@@ -256,7 +257,7 @@ fn handle_potential_react_component(
     }
 
     if is_inside_jsx {
-        if let Some(node) = ReactComponentExpression::cast_ref(node.syntax()) {
+        if let Some(node) = ReactComponentExpression::cast(node.into_syntax()) {
             let range = handle_react_component(node, model)?;
             Some(range)
         } else {
@@ -264,7 +265,7 @@ fn handle_potential_react_component(
         }
     } else {
         let range =
-            handle_react_component(ReactComponentExpression::cast_ref(node.syntax())?, model)?;
+            handle_react_component(ReactComponentExpression::cast(node.into_syntax())?, model)?;
         Some(range)
     }
 }
@@ -290,7 +291,7 @@ fn handle_react_component(
 /// ```
 fn handle_jsx_tag(node: &JsxTagExpression, model: &SemanticModel) -> Option<Vec<TextRange>> {
     let tag = node.tag().ok()?;
-    let tag = AnyJsxChild::cast_ref(tag.syntax())?;
+    let tag = AnyJsxChild::cast(tag.into_syntax())?;
     handle_jsx_child(&tag, model)
 }
 

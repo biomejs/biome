@@ -24,10 +24,10 @@ mod visitor;
 pub use biome_diagnostics::category_concat;
 
 pub use crate::categories::{
-    ActionCategory, RefactorKind, RuleCategories, RuleCategory, SourceActionKind,
+    ActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder, RuleCategory,
+    SourceActionKind,
 };
-pub use crate::diagnostics::AnalyzerDiagnostic;
-pub use crate::diagnostics::SuppressionDiagnostic;
+pub use crate::diagnostics::{AnalyzerDiagnostic, RuleError, SuppressionDiagnostic};
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
 pub use crate::options::{AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
 pub use crate::query::{AddVisitor, QueryKey, QueryMatch, Queryable};
@@ -806,7 +806,7 @@ impl<'a> RuleFilter<'a> {
         }
     }
     /// Return `true` if the group `G` matches this filter
-    fn match_group<G: RuleGroup>(self) -> bool {
+    pub fn match_group<G: RuleGroup>(self) -> bool {
         match self {
             RuleFilter::Group(group) => group == G::NAME,
             RuleFilter::Rule(group, _) => group == G::NAME,
@@ -814,7 +814,7 @@ impl<'a> RuleFilter<'a> {
     }
 
     /// Return `true` if the rule `R` matches this filter
-    fn match_rule<R>(self) -> bool
+    pub fn match_rule<R>(self) -> bool
     where
         R: Rule,
     {
@@ -885,7 +885,7 @@ impl<'analysis> AnalysisFilter<'analysis> {
 
     /// Return `true` if the category `C` matches this filter
     pub fn match_category<C: GroupCategory>(&self) -> bool {
-        self.categories.contains(C::CATEGORY.into())
+        self.categories.contains(C::CATEGORY)
     }
 
     /// Return `true` if the group `G` matches this filter
@@ -921,12 +921,12 @@ pub enum Never {}
 
 /// Type alias of [ops::ControlFlow] with the `B` generic type defaulting to [Never]
 ///
-/// By default the analysis loop never breaks, so it behaves mostly like
+/// By default, the analysis loop never breaks, so it behaves mostly like
 /// `let b = loop {};` and has a "break type" of `!` (the `!` type isn't stable
-/// yet so I'm using an empty enum instead but they're identical for this
+/// yet, so I'm using an empty enum instead, but they're identical for this
 /// purpose)
 ///
-/// In practice it's not really a `loop` but a `for` because it's iterating on
+/// In practice, it's not really a `loop` but a `for` because it's iterating on
 /// all nodes in the syntax tree, so when it reaches the end of the iterator
 /// the loop will exit but without producing a value of type `B`: for this
 /// reason the `analyze` function returns an `Option<B>` that's set to

@@ -5,7 +5,8 @@ use biome_deserialize::{json::deserialize_from_json_str, StringSet};
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{
-    AttributePosition, IndentWidth, LineEnding, LineWidth, ParseFormatNumberError, QuoteStyle,
+    AttributePosition, BracketSpacing, IndentWidth, LineEnding, LineWidth, ParseFormatNumberError,
+    QuoteStyle,
 };
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
@@ -194,9 +195,9 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
         let line_width = LineWidth::try_from(value.print_width)?;
         let indent_width = IndentWidth::try_from(value.tab_width)?;
         let indent_style = if value.use_tabs {
-            biome_configuration::PlainIndentStyle::Tab
+            biome_formatter::IndentStyle::Tab
         } else {
-            biome_configuration::PlainIndentStyle::Space
+            biome_formatter::IndentStyle::Space
         };
         let formatter = biome_configuration::PartialFormatterConfiguration {
             indent_width: Some(indent_width),
@@ -208,8 +209,12 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             ignore: None,
             include: None,
             enabled: Some(true),
+            // editorconfig support is intentionally set to true, because prettier always reads the editorconfig file
+            // see: https://github.com/prettier/prettier/issues/15255
+            use_editorconfig: Some(true),
             // deprecated
             indent_size: None,
+            bracket_spacing: Some(BracketSpacing::default()),
         };
         result.formatter = Some(formatter);
 
@@ -246,7 +251,7 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             trailing_comma: None,
             quote_style: Some(quote_style),
             quote_properties: Some(value.quote_props.into()),
-            bracket_spacing: Some(value.bracket_spacing),
+            bracket_spacing: Some(value.bracket_spacing.into()),
             jsx_quote_style: Some(jsx_quote_style),
             attribute_position: Some(AttributePosition::default()),
         };
@@ -292,9 +297,9 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             };
             let indent_style = options.use_tabs.map(|use_tabs| {
                 if use_tabs {
-                    biome_configuration::PlainIndentStyle::Tab
+                    biome_formatter::IndentStyle::Tab
                 } else {
-                    biome_configuration::PlainIndentStyle::Space
+                    biome_formatter::IndentStyle::Space
                 }
             });
             let formatter = biome_configuration::OverrideFormatterConfiguration {
@@ -349,7 +354,6 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
                 .map(|trailing_comma| trailing_comma.into()),
             quote_style,
             quote_properties: options.quote_props.map(|quote_props| quote_props.into()),
-            bracket_spacing: options.bracket_spacing,
             jsx_quote_style,
             ..Default::default()
         };

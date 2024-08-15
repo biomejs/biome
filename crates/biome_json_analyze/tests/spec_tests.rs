@@ -2,13 +2,14 @@ use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilt
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
 use biome_json_parser::{parse_json, JsonParserOptions};
-use biome_json_syntax::JsonLanguage;
+use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_rowan::AstNode;
 use biome_test_utils::{
     assert_errors_are_absent, code_fix_to_string, create_analyzer_options, diagnostic_to_string,
     has_bogus_nodes_or_empty_slots, parse_test_path, register_leak_checker,
     write_analyzer_snapshot,
 };
+use std::ops::Deref;
 use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{json}", crate::run_test, "module"}
@@ -27,7 +28,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         panic!("the test file must be placed in the {group}/{rule}/<rule-name>/ directory");
     }
 
-    if biome_json_analyze::metadata()
+    if biome_json_analyze::METADATA
+        .deref()
         .find_rule(group, rule)
         .is_none()
     {
@@ -43,10 +45,20 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     let mut snapshot = String::new();
 
     let input_code = read_to_string(input_file)
-        .unwrap_or_else(|err| panic!("failed to read {:?}: {:?}", input_file, err));
+        .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    let quantity_diagnostics =
-        analyze_and_snap(&mut snapshot, &input_code, filter, file_name, input_file);
+    let Ok(file_source) = input_file.try_into() else {
+        return;
+    };
+
+    let quantity_diagnostics = analyze_and_snap(
+        &mut snapshot,
+        &input_code,
+        file_source,
+        filter,
+        file_name,
+        input_file,
+    );
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
@@ -63,6 +75,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,
+    file_source: JsonFileSource,
     filter: AnalysisFilter,
     file_name: &str,
     input_file: &Path,
@@ -74,7 +87,7 @@ pub(crate) fn analyze_and_snap(
     let mut code_fixes = Vec::new();
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
-    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, |event| {
+    let (_, errors) = biome_json_analyze::analyze(&root, filter, &options, file_source, |event| {
         if let Some(mut diag) = event.diagnostic() {
             for action in event.actions() {
                 if !action.is_suppression() {
@@ -129,10 +142,7 @@ fn check_code_action(path: &Path, source: &str, action: &AnalyzerAction<JsonLang
     assert_eq!(new_tree.to_string(), output);
 
     if has_bogus_nodes_or_empty_slots(&new_tree) {
-        panic!(
-            "modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {}",
-            new_tree
-        )
+        panic!("modified tree has bogus nodes or empty slots:\n{new_tree:#?} \n\n {new_tree}")
     }
 
     // Checks the returned tree contains no missing children node
