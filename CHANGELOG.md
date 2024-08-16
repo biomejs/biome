@@ -285,10 +285,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
+
 - Fix [[#3149](https://github.com/biomejs/biome/issues/3149)] crashes that occurred when applying the `noUselessFragments` unsafe fixes in certain scenarios. Contributed by @unvalley
+
 - `noExcessiveNestedTestSuites`: Fix another edge case where the rule would alert on heavily nested zod schemas. Contributed by @dyc3
 
 - `noExtraNonNullAssertion` no longer reports a single non-null assertion enclosed in parentheses ([#3352](https://github.com/biomejs/biome/issues/3352)). Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer report redeclartions for lexically scoped function declarations [#3664](https://github.com/biomejs/biome/issues/3664).
+
+  In JavaScript strict mode, function declarations are lexically scoped:
+  they cannot be accessed outside the block where they are declared.
+
+  In non-strict mode, function declarations are hoisted to the top of the enclosing function or global scope.
+
+  Previously Biome always hoisted function declarations.
+  It now takes into account whether the code is in strict or non strict mode.
+
+  Contributed by @Conaclos
 
 - `useAdjacentOverloadSignatures` no longer reports a `#private` class member and a public class member that share the same name ([#3309](https://github.com/biomejs/biome/issues/3309)).
 
