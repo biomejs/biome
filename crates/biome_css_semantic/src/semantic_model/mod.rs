@@ -123,7 +123,14 @@ mod tests {
 
     #[test]
     fn debug() {
-        let parse = parse_css(r#":root {--foo: red}"#, CssParserOptions::default());
+        let parse = parse_css(
+            r#"@property --item-size {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 40%;
+}"#,
+            CssParserOptions::default(),
+        );
 
         let root = parse.tree();
         let model = super::semantic_model(&root);

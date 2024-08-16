@@ -1,7 +1,9 @@
 use std::collections::VecDeque;
 
-use biome_css_syntax::{AnyCssSelector, CssRelativeSelector, CssSyntaxKind::*};
-use biome_rowan::{AstNode, TextRange};
+use biome_css_syntax::{
+    AnyCssSelector, CssDeclarationBlock, CssRelativeSelector, CssSyntaxKind::*,
+};
+use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 
 use crate::{
     model::{CssProperty, CssValue},
@@ -26,6 +28,12 @@ pub enum SemanticEvent {
     RootSelectorStart,
     /// Indicates the end of a `:root` selector
     RootSelectorEnd,
+    /// Indicates the start of an `@property` rule
+    AtProperty {
+        property: CssProperty,
+        value: CssValue,
+        range: TextRange,
+    },
 }
 
 #[derive(Default, Debug)]
@@ -85,6 +93,9 @@ impl SemanticEventExtractor {
                     }
                 }
             }
+            CSS_PROPERTY_AT_RULE => {
+                self.process_at_property(node);
+            }
             _ => {}
         }
     }
@@ -107,6 +118,47 @@ impl SemanticEventExtractor {
                 self.add_selector_event(selector.text().to_string(), selector.range())
             }
             _ => {}
+        }
+    }
+
+    fn process_at_property(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
+        let property_name = match node.first_child() {
+            Some(name) => name,
+            None => return,
+        };
+
+        let value = match property_name.next_sibling() {
+            Some(val) => val,
+            None => return,
+        };
+
+        let decls = match value.cast::<CssDeclarationBlock>() {
+            Some(d) => d,
+            None => return,
+        };
+
+        for d in decls.declarations() {
+            if let Ok(declaration) = d.declaration() {
+                if let Ok(biome_css_syntax::AnyCssProperty::CssGenericProperty(p)) =
+                    declaration.property()
+                {
+                    if let Ok(name) = p.name() {
+                        if name.text() == "initial-value" {
+                            self.stash.push_back(SemanticEvent::AtProperty {
+                                property: CssProperty {
+                                    name: property_name.text_trimmed().to_string(),
+                                    range: property_name.text_range(),
+                                },
+                                value: CssValue {
+                                    value: p.value().text().to_string(),
+                                    range: p.value().range(),
+                                },
+                                range: node.text_range(),
+                            });
+                        }
+                    }
+                }
+            }
         }
     }
 

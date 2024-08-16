@@ -112,6 +112,20 @@ impl SemanticModelBuilder {
             SemanticEvent::RootSelectorEnd => {
                 self.in_root_selector = false;
             }
+            SemanticEvent::AtProperty {
+                property,
+                value,
+                range,
+            } => {
+                self.global_css_variables.insert(
+                    property.name.to_string(),
+                    CssVariable {
+                        name: property,
+                        value,
+                        range,
+                    },
+                );
+            }
         }
     }
 }
