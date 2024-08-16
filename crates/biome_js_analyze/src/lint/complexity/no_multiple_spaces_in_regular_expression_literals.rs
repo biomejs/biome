@@ -68,8 +68,8 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
         let mut previous_is_space = false;
         let mut first_consecutive_space_index = 0;
         // We use `char_indices` to get the byte index of every character
-        for (i, ch) in trimmed_text.char_indices() {
-            if ch == ' ' {
+        for (i, ch) in trimmed_text.bytes().enumerate() {
+            if ch == b' ' {
                 if !previous_is_space {
                     previous_is_space = true;
                     first_consecutive_space_index = i;
@@ -123,16 +123,16 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
             // handle quantifiers
             // See: https://262.ecma-international.org/#prod-QuantifierPrefix
             // `n` holds the number of characters used by the quantifier
-            let n = match text.chars().nth(range.end) {
-                Some('?') => {
+            let n = match text.as_bytes().get(range.end) {
+                Some(b'?') => {
                     write!(normalized_text, "{{{},{}}}", range.len() - 1, range.len()).unwrap();
                     1
                 }
-                Some('+') => {
+                Some(b'+') => {
                     write!(normalized_text, "{{{},}}", range.len()).unwrap();
                     1
                 }
-                Some('*') => {
+                Some(b'*') => {
                     if range.len() == 2 {
                         write!(normalized_text, "+").unwrap();
                     } else {
@@ -140,7 +140,7 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
                     }
                     1
                 }
-                Some('{') => {
+                Some(b'{') => {
                     if let Some((quantifier, n)) = parse_range_quantifier(&text[range.end..]) {
                         match quantifier {
                             RegexQuantifier::Amount(amount) => {

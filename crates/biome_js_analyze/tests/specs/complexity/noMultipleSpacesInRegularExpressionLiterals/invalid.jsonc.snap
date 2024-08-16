@@ -602,4 +602,50 @@ invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  F
 
 ```
 
+# Input
+```cjs
+/foo😀  ?/;
+```
 
+# Diagnostics
+```
+invalid.jsonc:1:6 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo😀  ?/;
+      │       ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo😀··?/;
+  + /foo😀·{1,2}/;
+  
+
+```
+
+# Input
+```cjs
+/foo  😀/;
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/complexity/noMultipleSpacesInRegularExpressionLiterals  FIXABLE  ━━━━━━━━━━━━
+
+  ! This regular expression contains unclear uses of consecutive spaces.
+  
+  > 1 │ /foo  😀/;
+      │     ^^
+  
+  i It's hard to visually count the amount of spaces.
+  
+  i Safe fix: Use a quantifier instead.
+  
+  - /foo··😀/;
+  + /foo·{2}😀/;
+  
+
+```
