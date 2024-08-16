@@ -25,5 +25,9 @@ invalid.ts:1:1 lint/nursery/noEnum ━━━━━━━━━━━━━━━
   
   i Prefer using JavaScript objects or TypeScript unions over enums.
   
+  i TypeScript enums are not a type-level extension of JavaScript like type annotations or definitions.
+  
+  i Enums will get compiled into JavaScript code, which can increase bundle size and cause side-effects in the codebase.
+  
 
 ```

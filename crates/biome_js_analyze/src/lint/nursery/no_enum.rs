@@ -63,6 +63,12 @@ impl Rule for NoEnum {
             )
             .note(markup! {
                 "Prefer using JavaScript objects or TypeScript unions over enums."
+            })
+            .note(markup! {
+                "TypeScript enums are not a type-level extension of JavaScript like type annotations or definitions."
+            })
+            .note(markup! {
+                "Enums will get compiled into JavaScript code, which can increase bundle size and cause side-effects in the codebase."
             }),
         )
     }
