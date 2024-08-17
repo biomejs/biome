@@ -55,7 +55,9 @@ impl ExtensionSettings {
 
     pub(crate) fn requires_configuration(&self) -> bool {
         if let Some(experimental) = &self.settings.experimental {
-            experimental.rename.unwrap_or_else(|| self.settings.rename.unwrap_or_default())
+            experimental
+                .rename
+                .unwrap_or_else(|| self.settings.rename.unwrap_or_default())
         } else {
             self.settings.rename.unwrap_or_default()
         }
