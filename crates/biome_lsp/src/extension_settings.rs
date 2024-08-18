@@ -54,13 +54,15 @@ impl ExtensionSettings {
     }
 
     pub(crate) fn renames_enabled(&self) -> bool {
-        if let Some(experimental) = &self.settings.experimental {
-            experimental
-                .rename
-                .unwrap_or_else(|| self.settings.rename.unwrap_or_default())
-        } else {
-            self.settings.rename.unwrap_or_default()
-        }
+        let new_setting = self
+            .settings
+            .experimental
+            .as_ref()
+            .is_some_and(|experimental| experimental.rename.unwrap_or(false));
+
+        let old_setting = self.settings.rename.unwrap_or(false);
+
+        new_setting | old_setting
     }
 
     pub(crate) fn requires_configuration(&self) -> bool {
