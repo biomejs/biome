@@ -282,6 +282,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Jayllyz
 
+- [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules/) now ignores type-only imports ([#1674](https://github.com/biomejs/biome/issues/1674)).
+
+  The rule no longer reports type-only imports such as:
+
+  ```ts
+  import type assert from "assert";
+  import type * as assert2 from "assert";
+  ```
+
+  Contributed by @Conaclos
+
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown

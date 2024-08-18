@@ -3,7 +3,8 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike};
+use biome_js_syntax::{inner_string_text, AnyJsImportClause, AnyJsImportLike};
+use biome_rowan::AstNode;
 use biome_rowan::TextRange;
 
 declare_lint_rule! {
@@ -47,6 +48,14 @@ impl Rule for NoNodejsModules {
         let node = ctx.query();
         if node.is_in_ts_module_declaration() {
             return None;
+        }
+        if let AnyJsImportLike::JsModuleSource(module_source) = &node {
+            if let Some(import_clause) = module_source.parent::<AnyJsImportClause>() {
+                if import_clause.type_token().is_some() {
+                    // Ignore type-only imports
+                    return None;
+                }
+            }
         }
         let module_name = node.module_name_token()?;
         is_node_builtin_module(&inner_string_text(&module_name))
