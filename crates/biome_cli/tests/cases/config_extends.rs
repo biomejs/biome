@@ -358,3 +358,49 @@ fn allows_reverting_fields_in_extended_config_to_default() {
         result,
     ));
 }
+
+#[test]
+fn extends_config_merge_overrides() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let shared = Path::new("shared.json");
+    fs.insert(
+        shared.into(),
+        r#"{
+            "overrides": [{
+                "include": ["**/*.js"],
+                "linter": { "rules": { "suspicious": { "noDebugger": "off" } } }
+            }]
+        }"#,
+    );
+
+    let biome_json = Path::new("biome.json");
+    fs.insert(
+        biome_json.into(),
+        r#"{
+            "extends": ["shared.json"],
+            "overrides": [{
+                "include": ["**/*.js"],
+                "linter": { "rules": { "correctness": { "noUnusedVariables": "error" } } }
+            }]
+        }"#,
+    );
+
+    let test_file = Path::new("test.js");
+    fs.insert(test_file.into(), "debugger; const a = 0;");
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["lint", test_file.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "extends_config_merge_overrides",
+        fs,
+        console,
+        result,
+    ));
+}

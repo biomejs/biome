@@ -702,7 +702,7 @@ export interface A11y {
 	/**
 	 * Disallow target="_blank" attribute without rel="noreferrer"
 	 */
-	noBlankTarget?: RuleFixConfiguration_for_Null;
+	noBlankTarget?: RuleFixConfiguration_for_AllowDomainOptions;
 	/**
 	 * Enforces that no distracting elements are used.
 	 */
@@ -855,7 +855,7 @@ export interface Complexity {
 	/**
 	 * Disallow unnecessary catch clauses.
 	 */
-	noUselessCatch?: RuleConfiguration_for_Null;
+	noUselessCatch?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary constructors.
 	 */
@@ -1187,10 +1187,6 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
-	 * Disallows the use of irregular whitespace.
-	 */
-	noIrregularWhitespaceCss?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce that a label element or component has a text label and an associated input.
 	 */
 	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
@@ -1283,7 +1279,7 @@ export interface Nursery {
 	 */
 	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce that ARIA properties are valid for the roles that are supported by the element.
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
@@ -1898,6 +1894,9 @@ export type RuleAssistConfiguration = "on" | "off";
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
+export type RuleFixConfiguration_for_AllowDomainOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_AllowDomainOptions;
 export type RuleConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_Null;
@@ -1954,6 +1953,20 @@ export interface RuleWithFixOptions_for_Null {
 	 * Rule's options
 	 */
 	options: null;
+}
+export interface RuleWithFixOptions_for_AllowDomainOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: AllowDomainOptions;
 }
 export interface RuleWithOptions_for_Null {
 	/**
@@ -2119,6 +2132,12 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
  * Used to identify the kind of code action emitted by a rule
  */
 export type FixKind = "none" | "safe" | "unsafe";
+export interface AllowDomainOptions {
+	/**
+	 * List of domains to allow `target="_blank"` without `rel="noreferrer"`
+	 */
+	allowDomains: string[];
+}
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
 	ignoreNonDom: boolean;
@@ -2619,7 +2638,6 @@ export type Category =
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
-	| "lint/nursery/noIrregularWhitespaceCss"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"

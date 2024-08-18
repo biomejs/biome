@@ -52,7 +52,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   - `--log-prefix-name`: a prefix that's added to the file name of the logs. It defaults to `server.log`. The commands also accepts the environment variable `BIOME_LOG_PREFIX_NAME`.
 
   @Contributed by @ematipico
-   
+
 
 #### Enhancements
 
@@ -86,12 +86,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - `biome lint --write` now takes `--only` and `--skip` into account ([#3470](https://github.com/biomejs/biome/issues/3470)). Contributed by @Conaclos
+
 - Fix [#3368](https://github.com/biomejs/biome/issues/3368), now the reporter `github` tracks the diagnostics that belong to formatting and organize imports. Contributed by @ematipico
+
+- Fix [#3545](https://github.com/biomejs/biome/issues/3545), display a warning, 'Avoid using unnecessary Fragment,' when a Fragment contains only one child element that is placed on a new line. Contributed by @satojin219
+
+- Migrating from Prettier or ESLint no longer overwrite the `overrides` field from the configuration ([#3544](https://github.com/biomejs/biome/issues/3544)). Contributed by @Conaclos
 
 ### Configuration
 
-- Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)). Contributed by @dyc3
+- Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)).
+
   Configuration supplied in `.editorconfig` will be overridden by the configuration in `biome.json`. Support is disabled by default and can be enabled by adding the following to your formatter configuration in `biome.json`:
+
   ```json
   {
     "formatter": {
@@ -99,6 +106,58 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     }
   }
   ```
+
+  Contributed by @dyc3
+
+- `overrides` from an extended configuration is now merged with the `overrides` of the extension.
+
+  Given the following shared configuration `biome.shared.json`:
+
+  ```json5
+  {
+    "overrides": [
+      {
+        "include": ["**/*.json"],
+        // ...
+      }
+    ]
+  }
+  ```
+
+  and the following configuration:
+
+  ```json5
+  {
+    "extends": ["./biome.shared.json"],
+    "overrides": [
+      {
+        "include": ["**/*.ts"],
+        // ...
+      }
+    ]
+  }
+  ```
+
+  Previously, the `overrides` from `biome.shared.json` was overwritten.
+  It is now merged and results in the following configuration:
+
+  ```json5
+  {
+    "extends": ["./biome.shared.json"],
+    "overrides": [
+      {
+        "include": ["**/*.json"],
+        // ...
+      },
+      {
+        "include": ["**/*.ts"],
+        // ...
+      }
+    ]
+  }
+  ```
+
+  Contributed by @Conaclos
 
 ### Editors
 
@@ -260,13 +319,63 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noBlankTarget](https://biomejs.dev/linter/rules/no-blank-target) now supports an array of allowed domains.
+
+  The following configuration allows `example.com` and `example.org` as blank targets.
+
+  ```json
+  "linter": {
+    "rules": {
+      "a11y": {
+        "noBlankTarget": {
+        "level": "error",
+          "options": {
+             "allowDomains": ["example.com", "example.org"]
+            }
+          }
+        }
+      }
+    }
+  ```
+
+  Contributed by @Jayllyz
+
+- [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules/) now ignores type-only imports ([#1674](https://github.com/biomejs/biome/issues/1674)).
+
+  The rule no longer reports type-only imports such as:
+
+  ```ts
+  import type assert from "assert";
+  import type * as assert2 from "assert";
+  ```
+
+  Contributed by @Conaclos
+
+- [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules/) now ignores imports of a package which has the same name as a Node.js module. Contributed by @Conaclos
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
+
 - Fix [[#3149](https://github.com/biomejs/biome/issues/3149)] crashes that occurred when applying the `noUselessFragments` unsafe fixes in certain scenarios. Contributed by @unvalley
+
 - `noExcessiveNestedTestSuites`: Fix another edge case where the rule would alert on heavily nested zod schemas. Contributed by @dyc3
 
 - `noExtraNonNullAssertion` no longer reports a single non-null assertion enclosed in parentheses ([#3352](https://github.com/biomejs/biome/issues/3352)). Contributed by @Conaclos
+
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer report redeclartions for lexically scoped function declarations [#3664](https://github.com/biomejs/biome/issues/3664).
+
+  In JavaScript strict mode, function declarations are lexically scoped:
+  they cannot be accessed outside the block where they are declared.
+
+  In non-strict mode, function declarations are hoisted to the top of the enclosing function or global scope.
+
+  Previously Biome always hoisted function declarations.
+  It now takes into account whether the code is in strict or non strict mode.
+
+  Contributed by @Conaclos
+
+- [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) now correctly provides a code fix when unicode characters are used.
 
 - `useAdjacentOverloadSignatures` no longer reports a `#private` class member and a public class member that share the same name ([#3309](https://github.com/biomejs/biome/issues/3309)).
 
@@ -309,6 +418,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Moreover, `\uhhhh` was not handled in unicode-aware regexes.
 
   Contributed by @Conaclos
+
+- [suspicious/noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now reports control characters and escape sequence of control characters in string regexes. Contributed by @Conaclos
 
 - [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) lint error with Template literals ([#3394](https://github.com/biomejs/biome/issues/3394)). Contributed by @hangaoke1
 
@@ -470,6 +581,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add [nursery/useValidAutocomplete](https://biomejs.dev/linter/rules/use-valid-autocomplete/). Contributed by @unvalley
+
+#### Enhancements
+
+- Add a code action for [noUselessCatch](https://biomejs.dev/linter/rules/no-useless-catch/). Contributed by @chansuke
 
 #### Bug fixes
 

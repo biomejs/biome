@@ -12,7 +12,7 @@ const IRREGULAR_WHITESPACES: &[char; 22] = &[
 ];
 
 declare_lint_rule! {
-    /// Disallows the use of irregular whitespace.
+    /// Disallows the use of irregular whitespace characters.
     ///
     /// Using irregular whitespace would lead to the failure of selecting the correct target.
     ///
@@ -39,16 +39,16 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub NoIrregularWhitespaceCss {
+    pub NoIrregularWhitespace {
         version: "next",
-        name: "noIrregularWhitespaceCss",
+        name: "noIrregularWhitespace",
         language: "css",
         recommended: false,
         sources: &[RuleSource::Stylelint("no-irregular-whitespace")],
     }
 }
 
-impl Rule for NoIrregularWhitespaceCss {
+impl Rule for NoIrregularWhitespace {
     type Query = Ast<AnyCssRule>;
     type State = TextRange;
     type Signals = Vec<Self::State>;

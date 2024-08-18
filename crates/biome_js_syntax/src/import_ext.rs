@@ -2,8 +2,7 @@ use crate::{
     inner_string_text, AnyJsBinding, AnyJsImportClause, AnyJsModuleSource,
     AnyJsNamedImportSpecifier, JsCallExpression, JsDefaultImportSpecifier, JsImport,
     JsImportAssertion, JsImportCallExpression, JsModuleSource, JsNamedImportSpecifier,
-    JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier, JsSyntaxToken,
-    TsExternalModuleDeclaration,
+    JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rowan::{
     declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText,
@@ -312,9 +311,11 @@ impl AnyJsImportLike {
     }
 
     /// Check whether the js import specifier like is in a ts module declaration:
+    ///
     /// ```ts
-    /// declare "abc" {}
+    /// declare module "abc" {}
     /// ```
+    ///
     /// ## Examples
     ///
     /// ```
@@ -333,14 +334,11 @@ impl AnyJsImportLike {
     /// ```
     pub fn is_in_ts_module_declaration(&self) -> bool {
         // It first has to be a JsModuleSource
-        if !matches!(self, AnyJsImportLike::JsModuleSource(_)) {
-            return false;
-        }
-        // Then test whether its parent is a TsExternalModuleDeclaration
-        if let Some(parent_syntax_kind) = self.syntax().parent().kind() {
-            return TsExternalModuleDeclaration::can_cast(parent_syntax_kind);
-        }
-        false
+        matches!(self, AnyJsImportLike::JsModuleSource(_))
+            && matches!(
+                self.syntax().parent().kind(),
+                Some(JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION)
+            )
     }
 }
 

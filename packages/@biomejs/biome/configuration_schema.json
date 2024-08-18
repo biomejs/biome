@@ -125,7 +125,7 @@
 				"noBlankTarget": {
 					"description": "Disallow target=\"_blank\" attribute without rel=\"noreferrer\"",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/AllowDomainConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -320,6 +320,24 @@
 			},
 			"additionalProperties": false
 		},
+		"AllowDomainConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithAllowDomainOptions" }
+			]
+		},
+		"AllowDomainOptions": {
+			"type": "object",
+			"required": ["allowDomains"],
+			"properties": {
+				"allowDomains": {
+					"description": "List of domains to allow `target=\"_blank\"` without `rel=\"noreferrer\"`",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
 		"AssistsConfiguration": {
 			"type": "object",
@@ -419,7 +437,7 @@
 				"noUselessCatch": {
 					"description": "Disallow unnecessary catch clauses.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1947,13 +1965,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noIrregularWhitespaceCss": {
-					"description": "Disallows the use of irregular whitespace.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noLabelWithoutControl": {
 					"description": "Enforce that a label element or component has a text label and an associated input.",
 					"anyOf": [
@@ -2113,7 +2124,7 @@
 					]
 				},
 				"useAriaPropsSupportedByRole": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce that ARIA properties are valid for the roles that are supported by the element.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2527,6 +2538,25 @@
 		"RulePlainConfiguration": {
 			"type": "string",
 			"enum": ["warn", "error", "info", "off"]
+		},
+		"RuleWithAllowDomainOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/AllowDomainOptions" }]
+				}
+			},
+			"additionalProperties": false
 		},
 		"RuleWithComplexityOptions": {
 			"type": "object",

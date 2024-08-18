@@ -161,14 +161,48 @@ impl Rule for NoUselessFragments {
                 let child_list = fragment.children();
 
                 if !parents_where_fragments_must_be_preserved {
-                    match child_list.first() {
-                        Some(first) if child_list.len() == 1 => {
-                            if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
-                                return None;
+                    let mut significant_children = 0;
+                    let mut first_significant_child = None;
+
+                    for child in child_list.iter() {
+                        match child.syntax().kind() {
+                            JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
+                            | JsSyntaxKind::JSX_ELEMENT
+                            | JsSyntaxKind::JSX_EXPRESSION_CHILD
+                            | JsSyntaxKind::JSX_FRAGMENT => {
+                                significant_children += 1;
+                                if first_significant_child.is_none() {
+                                    first_significant_child = Some(child);
+                                }
                             }
-                            Some(NoUselessFragmentsState::Child(first))
+                            JsSyntaxKind::JSX_TEXT => {
+                                if !child.syntax().text().to_string().trim().is_empty() {
+                                    significant_children += 1;
+                                    if first_significant_child.is_none() {
+                                        first_significant_child = Some(child);
+                                    }
+                                }
+                            }
+                            _ => {}
                         }
-                        None => Some(NoUselessFragmentsState::Empty),
+                        if significant_children > 1 {
+                            break;
+                        }
+                    }
+
+                    match significant_children {
+                        0 => Some(NoUselessFragmentsState::Empty),
+                        1 => {
+                            if let Some(first) = first_significant_child {
+                                if JsxText::can_cast(first.syntax().kind()) && in_jsx_attr_expr {
+                                    None
+                                } else {
+                                    Some(NoUselessFragmentsState::Child(first))
+                                }
+                            } else {
+                                None
+                            }
+                        }
                         _ => None,
                     }
                 } else {
@@ -254,7 +288,18 @@ impl Rule for NoUselessFragments {
                 None => parent.into_syntax(),
             };
 
-            let child = node.children().first();
+            let child = node
+                .children()
+                .iter()
+                .find(|child| match child.syntax().kind() {
+                    JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
+                    | JsSyntaxKind::JSX_ELEMENT
+                    | JsSyntaxKind::JSX_EXPRESSION_CHILD
+                    | JsSyntaxKind::JSX_FRAGMENT => true,
+                    JsSyntaxKind::JSX_TEXT => !child.syntax().text().to_string().trim().is_empty(),
+                    _ => false,
+                });
+
             if let Some(child) = child {
                 let new_node = match child {
                     AnyJsxChild::JsxElement(node) => {

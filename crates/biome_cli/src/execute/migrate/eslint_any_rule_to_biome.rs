@@ -186,18 +186,6 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
-        "@typescript-eslint/no-throw-literal" => {
-            if !options.include_inspired {
-                results.has_inspired_rules = true;
-                return false;
-            }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group.use_throw_only_error.get_or_insert(Default::default());
-            rule.set_level(rule_severity.into());
-        }
         "@typescript-eslint/no-unnecessary-type-constraint" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
@@ -562,7 +550,7 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_redundant_alt.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
-        "jsx-a11y/interactive-support-focus" => {
+        "jsx-a11y/interactive-supports-focus" => {
             if !options.include_nursery {
                 return false;
             }
@@ -673,6 +661,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group
                 .use_aria_props_for_role
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "jsx-a11y/role-supports-aria-props" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_aria_props_supported_by_role
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -1052,7 +1050,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
-        "no-sparse-array" => {
+        "no-sparse-arrays" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.no_sparse_array.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
