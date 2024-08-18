@@ -55,7 +55,7 @@ impl Rule for UseAriaPropsSupportedByRole {
         let attributes = ctx.convert_all_attribute_values(attributes);
 
         if let Some(attributes) = &attributes {
-            let role_name = aria_roles.get_role_by_element_name(element_name, &attributes)?;
+            let role_name = aria_roles.get_role_by_element_name(element_name, attributes)?;
             for attribute in attributes.keys() {
                 if attribute.starts_with("aria-")
                     && !is_valid_aria_props_supported_by_role(
