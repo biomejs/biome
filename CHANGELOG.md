@@ -86,13 +86,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - `biome lint --write` now takes `--only` and `--skip` into account ([#3470](https://github.com/biomejs/biome/issues/3470)). Contributed by @Conaclos
+
 - Fix [#3368](https://github.com/biomejs/biome/issues/3368), now the reporter `github` tracks the diagnostics that belong to formatting and organize imports. Contributed by @ematipico
+
 - Fix [#3545](https://github.com/biomejs/biome/issues/3545), display a warning, 'Avoid using unnecessary Fragment,' when a Fragment contains only one child element that is placed on a new line. Contributed by @satojin219
+
+- Migrating from Prettier or ESLint no longer overwrite the `overrides` field from the configuration ([#3544](https://github.com/biomejs/biome/issues/3544)). Contributed by @Conaclos
 
 ### Configuration
 
-- Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)). Contributed by @dyc3
+- Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)).
+
   Configuration supplied in `.editorconfig` will be overridden by the configuration in `biome.json`. Support is disabled by default and can be enabled by adding the following to your formatter configuration in `biome.json`:
+
   ```json
   {
     "formatter": {
@@ -100,6 +106,58 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     }
   }
   ```
+
+  Contributed by @dyc3
+
+- `overrides` from an extended configuration is now merged with the `overrides` of the extension.
+
+  Given the following shared configuration `biome.shared.json`:
+
+  ```json5
+  {
+    "overrides": [
+      {
+        "include": ["**/*.json"],
+        // ...
+      }
+    ]
+  }
+  ```
+
+  and the following configuration:
+
+  ```json5
+  {
+    "extends": ["./biome.shared.json"],
+    "overrides": [
+      {
+        "include": ["**/*.ts"],
+        // ...
+      }
+    ]
+  }
+  ```
+
+  Previously, the `overrides` from `biome.shared.json` was overwritten.
+  It is now merged and results in the following configuration:
+
+  ```json5
+  {
+    "extends": ["./biome.shared.json"],
+    "overrides": [
+      {
+        "include": ["**/*.json"],
+        // ...
+      },
+      {
+        "include": ["**/*.ts"],
+        // ...
+      }
+    ]
+  }
+  ```
+
+  Contributed by @Conaclos
 
 ### Editors
 
