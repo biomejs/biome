@@ -351,6 +351,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules/) now ignores imports of a package which has the same name as a Node.js module. Contributed by @Conaclos
 
 #### Bug fixes
 
