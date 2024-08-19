@@ -39,6 +39,9 @@ impl BiomePath {
     }
 
     /// Returns the contents of a file, if it exists
+    ///
+    /// ## Error
+    /// If Biome doesn't have permissions to read the file
     pub fn get_buffer_from_file(&mut self) -> String {
         // we assume we have permissions
         fs::read_to_string(&self.path).expect("cannot read the file to format")
