@@ -53,7 +53,7 @@ impl ExtensionSettings {
         Ok(())
     }
 
-    pub(crate) fn renames_enabled(&self) -> bool {
+    pub(crate) fn rename_enabled(&self) -> bool {
         let new_setting = self
             .settings
             .experimental
