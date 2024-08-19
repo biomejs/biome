@@ -9,6 +9,9 @@ declare_lint_rule! {
     /// TypeScript enums are not a type-level extension of JavaScript like type annotations or definitions.
     /// Enums will get compiled into JavaScript code, which can increase bundle size and cause side-effects in the codebase.
     ///
+    /// Const enums are not covered by this rule since `noConstEnum` already handles them.
+    /// Enums within the ambient context, including declaration files, are ignores as well.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -57,18 +60,18 @@ impl Rule for NoEnum {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let enum_decl = ctx.query();
-        let is_const_decl = enum_decl.const_token().is_some();
-        let is_ambient = enum_decl.is_ambient();
-
-        if is_const_decl || is_ambient {
-            return None;
-        }
 
         let source_type = ctx.source_type::<JsFileSource>().language();
         let is_declaration = source_type.is_definition_file();
 
         if is_declaration {
             return None
+        }
+
+        let is_const_decl = enum_decl.const_token().is_some();
+
+        if is_const_decl || enum_decl.is_ambient() {
+            return None;
         }
 
         Some(())
@@ -84,7 +87,7 @@ impl Rule for NoEnum {
                 },
             )
             .note(markup! {
-                "Prefer using JavaScript objects, TypeScript unions or const enums over plain enums."
+                "Prefer using JavaScript objects or TypeScript unions over plain enums."
             })
             .note(markup! {
                 "TypeScript enums are not a type-level extension of JavaScript like type annotations or definitions."
