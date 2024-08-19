@@ -58,8 +58,9 @@ impl Rule for NoEnum {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let enum_decl = ctx.query();
         let is_const_decl = enum_decl.const_token().is_some();
+        let is_ambient = enum_decl.is_ambient();
 
-        if is_const_decl {
+        if is_const_decl || is_ambient {
             return None;
         }
 
