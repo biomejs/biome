@@ -26,7 +26,7 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```ts
-    /// const Foo {
+    /// const Foo = {
     ///     BAR: 'bar',
     ///     BAZ: 'baz',
     /// } as const
