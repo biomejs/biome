@@ -198,7 +198,7 @@ impl<L: Language, S: SyntaxFactory<Kind = L::Kind>> TreeBuilder<'_, L, S> {
     #[must_use]
     pub fn finish(mut self) -> SyntaxNode<L> {
         let root = SyntaxNode::new_root(self.finish_green());
-        self.cache.sweep_cache();
+        self.cache.retain_cache();
         root
     }
 
