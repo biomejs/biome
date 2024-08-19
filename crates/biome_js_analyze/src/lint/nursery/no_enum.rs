@@ -65,7 +65,7 @@ impl Rule for NoEnum {
         let is_declaration = source_type.is_definition_file();
 
         if is_declaration {
-            return None
+            return None;
         }
 
         let is_const_decl = enum_decl.const_token().is_some();
