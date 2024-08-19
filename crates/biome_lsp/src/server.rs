@@ -199,7 +199,7 @@ impl LSPServer {
 
         let rename = {
             let config = self.session.extension_settings.read().ok();
-            config.and_then(|x| x.settings.rename).unwrap_or(false)
+            config.is_some_and(|x| x.rename_enabled())
         };
 
         capabilities.add_capability(

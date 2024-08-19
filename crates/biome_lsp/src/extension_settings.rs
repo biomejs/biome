@@ -13,10 +13,21 @@ pub struct WorkspaceSettings {
     pub unstable: bool,
 
     /// Enable rename capability
+    /// Deprecated, use `experimental.rename` instead
     pub rename: Option<bool>,
 
     /// Only run Biome if a `biome.json` configuration file exists.
     pub require_configuration: Option<bool>,
+
+    /// Experimental settings
+    pub experimental: Option<ExperimentalSettings>,
+}
+
+#[derive(Debug, Default, Clone, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct ExperimentalSettings {
+    /// Enable experimental symbol renaming
+    pub rename: Option<bool>,
 }
 
 /// The `biome.*` extension settings
@@ -40,6 +51,18 @@ impl ExtensionSettings {
             self.settings
         );
         Ok(())
+    }
+
+    pub(crate) fn rename_enabled(&self) -> bool {
+        let new_setting = self
+            .settings
+            .experimental
+            .as_ref()
+            .is_some_and(|experimental| experimental.rename.unwrap_or(false));
+
+        let old_setting = self.settings.rename.unwrap_or(false);
+
+        new_setting | old_setting
     }
 
     pub(crate) fn requires_configuration(&self) -> bool {
