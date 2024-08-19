@@ -1,6 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::TsEnumDeclaration;
+use biome_js_syntax::{JsFileSource, TsEnumDeclaration};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -33,6 +33,13 @@ declare_lint_rule! {
     /// type Foo = 'bar' | 'baz'
     /// ```
     ///
+    /// ```ts
+    /// const enum Foo {
+    ///     BAR = 'bar'
+    ///     BAZ = 'baz'
+    /// }
+    /// ```
+    ///
     ///
     pub NoEnum {
         version: "next",
@@ -48,7 +55,21 @@ impl Rule for NoEnum {
     type Signals = Option<Self::State>;
     type Options = ();
 
-    fn run(_ctx: &RuleContext<Self>) -> Self::Signals {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let enum_decl = ctx.query();
+        let is_const_decl = enum_decl.const_token().is_some();
+
+        if is_const_decl {
+            return None;
+        }
+
+        let source_type = ctx.source_type::<JsFileSource>().language();
+        let is_declaration = source_type.is_definition_file();
+
+        if is_declaration {
+            return None
+        }
+
         Some(())
     }
 
@@ -62,7 +83,7 @@ impl Rule for NoEnum {
                 },
             )
             .note(markup! {
-                "Prefer using JavaScript objects or TypeScript unions over enums."
+                "Prefer using JavaScript objects, TypeScript unions or const enums over plain enums."
             })
             .note(markup! {
                 "TypeScript enums are not a type-level extension of JavaScript like type annotations or definitions."
