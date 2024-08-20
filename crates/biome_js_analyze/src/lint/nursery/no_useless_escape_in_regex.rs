@@ -182,7 +182,10 @@ impl Rule for NoUselessEscapeInRegex {
                             b']' => {
                                 if has_v_flag && inner_class_count != 0 {
                                     inner_class_count -= 1;
-                                } else if !has_v_flag && bytes[index - 1] == b'-' {
+                                } else if !has_v_flag
+                                    && bytes[index - 2] == b'\\'
+                                    && bytes[index - 1] == b'-'
+                                {
                                     return Some(State {
                                         backslash_index: (index - 2) as u16,
                                         escaped: b'-',
