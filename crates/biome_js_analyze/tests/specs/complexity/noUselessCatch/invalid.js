@@ -1,14 +1,23 @@
-try {
-	doSomethingThatMightThrow();
-} catch (e) {
-	throw e;
+function foo () {
+	f();
+	try {
+		doSomethingThatMightThrowA();
+		doSomethingThatMightThrowB();
+	} catch (e) {
+		throw e;
+	}
+	g();
 }
 
-try {
-	doSomethingThatMightThrowA();
-	doSomethingThatMightThrowB();
-} catch (e) {
-	throw e;
+for(let i = 0; i < 5; i++) {
+	try {
+		doSomethingThatMightThrowA();
+		if (true) {
+			doSomethingThatMightThrowB();
+		}
+	} catch (e) {
+		throw e;
+	}
 }
 
 try {
