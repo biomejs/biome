@@ -20,4 +20,5 @@
         /* comment
         comment */
     </div>
+    <div>😀//😀 comment </div>
 </>
