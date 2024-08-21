@@ -177,6 +177,8 @@ jobs:
         run: cargo codegen-schema
       - name: Run the bindings codegen
         run: cargo codegen-bindings
+      - name: Run the migrate codegen
+        run: cargo codegen-migrate
       - name: Check for git diff
         run: |
           if [[ `git status --porcelain` ]]; then
