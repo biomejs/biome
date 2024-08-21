@@ -38,16 +38,16 @@ mod tests {
     #[test]
     fn needs_parentheses() {
         assert_needs_parentheses!(
-            "type A = T extends (infer string)[] ? string : never",
+            "type A<T> = T extends (infer string)[] ? string : never",
             TsInferType
         );
         assert_needs_parentheses!(
-            "type A = T extends unique (infer string) ? string : never",
+            "type A<T> = T extends unique (infer string) ? string : never",
             TsInferType
         );
 
         assert_not_needs_parentheses!(
-            "type A = T extends [number, ...infer string] ? string : never",
+            "type A<T> = T extends [number, ...infer string] ? string : never",
             TsInferType
         );
         assert_needs_parentheses!(
@@ -55,16 +55,20 @@ mod tests {
             TsInferType
         );
         assert_needs_parentheses!(
-            "type A = T extends [(infer string) | undefined] ? string : never",
+            "type A<T> = [T] extends [(infer S extends string) | undefined] ? S : T",
             TsInferType
         );
 
         assert_needs_parentheses!(
-            "type A = T extends (infer string)[a] ? string : never",
+            "type A<T> = T extends (infer string)[a] ? string : never",
             TsInferType
         );
         assert_not_needs_parentheses!(
-            "type A = T extends a[(infer string)] ? string : never",
+            "type A<T> = T extends a[(infer string)] ? string : never",
+            TsInferType
+        );
+        assert_not_needs_parentheses!(
+            "type A = T extends () => infer R | B ? R : never",
             TsInferType
         );
     }
