@@ -22,7 +22,7 @@ upgrade-tools:
 gen-all:
   cargo run -p xtask_codegen -- all
   cargo codegen-configuration
-  cargo run -p xtask_codegen --features configuration -- migrate-eslint
+  cargo codegen-migrate
   just gen-bindings
   just format
 
@@ -35,7 +35,7 @@ gen-bindings:
 gen-lint:
   cargo run -p xtask_codegen -- analyzer
   cargo codegen-configuration
-  cargo run -p xtask_codegen --features configuration -- migrate-eslint
+  cargo codegen-migrate
   just gen-bindings
   cargo run -p rules_check
   just format
