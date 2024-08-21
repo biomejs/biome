@@ -310,7 +310,7 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                     if !ctx.can_handle(&biome_path) {
                         continue;
                     }
-                    ctx.store_path(path);
+                    ctx.store_path(&biome_path);
                 }
             }
         }
@@ -337,7 +337,7 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
     }
 
     fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf) {
-        context.handle_path(&path);
+        context.handle_path(&BiomePath::new(path));
     }
 }
 
@@ -353,7 +353,7 @@ mod tests {
     use parking_lot::Mutex;
     use rustc_hash::FxHashSet;
 
-    use crate::{fs::FileSystemExt, EvaluatedPath, OpenOptions};
+    use crate::{fs::FileSystemExt, OpenOptions};
     use crate::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};
 
     #[test]
@@ -518,7 +518,7 @@ mod tests {
 
         struct TestContext {
             interner: PathInterner,
-            visited: Mutex<FxHashSet<EvaluatedPath>>,
+            visited: Mutex<FxHashSet<BiomePath>>,
         }
 
         impl TraversalContext for TestContext {
@@ -534,17 +534,15 @@ mod tests {
                 true
             }
 
-            fn handle_path(&self, path: &Path) {
-                self.visited
-                    .lock()
-                    .insert(EvaluatedPath::new_evaluated(path));
+            fn handle_path(&self, path: &BiomePath) {
+                self.visited.lock().insert(path.to_fixed());
             }
 
-            fn store_path(&self, path: &Path) {
+            fn store_path(&self, path: &BiomePath) {
                 self.visited.lock().insert(path.into());
             }
 
-            fn evaluated_paths(&self) -> FxHashSet<EvaluatedPath> {
+            fn evaluated_paths(&self) -> FxHashSet<BiomePath> {
                 let lock = self.visited.lock();
                 lock.clone()
             }
@@ -565,8 +563,8 @@ mod tests {
         swap(&mut visited, ctx.visited.get_mut());
 
         assert_eq!(visited.len(), 2);
-        assert!(visited.contains(&EvaluatedPath::from("dir1/file1")));
-        assert!(visited.contains(&EvaluatedPath::from("dir1/file2")));
+        assert!(visited.contains(&BiomePath::new("dir1/file1")));
+        assert!(visited.contains(&BiomePath::new("dir1/file2")));
 
         // Traverse a single file
         fs.traversal(Box::new(|scope| {
@@ -577,6 +575,6 @@ mod tests {
         swap(&mut visited, ctx.visited.get_mut());
 
         assert_eq!(visited.len(), 1);
-        assert!(visited.contains(&EvaluatedPath::from("dir2/file2")));
+        assert!(visited.contains(&BiomePath::new("dir2/file2")));
     }
 }

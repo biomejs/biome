@@ -10,7 +10,7 @@ use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
-use biome_fs::{BiomePath, EvaluatedPath, FileSystem, PathInterner};
+use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
 use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
@@ -22,7 +22,7 @@ use std::{
     env::current_dir,
     ffi::OsString,
     panic::catch_unwind,
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::{
         atomic::{AtomicUsize, Ordering},
         Once,
@@ -33,7 +33,7 @@ use std::{
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
-    pub(crate) evaluated_paths: FxHashSet<EvaluatedPath>,
+    pub(crate) evaluated_paths: FxHashSet<BiomePath>,
     pub(crate) diagnostics: Vec<Error>,
 }
 
@@ -168,7 +168,7 @@ fn traverse_inputs(
     fs: &dyn FileSystem,
     inputs: Vec<OsString>,
     ctx: &TraversalOptions,
-) -> (Duration, FxHashSet<EvaluatedPath>) {
+) -> (Duration, FxHashSet<BiomePath>) {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
@@ -545,14 +545,14 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     pub(crate) remaining_diagnostics: &'ctx AtomicU32,
 
     /// List of paths that should be processed
-    pub(crate) evaluated_paths: RwLock<FxHashSet<EvaluatedPath>>,
+    pub(crate) evaluated_paths: RwLock<FxHashSet<BiomePath>>,
 }
 
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
-    pub(crate) fn increment_changed(&self, path: &Path) {
+    pub(crate) fn increment_changed(&self, path: &BiomePath) {
         self.changed.fetch_add(1, Ordering::Relaxed);
         let mut evaluated_paths = self.evaluated_paths.write().unwrap();
-        evaluated_paths.replace(EvaluatedPath::new_evaluated(path));
+        evaluated_paths.replace(path.to_fixed());
     }
     pub(crate) fn increment_unchanged(&self) {
         self.unchanged.fetch_add(1, Ordering::Relaxed);
@@ -583,7 +583,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         &self.interner
     }
 
-    fn evaluated_paths(&self) -> FxHashSet<EvaluatedPath> {
+    fn evaluated_paths(&self) -> FxHashSet<BiomePath> {
         self.evaluated_paths.read().unwrap().clone()
     }
 
@@ -657,11 +657,11 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         }
     }
 
-    fn handle_path(&self, path: &Path) {
+    fn handle_path(&self, path: &BiomePath) {
         handle_file(self, path)
     }
 
-    fn store_path(&self, path: &Path) {
+    fn store_path(&self, path: &BiomePath) {
         self.evaluated_paths.write().unwrap().insert(path.into());
     }
 }
@@ -669,7 +669,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
 /// This function wraps the [process_file] function implementing the traversal
 /// in a [catch_unwind] block and emit diagnostics in case of error (either the
 /// traversal function returns Err or panics)
-fn handle_file(ctx: &TraversalOptions, path: &Path) {
+fn handle_file(ctx: &TraversalOptions, path: &BiomePath) {
     match catch_unwind(move || process_file(ctx, path)) {
         Ok(Ok(FileStatus::Changed)) => {
             ctx.increment_changed(path);
