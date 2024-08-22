@@ -12,6 +12,7 @@ use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
 use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
+use biome_service::dome::Dome;
 use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
@@ -163,7 +164,7 @@ fn init_thread_pool() {
 }
 
 /// Initiate the filesystem traversal tasks with the provided input paths and
-/// run it to completion, returning the duration of the process
+/// run it to completion, returning the duration of the process and the evaluated paths
 fn traverse_inputs(
     fs: &dyn FileSystem,
     inputs: Vec<OsString>,
@@ -177,14 +178,23 @@ fn traverse_inputs(
     }));
 
     let paths = ctx.evaluated_paths();
-
+    let dome = Dome::new(paths);
+    let mut iter = dome.iter();
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-        for path in paths.clone() {
+        while let Some(path) = iter.next_config() {
+            scope.handle(ctx, path.to_path_buf());
+        }
+
+        while let Some(path) = iter.next_manifest() {
+            scope.handle(ctx, path.to_path_buf());
+        }
+
+        for path in iter {
             scope.handle(ctx, path.to_path_buf());
         }
     }));
 
-    (start.elapsed(), paths)
+    (start.elapsed(), dome.to_paths())
 }
 
 // struct DiagnosticsReporter<'ctx> {}

@@ -30,7 +30,7 @@ use biome_js_syntax::ModuleKind;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
-use biome_project::{NodeJsProject, PackageType};
+use biome_project::{NodeJsProject, PackageType, Project};
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
@@ -171,7 +171,7 @@ impl WorkspaceServer {
                         );
 
                         let mut node_js_project = NodeJsProject::default();
-                        node_js_project.from_root(&parsed.tree());
+                        node_js_project.deserialize_manifest(&parsed.tree());
 
                         Ok(Some(entry.insert(node_js_project).clone()))
                     } else {

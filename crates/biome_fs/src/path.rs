@@ -8,6 +8,7 @@ use enumflags2::{bitflags, BitFlags};
 use std::cmp::Ordering;
 use std::ffi::OsStr;
 use std::fs::read_to_string;
+use std::path::Path;
 use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 
 /// The priority of the file
@@ -133,6 +134,18 @@ impl BiomePath {
             FileKindFlag::ToHandle.into()
         }
     }
+
+    pub fn is_config(&self) -> bool {
+        self.kind.0.contains(FileKindFlag::Config)
+    }
+
+    pub fn is_manifest(&self) -> bool {
+        self.kind.0.contains(FileKindFlag::Manifest)
+    }
+
+    pub fn is_to_inspect(&self) -> bool {
+        self.kind.0.contains(FileKindFlag::ToInspect)
+    }
 }
 
 #[cfg(feature = "serde")]
@@ -192,6 +205,62 @@ impl Ord for BiomePath {
 impl From<&BiomePath> for BiomePath {
     fn from(value: &BiomePath) -> Self {
         BiomePath::new(value.path.clone())
+    }
+}
+
+#[derive(Debug, Clone, Hash, Default)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
+/// It defines an alias for a path
+struct AliasPath {
+    /// The name given to the alias
+    name: String,
+    /// The path associated to `name`
+    prefix: Vec<PathBuf>,
+}
+
+impl AliasPath {
+    pub fn new(name: impl Into<String>) -> Self {
+        Self {
+            name: name.into(),
+            prefix: vec![],
+        }
+    }
+
+    pub fn add_prefix(&mut self, prefix: impl Into<PathBuf>) {
+        self.prefix.push(prefix.into());
+    }
+}
+
+pub struct Aliases {
+    aliases: Vec<AliasPath>,
+}
+
+impl Aliases {
+    pub fn new() -> Self {
+        Self { aliases: vec![] }
+    }
+
+    pub fn with_alias<'a>(
+        mut self,
+        name: impl Into<String>,
+        paths: impl Iterator<Item = &'a Path>,
+    ) -> Self {
+        let mut alias = AliasPath::new(name);
+        for path in paths {
+            alias.add_prefix(path);
+        }
+        self.aliases.push(alias);
+        self
+    }
+
+    pub fn get_paths_by_name(&self, name: &str) -> Option<&Vec<PathBuf>> {
+        self.aliases
+            .iter()
+            .find(|alias| alias.name == name)
+            .map(|alias| &alias.prefix)
     }
 }
 
