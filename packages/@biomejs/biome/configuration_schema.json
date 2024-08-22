@@ -1817,6 +1817,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoDoubleEqualsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoDoubleEqualsOptions" }
+			]
+		},
+		"NoDoubleEqualsOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"authorizeNull": {
+					"description": "If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.\n\nIf `false`, no such exception will be made.",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelWithoutControlConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2664,6 +2681,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoDoubleEqualsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoDoubleEqualsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoLabelWithoutControlOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -3364,7 +3400,7 @@
 				"noDoubleEquals": {
 					"description": "Require the use of === and !==",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/NoDoubleEqualsConfiguration" },
 						{ "type": "null" }
 					]
 				},
