@@ -37,25 +37,27 @@ pub struct DomeIterator<'a> {
 
 impl<'a> DomeIterator<'a> {
     pub fn next_config(&mut self) -> Option<&'a BiomePath> {
-        while let Some(path) = self.iter.peek() {
-            return if path.is_config() {
+        return if let Some(path) = self.iter.peek() {
+            if path.is_config() {
                 self.iter.next()
             } else {
                 None
-            };
-        }
-        None
+            }
+        } else {
+            None
+        };
     }
 
     pub fn next_manifest(&mut self) -> Option<&'a BiomePath> {
-        while let Some(path) = self.iter.peek() {
-            return if path.is_manifest() {
+        return if let Some(path) = self.iter.peek() {
+            if path.is_manifest() {
                 self.iter.next()
             } else {
                 None
-            };
-        }
-        None
+            }
+        } else {
+            None
+        };
     }
 }
 

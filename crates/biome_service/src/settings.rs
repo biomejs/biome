@@ -88,7 +88,6 @@ impl WorkspaceSettings {
     pub fn get_current_manifest(&self) -> Option<&PackageJson> {
         let data = self.data.get(self.current_project);
         if let Some(data) = data {
-            dbg!(&data.path);
             data.project.as_ref().map(|project| &project.manifest)
         } else {
             None

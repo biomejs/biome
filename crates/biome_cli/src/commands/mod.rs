@@ -3,7 +3,7 @@ use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
 use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
-use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
+use crate::{CliDiagnostic, LoggingLevel, VERSION};
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::PartialCssLinter;
 use biome_configuration::javascript::PartialJavascriptLinter;

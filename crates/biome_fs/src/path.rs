@@ -8,17 +8,19 @@ use enumflags2::{bitflags, BitFlags};
 use std::cmp::Ordering;
 use std::ffi::OsStr;
 use std::fs::read_to_string;
+use std::hash::Hash;
 use std::path::Path;
 use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 
 /// The priority of the file
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Hash)]
 #[repr(u8)]
 #[bitflags]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
 )]
+// NOTE: The order of the variants is important, the one on the top has the highest priority
 pub enum FileKindFlag {
     /// A configuration file has the highest priority. It's usually `biome.json` and `biome.jsonc`
     ///
@@ -44,7 +46,7 @@ impl From<FileKindFlag> for FileKind {
     }
 }
 
-#[derive(Debug, Clone, Hash, Default)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
@@ -176,15 +178,7 @@ impl Deref for BiomePath {
     }
 }
 
-impl Eq for BiomePath {}
-
-impl PartialEq<Self> for BiomePath {
-    fn eq(&self, other: &Self) -> bool {
-        self.path == other.path
-    }
-}
-
-impl PartialOrd<Self> for BiomePath {
+impl PartialOrd for BiomePath {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp(other))
     }
@@ -196,12 +190,9 @@ impl Ord for BiomePath {
         let other_file_name = other.get_file_name();
         match (current_file_name, other_file_name) {
             (Some(current_file_name), Some(other_file_name)) => {
-                if Self::priority(current_file_name) < Self::priority(other_file_name) {
-                    Ordering::Less
-                } else if Self::priority(current_file_name) > Self::priority(other_file_name) {
-                    Ordering::Greater
-                } else {
-                    current_file_name.cmp(other_file_name)
+                match Self::priority(current_file_name).cmp(&Self::priority(other_file_name)) {
+                    Ordering::Equal => self.path.cmp(&other.path),
+                    ordering => ordering,
                 }
             }
             (Some(_), None) => Ordering::Less,
@@ -311,7 +302,7 @@ mod test {
         let path5 = BiomePath::new(PathBuf::from("src/README.md"));
         let path6 = BiomePath::new(PathBuf::from("src/frontend/biome.jsonc"));
 
-        let mut paths = vec![path1, path2, path3, path4, path5, path6];
+        let mut paths = [path1, path2, path3, path4, path5, path6];
         paths.sort();
         let mut iter = paths.iter();
         assert_eq!(iter.next().unwrap().get_file_name(), Some("biome.json"));
@@ -349,11 +340,11 @@ mod test {
         );
         assert_eq!(
             iter.next().unwrap().display().to_string(),
-            "src/package.json"
+            "src/frontend/package.json"
         );
         assert_eq!(
             iter.next().unwrap().display().to_string(),
-            "src/frontend/package.json"
+            "src/package.json"
         );
         assert_eq!(
             iter.next().unwrap().display().to_string(),
