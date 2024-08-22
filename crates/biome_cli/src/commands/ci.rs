@@ -10,7 +10,9 @@ use biome_deserialize::Merge;
 use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
-use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
+use biome_service::workspace::{
+    RegisterProjectFolderParams, SetManifestForProjectParams, UpdateSettingsParams,
+};
 use std::ffi::OsString;
 
 pub(crate) struct CiCommandPayload {
@@ -48,7 +50,6 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
         session.app.console,
         cli_options.verbose,
     )?;
-    resolve_manifest(&session)?;
 
     let LoadedConfiguration {
         configuration: mut fs_configuration,
@@ -127,6 +128,18 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
             set_as_current_workspace: true,
         })?;
 
+    let manifest_data = resolve_manifest(&session.app.fs)?;
+
+    if let Some((manifest_path, content)) = manifest_data {
+        session
+            .app
+            .workspace
+            .set_manifest_for_project(SetManifestForProjectParams {
+                manifest_path,
+                content,
+                version: 0,
+            })?;
+    }
     session
         .app
         .workspace

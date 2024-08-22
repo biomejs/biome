@@ -15,7 +15,10 @@ use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 #[bitflags]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
 pub enum FileKindFlag {
     /// A configuration file has the highest priority. It's usually `biome.json` and `biome.jsonc`
     ///
@@ -124,11 +127,17 @@ impl BiomePath {
         self.path.file_name().and_then(OsStr::to_str)
     }
 
-    /// The priority of the file
+    /// The priority of the file.
+    /// - `biome.json` and `biome.jsonc` have the highest priority
+    /// - `package.json` and `tsconfig.json`/`jsconfig.json` have the second-highest priority, and they are considered as manifest files
+    /// - Other files are considered as files to handle
     fn priority(file_name: &str) -> FileKind {
         if file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc() {
             FileKindFlag::Config.into()
-        } else if matches!(file_name, "package.json" | "tsconfig.json") {
+        } else if matches!(
+            file_name,
+            "package.json" | "tsconfig.json" | "jsconfig.json"
+        ) {
             FileKindFlag::Manifest.into()
         } else {
             FileKindFlag::ToHandle.into()
@@ -155,7 +164,7 @@ impl schemars::JsonSchema for FileKind {
     }
 
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<FileKind>>::json_schema(gen)
+        <Vec<FileKindFlag>>::json_schema(gen)
     }
 }
 

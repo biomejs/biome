@@ -498,16 +498,10 @@ pub struct OpenFileParams {
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct OpenProjectParams {
-    pub path: BiomePath,
+pub struct SetManifestForProjectParams {
+    pub manifest_path: BiomePath,
     pub content: String,
     pub version: i32,
-}
-
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct UpdateProjectParams {
-    pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -848,7 +842,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
 
     /// Add a new project to the workspace
-    fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError>;
+    fn set_manifest_for_project(
+        &self,
+        params: SetManifestForProjectParams,
+    ) -> Result<(), WorkspaceError>;
 
     /// Register a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
     fn register_project_folder(
@@ -861,9 +858,6 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         &self,
         params: UnregisterProjectFolderParams,
     ) -> Result<(), WorkspaceError>;
-
-    /// Sets the current project path
-    fn update_current_manifest(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
 
     // Return a textual, debug representation of the syntax tree for a given document
     fn get_syntax_tree(

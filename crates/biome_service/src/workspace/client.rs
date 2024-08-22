@@ -1,7 +1,7 @@
 use crate::workspace::{
-    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OpenProjectParams,
-    OrganizeImportsParams, OrganizeImportsResult, ProjectKey, RageParams, RageResult,
-    RegisterProjectFolderParams, ServerInfo, UnregisterProjectFolderParams, UpdateProjectParams,
+    FileFeaturesResult, GetFileContentParams, IsPathIgnoredParams, OrganizeImportsParams,
+    OrganizeImportsResult, ProjectKey, RageParams, RageResult, RegisterProjectFolderParams,
+    ServerInfo, SetManifestForProjectParams, UnregisterProjectFolderParams,
 };
 use crate::{TransportError, Workspace, WorkspaceError};
 use biome_formatter::Printed;
@@ -118,8 +118,11 @@ where
         self.request("biome/open_file", params)
     }
 
-    fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError> {
-        self.request("biome/open_project", params)
+    fn set_manifest_for_project(
+        &self,
+        params: SetManifestForProjectParams,
+    ) -> Result<(), WorkspaceError> {
+        self.request("biome/set_manifest_for_project", params)
     }
 
     fn register_project_folder(
@@ -134,10 +137,6 @@ where
         params: UnregisterProjectFolderParams,
     ) -> Result<(), WorkspaceError> {
         self.request("biome/unregister_project_folder", params)
-    }
-
-    fn update_current_manifest(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
-        self.request("biome/update_current_manifest", params)
     }
 
     fn get_syntax_tree(

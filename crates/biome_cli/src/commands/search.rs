@@ -9,7 +9,8 @@ use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::{
-    ParsePatternParams, RegisterProjectFolderParams, UpdateSettingsParams,
+    ParsePatternParams, RegisterProjectFolderParams, SetManifestForProjectParams,
+    UpdateSettingsParams,
 };
 use std::ffi::OsString;
 
@@ -44,7 +45,6 @@ pub(crate) fn search(
         session.app.console,
         cli_options.verbose,
     )?;
-    resolve_manifest(&session)?;
 
     let LoadedConfiguration {
         mut configuration,
@@ -60,7 +60,6 @@ pub(crate) fn search(
     let (vcs_base_path, gitignore_matches) =
         configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
 
-    let workspace = &session.app.workspace;
     session
         .app
         .workspace
@@ -68,17 +67,35 @@ pub(crate) fn search(
             path: session.app.fs.working_directory(),
             set_as_current_workspace: true,
         })?;
-    workspace.update_settings(UpdateSettingsParams {
-        workspace_directory: session.app.fs.working_directory(),
-        configuration,
-        vcs_base_path,
-        gitignore_matches,
-    })?;
+    let manifest_data = resolve_manifest(&session.app.fs)?;
+
+    if let Some((manifest_path, content)) = manifest_data {
+        session
+            .app
+            .workspace
+            .set_manifest_for_project(SetManifestForProjectParams {
+                manifest_path,
+                content,
+                version: 0,
+            })?;
+    }
+
+    session
+        .app
+        .workspace
+        .update_settings(UpdateSettingsParams {
+            workspace_directory: session.app.fs.working_directory(),
+            configuration,
+            vcs_base_path,
+            gitignore_matches,
+        })?;
 
     let console = &mut *session.app.console;
     let stdin = get_stdin(stdin_file_path, console, "search")?;
 
-    let pattern = workspace
+    let pattern = session
+        .app
+        .workspace
         .parse_pattern(ParsePatternParams { pattern })?
         .pattern_id;
 
