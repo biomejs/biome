@@ -85,50 +85,29 @@ impl<W: io::Write> io::Write for HtmlAdapter<W> {
     fn write(&mut self, mut buf: &[u8]) -> io::Result<usize> {
         let mut bytes = 0;
 
-        const HTML_ESCAPES: [u8; 4] = [b'"', b'&', b'<', b'>'];
-        const NEW_LINES: [u8; 2] = [b'\n', b'\r'];
-        let iter = buf.iter().enumerate();
-        for (idx, byte) in iter {
-            if HTML_ESCAPES.contains(byte) {
-                let (before, after) = buf.split_at(idx);
+        const CHARS_TO_CHECK: [u8; 6] = [b'"', b'&', b'<', b'>', b'\n', b'\r'];
+        while let Some(idx) = buf.iter().position(|byte| CHARS_TO_CHECK.contains(byte)) {
+            let (before, after) = buf.split_at(idx);
 
-                self.0.write_all(before)?;
-                bytes += before.len();
+            self.0.write_all(before)?;
+            bytes += before.len();
 
-                // SAFETY: Because of the above `position` match we know the buffer
-                // contains at least the matching byte
-                let (byte, after) = after.split_first().unwrap();
-                match *byte {
-                    b'"' => self.0.write_all(b"&quot;")?,
-                    b'&' => self.0.write_all(b"&amp;")?,
-                    b'<' => self.0.write_all(b"&lt;")?,
-                    b'>' => self.0.write_all(b"&gt;")?,
-                    _ => unreachable!(),
-                }
-
-                // Only 1 byte of the input was written
-                bytes += 1;
-                buf = after;
+            // SAFETY: Because of the above `position` match we know the buffer
+            // contains at least the matching byte
+            let (byte, after) = after.split_first().unwrap();
+            match *byte {
+                b'"' => self.0.write_all(b"&quot;")?,
+                b'&' => self.0.write_all(b"&amp;")?,
+                b'<' => self.0.write_all(b"&lt;")?,
+                b'>' => self.0.write_all(b"&gt;")?,
+                b'\n' => self.0.write_all(b"<br />")?,
+                b'\r' => self.0.write_all(b"<br />")?,
+                _ => unreachable!(),
             }
-            if NEW_LINES.contains(byte) {
-                let (before, after) = buf.split_at(idx);
 
-                self.0.write_all(before)?;
-                bytes += before.len();
-
-                // SAFETY: Because of the above `position` match we know the buffer
-                // contains at least the matching byte
-                let (byte, after) = after.split_first().unwrap();
-                match *byte {
-                    b'\n' => self.0.write_all(b"<br />")?,
-                    b'\r' => self.0.write_all(b"<br />")?,
-                    _ => unreachable!(),
-                }
-
-                // Only 1 byte of the input was written
-                bytes += 1;
-                buf = after;
-            }
+            // Only 1 byte of the input was written
+            bytes += 1;
+            buf = after;
         }
 
         self.0.write_all(buf)?;
@@ -192,5 +171,23 @@ mod test {
             .unwrap();
 
         assert_eq!(String::from_utf8(buf).unwrap(), "&quot;&quot;");
+    }
+
+    #[test]
+    fn test_escapes_and_new_lines() {
+        let mut buf = Vec::new();
+        let mut writer = super::HTML(&mut buf);
+        let mut formatter = Formatter::new(&mut writer);
+
+        formatter
+            .write_markup(markup! {
+                "New rules that are still under development.\n\n."
+            })
+            .unwrap();
+
+        assert_eq!(
+            String::from_utf8(buf).unwrap(),
+            "New rules that are still under development.<br /><br />."
+        );
     }
 }
