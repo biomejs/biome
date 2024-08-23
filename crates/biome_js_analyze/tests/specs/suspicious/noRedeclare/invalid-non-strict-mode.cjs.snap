@@ -1,0 +1,79 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-non-strict-mode.cjs
+---
+# Input
+```cjs
+switch (x) {
+	case 0: {
+		function foo() {}
+		break;
+	}
+	default: {
+		function foo() {}
+		break;
+	}
+}
+
+function f() {
+	switch (x) {
+		case 0: {
+			function foo() {}
+			break;
+		}
+		default: {
+			function foo() {}
+			break;
+		}
+	}
+}
+```
+
+# Diagnostics
+```
+invalid-non-strict-mode.cjs:7:12 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Shouldn't redeclare 'foo'. Consider to delete it or rename it.
+  
+    5 │ 	}
+    6 │ 	default: {
+  > 7 │ 		function foo() {}
+      │ 		         ^^^
+    8 │ 		break;
+    9 │ 	}
+  
+  i 'foo' is defined here:
+  
+    1 │ switch (x) {
+    2 │ 	case 0: {
+  > 3 │ 		function foo() {}
+      │ 		         ^^^
+    4 │ 		break;
+    5 │ 	}
+  
+
+```
+
+```
+invalid-non-strict-mode.cjs:19:13 lint/suspicious/noRedeclare ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Shouldn't redeclare 'foo'. Consider to delete it or rename it.
+  
+    17 │ 		}
+    18 │ 		default: {
+  > 19 │ 			function foo() {}
+       │ 			         ^^^
+    20 │ 			break;
+    21 │ 		}
+  
+  i 'foo' is defined here:
+  
+    13 │ 	switch (x) {
+    14 │ 		case 0: {
+  > 15 │ 			function foo() {}
+       │ 			         ^^^
+    16 │ 			break;
+    17 │ 		}
+  
+
+```

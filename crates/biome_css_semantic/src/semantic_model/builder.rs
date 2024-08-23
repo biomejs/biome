@@ -2,14 +2,16 @@ use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
-use super::model::{Declaration, Rule, Selector, SemanticModel, SemanticModelData};
+use super::model::{CssVariable, Declaration, Rule, Selector, SemanticModel, SemanticModelData};
 use crate::events::SemanticEvent;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     rules: Vec<Rule>,
+    global_css_variables: FxHashMap<String, CssVariable>,
     current_rule_stack: Vec<Rule>,
+    in_root_selector: bool,
 }
 
 impl SemanticModelBuilder {
@@ -19,6 +21,8 @@ impl SemanticModelBuilder {
             node_by_range: FxHashMap::default(),
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
+            global_css_variables: FxHashMap::default(),
+            in_root_selector: false,
         }
     }
 
@@ -27,6 +31,7 @@ impl SemanticModelBuilder {
             root: self.root,
             node_by_range: self.node_by_range,
             rules: self.rules,
+            global_css_variables: self.global_css_variables,
         };
         SemanticModel::new(data)
     }
@@ -77,19 +82,49 @@ impl SemanticModelBuilder {
                 }
             }
             SemanticEvent::PropertyDeclaration {
-                property,
-                value,
-                property_range,
-                value_range,
+                ref property,
+                ref value,
+                range,
             } => {
                 if let Some(current_rule) = self.current_rule_stack.last_mut() {
+                    if self.in_root_selector {
+                        let key = &property.name;
+                        if key.starts_with("--") {
+                            self.global_css_variables.insert(
+                                key.to_string(),
+                                CssVariable {
+                                    name: property.clone(),
+                                    value: value.clone(),
+                                    range,
+                                },
+                            );
+                        }
+                    }
                     current_rule.declarations.push(Declaration {
-                        property,
-                        value,
-                        property_range,
-                        value_range,
+                        property: property.clone(),
+                        value: value.clone(),
                     });
                 }
+            }
+            SemanticEvent::RootSelectorStart => {
+                self.in_root_selector = true;
+            }
+            SemanticEvent::RootSelectorEnd => {
+                self.in_root_selector = false;
+            }
+            SemanticEvent::AtProperty {
+                property,
+                value,
+                range,
+            } => {
+                self.global_css_variables.insert(
+                    property.name.to_string(),
+                    CssVariable {
+                        name: property,
+                        value,
+                        range,
+                    },
+                );
             }
         }
     }

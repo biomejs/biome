@@ -68,7 +68,6 @@ mod tests {
         let root = parse.tree();
         let model = super::semantic_model(&root);
         let rule = model.rules().first().unwrap();
-
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
         assert_eq!(rule.children.len(), 1);
@@ -123,14 +122,51 @@ mod tests {
     }
 
     #[test]
+    fn test_global_css_variables() {
+        let parse = parse_css(
+            r#"@property --item-size {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 40%;
+}
+
+:root {
+  --custom-color: red;
+  --custom-size: 20px;
+}
+  "#,
+            CssParserOptions::default(),
+        );
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let global_custom_variables = model.global_css_variables();
+
+        assert_eq!(global_custom_variables.len(), 3);
+
+        let item_size = global_custom_variables.contains_key("--item-size");
+        let custom_color = global_custom_variables.contains_key("--custom-color");
+        let custom_size = global_custom_variables.contains_key("--custom-size");
+
+        assert!(item_size);
+        assert!(custom_color);
+        assert!(custom_size);
+    }
+
+    #[test]
     fn debug() {
         let parse = parse_css(
-            r#"[a="b"i], [ a="b"i], [ a ="b"i], [ a = "b"i], [ a = "b" i], [ a = "b" i ] {}"#,
+            r#"@property --item-size {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 40%;
+}"#,
             CssParserOptions::default(),
         );
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
         dbg!(&model.rules());
+        dbg!(&model.global_css_variables());
     }
 }

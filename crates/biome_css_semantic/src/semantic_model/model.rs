@@ -33,6 +33,10 @@ impl SemanticModel {
     pub fn rules(&self) -> &[Rule] {
         &self.data.rules
     }
+
+    pub fn global_css_variables(&self) -> &FxHashMap<String, CssVariable> {
+        &self.data.global_css_variables
+    }
 }
 
 /// Contains the internal data of a `SemanticModel`.
@@ -42,13 +46,30 @@ impl SemanticModel {
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
     pub(crate) root: CssRoot,
-    // Map to each by its range
+    /// Map to each by its range
     pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
-    // List of all the rules
+    /// List of all the css rules
     pub(crate) rules: Vec<Rule>,
+    /// Map of CSS variables declared in the `:root` selector or using the @property rule.
+    pub(crate) global_css_variables: FxHashMap<String, CssVariable>,
 }
 
-/// Represents a CSS rule, including its selectors, declarations, and nested rules.
+/// Represents a CSS rule set, including its selectors, declarations, and nested rules.
+///
+/// ┌─ Rule Set ──────────────────────────┐
+/// │                                     │
+/// │  p {                ← Selector      │
+/// │    color: red;      ← Declaration   │
+/// │     │       │                       │
+/// │     │       └─ Value                │
+/// │     └─ Property                     |
+/// |                                     |
+/// │    .child {         ← children      │
+/// │      color: blue;                   |
+/// |    }                                |
+/// │  }                                  │
+/// └─────────────────────────────────────┘
+///
 #[derive(Debug)]
 pub struct Rule {
     /// The selectors associated with this rule.
@@ -65,13 +86,28 @@ pub struct Rule {
 #[derive(Debug, Clone)]
 pub struct Declaration {
     /// The property name.
-    pub property: String,
+    pub property: CssProperty,
     /// The property value.
+    pub value: CssValue,
+}
+
+#[derive(Debug, Clone)]
+pub struct CssProperty {
+    pub name: String,
+    pub range: TextRange,
+}
+
+#[derive(Debug, Clone)]
+pub struct CssValue {
     pub value: String,
-    /// The text range of the property in the source document.
-    pub property_range: TextRange,
-    /// The text range of the value in the source document.
-    pub value_range: TextRange,
+    pub range: TextRange,
+}
+
+#[derive(Debug, Clone)]
+pub struct CssVariable {
+    pub name: CssProperty,
+    pub value: CssValue,
+    pub range: TextRange,
 }
 
 /// Represents a CSS selector.

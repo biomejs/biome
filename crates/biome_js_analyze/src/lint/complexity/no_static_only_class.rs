@@ -149,6 +149,10 @@ impl Rule for NoStaticOnlyClass {
             return None;
         }
 
+        if class_declaration.extends_clause().is_some() {
+            return None;
+        }
+
         let all_members_static = class_declaration
             .members()
             .iter()

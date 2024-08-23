@@ -298,12 +298,12 @@ impl Rule for {rule_name_upper_camel} {{
         }
         LanguageKind::Graphql => {
             format!(
-                r#"use biome_analyze::{{context::RuleContext, declare_rule, Ast, Rule, RuleDiagnostic}};
+                r#"use biome_analyze::{{context::RuleContext, {macro_name}, Ast, Rule, RuleDiagnostic}};
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlRoot;
 use biome_rowan::AstNode;
 
-declare_rule! {{
+{macro_name}! {{
     /// Succinct description of the rule.
     ///
     /// Put context and details about the rule.
@@ -318,14 +318,14 @@ declare_rule! {{
     /// ### Invalid
     ///
     /// ```graphql,expect_diagnostic
-    /// p {{}}
+    /// quer {{}}
     /// ```
     ///
     /// ### Valid
     ///
     /// ```graphql
-    /// p {{
-    ///   color: red;
+    /// query {{
+    ///   field
     /// }}
     /// ```
     ///

@@ -56,7 +56,7 @@ impl NeedsParentheses for TsInferType {
         match parent.kind() {
             JsSyntaxKind::TS_REST_TUPLE_TYPE_ELEMENT => false,
             JsSyntaxKind::TS_INTERSECTION_TYPE_ELEMENT_LIST
-            | JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => true,
+            | JsSyntaxKind::TS_UNION_TYPE_VARIANT_LIST => self.constraint().is_some(),
             _ => operator_type_or_higher_needs_parens(self.syntax(), parent),
         }
     }
