@@ -2281,7 +2281,7 @@ export interface NoDoubleEqualsOptions {
 
 If `false`, no such exception will be made. 
 	 */
-	authorizeNull: boolean;
+	ignoreNull: boolean;
 }
 export interface Hook {
 	/**

@@ -1827,7 +1827,7 @@
 			"description": "Rule's options",
 			"type": "object",
 			"properties": {
-				"authorizeNull": {
+				"ignoreNull": {
 					"description": "If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.\n\nIf `false`, no such exception will be made.",
 					"type": "boolean"
 				}
