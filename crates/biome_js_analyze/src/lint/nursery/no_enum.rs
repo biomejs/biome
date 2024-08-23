@@ -18,8 +18,8 @@ declare_lint_rule! {
     ///
     /// ```ts,expect_diagnostic
     /// enum Foo {
-    ///     BAR = 'bar'
-    ///     BAZ = 'baz'
+    ///     BAR = 'bar',
+    ///     BAZ = 'baz',
     /// }
     /// ```
     ///
@@ -38,8 +38,8 @@ declare_lint_rule! {
     ///
     /// ```ts
     /// const enum Foo {
-    ///     BAR = 'bar'
-    ///     BAZ = 'baz'
+    ///     BAR = 'bar',
+    ///     BAZ = 'baz',
     /// }
     /// ```
     ///
