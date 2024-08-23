@@ -4,8 +4,11 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::jsx_ext::AnyJsxElement;
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_js_syntax::{
+    jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsNumberLiteralExpression,
+    JsStringLiteralExpression, JsUnaryExpression,
+};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
 declare_lint_rule! {
     /// Enforce that aria-hidden="true" is not set on focusable elements.
@@ -33,6 +36,10 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx
+    /// <button aria-hidden="true" tabIndex={-1} />
+    /// ```
+    ///
+    /// ```jsx
     /// <div aria-hidden="true"><a href="#"></a></div>
     /// ```
     ///
@@ -49,6 +56,40 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintJsxA11y("no-aria-hidden-on-focusable")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
+    }
+}
+
+declare_node_union! {
+    /// Subset of expressions supported by this rule.
+    ///
+    /// ## Examples
+    ///
+    /// - `JsStringLiteralExpression` &mdash; `"5"`
+    /// - `JsNumberLiteralExpression` &mdash; `5`
+    /// - `JsUnaryExpression` &mdash; `+5` | `-5`
+    ///
+    pub AnyNumberLikeExpression = JsStringLiteralExpression | JsNumberLiteralExpression | JsUnaryExpression
+}
+
+impl AnyNumberLikeExpression {
+    /// Returns the value of a number-like expression; it returns the expression
+    /// text for literal expressions. However, for unary expressions, it only
+    /// returns the value for signed numeric expressions.
+    pub(crate) fn value(&self) -> Option<String> {
+        match self {
+            AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
+                return Some(string_literal.inner_string_text().ok()?.to_string());
+            }
+            AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
+                return Some(number_literal.value_token().ok()?.to_string());
+            }
+            AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
+                if unary_expression.is_signed_numeric_literal().ok()? {
+                    return Some(unary_expression.text());
+                }
+            }
+        }
+        None
     }
 }
 
@@ -75,22 +116,57 @@ impl Rule for NoAriaHiddenOnFocusable {
                 return None;
             }
 
-            if let Some(tabindex_attr) = node.find_attribute_by_name("tabIndex") {
-                if let Some(tabindex_static) = tabindex_attr.as_static_value() {
-                    let tabindex_text = tabindex_static.text();
-                    let tabindex_val = tabindex_text.trim().parse::<i32>();
+            // if let Some(tabindex_static) =
+            //     node.find_attribute_by_name("tabIndex")?.as_static_value()
+            // {
+            //     let tabindex_text = tabindex_static.text();
+            //     let tabindex_val = tabindex_text.trim().parse::<i32>();
+            //
+            //     if let Ok(num) = tabindex_val {
+            //         return (num >= 0).then_some(());
+            //     }
+            //
+            //     if !aria_roles
+            //         .is_not_interactive_element(element_name.text_trimmed(), attributes)
+            //     {
+            //         return Some(());
+            //     }
+            // }
 
-                    if let Ok(num) = tabindex_val {
-                        return (num >= 0).then_some(());
+            // Do stuff if there is a tabIndex attribute
+            if let Some(tabindex_attr) = node.find_attribute_by_name("tabIndex") {
+                let tabindex_val = tabindex_attr.initializer()?.value().ok()?;
+
+                match tabindex_val {
+                    AnyJsxAttributeValue::AnyJsxTag(jsx_tag) => {
+                        let value = jsx_tag.text().parse::<i32>();
+                        if let Ok(num) = value {
+                            return (num >= 0).then_some(());
+                        }
+                    }
+                    AnyJsxAttributeValue::JsxString(jsx_string) => {
+                        let value = jsx_string
+                            .inner_string_text()
+                            .ok()?
+                            .to_string()
+                            .parse::<i32>();
+                        if let Ok(num) = value {
+                            return (num >= 0).then_some(());
+                        }
+                    }
+                    AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
+                        let expression = value.expression().ok()?;
+                        let expression_value =
+                            AnyNumberLikeExpression::cast(expression.into_syntax())?
+                                .value()?
+                                .parse::<i32>();
+                        if let Ok(num) = expression_value {
+                            return (num >= 0).then_some(());
+                        }
                     }
                 }
             }
-
-            if !aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes) {
-                return Some(());
-            }
         }
-
         None
     }
 

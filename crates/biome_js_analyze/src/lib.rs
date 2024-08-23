@@ -180,7 +180,6 @@ mod tests {
     use crate::react::hooks::StableHookResult;
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
-    #[ignore]
     #[test]
     fn quick_test() {
         fn markup_to_string(markup: Markup) -> String {
@@ -204,7 +203,7 @@ mod tests {
             dependencies_index: Some(1),
             stable_result: StableHookResult::None,
         };
-        let rule_filter = RuleFilter::Rule("style", "useNodejsImportProtocol");
+        let rule_filter = RuleFilter::Rule("a11y", "noAriaHiddenOnFocusable");
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
