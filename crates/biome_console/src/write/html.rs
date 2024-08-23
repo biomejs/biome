@@ -17,13 +17,13 @@ where
 {
     fn write_str(&mut self, elements: &MarkupElements, content: &str) -> io::Result<()> {
         push_styles(&mut self.0, elements)?;
-        EscapeAdapter(&mut self.0).write_all(content.as_bytes())?;
+        HtmlAdapter(&mut self.0).write_all(content.as_bytes())?;
         pop_styles(&mut self.0, elements)
     }
 
     fn write_fmt(&mut self, elements: &MarkupElements, content: fmt::Arguments) -> io::Result<()> {
         push_styles(&mut self.0, elements)?;
-        EscapeAdapter(&mut self.0).write_fmt(content)?;
+        HtmlAdapter(&mut self.0).write_fmt(content)?;
         pop_styles(&mut self.0, elements)
     }
 }
@@ -76,35 +76,59 @@ fn pop_styles<W: io::Write>(fmt: &mut W, elements: &MarkupElements) -> io::Resul
     })
 }
 
-/// Adapter wrapping a type implementing [io::Write] and adding HTML special
-/// characters escaping to the written byte sequence
-struct EscapeAdapter<W>(W);
+/// Adapter wrapping a type implementing [io::Write]. It's responsible for:
+/// - and adding HTML special characters escaping to the written byte sequence
+/// - and adding HTML line breaks for newline characters
+struct HtmlAdapter<W>(W);
 
-impl<W: io::Write> io::Write for EscapeAdapter<W> {
+impl<W: io::Write> io::Write for HtmlAdapter<W> {
     fn write(&mut self, mut buf: &[u8]) -> io::Result<usize> {
         let mut bytes = 0;
 
         const HTML_ESCAPES: [u8; 4] = [b'"', b'&', b'<', b'>'];
-        while let Some(idx) = buf.iter().position(|b| HTML_ESCAPES.contains(b)) {
-            let (before, after) = buf.split_at(idx);
+        const NEW_LINES: [u8; 2] = [b'\n', b'\r'];
+        let iter = buf.iter().enumerate();
+        for (idx, byte) in iter {
+            if HTML_ESCAPES.contains(byte) {
+                let (before, after) = buf.split_at(idx);
 
-            self.0.write_all(before)?;
-            bytes += before.len();
+                self.0.write_all(before)?;
+                bytes += before.len();
 
-            // SAFETY: Because of the above `position` match we know the buffer
-            // contains at least the matching byte
-            let (byte, after) = after.split_first().unwrap();
-            match *byte {
-                b'"' => self.0.write_all(b"&quot;")?,
-                b'&' => self.0.write_all(b"&amp;")?,
-                b'<' => self.0.write_all(b"&lt;")?,
-                b'>' => self.0.write_all(b"&gt;")?,
-                _ => unreachable!(),
+                // SAFETY: Because of the above `position` match we know the buffer
+                // contains at least the matching byte
+                let (byte, after) = after.split_first().unwrap();
+                match *byte {
+                    b'"' => self.0.write_all(b"&quot;")?,
+                    b'&' => self.0.write_all(b"&amp;")?,
+                    b'<' => self.0.write_all(b"&lt;")?,
+                    b'>' => self.0.write_all(b"&gt;")?,
+                    _ => unreachable!(),
+                }
+
+                // Only 1 byte of the input was written
+                bytes += 1;
+                buf = after;
             }
+            if NEW_LINES.contains(byte) {
+                let (before, after) = buf.split_at(idx);
 
-            // Only 1 byte of the input was written
-            bytes += 1;
-            buf = after;
+                self.0.write_all(before)?;
+                bytes += before.len();
+
+                // SAFETY: Because of the above `position` match we know the buffer
+                // contains at least the matching byte
+                let (byte, after) = after.split_first().unwrap();
+                match *byte {
+                    b'\n' => self.0.write_all(b"<br />")?,
+                    b'\r' => self.0.write_all(b"<br />")?,
+                    _ => unreachable!(),
+                }
+
+                // Only 1 byte of the input was written
+                bytes += 1;
+                buf = after;
+            }
         }
 
         self.0.write_all(buf)?;
@@ -114,5 +138,59 @@ impl<W: io::Write> io::Write for EscapeAdapter<W> {
 
     fn flush(&mut self) -> io::Result<()> {
         self.0.flush()
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate as biome_console;
+    use crate::fmt::Formatter;
+    use biome_markup::markup;
+
+    #[test]
+    fn test_new_lines() {
+        let mut buf = Vec::new();
+        let mut writer = super::HTML(&mut buf);
+        let mut formatter = Formatter::new(&mut writer);
+
+        formatter
+            .write_markup(markup! {
+                "Hello"
+            })
+            .unwrap();
+
+        formatter
+            .write_markup(markup! {
+                "\n"
+            })
+            .unwrap();
+
+        formatter
+            .write_markup(markup! {
+                "World"
+            })
+            .unwrap();
+
+        assert_eq!(String::from_utf8(buf).unwrap(), "Hello<br />World");
+    }
+
+    #[test]
+    fn test_escapes() {
+        let mut buf = Vec::new();
+        let mut writer = super::HTML(&mut buf);
+        let mut formatter = Formatter::new(&mut writer);
+
+        formatter
+            .write_markup(markup! {
+                "\""
+            })
+            .unwrap();
+        formatter
+            .write_markup(markup! {
+                "\""
+            })
+            .unwrap();
+
+        assert_eq!(String::from_utf8(buf).unwrap(), "&quot;&quot;");
     }
 }
