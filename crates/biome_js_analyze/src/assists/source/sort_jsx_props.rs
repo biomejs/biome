@@ -16,9 +16,8 @@ declare_source_rule! {
     /// Enforce props sorting in JSX elements.
     ///
     /// This rule checks if the JSX props are sorted in a consistent way.
+    /// Props are sorted alphabetically.
     /// A spread prop resets the sorting order.
-    ///
-    /// The rule can be configured to sort props alphabetically, ignore case, and more.
     ///
     /// ## Examples
     ///
@@ -33,67 +32,6 @@ declare_source_rule! {
     /// ```js
     /// <Hello firstName="John" lastName="Smith" />;
     /// <Hello tel={5555555} {...this.props} firstName="John" lastName="Smith" />;
-    /// ```
-    ///
-    /// ## Options
-    ///
-    /// ### `callbacksLast`
-    ///
-    /// When `true`, callback props are sorted last.
-    ///
-    /// #### Example
-    ///
-    /// ```js
-    /// <Hello tel={5555555} onClick={this._handleClick} />;
-    /// ```
-    ///
-    /// ### `shordhand`
-    ///
-    /// When `first`, shorthand props are sorted first.
-    /// When `last`, shorthand props are sorted last, unless `callbacksLast` is `true`,
-    /// in which case they are sorted before callbacks.
-    /// Default is `ignore`.
-    ///
-    /// #### Example
-    ///
-    /// ```js
-    /// // shorthand first
-    /// <Hello active validate name="John" tel={5555555} />;
-    /// // shorthand last
-    /// <Hello name="John" tel={5555555} active validate />;
-    /// ```
-    ///
-    /// ### `multiline`
-    ///
-    /// When `first`, multiline props are sorted first, unless `shorthand` is `first`,
-    /// in which case they are sorted after shorthand props.
-    /// When `last`, multiline props are sorted last, unless `shorthand` is `last` or `callbacksLast` is `true`,
-    /// in which case they are sorted before shorthand props or callbacks.
-    /// Default is `ignore`.
-    ///
-    /// #### Example
-    ///
-    /// ```js
-    /// // multiline first
-    /// <Hello
-    ///   classes={{
-    ///     greetings: classes.greetings
-    ///   }}
-    ///   name="John"
-    ///   tel={5555555}
-    ///   active
-    ///   validate
-    /// />;
-    /// // multiline last
-    /// <Hello
-    ///   name="John"
-    ///   tel={5555555}
-    ///   active
-    ///   validate
-    ///   classes={{
-    ///     greetings: classes.greetings
-    ///   }}
-    /// />;
     /// ```
     ///
     pub SortJsxProps {
