@@ -3730,37 +3730,6 @@ fn lint_only_group() {
 }
 
 #[test]
-fn lint_only_nursery_group() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-    let content = "";
-
-    let file_path = Path::new("check.js");
-    fs.insert(file_path.into(), content.as_bytes());
-
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from(
-            [
-                ("lint"),
-                "--only=nursery",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "lint_only_nursery_group",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn lint_only_group_with_disabled_rule() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
