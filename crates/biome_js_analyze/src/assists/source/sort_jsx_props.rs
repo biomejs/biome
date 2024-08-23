@@ -56,32 +56,29 @@ impl Rule for SortJsxProps {
 
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let props = ctx.query().clone();
-        let mut non_spread_props: Option<Vec<_>> = None;
+        let mut non_spread_props = Vec::new();
         let mut new_props = Vec::new();
         for prop in props.clone() {
             match prop {
                 AnyJsxAttribute::JsxAttribute(attr) => {
-                    if let Some(non_spread_props) = &mut non_spread_props {
-                        non_spread_props.push(attr);
-                    } else {
-                        non_spread_props = Some(vec![attr]);
-                    }
+                    non_spread_props.push(attr);
                 }
                 AnyJsxAttribute::JsxSpreadAttribute(_) => {
-                    if let Some(mut non_spread_props) = non_spread_props.take() {
+                    if !non_spread_props.is_empty() {
                         non_spread_props.sort_by(compare_props());
                         new_props.extend(
                             non_spread_props
+                                .clone()
                                 .into_iter()
                                 .map(AnyJsxAttribute::JsxAttribute),
                         );
                     }
-                    non_spread_props = None;
+                    non_spread_props.clear();
                     new_props.push(prop);
                 }
             }
         }
-        if let Some(mut non_spread_props) = non_spread_props {
+        if !non_spread_props.is_empty() {
             non_spread_props.sort_by(compare_props());
             new_props.extend(
                 non_spread_props
