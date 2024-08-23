@@ -116,24 +116,6 @@ impl Rule for NoAriaHiddenOnFocusable {
                 return None;
             }
 
-            // if let Some(tabindex_static) =
-            //     node.find_attribute_by_name("tabIndex")?.as_static_value()
-            // {
-            //     let tabindex_text = tabindex_static.text();
-            //     let tabindex_val = tabindex_text.trim().parse::<i32>();
-            //
-            //     if let Ok(num) = tabindex_val {
-            //         return (num >= 0).then_some(());
-            //     }
-            //
-            //     if !aria_roles
-            //         .is_not_interactive_element(element_name.text_trimmed(), attributes)
-            //     {
-            //         return Some(());
-            //     }
-            // }
-
-            // Do stuff if there is a tabIndex attribute
             if let Some(tabindex_attr) = node.find_attribute_by_name("tabIndex") {
                 let tabindex_val = tabindex_attr.initializer()?.value().ok()?;
 
@@ -165,6 +147,10 @@ impl Rule for NoAriaHiddenOnFocusable {
                         }
                     }
                 }
+            }
+
+            if !aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes) {
+                return Some(());
             }
         }
         None
