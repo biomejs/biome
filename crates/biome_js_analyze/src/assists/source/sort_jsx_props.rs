@@ -90,7 +90,7 @@ impl Rule for SortJsxProps {
             return None;
         }
         let mut mutation = ctx.root().begin();
-        mutation.replace_node_discard_trivia(props, jsx_attribute_list(new_props));
+        mutation.replace_node(props, jsx_attribute_list(new_props));
 
         Some(RuleAction::new(
             rule_action_category!(),
