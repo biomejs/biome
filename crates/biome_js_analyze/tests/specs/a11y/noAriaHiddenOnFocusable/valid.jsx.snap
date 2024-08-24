@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
 expression: valid.jsx
 ---
 # Input
@@ -14,4 +15,5 @@ expression: valid.jsx
   <div aria-hidden="true"><a href="#"></a></div>
   <button />
 </>
+
 ```
