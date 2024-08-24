@@ -34,7 +34,9 @@ use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
+use biome_string_case::StrExtension;
 pub use javascript::JsFormatterSettings;
+use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::Path;
 
@@ -91,30 +93,30 @@ impl From<&Path> for DocumentFileSource {
 }
 
 impl DocumentFileSource {
-    fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
-        if let Ok(file_source) = JsonFileSource::try_from_well_known(file_name) {
+    fn try_from_well_known(path: &Path) -> Result<Self, FileSourceError> {
+        if let Ok(file_source) = JsonFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = JsFileSource::try_from_well_known(file_name) {
+        if let Ok(file_source) = JsFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = CssFileSource::try_from_well_known(file_name) {
+        if let Ok(file_source) = CssFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = GraphqlFileSource::try_from_well_known(file_name) {
+        if let Ok(file_source) = GraphqlFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
         }
 
-        Err(FileSourceError::UnknownFileName(file_name.into()))
+        Err(FileSourceError::UnknownFileName)
     }
 
     /// Returns the document file source corresponding to this file name from well-known files
-    pub fn from_well_known(file_name: &str) -> Self {
-        Self::try_from_well_known(file_name)
+    pub fn from_well_known(path: &Path) -> Self {
+        Self::try_from_well_known(path)
             .map_or(DocumentFileSource::Unknown, |file_source| file_source)
     }
 
-    fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
+    fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -127,15 +129,12 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        Err(FileSourceError::UnknownExtension(
-            Default::default(),
-            extension.into(),
-        ))
+        Err(FileSourceError::UnknownExtension)
     }
 
     /// Returns the document file source corresponding to this file extension
-    pub fn from_extension(extension: &str) -> Self {
-        Self::try_from_extension(extension)
+    pub fn from_extension(extension: impl AsRef<OsStr>) -> Self {
+        Self::try_from_extension(extension.as_ref())
             .map_or(DocumentFileSource::Unknown, |file_source| file_source)
     }
 
@@ -152,7 +151,7 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        Err(FileSourceError::UnknownLanguageId(language_id.into()))
+        Err(FileSourceError::UnknownLanguageId)
     }
 
     /// Returns the document file source corresponding to this language ID
@@ -167,45 +166,38 @@ impl DocumentFileSource {
     }
 
     fn try_from_path(path: &Path) -> Result<Self, FileSourceError> {
-        let file_name = path
-            .file_name()
-            .and_then(OsStr::to_str)
-            .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?;
-
-        if let Ok(file_source) = Self::try_from_well_known(file_name) {
+        if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
         }
+
+        let filename = path
+            .file_name()
+            // We assume the file extensions are case-insensitive.
+            // Thus, we normalize the filrname to lowercase.
+            .map(|filename| filename.to_ascii_lowercase_cow());
 
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
         // TODO: This should be extracted to a dedicated function, maybe in biome_fs
         // because the same logic is also used in JsFileSource::try_from
         // and we may support more and more extensions with more than one dots.
-        let extension = &match path {
-            _ if path
-                .to_str()
-                .is_some_and(|p| p.to_lowercase().ends_with(".d.ts")) =>
-            {
-                Some("d.ts".to_owned())
+        let extension = &match filename {
+            Some(filename) if filename.as_encoded_bytes().ends_with(b".d.ts") => {
+                Cow::Borrowed("d.ts".as_ref())
             }
-            _ if path
-                .to_str()
-                .is_some_and(|p| p.to_lowercase().ends_with(".d.mts")) =>
-            {
-                Some("d.mts".to_owned())
+            Some(filename) if filename.as_encoded_bytes().ends_with(b".d.mts") => {
+                Cow::Borrowed("d.mts".as_ref())
             }
-            _ if path
-                .to_str()
-                .is_some_and(|p| p.to_lowercase().ends_with(".d.cts")) =>
-            {
-                Some("d.cts".to_owned())
+            Some(filename) if filename.as_encoded_bytes().ends_with(b".d.cts") => {
+                Cow::Borrowed("d.cts".as_ref())
             }
-            path => path
+            _ => path
                 .extension()
-                .and_then(OsStr::to_str)
-                .map(|s| s.to_lowercase()),
-        }
-        .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?;
+                // We assume the file extensions are case-insensitive.
+                // Thus, we normalize the extension to lowercase.
+                .map(|ext| ext.to_ascii_lowercase_cow())
+                .ok_or(FileSourceError::MissingFileExtension)?,
+        };
 
         Self::try_from_extension(extension)
     }

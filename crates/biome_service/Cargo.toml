@@ -45,6 +45,7 @@ biome_json_syntax        = { workspace = true }
 biome_parser             = { workspace = true }
 biome_project            = { workspace = true }
 biome_rowan              = { workspace = true, features = ["serde"] }
+biome_string_case        = { workspace = true }
 biome_text_edit          = { workspace = true }
 bpaf                     = { workspace = true }
 dashmap                  = { workspace = true }

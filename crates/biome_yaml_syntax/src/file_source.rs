@@ -30,25 +30,27 @@ impl YamlFileSource {
     }
 
     /// Try to return the Yaml file source corresponding to this file name from well-known files
-    pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
+    pub fn try_from_well_known(path: &Path) -> Result<Self, FileSourceError> {
+        let file_name = path
+            .file_name()
+            .and_then(OsStr::to_str)
+            .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?;
         if Self::is_well_known_yaml_file(file_name) {
             return Ok(Self::yaml());
         }
-        Err(FileSourceError::UnknownFileName(file_name.into()))
+        Err(FileSourceError::UnknownFileName)
     }
 
     /// Try to return the YAML file source corresponding to this file extension
-    pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
-        match extension {
+    pub fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
+        // We assume the file extension is normalized to lowercase
+        match extension.as_encoded_bytes() {
             // https://github.com/github-linguist/linguist/blob/4ac734c15a96f9e16fd12330d0cb8de82274f700/lib/linguist/languages.yml#L8070-L8079
             // https://yaml.org/spec/1.2.2/
-            "yaml" | "yml" | "eyaml" | "eyml" | "cff" | "yaml-tmlanguage"
-            | "yaml-tmpreferences" | "yaml-tmtheme" | "mir" | "reek" | "rviz"
-            | "sublime-syntax" | "syntax" | "yaml.sed" | "yml.mysql" => Ok(Self::yaml()),
-            _ => Err(FileSourceError::UnknownExtension(
-                Default::default(),
-                extension.into(),
-            )),
+            b"yaml" | b"yml" | b"eyaml" | b"eyml" | b"cff" | b"yaml-tmlanguage"
+            | b"yaml-tmpreferences" | b"yaml-tmtheme" | b"mir" | b"reek" | b"rviz"
+            | b"sublime-syntax" | b"syntax" | b"yaml.sed" | b"yml.mysql" => Ok(Self::yaml()),
+            _ => Err(FileSourceError::UnknownExtension),
         }
     }
 
@@ -63,7 +65,7 @@ impl YamlFileSource {
     pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         match language_id {
             "yaml" => Ok(Self::yaml()),
-            _ => Err(FileSourceError::UnknownLanguageId(language_id.into())),
+            _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
 }
@@ -75,21 +77,18 @@ impl TryFrom<&Path> for YamlFileSource {
         let file_name = path
             .file_name()
             .and_then(OsStr::to_str)
-            .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?;
+            .ok_or_else(|| FileSourceError::MissingFileName)?;
 
         if let Ok(file_source) = Self::try_from_well_known(file_name) {
             return Ok(file_source);
         }
 
+        let Some(extension) = path.extension() else {
+            return Err(FileSourceError::MissingFileExtension);
+        };
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
-        let extension = &path
-            .extension()
-            .and_then(OsStr::to_str)
-            .map(str::to_lowercase)
-            .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?;
-
-        Self::try_from_extension(extension)
+        Self::try_from_extension(&extension.to_ascii_lowercase())
     }
 }
 
