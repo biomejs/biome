@@ -436,17 +436,44 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### Enhancements
+
+- The JSON parser now allows comments in files with the `.json` extension under the `.vscode` and `.zed` directories.
+
+  Biome recognizes are well known JSON files that allows comments and/or trailing commas.
+  Previously, Biome did not recognize JSON files under the `.vscode` and the `.zed` directories as JSON files that allow comments.
+  You had to configure Biome to recognize them:
+
+  ```json
+  {
+    "overrides": [
+      {
+        "include": ["**/.vscode/*.json", "**/.zed/*.json"],
+        "json": { "parser": { "allowComments": true } }
+      }
+    ]
+  }
+  ```
+
+  This override is no longer needed!
+  Note that JSON files under the `.vscode` and the `.zed` directories don't accept trailing commas.
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#3287](https://github.com/biomejs/biome/issues/3287) nested selectors with pseudo-classes. Contributed by @denbezrukov
+
 - Fix [#3349](https://github.com/biomejs/biome/issues/3349) allow CSS multiple ampersand support. Contributed by @denbezrukov
-```css
-.class {
-  && {
-    color: red;
+
+  ```css
+  .class {
+    && {
+      color: red;
+    }
   }
-}
-```
+  ```
+
 - Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords.
   ```js
   out: while (true) {

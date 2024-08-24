@@ -1,6 +1,9 @@
 use biome_rowan::FileSourceError;
 use core::str;
-use std::{ffi::OsStr, path::Path};
+use std::{
+    ffi::OsStr,
+    path::{Component, Path},
+};
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[derive(
@@ -70,6 +73,12 @@ impl JsonFileSource {
         // https://github.com/vercel/turbo/blob/0f327961157a5ab07bbb353ac6ecb9a9df7e29b3/crates/turborepo-lib/src/turbo_json/mod.rs#L963
         b"turbo.json",
     ];
+
+    // Well-known folder where file with the `.json` extension support comments
+    // but no trailing commas.
+    // This list should be SORTED!
+    const WELL_KNOWN_JSON_ALLOW_COMMENTS_DIRECTORIES: &'static [&'static [u8]] =
+        &[b".vscode", b".zed"];
 
     // Well-known JSON-like files that support comments and trailing commas
     // This list should be SORTED!
@@ -177,6 +186,11 @@ impl JsonFileSource {
             .is_ok()
     }
 
+    pub fn is_well_known_json_allow_comments_directory(dirname: &OsStr) -> bool {
+        // Note: we don't use a binary search because the slice has only a few elements.
+        Self::WELL_KNOWN_JSON_ALLOW_COMMENTS_DIRECTORIES.contains(&dirname.as_encoded_bytes())
+    }
+
     pub fn is_well_known_json_allow_comments_and_trailing_commas_file(filename: &OsStr) -> bool {
         Self::WELL_KNOWN_JSON_ALLOW_COMMENTS_AND_TRAILING_COMMAS_FILES
             .binary_search(&filename.as_encoded_bytes())
@@ -191,6 +205,11 @@ impl JsonFileSource {
         }
         if Self::is_well_known_json_allow_comments_file(file_name) {
             return Ok(Self::json_allow_comments());
+        }
+        if let Some(Component::Normal(parent_dir)) = path.components().rev().nth(1) {
+            if Self::is_well_known_json_allow_comments_directory(parent_dir) {
+                return Ok(Self::json_allow_comments());
+            }
         }
         if Self::is_well_known_json_file(file_name) {
             return Ok(Self::json());
@@ -281,6 +300,14 @@ fn test_order() {
         );
     }
     for items in JsonFileSource::WELL_KNOWN_JSON_FILES.windows(2) {
+        assert!(
+            items[0] < items[1],
+            "{} < {}",
+            str::from_utf8(items[0]).unwrap(),
+            str::from_utf8(items[1]).unwrap()
+        );
+    }
+    for items in JsonFileSource::WELL_KNOWN_JSON_ALLOW_COMMENTS_DIRECTORIES.windows(2) {
         assert!(
             items[0] < items[1],
             "{} < {}",
