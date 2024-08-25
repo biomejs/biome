@@ -96,44 +96,64 @@ impl<W: io::Write> io::Write for HtmlAdapter<W> {
     fn write(&mut self, mut buf: &[u8]) -> io::Result<usize> {
         let mut bytes = 0;
 
-        const CHARS_TO_CHECK: [u8; 11] = [
-            b'"', b'&', b'<', b'>', b'\n', b'\r', b'{', b'}', b'*', b'_', b'\\',
-        ];
-        while let Some(idx) = buf.iter().position(|byte| CHARS_TO_CHECK.contains(byte)) {
-            let (before, after) = buf.split_at(idx);
+        const CHARS_TO_CHECK: [u8; 4] = [b'"', b'&', b'<', b'>'];
 
-            self.0.write_all(before)?;
-            bytes += before.len();
+        const MDX_CHARS: [u8; 7] = [b'\n', b'\r', b'{', b'}', b'*', b'_', b'\\'];
 
-            // SAFETY: Because of the above `position` match we know the buffer
-            // contains at least the matching byte
-            let result = after.split_first();
-            if let Some((byte, after)) = result {
-                match *byte {
-                    b'"' => self.0.write_all(b"&quot;")?,
-                    b'&' => self.0.write_all(b"&amp;")?,
-                    b'<' => self.0.write_all(b"&lt;")?,
-                    b'>' => self.0.write_all(b"&gt;")?,
-                    b'\n' => self.0.write_all(b"<br />")?,
-                    b'\r' => self.0.write_all(b"<br />")?,
-                    _ => {
-                        if self.1 {
-                            match *byte {
-                                b'{' => self.0.write_all(b"&#123;")?,
-                                b'}' => self.0.write_all(b"&#125;")?,
-                                b'*' => self.0.write_all(b"&#42;")?,
-                                b'_' => self.0.write_all(b"&#95;")?,
-                                b'\\' => self.0.write_all(b"&#92;")?,
-                                _ => self.0.write_all(&[*byte])?,
-                            }
-                        } else {
-                            unreachable!()
-                        }
+        for (idx, byte) in buf.iter().enumerate() {
+            if buf.get(idx).is_some() {
+                if CHARS_TO_CHECK.contains(byte) {
+                    let (before, after) = buf.split_at(idx);
+
+                    self.0.write_all(before)?;
+                    bytes += before.len();
+
+                    // SAFETY: Because of the above `position` match we know the buffer
+                    // contains at least the matching byte
+                    let (byte, after) = after.split_first().unwrap();
+
+                    match *byte {
+                        b'"' => self.0.write_all(b"&quot;")?,
+                        b'&' => self.0.write_all(b"&amp;")?,
+                        b'<' => self.0.write_all(b"&lt;")?,
+                        b'>' => self.0.write_all(b"&gt;")?,
+                        _ => unreachable!(
+                            "This should never happen, no mdx. Found `{}`",
+                            String::from_utf8(vec![*byte]).unwrap()
+                        ),
                     }
+
+                    bytes += 1;
+                    buf = after;
                 }
-                // Only 1 byte of the input was written
-                bytes += 1;
-                buf = after;
+
+                if MDX_CHARS.contains(byte) && self.1 {
+                    let (before, after) = buf.split_at(idx);
+
+                    self.0.write_all(before)?;
+                    bytes += before.len();
+
+                    // SAFETY: Because of the above `position` match we know the buffer
+                    // contains at least the matching byte
+                    let (byte, after) = after.split_first().unwrap();
+
+                    match *byte {
+                        b'\n' => self.0.write_all(b"<br />")?,
+                        b'\r' => self.0.write_all(b"<br />")?,
+                        b'{' => self.0.write_all(b"&#123;")?,
+                        b'}' => self.0.write_all(b"&#125;")?,
+                        b'*' => self.0.write_all(b"&#42;")?,
+                        b'_' => self.0.write_all(b"&#95;")?,
+                        b'\\' => self.0.write_all(b"&#92;")?,
+                        _ => unreachable!(
+                            "This should never happen, with mdx. Found `{}`",
+                            String::from_utf8(vec![*byte]).unwrap()
+                        ),
+                    }
+
+                    bytes += 1;
+                    buf = after;
+                }
             }
         }
 

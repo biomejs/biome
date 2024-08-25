@@ -384,6 +384,7 @@ dependencies = [
  "biome_text_size",
  "bitflags 2.6.0",
  "bpaf",
+ "insta",
  "oxc_resolver",
  "schemars",
  "serde",
