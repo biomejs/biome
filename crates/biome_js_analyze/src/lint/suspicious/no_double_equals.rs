@@ -66,7 +66,7 @@ declare_lint_rule! {
     /// ### ignoreNull
     ///
     /// When this option is set to `true`, an exception will be made for checking against `null`,
-    /// as reling on the double equals operator to compare with `null` is frequently used to check
+    /// as relying on the double equals operator to compare with `null` is frequently used to check
     /// equality with either `null` or `undefined`.
     ///
     /// When the option is set to `false`, all double equal operators will be forbidden without
