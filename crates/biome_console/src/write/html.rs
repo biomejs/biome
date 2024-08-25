@@ -9,7 +9,18 @@ use super::Write;
 
 /// Adapter struct implementing [Write] over types implementing [io::Write],
 /// renders markup as UTF-8 strings of HTML code
-pub struct HTML<W>(pub W);
+pub struct HTML<W>(pub W, bool);
+
+impl<W> HTML<W> {
+    pub fn new(writer: W) -> Self {
+        Self(writer, false)
+    }
+
+    pub fn with_mdx(mut self) -> Self {
+        self.1 = true;
+        self
+    }
+}
 
 impl<W> Write for HTML<W>
 where
@@ -17,13 +28,13 @@ where
 {
     fn write_str(&mut self, elements: &MarkupElements, content: &str) -> io::Result<()> {
         push_styles(&mut self.0, elements)?;
-        HtmlAdapter(&mut self.0).write_all(content.as_bytes())?;
+        HtmlAdapter(&mut self.0, self.1).write_all(content.as_bytes())?;
         pop_styles(&mut self.0, elements)
     }
 
     fn write_fmt(&mut self, elements: &MarkupElements, content: fmt::Arguments) -> io::Result<()> {
         push_styles(&mut self.0, elements)?;
-        HtmlAdapter(&mut self.0).write_fmt(content)?;
+        HtmlAdapter(&mut self.0, self.1).write_fmt(content)?;
         pop_styles(&mut self.0, elements)
     }
 }
@@ -79,13 +90,13 @@ fn pop_styles<W: io::Write>(fmt: &mut W, elements: &MarkupElements) -> io::Resul
 /// Adapter wrapping a type implementing [io::Write]. It's responsible for:
 /// - and adding HTML special characters escaping to the written byte sequence
 /// - and adding HTML line breaks for newline characters
-struct HtmlAdapter<W>(W);
+struct HtmlAdapter<W>(W, bool);
 
 impl<W: io::Write> io::Write for HtmlAdapter<W> {
     fn write(&mut self, mut buf: &[u8]) -> io::Result<usize> {
         let mut bytes = 0;
 
-        const CHARS_TO_CHECK: [u8; 6] = [b'"', b'&', b'<', b'>', b'\n', b'\r'];
+        const CHARS_TO_CHECK: [u8; 8] = [b'"', b'&', b'<', b'>', b'\n', b'\r', b'{', b'}'];
         while let Some(idx) = buf.iter().position(|byte| CHARS_TO_CHECK.contains(byte)) {
             let (before, after) = buf.split_at(idx);
 
@@ -94,20 +105,31 @@ impl<W: io::Write> io::Write for HtmlAdapter<W> {
 
             // SAFETY: Because of the above `position` match we know the buffer
             // contains at least the matching byte
-            let (byte, after) = after.split_first().unwrap();
-            match *byte {
-                b'"' => self.0.write_all(b"&quot;")?,
-                b'&' => self.0.write_all(b"&amp;")?,
-                b'<' => self.0.write_all(b"&lt;")?,
-                b'>' => self.0.write_all(b"&gt;")?,
-                b'\n' => self.0.write_all(b"<br />")?,
-                b'\r' => self.0.write_all(b"<br />")?,
-                _ => unreachable!(),
+            let result = after.split_first();
+            if let Some((byte, after)) = result {
+                match *byte {
+                    b'"' => self.0.write_all(b"&quot;")?,
+                    b'&' => self.0.write_all(b"&amp;")?,
+                    b'<' => self.0.write_all(b"&lt;")?,
+                    b'>' => self.0.write_all(b"&gt;")?,
+                    b'\n' => self.0.write_all(b"<br />")?,
+                    b'\r' => self.0.write_all(b"<br />")?,
+                    _ => {
+                        if self.1 {
+                            match *byte {
+                                b'{' => self.0.write_all(b"&#123;")?,
+                                b'}' => self.0.write_all(b"&#125;")?,
+                                _ => self.0.write_all(&[*byte])?,
+                            }
+                        } else {
+                            unreachable!()
+                        }
+                    }
+                }
+                // Only 1 byte of the input was written
+                bytes += 1;
+                buf = after;
             }
-
-            // Only 1 byte of the input was written
-            bytes += 1;
-            buf = after;
         }
 
         self.0.write_all(buf)?;
@@ -129,7 +151,7 @@ mod test {
     #[test]
     fn test_new_lines() {
         let mut buf = Vec::new();
-        let mut writer = super::HTML(&mut buf);
+        let mut writer = super::HTML(&mut buf, false);
         let mut formatter = Formatter::new(&mut writer);
 
         formatter
@@ -156,7 +178,7 @@ mod test {
     #[test]
     fn test_escapes() {
         let mut buf = Vec::new();
-        let mut writer = super::HTML(&mut buf);
+        let mut writer = super::HTML(&mut buf, false);
         let mut formatter = Formatter::new(&mut writer);
 
         formatter
@@ -176,7 +198,7 @@ mod test {
     #[test]
     fn test_escapes_and_new_lines() {
         let mut buf = Vec::new();
-        let mut writer = super::HTML(&mut buf);
+        let mut writer = super::HTML(&mut buf, false);
         let mut formatter = Formatter::new(&mut writer);
 
         formatter
@@ -188,6 +210,42 @@ mod test {
         assert_eq!(
             String::from_utf8(buf).unwrap(),
             "New rules that are still under development.<br /><br />."
+        );
+    }
+
+    #[test]
+    fn does_not_escape_curly_braces() {
+        let mut buf = Vec::new();
+        let mut writer = super::HTML(&mut buf, false);
+        let mut formatter = Formatter::new(&mut writer);
+
+        formatter
+            .write_markup(markup! {
+                "New rules that are still under development.\n\n."
+            })
+            .unwrap();
+
+        assert_eq!(
+            String::from_utf8(buf).unwrap(),
+            "New rules that are still under development.<br /><br />."
+        );
+    }
+
+    #[test]
+    fn escape_curly_braces() {
+        let mut buf = Vec::new();
+        let mut writer = super::HTML(&mut buf, false).with_mdx();
+        let mut formatter = Formatter::new(&mut writer);
+
+        formatter
+            .write_markup(markup! {
+                "New rules that are {still} under development.\n\n."
+            })
+            .unwrap();
+
+        assert_eq!(
+            String::from_utf8(buf).unwrap(),
+            "New rules that are &#123;still&#125; under development.<br /><br />."
         );
     }
 }
