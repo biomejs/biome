@@ -96,7 +96,8 @@ impl<W: io::Write> io::Write for HtmlAdapter<W> {
     fn write(&mut self, mut buf: &[u8]) -> io::Result<usize> {
         let mut bytes = 0;
 
-        const CHARS_TO_CHECK: [u8; 8] = [b'"', b'&', b'<', b'>', b'\n', b'\r', b'{', b'}'];
+        const CHARS_TO_CHECK: [u8; 10] =
+            [b'"', b'&', b'<', b'>', b'\n', b'\r', b'{', b'}', b'*', b'_'];
         while let Some(idx) = buf.iter().position(|byte| CHARS_TO_CHECK.contains(byte)) {
             let (before, after) = buf.split_at(idx);
 
@@ -119,6 +120,8 @@ impl<W: io::Write> io::Write for HtmlAdapter<W> {
                             match *byte {
                                 b'{' => self.0.write_all(b"&#123;")?,
                                 b'}' => self.0.write_all(b"&#125;")?,
+                                b'*' => self.0.write_all(b"&#42;")?,
+                                b'_' => self.0.write_all(b"&#95;")?,
                                 _ => self.0.write_all(&[*byte])?,
                             }
                         } else {
