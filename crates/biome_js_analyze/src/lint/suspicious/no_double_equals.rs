@@ -162,17 +162,27 @@ pub struct NoDoubleEqualsOptions {
     /// both for `null` or `undefined`.
     ///
     /// If `false`, no such exception will be made.
-    #[serde(default, skip_serializing_if = "is_default")]
+    #[serde(
+        default = "ignore_null_default",
+        skip_serializing_if = "is_ignore_null_default"
+    )]
     pub ignore_null: bool,
 }
 
 impl Default for NoDoubleEqualsOptions {
     fn default() -> Self {
-        Self { ignore_null: true }
+        Self {
+            ignore_null: ignore_null_default(),
+        }
     }
 }
-fn is_default<T: Default + Eq>(value: &T) -> bool {
-    value == &T::default()
+
+fn ignore_null_default() -> bool {
+    true
+}
+
+fn is_ignore_null_default(value: &bool) -> bool {
+    value == &ignore_null_default()
 }
 
 fn is_null_literal(res: &SyntaxResult<AnyJsExpression>) -> bool {
