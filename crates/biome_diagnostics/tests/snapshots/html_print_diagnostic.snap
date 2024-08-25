@@ -1,6 +1,6 @@
 ---
 source: crates/biome_diagnostics/tests/disagnostics.rs
-expression: "String::from_utf8(content).unwrap()"
+expression: content
 ---
 code_block check <span style="color: #000; background-color: #ddd;"> FIXABLE </span> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

@@ -46,10 +46,11 @@ fn html_print_diagnostic() {
         })
         .unwrap();
 
+    let content = String::from_utf8(content).unwrap();
     insta::with_settings!({
         prepend_module_to_snapshot => false,
     }, {
-        insta::assert_snapshot!(String::from_utf8(content).unwrap());
+        insta::assert_snapshot!(content);
     });
 }
 
