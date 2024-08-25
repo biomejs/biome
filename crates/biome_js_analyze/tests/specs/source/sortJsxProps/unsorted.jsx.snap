@@ -22,6 +22,14 @@ expression: unsorted.jsx
 @@ -1,2 +1,2 @@
  <Hello lastName="Smith" firstName="John" />;
 -<Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
-+<Hello address="NY" tel={5555555} {...this.props} firstName="John" lastName="Smith" />;
++<Hello address="NY" tel={5555555} {...this.props} lastName="Smith" firstName="John" />;
+
+```
+
+```diff
+@@ -1,2 +1,2 @@
+ <Hello lastName="Smith" firstName="John" />;
+-<Hello tel={5555555} address="NY" {...this.props} lastName="Smith" firstName="John" />;
++<Hello tel={5555555} address="NY" {...this.props} firstName="John" lastName="Smith" />;
 
 ```
