@@ -260,11 +260,11 @@ impl Aliases {
         self
     }
 
-    pub fn get_paths_by_name(&self, name: &str) -> Option<&Vec<PathBuf>> {
+    pub fn get_paths_by_name(&self, name: &str) -> Option<&[PathBuf]> {
         self.aliases
             .iter()
             .find(|alias| alias.name == name)
-            .map(|alias| &alias.prefix)
+            .map(|alias| alias.prefix.as_slice())
     }
 }
 
