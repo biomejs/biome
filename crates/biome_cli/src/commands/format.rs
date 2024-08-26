@@ -18,9 +18,7 @@ use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{
     load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
-use biome_service::workspace::{
-    RegisterProjectFolderParams, SetManifestForProjectParams, UpdateSettingsParams,
-};
+use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
 
 use super::check_fix_incompatible_arguments;
@@ -238,15 +236,11 @@ pub(crate) fn format(
 
     let manifest_data = resolve_manifest(&session.app.fs)?;
 
-    if let Some((manifest_path, content)) = manifest_data {
+    if let Some(manifest_data) = manifest_data {
         session
             .app
             .workspace
-            .set_manifest_for_project(SetManifestForProjectParams {
-                manifest_path,
-                content,
-                version: 0,
-            })?;
+            .set_manifest_for_project(manifest_data.into())?;
     }
     session
         .app

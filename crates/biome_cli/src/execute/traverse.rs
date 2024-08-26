@@ -17,6 +17,7 @@ use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
+use std::collections::BTreeSet;
 use std::sync::atomic::AtomicU32;
 use std::sync::RwLock;
 use std::{
@@ -34,7 +35,7 @@ use std::{
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
-    pub(crate) evaluated_paths: FxHashSet<BiomePath>,
+    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
     pub(crate) diagnostics: Vec<Error>,
 }
 
@@ -169,7 +170,7 @@ fn traverse_inputs(
     fs: &dyn FileSystem,
     inputs: Vec<OsString>,
     ctx: &TraversalOptions,
-) -> (Duration, FxHashSet<BiomePath>) {
+) -> (Duration, BTreeSet<BiomePath>) {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
@@ -555,7 +556,7 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     pub(crate) remaining_diagnostics: &'ctx AtomicU32,
 
     /// List of paths that should be processed
-    pub(crate) evaluated_paths: RwLock<FxHashSet<BiomePath>>,
+    pub(crate) evaluated_paths: RwLock<BTreeSet<BiomePath>>,
 }
 
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
@@ -593,7 +594,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         &self.interner
     }
 
-    fn evaluated_paths(&self) -> FxHashSet<BiomePath> {
+    fn evaluated_paths(&self) -> BTreeSet<BiomePath> {
         self.evaluated_paths.read().unwrap().clone()
     }
 
@@ -667,11 +668,11 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         }
     }
 
-    fn handle_path(&self, path: &BiomePath) {
-        handle_file(self, path)
+    fn handle_path(&self, path: BiomePath) {
+        handle_file(self, &path)
     }
 
-    fn store_path(&self, path: &BiomePath) {
+    fn store_path(&self, path: BiomePath) {
         self.evaluated_paths
             .write()
             .unwrap()

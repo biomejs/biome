@@ -310,7 +310,7 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                     if !ctx.can_handle(&biome_path) {
                         continue;
                     }
-                    ctx.store_path(&biome_path);
+                    ctx.store_path(biome_path);
                 }
             }
         }
@@ -337,12 +337,13 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
     }
 
     fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf) {
-        context.handle_path(&BiomePath::new(path));
+        context.handle_path(BiomePath::new(path));
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeSet;
     use std::{
         io,
         mem::swap,
@@ -518,7 +519,7 @@ mod tests {
 
         struct TestContext {
             interner: PathInterner,
-            visited: Mutex<FxHashSet<BiomePath>>,
+            visited: Mutex<BTreeSet<BiomePath>>,
         }
 
         impl TraversalContext for TestContext {
@@ -534,15 +535,15 @@ mod tests {
                 true
             }
 
-            fn handle_path(&self, path: &BiomePath) {
+            fn handle_path(&self, path: BiomePath) {
                 self.visited.lock().insert(path.to_written());
             }
 
-            fn store_path(&self, path: &BiomePath) {
-                self.visited.lock().insert(path.clone());
+            fn store_path(&self, path: BiomePath) {
+                self.visited.lock().insert(path);
             }
 
-            fn evaluated_paths(&self) -> FxHashSet<BiomePath> {
+            fn evaluated_paths(&self) -> BTreeSet<BiomePath> {
                 let lock = self.visited.lock();
                 lock.clone()
             }
@@ -559,7 +560,7 @@ mod tests {
             scope.evaluate(&ctx, PathBuf::from("dir1"));
         }));
 
-        let mut visited = FxHashSet::default();
+        let mut visited = BTreeSet::default();
         swap(&mut visited, ctx.visited.get_mut());
 
         assert_eq!(visited.len(), 2);
@@ -571,7 +572,7 @@ mod tests {
             scope.evaluate(&ctx, PathBuf::from("dir2/file2"));
         }));
 
-        let mut visited = FxHashSet::default();
+        let mut visited = BTreeSet::default();
         swap(&mut visited, ctx.visited.get_mut());
 
         assert_eq!(visited.len(), 1);

@@ -9,8 +9,7 @@ use biome_service::configuration::{
     load_configuration, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::{
-    ParsePatternParams, RegisterProjectFolderParams, SetManifestForProjectParams,
-    UpdateSettingsParams,
+    ParsePatternParams, RegisterProjectFolderParams, UpdateSettingsParams,
 };
 use std::ffi::OsString;
 
@@ -69,15 +68,11 @@ pub(crate) fn search(
         })?;
     let manifest_data = resolve_manifest(&session.app.fs)?;
 
-    if let Some((manifest_path, content)) = manifest_data {
+    if let Some(manifest_data) = manifest_data {
         session
             .app
             .workspace
-            .set_manifest_for_project(SetManifestForProjectParams {
-                manifest_path,
-                content,
-                version: 0,
-            })?;
+            .set_manifest_for_project(manifest_data.into())?;
     }
 
     session

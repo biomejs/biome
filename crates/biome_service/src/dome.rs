@@ -1,13 +1,13 @@
 use biome_fs::BiomePath;
-use rustc_hash::FxHashSet;
-use std::collections::hash_set::Iter;
-use std::iter::Peekable;
+use std::collections::btree_set::Iter;
+use std::collections::BTreeSet;
+use std::iter::{FusedIterator, Peekable};
 
 #[derive(Debug, Default)]
 /// A type that holds the evaluated paths, and provides an iterator to extract
 /// specific paths like configuration files, manifests and more.
 pub struct Dome {
-    paths: FxHashSet<BiomePath>,
+    paths: BTreeSet<BiomePath>,
 }
 
 impl Dome {
@@ -16,7 +16,7 @@ impl Dome {
         self
     }
 
-    pub fn new(paths: FxHashSet<BiomePath>) -> Self {
+    pub fn new(paths: BTreeSet<BiomePath>) -> Self {
         Self { paths }
     }
 
@@ -26,7 +26,7 @@ impl Dome {
         }
     }
 
-    pub fn to_paths(self) -> FxHashSet<BiomePath> {
+    pub fn to_paths(self) -> BTreeSet<BiomePath> {
         self.paths
     }
 }
@@ -80,3 +80,5 @@ impl<'a> Iterator for DomeIterator<'a> {
         self.iter.next()
     }
 }
+
+impl<'a> FusedIterator for DomeIterator<'a> {}

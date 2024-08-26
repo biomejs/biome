@@ -15,7 +15,7 @@ use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{load_editorconfig, PartialConfigurationExt};
-use biome_service::workspace::{RegisterProjectFolderParams, SetManifestForProjectParams};
+use biome_service::workspace::RegisterProjectFolderParams;
 use biome_service::{
     configuration::{load_configuration, LoadedConfiguration},
     workspace::UpdateSettingsParams,
@@ -187,16 +187,13 @@ pub(crate) fn check(
         })?;
     let manifest_data = resolve_manifest(&session.app.fs)?;
 
-    if let Some((manifest_path, content)) = manifest_data {
+    if let Some(manifest_data) = manifest_data {
         session
             .app
             .workspace
-            .set_manifest_for_project(SetManifestForProjectParams {
-                manifest_path,
-                content,
-                version: 0,
-            })?;
+            .set_manifest_for_project(manifest_data.into())?;
     }
+
     session
         .app
         .workspace

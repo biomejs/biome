@@ -504,6 +504,16 @@ pub struct SetManifestForProjectParams {
     pub version: i32,
 }
 
+impl From<(BiomePath, String)> for SetManifestForProjectParams {
+    fn from((manifest_path, content): (BiomePath, String)) -> Self {
+        Self {
+            manifest_path,
+            content,
+            version: 0,
+        }
+    }
+}
+
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GetSyntaxTreeParams {

@@ -4,8 +4,8 @@ use biome_diagnostics::{Error, Severity};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
 use oxc_resolver::{Resolution, ResolveError};
-use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
 use std::panic::RefUnwindSafe;
 use std::path::{Path, PathBuf};
@@ -331,14 +331,14 @@ pub trait TraversalContext: Sync {
 
     /// This method will be called by the traversal for each file it finds
     /// where [TraversalContext::can_handle] returned true
-    fn handle_path(&self, path: &BiomePath);
+    fn handle_path(&self, path: BiomePath);
 
     /// This method will be called by the traversal for each file it finds
     /// where [TraversalContext::store_path] returned true
-    fn store_path(&self, path: &BiomePath);
+    fn store_path(&self, path: BiomePath);
 
     /// Returns the paths that should be handled
-    fn evaluated_paths(&self) -> FxHashSet<BiomePath>;
+    fn evaluated_paths(&self) -> BTreeSet<BiomePath>;
 }
 
 impl<T> FileSystem for Arc<T>
