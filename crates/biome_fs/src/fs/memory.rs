@@ -539,7 +539,7 @@ mod tests {
             }
 
             fn store_path(&self, path: &BiomePath) {
-                self.visited.lock().insert(path.into());
+                self.visited.lock().insert(path.clone());
             }
 
             fn evaluated_paths(&self) -> FxHashSet<BiomePath> {
