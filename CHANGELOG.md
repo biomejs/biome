@@ -104,6 +104,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Migrating from Prettier or ESLint no longer overwrite the `overrides` field from the configuration ([#3544](https://github.com/biomejs/biome/issues/3544)). Contributed by @Conaclos
 
+- Fix JSX expressions for `noAriaHiddenOnFocusable` ([#3708](https://github.com/biomejs/biome/pull/3708)) . Contributed by @anthonyshew
+
 ### Configuration
 
 - Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)).
