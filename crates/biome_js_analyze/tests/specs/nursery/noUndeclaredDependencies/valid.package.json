@@ -1,4 +1,8 @@
 {
+	"name": "my-package",
+	"exports": {
+	  ".": "./index.js"
+	},
 	"dependencies": {
 		"react": "1.0.0",
 		"@mui/material": "5.15.12",

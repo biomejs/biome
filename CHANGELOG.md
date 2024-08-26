@@ -425,16 +425,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- [suspicious/noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now corretcly handle `\u` escapes in unicode-aware regexes.
+- [noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now corretcly handle `\u` escapes in unicode-aware regexes.
 
   Previously, the rule didn't consider regex with the `v` flags as unicode-aware regexes.
   Moreover, `\uhhhh` was not handled in unicode-aware regexes.
 
   Contributed by @Conaclos
 
-- [suspicious/noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now reports control characters and escape sequence of control characters in string regexes. Contributed by @Conaclos
+- [noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now reports control characters and escape sequence of control characters in string regexes. Contributed by @Conaclos
 
 - [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) lint error with Template literals ([#3394](https://github.com/biomejs/biome/issues/3394)). Contributed by @hangaoke1
+
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now ignores self package imports. Contributed by @Conaclos
 
 ### Parser
 
