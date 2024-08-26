@@ -352,7 +352,6 @@ mod tests {
 
     use biome_diagnostics::Error;
     use parking_lot::Mutex;
-    use rustc_hash::FxHashSet;
 
     use crate::{fs::FileSystemExt, OpenOptions};
     use crate::{BiomePath, FileSystem, MemoryFileSystem, PathInterner, TraversalContext};

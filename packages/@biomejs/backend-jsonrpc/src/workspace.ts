@@ -33,8 +33,8 @@ export type FileKind2 =
 	| "Config"
 	| "Manifest"
 	| "Ignore"
-	| "ToInspect"
-	| "ToHandle";
+	| "Inspectable"
+	| "Handleable";
 export interface SupportsFeatureResult {
 	reason?: SupportKind;
 }
