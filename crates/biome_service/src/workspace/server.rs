@@ -174,14 +174,14 @@ impl WorkspaceServer {
         let _ = current_project_path.insert(path);
     }
 
-    /// Updates the current project of the current workspace
+    /// Register a new project in the current workspace
     fn register_project(&self, path: PathBuf) -> ProjectKey {
         let mut workspace = self.workspaces_mut();
         let workspace_mut = workspace.as_mut();
         workspace_mut.insert_project(path.clone())
     }
 
-    /// Updates the current project of the current workspace
+    /// Updates the manifest for the current project. Given the manifest path, the function will try to parse the manifest and update the current project.
     fn register_manifest_for_project(&self, manifest_path: BiomePath) {
         let mut workspace = self.workspaces_mut();
         let workspace_mut = workspace.as_mut();
@@ -200,7 +200,7 @@ impl WorkspaceServer {
         }
     }
 
-    /// Updates the current project of the current workspace
+    /// Sets the current project of the current workspace
     fn set_current_project(&self, project_key: ProjectKey) {
         let mut workspace = self.workspaces_mut();
         let workspace_mut = workspace.as_mut();
