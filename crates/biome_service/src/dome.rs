@@ -3,9 +3,9 @@ use std::collections::btree_set::Iter;
 use std::collections::BTreeSet;
 use std::iter::{FusedIterator, Peekable};
 
-#[derive(Debug, Default)]
 /// A type that holds the evaluated paths, and provides an iterator to extract
 /// specific paths like configuration files, manifests and more.
+#[derive(Debug, Default)]
 pub struct Dome {
     paths: BTreeSet<BiomePath>,
 }

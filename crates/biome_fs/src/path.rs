@@ -212,12 +212,12 @@ impl Ord for BiomePath {
     }
 }
 
+/// It defines an alias for a path
 #[derive(Debug, Clone, Hash, Default)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
 )]
-/// It defines an alias for a path
 struct AliasPath {
     /// The name given to the alias
     name: String,
