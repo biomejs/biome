@@ -94,7 +94,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
             list: ListAdvice {
                 list: evaluated_paths
                     .iter()
-                    .filter(|p| p.is_fixed())
+                    .filter(|p| p.was_written())
                     .map(|p| p.display().to_string())
                     .collect(),
             },

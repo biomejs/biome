@@ -562,7 +562,7 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
     pub(crate) fn increment_changed(&self, path: &BiomePath) {
         self.changed.fetch_add(1, Ordering::Relaxed);
         let mut evaluated_paths = self.evaluated_paths.write().unwrap();
-        evaluated_paths.replace(path.to_fixed());
+        evaluated_paths.replace(path.to_written());
     }
     pub(crate) fn increment_unchanged(&self) {
         self.unchanged.fetch_add(1, Ordering::Relaxed);

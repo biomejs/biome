@@ -6,9 +6,18 @@ export interface SupportsFeatureParams {
 }
 export type FeatureName = FeatureKind[];
 export interface BiomePath {
-	is_fixed: boolean;
+	/**
+	 * Determines the kind of the file inside Biome. Some files are considered as configuration files, others as manifest files, and others as files to handle
+	 */
 	kind: FileKind;
+	/**
+	 * The path to the file
+	 */
 	path: string;
+	/**
+	 * Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
+	 */
+	was_written: boolean;
 }
 export type FeatureKind =
 	| "Format"
@@ -16,11 +25,16 @@ export type FeatureKind =
 	| "OrganizeImports"
 	| "Search"
 	| "Assists";
-export type FileKind = FileKindFlag[];
+export type FileKind = FileKind2[];
 /**
  * The priority of the file
  */
-export type FileKindFlag = "Config" | "Manifest" | "ToInspect" | "ToHandle";
+export type FileKind2 =
+	| "Config"
+	| "Manifest"
+	| "Ignore"
+	| "ToInspect"
+	| "ToHandle";
 export interface SupportsFeatureResult {
 	reason?: SupportKind;
 }

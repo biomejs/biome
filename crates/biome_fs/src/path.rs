@@ -13,7 +13,7 @@ use std::path::Path;
 use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 
 /// The priority of the file
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Ord, PartialOrd, Hash)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Ord, PartialOrd, Hash)]
 #[repr(u8)]
 #[bitflags]
 #[cfg_attr(
@@ -21,27 +21,30 @@ use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
 )]
 // NOTE: The order of the variants is important, the one on the top has the highest priority
-pub enum FileKindFlag {
+pub enum FileKind {
     /// A configuration file has the highest priority. It's usually `biome.json` and `biome.jsonc`
     ///
     /// Other third-party configuration files might be added in the future
     Config,
     /// It's usually `package.json` and `tsconfig.json`
     Manifest,
+    /// An ignore file, like `.gitignore`
+    Ignore,
     /// Files that are required to be inspected before handling other files.
     ///
     /// An example is the GraphQL schema
     ToInspect,
     /// A file to handle has the lowest priority. It's usually a traversed file, or a file opened by the LSP
+    #[default]
     ToHandle,
 }
 
 #[derive(Debug, Clone, Hash, Ord, PartialOrd, Eq, PartialEq, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct FileKind(BitFlags<FileKindFlag>);
+pub struct FileKinds(BitFlags<FileKind>);
 
-impl From<FileKindFlag> for FileKind {
-    fn from(flag: FileKindFlag) -> Self {
+impl From<FileKind> for FileKinds {
+    fn from(flag: FileKind) -> Self {
         Self(BitFlags::from(flag))
     }
 }
@@ -52,47 +55,50 @@ impl From<FileKindFlag> for FileKind {
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
 )]
 pub struct BiomePath {
+    /// The path to the file
     path: PathBuf,
-    kind: FileKind,
-    is_fixed: bool,
+    /// Determines the kind of the file inside Biome. Some files are considered as configuration files, others as manifest files, and others as files to handle
+    kind: FileKinds,
+    /// Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
+    was_written: bool,
 }
 
 impl BiomePath {
     pub fn new(path_to_file: impl Into<PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = Self::priority(path.file_name().and_then(OsStr::to_str).unwrap_or(""));
+        let kind = path.file_name().map(Self::priority).unwrap_or_default();
         Self {
             path,
             kind,
-            is_fixed: false,
+            was_written: false,
         }
     }
 
-    pub fn new_fixed(path_to_file: impl Into<PathBuf>) -> Self {
+    pub fn new_written(path_to_file: impl Into<PathBuf>) -> Self {
         let path = path_to_file.into();
-        let kind = Self::priority(path.file_name().and_then(OsStr::to_str).unwrap_or(""));
+        let kind = path.file_name().map(Self::priority).unwrap_or_default();
         Self {
             path,
             kind,
-            is_fixed: true,
+            was_written: true,
         }
     }
 
     /// Creates a new [BiomePath], marked as fixed
-    pub fn to_fixed(&self) -> Self {
+    pub fn to_written(&self) -> Self {
         Self {
             path: self.path.clone(),
             kind: self.kind.clone(),
-            is_fixed: true,
+            was_written: true,
         }
     }
 
-    pub fn is_fixed(&self) -> bool {
-        self.is_fixed
+    pub fn was_written(&self) -> bool {
+        self.was_written
     }
 
     /// Adds a file kind to the current file
-    pub fn with_file_kind(mut self, kind: FileKindFlag) -> Self {
+    pub fn with_file_kind(mut self, kind: FileKind) -> Self {
         self.kind.0.insert(kind);
         self
     }
@@ -125,48 +131,52 @@ impl BiomePath {
     }
 
     /// Returns the file name of the path
-    fn get_file_name(&self) -> Option<&str> {
-        self.path.file_name().and_then(OsStr::to_str)
+    fn get_file_name(&self) -> Option<&OsStr> {
+        self.path.file_name()
     }
 
     /// The priority of the file.
     /// - `biome.json` and `biome.jsonc` have the highest priority
     /// - `package.json` and `tsconfig.json`/`jsconfig.json` have the second-highest priority, and they are considered as manifest files
     /// - Other files are considered as files to handle
-    fn priority(file_name: &str) -> FileKind {
+    fn priority(file_name: &OsStr) -> FileKinds {
         if file_name == ConfigName::biome_json() || file_name == ConfigName::biome_jsonc() {
-            FileKindFlag::Config.into()
+            FileKind::Config.into()
         } else if matches!(
-            file_name,
-            "package.json" | "tsconfig.json" | "jsconfig.json"
+            file_name.as_encoded_bytes(),
+            b"package.json" | b"tsconfig.json" | b"jsconfig.json"
         ) {
-            FileKindFlag::Manifest.into()
+            FileKind::Manifest.into()
         } else {
-            FileKindFlag::ToHandle.into()
+            FileKind::ToHandle.into()
         }
     }
 
     pub fn is_config(&self) -> bool {
-        self.kind.0.contains(FileKindFlag::Config)
+        self.kind.0.contains(FileKind::Config)
     }
 
     pub fn is_manifest(&self) -> bool {
-        self.kind.0.contains(FileKindFlag::Manifest)
+        self.kind.0.contains(FileKind::Manifest)
+    }
+
+    pub fn is_ignore(&self) -> bool {
+        self.kind.0.contains(FileKind::Ignore)
     }
 
     pub fn is_to_inspect(&self) -> bool {
-        self.kind.0.contains(FileKindFlag::ToInspect)
+        self.kind.0.contains(FileKind::ToInspect)
     }
 }
 
 #[cfg(feature = "serde")]
-impl schemars::JsonSchema for FileKind {
+impl schemars::JsonSchema for FileKinds {
     fn schema_name() -> String {
         String::from("FileKind")
     }
 
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
-        <Vec<FileKindFlag>>::json_schema(gen)
+        <Vec<FileKind>>::json_schema(gen)
     }
 }
 
@@ -202,12 +212,6 @@ impl Ord for BiomePath {
     }
 }
 
-impl From<&BiomePath> for BiomePath {
-    fn from(value: &BiomePath) -> Self {
-        BiomePath::new(value.path.clone())
-    }
-}
-
 #[derive(Debug, Clone, Hash, Default)]
 #[cfg_attr(
     feature = "serde",
@@ -217,7 +221,7 @@ impl From<&BiomePath> for BiomePath {
 struct AliasPath {
     /// The name given to the alias
     name: String,
-    /// The path associated to `name`
+    /// The paths associated to `name`
     prefix: Vec<PathBuf>,
 }
 
@@ -266,7 +270,8 @@ impl Aliases {
 
 #[cfg(test)]
 mod test {
-    use crate::path::FileKindFlag;
+    use crate::path::FileKind;
+    use std::ffi::OsStr;
 
     #[test]
     fn test_biome_paths() {
@@ -275,18 +280,18 @@ mod test {
 
         let path = PathBuf::from("src/package.json");
         let biome_path = BiomePath::new(path);
-        assert_eq!(biome_path.get_file_name(), Some("package.json"));
+        assert_eq!(biome_path.get_file_name(), Some(OsStr::new("package.json")));
         assert_eq!(
-            BiomePath::priority("package.json"),
-            FileKindFlag::Manifest.into()
+            BiomePath::priority(OsStr::new("package.json")),
+            FileKind::Manifest.into()
         );
         assert_eq!(
-            BiomePath::priority("biome.json"),
-            FileKindFlag::Config.into()
+            BiomePath::priority(OsStr::new("biome.json")),
+            FileKind::Config.into()
         );
         assert_eq!(
-            BiomePath::priority("biome.jsonc"),
-            FileKindFlag::Config.into()
+            BiomePath::priority(OsStr::new("biome.jsonc")),
+            FileKind::Config.into()
         );
     }
 
@@ -305,12 +310,30 @@ mod test {
         let mut paths = [path1, path2, path3, path4, path5, path6];
         paths.sort();
         let mut iter = paths.iter();
-        assert_eq!(iter.next().unwrap().get_file_name(), Some("biome.json"));
-        assert_eq!(iter.next().unwrap().get_file_name(), Some("biome.jsonc"));
-        assert_eq!(iter.next().unwrap().get_file_name(), Some("biome.jsonc"));
-        assert_eq!(iter.next().unwrap().get_file_name(), Some("package.json"));
-        assert_eq!(iter.next().unwrap().get_file_name(), Some("tsconfig.json"));
-        assert_eq!(iter.next().unwrap().get_file_name(), Some("README.md"));
+        assert_eq!(
+            iter.next().unwrap().get_file_name(),
+            Some(OsStr::new("biome.json"))
+        );
+        assert_eq!(
+            iter.next().unwrap().get_file_name(),
+            Some(OsStr::new("biome.jsonc"))
+        );
+        assert_eq!(
+            iter.next().unwrap().get_file_name(),
+            Some(OsStr::new("biome.jsonc"))
+        );
+        assert_eq!(
+            iter.next().unwrap().get_file_name(),
+            Some(OsStr::new("package.json"))
+        );
+        assert_eq!(
+            iter.next().unwrap().get_file_name(),
+            Some(OsStr::new("tsconfig.json"))
+        );
+        assert_eq!(
+            iter.next().unwrap().get_file_name(),
+            Some(OsStr::new("README.md"))
+        );
     }
 
     #[test]

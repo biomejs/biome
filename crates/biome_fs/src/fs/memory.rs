@@ -535,7 +535,7 @@ mod tests {
             }
 
             fn handle_path(&self, path: &BiomePath) {
-                self.visited.lock().insert(path.to_fixed());
+                self.visited.lock().insert(path.to_written());
             }
 
             fn store_path(&self, path: &BiomePath) {

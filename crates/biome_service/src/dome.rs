@@ -48,6 +48,18 @@ impl<'a> DomeIterator<'a> {
         };
     }
 
+    pub fn next_ignore(&mut self) -> Option<&'a BiomePath> {
+        return if let Some(path) = self.iter.peek() {
+            if path.is_ignore() {
+                self.iter.next()
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+    }
+
     pub fn next_manifest(&mut self) -> Option<&'a BiomePath> {
         return if let Some(path) = self.iter.peek() {
             if path.is_manifest() {
