@@ -5,7 +5,7 @@ expression: content
 # Emitted Messages
 
 ```block
-A command to retrieve the documentation of various aspects of the CLI.
+Shows documentation of various aspects of the CLI.
 ## Examples
 ```shell biome explain noDebugger ```
 ```shell biome explain daemon-logs ```
@@ -19,5 +19,3 @@ Available options:
     -h, --help  Prints help information
 
 ```
-
-
