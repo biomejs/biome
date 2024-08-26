@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::{env, io, iter};
 
+use biome_console::fmt::MarkupElements;
 use biome_console::{fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode};
 use biome_text_edit::TextEdit;
 use unicode_width::UnicodeWidthStr;
@@ -38,7 +39,6 @@ pub struct PrintDiagnostic<'fmt, D: ?Sized> {
     diag: &'fmt D,
     verbose: bool,
     search: bool,
-    escape_indentation: bool,
 }
 
 impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
@@ -47,7 +47,6 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
             diag,
             verbose: false,
             search: false,
-            escape_indentation: false,
         }
     }
 
@@ -56,7 +55,6 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
             diag,
             verbose: true,
             search: false,
-            escape_indentation: false,
         }
     }
 
@@ -65,16 +63,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
             diag,
             verbose: false,
             search: true,
-            escape_indentation: false,
         }
-    }
-
-    /// When enabled, the indentation of the messages will be escaped using `&nbsp;`, which is HTML friendly.
-    ///
-    /// Various tools out there, notably MDX, treats tags with whitespaces differently, and they will strip them.
-    pub fn with_escaped_indentation(mut self) -> Self {
-        self.escape_indentation = true;
-        self
     }
 }
 
@@ -86,31 +75,16 @@ impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintDiagnostic<'_, D> {
         fmt.write_markup(markup! {
             {PrintHeader(diagnostic)}"\n\n"
         })?;
-        let indentation = if self.escape_indentation {
-            "&nbsp;&nbsp;"
-        } else {
-            "  "
-        };
         // Wrap the formatter with an indentation level and print the advices
         let mut slot = None;
-        let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, indentation);
+        let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, "  ");
 
         if self.search {
             let mut visitor = PrintSearch(&mut fmt);
-            print_advices(
-                &mut visitor,
-                diagnostic,
-                self.verbose,
-                self.escape_indentation,
-            )
+            print_advices(&mut visitor, diagnostic, self.verbose)
         } else {
             let mut visitor = PrintAdvices(&mut fmt);
-            print_advices(
-                &mut visitor,
-                diagnostic,
-                self.verbose,
-                self.escape_indentation,
-            )
+            print_advices(&mut visitor, diagnostic, self.verbose)
         }
     }
 }
@@ -260,12 +234,7 @@ impl<W: fmt::Write + ?Sized> fmt::Write for CountWidth<'_, W> {
 }
 
 /// Write the advices for `diagnostic` into `visitor`.
-fn print_advices<V, D>(
-    visitor: &mut V,
-    diagnostic: &D,
-    verbose: bool,
-    escape_indentation: bool,
-) -> io::Result<()>
+fn print_advices<V, D>(visitor: &mut V, diagnostic: &D, verbose: bool) -> io::Result<()>
 where
     V: Visit,
     D: Diagnostic + ?Sized,
@@ -282,7 +251,7 @@ where
     let skip_frame = frame_visitor.skip_frame;
 
     // Print the message for the diagnostic as a log advice
-    print_message_advice(visitor, diagnostic, skip_frame, escape_indentation)?;
+    print_message_advice(visitor, diagnostic, skip_frame)?;
 
     // Print the other advices for the diagnostic
     diagnostic.advices(visitor)?;
@@ -328,12 +297,7 @@ impl Visit for FrameVisitor<'_> {
 }
 
 /// Print the message and code frame for the diagnostic as advices.
-fn print_message_advice<V, D>(
-    visitor: &mut V,
-    diagnostic: &D,
-    skip_frame: bool,
-    escape_indentation: bool,
-) -> io::Result<()>
+fn print_message_advice<V, D>(visitor: &mut V, diagnostic: &D, skip_frame: bool) -> io::Result<()>
 where
     V: Visit,
     D: Diagnostic + ?Sized,
@@ -342,7 +306,7 @@ where
     let message = {
         let mut message = MarkupBuf::default();
         let mut fmt = fmt::Formatter::new(&mut message);
-        fmt.write_markup(markup!({ PrintCauseChain(diagnostic, escape_indentation) }))?;
+        fmt.write_markup(markup!({ PrintCauseChain(diagnostic) }))?;
         message
     };
 
@@ -378,11 +342,11 @@ where
 
 /// Display wrapper for printing the "cause chain" of a diagnostic, with the
 /// message of this diagnostic and all of its sources.
-struct PrintCauseChain<'fmt, D: ?Sized>(&'fmt D, bool);
+struct PrintCauseChain<'fmt, D: ?Sized>(&'fmt D);
 
 impl<D: Diagnostic + ?Sized> fmt::Display for PrintCauseChain<'_, D> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let Self(diagnostic, should_escape_indentation) = *self;
+        let Self(diagnostic) = *self;
 
         diagnostic.message(fmt)?;
 
@@ -391,12 +355,7 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintCauseChain<'_, D> {
             fmt.write_str("\n\nCaused by:\n")?;
 
             let mut slot = None;
-            let indentation = if should_escape_indentation {
-                "&nbsp;&nbsp;"
-            } else {
-                "  "
-            };
-            let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, indentation);
+            let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, "  ");
             diagnostic.message(&mut fmt)?;
         }
 
@@ -614,7 +573,8 @@ impl<W: fmt::Write + ?Sized> fmt::Write for IndentWriter<'_, W> {
     ) -> io::Result<()> {
         while !content.is_empty() {
             if self.pending_indent {
-                self.writer.write_str(elements, self.ident_text)?;
+                self.writer
+                    .write_str(&MarkupElements::Root, self.ident_text)?;
                 self.pending_indent = false;
             }
 
@@ -843,9 +803,11 @@ mod tests {
         let expected = markup!{
             "path:1:1 internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis><Error>"  >"</Error></Emphasis>" "<Emphasis>"1 │ "</Emphasis>"source code\n"
+            "  "
+            <Emphasis><Error>">"</Error></Emphasis>" "<Emphasis>"1 │ "</Emphasis>"source code\n"
             "   "<Emphasis>"   │ "</Emphasis><Emphasis><Error>"^^^^^^"</Error></Emphasis>"\n"
             "  \n"
         }.to_owned();
@@ -867,13 +829,17 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"error"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"error"</Error>"\n"
             "  \n"
-            <Emphasis><Warn>"  ⚠"</Warn></Emphasis>" "<Warn>"warn"</Warn>"\n"
+            "  "
+            <Emphasis><Warn>"⚠"</Warn></Emphasis>" "<Warn>"warn"</Warn>"\n"
             "  \n"
-            <Emphasis><Info>"  ℹ"</Info></Emphasis>" "<Info>"info"</Info>"\n"
+            "  "
+            <Emphasis><Info>"ℹ"</Info></Emphasis>" "<Info>"info"</Info>"\n"
             "  \n"
             "  none\n"
             "  \n"
@@ -897,7 +863,8 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
             "  - item 1\n"
             "  - item 2\n"
@@ -922,9 +889,11 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis><Error>"  >"</Error></Emphasis>" "<Emphasis>"1 │ "</Emphasis>"context location context\n"
+            "  "
+            <Emphasis><Error>">"</Error></Emphasis>" "<Emphasis>"1 │ "</Emphasis>"context location context\n"
             "   "<Emphasis>"   │ "</Emphasis>"        "<Emphasis><Error>"^^^^^^^^"</Error></Emphasis>"\n"
             "  \n"
         }.to_owned();
@@ -947,10 +916,13 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Error>"  -"</Error>" "<Error>"context"</Error><Error><Dim>"·"</Dim></Error><Error><Emphasis>"before"</Emphasis></Error><Error><Dim>"·"</Dim></Error><Error>"context"</Error>"\n"
-            <Success>"  +"</Success>" "<Success>"context"</Success><Success><Dim>"·"</Dim></Success><Success><Emphasis>"after"</Emphasis></Success><Success><Dim>"·"</Dim></Success><Success>"context"</Success>"\n"
+            "  "
+            <Error>"-"</Error>" "<Error>"context"</Error><Error><Dim>"·"</Dim></Error><Error><Emphasis>"before"</Emphasis></Error><Error><Dim>"·"</Dim></Error><Error>"context"</Error>"\n"
+            "  "
+            <Success>"+"</Success>" "<Success>"context"</Success><Success><Dim>"·"</Dim></Success><Success><Emphasis>"after"</Emphasis></Success><Success><Dim>"·"</Dim></Success><Success>"context"</Success>"\n"
             "  \n"
         }.to_owned();
 
@@ -972,9 +944,11 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis><Info>"  ℹ"</Info></Emphasis>" "<Info>"Backtrace Title"</Info>"\n"
+            "  "
+            <Emphasis><Info>"ℹ"</Info></Emphasis>" "<Info>"Backtrace Title"</Info>"\n"
             "  \n"
             "     0: crate::module::function\n"
             "            at crate/src/module.rs:8:16\n"
@@ -998,9 +972,11 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis>"  $"</Emphasis>" biome command --argument\n"
+            "  "
+            <Emphasis>"$"</Emphasis>" biome command --argument\n"
             "  \n"
         }.to_owned();
 
@@ -1022,15 +998,20 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis>"  Group Title"</Emphasis>"\n"
+            "  "
+            <Emphasis>"Group Title"</Emphasis>"\n"
             "  \n"
-            <Emphasis><Error>"    ✖"</Error></Emphasis>" "<Error>"error"</Error>"\n"
+            "    "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"error"</Error>"\n"
             "    \n"
-            <Emphasis><Warn>"    ⚠"</Warn></Emphasis>" "<Warn>"warn"</Warn>"\n"
+            "    "
+            <Emphasis><Warn>"⚠"</Warn></Emphasis>" "<Warn>"warn"</Warn>"\n"
             "    \n"
-            <Emphasis><Info>"    ℹ"</Info></Emphasis>" "<Info>"info"</Info>"\n"
+            "    "
+            <Emphasis><Info>"ℹ"</Info></Emphasis>" "<Info>"info"</Info>"\n"
             "    \n"
             "    none\n"
             "    \n"
