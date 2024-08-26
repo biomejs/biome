@@ -6,6 +6,7 @@ use biome_json_syntax::JsonLanguage;
 use rustc_hash::FxHashMap;
 
 #[derive(Debug, Default, Clone, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
 pub struct TsConfigJson {
     base_url: Option<String>,
     paths: FxHashMap<String, Vec<String>>,
