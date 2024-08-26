@@ -9,11 +9,11 @@ use biome_formatter::token::string::normalize_string;
 use biome_formatter::QuoteStyle;
 use biome_formatter::{
     prelude::{dynamic_text, write},
-    token::string::ToAsciiLowercaseCow,
     trivia::format_replaced,
     Format, FormatResult,
 };
 use biome_rowan::SyntaxToken;
+use biome_string_case::StrExtension;
 
 use crate::{prelude::CssFormatContext, AsFormat, CssFormatter};
 

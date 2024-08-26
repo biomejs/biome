@@ -316,13 +316,7 @@ impl FromStr for RuleSelector {
             }
         } else {
             match linter::RuleGroup::from_str(selector) {
-                Ok(group) => {
-                    if matches!(group, linter::RuleGroup::Nursery) {
-                        Err("The `nursery` group cannot be selected. Select a specific nursery rule instead.")
-                    } else {
-                        Ok(RuleSelector::Group(group))
-                    }
-                }
+                Ok(group) => Ok(RuleSelector::Group(group)),
                 Err(_) => Err(
                     "This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.",
                 ),

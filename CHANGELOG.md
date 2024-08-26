@@ -61,7 +61,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - `biome init` now generates a new config file with more options set.
   This change intends to improve discoverability of the options and to set the more commonly used options to their default values.
   Contributed by @Conaclos
-- The `--verbose` flag how reports the list of files that were evaluated, and the list of files that were fixed.
+
+- The `--verbose` flag now reports the list of files that were evaluated, and the list of files that were fixed.
   The **evaluated** files are the those files that can be handled by Biome, files that are ignored, don't have an extension or have an extension that Biome can't evaluate are excluded by this list.
   The **fixed** files are those files that were handled by Biome and *changed*. Files that stays the same after the process are excluded from this list.
 
@@ -82,6 +83,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @ematipico
+
+- Allow passing `nursery` to the `--only` and `--skip` filters.
+
+  The `--only` option allows you to run a given rule or rule group.
+  The `--skip` option allows you to skip the execution of a given group or a given rule.
+
+  Previously, it was not possible to pass `nursery`.
+  This restriction is now removed, as it may make sense to skip the nursery rules that a project has enabled.
+
+  Contributed by @Conaclos
 
 #### Bug fixes
 
@@ -425,17 +436,44 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### Enhancements
+
+- The JSON parser now allows comments in files with the `.json` extension under the `.vscode` and `.zed` directories.
+
+  Biome recognizes are well known JSON files that allows comments and/or trailing commas.
+  Previously, Biome did not recognize JSON files under the `.vscode` and the `.zed` directories as JSON files that allow comments.
+  You had to configure Biome to recognize them:
+
+  ```json
+  {
+    "overrides": [
+      {
+        "include": ["**/.vscode/*.json", "**/.zed/*.json"],
+        "json": { "parser": { "allowComments": true } }
+      }
+    ]
+  }
+  ```
+
+  This override is no longer needed!
+  Note that JSON files under the `.vscode` and the `.zed` directories don't accept trailing commas.
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#3287](https://github.com/biomejs/biome/issues/3287) nested selectors with pseudo-classes. Contributed by @denbezrukov
+
 - Fix [#3349](https://github.com/biomejs/biome/issues/3349) allow CSS multiple ampersand support. Contributed by @denbezrukov
-```css
-.class {
-  && {
-    color: red;
+
+  ```css
+  .class {
+    && {
+      color: red;
+    }
   }
-}
-```
+  ```
+
 - Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords.
   ```js
   out: while (true) {
@@ -757,7 +795,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   biome lint --skip=style --skip=suspicious/noExplicitAny
   ```
 
-  You can also use `--only` and `--skip` together. `--skip` oevrrides `--only`.
+  You can also use `--only` and `--skip` together. `--skip` overrides `--only`.
   The following command executes only the rules from the `style` group, but the `style/useNamingConvention` rule.
 
   ```shell

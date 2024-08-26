@@ -722,10 +722,130 @@ fn does_not_override_well_known_special_files_when_config_override_is_present() 
         ),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "does_not_override_well_known_special_files_when_config_override_is_present",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn allow_trailing_commas_on_well_known_files() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "formatter": {
+                "indentStyle": "space",
+                "indentWidth": 4
+            },
+            "overrides": [
+                {
+                    "include": [
+                        "**/*.json"
+                    ],
+                    "json": { "parser": { "allowTrailingCommas": true } }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let tsconfig = Path::new("tsconfig.json");
+    fs.insert(
+        tsconfig.into(),
+        r#"{
+    // This is a comment
+    "compilerOptions": {},
+}"#,
+    );
+
+    let vscode_settings = Path::new(".vscode/settings.json");
+    fs.insert(
+        vscode_settings.into(),
+        r#"{
+    // This is a comment
+    "editor.rulers": [80, 100],
+}"#,
+    );
+
+    let other_json = Path::new("other.json");
+    fs.insert(
+        other_json.into(),
+        r#"{
+    "asta": ["lorem", "ipsum", "first", "second"],
+}"#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                "check",
+                other_json.as_os_str().to_str().unwrap(),
+                tsconfig.as_os_str().to_str().unwrap(),
+                vscode_settings.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "allow_trailing_commas_on_well_known_files",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn disallow_comments_on_well_known_files() {
+    let mut console = BufferConsole::default();
+    let mut fs = MemoryFileSystem::default();
+    let file_path = Path::new("biome.json");
+    fs.insert(
+        file_path.into(),
+        r#"{
+            "formatter": {
+                "indentStyle": "space",
+                "indentWidth": 4
+            },
+            "overrides": [
+                {
+                    "include": [
+                        "**/*.json"
+                    ],
+                    "json": { "parser": { "allowComments": false } }
+                }
+            ]
+        }"#
+        .as_bytes(),
+    );
+
+    let tsconfig = Path::new("tsconfig.json");
+    fs.insert(
+        tsconfig.into(),
+        r#"{
+    // This is a comment
+    "compilerOptions": {}
+}"#,
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["check", tsconfig.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "disallow_comments_on_well_known_files",
         fs,
         console,
         result,
