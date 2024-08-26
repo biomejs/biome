@@ -364,6 +364,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules/) now ignores imports of a package which has the same name as a Node.js module. Contributed by @Conaclos
 
+- Add an `ignoreNull` option for [noDoubleEquals](https://biomejs.dev/linter/rules/no-double-equals/). Contributed by @peaBerberian.
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
