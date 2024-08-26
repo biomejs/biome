@@ -154,6 +154,7 @@ define_categories! {
     "lint/nursery/noValueAtRule": "https://biomejs.dev/linter/rules/no-value-at-rule",
     "lint/nursery/noYodaExpression": "https://biomejs.dev/linter/rules/no-yoda-expression",
     "lint/nursery/useAdjacentOverloadSignatures": "https://biomejs.dev/linter/rules/use-adjacent-overload-signatures",
+    "lint/nursery/useAriaPropsSupportedByRole": "https://biomejs.dev/linter/rules/use-aria-props-supported-by-role",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
     "lint/nursery/useConsistentBuiltinInstantiation": "https://biomejs.dev/linter/rules/use-consistent-new-builtin",
     "lint/nursery/useConsistentCurlyBraces": "https://biomejs.dev/linter/rules/use-consistent-curly-braces",

@@ -664,6 +664,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "jsx-a11y/role-supports-aria-props" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_aria_props_supported_by_role
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "jsx-a11y/scope" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group.no_header_scope.get_or_insert(Default::default());

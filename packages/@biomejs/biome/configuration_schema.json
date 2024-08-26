@@ -2140,6 +2140,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAriaPropsSupportedByRole": {
+					"description": "Enforce that ARIA properties are valid for the roles that are supported by the element.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConsistentBuiltinInstantiation": {
 					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
 					"anyOf": [
