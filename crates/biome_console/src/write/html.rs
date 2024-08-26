@@ -92,74 +92,51 @@ fn pop_styles<W: io::Write>(fmt: &mut W, elements: &MarkupElements) -> io::Resul
 /// - and adding HTML line breaks for newline characters
 struct HtmlAdapter<W>(W, bool);
 
-impl<W: io::Write> io::Write for HtmlAdapter<W> {
-    fn write(&mut self, mut buf: &[u8]) -> io::Result<usize> {
-        let mut bytes = 0;
+impl<W: io::Write> HtmlAdapter<W> {
+    fn write_escapes(&mut self, current_byte: &u8) -> io::Result<bool> {
+        match *current_byte {
+            b'"' => self.0.write_all(b"&quot;")?,
+            b'&' => self.0.write_all(b"&amp;")?,
+            b'<' => self.0.write_all(b"&lt;")?,
+            b'>' => self.0.write_all(b"&gt;")?,
+            _ => return Ok(false),
+        };
 
-        const CHARS_TO_CHECK: [u8; 4] = [b'"', b'&', b'<', b'>'];
+        Ok(true)
+    }
 
-        const MDX_CHARS: [u8; 7] = [b'\n', b'\r', b'{', b'}', b'*', b'_', b'\\'];
-
-        for (idx, byte) in buf.iter().enumerate() {
-            if buf.get(idx).is_some() {
-                if CHARS_TO_CHECK.contains(byte) {
-                    let (before, after) = buf.split_at(idx);
-
-                    self.0.write_all(before)?;
-                    bytes += before.len();
-
-                    // SAFETY: Because of the above `position` match we know the buffer
-                    // contains at least the matching byte
-                    let (byte, after) = after.split_first().unwrap();
-
-                    match *byte {
-                        b'"' => self.0.write_all(b"&quot;")?,
-                        b'&' => self.0.write_all(b"&amp;")?,
-                        b'<' => self.0.write_all(b"&lt;")?,
-                        b'>' => self.0.write_all(b"&gt;")?,
-                        _ => unreachable!(
-                            "This should never happen, no mdx. Found `{}`",
-                            String::from_utf8(vec![*byte]).unwrap()
-                        ),
-                    }
-
-                    bytes += 1;
-                    buf = after;
-                }
-
-                if MDX_CHARS.contains(byte) && self.1 {
-                    let (before, after) = buf.split_at(idx);
-
-                    self.0.write_all(before)?;
-                    bytes += before.len();
-
-                    // SAFETY: Because of the above `position` match we know the buffer
-                    // contains at least the matching byte
-                    let (byte, after) = after.split_first().unwrap();
-
-                    match *byte {
-                        b'\n' => self.0.write_all(b"<br />")?,
-                        b'\r' => self.0.write_all(b"<br />")?,
-                        b'{' => self.0.write_all(b"&#123;")?,
-                        b'}' => self.0.write_all(b"&#125;")?,
-                        b'*' => self.0.write_all(b"&#42;")?,
-                        b'_' => self.0.write_all(b"&#95;")?,
-                        b'\\' => self.0.write_all(b"&#92;")?,
-                        _ => unreachable!(
-                            "This should never happen, with mdx. Found `{}`",
-                            String::from_utf8(vec![*byte]).unwrap()
-                        ),
-                    }
-
-                    bytes += 1;
-                    buf = after;
-                }
+    fn write_mdx_escapes(&mut self, current_byte: &u8) -> io::Result<bool> {
+        if !self.1 {
+            return Ok(false);
+        } else {
+            match current_byte {
+                b'\n' => self.0.write_all(b"<br />")?,
+                b'\r' => self.0.write_all(b"<br />")?,
+                b'{' => self.0.write_all(b"&#123;")?,
+                b'}' => self.0.write_all(b"&#125;")?,
+                b'*' => self.0.write_all(b"&#42;")?,
+                b'_' => self.0.write_all(b"&#95;")?,
+                b'\\' => self.0.write_all(b"&#92;")?,
+                _ => return Ok(false),
             }
         }
 
-        self.0.write_all(buf)?;
-        bytes += buf.len();
-        Ok(bytes)
+        Ok(true)
+    }
+}
+
+impl<W: io::Write> io::Write for HtmlAdapter<W> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        for idx in buf {
+            let byte = &buf[*idx as usize];
+
+            let escaped = self.write_escapes(byte)?;
+            let mdx_escaped = self.write_mdx_escapes(byte)?;
+            if !escaped && !mdx_escaped {
+                self.0.write_all(&[*byte])?;
+            }
+        }
+        Ok(buf.len())
     }
 
     fn flush(&mut self) -> io::Result<()> {
@@ -174,9 +151,9 @@ mod test {
     use biome_markup::markup;
 
     #[test]
-    fn test_new_lines() {
+    fn test_mdx_new_lines() {
         let mut buf = Vec::new();
-        let mut writer = super::HTML(&mut buf, false);
+        let mut writer = super::HTML(&mut buf, true);
         let mut formatter = Formatter::new(&mut writer);
 
         formatter
@@ -223,7 +200,7 @@ mod test {
     #[test]
     fn test_escapes_and_new_lines() {
         let mut buf = Vec::new();
-        let mut writer = super::HTML(&mut buf, false);
+        let mut writer = super::HTML(&mut buf, true);
         let mut formatter = Formatter::new(&mut writer);
 
         formatter
@@ -246,13 +223,13 @@ mod test {
 
         formatter
             .write_markup(markup! {
-                "New rules that are still under development.\n\n."
+                "New rules that are {still} under development."
             })
             .unwrap();
 
         assert_eq!(
             String::from_utf8(buf).unwrap(),
-            "New rules that are still under development.<br /><br />."
+            "New rules that are {still} under development."
         );
     }
 
