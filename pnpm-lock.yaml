@@ -15,8 +15,8 @@ importers:
         version: 3.4.10
     devDependencies:
       '@types/bun':
-        specifier: 1.1.6
-        version: 1.1.6
+        specifier: 1.1.8
+        version: 1.1.8
       read-package-up:
         specifier: 11.0.0
         version: 11.0.0
@@ -80,8 +80,8 @@ packages:
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
 
-  '@types/bun@1.1.6':
-    resolution: {integrity: sha512-uJgKjTdX0GkWEHZzQzFsJkWp5+43ZS7HC8sZPFnOwnSo1AsNl2q9o2bFeS23disNDqbggEgyFkKCHl/w8iZsMA==}
+  '@types/bun@1.1.8':
+    resolution: {integrity: sha512-PIwVFQKPviksiibobyvcWtMvMFMTj91T8dQEh9l1P3Ypr3ZuVn9w7HSr+5mTNrPqD1xpdDLEErzZPU8gqHBu6g==}
 
   '@types/node@20.12.12':
     resolution: {integrity: sha512-eWLDGF/FOSPtAvEqeRAQ4C8LSA7M1I7i0ky1I8U7kD1J5ITyW3AsRhQrKVoWf5pFKZ2kILsEGJhsI9r93PYnOw==}
@@ -139,8 +139,8 @@ packages:
     resolution: {integrity: sha512-b8um+L1RzM3WDSzvhm6gIz1yfTbBt6YTlcEKAvsmqCZZFw46z626lVj9j1yEPW33H5H+lBQpZMP1k8l+78Ha0A==}
     engines: {node: '>=8'}
 
-  bun-types@1.1.17:
-    resolution: {integrity: sha512-Z4+OplcSd/YZq7ZsrfD00DKJeCwuNY96a1IDJyR73+cTBaFIS7SC6LhpY/W3AMEXO9iYq5NJ58WAwnwL1p5vKg==}
+  bun-types@1.1.26:
+    resolution: {integrity: sha512-n7jDe62LsB2+WE8Q8/mT3azkPaatKlj/2MyP6hi3mKvPz9oPpB6JW/Ll6JHtNLudasFFuvfgklYSE+rreGvBjw==}
 
   camelcase-css@2.0.1:
     resolution: {integrity: sha512-QOSvevhslijgYwRx6Rv7zKdMF8lbRmx+uQGx2+vDc+KI/eBnsy9kit5aj23AgGu3pa4t9AgwbnXWqS+iOY+2aA==}
@@ -633,9 +633,9 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@types/bun@1.1.6':
+  '@types/bun@1.1.8':
     dependencies:
-      bun-types: 1.1.17
+      bun-types: 1.1.26
 
   '@types/node@20.12.12':
     dependencies:
@@ -686,7 +686,7 @@ snapshots:
     dependencies:
       fill-range: 7.0.1
 
-  bun-types@1.1.17:
+  bun-types@1.1.26:
     dependencies:
       '@types/node': 20.12.12
       '@types/ws': 8.5.10
