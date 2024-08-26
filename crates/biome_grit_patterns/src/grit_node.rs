@@ -7,7 +7,7 @@ use std::{borrow::Cow, ops::Deref, str::Utf8Error};
 ///
 /// This enables us to implement the [`GritAstNode`] trait on Grit nodes, which
 /// offers a bunch of utilities used by our node compilers.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct GritNode(GritSyntaxNode);
 
 impl Deref for GritNode {
@@ -150,12 +150,16 @@ impl Iterator for ChildrenIterator {
 
 #[derive(Clone)]
 struct GritNodeCursor {
-    node: GritNode,
+    root: GritNode,
+    current: GritNode,
 }
 
 impl GritNodeCursor {
     fn new(node: &GritNode) -> Self {
-        Self { node: node.clone() }
+        Self {
+            root: node.clone(),
+            current: node.clone(),
+        }
     }
 }
 
@@ -163,9 +167,9 @@ impl AstCursor for GritNodeCursor {
     type Node = GritNode;
 
     fn goto_first_child(&mut self) -> bool {
-        match self.node.first_child() {
+        match self.current.first_child() {
             Some(child) => {
-                self.node = child.into();
+                self.current = child.into();
                 true
             }
             None => false,
@@ -173,9 +177,13 @@ impl AstCursor for GritNodeCursor {
     }
 
     fn goto_parent(&mut self) -> bool {
-        match self.node.parent() {
+        if self.current == self.root {
+            return false;
+        }
+
+        match self.current.parent() {
             Some(parent) => {
-                self.node = parent;
+                self.current = parent;
                 true
             }
             None => false,
@@ -183,9 +191,13 @@ impl AstCursor for GritNodeCursor {
     }
 
     fn goto_next_sibling(&mut self) -> bool {
-        match self.node.next_sibling() {
+        if self.current == self.root {
+            return false;
+        }
+
+        match self.current.next_sibling() {
             Some(sibling) => {
-                self.node = sibling;
+                self.current = sibling;
                 true
             }
             None => false,
@@ -193,6 +205,6 @@ impl AstCursor for GritNodeCursor {
     }
 
     fn node(&self) -> Self::Node {
-        self.node.clone()
+        self.current.clone()
     }
 }
