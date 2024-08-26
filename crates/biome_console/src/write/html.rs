@@ -127,9 +127,7 @@ impl<W: io::Write> HtmlAdapter<W> {
 
 impl<W: io::Write> io::Write for HtmlAdapter<W> {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
-        for idx in buf {
-            let byte = &buf[*idx as usize];
-
+        for byte in buf {
             let escaped = self.write_escapes(byte)?;
             let mdx_escaped = self.write_mdx_escapes(byte)?;
             if !escaped && !mdx_escaped {
@@ -248,6 +246,23 @@ mod test {
         assert_eq!(
             String::from_utf8(buf).unwrap(),
             "New rules that are &#123;still&#125; under development.<br /><br />."
+        );
+    }
+    #[test]
+    fn test_from_website() {
+        let mut buf = Vec::new();
+        let mut writer = super::HTML(&mut buf, false).with_mdx();
+        let mut formatter = Formatter::new(&mut writer);
+
+        formatter
+            .write_markup(markup! {
+                "Rules focused on preventing accessibility problems."
+            })
+            .unwrap();
+
+        assert_eq!(
+            String::from_utf8(buf).unwrap(),
+            "Rules focused on preventing accessibility problems."
         );
     }
 }
