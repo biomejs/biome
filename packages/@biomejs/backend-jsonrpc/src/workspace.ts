@@ -1669,7 +1669,7 @@ export interface Suspicious {
 	/**
 	 * Require the use of === and !==
 	 */
-	noDoubleEquals?: RuleFixConfiguration_for_Null;
+	noDoubleEquals?: RuleFixConfiguration_for_NoDoubleEqualsOptions;
 	/**
 	 * Disallow duplicate case labels.
 	 */
@@ -1935,6 +1935,9 @@ export type RuleConfiguration_for_FilenamingConventionOptions =
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
+export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
 export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
 export interface RuleWithFixOptions_for_Null {
 	/**
@@ -2124,6 +2127,20 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
 	 */
 	options: NamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDoubleEqualsOptions;
+}
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -2254,6 +2271,17 @@ export interface NamingConventionOptions {
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
 	strictCase: boolean;
+}
+/**
+ * Rule's options
+ */
+export interface NoDoubleEqualsOptions {
+	/**
+	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.
+
+If `false`, no such exception will be made. 
+	 */
+	ignoreNull: boolean;
 }
 export interface Hook {
 	/**
