@@ -26,9 +26,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add `--graphql-linter-enabled` option, to control whether the linter should be enabled or not for GraphQL files. Contributed by @ematipico
 
-- New EXPERIMENTAL `search` command. The search command allows you to search a Biome project using [GritQL] syntax: https://docs.grit.io/language/overview
+- New EXPERIMENTAL `search` command. The search command allows you to search a Biome project using [GritQL syntax](https://biomejs.dev/reference/gritql).
 
-  GritQL is a powerful language that lets you do _structural_ searches on your codebase. This means that trivia such as whitespace or even the type of strings quotes used will be ignored in your search query. It also has [many features](https://docs.grit.io/language/syntax) for querying the structure of your code, making it much more elegant for searching code than regular expressions.
+  GritQL is a powerful language that lets you do _structural_ searches on your codebase. This means that trivia such as whitespace or even the type of strings quotes used will be ignored in your search query. It also has many features for querying the structure of your code, making it much more elegant for searching code than regular expressions.
 
   While we believe this command may already be useful to users in some situations (especially when integrated in the IDE extensions!), we also had an ulterior motive for adding this command: We intend to utilize GritQL for our plugin efforts, and by allowing our users to try it out in a first iteration, we hope to gain insight in the type of queries you want to do, as well as the bugs we need to focus on.
 
