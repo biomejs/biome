@@ -9,6 +9,7 @@ use std::cmp::Ordering;
 use std::ffi::OsStr;
 use std::fs::read_to_string;
 use std::hash::Hash;
+use std::ops::DerefMut;
 use std::path::Path;
 use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 
@@ -33,15 +34,29 @@ pub enum FileKind {
     /// Files that are required to be inspected before handling other files.
     ///
     /// An example is the GraphQL schema
-    ToInspect,
+    Inspectable,
     /// A file to handle has the lowest priority. It's usually a traversed file, or a file opened by the LSP
     #[default]
-    ToHandle,
+    Handleable,
 }
 
 #[derive(Debug, Clone, Hash, Ord, PartialOrd, Eq, PartialEq, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct FileKinds(BitFlags<FileKind>);
+
+impl Deref for FileKinds {
+    type Target = BitFlags<FileKind>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for FileKinds {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 impl From<FileKind> for FileKinds {
     fn from(flag: FileKind) -> Self {
@@ -99,7 +114,7 @@ impl BiomePath {
 
     /// Adds a file kind to the current file
     pub fn with_file_kind(mut self, kind: FileKind) -> Self {
-        self.kind.0.insert(kind);
+        self.kind.insert(kind);
         self
     }
 
@@ -148,24 +163,24 @@ impl BiomePath {
         ) {
             FileKind::Manifest.into()
         } else {
-            FileKind::ToHandle.into()
+            FileKind::Handleable.into()
         }
     }
 
     pub fn is_config(&self) -> bool {
-        self.kind.0.contains(FileKind::Config)
+        self.kind.contains(FileKind::Config)
     }
 
     pub fn is_manifest(&self) -> bool {
-        self.kind.0.contains(FileKind::Manifest)
+        self.kind.contains(FileKind::Manifest)
     }
 
     pub fn is_ignore(&self) -> bool {
-        self.kind.0.contains(FileKind::Ignore)
+        self.kind.contains(FileKind::Ignore)
     }
 
     pub fn is_to_inspect(&self) -> bool {
-        self.kind.0.contains(FileKind::ToInspect)
+        self.kind.contains(FileKind::Inspectable)
     }
 }
 

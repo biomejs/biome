@@ -187,7 +187,6 @@ impl WorkspaceServer {
         let workspace_mut = workspace.as_mut();
         let mut document = self.documents.get_mut(&manifest_path);
         if let Some(document) = document.as_deref_mut() {
-            // let document = &mut *document;
             let parsed = parse_json_with_cache(
                 document.content.as_str(),
                 &mut document.node_cache,
