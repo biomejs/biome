@@ -72,3 +72,22 @@ fn html_mdx_print_diagnostic() {
         insta::assert_snapshot!(content);
     });
 }
+
+#[test]
+fn html_mdx_print_diagnostic_with_escaped_indentation() {
+    let mut content = vec![];
+    let mut writer = HTML::new(&mut content).with_mdx();
+
+    Formatter::new(&mut writer)
+        .write_markup(markup! {
+            {PrintDiagnostic::simple(&TestDiagnostic::default()).with_escaped_indentation()}
+        })
+        .unwrap();
+
+    let content = String::from_utf8(content).unwrap();
+    insta::with_settings!({
+        prepend_module_to_snapshot => false,
+    }, {
+        insta::assert_snapshot!(content);
+    });
+}

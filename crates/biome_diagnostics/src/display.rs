@@ -38,6 +38,7 @@ pub struct PrintDiagnostic<'fmt, D: ?Sized> {
     diag: &'fmt D,
     verbose: bool,
     search: bool,
+    escape_indentation: bool,
 }
 
 impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
@@ -46,6 +47,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
             diag,
             verbose: false,
             search: false,
+            escape_indentation: false,
         }
     }
 
@@ -54,6 +56,7 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
             diag,
             verbose: true,
             search: false,
+            escape_indentation: false,
         }
     }
 
@@ -62,7 +65,16 @@ impl<'fmt, D: AsDiagnostic + ?Sized> PrintDiagnostic<'fmt, D> {
             diag,
             verbose: false,
             search: true,
+            escape_indentation: false,
         }
+    }
+
+    /// When enabled, the indentation of the messages will be escaped using `&nbsp;`, which is HTML friendly.
+    ///
+    /// Various tools out there, notably MDX, treats tags with whitespaces differently, and they will strip them.
+    pub fn with_escaped_indentation(mut self) -> Self {
+        self.escape_indentation = true;
+        self
     }
 }
 
@@ -74,17 +86,31 @@ impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintDiagnostic<'_, D> {
         fmt.write_markup(markup! {
             {PrintHeader(diagnostic)}"\n\n"
         })?;
-
+        let indentation = if self.escape_indentation {
+            "&nbsp;&nbsp;"
+        } else {
+            "  "
+        };
         // Wrap the formatter with an indentation level and print the advices
         let mut slot = None;
-        let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, "  ");
+        let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, indentation);
 
         if self.search {
             let mut visitor = PrintSearch(&mut fmt);
-            print_advices(&mut visitor, diagnostic, self.verbose)
+            print_advices(
+                &mut visitor,
+                diagnostic,
+                self.verbose,
+                self.escape_indentation,
+            )
         } else {
             let mut visitor = PrintAdvices(&mut fmt);
-            print_advices(&mut visitor, diagnostic, self.verbose)
+            print_advices(
+                &mut visitor,
+                diagnostic,
+                self.verbose,
+                self.escape_indentation,
+            )
         }
     }
 }
@@ -234,7 +260,12 @@ impl<W: fmt::Write + ?Sized> fmt::Write for CountWidth<'_, W> {
 }
 
 /// Write the advices for `diagnostic` into `visitor`.
-fn print_advices<V, D>(visitor: &mut V, diagnostic: &D, verbose: bool) -> io::Result<()>
+fn print_advices<V, D>(
+    visitor: &mut V,
+    diagnostic: &D,
+    verbose: bool,
+    escape_indentation: bool,
+) -> io::Result<()>
 where
     V: Visit,
     D: Diagnostic + ?Sized,
@@ -251,7 +282,7 @@ where
     let skip_frame = frame_visitor.skip_frame;
 
     // Print the message for the diagnostic as a log advice
-    print_message_advice(visitor, diagnostic, skip_frame)?;
+    print_message_advice(visitor, diagnostic, skip_frame, escape_indentation)?;
 
     // Print the other advices for the diagnostic
     diagnostic.advices(visitor)?;
@@ -297,7 +328,12 @@ impl Visit for FrameVisitor<'_> {
 }
 
 /// Print the message and code frame for the diagnostic as advices.
-fn print_message_advice<V, D>(visitor: &mut V, diagnostic: &D, skip_frame: bool) -> io::Result<()>
+fn print_message_advice<V, D>(
+    visitor: &mut V,
+    diagnostic: &D,
+    skip_frame: bool,
+    escape_indentation: bool,
+) -> io::Result<()>
 where
     V: Visit,
     D: Diagnostic + ?Sized,
@@ -306,7 +342,7 @@ where
     let message = {
         let mut message = MarkupBuf::default();
         let mut fmt = fmt::Formatter::new(&mut message);
-        fmt.write_markup(markup!({ PrintCauseChain(diagnostic) }))?;
+        fmt.write_markup(markup!({ PrintCauseChain(diagnostic, escape_indentation) }))?;
         message
     };
 
@@ -342,11 +378,11 @@ where
 
 /// Display wrapper for printing the "cause chain" of a diagnostic, with the
 /// message of this diagnostic and all of its sources.
-struct PrintCauseChain<'fmt, D: ?Sized>(&'fmt D);
+struct PrintCauseChain<'fmt, D: ?Sized>(&'fmt D, bool);
 
 impl<D: Diagnostic + ?Sized> fmt::Display for PrintCauseChain<'_, D> {
     fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> io::Result<()> {
-        let Self(diagnostic) = *self;
+        let Self(diagnostic, should_escape_indentation) = *self;
 
         diagnostic.message(fmt)?;
 
@@ -355,7 +391,12 @@ impl<D: Diagnostic + ?Sized> fmt::Display for PrintCauseChain<'_, D> {
             fmt.write_str("\n\nCaused by:\n")?;
 
             let mut slot = None;
-            let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, "  ");
+            let indentation = if should_escape_indentation {
+                "&nbsp;&nbsp;"
+            } else {
+                "  "
+            };
+            let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, indentation);
             diagnostic.message(&mut fmt)?;
         }
 
