@@ -487,7 +487,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
   Contributed by @ah-yu
-- Fix [#3464](https://github.com/biomejs/biome/issues/3464) by enabling JSX parsing inside `.vue` files. Contributed by @ematipico
+- Fix [#3464](https://github.com/biomejs/biome/issues/3464) by enabling JSX in `.vue` files that use the `lang='jsx'` or `lang='tsx'` attribute. Contributed by @ematipico
 
 ## v1.8.3 (2024-06-27)
 

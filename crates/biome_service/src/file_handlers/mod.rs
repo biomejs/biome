@@ -29,7 +29,9 @@ use biome_fs::BiomePath;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
 use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, Language, TextRange, TextSize};
+use biome_js_syntax::{
+    EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
+};
 use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
@@ -563,7 +565,9 @@ pub(crate) fn is_diagnostic_error(
 /// matched by regular expressions.
 ///
 // TODO: We should change the parser when HTMLish languages are supported.
-pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> Language {
+pub(crate) fn parse_lang_from_script_opening_tag(
+    script_opening_tag: &str,
+) -> (Language, LanguageVariant) {
     parse(
         script_opening_tag,
         JsFileSource::jsx(),
@@ -584,14 +588,27 @@ pub(crate) fn parse_lang_from_script_opening_tag(script_opening_tag: &str) -> La
             let attribute_inner_string =
                 attribute_value.as_jsx_string()?.inner_string_text().ok()?;
             match attribute_inner_string.text() {
-                "ts" | "tsx" => Some(Language::TypeScript {
-                    definition_file: false,
-                }),
+                "ts" => Some((
+                    Language::TypeScript {
+                        definition_file: false,
+                    },
+                    LanguageVariant::Standard,
+                )),
+                "tsx" => Some((
+                    Language::TypeScript {
+                        definition_file: false,
+                    },
+                    LanguageVariant::Jsx,
+                )),
+                "jsx" => Some((Language::JavaScript, LanguageVariant::Jsx)),
+                "js" => Some((Language::JavaScript, LanguageVariant::Standard)),
                 _ => None,
             }
         })
     })
-    .map_or(Language::JavaScript, |lang| lang)
+    .map_or((Language::JavaScript, LanguageVariant::Standard), |lang| {
+        lang
+    })
 }
 
 pub(crate) fn search(
@@ -630,14 +647,24 @@ fn test_svelte_script_lang() {
     const SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG: &str =
         r#"<script context="module" lang="ts">"#;
 
-    assert!(parse_lang_from_script_opening_tag(SVELTE_JS_SCRIPT_OPENING_TAG).is_javascript());
-    assert!(parse_lang_from_script_opening_tag(SVELTE_TS_SCRIPT_OPENING_TAG).is_typescript());
+    assert!(
+        parse_lang_from_script_opening_tag(SVELTE_JS_SCRIPT_OPENING_TAG)
+            .0
+            .is_javascript()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(SVELTE_TS_SCRIPT_OPENING_TAG)
+            .0
+            .is_typescript()
+    );
     assert!(
         parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_JS_SCRIPT_OPENING_TAG)
+            .0
             .is_javascript()
     );
     assert!(
         parse_lang_from_script_opening_tag(SVELTE_CONTEXT_MODULE_TS_SCRIPT_OPENING_TAG)
+            .0
             .is_typescript()
     );
 }
@@ -1137,12 +1164,53 @@ fn test_vue_script_lang() {
     const VUE_JS_SCRIPT_OPENING_TAG: &str = r#"<script>"#;
     const VUE_TS_SCRIPT_OPENING_TAG: &str = r#"<script lang="ts">"#;
     const VUE_TSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="tsx">"#;
+    const VUE_JSX_SCRIPT_OPENING_TAG: &str = r#"<script lang="jsx">"#;
     const VUE_SETUP_JS_SCRIPT_OPENING_TAG: &str = r#"<script setup>"#;
     const VUE_SETUP_TS_SCRIPT_OPENING_TAG: &str = r#"<script setup lang="ts">"#;
 
-    assert!(parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG).is_javascript());
-    assert!(parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG).is_typescript());
-    assert!(parse_lang_from_script_opening_tag(VUE_TSX_SCRIPT_OPENING_TAG).is_typescript());
-    assert!(parse_lang_from_script_opening_tag(VUE_SETUP_JS_SCRIPT_OPENING_TAG).is_javascript());
-    assert!(parse_lang_from_script_opening_tag(VUE_SETUP_TS_SCRIPT_OPENING_TAG).is_typescript());
+    assert!(
+        parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG)
+            .0
+            .is_javascript()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(VUE_JS_SCRIPT_OPENING_TAG)
+            .1
+            .is_standard()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG)
+            .0
+            .is_typescript()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG)
+            .1
+            .is_jsx()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(VUE_JSX_SCRIPT_OPENING_TAG)
+            .0
+            .is_javascript()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(VUE_JSX_SCRIPT_OPENING_TAG)
+            .1
+            .is_jsx()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(VUE_TSX_SCRIPT_OPENING_TAG)
+            .0
+            .is_typescript()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(VUE_SETUP_JS_SCRIPT_OPENING_TAG)
+            .0
+            .is_javascript()
+    );
+    assert!(
+        parse_lang_from_script_opening_tag(VUE_SETUP_TS_SCRIPT_OPENING_TAG)
+            .0
+            .is_typescript()
+    );
 }
