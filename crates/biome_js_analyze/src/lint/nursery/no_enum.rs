@@ -6,8 +6,8 @@ use biome_rowan::AstNode;
 declare_lint_rule! {
     /// Disallow TypeScript enum.
     ///
-    /// TypeScript enums are not a type-level extension of JavaScript like type annotations or definitions.
-    /// Enums will get compiled into JavaScript code, which can increase bundle size and cause side-effects in the codebase.
+    /// TypeScript enums are not a type-level extension to JavaScript like type annotations or definitions.
+    /// Users may wish to disable non-type-level extensions to use bundlers or compilers that only strip types.
     ///
     /// Const enums are not covered by this rule since `noConstEnum` already handles them.
     /// Enums within the ambient context, including declaration files, are ignores as well.
@@ -87,13 +87,10 @@ impl Rule for NoEnum {
                 },
             )
             .note(markup! {
-                "Prefer using JavaScript objects or TypeScript unions over plain enums."
+                "TypeScript enums are not a type-level extension to JavaScript like type annotations or definitions. Users may wish to disable non-type-level extensions to use bundlers or compilers that only strip types."
             })
             .note(markup! {
-                "TypeScript enums are not a type-level extension of JavaScript like type annotations or definitions."
-            })
-            .note(markup! {
-                "Enums will get compiled into JavaScript code, which can increase bundle size and cause side-effects in the codebase."
+                "Use JavaScript objects or TypeScript unions instead."
             }),
         )
     }
