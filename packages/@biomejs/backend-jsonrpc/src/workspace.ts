@@ -2845,6 +2845,7 @@ export type Category =
 	| "format"
 	| "check"
 	| "ci"
+	| "stdin"
 	| "configuration"
 	| "organizeImports"
 	| "assists"
