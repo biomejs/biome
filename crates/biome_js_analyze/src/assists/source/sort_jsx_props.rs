@@ -16,7 +16,12 @@ declare_source_rule! {
     ///
     /// This rule checks if the JSX props are sorted in a consistent way.
     /// Props are sorted alphabetically.
-    /// A spread prop resets the sorting order.
+    /// This rule will not consider spread props as sortable.
+    /// Instead, whenever it encounters a spread prop, it will sort all the
+    /// previous non spread props up until the nearest spread prop, if one
+    /// exist.
+    /// This prevents breaking the override of certain props using spread
+    /// props.
     ///
     /// ## Examples
     ///
@@ -30,7 +35,8 @@ declare_source_rule! {
     ///
     /// ```js
     /// <Hello firstName="John" lastName="Smith" />;
-    /// <Hello tel={5555555} {...this.props} firstName="John" lastName="Smith" />;
+    /// <Hello lastName="Smith" {...this.props} firstName="John" />;
+    /// <Hello tel={5555555} {...this.props} firstName="John"  {...another.props} lastName="Smith" />;
     /// ```
     ///
     pub SortJsxProps {
