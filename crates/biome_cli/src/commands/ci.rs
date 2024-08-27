@@ -48,7 +48,6 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
         session.app.console,
         cli_options.verbose,
     )?;
-    resolve_manifest(&session)?;
 
     let LoadedConfiguration {
         configuration: mut fs_configuration,
@@ -127,6 +126,14 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
             set_as_current_workspace: true,
         })?;
 
+    let manifest_data = resolve_manifest(&session.app.fs)?;
+
+    if let Some(manifest_data) = manifest_data {
+        session
+            .app
+            .workspace
+            .set_manifest_for_project(manifest_data.into())?;
+    }
     session
         .app
         .workspace

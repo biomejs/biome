@@ -3,7 +3,7 @@ use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
 use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
-use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
+use crate::{CliDiagnostic, LoggingLevel, VERSION};
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::PartialCssLinter;
 use biome_configuration::javascript::PartialJavascriptLinter;
@@ -24,7 +24,7 @@ use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
-use biome_service::workspace::{FixFileMode, OpenProjectParams, UpdateProjectParams};
+use biome_service::workspace::FixFileMode;
 use biome_service::{DynRef, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -640,10 +640,9 @@ pub(crate) fn validate_configuration_diagnostics(
     Ok(())
 }
 
-fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
-    let fs = &*cli_session.app.fs;
-    let workspace = &*cli_session.app.workspace;
-
+fn resolve_manifest(
+    fs: &DynRef<'_, dyn FileSystem>,
+) -> Result<Option<(BiomePath, String)>, WorkspaceError> {
     let result = fs.auto_search(
         &fs.working_directory().unwrap_or_default(),
         &["package.json"],
@@ -651,16 +650,10 @@ fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
     )?;
 
     if let Some(result) = result {
-        let biome_path = BiomePath::new(result.file_path);
-        workspace.open_project(OpenProjectParams {
-            path: biome_path.clone(),
-            content: result.content,
-            version: 0,
-        })?;
-        workspace.update_current_manifest(UpdateProjectParams { path: biome_path })?;
+        return Ok(Some((BiomePath::new(result.file_path), result.content)));
     }
 
-    Ok(())
+    Ok(None)
 }
 
 /// Computes [Stdin] if the CLI has the necessary information.

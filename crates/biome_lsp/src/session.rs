@@ -15,8 +15,8 @@ use biome_service::configuration::{
 };
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
-    RegisterProjectFolderParams, SupportsFeatureParams, UpdateProjectParams,
+    FeaturesBuilder, GetFileContentParams, PullDiagnosticsParams, RegisterProjectFolderParams,
+    SetManifestForProjectParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
@@ -570,17 +570,13 @@ impl Session {
                 Ok(result) => {
                     if let Some(result) = result {
                         let biome_path = BiomePath::new(result.file_path);
-                        let result = self.workspace.open_project(OpenProjectParams {
-                            path: biome_path.clone(),
-                            content: result.content,
-                            version: 0,
-                        });
-                        if let Err(err) = result {
-                            error!("{}", err);
-                        }
-                        let result = self
-                            .workspace
-                            .update_current_manifest(UpdateProjectParams { path: biome_path });
+                        let result =
+                            self.workspace
+                                .set_manifest_for_project(SetManifestForProjectParams {
+                                    manifest_path: biome_path.clone(),
+                                    content: result.content,
+                                    version: 0,
+                                });
                         if let Err(err) = result {
                             error!("{}", err);
                         }

@@ -472,6 +472,7 @@ dependencies = [
  "biome_diagnostics",
  "crossbeam",
  "directories",
+ "enumflags2",
  "indexmap 2.4.0",
  "oxc_resolver",
  "parking_lot",

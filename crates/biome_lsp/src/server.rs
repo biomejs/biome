@@ -617,8 +617,7 @@ impl ServerFactory {
         workspace_method!(builder, register_project_folder);
         workspace_method!(builder, unregister_project_folder);
         workspace_method!(builder, open_file);
-        workspace_method!(builder, open_project);
-        workspace_method!(builder, update_current_manifest);
+        workspace_method!(builder, set_manifest_for_project);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);

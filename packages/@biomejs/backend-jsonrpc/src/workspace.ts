@@ -6,7 +6,18 @@ export interface SupportsFeatureParams {
 }
 export type FeatureName = FeatureKind[];
 export interface BiomePath {
+	/**
+	 * Determines the kind of the file inside Biome. Some files are considered as configuration files, others as manifest files, and others as files to handle
+	 */
+	kind: FileKind;
+	/**
+	 * The path to the file
+	 */
 	path: string;
+	/**
+	 * Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
+	 */
+	was_written: boolean;
 }
 export type FeatureKind =
 	| "Format"
@@ -14,6 +25,16 @@ export type FeatureKind =
 	| "OrganizeImports"
 	| "Search"
 	| "Assists";
+export type FileKind = FileKind2[];
+/**
+ * The priority of the file
+ */
+export type FileKind2 =
+	| "Config"
+	| "Manifest"
+	| "Ignore"
+	| "Inspectable"
+	| "Handleable";
 export interface SupportsFeatureResult {
 	reason?: SupportKind;
 }
@@ -2415,12 +2436,9 @@ export interface RegisterProjectFolderParams {
 	setAsCurrentWorkspace: boolean;
 }
 export type ProjectKey = string;
-export interface UpdateProjectParams {
-	path: BiomePath;
-}
-export interface OpenProjectParams {
+export interface SetManifestForProjectParams {
 	content: string;
-	path: BiomePath;
+	manifest_path: BiomePath;
 	version: number;
 }
 export interface OpenFileParams {
@@ -3094,8 +3112,7 @@ export interface Workspace {
 	registerProjectFolder(
 		params: RegisterProjectFolderParams,
 	): Promise<ProjectKey>;
-	updateCurrentManifest(params: UpdateProjectParams): Promise<void>;
-	openProject(params: OpenProjectParams): Promise<void>;
+	setManifestForProject(params: SetManifestForProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -3128,11 +3145,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		registerProjectFolder(params) {
 			return transport.request("biome/register_project_folder", params);
 		},
-		updateCurrentManifest(params) {
-			return transport.request("biome/update_current_manifest", params);
-		},
-		openProject(params) {
-			return transport.request("biome/open_project", params);
+		setManifestForProject(params) {
+			return transport.request("biome/set_manifest_for_project", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);
