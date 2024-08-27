@@ -25,25 +25,3 @@ delete a.c;
 </script>
 <template></template>
 ```
-
-```block
-file.vue:4:1 lint/performance/noDelete  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid the delete operator which can impact performance.
-  
-    2 │ import { Button } from "./components/Button.vue";
-    3 │ 
-  > 4 │ delete a.c;
-      │ ^^^^^^^^^^
-    5 │ 
-  
-  i Unsafe fix: Use an undefined assignment instead.
-  
-    2 2 │   import { Button } from "./components/Button.vue";
-    3 3 │   
-    4   │ - delete·a.c;
-      4 │ + a.c·=·undefined;
-    5 5 │   
-  
-
-```

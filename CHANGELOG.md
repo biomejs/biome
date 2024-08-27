@@ -94,6 +94,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- The CLI now returns an error code when calling a command in `stdin` mode, and the contents of the files aren't fixed. For example, the following example will result in an error code of `1` because the `lint` command triggers some lint rules:
+
+  ```shell
+  echo "let x = 1" | biome lint --stdin-file-path=stdin.js
+  ```
+
+  Contributed by @ematipico
+
 #### Bug fixes
 
 - `biome lint --write` now takes `--only` and `--skip` into account ([#3470](https://github.com/biomejs/biome/issues/3470)). Contributed by @Conaclos
@@ -105,6 +113,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Migrating from Prettier or ESLint no longer overwrite the `overrides` field from the configuration ([#3544](https://github.com/biomejs/biome/issues/3544)). Contributed by @Conaclos
 
 - Fix JSX expressions for `noAriaHiddenOnFocusable` ([#3708](https://github.com/biomejs/biome/pull/3708)) . Contributed by @anthonyshew
+
+- Fix [#3633](https://github.com/biomejs/biome/issues/3633), where diagnostics where incorrectly printed if the code has errors. Contributed by @ematipico
 
 ### Configuration
 

@@ -299,6 +299,7 @@ define_categories! {
     "format",
     "check",
     "ci",
+    "stdin",
     "configuration",
     "organizeImports",
     "assists",

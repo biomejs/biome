@@ -2,20 +2,10 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
-## `biome.json`
-
-```json
-{
-  "formatter": {
-    "enabled": false
-  }
-}
-```
-
 # Input messages
 
 ```block
-function f() {return{}}
+let b = 2;
 ```
 
 # Termination Message
@@ -32,9 +22,5 @@ stdin ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-function f() {return{}}
-```
-
-```block
-The content was not formatted because the formatter is currently disabled.
+let b = 2;
 ```
