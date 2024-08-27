@@ -47,7 +47,7 @@ declare_lint_rule! {
         name: "noEmptyBlock",
         language: "css",
         recommended: true,
-        sources: &[RuleSource::Stylelint("no-empty-block")],
+        sources: &[RuleSource::Stylelint("block-no-empty")],
     }
 }
 

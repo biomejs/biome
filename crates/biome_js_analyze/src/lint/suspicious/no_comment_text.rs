@@ -6,12 +6,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxChild, JsSyntaxKind, JsSyntaxToken, JsxText};
-use biome_rowan::{AstNode, BatchMutationExt};
-use regex::Regex;
-use std::sync::LazyLock;
-
-static COMMENT_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"//.*|/\*[\s\S]*?\*/").unwrap());
+use biome_rowan::{AstNode, BatchMutationExt, TextRange, TextSize};
+use std::ops::Range;
 
 declare_lint_rule! {
     /// Prevent comments from being inserted as text nodes
@@ -84,57 +80,87 @@ declare_lint_rule! {
 
 impl Rule for NoCommentText {
     type Query = Ast<JsxText>;
-    type State = ();
+    type State = Range<usize>;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let n = ctx.query();
-        let jsx_value = n.text();
-        if !COMMENT_REGEX.is_match(&jsx_value) {
-            return None;
+        let node = ctx.query();
+        let jsx_value = node.value_token().ok()?;
+        let jsx_value = jsx_value.text();
+        let bytes = jsx_value.as_bytes();
+        let mut bytes_iter = jsx_value.bytes().enumerate();
+        while let Some((index, byte)) = bytes_iter.next() {
+            if byte != b'/' {
+                continue;
+            }
+            match bytes_iter.next()? {
+                (_, b'/') => {
+                    // Ignore `://` (`https://`, ...)
+                    if index == 0 || bytes.get(index - 1) != Some(&b':') {
+                        let end = bytes_iter
+                            .find(|(_, c)| c == &b'\n')
+                            .map_or(bytes.len(), |(index, _)| index);
+                        return Some(index..end);
+                    }
+                }
+                (_, b'*') => {
+                    let mut end = 0;
+                    while let Some((_, byte)) = bytes_iter.next() {
+                        if byte != b'*' {
+                            continue;
+                        }
+                        let Some((index, b'/')) = bytes_iter.next() else {
+                            continue;
+                        };
+                        end = index + 1;
+                        break;
+                    }
+                    if end > 0 {
+                        return Some(index..end);
+                    }
+                }
+                _ => {}
+            }
         }
-
-        Some(())
+        None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-
+    fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+        let node_range_start = ctx.query().range().start();
         Some(RuleDiagnostic::new(
             rule_category!(),
-            node.range(),
+            TextRange::new(
+                node_range_start + TextSize::from(range.start as u32),
+                node_range_start + TextSize::from(range.end as u32),
+            ),
             markup! {
                 "Wrap "<Emphasis>"comments"</Emphasis>" inside children within "<Emphasis>"braces"</Emphasis>"."
             },
         ))
     }
 
-    fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, range: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-        let mut mutation = ctx.root().begin();
-        let node_text = node.text().to_string();
-
-        // Replace the comments with JSX comments
-        let new_jsx_value = COMMENT_REGEX.replace_all(&node_text, |caps: &regex::Captures| {
-            let comment = caps[0].trim();
-            match comment {
-                c if c.starts_with("//") => format!("{{/* {} */}}", c[2..].trim()),
-                c if c.starts_with("/**") => format!("{{/** {} */}}", &c[3..c.len() - 2].trim()),
-                c => format!("{{/* {} */}}", &c[2..c.len() - 2].trim()),
-            }
-        });
-
-        // Create a new JSX text node with the new value
+        let jsx_value = node.value_token().ok()?;
+        let jsx_value = jsx_value.text();
+        let before_comment = &jsx_value[..range.start];
+        let after_comment = &jsx_value[range.end..];
+        let new_jsx_value = if jsx_value.as_bytes()[range.start + 1] == b'*' {
+            let comment = &jsx_value[range.start..range.end];
+            format!("{before_comment}{{{comment}}}{after_comment}")
+        } else {
+            let comment_text = &jsx_value[range.start + 2..range.end].trim();
+            format!("{before_comment}{{/* {comment_text} */}}{after_comment}")
+        };
         let new_jsx_text = AnyJsxChild::JsxText(make::jsx_text(JsSyntaxToken::new_detached(
             JsSyntaxKind::JSX_TEXT,
             &new_jsx_value,
             [],
             [],
         )));
-
+        let mut mutation = ctx.root().begin();
         mutation.replace_node(AnyJsxChild::from(node.clone()), new_jsx_text);
-
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),

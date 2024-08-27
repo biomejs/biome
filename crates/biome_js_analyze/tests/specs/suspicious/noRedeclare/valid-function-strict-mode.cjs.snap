@@ -1,0 +1,35 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-function-strict-mode.cjs
+---
+# Input
+```cjs
+function f() {
+	"use strict"
+	switch (x) {
+		case 0: {
+			function foo() {}
+			break;
+		}
+		default: {
+			function foo() {}
+			break;
+		}
+	}
+}
+
+class C {
+	method() {
+		switch (x) {
+			case 0: {
+				function foo() {}
+				break;
+			}
+			default: {
+				function foo() {}
+				break;
+			}
+		}
+	}
+}
+```

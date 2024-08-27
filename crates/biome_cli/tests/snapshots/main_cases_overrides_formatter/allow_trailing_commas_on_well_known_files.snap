@@ -1,0 +1,111 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 4
+  },
+  "overrides": [
+    {
+      "include": ["**/*.json"],
+      "json": { "parser": { "allowTrailingCommas": true } }
+    }
+  ]
+}
+```
+
+## `.vscode/settings.json`
+
+```json
+{
+    // This is a comment
+    "editor.rulers": [80, 100],
+}
+```
+
+## `other.json`
+
+```json
+{
+    "asta": ["lorem", "ipsum", "first", "second"],
+}
+```
+
+## `tsconfig.json`
+
+```json
+{
+    // This is a comment
+    "compilerOptions": {},
+}
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+other.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   {
+    2   │ - ····"asta":·["lorem",·"ipsum",·"first",·"second"],
+    3   │ - }
+      2 │ + ····"asta":·["lorem",·"ipsum",·"first",·"second"]
+      3 │ + }
+      4 │ + 
+  
+
+```
+
+```block
+tsconfig.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   {
+    2 2 │       // This is a comment
+    3   │ - ····"compilerOptions":·{},
+    4   │ - }
+      3 │ + ····"compilerOptions":·{}
+      4 │ + }
+      5 │ + 
+  
+
+```
+
+```block
+.vscode/settings.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+    1 1 │   {
+    2 2 │       // This is a comment
+    3   │ - ····"editor.rulers":·[80,·100],
+    4   │ - }
+      3 │ + ····"editor.rulers":·[80,·100]
+      4 │ + }
+      5 │ + 
+  
+
+```
+
+```block
+Checked 3 files in <TIME>. No fixes applied.
+Found 3 errors.
+```

@@ -1,0 +1,225 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "formatter": {
+    "indentStyle": "space",
+    "indentWidth": 4
+  },
+  "overrides": [
+    {
+      "include": ["**/*.json"],
+      "json": { "parser": { "allowComments": false } }
+    }
+  ]
+}
+```
+
+## `tsconfig.json`
+
+```json
+{
+    // This is a comment
+    "compilerOptions": {}
+}
+```
+
+# Termination Message
+
+```block
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+tsconfig.json:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property but instead found '// This is a comment'.
+  
+    1 │ {
+  > 2 │     // This is a comment
+      │     ^^^^^^^^^^^^^^^^^^^^
+    3 │     "compilerOptions": {}
+    4 │ }
+  
+  i Expected a property here.
+  
+    1 │ {
+  > 2 │     // This is a comment
+      │     ^^^^^^^^^^^^^^^^^^^^
+    3 │     "compilerOptions": {}
+    4 │ }
+  
+
+```
+
+```block
+tsconfig.json:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │     // This is a comment
+  > 3 │     "compilerOptions": {}
+      │     ^^^^^^^^^^^^^^^^^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+tsconfig.json:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │     // This is a comment
+  > 3 │     "compilerOptions": {}
+      │                      ^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+tsconfig.json:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │     // This is a comment
+  > 3 │     "compilerOptions": {}
+      │                        ^^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+tsconfig.json:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    2 │     // This is a comment
+    3 │     "compilerOptions": {}
+  > 4 │ }
+      │ ^
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+tsconfig.json:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a property but instead found '// This is a comment'.
+  
+    1 │ {
+  > 2 │     // This is a comment
+      │     ^^^^^^^^^^^^^^^^^^^^
+    3 │     "compilerOptions": {}
+    4 │ }
+  
+  i Expected a property here.
+  
+    1 │ {
+  > 2 │     // This is a comment
+      │     ^^^^^^^^^^^^^^^^^^^^
+    3 │     "compilerOptions": {}
+    4 │ }
+  
+
+```
+
+```block
+tsconfig.json:3:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │     // This is a comment
+  > 3 │     "compilerOptions": {}
+      │     ^^^^^^^^^^^^^^^^^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+tsconfig.json:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │     // This is a comment
+  > 3 │     "compilerOptions": {}
+      │                      ^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+tsconfig.json:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    1 │ {
+    2 │     // This is a comment
+  > 3 │     "compilerOptions": {}
+      │                        ^^
+    4 │ }
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+tsconfig.json:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × End of file expected
+  
+    2 │     // This is a comment
+    3 │     "compilerOptions": {}
+  > 4 │ }
+      │ ^
+  
+  i Use an array for a sequence of values: `[1, 2]`
+  
+
+```
+
+```block
+tsconfig.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Code formatting aborted due to parsing errors. To format code with errors, enable the 'formatter.formatWithErrors' option.
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 11 errors.
+```

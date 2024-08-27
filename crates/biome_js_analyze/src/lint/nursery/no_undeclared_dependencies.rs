@@ -77,6 +77,10 @@ impl Rule for NoUndeclaredDependencies {
             || ctx.is_dev_dependency(package_name)
             || ctx.is_peer_dependency(package_name)
             || ctx.is_optional_dependency(package_name)
+            // Self package imports
+            // TODO: we should also check that an `.` exportse exists.
+            // See https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name
+            || ctx.name() == Some(package_name)
         {
             return None;
         }

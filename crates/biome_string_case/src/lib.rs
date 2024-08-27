@@ -1,5 +1,7 @@
 //! Identify string case and convert to various string cases.
 
+use std::borrow::Cow;
+
 /// Represents the [Case] of a string.
 ///
 /// Note that some cases are superset of others.
@@ -277,7 +279,7 @@ impl std::fmt::Display for Case {
 ///
 /// Note that some [Case] are already sets of [Case].
 /// For example, [Case::Unknown] is a set that includes all [Case].
-/// So adding [Case::Unknown] to a [Cases] will superseed all other cases.
+/// So adding [Case::Unknown] to a [Cases] will supersede all other cases.
 ///
 /// A [Cases] is iterable.
 /// A Cases iterator doesn't yield a [Case] that is covered by another [Case] in the set.
@@ -405,8 +407,53 @@ const LEADING_BIT_INDEX_TO_CASE: [Case; 10] = [
     Case::Unknown,
 ];
 
+pub trait StrExtension: ToOwned {
+    /// Returns the same value as String::to_lowercase. The only difference
+    /// is that this functions returns ```Cow``` and does not allocate
+    /// if the string is already in lowercase.
+    fn to_ascii_lowercase_cow(&self) -> std::borrow::Cow<Self>;
+}
+
+impl StrExtension for str {
+    fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
+        let has_ascii_uppercase = self.bytes().any(|b| b.is_ascii_uppercase());
+        if has_ascii_uppercase {
+            Cow::Owned(self.to_ascii_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+}
+
+impl StrExtension for std::ffi::OsStr {
+    fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
+        let has_ascii_uppercase = self
+            .as_encoded_bytes()
+            .iter()
+            .any(|b| b.is_ascii_uppercase());
+        if has_ascii_uppercase {
+            Cow::Owned(self.to_ascii_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+}
+
+impl StrExtension for [u8] {
+    fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
+        let has_ascii_uppercase = self.iter().any(|b| b.is_ascii_uppercase());
+        if has_ascii_uppercase {
+            Cow::Owned(self.to_ascii_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::ffi::OsStr;
+
     use super::*;
 
     #[test]
@@ -783,5 +830,29 @@ mod tests {
             }
         }
         assert_eq!(cases.into_iter().size_hint().1, Some(max_count));
+    }
+
+    #[test]
+    fn to_ascii_lowercase_cow() {
+        assert_eq!("test", "Test".to_ascii_lowercase_cow());
+        assert_eq!(
+            OsStr::new("test"),
+            OsStr::new("Test").to_ascii_lowercase_cow()
+        );
+        assert_eq!(b"test", b"Test".to_ascii_lowercase_cow().as_ref());
+
+        assert_eq!("test", "teSt".to_ascii_lowercase_cow());
+        assert_eq!("te😀st", "te😀St".to_ascii_lowercase_cow());
+        assert_eq!(
+            OsStr::new("test"),
+            OsStr::new("teSt").to_ascii_lowercase_cow()
+        );
+        assert_eq!(b"test", b"teSt".to_ascii_lowercase_cow().as_ref());
+
+        assert!(matches!("test".to_ascii_lowercase_cow(), Cow::Borrowed(_)));
+        assert!(matches!(
+            OsStr::new("test").to_ascii_lowercase_cow(),
+            Cow::Borrowed(_)
+        ));
     }
 }

@@ -260,7 +260,7 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
 /// Potential improvements:
 /// 1. Use cursors that are passed as arguments -- not clear if this would be faster.
 /// 2. Precompute hashes on all nodes, which define the equivalence relation. The check then becomes O(1).
-pub fn are_equivalent(node1: &GritTargetNode, node2: &GritTargetNode) -> bool {
+fn are_equivalent(node1: &GritTargetNode, node2: &GritTargetNode) -> bool {
     // If the source is identical, we consider the nodes equivalent.
     // This covers most cases of constant nodes.
     // We may want a more precise check here eventually, but this is a good start.

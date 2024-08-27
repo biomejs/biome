@@ -1,0 +1,62 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `biome.json`
+
+```json
+{
+  "overrides": [
+    {
+      "include": ["*.js"],
+      "linter": { "enabled": false }
+    }
+  ]
+}
+```
+
+## `.eslintrc.json`
+
+```json
+{
+        "overrides": [{
+            "files": ["bin/*.js", "lib/*.js"],
+            "excludedFiles": "*.test.js",
+            "rules": {
+                "eqeqeq": ["off"]
+            }
+        }]
+    }
+```
+
+# Emitted Messages
+
+```block
+biome.json migrate ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i Configuration file can be updated.
+  
+    1  1 │   {
+    2    │ - ········"overrides":·[{
+    3    │ - ············"include":·["*.js"],
+    4    │ - ············"linter":·{·"enabled":·false·}
+    5    │ - ········}]
+    6    │ - ····}
+       2 │ + → "linter":·{·"rules":·{·"recommended":·false·}·},
+       3 │ + → "overrides":·[
+       4 │ + → → {·"include":·["*.js"],·"linter":·{·"enabled":·false·}·},
+       5 │ + → → {
+       6 │ + → → → "ignore":·["*.test.js"],
+       7 │ + → → → "include":·["bin/*.js",·"lib/*.js"],
+       8 │ + → → → "linter":·{·"rules":·{·"suspicious":·{·"noDoubleEquals":·"off"·}·}·}
+       9 │ + → → }
+      10 │ + → ]
+      11 │ + }
+      12 │ + 
+  
+
+```
+
+```block
+Run the command with the option --write to apply the changes.
+```

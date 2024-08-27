@@ -702,7 +702,7 @@ export interface A11y {
 	/**
 	 * Disallow target="_blank" attribute without rel="noreferrer"
 	 */
-	noBlankTarget?: RuleFixConfiguration_for_Null;
+	noBlankTarget?: RuleFixConfiguration_for_AllowDomainOptions;
 	/**
 	 * Enforces that no distracting elements are used.
 	 */
@@ -855,7 +855,7 @@ export interface Complexity {
 	/**
 	 * Disallow unnecessary catch clauses.
 	 */
-	noUselessCatch?: RuleConfiguration_for_Null;
+	noUselessCatch?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary constructors.
 	 */
@@ -1187,10 +1187,6 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
-	 * Disallows the use of irregular whitespace.
-	 */
-	noIrregularWhitespaceCss?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce that a label element or component has a text label and an associated input.
 	 */
 	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
@@ -1282,6 +1278,10 @@ export interface Nursery {
 	 * Disallow the use of overload signatures that are not next to each other.
 	 */
 	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce that ARIA properties are valid for the roles that are supported by the element.
+	 */
+	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */
@@ -1677,7 +1677,7 @@ export interface Suspicious {
 	/**
 	 * Require the use of === and !==
 	 */
-	noDoubleEquals?: RuleFixConfiguration_for_Null;
+	noDoubleEquals?: RuleFixConfiguration_for_NoDoubleEqualsOptions;
 	/**
 	 * Disallow duplicate case labels.
 	 */
@@ -1898,6 +1898,9 @@ export type RuleAssistConfiguration = "on" | "off";
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
+export type RuleFixConfiguration_for_AllowDomainOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_AllowDomainOptions;
 export type RuleConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_Null;
@@ -1943,6 +1946,9 @@ export type RuleConfiguration_for_FilenamingConventionOptions =
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
+export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
 export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
 export interface RuleWithFixOptions_for_Null {
 	/**
@@ -1957,6 +1963,20 @@ export interface RuleWithFixOptions_for_Null {
 	 * Rule's options
 	 */
 	options: null;
+}
+export interface RuleWithFixOptions_for_AllowDomainOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: AllowDomainOptions;
 }
 export interface RuleWithOptions_for_Null {
 	/**
@@ -2128,10 +2148,30 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
 	 */
 	options: NamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDoubleEqualsOptions;
+}
 /**
  * Used to identify the kind of code action emitted by a rule
  */
 export type FixKind = "none" | "safe" | "unsafe";
+export interface AllowDomainOptions {
+	/**
+	 * List of domains to allow `target="_blank"` without `rel="noreferrer"`
+	 */
+	allowDomains: string[];
+}
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
 	ignoreNonDom: boolean;
@@ -2256,6 +2296,17 @@ export interface NamingConventionOptions {
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
 	strictCase: boolean;
+}
+/**
+ * Rule's options
+ */
+export interface NoDoubleEqualsOptions {
+	/**
+	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.
+
+If `false`, no such exception will be made. 
+	 */
+	ignoreNull: boolean;
 }
 export interface Hook {
 	/**
@@ -2636,7 +2687,6 @@ export type Category =
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
-	| "lint/nursery/noIrregularWhitespaceCss"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
@@ -2660,6 +2710,7 @@ export type Category =
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
+	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentBuiltinInstantiation"

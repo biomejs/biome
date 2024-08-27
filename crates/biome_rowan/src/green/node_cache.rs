@@ -221,11 +221,11 @@ impl NodeCache {
     /// Returns an entry that allows the caller to:
     /// * Retrieve the cached node if it is present in the cache
     /// * Insert a node if it isn't present in the cache
-    pub(crate) fn node<'a>(
-        &'a mut self,
+    pub(crate) fn node(
+        &mut self,
         kind: RawSyntaxKind,
         children: &[(u64, GreenElement)],
-    ) -> NodeCacheNodeEntryMut<'a> {
+    ) -> NodeCacheNodeEntryMut {
         if children.len() > 3 {
             return NodeCacheNodeEntryMut::NoCache(Self::UNCACHED_NODE_HASH);
         }
@@ -343,16 +343,16 @@ impl NodeCache {
 
     /// Removes nodes, tokens and trivia entries from the cache when their
     /// generation doesn't match the current generation of the whole cache
-    pub(crate) fn sweep_cache(&mut self) {
+    pub(crate) fn retain_cache(&mut self) {
         self.nodes
-            .drain_filter(|node, _| node.node.generation() != self.generation);
+            .retain(|node, _| node.node.generation() == self.generation);
 
         self.tokens
-            .drain_filter(|token, _| token.0.generation() != self.generation);
+            .retain(|token, _| token.0.generation() == self.generation);
 
         self.trivia
             .cache
-            .drain_filter(|trivia, _| trivia.0.generation() != self.generation);
+            .retain(|trivia, _| trivia.0.generation() == self.generation);
     }
 }
 

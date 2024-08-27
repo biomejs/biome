@@ -4,6 +4,7 @@ use biome_analyze::{
     declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make::{
     jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_ident, jsx_name,
     jsx_string, jsx_string_literal, token,
@@ -13,6 +14,7 @@ use biome_js_syntax::{
     AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList, T,
 };
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPieceKind};
+use serde::{Deserialize, Serialize};
 
 declare_lint_rule! {
     /// Disallow `target="_blank"` attribute without `rel="noreferrer"`
@@ -49,6 +51,29 @@ declare_lint_rule! {
     /// ```jsx
     /// <a href='http://external.link' target='_blank' rel="noopener" {...props}>child</a>
     /// ```
+    ///
+    /// ## Options
+    ///
+    /// The option `allowDomains` allows specific domains to use `target="_blank"` without `rel="noreferrer"`.
+    /// In the following configuration, it's allowed to use the domains `https://example.com` and `example.org`:
+    ///
+    /// ```json,ignore
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "allowDomains": ["https://example.com", "example.org"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,ignore
+    /// <>
+    ///   <a target="_blank" href="https://example.com"></a>
+    ///   <a target="_blank" href="example.org"></a>
+    /// </>
+    /// ```
+    ///
+    /// Biome doesn't check if the list contains valid URLs.
     pub NoBlankTarget {
         version: "1.0.0",
         name: "noBlankTarget",
@@ -66,7 +91,7 @@ impl Rule for NoBlankTarget {
     /// 2. The attribute `rel=`, if present
     type State = (JsxAttribute, Option<JsxAttribute>);
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = AllowDomainOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -80,6 +105,22 @@ impl Rule for NoBlankTarget {
         let rel_attribute = node.find_attribute_by_name("rel");
 
         if target_attribute.as_static_value()?.text() == "_blank" {
+            if !ctx.options().allow_domains.is_empty() {
+                let href_attribute = node.find_attribute_by_name("href")?;
+                if let Some(href_value) = href_attribute.as_static_value() {
+                    let href = href_value.text();
+                    let allow_domains: Vec<&str> = ctx
+                        .options()
+                        .allow_domains
+                        .iter()
+                        .map(AsRef::as_ref)
+                        .collect();
+                    if is_allowed_domain(href, &allow_domains) {
+                        return None;
+                    }
+                }
+            }
+
             match rel_attribute {
                 None => {
                     if !node.has_trailing_spread_prop(&target_attribute) {
@@ -176,4 +217,19 @@ impl Rule for NoBlankTarget {
             }
         ))
     }
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AllowDomainOptions {
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    /// List of domains to allow `target="_blank"` without `rel="noreferrer"`
+    pub allow_domains: Vec<String>,
+}
+
+fn is_allowed_domain(href: &str, allow_domains: &[&str]) -> bool {
+    allow_domains
+        .iter()
+        .any(|allowed| href.starts_with(allowed) || href.contains(allowed))
 }

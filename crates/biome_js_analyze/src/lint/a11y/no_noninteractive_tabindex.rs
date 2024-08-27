@@ -6,10 +6,9 @@ use biome_analyze::{
 use biome_aria::AriaRoles;
 use biome_console::markup;
 use biome_js_syntax::{
-    jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsNumberLiteralExpression,
-    JsStringLiteralExpression, JsUnaryExpression, TextRange,
+    jsx_ext::AnyJsxElement, AnyJsxAttributeValue, AnyNumberLikeExpression, TextRange,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_lint_rule! {
     /// Enforce that `tabIndex` is not assigned to non-interactive HTML elements.
@@ -55,40 +54,6 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintJsxA11y("no-noninteractive-tabindex")],
         recommended: true,
         fix_kind: FixKind::Unsafe,
-    }
-}
-
-declare_node_union! {
-    /// Subset of expressions supported by this rule.
-    ///
-    /// ## Examples
-    ///
-    /// - `JsStringLiteralExpression` &mdash; `"5"`
-    /// - `JsNumberLiteralExpression` &mdash; `5`
-    /// - `JsUnaryExpression` &mdash; `+5` | `-5`
-    ///
-    pub AnyNumberLikeExpression = JsStringLiteralExpression | JsNumberLiteralExpression | JsUnaryExpression
-}
-
-impl AnyNumberLikeExpression {
-    /// Returns the value of a number-like expression; it returns the expression
-    /// text for literal expressions. However, for unary expressions, it only
-    /// returns the value for signed numeric expressions.
-    pub(crate) fn value(&self) -> Option<String> {
-        match self {
-            AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
-                return Some(string_literal.inner_string_text().ok()?.to_string());
-            }
-            AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
-                return Some(number_literal.value_token().ok()?.to_string());
-            }
-            AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
-                if unary_expression.is_signed_numeric_literal().ok()? {
-                    return Some(unary_expression.text());
-                }
-            }
-        }
-        None
     }
 }
 

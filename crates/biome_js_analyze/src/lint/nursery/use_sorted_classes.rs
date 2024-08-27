@@ -24,6 +24,7 @@ use crate::JsRuleAction;
 pub use self::options::UtilityClassSortingOptions;
 use self::{
     any_class_string_like::AnyClassStringLike, presets::UseSortedClassesPreset,
+    sort::get_sort_class_name_range, sort::should_ignore_postfix, sort::should_ignore_prefix,
     sort::sort_class_name, sort_config::SortConfig,
 };
 
@@ -159,7 +160,11 @@ impl Rule for UseSortedClasses {
 
         if node.should_visit(options)? {
             if let Some(value) = node.value() {
-                let sorted_value = sort_class_name(&value, &SORT_CONFIG);
+                // Check if the class should be ignored.
+                let ignore_prefix = should_ignore_prefix(node);
+                let ignore_postfix = should_ignore_postfix(node);
+                let sorted_value =
+                    sort_class_name(&value, &SORT_CONFIG, ignore_prefix, ignore_postfix);
                 if value.text() != sorted_value {
                     return Some(sorted_value);
                 }
@@ -169,9 +174,23 @@ impl Rule for UseSortedClasses {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+
+        // Calculate the range offset to account for the ignored prefix and postfix.
+        let sort_range = if let Some(value) = node.value() {
+            let range = node.range();
+            let ignore_prefix = should_ignore_prefix(node);
+            let ignore_postfix = should_ignore_postfix(node);
+            let real_sort_range =
+                get_sort_class_name_range(&value, &range, ignore_prefix, ignore_postfix);
+            real_sort_range.unwrap_or(range)
+        } else {
+            node.range()
+        };
+
         Some(RuleDiagnostic::new(
             rule_category!(),
-            ctx.query().range(),
+            sort_range,
             "These CSS classes should be sorted.",
         ))
     }

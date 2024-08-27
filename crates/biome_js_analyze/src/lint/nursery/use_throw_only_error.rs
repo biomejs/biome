@@ -53,7 +53,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "useThrowOnlyError",
         language: "js",
-        sources: &[RuleSource::Eslint("no-throw-literal"), RuleSource::EslintTypeScript("no-throw-literal"), RuleSource::EslintTypeScript("only-throw-error")],
+        sources: &[RuleSource::Eslint("no-throw-literal"), RuleSource::EslintTypeScript("only-throw-error")],
         source_kind: RuleSourceKind::Inspired,
         recommended: false,
     }

@@ -125,7 +125,7 @@
 				"noBlankTarget": {
 					"description": "Disallow target=\"_blank\" attribute without rel=\"noreferrer\"",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/AllowDomainConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -320,6 +320,24 @@
 			},
 			"additionalProperties": false
 		},
+		"AllowDomainConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithAllowDomainOptions" }
+			]
+		},
+		"AllowDomainOptions": {
+			"type": "object",
+			"required": ["allowDomains"],
+			"properties": {
+				"allowDomains": {
+					"description": "List of domains to allow `target=\"_blank\"` without `rel=\"noreferrer\"`",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
 		"AssistsConfiguration": {
 			"type": "object",
@@ -419,7 +437,7 @@
 				"noUselessCatch": {
 					"description": "Disallow unnecessary catch clauses.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1799,6 +1817,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoDoubleEqualsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoDoubleEqualsOptions" }
+			]
+		},
+		"NoDoubleEqualsOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"ignoreNull": {
+					"description": "If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.\n\nIf `false`, no such exception will be made.",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelWithoutControlConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1942,13 +1977,6 @@
 				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noIrregularWhitespaceCss": {
-					"description": "Disallows the use of irregular whitespace.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2112,10 +2140,19 @@
 						{ "type": "null" }
 					]
 				},
+				"useAriaPropsSupportedByRole": {
+					"description": "Enforce that ARIA properties are valid for the roles that are supported by the element.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useComponentExportOnlyModules": {
 					"description": "Enforce declaring components only within modules that export React Components exclusively.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseComponentExportOnlyModulesConfiguration" },
+						{
+							"$ref": "#/definitions/UseComponentExportOnlyModulesConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -2528,6 +2565,25 @@
 			"type": "string",
 			"enum": ["warn", "error", "info", "off"]
 		},
+		"RuleWithAllowDomainOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/AllowDomainOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithComplexityOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2641,6 +2697,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoDoubleEqualsOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoDoubleEqualsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoLabelWithoutControlOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2707,7 +2782,9 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseComponentExportOnlyModulesOptions" }]
+					"allOf": [
+						{ "$ref": "#/definitions/UseComponentExportOnlyModulesOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -3356,7 +3433,7 @@
 				"noDoubleEquals": {
 					"description": "Require the use of === and !==",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/NoDoubleEqualsConfiguration" },
 						{ "type": "null" }
 					]
 				},

@@ -28,7 +28,19 @@ use std::str::FromStr;
 pub fn check_rules() -> anyhow::Result<()> {
     #[derive(Default)]
     struct LintRulesVisitor {
-        groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
+        groups: BTreeMap<(&'static str, &'static str), BTreeMap<&'static str, RuleMetadata>>,
+    }
+
+    impl LintRulesVisitor {
+        fn push_rule<R, L>(&mut self)
+        where
+            R: Rule<Options: Default, Query: Queryable<Language = L, Output: Clone>> + 'static,
+        {
+            self.groups
+                .entry((<R::Group as RuleGroup>::NAME, R::METADATA.language))
+                .or_default()
+                .insert(R::METADATA.name, R::METADATA);
+        }
     }
 
     impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
@@ -43,10 +55,7 @@ pub fn check_rules() -> anyhow::Result<()> {
             R: Rule<Options: Default, Query: Queryable<Language = JsLanguage, Output: Clone>>
                 + 'static,
         {
-            self.groups
-                .entry(<R::Group as RuleGroup>::NAME)
-                .or_default()
-                .insert(R::METADATA.name, R::METADATA);
+            self.push_rule::<R, <R::Query as Queryable>::Language>()
         }
     }
 
@@ -62,10 +71,7 @@ pub fn check_rules() -> anyhow::Result<()> {
             R: Rule<Options: Default, Query: Queryable<Language = JsonLanguage, Output: Clone>>
                 + 'static,
         {
-            self.groups
-                .entry(<R::Group as RuleGroup>::NAME)
-                .or_default()
-                .insert(R::METADATA.name, R::METADATA);
+            self.push_rule::<R, <R::Query as Queryable>::Language>()
         }
     }
 
@@ -81,10 +87,7 @@ pub fn check_rules() -> anyhow::Result<()> {
             R: Rule<Options: Default, Query: Queryable<Language = CssLanguage, Output: Clone>>
                 + 'static,
         {
-            self.groups
-                .entry(<R::Group as RuleGroup>::NAME)
-                .or_default()
-                .insert(R::METADATA.name, R::METADATA);
+            self.push_rule::<R, <R::Query as Queryable>::Language>()
         }
     }
 
@@ -100,10 +103,7 @@ pub fn check_rules() -> anyhow::Result<()> {
             R: Rule<Options: Default, Query: Queryable<Language = GraphqlLanguage, Output: Clone>>
                 + 'static,
         {
-            self.groups
-                .entry(<R::Group as RuleGroup>::NAME)
-                .or_default()
-                .insert(R::METADATA.name, R::METADATA);
+            self.push_rule::<R, <R::Query as Queryable>::Language>()
         }
     }
 
@@ -115,7 +115,7 @@ pub fn check_rules() -> anyhow::Result<()> {
 
     let LintRulesVisitor { groups } = visitor;
 
-    for (group, rules) in groups {
+    for ((group, _), rules) in groups {
         for (_, meta) in rules {
             parse_documentation(group, meta.name, meta.docs)?;
         }
