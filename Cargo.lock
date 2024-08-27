@@ -1142,6 +1142,8 @@ dependencies = [
  "biome_rowan",
  "biome_unicode_table",
  "biome_yaml_syntax",
+ "quickcheck",
+ "quickcheck_macros",
  "tracing",
 ]
 
