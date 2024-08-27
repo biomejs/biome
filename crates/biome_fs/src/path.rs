@@ -112,12 +112,6 @@ impl BiomePath {
         self.was_written
     }
 
-    /// Adds a file kind to the current file
-    pub fn with_file_kind(mut self, kind: FileKind) -> Self {
-        self.kind.insert(kind);
-        self
-    }
-
     /// Accepts a file opened in read mode and saves into it
     pub fn save(&mut self, content: &str) -> Result<(), std::io::Error> {
         let mut file_to_write = File::create(&self.path).unwrap();
@@ -144,11 +138,7 @@ impl BiomePath {
     pub fn extension_as_str(&self) -> Option<&str> {
         self.extension().and_then(OsStr::to_str)
     }
-
-    /// Returns the file name of the path
-    fn get_file_name(&self) -> Option<&OsStr> {
-        self.path.file_name()
-    }
+    
 
     /// The priority of the file.
     /// - `biome.json` and `biome.jsonc` have the highest priority
@@ -211,18 +201,9 @@ impl PartialOrd for BiomePath {
 
 impl Ord for BiomePath {
     fn cmp(&self, other: &Self) -> Ordering {
-        let current_file_name = self.get_file_name();
-        let other_file_name = other.get_file_name();
-        match (current_file_name, other_file_name) {
-            (Some(current_file_name), Some(other_file_name)) => {
-                match Self::priority(current_file_name).cmp(&Self::priority(other_file_name)) {
-                    Ordering::Equal => self.path.cmp(&other.path),
-                    ordering => ordering,
-                }
-            }
-            (Some(_), None) => Ordering::Less,
-            (None, Some(_)) => Ordering::Greater,
-            (None, None) => Ordering::Equal,
+        match self.kind.cmp(&other.kind) {
+            Ordering::Equal => self.path.cmp(&other.path),
+            ordering => ordering,
         }
     }
 }
