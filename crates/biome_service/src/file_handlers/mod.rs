@@ -1186,7 +1186,7 @@ fn test_vue_script_lang() {
     assert!(
         parse_lang_from_script_opening_tag(VUE_TS_SCRIPT_OPENING_TAG)
             .1
-            .is_jsx()
+            .is_standard()
     );
     assert!(
         parse_lang_from_script_opening_tag(VUE_JSX_SCRIPT_OPENING_TAG)
