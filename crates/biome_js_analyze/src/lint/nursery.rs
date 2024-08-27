@@ -6,6 +6,7 @@ pub mod no_console;
 pub mod no_done_callback;
 pub mod no_duplicate_else_if;
 pub mod no_dynamic_namespace_import_access;
+pub mod no_enum;
 pub mod no_evolving_types;
 pub mod no_exported_imports;
 pub mod no_irregular_whitespace;
@@ -50,6 +51,7 @@ declare_lint_group! {
             self :: no_done_callback :: NoDoneCallback ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
             self :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccess ,
+            self :: no_enum :: NoEnum ,
             self :: no_evolving_types :: NoEvolvingTypes ,
             self :: no_exported_imports :: NoExportedImports ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
