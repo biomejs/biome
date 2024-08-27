@@ -178,7 +178,7 @@ pub(crate) fn run<'a>(
                 Some("svelte") => SvelteFileHandler::output(&new_content, code.as_str()),
                 _ => code,
             };
-            if mode.is_check_apply() || mode.is_check_apply_unsafe() && output != new_content {
+            if (mode.is_check_apply() || mode.is_check_apply_unsafe()) && output != new_content {
                 new_content = Cow::Owned(output);
             }
         }
