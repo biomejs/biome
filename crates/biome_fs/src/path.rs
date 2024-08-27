@@ -275,7 +275,7 @@ mod test {
 
         let path = PathBuf::from("src/package.json");
         let biome_path = BiomePath::new(path);
-        assert_eq!(biome_path.get_file_name(), Some(OsStr::new("package.json")));
+        assert_eq!(biome_path.file_name(), Some(OsStr::new("package.json")));
         assert_eq!(
             BiomePath::priority(OsStr::new("package.json")),
             FileKind::Manifest.into()
@@ -306,27 +306,27 @@ mod test {
         paths.sort();
         let mut iter = paths.iter();
         assert_eq!(
-            iter.next().unwrap().get_file_name(),
+            iter.next().unwrap().file_name(),
             Some(OsStr::new("biome.json"))
         );
         assert_eq!(
-            iter.next().unwrap().get_file_name(),
+            iter.next().unwrap().file_name(),
             Some(OsStr::new("biome.jsonc"))
         );
         assert_eq!(
-            iter.next().unwrap().get_file_name(),
+            iter.next().unwrap().file_name(),
             Some(OsStr::new("biome.jsonc"))
         );
         assert_eq!(
-            iter.next().unwrap().get_file_name(),
+            iter.next().unwrap().file_name(),
             Some(OsStr::new("package.json"))
         );
         assert_eq!(
-            iter.next().unwrap().get_file_name(),
+            iter.next().unwrap().file_name(),
             Some(OsStr::new("tsconfig.json"))
         );
         assert_eq!(
-            iter.next().unwrap().get_file_name(),
+            iter.next().unwrap().file_name(),
             Some(OsStr::new("README.md"))
         );
     }
