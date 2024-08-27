@@ -138,7 +138,6 @@ impl BiomePath {
     pub fn extension_as_str(&self) -> Option<&str> {
         self.extension().and_then(OsStr::to_str)
     }
-    
 
     /// The priority of the file.
     /// - `biome.json` and `biome.jsonc` have the highest priority
