@@ -383,7 +383,7 @@ impl Diagnostic for QueryDiagnostic {
     fn verbose_advices(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
         visitor.record_log(
             LogCategory::Info,
-            &markup! { "Please consult "<Hyperlink href="https://docs.grit.io/language/syntax">"the official grit syntax page"</Hyperlink>"." }
+            &markup! { "Please consult "<Hyperlink href="https://biomejs.dev/reference/gritql">"our GritQL reference"</Hyperlink>"." }
         )
     }
 }
