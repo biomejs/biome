@@ -48,6 +48,7 @@ unicode-width                = { workspace = true }
 schema = ["schemars", "biome_text_edit/schemars", "biome_diagnostics_categories/schemars"]
 
 [dev-dependencies]
+insta      = { workspace = true }
 serde_json = { workspace = true }
 trybuild   = "1.0.99"
 

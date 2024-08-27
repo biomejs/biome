@@ -1,8 +1,9 @@
 mod package_json;
+mod tsconfig_json;
 
 pub use crate::node_js_project::package_json::{Dependencies, PackageJson, PackageType};
+use crate::node_js_project::tsconfig_json::TsConfigJson;
 use crate::{Manifest, Project, ProjectAnalyzeDiagnostic, ProjectAnalyzeResult, LICENSE_LIST};
-use biome_json_syntax::JsonRoot;
 use biome_rowan::Language;
 use std::path::{Path, PathBuf};
 
@@ -15,11 +16,19 @@ pub struct NodeJsProject {
     pub manifest: PackageJson,
     /// Diagnostics emitted during the operations
     pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
+    /// The `tsconfig.json` manifest
+    pub tsconfig: TsConfigJson,
 }
 
 impl NodeJsProject {
-    pub fn from_root(&mut self, root: &JsonRoot) {
-        self.deserialize_manifest(root);
+    pub fn deserialize_tsconfig(&mut self, content: &ProjectLanguageRoot<TsConfigJson>) {
+        let tsconfig = TsConfigJson::deserialize_manifest(content);
+        let (tsconfig, deserialize_diagnostics) = tsconfig.consume();
+        self.tsconfig = tsconfig.unwrap_or_default();
+        self.diagnostics = deserialize_diagnostics
+            .into_iter()
+            .map(biome_diagnostics::serde::Diagnostic::new)
+            .collect();
     }
 }
 

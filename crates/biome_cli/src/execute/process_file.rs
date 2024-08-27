@@ -18,7 +18,7 @@ use lint::lint;
 use search::search;
 use std::marker::PhantomData;
 use std::ops::Deref;
-use std::path::Path;
+
 #[derive(Debug)]
 pub(crate) enum FileStatus {
     /// File changed and it was a success
@@ -125,17 +125,16 @@ impl<'ctx, 'app> Deref for SharedTraversalOptions<'ctx, 'app> {
 /// diagnostics were emitted, or compare the formatted code with the original
 /// content of the file and emit a diff or write the new content to the disk if
 /// write mode is enabled
-pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
-    tracing::trace_span!("process_file", path = ?path).in_scope(move || {
-        let biome_path = BiomePath::new(path);
+pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> FileResult {
+    tracing::trace_span!("process_file", path = ?biome_path).in_scope(move || {
         let file_features = ctx
             .workspace
             .file_features(SupportsFeatureParams {
-                path: biome_path,
+                path: biome_path.clone(),
                 features: ctx.execution.to_feature(),
             })
             .with_file_path_and_code_and_tags(
-                path.display().to_string(),
+                biome_path.display().to_string(),
                 category!("files/missingHandler"),
                 DiagnosticTags::VERBOSE,
             )?;
@@ -145,7 +144,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             return Ok(FileStatus::Ignored);
         } else if file_features.is_not_supported() {
             return Err(Message::from(
-                UnhandledDiagnostic.with_file_path(path.display().to_string()),
+                UnhandledDiagnostic.with_file_path(biome_path.display().to_string()),
             ));
         }
 
@@ -192,14 +191,14 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
             match reason {
                 SupportKind::FileNotSupported => {
                     return Err(Message::from(
-                        UnhandledDiagnostic.with_file_path(path.display().to_string()),
+                        UnhandledDiagnostic.with_file_path(biome_path.display().to_string()),
                     ));
                 }
                 SupportKind::FeatureNotEnabled | SupportKind::Ignored => {
                     return Ok(FileStatus::Ignored);
                 }
                 SupportKind::Protected => {
-                    return Ok(FileStatus::Protected(path.display().to_string()));
+                    return Ok(FileStatus::Protected(biome_path.display().to_string()));
                 }
                 SupportKind::Supported => {}
             };
@@ -210,21 +209,21 @@ pub(crate) fn process_file(ctx: &TraversalOptions, path: &Path) -> FileResult {
         match ctx.execution.traversal_mode {
             TraversalMode::Lint { .. } => {
                 // the unsupported case should be handled already at this point
-                lint(shared_context, path)
+                lint(shared_context, biome_path)
             }
             TraversalMode::Format { .. } => {
                 // the unsupported case should be handled already at this point
-                format(shared_context, path)
+                format(shared_context, biome_path)
             }
             TraversalMode::Check { .. } | TraversalMode::CI { .. } => {
-                check_file(shared_context, path, &file_features)
+                check_file(shared_context, biome_path, &file_features)
             }
             TraversalMode::Migrate { .. } => {
                 unreachable!("The migration should not be called for this file")
             }
             TraversalMode::Search { ref pattern, .. } => {
                 // the unsupported case should be handled already at this point
-                search(shared_context, path, pattern)
+                search(shared_context, biome_path, pattern)
             }
         }
     })

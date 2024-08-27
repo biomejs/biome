@@ -62,7 +62,7 @@ impl DiagnosticPrinter {
             .with_file_path(&self.file_name)
             .with_file_source_code(&self.file_source);
 
-        let mut html = HTML(&mut self.buffer);
+        let mut html = HTML::new(&mut self.buffer);
         Formatter::new(&mut html)
             .write_markup(markup!({ printer(&err) }))
             .map_err(into_error)?;

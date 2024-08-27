@@ -6,7 +6,18 @@ export interface SupportsFeatureParams {
 }
 export type FeatureName = FeatureKind[];
 export interface BiomePath {
+	/**
+	 * Determines the kind of the file inside Biome. Some files are considered as configuration files, others as manifest files, and others as files to handle
+	 */
+	kind: FileKind;
+	/**
+	 * The path to the file
+	 */
 	path: string;
+	/**
+	 * Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
+	 */
+	was_written: boolean;
 }
 export type FeatureKind =
 	| "Format"
@@ -14,6 +25,16 @@ export type FeatureKind =
 	| "OrganizeImports"
 	| "Search"
 	| "Assists";
+export type FileKind = FileKind2[];
+/**
+ * The priority of the file
+ */
+export type FileKind2 =
+	| "Config"
+	| "Manifest"
+	| "Ignore"
+	| "Inspectable"
+	| "Handleable";
 export interface SupportsFeatureResult {
 	reason?: SupportKind;
 }
@@ -1283,6 +1304,10 @@ export interface Nursery {
 	 */
 	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce that ARIA properties are valid for the roles that are supported by the element.
+	 */
+	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
@@ -1673,7 +1698,7 @@ export interface Suspicious {
 	/**
 	 * Require the use of === and !==
 	 */
-	noDoubleEquals?: RuleFixConfiguration_for_Null;
+	noDoubleEquals?: RuleFixConfiguration_for_NoDoubleEqualsOptions;
 	/**
 	 * Disallow duplicate case labels.
 	 */
@@ -1939,6 +1964,9 @@ export type RuleConfiguration_for_FilenamingConventionOptions =
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
+export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
 export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
 export interface RuleWithFixOptions_for_Null {
 	/**
@@ -2128,6 +2156,20 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
 	 */
 	options: NamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDoubleEqualsOptions;
+}
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -2259,6 +2301,17 @@ export interface NamingConventionOptions {
 	 */
 	strictCase: boolean;
 }
+/**
+ * Rule's options
+ */
+export interface NoDoubleEqualsOptions {
+	/**
+	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.
+
+If `false`, no such exception will be made. 
+	 */
+	ignoreNull: boolean;
+}
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -2387,12 +2440,9 @@ export interface RegisterProjectFolderParams {
 	setAsCurrentWorkspace: boolean;
 }
 export type ProjectKey = string;
-export interface UpdateProjectParams {
-	path: BiomePath;
-}
-export interface OpenProjectParams {
+export interface SetManifestForProjectParams {
 	content: string;
-	path: BiomePath;
+	manifest_path: BiomePath;
 	version: number;
 }
 export interface OpenFileParams {
@@ -2662,6 +2712,7 @@ export type Category =
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
+	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
@@ -3066,8 +3117,7 @@ export interface Workspace {
 	registerProjectFolder(
 		params: RegisterProjectFolderParams,
 	): Promise<ProjectKey>;
-	updateCurrentManifest(params: UpdateProjectParams): Promise<void>;
-	openProject(params: OpenProjectParams): Promise<void>;
+	setManifestForProject(params: SetManifestForProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -3100,11 +3150,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		registerProjectFolder(params) {
 			return transport.request("biome/register_project_folder", params);
 		},
-		updateCurrentManifest(params) {
-			return transport.request("biome/update_current_manifest", params);
-		},
-		openProject(params) {
-			return transport.request("biome/open_project", params);
+		setManifestForProject(params) {
+			return transport.request("biome/set_manifest_for_project", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);

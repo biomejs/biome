@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::{env, io, iter};
 
+use biome_console::fmt::MarkupElements;
 use biome_console::{fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode};
 use biome_text_edit::TextEdit;
 use unicode_width::UnicodeWidthStr;
@@ -74,7 +75,6 @@ impl<D: AsDiagnostic + ?Sized> fmt::Display for PrintDiagnostic<'_, D> {
         fmt.write_markup(markup! {
             {PrintHeader(diagnostic)}"\n\n"
         })?;
-
         // Wrap the formatter with an indentation level and print the advices
         let mut slot = None;
         let mut fmt = IndentWriter::wrap(fmt, &mut slot, true, "  ");
@@ -573,7 +573,8 @@ impl<W: fmt::Write + ?Sized> fmt::Write for IndentWriter<'_, W> {
     ) -> io::Result<()> {
         while !content.is_empty() {
             if self.pending_indent {
-                self.writer.write_str(elements, self.ident_text)?;
+                self.writer
+                    .write_str(&MarkupElements::Root, self.ident_text)?;
                 self.pending_indent = false;
             }
 
@@ -802,9 +803,11 @@ mod tests {
         let expected = markup!{
             "path:1:1 internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis><Error>"  >"</Error></Emphasis>" "<Emphasis>"1 │ "</Emphasis>"source code\n"
+            "  "
+            <Emphasis><Error>">"</Error></Emphasis>" "<Emphasis>"1 │ "</Emphasis>"source code\n"
             "   "<Emphasis>"   │ "</Emphasis><Emphasis><Error>"^^^^^^"</Error></Emphasis>"\n"
             "  \n"
         }.to_owned();
@@ -826,13 +829,17 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"error"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"error"</Error>"\n"
             "  \n"
-            <Emphasis><Warn>"  ⚠"</Warn></Emphasis>" "<Warn>"warn"</Warn>"\n"
+            "  "
+            <Emphasis><Warn>"⚠"</Warn></Emphasis>" "<Warn>"warn"</Warn>"\n"
             "  \n"
-            <Emphasis><Info>"  ℹ"</Info></Emphasis>" "<Info>"info"</Info>"\n"
+            "  "
+            <Emphasis><Info>"ℹ"</Info></Emphasis>" "<Info>"info"</Info>"\n"
             "  \n"
             "  none\n"
             "  \n"
@@ -856,7 +863,8 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
             "  - item 1\n"
             "  - item 2\n"
@@ -881,9 +889,11 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis><Error>"  >"</Error></Emphasis>" "<Emphasis>"1 │ "</Emphasis>"context location context\n"
+            "  "
+            <Emphasis><Error>">"</Error></Emphasis>" "<Emphasis>"1 │ "</Emphasis>"context location context\n"
             "   "<Emphasis>"   │ "</Emphasis>"        "<Emphasis><Error>"^^^^^^^^"</Error></Emphasis>"\n"
             "  \n"
         }.to_owned();
@@ -906,10 +916,13 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Error>"  -"</Error>" "<Error>"context"</Error><Error><Dim>"·"</Dim></Error><Error><Emphasis>"before"</Emphasis></Error><Error><Dim>"·"</Dim></Error><Error>"context"</Error>"\n"
-            <Success>"  +"</Success>" "<Success>"context"</Success><Success><Dim>"·"</Dim></Success><Success><Emphasis>"after"</Emphasis></Success><Success><Dim>"·"</Dim></Success><Success>"context"</Success>"\n"
+            "  "
+            <Error>"-"</Error>" "<Error>"context"</Error><Error><Dim>"·"</Dim></Error><Error><Emphasis>"before"</Emphasis></Error><Error><Dim>"·"</Dim></Error><Error>"context"</Error>"\n"
+            "  "
+            <Success>"+"</Success>" "<Success>"context"</Success><Success><Dim>"·"</Dim></Success><Success><Emphasis>"after"</Emphasis></Success><Success><Dim>"·"</Dim></Success><Success>"context"</Success>"\n"
             "  \n"
         }.to_owned();
 
@@ -931,9 +944,11 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis><Info>"  ℹ"</Info></Emphasis>" "<Info>"Backtrace Title"</Info>"\n"
+            "  "
+            <Emphasis><Info>"ℹ"</Info></Emphasis>" "<Info>"Backtrace Title"</Info>"\n"
             "  \n"
             "     0: crate::module::function\n"
             "            at crate/src/module.rs:8:16\n"
@@ -957,9 +972,11 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis>"  $"</Emphasis>" biome command --argument\n"
+            "  "
+            <Emphasis>"$"</Emphasis>" biome command --argument\n"
             "  \n"
         }.to_owned();
 
@@ -981,15 +998,20 @@ mod tests {
         let expected = markup!{
             "internalError/io "<Inverse>" FIXABLE "</Inverse>" ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
             "\n"
-            <Emphasis><Error>"  ✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
+            "  "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"diagnostic message"</Error>"\n"
             "  \n"
-            <Emphasis>"  Group Title"</Emphasis>"\n"
+            "  "
+            <Emphasis>"Group Title"</Emphasis>"\n"
             "  \n"
-            <Emphasis><Error>"    ✖"</Error></Emphasis>" "<Error>"error"</Error>"\n"
+            "    "
+            <Emphasis><Error>"✖"</Error></Emphasis>" "<Error>"error"</Error>"\n"
             "    \n"
-            <Emphasis><Warn>"    ⚠"</Warn></Emphasis>" "<Warn>"warn"</Warn>"\n"
+            "    "
+            <Emphasis><Warn>"⚠"</Warn></Emphasis>" "<Warn>"warn"</Warn>"\n"
             "    \n"
-            <Emphasis><Info>"    ℹ"</Info></Emphasis>" "<Info>"info"</Info>"\n"
+            "    "
+            <Emphasis><Info>"ℹ"</Info></Emphasis>" "<Info>"info"</Info>"\n"
             "    \n"
             "    none\n"
             "    \n"

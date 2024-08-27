@@ -104,6 +104,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Migrating from Prettier or ESLint no longer overwrite the `overrides` field from the configuration ([#3544](https://github.com/biomejs/biome/issues/3544)). Contributed by @Conaclos
 
+- Fix JSX expressions for `noAriaHiddenOnFocusable` ([#3708](https://github.com/biomejs/biome/pull/3708)) . Contributed by @anthonyshew
+
 ### Configuration
 
 - Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)).
@@ -364,6 +366,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules/) now ignores imports of a package which has the same name as a Node.js module. Contributed by @Conaclos
 
+- Add an `ignoreNull` option for [noDoubleEquals](https://biomejs.dev/linter/rules/no-double-equals/). Contributed by @peaBerberian.
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
@@ -423,30 +427,59 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- [suspicious/noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now corretcly handle `\u` escapes in unicode-aware regexes.
+- [noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now corretcly handle `\u` escapes in unicode-aware regexes.
 
   Previously, the rule didn't consider regex with the `v` flags as unicode-aware regexes.
   Moreover, `\uhhhh` was not handled in unicode-aware regexes.
 
   Contributed by @Conaclos
 
-- [suspicious/noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now reports control characters and escape sequence of control characters in string regexes. Contributed by @Conaclos
+- [noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) now reports control characters and escape sequence of control characters in string regexes. Contributed by @Conaclos
 
 - [useSortedClasses](https://biomejs.dev/linter/rules/use-sorted-classes/) lint error with Template literals ([#3394](https://github.com/biomejs/biome/issues/3394)). Contributed by @hangaoke1
 
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now ignores self package imports. Contributed by @Conaclos
+
 ### Parser
+
+#### Enhancements
+
+- The JSON parser now allows comments in files with the `.json` extension under the `.vscode` and `.zed` directories.
+
+  Biome recognizes are well known JSON files that allows comments and/or trailing commas.
+  Previously, Biome did not recognize JSON files under the `.vscode` and the `.zed` directories as JSON files that allow comments.
+  You had to configure Biome to recognize them:
+
+  ```json
+  {
+    "overrides": [
+      {
+        "include": ["**/.vscode/*.json", "**/.zed/*.json"],
+        "json": { "parser": { "allowComments": true } }
+      }
+    ]
+  }
+  ```
+
+  This override is no longer needed!
+  Note that JSON files under the `.vscode` and the `.zed` directories don't accept trailing commas.
+
+  Contributed by @Conaclos
 
 #### Bug fixes
 
 - Fix [#3287](https://github.com/biomejs/biome/issues/3287) nested selectors with pseudo-classes. Contributed by @denbezrukov
+
 - Fix [#3349](https://github.com/biomejs/biome/issues/3349) allow CSS multiple ampersand support. Contributed by @denbezrukov
-```css
-.class {
-  && {
-    color: red;
+
+  ```css
+  .class {
+    && {
+      color: red;
+    }
   }
-}
-```
+  ```
+
 - Fix [#3410](https://github.com/biomejs/biome/issues/3410) by correctly parsing break statements containing keywords.
   ```js
   out: while (true) {

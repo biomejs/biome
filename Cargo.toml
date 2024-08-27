@@ -173,14 +173,14 @@ oxc_resolver       = "1.10.2"
 proc-macro2        = "1.0.86"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
-quote              = "1.0.36"
+quote              = "1.0.37"
 rayon              = "1.10.0"
 regex              = "1.10.6"
 rustc-hash         = "1.1.0"
 schemars           = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
-serde              = { version = "1.0.208", features = ["derive"] }
+serde              = { version = "1.0.209", features = ["derive"] }
 serde_ini          = "0.2.0"
-serde_json         = "1.0.125"
+serde_json         = "1.0.127"
 similar            = "2.6.0"
 slotmap            = "1.0.7"
 smallvec           = { version = "1.13.2", features = ["union", "const_new", "serde"] }

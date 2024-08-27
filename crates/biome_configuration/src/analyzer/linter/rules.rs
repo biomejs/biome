@@ -3017,6 +3017,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_adjacent_overload_signatures:
         Option<RuleConfiguration<biome_js_analyze::options::UseAdjacentOverloadSignatures>>,
+    #[doc = "Enforce that ARIA properties are valid for the roles that are supported by the element."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_aria_props_supported_by_role:
+        Option<RuleConfiguration<biome_js_analyze::options::UseAriaPropsSupportedByRole>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_builtin_instantiation:
@@ -3154,6 +3158,7 @@ impl Nursery {
         "noValueAtRule",
         "noYodaExpression",
         "useAdjacentOverloadSignatures",
+        "useAriaPropsSupportedByRole",
         "useConsistentBuiltinInstantiation",
         "useConsistentCurlyBraces",
         "useConsistentGridAreas",
@@ -3197,6 +3202,7 @@ impl Nursery {
         "noUnknownUnit",
         "noUnmatchableAnbSelector",
         "noUselessEscapeInRegex",
+        "useAriaPropsSupportedByRole",
         "useDeprecatedReason",
         "useFocusableInteractive",
         "useGenericFontNames",
@@ -4101,6 +4107,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useAdjacentOverloadSignatures" => self
                 .use_adjacent_overload_signatures
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useAriaPropsSupportedByRole" => self
+                .use_aria_props_supported_by_role
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentBuiltinInstantiation" => self

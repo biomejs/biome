@@ -27,20 +27,18 @@ impl HtmlFileSource {
     }
 
     /// Try to return the HTML file source corresponding to this file name from well-known files
-    pub fn try_from_well_known(file_name: &str) -> Result<Self, FileSourceError> {
+    pub fn try_from_well_known(_: &Path) -> Result<Self, FileSourceError> {
         // TODO: to be implemented
-        Err(FileSourceError::UnknownFileName(file_name.into()))
+        Err(FileSourceError::UnknownFileName)
     }
 
     /// Try to return the HTML file source corresponding to this file extension
-    pub fn try_from_extension(extension: &str) -> Result<Self, FileSourceError> {
-        match extension {
-            "html" => Ok(Self::html()),
-            "astro" => Ok(Self::astro()),
-            _ => Err(FileSourceError::UnknownExtension(
-                Default::default(),
-                extension.into(),
-            )),
+    pub fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
+        // We assume the file extension is normalized to lowercase
+        match extension.as_encoded_bytes() {
+            b"html" => Ok(Self::html()),
+            b"astro" => Ok(Self::astro()),
+            _ => Err(FileSourceError::UnknownExtension),
         }
     }
 
@@ -57,7 +55,7 @@ impl HtmlFileSource {
         match language_id {
             "html" => Ok(Self::html()),
             "astro" => Ok(Self::astro()),
-            _ => Err(FileSourceError::UnknownLanguageId(language_id.into())),
+            _ => Err(FileSourceError::UnknownLanguageId),
         }
     }
 }
@@ -66,23 +64,15 @@ impl TryFrom<&Path> for HtmlFileSource {
     type Error = FileSourceError;
 
     fn try_from(path: &Path) -> Result<Self, Self::Error> {
-        let file_name = path
-            .file_name()
-            .and_then(OsStr::to_str)
-            .ok_or_else(|| FileSourceError::MissingFileName(path.into()))?;
-
-        if let Ok(file_source) = Self::try_from_well_known(file_name) {
+        if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
         }
 
+        let Some(extension) = path.extension() else {
+            return Err(FileSourceError::MissingFileExtension);
+        };
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
-        let extension = &path
-            .extension()
-            .and_then(OsStr::to_str)
-            .map(str::to_lowercase)
-            .ok_or_else(|| FileSourceError::MissingFileExtension(path.into()))?;
-
-        Self::try_from_extension(extension)
+        Self::try_from_extension(&extension.to_ascii_lowercase())
     }
 }

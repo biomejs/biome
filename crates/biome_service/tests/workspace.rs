@@ -145,6 +145,19 @@ mod test {
         .unwrap();
         assert!(well_known_json_with_comments_file.format_file().is_ok());
 
+        // well-known json-with-comments file allows comments
+        let well_known_json_with_comments_file = FileGuard::open(
+            workspace.as_ref(),
+            OpenFileParams {
+                path: BiomePath::new("project/.vscode/settings.json"),
+                content: r#"{"a": 42}//comment"#.into(),
+                version: 0,
+                document_file_source: None,
+            },
+        )
+        .unwrap();
+        assert!(well_known_json_with_comments_file.format_file().is_ok());
+
         // well-known json-with-comments file doesn't allow trailing commas
         let well_known_json_with_comments_file_with_trailing_commas = FileGuard::open(
             workspace.as_ref(),
