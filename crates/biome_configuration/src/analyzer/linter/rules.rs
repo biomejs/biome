@@ -3020,8 +3020,8 @@ pub struct Nursery {
         Option<RuleConfiguration<biome_js_analyze::options::UseAdjacentOverloadSignatures>>,
     #[doc = "Enforce declaring components only within modules that export React Components exclusively."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_components_only_module:
-        Option<RuleConfiguration<biome_js_analyze::options::UseComponentsOnlyModule>>,
+    pub use_component_export_only_modules:
+        Option<RuleConfiguration<biome_js_analyze::options::UseComponentExportOnlyModules>>,
     #[doc = "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_builtin_instantiation:
@@ -3159,7 +3159,7 @@ impl Nursery {
         "noValueAtRule",
         "noYodaExpression",
         "useAdjacentOverloadSignatures",
-        "useComponentsOnlyModule",
+        "useComponentExportOnlyModules",
         "useConsistentBuiltinInstantiation",
         "useConsistentCurlyBraces",
         "useConsistentGridAreas",
@@ -3509,7 +3509,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_components_only_module.as_ref() {
+        if let Some(rule) = self.use_component_export_only_modules.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
@@ -3818,7 +3818,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]));
             }
         }
-        if let Some(rule) = self.use_components_only_module.as_ref() {
+        if let Some(rule) = self.use_component_export_only_modules.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[39]));
             }
@@ -4120,8 +4120,8 @@ impl Nursery {
                 .use_adjacent_overload_signatures
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "useComponentsOnlyModule" => self
-                .use_components_only_module
+            "useComponentExportOnlyModules" => self
+                .use_component_export_only_modules
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentBuiltinInstantiation" => self

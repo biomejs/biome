@@ -156,7 +156,7 @@ define_categories! {
     "lint/nursery/noYodaExpression": "https://biomejs.dev/linter/rules/no-yoda-expression",
     "lint/nursery/useAdjacentOverloadSignatures": "https://biomejs.dev/linter/rules/use-adjacent-overload-signatures",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
-    "lint/nursery/useComponentsOnlyModule": "https://biomejs.dev/linter/rules/use-components-only-module",
+    "lint/nursery/useComponentExportOnlyModules": "https://biomejs.dev/linter/rules/use-components-only-module",
     "lint/nursery/useConsistentBuiltinInstantiation": "https://biomejs.dev/linter/rules/use-consistent-new-builtin",
     "lint/nursery/useConsistentCurlyBraces": "https://biomejs.dev/linter/rules/use-consistent-curly-braces",
     "lint/nursery/useConsistentGridAreas": "https://biomejs.dev/linter/rules/use-consistent-grid-areas",

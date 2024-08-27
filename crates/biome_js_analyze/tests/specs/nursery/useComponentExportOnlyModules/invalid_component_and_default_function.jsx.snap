@@ -1,30 +1,27 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 84
-expression: invalid_component_and_enum.tsx
+expression: invalid_component_and_default_function.jsx
 ---
 # Input
-```tsx
+```jsx
 export const SampleComponent = () => <></>
-export enum SampleEnum {
-  A,
-  B,
-  C,
-}
+export default function hoge () {
+  return 100
+} 
 
 ```
 
 # Diagnostics
 ```
-invalid_component_and_enum.tsx:2:13 lint/nursery/useComponentsOnlyModule ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_component_and_default_function.jsx:2:25 lint/nursery/useComponentExportOnlyModules ━━━━━━━━━━
 
   ! Exporting a non-component with components is not allowed.
   
     1 │ export const SampleComponent = () => <></>
-  > 2 │ export enum SampleEnum {
-      │             ^^^^^^^^^^
-    3 │   A,
-    4 │   B,
+  > 2 │ export default function hoge () {
+      │                         ^^^^
+    3 │   return 100
+    4 │ }·
   
   i Fast Refresh only works when a file only exports components.
   

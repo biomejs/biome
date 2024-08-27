@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 84
 expression: invalid_component_and_variable_clause.jsx
 ---
 # Input
@@ -14,7 +13,7 @@ export { foo, Bar, baz as qux }
 
 # Diagnostics
 ```
-invalid_component_and_variable_clause.jsx:4:10 lint/nursery/useComponentsOnlyModule ━━━━━━━━━━━━━━━━
+invalid_component_and_variable_clause.jsx:4:10 lint/nursery/useComponentExportOnlyModules ━━━━━━━━━━
 
   ! Exporting a non-component with components is not allowed.
   
@@ -34,7 +33,7 @@ invalid_component_and_variable_clause.jsx:4:10 lint/nursery/useComponentsOnlyMod
 ```
 
 ```
-invalid_component_and_variable_clause.jsx:4:27 lint/nursery/useComponentsOnlyModule ━━━━━━━━━━━━━━━━
+invalid_component_and_variable_clause.jsx:4:27 lint/nursery/useComponentExportOnlyModules ━━━━━━━━━━
 
   ! Exporting a non-component with components is not allowed.
   

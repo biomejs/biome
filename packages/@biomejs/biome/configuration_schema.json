@@ -2112,10 +2112,10 @@
 						{ "type": "null" }
 					]
 				},
-				"useComponentsOnlyModule": {
+				"useComponentExportOnlyModules": {
 					"description": "Enforce declaring components only within modules that export React Components exclusively.",
 					"anyOf": [
-						{ "$ref": "#/definitions/UseComponentsOnlyModuleConfiguration" },
+						{ "$ref": "#/definitions/UseComponentExportOnlyModulesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2697,7 +2697,7 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithUseComponentsOnlyModuleOptions": {
+		"RuleWithUseComponentExportOnlyModulesOptions": {
 			"type": "object",
 			"required": ["level", "options"],
 			"properties": {
@@ -2707,7 +2707,7 @@
 				},
 				"options": {
 					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/UseComponentsOnlyModuleOptions" }]
+					"allOf": [{ "$ref": "#/definitions/UseComponentExportOnlyModulesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3681,13 +3681,13 @@
 				}
 			]
 		},
-		"UseComponentsOnlyModuleConfiguration": {
+		"UseComponentExportOnlyModulesConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithUseComponentsOnlyModuleOptions" }
+				{ "$ref": "#/definitions/RuleWithUseComponentExportOnlyModulesOptions" }
 			]
 		},
-		"UseComponentsOnlyModuleOptions": {
+		"UseComponentExportOnlyModulesOptions": {
 			"type": "object",
 			"properties": {
 				"allowConstantExport": { "default": false, "type": "boolean" },

@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 84
 expression: invalid_hooked_non_component.jsx
 ---
 # Input
@@ -13,7 +12,7 @@ export default memo(func)
 
 # Diagnostics
 ```
-invalid_hooked_non_component.jsx:3:16 lint/nursery/useComponentsOnlyModule ━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid_hooked_non_component.jsx:3:16 lint/nursery/useComponentExportOnlyModules ━━━━━━━━━━━━━━━━━━━
 
   ! Exporting a non-component with components is not allowed.
   

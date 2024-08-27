@@ -1275,7 +1275,7 @@ pub(crate) fn migrate_eslint_any_rule(
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
-                .use_components_only_module
+                .use_component_export_only_modules
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }

@@ -1285,7 +1285,7 @@ export interface Nursery {
 	/**
 	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */
-	useComponentsOnlyModule?: RuleConfiguration_for_UseComponentsOnlyModuleOptions;
+	useComponentExportOnlyModules?: RuleConfiguration_for_UseComponentExportOnlyModulesOptions;
 	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
@@ -1919,9 +1919,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
-export type RuleConfiguration_for_UseComponentsOnlyModuleOptions =
+export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseComponentsOnlyModuleOptions;
+	| RuleWithOptions_for_UseComponentExportOnlyModulesOptions;
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
@@ -2032,7 +2032,7 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 */
 	options: RestrictedImportsOptions;
 }
-export interface RuleWithOptions_for_UseComponentsOnlyModuleOptions {
+export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -2040,7 +2040,7 @@ export interface RuleWithOptions_for_UseComponentsOnlyModuleOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseComponentsOnlyModuleOptions;
+	options: UseComponentExportOnlyModulesOptions;
 }
 export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
@@ -2181,7 +2181,7 @@ export interface RestrictedImportsOptions {
 	 */
 	paths: {};
 }
-export interface UseComponentsOnlyModuleOptions {
+export interface UseComponentExportOnlyModulesOptions {
 	allowConstantExport?: boolean;
 	allowExportNames: string[];
 }
@@ -2661,7 +2661,7 @@ export type Category =
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useComponentsOnlyModule"
+	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentGridAreas"

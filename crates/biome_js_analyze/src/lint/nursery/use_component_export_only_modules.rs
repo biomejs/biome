@@ -101,9 +101,9 @@ declare_lint_rule! {
     /// [Vite]: https://vitejs.dev/
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`PascalCase`]: https://en.wikipedia.org/wiki/Camel_case
-    pub UseComponentsOnlyModule {
+    pub UseComponentExportOnlyModules {
         version: "next",
-        name: "useComponentsOnlyModule",
+        name: "useComponentExportOnlyModules",
         language: "jsx",
         sources: &[RuleSource::EslintReactRefresh("only-export-components")],
         source_kind: RuleSourceKind::Inspired,
@@ -114,7 +114,7 @@ declare_lint_rule! {
 #[derive(Debug, Clone, Deserialize, Deserializable, Eq, PartialEq, Serialize, Default)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct UseComponentsOnlyModuleOptions {
+pub struct UseComponentExportOnlyModulesOptions {
     // Allow the export of constants.
     // (This option is for environments that support it, such as [Vite])
     #[serde(default)]
@@ -131,18 +131,18 @@ enum ErrorType {
     NoExport,
 }
 
-pub struct UseComponentsOnlyModuleState {
+pub struct UseComponentExportOnlyModulesState {
     error: ErrorType,
     range: TextRange,
 }
 
 const JSX_FILE_EXT: [&str; 2] = [".jsx", ".tsx"];
 
-impl Rule for UseComponentsOnlyModule {
+impl Rule for UseComponentExportOnlyModules {
     type Query = Ast<JsModule>;
-    type State = UseComponentsOnlyModuleState;
+    type State = UseComponentExportOnlyModulesState;
     type Signals = Vec<Self::State>;
-    type Options = UseComponentsOnlyModuleOptions;
+    type Options = UseComponentExportOnlyModulesOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         if let Some(file_name) = ctx.file_path().file_name().and_then(|x| x.to_str()) {
@@ -217,24 +217,24 @@ impl Rule for UseComponentsOnlyModule {
             }
         });
 
-if !exported_component_ids.is_empty() {                                           
-    return exported_non_component_ids                                             
-        .iter()                                                                   
-        .filter_map(|id| {                                                        
-            let range = id.identifier.as_ref().map_or_else(                       
-                || id.exported.as_ref().map(|exported| exported.range()),
-                |identifier| Some(identifier.range()),                         
-            );                                                                    
-            range.map(|range| UseComponentsOnlyModuleState {                      
-                error: ErrorType::ExportedNonComponentWithComponent,              
-                range,                                                            
-            })                                                                    
-        })                                                                        
-        .collect();                                                               
-}                                                                                 
+        if !exported_component_ids.is_empty() {
+            return exported_non_component_ids
+                .iter()
+                .filter_map(|id| {
+                    let range = id.identifier.as_ref().map_or_else(
+                        || id.exported.as_ref().map(|exported| exported.range()),
+                        |identifier| Some(identifier.range()),
+                    );
+                    range.map(|range| UseComponentExportOnlyModulesState {
+                        error: ErrorType::ExportedNonComponentWithComponent,
+                        range,
+                    })
+                })
+                .collect();
+        }
 
         local_component_ids
-            .map(|id| UseComponentsOnlyModuleState {
+            .map(|id| UseComponentExportOnlyModulesState {
                 error: if exported_non_component_ids.is_empty() {
                     ErrorType::UnexportedComponent
                 } else {
@@ -242,7 +242,7 @@ if !exported_component_ids.is_empty() {
                 },
                 range: id,
             })
-            .collect::<Vec<UseComponentsOnlyModuleState>>()
+            .collect::<Vec<UseComponentExportOnlyModulesState>>()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

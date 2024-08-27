@@ -22,7 +22,7 @@ pub mod no_useless_string_concat;
 pub mod no_useless_undefined_initialization;
 pub mod no_yoda_expression;
 pub mod use_adjacent_overload_signatures;
-pub mod use_components_only_module;
+pub mod use_component_export_only_modules;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
 pub mod use_date_now;
@@ -66,7 +66,7 @@ declare_lint_group! {
             self :: no_useless_undefined_initialization :: NoUselessUndefinedInitialization ,
             self :: no_yoda_expression :: NoYodaExpression ,
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
-            self :: use_components_only_module :: UseComponentsOnlyModule ,
+            self :: use_component_export_only_modules :: UseComponentExportOnlyModules ,
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_consistent_curly_braces :: UseConsistentCurlyBraces ,
             self :: use_date_now :: UseDateNow ,
