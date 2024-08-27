@@ -217,24 +217,21 @@ impl Rule for UseComponentsOnlyModule {
             }
         });
 
-        if !exported_component_ids.is_empty() {
-            return exported_non_component_ids
-                .iter()
-                .filter_map(|id| {
-                    let range = if let Some(identifier) = id.identifier.clone() {
-                        identifier.range()
-                    } else if let Some(exported) = id.exported.clone() {
-                        exported.range()
-                    } else {
-                        return None;
-                    };
-                    Some(UseComponentsOnlyModuleState {
-                        error: ErrorType::ExportedNonComponentWithComponent,
-                        range,
-                    })
-                })
-                .collect();
-        }
+if !exported_component_ids.is_empty() {                                           
+    return exported_non_component_ids                                             
+        .iter()                                                                   
+        .filter_map(|id| {                                                        
+            let range = id.identifier.as_ref().map_or_else(                       
+                || id.exported.as_ref().map(|exported| exported.range()),
+                |identifier| Some(identifier.range()),                         
+            );                                                                    
+            range.map(|range| UseComponentsOnlyModuleState {                      
+                error: ErrorType::ExportedNonComponentWithComponent,              
+                range,                                                            
+            })                                                                    
+        })                                                                        
+        .collect();                                                               
+}                                                                                 
 
         local_component_ids
             .map(|id| UseComponentsOnlyModuleState {
