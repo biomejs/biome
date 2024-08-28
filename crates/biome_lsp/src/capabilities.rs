@@ -58,9 +58,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         .and_then(|code_action| code_action.code_action_literal_support.as_ref())
         .map(|_| {
             CodeActionProviderCapability::Options(CodeActionOptions {
-                code_action_kinds: Some(vec![
-                    CodeActionKind::new("source.fixAll.biome"),
-                ]),
+                code_action_kinds: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
                 ..Default::default()
             })
         })

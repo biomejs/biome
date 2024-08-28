@@ -423,9 +423,7 @@ async fn server_capabilities_fix_all_code_action_kinds() -> Result<()> {
     let reader = tokio::spawn(client_handler(stream, sink, sender));
     let expect_code_action_provider =
         Some(CodeActionProviderCapability::Options(CodeActionOptions {
-            code_action_kinds: Some(vec![
-                CodeActionKind::new("source.fixAll.biome"),
-            ]),
+            code_action_kinds: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
             ..Default::default()
         }));
     let res: InitializeResult = server
