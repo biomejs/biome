@@ -16,6 +16,7 @@ use biome_service::workspace::{
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
 use std::collections::HashMap;
+use std::ffi::OsStr;
 use std::ops::Sub;
 use tower_lsp::lsp_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse,
@@ -84,10 +85,10 @@ pub(crate) fn code_actions(
     let content = session.workspace.get_file_content(GetFileContentParams {
         path: biome_path.clone(),
     })?;
-    let offset = match biome_path.extension().and_then(|s| s.to_str()) {
-        Some("vue") => VueFileHandler::start(content.as_str()),
-        Some("astro") => AstroFileHandler::start(content.as_str()),
-        Some("svelte") => SvelteFileHandler::start(content.as_str()),
+    let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
+        Some(b"vue") => VueFileHandler::start(content.as_str()),
+        Some(b"astro") => AstroFileHandler::start(content.as_str()),
+        Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
         _ => None,
     };
     let cursor_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)

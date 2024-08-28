@@ -396,7 +396,7 @@ pub fn extension_error(path: &BiomePath) -> WorkspaceError {
         path.clone()
             .extension()
             .and_then(OsStr::to_str)
-            .map(|s| s.to_string()),
+            .map(str::to_string),
     )
 }
 
@@ -621,10 +621,7 @@ mod test {
             WorkspaceError::SourceFileNotSupported(SourceFileNotSupported {
                 file_source: DocumentFileSource::Unknown,
                 path: path.display().to_string(),
-                extension: path
-                    .extension()
-                    .and_then(OsStr::to_str)
-                    .map(|s| s.to_string()),
+                extension: path.extension().and_then(OsStr::to_str).map(str::to_string),
             })
             .with_file_path("not_supported.toml"),
         )

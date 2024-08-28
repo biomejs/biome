@@ -6,6 +6,7 @@ use biome_fs::{FileSystem, OpenOptions};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
 use std::borrow::Cow;
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 use crate::diagnostics::MigrationDiagnostic;
@@ -154,8 +155,7 @@ fn load_legacy_config_data(
     path: &Path,
     console: &mut dyn Console,
 ) -> Result<eslint_eslint::LegacyConfigData, CliDiagnostic> {
-    let (deserialized, diagnostics) = match path.extension().and_then(|file_ext| file_ext.to_str())
-    {
+    let (deserialized, diagnostics) = match path.extension().and_then(OsStr::to_str) {
         None | Some("json") => {
             let mut file = fs.open_with_options(path, OpenOptions::default().read(true))?;
             let mut content = String::new();

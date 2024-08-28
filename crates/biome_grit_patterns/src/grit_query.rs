@@ -142,7 +142,7 @@ impl GritQuery {
         let name = path
             .and_then(Path::file_stem)
             .map(OsStr::to_string_lossy)
-            .map(|stem| stem.to_string());
+            .map(|stem| stem.into_owned());
         let language = context.lang;
         let variable_locations = VariableLocations::new(vars_array);
 

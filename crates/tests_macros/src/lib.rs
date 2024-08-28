@@ -198,8 +198,8 @@ impl Arguments {
                 .into_iter()
                 .flat_map(|path| path.components())
                 .map(Component::as_os_str)
-                .filter_map(OsStr::to_str)
-                .skip_while(|item| *item != "specs");
+                .skip_while(|item| item.as_encoded_bytes() != b"specs")
+                .filter_map(OsStr::to_str);
 
             let span = self.pattern.lit.span();
             let test_name = syn::Ident::new(&test_name, span);

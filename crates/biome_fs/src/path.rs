@@ -134,11 +134,6 @@ impl BiomePath {
         read_to_string(path)
     }
 
-    /// Returns the extension of the path
-    pub fn extension_as_str(&self) -> Option<&str> {
-        self.extension().and_then(OsStr::to_str)
-    }
-
     /// The priority of the file.
     /// - `biome.json` and `biome.jsonc` have the highest priority
     /// - `package.json` and `tsconfig.json`/`jsconfig.json` have the second-highest priority, and they are considered as manifest files

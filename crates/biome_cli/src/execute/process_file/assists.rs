@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{
@@ -38,14 +40,14 @@ pub(crate) fn assists_with_guard<'ctx>(
 
             let mut output = fix_result.code;
 
-            match workspace_file.as_extension() {
-                Some("astro") => {
+            match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
+                Some(b"astro") => {
                     output = AstroFileHandler::output(input.as_str(), output.as_str());
                 }
-                Some("vue") => {
+                Some(b"vue") => {
                     output = VueFileHandler::output(input.as_str(), output.as_str());
                 }
-                Some("svelte") => {
+                Some(b"svelte") => {
                     output = SvelteFileHandler::output(input.as_str(), output.as_str());
                 }
                 _ => {}
