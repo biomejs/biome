@@ -134,6 +134,7 @@ impl Rule for NoRedundantUseStrict {
                                     if index + 1 == directives_len
                                         && parent.is_script()
                                         && file_source.is_script()
+                                        && outer_most.is_none()
                                     {
                                         break;
                                     }
