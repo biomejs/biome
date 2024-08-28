@@ -113,7 +113,7 @@ JSON Formatter:
   Trailing Commas:              unset
 
 CSS Formatter:
-  Enabled:                      false
+  Enabled:                      true
   Indent style:                 unset
   Indent width:                 unset
   Line ending:                  unset
