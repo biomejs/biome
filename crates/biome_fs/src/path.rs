@@ -398,7 +398,7 @@ mod test {
         let result = serde_json::from_str::<FileKinds>("[\"Config\"]");
         assert!(result.is_ok());
         let file_kinds = result.unwrap();
-        assert_eq!(file_kinds.contains(FileKind::Config), true);
+        assert!(file_kinds.contains(FileKind::Config));
     }
 
     #[test]

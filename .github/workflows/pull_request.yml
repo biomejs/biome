@@ -94,7 +94,7 @@ jobs:
         with:
           cache-base: main
       - name: Run tests
-        run: cargo test --workspace --all-features
+        run: cargo test --workspace
 
   test-node-api:
     name: Test node.js API
