@@ -2642,7 +2642,6 @@ fn should_apply_different_formatting() {
         },
         "css": {
             "formatter": {
-                "enabled": true,
                 "lineWidth": 40,
                 "indentWidth": 6
             }

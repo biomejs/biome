@@ -1,7 +1,7 @@
 /// Sorted array of Node builtin
 ///
 /// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L1801-L1869>
-pub const BUILTIN: &[&str; 67] = &[
+pub const BUILTIN: &[&str] = &[
     "AbortController",
     "AbortSignal",
     "Blob",
@@ -74,7 +74,7 @@ pub const BUILTIN: &[&str; 67] = &[
 /// Sorted array of Node
 ///
 /// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L1727-L1800>
-pub const NODE: &[&str; 72] = &[
+pub const NODE: &[&str] = &[
     "AbortController",
     "AbortSignal",
     "Blob",
@@ -152,7 +152,7 @@ pub const NODE: &[&str; 72] = &[
 /// Sorted array of CommonJs builtin
 ///
 /// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L1870-L1875>
-pub const COMMON_JS: &[&str; 4] = &["exports", "global", "module", "require"];
+pub const COMMON_JS: &[&str] = &["exports", "global", "module", "require"];
 
 /// Returns `true` if `name` is a node global
 ///
