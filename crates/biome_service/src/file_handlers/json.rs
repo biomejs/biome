@@ -102,12 +102,14 @@ impl ServiceLanguage for JsonLanguage {
             .unwrap_or_default();
 
         // ensure it never formats biome.json into a form it can't parse
-        let trailing_commas =
-            if matches!(path.file_name().and_then(OsStr::to_str), Some("biome.json")) {
-                TrailingCommas::None
-            } else {
-                language.and_then(|l| l.trailing_commas).unwrap_or_default()
-            };
+        let trailing_commas = if matches!(
+            path.file_name().map(OsStr::as_encoded_bytes),
+            Some(b"biome.json")
+        ) {
+            TrailingCommas::None
+        } else {
+            language.and_then(|l| l.trailing_commas).unwrap_or_default()
+        };
 
         let options = JsonFormatOptions::new()
             .with_line_ending(line_ending)

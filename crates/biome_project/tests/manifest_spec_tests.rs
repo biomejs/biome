@@ -17,13 +17,12 @@ mod tsconfig {
 fn run_invalid_manifests(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
-    let extension = input_file.extension().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let mut project = NodeJsProject::default();
-    match extension {
-        "json" => {
+    match input_file.extension().map(OsStr::as_encoded_bytes) {
+        Some(b"json") => {
             let parsed = parse_json(input_code.as_str(), JsonParserOptions::default());
             project.deserialize_manifest(&parsed.tree());
         }
@@ -72,13 +71,12 @@ fn run_invalid_manifests(input: &'static str, _: &str, _: &str, _: &str) {
 fn run_invalid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
-    let extension = input_file.extension().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let mut project = NodeJsProject::default();
-    match extension {
-        "json" => {
+    match input_file.extension().map(OsStr::as_encoded_bytes) {
+        Some(b"json") => {
             let parsed = parse_json(
                 input_code.as_str(),
                 JsonParserOptions::default().with_allow_comments(),
@@ -130,13 +128,12 @@ fn run_invalid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
 fn run_valid_tsconfig(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
-    let extension = input_file.extension().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
     let mut project = NodeJsProject::default();
-    match extension {
-        "json" => {
+    match input_file.extension().map(OsStr::as_encoded_bytes) {
+        Some(b"json") => {
             let parsed = parse_json(
                 input_code.as_str(),
                 JsonParserOptions::default().with_allow_comments(),

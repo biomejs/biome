@@ -25,6 +25,7 @@ use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
+use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicU8};
@@ -339,10 +340,10 @@ impl Session {
             let content = self.workspace.get_file_content(GetFileContentParams {
                 path: biome_path.clone(),
             })?;
-            let offset = match biome_path.extension().and_then(|s| s.to_str()) {
-                Some("vue") => VueFileHandler::start(content.as_str()),
-                Some("astro") => AstroFileHandler::start(content.as_str()),
-                Some("svelte") => SvelteFileHandler::start(content.as_str()),
+            let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
+                Some(b"vue") => VueFileHandler::start(content.as_str()),
+                Some(b"astro") => AstroFileHandler::start(content.as_str()),
+                Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
                 _ => None,
             };
 
