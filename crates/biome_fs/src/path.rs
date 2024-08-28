@@ -5,6 +5,7 @@
 //! - shortcuts to open/write to the file
 use crate::ConfigName;
 use enumflags2::{bitflags, BitFlags};
+use smallvec::SmallVec;
 use std::cmp::Ordering;
 use std::ffi::OsStr;
 use std::fs::read_to_string;
@@ -44,12 +45,15 @@ pub enum FileKind {
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize),
-    serde(from = "Vec<FileKind>", into = "Vec<FileKind>")
+    serde(
+        from = "smallvec::SmallVec<[FileKind; 5]>",
+        into = "smallvec::SmallVec<[FileKind; 5]>"
+    )
 )]
 pub struct FileKinds(BitFlags<FileKind>);
 
-impl From<Vec<FileKind>> for FileKinds {
-    fn from(value: Vec<FileKind>) -> Self {
+impl From<SmallVec<[FileKind; 5]>> for FileKinds {
+    fn from(value: SmallVec<[FileKind; 5]>) -> Self {
         value
             .into_iter()
             .fold(FileKinds::default(), |mut acc, kind| {
@@ -59,7 +63,7 @@ impl From<Vec<FileKind>> for FileKinds {
     }
 }
 
-impl From<FileKinds> for Vec<FileKind> {
+impl From<FileKinds> for SmallVec<[FileKind; 5]> {
     fn from(value: FileKinds) -> Self {
         value.iter().collect()
     }
