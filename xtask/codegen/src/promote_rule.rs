@@ -17,6 +17,7 @@ const KNOWN_PATHS: &[&str] = &[
     "crates/biome_js_analyze/src/lint",
     "crates/biome_css_analyze/src/lint",
     "crates/biome_json_analyze/src/lint",
+    "crates/biome_graphql_analyze/src/lint",
 ];
 pub fn promote_rule(rule_name: &str, new_group: &str) {
     let current_dir = env::current_dir().ok().unwrap();
@@ -85,10 +86,12 @@ pub fn promote_rule(rule_name: &str, new_group: &str) {
         std::fs::write(categories_path, categories).unwrap();
 
         let old_test_path = current_dir
-            .join("crates/biome_js_analyze/tests/specs/nursery")
+            .join(analyzers_path.clone())
+            .join("tests/specs/nursery")
             .join(rule_name);
         let new_test_path = current_dir
-            .join("crates/biome_js_analyze/tests/specs")
+            .join(analyzers_path)
+            .join("tests/specs")
             .join(new_group)
             .join(rule_name);
         fs::rename(old_test_path, new_test_path).unwrap();

@@ -11,6 +11,17 @@ import {a as a} from 'mod';
 <div></div>
 ```
 
+# Termination Message
+
+```block
+stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The contents aren't fixed. Use the `--fix` flag to fix them.
+  
+
+
+```
+
 # Emitted Messages
 
 ```block
@@ -18,20 +29,4 @@ import {a as a} from 'mod';
 import {a as a} from 'mod';
 ---
 <div></div>
-```
-
-```block
-file.astro:2:9 lint/complexity/noUselessRename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Useless rename.
-  
-  > 2 │ import {a as a} from 'mod';
-      │         ^^^^^^
-    3 │ 
-  
-  i Safe fix: Remove the renaming.
-  
-    2 │ import·{a·as·a}·from·'mod';
-      │          -----             
-
 ```

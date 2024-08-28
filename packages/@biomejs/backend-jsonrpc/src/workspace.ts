@@ -683,6 +683,10 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
+	 * Enforce props sorting in JSX elements.
+	 */
+	sortJsxProps?: RuleAssistConfiguration;
+	/**
 	 * Sorts the keys of a JSON object in natural order
 	 */
 	useSortedKeys?: RuleAssistConfiguration;
@@ -1164,10 +1168,6 @@ export interface Nursery {
 	 */
 	noDuplicateFontNames?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow two keys with the same name inside a JSON object.
-	 */
-	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
@@ -1183,6 +1183,10 @@ export interface Nursery {
 	 * Disallow CSS empty blocks.
 	 */
 	noEmptyBlock?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow TypeScript enum.
+	 */
+	noEnum?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
@@ -1708,9 +1712,9 @@ export interface Suspicious {
 	 */
 	noDuplicateJsxProps?: RuleConfiguration_for_Null;
 	/**
-	 * Prevents object literals having more than one property declaration for the same name.
+	 * Disallow two keys with the same name inside objects.
 	 */
-	noDuplicateObjectKeys?: RuleFixConfiguration_for_Null;
+	noDuplicateObjectKeys?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate function parameter name.
 	 */
@@ -2673,11 +2677,11 @@ export type Category =
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
-	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
+	| "lint/nursery/noEnum"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noImportantInKeyframe"
@@ -2845,6 +2849,7 @@ export type Category =
 	| "format"
 	| "check"
 	| "ci"
+	| "stdin"
 	| "configuration"
 	| "organizeImports"
 	| "assists"

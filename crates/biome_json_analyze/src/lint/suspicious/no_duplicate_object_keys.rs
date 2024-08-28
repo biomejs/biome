@@ -5,7 +5,7 @@ use biome_rowan::{AstNode, AstSeparatedList};
 use rustc_hash::FxHashMap;
 
 declare_lint_rule! {
-    /// Disallow two keys with the same name inside a JSON object.
+    /// Disallow two keys with the same name inside objects.
     ///
     /// ## Examples
     ///
@@ -26,15 +26,15 @@ declare_lint_rule! {
     ///   "secondTitle": "Second title"
     /// }
     /// ```
-    pub NoDuplicateJsonKeys {
+    pub NoDuplicateObjectKeys {
         version: "1.0.0",
-        name: "noDuplicateJsonKeys",
+        name: "noDuplicateObjectKeys",
         language: "json",
         recommended: true,
     }
 }
 
-impl Rule for NoDuplicateJsonKeys {
+impl Rule for NoDuplicateObjectKeys {
     type Query = Ast<JsonObjectValue>;
     type State = (JsonMemberName, Vec<TextRange>);
     type Signals = Vec<Self::State>;

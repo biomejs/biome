@@ -2887,10 +2887,6 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_font_names:
         Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateFontNames>>,
-    #[doc = "Disallow two keys with the same name inside a JSON object."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_duplicate_json_keys:
-        Option<RuleConfiguration<biome_json_analyze::options::NoDuplicateJsonKeys>>,
     #[doc = "Disallow duplicate selectors within keyframe blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_selectors_keyframe_block:
@@ -2906,6 +2902,9 @@ pub struct Nursery {
     #[doc = "Disallow CSS empty blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_empty_block: Option<RuleConfiguration<biome_css_analyze::options::NoEmptyBlock>>,
+    #[doc = "Disallow TypeScript enum."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_enum: Option<RuleConfiguration<biome_js_analyze::options::NoEnum>>,
     #[doc = "Disallow variables from evolving into any type through reassignments."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_evolving_types: Option<RuleConfiguration<biome_js_analyze::options::NoEvolvingTypes>>,
@@ -3121,11 +3120,11 @@ impl Nursery {
         "noDuplicateAtImportRules",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
-        "noDuplicateJsonKeys",
         "noDuplicateSelectorsKeyframeBlock",
         "noDuplicatedFields",
         "noDynamicNamespaceImportAccess",
         "noEmptyBlock",
+        "noEnum",
         "noEvolvingTypes",
         "noExportedImports",
         "noImportantInKeyframe",
@@ -3182,7 +3181,6 @@ impl Nursery {
         "noDuplicateAtImportRules",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
-        "noDuplicateJsonKeys",
         "noDuplicateSelectorsKeyframeBlock",
         "noDuplicatedFields",
         "noEmptyBlock",
@@ -3212,8 +3210,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[12]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[13]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
@@ -3335,27 +3332,27 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
+        if let Some(rule) = self.no_duplicated_fields.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_duplicated_fields.as_ref() {
+        if let Some(rule) = self.no_dynamic_namespace_import_access.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_dynamic_namespace_import_access.as_ref() {
+        if let Some(rule) = self.no_empty_block.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_empty_block.as_ref() {
+        if let Some(rule) = self.no_enum.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
@@ -3639,27 +3636,27 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]));
             }
         }
-        if let Some(rule) = self.no_duplicate_json_keys.as_ref() {
+        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]));
             }
         }
-        if let Some(rule) = self.no_duplicate_selectors_keyframe_block.as_ref() {
+        if let Some(rule) = self.no_duplicated_fields.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]));
             }
         }
-        if let Some(rule) = self.no_duplicated_fields.as_ref() {
+        if let Some(rule) = self.no_dynamic_namespace_import_access.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_dynamic_namespace_import_access.as_ref() {
+        if let Some(rule) = self.no_empty_block.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_empty_block.as_ref() {
+        if let Some(rule) = self.no_enum.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
@@ -3970,10 +3967,6 @@ impl Nursery {
                 .no_duplicate_font_names
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noDuplicateJsonKeys" => self
-                .no_duplicate_json_keys
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateSelectorsKeyframeBlock" => self
                 .no_duplicate_selectors_keyframe_block
                 .as_ref()
@@ -3988,6 +3981,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noEmptyBlock" => self
                 .no_empty_block
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noEnum" => self
+                .no_enum
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noEvolvingTypes" => self
@@ -5595,10 +5592,10 @@ pub struct Suspicious {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_jsx_props:
         Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateJsxProps>>,
-    #[doc = "Prevents object literals having more than one property declaration for the same name."]
+    #[doc = "Disallow two keys with the same name inside objects."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_object_keys:
-        Option<RuleFixConfiguration<biome_js_analyze::options::NoDuplicateObjectKeys>>,
+        Option<RuleConfiguration<biome_json_analyze::options::NoDuplicateObjectKeys>>,
     #[doc = "Disallow duplicate function parameter name."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_parameters:

@@ -182,24 +182,31 @@ fn parse(
     settings: Option<&Settings>,
     cache: &mut NodeCache,
 ) -> ParseResult {
-    let parser = settings.map(|s| &s.languages.json.parser);
-    let overrides = settings.map(|s| &s.override_settings);
-    let optional_json_file_source = file_source.to_json_file_source();
-    let options = JsonParserOptions {
-        allow_comments: parser.and_then(|p| p.allow_comments).map_or_else(
-            || optional_json_file_source.map_or(false, |x| x.allow_comments()),
-            |value| value,
-        ),
-        allow_trailing_commas: parser.and_then(|p| p.allow_trailing_commas).map_or_else(
-            || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
-            |value| value,
-        ),
-    };
-    let options = if let Some(overrides) = overrides {
-        overrides.to_override_json_parser_options(biome_path, options)
+    let options = if biome_path.ends_with(ConfigName::biome_jsonc()) {
+        JsonParserOptions::default()
+            .with_allow_comments()
+            .with_allow_trailing_commas()
     } else {
-        options
+        let parser = settings.map(|s| &s.languages.json.parser);
+        let overrides = settings.map(|s| &s.override_settings);
+        let optional_json_file_source = file_source.to_json_file_source();
+        let options = JsonParserOptions {
+            allow_comments: parser.and_then(|p| p.allow_comments).map_or_else(
+                || optional_json_file_source.map_or(false, |x| x.allow_comments()),
+                |value| value,
+            ),
+            allow_trailing_commas: parser.and_then(|p| p.allow_trailing_commas).map_or_else(
+                || optional_json_file_source.map_or(false, |x| x.allow_trailing_commas()),
+                |value| value,
+            ),
+        };
+        if let Some(overrides) = overrides {
+            overrides.to_override_json_parser_options(biome_path, options)
+        } else {
+            options
+        }
     };
+
     let parse = biome_json_parser::parse_json_with_cache(text, cache, options);
 
     ParseResult {

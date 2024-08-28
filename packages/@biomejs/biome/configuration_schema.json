@@ -1905,13 +1905,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateJsonKeys": {
-					"description": "Disallow two keys with the same name inside a JSON object.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateSelectorsKeyframeBlock": {
 					"description": "Disallow duplicate selectors within keyframe blocks.",
 					"anyOf": [
@@ -1935,6 +1928,13 @@
 				},
 				"noEmptyBlock": {
 					"description": "Disallow CSS empty blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEnum": {
+					"description": "Disallow TypeScript enum.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2933,6 +2933,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"sortJsxProps": {
+					"description": "Enforce props sorting in JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
 					"anyOf": [
@@ -3433,9 +3440,9 @@
 					]
 				},
 				"noDuplicateObjectKeys": {
-					"description": "Prevents object literals having more than one property declaration for the same name.",
+					"description": "Disallow two keys with the same name inside objects.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

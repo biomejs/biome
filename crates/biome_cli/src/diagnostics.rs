@@ -56,6 +56,8 @@ pub enum CliDiagnostic {
     MigrateError(MigrationDiagnostic),
     /// Emitted during the reporting phase
     Report(ReportDiagnostic),
+    /// Emitted when there's an error emitted when using stdin mode
+    Stdin(StdinDiagnostic),
 }
 
 #[derive(Debug, Diagnostic)]
@@ -415,6 +417,10 @@ impl CliDiagnostic {
         })
     }
 
+    pub fn stdin() -> Self {
+        Self::Stdin(StdinDiagnostic::default())
+    }
+
     /// Emitted when the server is not running
     pub fn server_not_running() -> Self {
         Self::ServerNotRunning(ServerNotRunning)
@@ -488,6 +494,14 @@ impl DeprecatedConfigurationFile {
         Self { path: path.into() }
     }
 }
+
+#[derive(Debug, Default, Diagnostic)]
+#[diagnostic(
+    severity = Error,
+    category = "stdin",
+    message = "The contents aren't fixed. Use the `--fix` flag to fix them."
+)]
+pub struct StdinDiagnostic {}
 
 #[cfg(test)]
 mod test {

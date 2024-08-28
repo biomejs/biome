@@ -79,6 +79,7 @@ pub type NoEmptyInterface =
 pub type NoEmptyPattern =
     <lint::correctness::no_empty_pattern::NoEmptyPattern as biome_analyze::Rule>::Options;
 pub type NoEmptyTypeParameters = < lint :: complexity :: no_empty_type_parameters :: NoEmptyTypeParameters as biome_analyze :: Rule > :: Options ;
+pub type NoEnum = <lint::nursery::no_enum::NoEnum as biome_analyze::Rule>::Options;
 pub type NoEvolvingTypes =
     <lint::nursery::no_evolving_types::NoEvolvingTypes as biome_analyze::Rule>::Options;
 pub type NoExcessiveCognitiveComplexity = < lint :: complexity :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity as biome_analyze :: Rule > :: Options ;
@@ -256,6 +257,8 @@ pub type NoYodaExpression =
     <lint::nursery::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
 pub type OrganizeImports =
     <assists::source::organize_imports::OrganizeImports as biome_analyze::Rule>::Options;
+pub type SortJsxProps =
+    <assists::source::sort_jsx_props::SortJsxProps as biome_analyze::Rule>::Options;
 pub type UseAdjacentOverloadSignatures = < lint :: nursery :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures as biome_analyze :: Rule > :: Options ;
 pub type UseAltText = <lint::a11y::use_alt_text::UseAltText as biome_analyze::Rule>::Options;
 pub type UseAnchorContent =

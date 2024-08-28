@@ -32,6 +32,10 @@ declare_lint_rule! {
     /// <input role="button" />;
     /// ```
     ///
+    /// ```jsx
+    /// <canvas role="img" />;
+    /// ```
+    ///
     pub NoInteractiveElementToNoninteractiveRole {
         version: "1.3.0",
         name: "noInteractiveElementToNoninteractiveRole",
@@ -66,6 +70,11 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
                 // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
                 let role_sensitive_elements = ["div", "span"];
                 if role_sensitive_elements.contains(&element_name.text_trimmed()) {
+                    return None;
+                }
+
+                // A <canvas> element can be given an "img" to make it non-interactive for a11y reasons.
+                if element_name.text_trimmed() == "canvas" && role_attribute_value == "img" {
                     return None;
                 }
 
