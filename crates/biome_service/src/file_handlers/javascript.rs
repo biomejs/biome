@@ -47,7 +47,6 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::ffi::OsStr;
 use std::fmt::Debug;
 use tracing::{debug, debug_span, error, info, trace, trace_span};
 
@@ -232,26 +231,41 @@ impl ServiceLanguage for JsLanguage {
             );
         }
 
-        match path.extension().and_then(OsStr::to_str) {
-            Some("vue") => {
+        if let Some(filename) = path.file_name().map(|filename| filename.as_encoded_bytes()) {
+            if filename.ends_with(b".vue") {
                 globals.extend(
                     [
-                        "defineOptions",
-                        "defineModel",
-                        "withDefaults",
-                        "defineProps",
                         "defineEmits",
-                        "defineSlots",
                         "defineExpose",
+                        "defineModel",
+                        "defineOptions",
+                        "defineProps",
+                        "defineSlots",
+                        "withDefaults",
                     ]
-                    .map(ToOwned::to_owned),
+                    .map(str::to_string),
+                );
+            } else if filename.ends_with(b".astro") {
+                globals.extend(["Astro"].map(str::to_string));
+            } else if filename.ends_with(b".svelte")
+                || filename.ends_with(b".svelte.js")
+                || filename.ends_with(b".svelte.ts")
+            {
+                // Svelte 5 runes
+                globals.extend(
+                    [
+                        "$bindable",
+                        "$derived",
+                        "$effect",
+                        "$host",
+                        "$inspect",
+                        "$props",
+                        "$state",
+                    ]
+                    .map(str::to_string),
                 );
             }
-            Some("astro") => {
-                globals.extend(["Astro"].map(ToOwned::to_owned));
-            }
-            _ => {}
-        };
+        }
 
         let configuration = AnalyzerConfiguration {
             rules: global

@@ -1,7 +1,7 @@
 /// Sorted array of browser builtin
 ///
 /// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L368-L1442>
-pub const BROWSER: &[&str; 1073] = &[
+pub const BROWSER: &[&str] = &[
     "AbortController",
     "AbortSignal",
     "AbsoluteOrientationSensor",
@@ -1080,7 +1080,7 @@ pub const BROWSER: &[&str; 1073] = &[
 /// Sorted array of browser service worker builtin
 ///
 /// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L2212-L2334>
-pub const SERVICE_WORKER: &[&str; 121] = &[
+pub const SERVICE_WORKER: &[&str] = &[
     "Blob",
     "BroadcastChannel",
     "ByteLengthQueuingStrategy",
@@ -1207,7 +1207,7 @@ pub const SERVICE_WORKER: &[&str; 121] = &[
 /// Sorted array of browser web worker builtin
 ///
 /// Source: <https://github.com/sindresorhus/globals/blob/9e2e2598dabdb845ff76c0c3acf5c52c812a64de/globals.json#L1443-L1726>
-pub const WEB_WORKER: &[&str; 282] = &[
+pub const WEB_WORKER: &[&str] = &[
     "AbortController",
     "AbortSignal",
     "AudioData",

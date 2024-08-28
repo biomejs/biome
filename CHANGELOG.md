@@ -361,6 +361,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) recognized Svelte 5 runes in Svelte components and svelte files.
+
+  Svelte 5 introduced runes.
+  The rule now recognizes Svelte 5 runes in files ending with the `.svelte`, `.svelte.js` or `.svelte.ts` extensions.
+
+  Contributed by @Conaclos
+
 - [noBlankTarget](https://biomejs.dev/linter/rules/no-blank-target) now supports an array of allowed domains.
 
   The following configuration allows `example.com` and `example.org` as blank targets.
