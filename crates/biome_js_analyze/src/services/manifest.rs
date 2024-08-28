@@ -51,6 +51,15 @@ impl ManifestServices {
             .map(|pkg| pkg.optional_dependencies.contains(specifier))
             .unwrap_or_default()
     }
+
+    pub(crate) fn is_commonjs(&self) -> bool {
+        self.manifest
+            .as_ref()
+            .as_ref()
+            .and_then(|pkg| pkg.r#type.as_ref())
+            .map(|r#type| r#type.is_commonjs())
+            .unwrap_or_default()
+    }
 }
 
 impl FromServices for ManifestServices {

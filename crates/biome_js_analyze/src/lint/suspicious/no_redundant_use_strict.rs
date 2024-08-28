@@ -1,12 +1,13 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsClass, JsDirective, JsDirectiveList, JsFunctionBody, JsModule, JsScript,
 };
 
+use crate::services::manifest::Manifest;
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
 declare_lint_rule! {
@@ -102,7 +103,7 @@ impl AnyNodeWithDirectives {
 declare_node_union! { pub AnyJsStrictModeNode = AnyJsClass| JsModule | JsDirective  }
 
 impl Rule for NoRedundantUseStrict {
-    type Query = Ast<JsDirective>;
+    type Query = Manifest<JsDirective>;
     type State = AnyJsStrictModeNode;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -110,6 +111,9 @@ impl Rule for NoRedundantUseStrict {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         if node.inner_string_text().ok()? != "use strict" {
+            return None;
+        }
+        if ctx.is_commonjs() {
             return None;
         }
         let mut outer_most: Option<AnyJsStrictModeNode> = None;

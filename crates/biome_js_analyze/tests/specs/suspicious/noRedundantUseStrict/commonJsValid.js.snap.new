@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: commonJsValid.js
+---
+# Input
+```jsx
+"use strict"
+
+const a = require("a")
+
+```

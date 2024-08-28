@@ -399,6 +399,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - The rule `noDuplicateObjectKeys` now works for JSON and JSONC files. Contributed by @ematipico
 
+- The rule `noRedundantUseStrict` no longer reports `use strict` when the `package.json` marks the file as a script using the field `"type": "commonjs"`. Contributed by @ematipico
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
