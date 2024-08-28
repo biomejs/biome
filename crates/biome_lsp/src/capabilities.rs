@@ -1,7 +1,8 @@
 use crate::converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use tower_lsp::lsp_types::{
-    ClientCapabilities, CodeActionProviderCapability, DocumentOnTypeFormattingOptions, OneOf,
-    PositionEncodingKind, ServerCapabilities, TextDocumentSyncCapability, TextDocumentSyncKind,
+    ClientCapabilities, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
+    DocumentOnTypeFormattingOptions, OneOf, PositionEncodingKind, ServerCapabilities,
+    TextDocumentSyncCapability, TextDocumentSyncKind,
 };
 
 /// The capabilities to send from server as part of [`InitializeResult`]
@@ -64,7 +65,13 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         document_formatting_provider: supports_formatter_dynamic_registration,
         document_range_formatting_provider: supports_range_formatter_dynamic_registration,
         document_on_type_formatting_provider: supports_on_type_formatter_dynamic_registration,
-        code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
+        code_action_provider: Some(CodeActionProviderCapability::Options(CodeActionOptions {
+            code_action_kinds: Some(vec![
+                CodeActionKind::SOURCE_FIX_ALL,
+                CodeActionKind::new("source.fixAll.biome"),
+            ]),
+            ..Default::default()
+        })),
         rename_provider: None,
         ..Default::default()
     }
