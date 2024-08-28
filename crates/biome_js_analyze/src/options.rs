@@ -257,6 +257,8 @@ pub type NoYodaExpression =
     <lint::nursery::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
 pub type OrganizeImports =
     <assists::source::organize_imports::OrganizeImports as biome_analyze::Rule>::Options;
+pub type SortJsxProps =
+    <assists::source::sort_jsx_props::SortJsxProps as biome_analyze::Rule>::Options;
 pub type UseAdjacentOverloadSignatures = < lint :: nursery :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures as biome_analyze :: Rule > :: Options ;
 pub type UseAltText = <lint::a11y::use_alt_text::UseAltText as biome_analyze::Rule>::Options;
 pub type UseAnchorContent =

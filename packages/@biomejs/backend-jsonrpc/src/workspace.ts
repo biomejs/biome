@@ -683,6 +683,10 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
+	 * Enforce props sorting in JSX elements.
+	 */
+	sortJsxProps?: RuleAssistConfiguration;
+	/**
 	 * Sorts the keys of a JSON object in natural order
 	 */
 	useSortedKeys?: RuleAssistConfiguration;

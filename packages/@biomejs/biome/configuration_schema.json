@@ -2940,6 +2940,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"sortJsxProps": {
+					"description": "Enforce props sorting in JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
 					"anyOf": [
