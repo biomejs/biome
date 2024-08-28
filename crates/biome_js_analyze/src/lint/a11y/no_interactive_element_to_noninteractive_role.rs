@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx
-    /// <input role="canvas" role="img" />;
+    /// <canvas role="img" />;
     /// ```
     ///
     pub NoInteractiveElementToNoninteractiveRole {
