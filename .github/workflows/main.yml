@@ -93,7 +93,7 @@ jobs:
         with:
           cache-base: main
       - name: Run tests on ${{ matrix.os }}
-        run: cargo test --workspace
+        run: cargo test --workspace --all-features
 
   coverage:
     name: Test262 Coverage
