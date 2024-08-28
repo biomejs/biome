@@ -206,6 +206,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#3577](https://github.com/biomejs/biome/issues/3577), where the update of the configuration file was resulting in the creation of a new internal project. Contributed by @ematipico
+- Fix [#3696](https://github.com/biomejs/biome/issues/3696), where `biome.jsonc` was incorrectly parsed with incorrect options. Contributed by @ematipico
 
 ### Formatter
 
