@@ -131,6 +131,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix JSX expressions for `noAriaHiddenOnFocusable` ([#3708](https://github.com/biomejs/biome/pull/3708)) . Contributed by @anthonyshew
 
+- Fix edge case for `<canvas>` elements that use `role="img"` ([#3728](https://github.com/biomejs/biome/pull/3728)) . Contributed by @anthonyshew
+
 - Fix [#3633](https://github.com/biomejs/biome/issues/3633), where diagnostics where incorrectly printed if the code has errors. Contributed by @ematipico
 
 ### Configuration

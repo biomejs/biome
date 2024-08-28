@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
 expression: valid.jsx
 ---
 # Input
@@ -61,6 +62,7 @@ expression: valid.jsx
 <body role="button" />;
 <br role="button" />;
 <canvas role="button" />;
+<canvas role="img" />;
 <caption role="button" />;
 <center role="button" />;
 <cite role="button" />;
@@ -272,5 +274,3 @@ expression: valid.jsx
 
 
 ```
-
-
