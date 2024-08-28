@@ -51,6 +51,22 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
             }
         });
 
+    let code_action_provider = capabilities
+        .text_document
+        .as_ref()
+        .and_then(|text_document| text_document.code_action.as_ref())
+        .and_then(|code_action| code_action.code_action_literal_support.as_ref())
+        .map(|_| {
+            CodeActionProviderCapability::Options(CodeActionOptions {
+                code_action_kinds: Some(vec![
+                    CodeActionKind::SOURCE_FIX_ALL,
+                    CodeActionKind::new("source.fixAll.biome"),
+                ]),
+                ..Default::default()
+            })
+        })
+        .or(Some(CodeActionProviderCapability::Simple(true)));
+
     ServerCapabilities {
         position_encoding: Some(match negotiated_encoding(capabilities) {
             PositionEncoding::Utf8 => PositionEncodingKind::UTF8,
@@ -65,13 +81,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         document_formatting_provider: supports_formatter_dynamic_registration,
         document_range_formatting_provider: supports_range_formatter_dynamic_registration,
         document_on_type_formatting_provider: supports_on_type_formatter_dynamic_registration,
-        code_action_provider: Some(CodeActionProviderCapability::Options(CodeActionOptions {
-            code_action_kinds: Some(vec![
-                CodeActionKind::SOURCE_FIX_ALL,
-                CodeActionKind::new("source.fixAll.biome"),
-            ]),
-            ..Default::default()
-        })),
+        code_action_provider,
         rename_provider: None,
         ..Default::default()
     }
