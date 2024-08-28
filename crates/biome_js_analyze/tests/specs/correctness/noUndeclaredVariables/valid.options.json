@@ -1,0 +1,5 @@
+{
+    "javascript": {
+        "globals": ["global1"]
+    }
+}
