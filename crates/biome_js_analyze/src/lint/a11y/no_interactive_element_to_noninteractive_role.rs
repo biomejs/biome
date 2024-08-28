@@ -73,7 +73,7 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
                     return None;
                 }
 
-                // A <canvas> element can be given an "img" to make is as non_interactive.
+                // A <canvas> element can be given an "img" to make it non-interactive for a11y reasons.
                 if element_name.text_trimmed() == "canvas" && role_attribute_value == "img" {
                     return None;
                 }
