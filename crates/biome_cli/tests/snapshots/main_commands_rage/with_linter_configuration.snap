@@ -61,7 +61,7 @@ Biome Configuration:
 Linter:
   JavaScript enabled:           true
   JSON enabled:                 true
-  CSS enabled:                  false
+  CSS enabled:                  true
   GraphQL enabled:              false
   Recommended:                  false
   All:                          false

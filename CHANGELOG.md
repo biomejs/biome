@@ -224,6 +224,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- The CSS formatter is enabled by default. Which means that you don't need to opt-in anymore using the configuration file `biome.json`:
+
+  ```diff
+  {
+  -  "css": {
+  -    "formatter": {
+  -      "enabled": true
+  -    }
+  -  }
+  }
+  ```
+
+  Contributed by @ematipico
+
 #### Bug fixes
 
 - Keep the parentheses around `infer ... extends` declarations in type unions and type intersections ([#3419](https://github.com/biomejs/biome/issues/3419)). Contributed by @Conaclos
@@ -399,6 +413,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add an `ignoreNull` option for [noDoubleEquals](https://biomejs.dev/linter/rules/no-double-equals/). Contributed by @peaBerberian.
 
 - The rule `noDuplicateObjectKeys` now works for JSON and JSONC files. Contributed by @ematipico
+
+- The CSS linter is now enabled by default. Which means that you don't need to opt-in anymore using the configuration file `biome.json`:
+
+  ```diff
+  {
+  -  "css": {
+  -    "linter": {
+  -      "enabled": true
+  -    }
+  -  }
+  }
+  ```
+
+  Contributed by @ematipico
 
 #### Bug fixes
 
