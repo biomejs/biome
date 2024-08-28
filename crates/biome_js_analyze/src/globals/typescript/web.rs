@@ -622,6 +622,7 @@ pub const DOM: &[&str] = &[
     "KeyframeAnimationOptions",
     "KeyframeEffect",
     "KeyframeEffectOptions",
+    "LargestContentfulPaint",
     "LatencyMode",
     "LineAlignSetting",
     "LineAndPositionSetting",
