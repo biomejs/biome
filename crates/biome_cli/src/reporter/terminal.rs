@@ -240,7 +240,7 @@ impl<'a> fmt::Display for ConsoleTraversalSummary<'a> {
 
         match self.0 {
             TraversalMode::Search { .. } => {
-                fmt.write_markup(markup!("Found "{self.1.matches}" matches"))?
+                fmt.write_markup(markup!("\n"<Info>"Found "{self.1.matches}" matches."</Info>))?
             },
             _ => ()
         };
