@@ -252,6 +252,20 @@ fn migrate_eslint_rule(
                 }
             }
         }
+        eslint_eslint::Rule::TypeScriptExplicitMemberAccessibility(conf) => {
+            if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
+                if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
+                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    group.use_consistent_member_accessibility =
+                        Some(biome_config::RuleConfiguration::WithOptions(
+                            biome_config::RuleWithOptions {
+                                level: severity.into(),
+                                options: rule_options.into(),
+                            },
+                        ));
+                }
+            }
+        }
         eslint_eslint::Rule::TypeScriptNamingConvention(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();

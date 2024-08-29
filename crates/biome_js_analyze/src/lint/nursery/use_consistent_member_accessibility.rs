@@ -224,8 +224,8 @@ declare_lint_rule! {
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct UseConsistentMemberAccessibilityOptions {
-    accessibility: Accessibility,
+pub struct ConsistentMemberAccessibilityOptions {
+    pub accessibility: Accessibility,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
@@ -242,7 +242,7 @@ impl Rule for UseConsistentMemberAccessibility {
     type Query = Ast<AnyJsMemberWithAccessibility>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = UseConsistentMemberAccessibilityOptions;
+    type Options = ConsistentMemberAccessibilityOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();

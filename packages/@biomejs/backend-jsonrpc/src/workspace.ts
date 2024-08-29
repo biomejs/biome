@@ -1322,7 +1322,7 @@ export interface Nursery {
 	/**
 	 * Require consistent accessibility modifiers on class properties and methods.
 	 */
-	useConsistentMemberAccessibility?: RuleConfiguration_for_UseConsistentMemberAccessibilityOptions;
+	useConsistentMemberAccessibility?: RuleConfiguration_for_ConsistentMemberAccessibilityOptions;
 	/**
 	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
 	 */
@@ -1947,9 +1947,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
-export type RuleConfiguration_for_UseConsistentMemberAccessibilityOptions =
+export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseConsistentMemberAccessibilityOptions;
+	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
@@ -2077,7 +2077,7 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 */
 	options: RestrictedImportsOptions;
 }
-export interface RuleWithOptions_for_UseConsistentMemberAccessibilityOptions {
+export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -2085,7 +2085,7 @@ export interface RuleWithOptions_for_UseConsistentMemberAccessibilityOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseConsistentMemberAccessibilityOptions;
+	options: ConsistentMemberAccessibilityOptions;
 }
 export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
@@ -2246,7 +2246,7 @@ export interface RestrictedImportsOptions {
 	 */
 	paths: {};
 }
-export interface UseConsistentMemberAccessibilityOptions {
+export interface ConsistentMemberAccessibilityOptions {
 	accessibility: Accessibility;
 }
 export interface UseImportExtensionsOptions {

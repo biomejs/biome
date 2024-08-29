@@ -494,6 +494,11 @@ impl Deserializable for Rules {
                                 result.insert(Rule::TypeScriptArrayType(conf));
                             }
                         }
+                        "@typescript-eslint/explicit-member-accessibility" => {
+                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                                result.insert(Rule::TypeScriptExplicitMemberAccessibility(conf));
+                            }
+                        }
                         "@typescript-eslint/naming-convention" => {
                             if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
                                 result.insert(Rule::TypeScriptNamingConvention(conf));
@@ -567,6 +572,9 @@ pub(crate) enum Rule {
     // Eslint plugins
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
     TypeScriptArrayType(RuleConf<eslint_typescript::ArrayTypeOptions>),
+    TypeScriptExplicitMemberAccessibility(
+        RuleConf<eslint_typescript::ExplicitMemberAccessibilityOptions>,
+    ),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
@@ -578,6 +586,9 @@ impl Rule {
             Rule::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Rule::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Rule::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
+            Rule::TypeScriptExplicitMemberAccessibility(_) => {
+                Cow::Borrowed("@typescript-eslint/explicit-member-accessibility")
+            }
             Rule::TypeScriptNamingConvention(_) => {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }

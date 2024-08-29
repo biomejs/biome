@@ -319,21 +319,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noIrregularWhitespace](https://biomejs.dev/linter/rules/no-irregular-whitespace). Contributed by @michellocana
 
-<<<<<<< HEAD
 - Implement `noIrreguluarWhitespace` for CSS. Contributed by @DerTimonius
 
-||||||| parent of 03501f3e17 (feat(biome_js_analyze): useConsistentMemberAccessibility)
-=======
->>>>>>> 03501f3e17 (feat(biome_js_analyze): useConsistentMemberAccessibility)
 - Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
 
-<<<<<<< HEAD
 - Add [nursery/noUselessEscapeInRegex](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/).
   Contributed by @Conaclos
-||||||| parent of 03501f3e17 (feat(biome_js_analyze): useConsistentMemberAccessibility)
-=======
+
 - Add [nursery/useConsistentMemberAccessibility](https://biomejs.dev/linter/rules/use-consistent-member-accessibility/). Contributed by @seitarof
->>>>>>> 03501f3e17 (feat(biome_js_analyze): useConsistentMemberAccessibility)
 
 #### Enhancements
 
