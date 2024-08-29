@@ -76,6 +76,7 @@ pub(crate) fn traverse(
 
     let changed = AtomicUsize::new(0);
     let unchanged = AtomicUsize::new(0);
+    let matches = AtomicUsize::new(0);
     let skipped = AtomicUsize::new(0);
 
     let fs = &*session.app.fs;
@@ -105,6 +106,7 @@ pub(crate) fn traverse(
                 workspace,
                 execution,
                 interner,
+                matches: &matches,
                 changed: &changed,
                 unchanged: &unchanged,
                 skipped: &skipped,
@@ -130,6 +132,7 @@ pub(crate) fn traverse(
     let warnings = printer.warnings();
     let changed = changed.load(Ordering::Relaxed);
     let unchanged = unchanged.load(Ordering::Relaxed);
+    let matches = matches.load(Ordering::Relaxed);
     let skipped = skipped.load(Ordering::Relaxed);
     let suggested_fixes_skipped = printer.skipped_fixes();
     let diagnostics_not_printed = printer.not_printed_diagnostics();
@@ -139,6 +142,7 @@ pub(crate) fn traverse(
             unchanged,
             duration,
             errors,
+            matches,
             warnings,
             skipped,
             suggested_fixes_skipped,
@@ -536,6 +540,8 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     changed: &'ctx AtomicUsize,
     /// Shared atomic counter storing the number of unchanged files
     unchanged: &'ctx AtomicUsize,
+    /// Shared atomic counter storing the number of unchanged files
+    matches: &'ctx AtomicUsize,
     /// Shared atomic counter storing the number of skipped files
     skipped: &'ctx AtomicUsize,
     /// Channel sending messages to the display thread
@@ -556,6 +562,9 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
     }
     pub(crate) fn increment_unchanged(&self) {
         self.unchanged.fetch_add(1, Ordering::Relaxed);
+    }
+    pub(crate) fn increment_matches(&self) {
+        self.matches.fetch_add(1, Ordering::Relaxed);
     }
 
     /// Send a message to the display thread
@@ -676,6 +685,11 @@ fn handle_file(ctx: &TraversalOptions, path: &Path) {
         }
         Ok(Ok(FileStatus::Unchanged)) => {
             ctx.increment_unchanged();
+        }
+        Ok(Ok(FileStatus::Search(msg))) => {
+            ctx.increment_changed(path);
+            ctx.increment_matches();
+            ctx.push_message(msg);
         }
         Ok(Ok(FileStatus::Message(msg))) => {
             ctx.increment_unchanged();

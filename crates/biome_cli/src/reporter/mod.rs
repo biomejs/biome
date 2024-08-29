@@ -25,6 +25,7 @@ pub struct DiagnosticsPayload {
 pub struct TraversalSummary {
     pub changed: usize,
     pub unchanged: usize,
+    pub matches: usize,
     // We skip it during testing because the time isn't predictable
     #[cfg_attr(debug_assertions, serde(skip))]
     pub duration: Duration,

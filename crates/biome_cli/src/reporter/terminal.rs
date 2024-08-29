@@ -237,6 +237,13 @@ impl<'a> fmt::Display for ConsoleTraversalSummary<'a> {
                 fmt.write_markup(markup!("\n"<Warn>"Found "{self.1.warnings}" warnings."</Warn>))?;
             }
         }
+
+        match self.0 {
+            TraversalMode::Search { .. } => {
+                fmt.write_markup(markup!("Found "{self.1.matches}" matches"))?
+            },
+            _ => ()
+        };
         Ok(())
     }
 }
