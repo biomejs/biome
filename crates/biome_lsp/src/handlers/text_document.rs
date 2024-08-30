@@ -1,13 +1,11 @@
+use crate::utils::apply_document_changes;
+use crate::{documents::Document, session::Session};
 use anyhow::Result;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, GetFileContentParams, OpenFileParams,
 };
 use tower_lsp::lsp_types;
 use tracing::{error, field};
-
-use crate::diagnostics::LspError;
-use crate::utils::apply_document_changes;
-use crate::{documents::Document, session::Session};
 
 /// Handler for `textDocument/didOpen` LSP notification
 #[tracing::instrument(
@@ -21,7 +19,7 @@ use crate::{documents::Document, session::Session};
 pub(crate) async fn did_open(
     session: &Session,
     params: lsp_types::DidOpenTextDocumentParams,
-) -> Result<(), LspError> {
+) -> Result<()> {
     let url = params.text_document.uri;
     let version = params.text_document.version;
     let content = params.text_document.text;
@@ -41,7 +39,6 @@ pub(crate) async fn did_open(
 
     if let Err(err) = session.update_diagnostics(url).await {
         error!("Failed to update diagnostics: {}", err);
-        return Err(err);
     }
 
     Ok(())
