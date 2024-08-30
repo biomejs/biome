@@ -322,6 +322,9 @@ impl Session {
             && !file_features.supports_organize_imports()
             && !file_features.supports_assists()
         {
+            self.client
+                .publish_diagnostics(url, vec![], Some(doc.version))
+                .await;
             return Ok(());
         }
 
