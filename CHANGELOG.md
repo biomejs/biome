@@ -13,6 +13,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### New features
+
+- Implement [nursery/useConsistentMemberAccessibility](https://github.com/biomejs/biome/issues/3271). Contributed by @seitarof
+
 #### Enhancements
 
 - Implement [css suppression action](https://github.com/biomejs/biome/issues/3278). Contributed by @togami2864
@@ -321,6 +325,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noUselessEscapeInRegex](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/).
   Contributed by @Conaclos
+
+- Add [nursery/useConsistentMemberAccessibility](https://biomejs.dev/linter/rules/use-consistent-member-accessibility/). Contributed by @seitarof
 
 #### Enhancements
 

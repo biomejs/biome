@@ -311,6 +311,10 @@
 			},
 			"additionalProperties": false
 		},
+		"Accessibility": {
+			"type": "string",
+			"enum": ["noPublic", "explicit", "none"]
+		},
 		"Actions": {
 			"type": "object",
 			"properties": {
@@ -626,6 +630,20 @@
 			"required": ["syntax"],
 			"properties": {
 				"syntax": { "$ref": "#/definitions/ConsistentArrayType" }
+			},
+			"additionalProperties": false
+		},
+		"ConsistentMemberAccessibilityConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithConsistentMemberAccessibilityOptions" }
+			]
+		},
+		"ConsistentMemberAccessibilityOptions": {
+			"type": "object",
+			"required": ["accessibility"],
+			"properties": {
+				"accessibility": { "$ref": "#/definitions/Accessibility" }
 			},
 			"additionalProperties": false
 		},
@@ -2168,6 +2186,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentMemberAccessibility": {
+					"description": "Require consistent accessibility modifiers on class properties and methods.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/ConsistentMemberAccessibilityConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useDateNow": {
 					"description": "Use Date.now() to get the number of milliseconds since the Unix Epoch.",
 					"anyOf": [
@@ -2605,6 +2632,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/ConsistentArrayTypeOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithConsistentMemberAccessibilityOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/ConsistentMemberAccessibilityOptions" }
+					]
 				}
 			},
 			"additionalProperties": false

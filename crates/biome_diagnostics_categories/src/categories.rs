@@ -159,6 +159,7 @@ define_categories! {
     "lint/nursery/useConsistentBuiltinInstantiation": "https://biomejs.dev/linter/rules/use-consistent-new-builtin",
     "lint/nursery/useConsistentCurlyBraces": "https://biomejs.dev/linter/rules/use-consistent-curly-braces",
     "lint/nursery/useConsistentGridAreas": "https://biomejs.dev/linter/rules/use-consistent-grid-areas",
+    "lint/nursery/useConsistentMemberAccessibility": "https://biomejs.dev/linter/rules/use-consistent-member-accessibility",
     "lint/nursery/useDateNow": "https://biomejs.dev/linter/rules/use-date-now",
     "lint/nursery/useDefaultSwitchClause": "https://biomejs.dev/linter/rules/use-default-switch-clause",
     "lint/nursery/useDeprecatedReason": "https://biomejs.dev/linter/rules/use-deprecated-reason",
