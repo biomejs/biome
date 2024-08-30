@@ -318,6 +318,13 @@ impl Session {
             path: biome_path.clone(),
         })?;
 
+        if !file_features.supports_lint()
+            && !file_features.supports_organize_imports()
+            && !file_features.supports_assists()
+        {
+            return Ok(());
+        }
+
         let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
             if self.configuration_status().is_loaded() {
