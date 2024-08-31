@@ -2,16 +2,14 @@ use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
-use super::model::{
-    CssCustomProperty, CssDeclaration, Rule, Selector, SemanticModel, SemanticModelData,
-};
+use super::model::{CssDeclaration, Rule, Selector, SemanticModel, SemanticModelData};
 use crate::events::SemanticEvent;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     rules: Vec<Rule>,
-    global_css_variables: FxHashMap<String, CssCustomProperty>,
+    global_css_variables: FxHashMap<String, CssDeclaration>,
     current_rule_stack: Vec<Rule>,
     is_in_root_selector: bool,
 }
@@ -84,27 +82,26 @@ impl SemanticModelBuilder {
                 }
             }
             SemanticEvent::PropertyDeclaration {
-                ref property,
-                ref value,
+                property,
+                value,
                 range,
             } => {
+                let is_global_var = self.is_in_root_selector && property.name.starts_with("--");
+
                 if let Some(current_rule) = self.current_rule_stack.last_mut() {
-                    if self.is_in_root_selector {
-                        let key = &property.name;
-                        if key.starts_with("--") {
-                            self.global_css_variables.insert(
-                                key.to_string(),
-                                CssCustomProperty {
-                                    name: property.clone(),
-                                    value: value.clone(),
-                                    range,
-                                },
-                            );
-                        }
+                    if is_global_var {
+                        self.global_css_variables.insert(
+                            property.name.clone(),
+                            CssDeclaration {
+                                property: property.clone(),
+                                value: value.clone(),
+                                range,
+                            },
+                        );
                     }
                     current_rule.declarations.push(CssDeclaration {
-                        property: property.clone(),
-                        value: value.clone(),
+                        property,
+                        value,
                         range,
                     });
                 }
@@ -122,8 +119,8 @@ impl SemanticModelBuilder {
             } => {
                 self.global_css_variables.insert(
                     property.name.to_string(),
-                    CssCustomProperty {
-                        name: property,
+                    CssDeclaration {
+                        property,
                         value,
                         range,
                     },

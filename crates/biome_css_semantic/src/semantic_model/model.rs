@@ -34,7 +34,7 @@ impl SemanticModel {
         &self.data.rules
     }
 
-    pub fn global_css_variables(&self) -> &FxHashMap<String, CssCustomProperty> {
+    pub fn global_css_variables(&self) -> &FxHashMap<String, CssDeclaration> {
         &self.data.global_css_variables
     }
 }
@@ -51,7 +51,7 @@ pub(crate) struct SemanticModelData {
     /// List of all the css rules
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
-    pub(crate) global_css_variables: FxHashMap<String, CssCustomProperty>,
+    pub(crate) global_css_variables: FxHashMap<String, CssDeclaration>,
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -83,6 +83,12 @@ pub struct Rule {
 }
 
 /// Represents a CSS selector.
+/// /// ```css
+/// span {
+/// ^^^^
+///   color: red;
+/// }
+/// ```
 #[derive(Debug, Clone)]
 pub struct Selector {
     /// The name of the selector.
@@ -124,18 +130,5 @@ pub struct CssProperty {
 #[derive(Debug, Clone, Default)]
 pub struct CssValue {
     pub text: String,
-    pub range: TextRange,
-}
-
-/// Represents a CSS custom property declaration.
-/// ```css
-/// :root {
-///  --main-bg-color: brown;
-/// ^^^^^^^^^^^^^^^^^^^^^^^^
-/// }
-#[derive(Debug, Clone)]
-pub struct CssCustomProperty {
-    pub name: CssProperty,
-    pub value: CssValue,
     pub range: TextRange,
 }
