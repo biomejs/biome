@@ -16,7 +16,7 @@ const UNICODE: TokenSet<CssSyntaxKind> = token_set![
     T![+],
     // u+000;
     CSS_NUMBER_LITERAL,
-    // u+ff??;
+    // u+00ff?;
     CSS_DIMENSION_VALUE,
 ];
 
