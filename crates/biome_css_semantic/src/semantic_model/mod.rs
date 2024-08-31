@@ -52,6 +52,8 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 2);
+        assert_eq!(rule.child_ids.len(), 0);
+        assert_eq!(rule.parent_id, None);
     }
     #[test]
     fn test_nested_selector() {
@@ -71,7 +73,15 @@ mod tests {
         let rule = model.rules().first().unwrap();
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
-        assert_eq!(rule.children.len(), 1);
+        assert_eq!(rule.child_ids.len(), 1);
+
+        let child_id = rule.child_ids.first().unwrap();
+        let child = model.get_rule_by_id(*child_id).unwrap();
+
+        assert_eq!(child.selectors.len(), 1);
+        assert_eq!(child.declarations.len(), 1);
+        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.parent_id, Some(rule.id));
     }
 
     #[test]
@@ -91,11 +101,14 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
-        assert_eq!(rule.children.len(), 1);
+        assert_eq!(rule.child_ids.len(), 1);
 
-        let child = rule.children.first().unwrap();
+        let child_id = rule.child_ids.first().unwrap();
+        let child = model.get_rule_by_id(*child_id).unwrap();
         assert_eq!(child.selectors.len(), 1);
         assert_eq!(child.declarations.len(), 1);
+        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.parent_id, Some(rule.id));
     }
 
     #[test]
@@ -115,11 +128,14 @@ mod tests {
 
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 0);
-        assert_eq!(rule.children.len(), 1);
+        assert_eq!(rule.child_ids.len(), 1);
 
-        let child = rule.children.first().unwrap();
+        let child_id = rule.child_ids.first().unwrap();
+        let child = model.get_rule_by_id(*child_id).unwrap();
         assert_eq!(child.selectors.len(), 0);
         assert_eq!(child.declarations.len(), 1);
+        assert_eq!(child.child_ids.len(), 0);
+        assert_eq!(child.parent_id, Some(rule.id));
     }
 
     #[test]
@@ -220,7 +236,7 @@ mod tests {
         // range of the declaration 'blue' in '.child'
         let range = TextRange::new(60.into(), 64.into());
         let rule = model.get_rule_by_range(range).unwrap();
-        dbg!(&rule);
+
         assert_eq!(rule.selectors.len(), 1);
         assert_eq!(rule.declarations.len(), 1);
 
@@ -228,6 +244,17 @@ mod tests {
 
         assert_eq!(rule.declarations[0].property.name, "color");
         assert_eq!(rule.declarations[0].value.text, "var(--foo)");
+
+        let parent = model.get_rule_by_id(rule.parent_id.unwrap()).unwrap();
+        assert_eq!(parent.selectors.len(), 1);
+        assert_eq!(parent.declarations.len(), 2);
+
+        assert_eq!(parent.selectors[0].name, "p");
+        assert_eq!(parent.declarations[0].property.name, "--foo");
+        assert_eq!(parent.declarations[0].value.text, "red");
+
+        assert_eq!(parent.declarations[1].property.name, "font-size");
+        assert_eq!(parent.declarations[1].value.text, "12px");
     }
 
     #[ignore]
