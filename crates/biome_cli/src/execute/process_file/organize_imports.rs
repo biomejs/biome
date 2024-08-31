@@ -1,3 +1,5 @@
+use std::ffi::OsStr;
+
 use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{
@@ -24,21 +26,21 @@ pub(crate) fn organize_imports_with_guard<'ctx>(
             let input = workspace_file.input()?;
             let mut output = sorted.code;
 
-            match workspace_file.as_extension() {
-                Some("astro") => {
+            match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
+                Some(b"astro") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
                     }
                     output = AstroFileHandler::output(input.as_str(), output.as_str());
                 }
-                Some("vue") => {
+                Some(b"vue") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
                     }
                     output = VueFileHandler::output(input.as_str(), output.as_str());
                 }
 
-                Some("svelte") => {
+                Some(b"svelte") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
                     }

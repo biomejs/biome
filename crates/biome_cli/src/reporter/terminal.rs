@@ -5,8 +5,8 @@ use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup, Console, ConsoleExt};
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
-use biome_fs::EvaluatedPath;
-use rustc_hash::FxHashSet;
+use biome_fs::BiomePath;
+use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 
@@ -14,7 +14,7 @@ pub(crate) struct ConsoleReporter {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
-    pub(crate) evaluated_paths: FxHashSet<EvaluatedPath>,
+    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
 }
 
 impl Reporter for ConsoleReporter {
@@ -80,15 +80,12 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
         Ok(())
     }
 
-    fn report_handled_paths(
-        &mut self,
-        evaluated_paths: FxHashSet<EvaluatedPath>,
-    ) -> io::Result<()> {
+    fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
             list: ListAdvice {
                 list: evaluated_paths
                     .iter()
-                    .map(|p| p.as_ref().display().to_string())
+                    .map(|p| p.display().to_string())
                     .collect(),
             },
         };
@@ -97,8 +94,8 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
             list: ListAdvice {
                 list: evaluated_paths
                     .iter()
-                    .filter(|p| p.is_fixed())
-                    .map(|p| p.as_ref().display().to_string())
+                    .filter(|p| p.was_written())
+                    .map(|p| p.display().to_string())
                     .collect(),
             },
         };

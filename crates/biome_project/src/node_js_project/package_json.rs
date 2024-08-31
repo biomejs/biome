@@ -166,3 +166,13 @@ pub enum PackageType {
     Module,
     Commonjs,
 }
+
+impl PackageType {
+    pub const fn is_commonjs(&self) -> bool {
+        matches!(self, Self::Commonjs)
+    }
+
+    pub const fn is_module(&self) -> bool {
+        matches!(self, Self::Module)
+    }
+}

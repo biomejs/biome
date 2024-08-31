@@ -7,6 +7,7 @@ use crate::execute::TraversalMode;
 use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Error, Severity};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use std::ffi::OsStr;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 use tracing::debug;
@@ -90,21 +91,21 @@ pub(crate) fn format_with_guard<'ctx>(
                 return Ok(FileStatus::Ignored);
             }
 
-            match workspace_file.as_extension() {
-                Some("astro") => {
+            match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
+                Some(b"astro") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
                     }
                     output = AstroFileHandler::output(input.as_str(), output.as_str());
                 }
-                Some("vue") => {
+                Some(b"vue") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
                     }
                     output = VueFileHandler::output(input.as_str(), output.as_str());
                 }
 
-                Some("svelte") => {
+                Some(b"svelte") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
                     }

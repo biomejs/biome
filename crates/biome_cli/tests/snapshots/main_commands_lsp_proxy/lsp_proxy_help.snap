@@ -5,7 +5,7 @@ expression: content
 # Emitted Messages
 
 ```block
-Acts as a server for the Language Server Protocol over stdin/stdout
+Acts as a server for the Language Server Protocol over stdin/stdout.
 
 Usage: lsp-proxy [--config-path=PATH]
 

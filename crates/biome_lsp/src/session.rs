@@ -15,8 +15,8 @@ use biome_service::configuration::{
 };
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
-    RegisterProjectFolderParams, SupportsFeatureParams, UpdateProjectParams,
+    FeaturesBuilder, GetFileContentParams, PullDiagnosticsParams, RegisterProjectFolderParams,
+    SetManifestForProjectParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
@@ -25,6 +25,7 @@ use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
+use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicU8};
@@ -317,6 +318,16 @@ impl Session {
             path: biome_path.clone(),
         })?;
 
+        if !file_features.supports_lint()
+            && !file_features.supports_organize_imports()
+            && !file_features.supports_assists()
+        {
+            self.client
+                .publish_diagnostics(url, vec![], Some(doc.version))
+                .await;
+            return Ok(());
+        }
+
         let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
             if self.configuration_status().is_loaded() {
@@ -339,10 +350,10 @@ impl Session {
             let content = self.workspace.get_file_content(GetFileContentParams {
                 path: biome_path.clone(),
             })?;
-            let offset = match biome_path.extension().and_then(|s| s.to_str()) {
-                Some("vue") => VueFileHandler::start(content.as_str()),
-                Some("astro") => AstroFileHandler::start(content.as_str()),
-                Some("svelte") => SvelteFileHandler::start(content.as_str()),
+            let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
+                Some(b"vue") => VueFileHandler::start(content.as_str()),
+                Some(b"astro") => AstroFileHandler::start(content.as_str()),
+                Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
                 _ => None,
             };
 
@@ -570,17 +581,13 @@ impl Session {
                 Ok(result) => {
                     if let Some(result) = result {
                         let biome_path = BiomePath::new(result.file_path);
-                        let result = self.workspace.open_project(OpenProjectParams {
-                            path: biome_path.clone(),
-                            content: result.content,
-                            version: 0,
-                        });
-                        if let Err(err) = result {
-                            error!("{}", err);
-                        }
-                        let result = self
-                            .workspace
-                            .update_current_manifest(UpdateProjectParams { path: biome_path });
+                        let result =
+                            self.workspace
+                                .set_manifest_for_project(SetManifestForProjectParams {
+                                    manifest_path: biome_path.clone(),
+                                    content: result.content,
+                                    version: 0,
+                                });
                         if let Err(err) = result {
                             error!("{}", err);
                         }

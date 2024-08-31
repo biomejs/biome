@@ -1,0 +1,26 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+# Input messages
+
+```block
+let b = 2;
+```
+
+# Termination Message
+
+```block
+stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The contents aren't fixed. Use the `--fix` flag to fix them.
+  
+
+
+```
+
+# Emitted Messages
+
+```block
+let b = 2;
+```

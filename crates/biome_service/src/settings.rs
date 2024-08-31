@@ -29,6 +29,7 @@ use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_project::{NodeJsProject, PackageJson};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use indexmap::IndexSet;
 use rustc_hash::FxHashMap;
@@ -49,6 +50,8 @@ pub struct ProjectData {
     path: BiomePath,
     /// The settings of the project, usually inferred from the configuration file e.g. `biome.json`.
     settings: Settings,
+    /// Information relative to the current project
+    project: Option<NodeJsProject>,
 }
 
 #[derive(Debug, Default)]
@@ -65,12 +68,27 @@ impl WorkspaceSettings {
         self.current_project
     }
 
+    pub fn get_current_project_data_mut(&mut self) -> &mut ProjectData {
+        self.data
+            .get_mut(self.current_project)
+            .expect("You must have at least one workspace.")
+    }
+
     /// Retrieves the settings of the current workspace folder
     pub fn get_current_settings(&self) -> Option<&Settings> {
         trace!("Current key {:?}", self.current_project);
         let data = self.data.get(self.current_project);
         if let Some(data) = data {
             Some(&data.settings)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_current_manifest(&self) -> Option<&PackageJson> {
+        let data = self.data.get(self.current_project);
+        if let Some(data) = data {
+            data.project.as_ref().map(|project| &project.manifest)
         } else {
             None
         }
@@ -98,7 +116,13 @@ impl WorkspaceSettings {
         self.data.insert(ProjectData {
             path,
             settings: Settings::default(),
+            project: None,
         })
+    }
+
+    pub fn insert_manifest(&mut self, manifest: NodeJsProject) {
+        let project_data = self.get_current_project_data_mut();
+        let _ = project_data.project.insert(manifest);
     }
 
     /// Remove a project using its folder.
@@ -599,8 +623,7 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
             language_setting.parser.css_modules = parser.css_modules;
         }
         if let Some(formatter) = css.formatter {
-            // TODO: change RHS to `formatter.enabled` when css formatting is enabled by default
-            language_setting.formatter.enabled = Some(formatter.enabled.unwrap_or_default());
+            language_setting.formatter.enabled = formatter.enabled;
             language_setting.formatter.indent_width = formatter.indent_width;
             language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
             language_setting.formatter.line_width = formatter.line_width;
@@ -608,8 +631,7 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
             language_setting.formatter.quote_style = formatter.quote_style;
         }
         if let Some(linter) = css.linter {
-            // TODO: change RHS to `linter.enabled` when css linting is enabled by default
-            language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
+            language_setting.linter.enabled = linter.enabled;
         }
 
         language_setting

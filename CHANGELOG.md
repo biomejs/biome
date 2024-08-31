@@ -13,6 +13,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### New features
+
+- Implement [nursery/useConsistentMemberAccessibility](https://github.com/biomejs/biome/issues/3271). Contributed by @seitarof
+
 #### Enhancements
 
 - Implement [css suppression action](https://github.com/biomejs/biome/issues/3278). Contributed by @togami2864
@@ -25,6 +29,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add `--graphql-linter-enabled` option, to control whether the linter should be enabled or not for GraphQL files. Contributed by @ematipico
+
+- New EXPERIMENTAL `search` command. The search command allows you to search a Biome project using [GritQL syntax](https://biomejs.dev/reference/gritql).
+
+  GritQL is a powerful language that lets you do _structural_ searches on your codebase. This means that trivia such as whitespace or even the type of strings quotes used will be ignored in your search query. It also has many features for querying the structure of your code, making it much more elegant for searching code than regular expressions.
+
+  While we believe this command may already be useful to users in some situations (especially when integrated in the IDE extensions!), we also had an ulterior motive for adding this command: We intend to utilize GritQL for our plugin efforts, and by allowing our users to try it out in a first iteration, we hope to gain insight in the type of queries you want to do, as well as the bugs we need to focus on.
+
+  For now, the `search` command is explicitly marked as EXPERIMENTAL, since many bugs remain. Keep this in mind when you try it out, and please [let us know](https://github.com/biomejs/biome/issues) your issues!
+
+  Note: GritQL escapes code snippets using backticks, but most shells interpret backticks as command invocations. To avoid this, it's best to put _single quotes_ around your Grit queries.
+
+  ```shell
+  biome search '`console.log($message)`' # find all `console.log` invocations
+  ```
+
+  Contributed by @arendjr and @BackupMiles
+
 - The option `--max-diagnostics` now accept a `none` value, which lifts the limit of diagnostics shown. Contributed by @ematipico
   - Add a new reporter `--reporter=gitlab`, that emits diagnostics for using the [GitLab Code Quality report](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool).
 
@@ -94,6 +115,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- The CLI now returns an error code when calling a command in `stdin` mode, and the contents of the files aren't fixed. For example, the following example will result in an error code of `1` because the `lint` command triggers some lint rules:
+
+  ```shell
+  echo "let x = 1" | biome lint --stdin-file-path=stdin.js
+  ```
+
+  Contributed by @ematipico
+
 #### Bug fixes
 
 - `biome lint --write` now takes `--only` and `--skip` into account ([#3470](https://github.com/biomejs/biome/issues/3470)). Contributed by @Conaclos
@@ -105,6 +134,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Migrating from Prettier or ESLint no longer overwrite the `overrides` field from the configuration ([#3544](https://github.com/biomejs/biome/issues/3544)). Contributed by @Conaclos
 
 - Fix JSX expressions for `noAriaHiddenOnFocusable` ([#3708](https://github.com/biomejs/biome/pull/3708)) . Contributed by @anthonyshew
+
+- Fix edge case for `<canvas>` elements that use `role="img"` ([#3728](https://github.com/biomejs/biome/pull/3728)) . Contributed by @anthonyshew
+
+- Fix [#3633](https://github.com/biomejs/biome/issues/3633), where diagnostics where incorrectly printed if the code has errors. Contributed by @ematipico
 
 ### Configuration
 
@@ -177,6 +210,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#3577](https://github.com/biomejs/biome/issues/3577), where the update of the configuration file was resulting in the creation of a new internal project. Contributed by @ematipico
+- Fix [#3696](https://github.com/biomejs/biome/issues/3696), where `biome.jsonc` was incorrectly parsed with incorrect options. Contributed by @ematipico
 
 ### Formatter
 
@@ -193,6 +227,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @Conaclos
+
+- The CSS formatter is enabled by default. Which means that you don't need to opt-in anymore using the configuration file `biome.json`:
+
+  ```diff
+  {
+  -  "css": {
+  -    "formatter": {
+  -      "enabled": true
+  -    }
+  -  }
+  }
+  ```
+
+  Contributed by @ematipico
 
 #### Bug fixes
 
@@ -278,6 +326,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/noUselessEscapeInRegex](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/).
   Contributed by @Conaclos
 
+- Add [nursery/useConsistentMemberAccessibility](https://biomejs.dev/linter/rules/use-consistent-member-accessibility/). Contributed by @seitarof
+
 #### Enhancements
 
 - [noInvalidUseBeforeDeclaration](https://biomejs.dev/linter/rules/no-invalid-use-before-declaration) now reports direct use of an enum member before its declaration.
@@ -332,6 +382,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) recognized Svelte 5 runes in Svelte components and svelte files.
+
+  Svelte 5 introduced runes.
+  The rule now recognizes Svelte 5 runes in files ending with the `.svelte`, `.svelte.js` or `.svelte.ts` extensions.
+
+  Contributed by @Conaclos
+
 - [noBlankTarget](https://biomejs.dev/linter/rules/no-blank-target) now supports an array of allowed domains.
 
   The following configuration allows `example.com` and `example.org` as blank targets.
@@ -367,6 +424,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - [noNodejsModules](https://biomejs.dev/linter/rules/no-nodejs-modules/) now ignores imports of a package which has the same name as a Node.js module. Contributed by @Conaclos
 
 - Add an `ignoreNull` option for [noDoubleEquals](https://biomejs.dev/linter/rules/no-double-equals/). Contributed by @peaBerberian.
+
+- The rule `noDuplicateObjectKeys` now works for JSON and JSONC files. Contributed by @ematipico
+
+- The CSS linter is now enabled by default. Which means that you don't need to opt-in anymore using the configuration file `biome.json`:
+
+  ```diff
+  {
+  -  "css": {
+  -    "linter": {
+  -      "enabled": true
+  -    }
+  -  }
+  }
+  ```
+
+  Contributed by @ematipico
+
+- The rule `noRedundantUseStrict` no longer reports `use strict` when the `package.json` marks the file as a script using the field `"type": "commonjs"`. Contributed by @ematipico
 
 #### Bug fixes
 
@@ -487,6 +562,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
   Contributed by @ah-yu
+- Fix [#3464](https://github.com/biomejs/biome/issues/3464) by enabling JSX in `.vue` files that use the `lang='jsx'` or `lang='tsx'` attribute. Contributed by @ematipico
 
 ## v1.8.3 (2024-06-27)
 

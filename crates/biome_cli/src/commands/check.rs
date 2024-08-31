@@ -87,8 +87,6 @@ pub(crate) fn check(
         cli_options.verbose,
     )?;
 
-    resolve_manifest(&session)?;
-
     let editorconfig_search_path = loaded_configuration.directory_path.clone();
     let LoadedConfiguration {
         configuration: biome_configuration,
@@ -187,6 +185,14 @@ pub(crate) fn check(
             path: session.app.fs.working_directory(),
             set_as_current_workspace: true,
         })?;
+    let manifest_data = resolve_manifest(&session.app.fs)?;
+
+    if let Some(manifest_data) = manifest_data {
+        session
+            .app
+            .workspace
+            .set_manifest_for_project(manifest_data.into())?;
+    }
 
     session
         .app

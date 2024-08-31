@@ -472,7 +472,7 @@ fn lint_stdin_successfully() {
         Args::from(["lint", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     let message = console
         .out_buffer
@@ -590,7 +590,7 @@ fn check_stdin_successfully() {
         Args::from(["check", "--stdin-file-path", "file.astro"].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     let message = console
         .out_buffer

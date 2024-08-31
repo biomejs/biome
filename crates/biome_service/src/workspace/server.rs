@@ -1,11 +1,11 @@
 use super::{
     ChangeFileParams, CloseFileParams, FeatureKind, FeatureName, FixFileResult, FormatFileParams,
     FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, OpenProjectParams,
-    ParsePatternParams, ParsePatternResult, PatternId, ProjectKey, PullActionsParams,
-    PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult, RegisterProjectFolderParams,
-    RenameResult, SearchPatternParams, SearchResults, SupportsFeatureParams,
-    UnregisterProjectFolderParams, UpdateProjectParams, UpdateSettingsParams,
+    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, ParsePatternParams,
+    ParsePatternResult, PatternId, ProjectKey, PullActionsParams, PullActionsResult,
+    PullDiagnosticsParams, PullDiagnosticsResult, RegisterProjectFolderParams, RenameResult,
+    SearchPatternParams, SearchResults, SetManifestForProjectParams, SupportsFeatureParams,
+    UnregisterProjectFolderParams, UpdateSettingsParams,
 };
 use crate::diagnostics::{InvalidPattern, SearchError};
 use crate::file_handlers::{
@@ -30,7 +30,7 @@ use biome_js_syntax::ModuleKind;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
 use biome_parser::AnyParse;
-use biome_project::{NodeJsProject, PackageType};
+use biome_project::{NodeJsProject, PackageJson, PackageType, Project};
 use biome_rowan::NodeCache;
 use dashmap::{mapref::entry::Entry, DashMap};
 use indexmap::IndexSet;
@@ -39,7 +39,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::{panic::RefUnwindSafe, sync::RwLock};
-use tracing::{debug, info, info_span, trace};
+use tracing::{debug, info, info_span};
 
 pub(super) struct WorkspaceServer {
     /// features available throughout the application
@@ -50,12 +50,8 @@ pub(super) struct WorkspaceServer {
     documents: DashMap<BiomePath, Document>,
     /// Stores the result of the parser (syntax tree + diagnostics) for a given URL
     syntax: DashMap<BiomePath, AnyParse>,
-    /// Stores the parsed manifests
-    manifests: DashMap<BiomePath, NodeJsProject>,
     /// The current focused project
     current_project_path: RwLock<Option<BiomePath>>,
-    /// The path of the manifest
-    current_manifest_path: RwLock<Option<BiomePath>>,
     /// Stores the document sources used across the workspace
     file_sources: RwLock<IndexSet<DocumentFileSource>>,
     /// Stores patterns to search for.
@@ -92,9 +88,7 @@ impl WorkspaceServer {
             settings: RwLock::default(),
             documents: DashMap::default(),
             syntax: DashMap::default(),
-            manifests: DashMap::default(),
             current_project_path: RwLock::default(),
-            current_manifest_path: RwLock::default(),
             file_sources: RwLock::default(),
             patterns: Default::default(),
         }
@@ -138,9 +132,8 @@ impl WorkspaceServer {
             let language = DocumentFileSource::from_path(path).or(file_source);
             WorkspaceError::source_file_not_supported(
                 language,
-                path.clone().display().to_string(),
-                path.clone()
-                    .extension()
+                path.display().to_string(),
+                path.extension()
                     .and_then(OsStr::to_str)
                     .map(|s| s.to_string()),
             )
@@ -151,37 +144,11 @@ impl WorkspaceServer {
     ///
     /// ## Errors
     ///
-    /// - If no document is found in the workspace. Usually, you'll have to call [WorkspaceServer::open_project] to store said document.
+    /// - If no document is found in the workspace. Usually, you'll have to call [WorkspaceServer::set_manifest_for_project] to store said document.
     #[tracing::instrument(level = "trace", skip(self))]
-    fn get_current_manifest(&self) -> Result<Option<NodeJsProject>, WorkspaceError> {
-        let path = self.get_current_manifest_path();
-        trace!("Current project folder: {:?} ", path);
-        if let Some(path) = path.as_ref() {
-            match self.manifests.entry(path.clone()) {
-                Entry::Occupied(entry) => Ok(Some(entry.get().clone())),
-                Entry::Vacant(entry) => {
-                    let path = entry.key();
-                    let mut document = self.documents.get_mut(path);
-                    if let Some(document) = document.as_deref_mut() {
-                        // let document = &mut *document;
-                        let parsed = parse_json_with_cache(
-                            document.content.as_str(),
-                            &mut document.node_cache,
-                            JsonParserOptions::default(),
-                        );
-
-                        let mut node_js_project = NodeJsProject::default();
-                        node_js_project.from_root(&parsed.tree());
-
-                        Ok(Some(entry.insert(node_js_project).clone()))
-                    } else {
-                        Ok(None)
-                    }
-                }
-            }
-        } else {
-            Ok(None)
-        }
+    fn get_current_manifest(&self) -> Result<Option<PackageJson>, WorkspaceError> {
+        let workspace = self.workspace();
+        Ok(workspace.as_ref().get_current_manifest().cloned())
     }
 
     fn get_source(&self, index: usize) -> Option<DocumentFileSource> {
@@ -206,23 +173,32 @@ impl WorkspaceServer {
         let _ = current_project_path.insert(path);
     }
 
-    /// Retrieves the current project path
-    fn get_current_manifest_path(&self) -> Option<BiomePath> {
-        self.current_manifest_path.read().unwrap().as_ref().cloned()
-    }
-
-    fn set_current_manifest_path(&self, path: BiomePath) {
-        let mut current_manifest_path = self.current_manifest_path.write().unwrap();
-        let _ = current_manifest_path.insert(path);
-    }
-
-    /// Updates the current project of the current workspace
+    /// Register a new project in the current workspace
     fn register_project(&self, path: PathBuf) -> ProjectKey {
         let mut workspace = self.workspaces_mut();
         let workspace_mut = workspace.as_mut();
         workspace_mut.insert_project(path.clone())
     }
-    /// Updates the current project of the current workspace
+
+    /// Updates the manifest for the current project. Given the manifest path, the function will try to parse the manifest and update the current project.
+    fn register_manifest_for_project(&self, manifest_path: BiomePath) {
+        let mut workspace = self.workspaces_mut();
+        let workspace_mut = workspace.as_mut();
+        let mut document = self.documents.get_mut(&manifest_path);
+        if let Some(document) = document.as_deref_mut() {
+            let parsed = parse_json_with_cache(
+                document.content.as_str(),
+                &mut document.node_cache,
+                JsonParserOptions::default(),
+            );
+
+            let mut node_js_project = NodeJsProject::default();
+            node_js_project.deserialize_manifest(&parsed.tree());
+            workspace_mut.insert_manifest(node_js_project);
+        }
+    }
+
+    /// Sets the current project of the current workspace
     fn set_current_project(&self, project_key: ProjectKey) {
         let mut workspace = self.workspaces_mut();
         let workspace_mut = workspace.as_mut();
@@ -465,7 +441,7 @@ impl Workspace for WorkspaceServer {
         let mut source = params
             .document_file_source
             .unwrap_or(DocumentFileSource::from_path(&params.path));
-        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?;
 
         if let DocumentFileSource::Js(js) = &mut source {
             if let Some(manifest) = manifest {
@@ -492,11 +468,14 @@ impl Workspace for WorkspaceServer {
 
         Ok(())
     }
-    fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError> {
+    fn set_manifest_for_project(
+        &self,
+        params: SetManifestForProjectParams,
+    ) -> Result<(), WorkspaceError> {
         let index = self.set_source(JsonFileSource::json().into());
-        self.syntax.remove(&params.path);
+        self.syntax.remove(&params.manifest_path);
         self.documents.insert(
-            params.path,
+            params.manifest_path.clone(),
             Document {
                 content: params.content,
                 version: params.version,
@@ -504,6 +483,7 @@ impl Workspace for WorkspaceServer {
                 node_cache: NodeCache::default(),
             },
         );
+        self.register_manifest_for_project(params.manifest_path);
         Ok(())
     }
 
@@ -543,11 +523,6 @@ impl Workspace for WorkspaceServer {
     ) -> Result<(), WorkspaceError> {
         let mut workspace = self.workspaces_mut();
         workspace.as_mut().remove_project(params.path.as_path());
-        Ok(())
-    }
-
-    fn update_current_manifest(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError> {
-        self.set_current_manifest_path(params.path);
         Ok(())
     }
 
@@ -646,7 +621,7 @@ impl Workspace for WorkspaceServer {
         params: PullDiagnosticsParams,
     ) -> Result<PullDiagnosticsResult, WorkspaceError> {
         let parse = self.get_parse(params.path.clone())?;
-        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?;
         let (diagnostics, errors, skipped_diagnostics) =
             if let Some(lint) = self.get_file_capabilities(&params.path).analyzer.lint {
                 info_span!("Pulling diagnostics", categories =? params.categories).in_scope(|| {
@@ -704,7 +679,7 @@ impl Workspace for WorkspaceServer {
 
         let parse = self.get_parse(params.path.clone())?;
         let workspace = self.workspace();
-        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?;
         let language = self.get_file_source(&params.path);
         Ok(code_actions(CodeActionsParams {
             parse,
@@ -799,7 +774,7 @@ impl Workspace for WorkspaceServer {
             .ok_or_else(self.build_capability_error(&params.path))?;
         let parse = self.get_parse(params.path.clone())?;
 
-        let manifest = self.get_current_manifest()?.map(|pr| pr.manifest);
+        let manifest = self.get_current_manifest()?;
         let language = self.get_file_source(&params.path);
         fix_all(FixAllParams {
             parse,

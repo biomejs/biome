@@ -66,12 +66,12 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
+use core::str;
 use enumflags2::{bitflags, BitFlags};
 #[cfg(feature = "schema")]
 use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
 use slotmap::{new_key_type, DenseSlotMap};
 use std::collections::HashMap;
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::debug;
@@ -101,22 +101,21 @@ pub struct FileFeaturesResult {
 impl FileFeaturesResult {
     /// Sorted array of files that should not be processed no matter the cases.
     /// These files are handled by other tools.
-    const PROTECTED_FILES: &'static [&'static str; 4] = &[
+    const PROTECTED_FILES: &'static [&'static [u8]] = &[
         // Composer
-        "composer.lock",
+        b"composer.lock",
         // NPM
-        "npm-shrinkwrap.json",
-        "package-lock.json",
+        b"npm-shrinkwrap.json",
+        b"package-lock.json",
         // Yarn
-        "yarn.lock",
+        b"yarn.lock",
     ];
 
     /// Checks whether this file is protected.
     /// A protected file is handled by a specific tool and should be ignored.
     pub(crate) fn is_protected_file(path: &Path) -> bool {
         path.file_name()
-            .and_then(OsStr::to_str)
-            .is_some_and(|file_name| FileFeaturesResult::PROTECTED_FILES.contains(&file_name))
+            .is_some_and(|filename| Self::PROTECTED_FILES.contains(&filename.as_encoded_bytes()))
     }
 
     /// By default, all features are not supported by a file.
@@ -498,16 +497,20 @@ pub struct OpenFileParams {
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct OpenProjectParams {
-    pub path: BiomePath,
+pub struct SetManifestForProjectParams {
+    pub manifest_path: BiomePath,
     pub content: String,
     pub version: i32,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct UpdateProjectParams {
-    pub path: BiomePath,
+impl From<(BiomePath, String)> for SetManifestForProjectParams {
+    fn from((manifest_path, content): (BiomePath, String)) -> Self {
+        Self {
+            manifest_path,
+            content,
+            version: 0,
+        }
+    }
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -848,7 +851,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
 
     /// Add a new project to the workspace
-    fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError>;
+    fn set_manifest_for_project(
+        &self,
+        params: SetManifestForProjectParams,
+    ) -> Result<(), WorkspaceError>;
 
     /// Register a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
     fn register_project_folder(
@@ -861,9 +867,6 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         &self,
         params: UnregisterProjectFolderParams,
     ) -> Result<(), WorkspaceError>;
-
-    /// Sets the current project path
-    fn update_current_manifest(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
 
     // Return a textual, debug representation of the syntax tree for a given document
     fn get_syntax_tree(
@@ -1102,7 +1105,12 @@ impl<'app, W: Workspace + ?Sized> Drop for FileGuard<'app, W> {
 #[test]
 fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        assert!(
+            items[0] < items[1],
+            "{} < {}",
+            str::from_utf8(items[0]).unwrap(),
+            str::from_utf8(items[1]).unwrap()
+        );
     }
 }
 

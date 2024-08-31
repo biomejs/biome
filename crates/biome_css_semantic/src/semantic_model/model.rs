@@ -34,8 +34,8 @@ impl SemanticModel {
         &self.data.rules
     }
 
-    pub fn global_css_variables(&self) -> &FxHashMap<String, CssVariable> {
-        &self.data.global_css_variables
+    pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
+        &self.data.global_custom_variables
     }
 }
 
@@ -51,7 +51,7 @@ pub(crate) struct SemanticModelData {
     /// List of all the css rules
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
-    pub(crate) global_css_variables: FxHashMap<String, CssVariable>,
+    pub(crate) global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -75,42 +75,20 @@ pub struct Rule {
     /// The selectors associated with this rule.
     pub selectors: Vec<Selector>,
     /// The declarations within this rule.
-    pub declarations: Vec<Declaration>,
+    pub declarations: Vec<CssDeclaration>,
     /// Any nested rules within this rule.
     pub children: Vec<Rule>,
     /// The text range of this rule in the source document.
     pub range: TextRange,
 }
 
-/// Represents a CSS declaration (property-value pair).
-#[derive(Debug, Clone)]
-pub struct Declaration {
-    /// The property name.
-    pub property: CssProperty,
-    /// The property value.
-    pub value: CssValue,
-}
-
-#[derive(Debug, Clone)]
-pub struct CssProperty {
-    pub name: String,
-    pub range: TextRange,
-}
-
-#[derive(Debug, Clone)]
-pub struct CssValue {
-    pub value: String,
-    pub range: TextRange,
-}
-
-#[derive(Debug, Clone)]
-pub struct CssVariable {
-    pub name: CssProperty,
-    pub value: CssValue,
-    pub range: TextRange,
-}
-
 /// Represents a CSS selector.
+/// /// ```css
+/// span {
+/// ^^^^
+///   color: red;
+/// }
+/// ```
 #[derive(Debug, Clone)]
 pub struct Selector {
     /// The name of the selector.
@@ -128,3 +106,54 @@ pub struct Selector {
 /// More details https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct Specificity(pub u32, pub u32, pub u32);
+
+/// Represents a CSS declaration (property-value pair).
+/// ```css
+/// a {
+///   color: red;
+///   ^^^^^^^^^^^
+/// }
+/// ```
+#[derive(Debug, Clone)]
+pub struct CssDeclaration {
+    pub property: CssProperty,
+    pub value: CssValue,
+    pub range: TextRange,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct CssProperty {
+    pub name: String,
+    pub range: TextRange,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct CssValue {
+    pub text: String,
+    pub range: TextRange,
+}
+
+/// Represents a CSS global custom variable declaration.
+/// This can be declared in the `:root` selector or using the `@property` rule.
+/// ```css
+/// :root {
+///   --custom-color: red;
+/// }
+///
+/// @property --item-size {
+///   syntax: "<percentage>";
+///   inherits: true;
+///   initial-value: 40%;
+/// }
+/// ```
+#[derive(Debug, Clone)]
+pub enum CssGlobalCustomVariable {
+    Root(CssDeclaration),
+    AtProperty {
+        property: CssProperty,
+        syntax: Option<String>,
+        inherits: Option<bool>,
+        initial_value: Option<CssValue>,
+        range: TextRange,
+    },
+}

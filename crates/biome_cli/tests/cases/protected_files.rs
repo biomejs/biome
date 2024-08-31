@@ -43,7 +43,7 @@ fn not_process_file_from_stdin_lint() {
         Args::from([("lint"), ("--stdin-file-path=package.json")].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),

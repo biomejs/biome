@@ -6,6 +6,7 @@ pub mod no_console;
 pub mod no_done_callback;
 pub mod no_duplicate_else_if;
 pub mod no_dynamic_namespace_import_access;
+pub mod no_enum;
 pub mod no_evolving_types;
 pub mod no_exported_imports;
 pub mod no_irregular_whitespace;
@@ -25,6 +26,7 @@ pub mod use_adjacent_overload_signatures;
 pub mod use_aria_props_supported_by_role;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
+pub mod use_consistent_member_accessibility;
 pub mod use_date_now;
 pub mod use_default_switch_clause;
 pub mod use_error_message;
@@ -50,6 +52,7 @@ declare_lint_group! {
             self :: no_done_callback :: NoDoneCallback ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
             self :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccess ,
+            self :: no_enum :: NoEnum ,
             self :: no_evolving_types :: NoEvolvingTypes ,
             self :: no_exported_imports :: NoExportedImports ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
@@ -69,6 +72,7 @@ declare_lint_group! {
             self :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRole ,
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_consistent_curly_braces :: UseConsistentCurlyBraces ,
+            self :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility ,
             self :: use_date_now :: UseDateNow ,
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,
             self :: use_error_message :: UseErrorMessage ,
