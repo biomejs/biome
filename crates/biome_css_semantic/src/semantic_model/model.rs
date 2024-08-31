@@ -180,16 +180,16 @@ pub enum CssGlobalCustomVariable {
 }
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub(crate) struct RuleId(u32);
+pub struct RuleId(u32);
 
 impl RuleId {
-    pub(crate) fn new(index: usize) -> Self {
+    pub fn new(index: usize) -> Self {
         // SAFETY: We didn't handle files execedding `u32::MAX` bytes.
         // Thus, it isn't possible to execedd `u32::MAX` bindings.
         Self(index as u32)
     }
 
-    pub(crate) fn index(self) -> usize {
+    pub fn index(self) -> usize {
         self.0 as usize
     }
 }
