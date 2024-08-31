@@ -2,16 +2,18 @@ use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
-use super::model::{CssVariable, Declaration, Rule, Selector, SemanticModel, SemanticModelData};
+use super::model::{
+    CssDeclaration, CssGlobalCustomVariable, Rule, Selector, SemanticModel, SemanticModelData,
+};
 use crate::events::SemanticEvent;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     rules: Vec<Rule>,
-    global_css_variables: FxHashMap<String, CssVariable>,
+    global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
     current_rule_stack: Vec<Rule>,
-    in_root_selector: bool,
+    is_in_root_selector: bool,
 }
 
 impl SemanticModelBuilder {
@@ -21,8 +23,8 @@ impl SemanticModelBuilder {
             node_by_range: FxHashMap::default(),
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
-            global_css_variables: FxHashMap::default(),
-            in_root_selector: false,
+            global_custom_variables: FxHashMap::default(),
+            is_in_root_selector: false,
         }
     }
 
@@ -31,7 +33,7 @@ impl SemanticModelBuilder {
             root: self.root,
             node_by_range: self.node_by_range,
             rules: self.rules,
-            global_css_variables: self.global_css_variables,
+            global_custom_variables: self.global_custom_variables,
         };
         SemanticModel::new(data)
     }
@@ -82,46 +84,50 @@ impl SemanticModelBuilder {
                 }
             }
             SemanticEvent::PropertyDeclaration {
-                ref property,
-                ref value,
-                range,
-            } => {
-                if let Some(current_rule) = self.current_rule_stack.last_mut() {
-                    if self.in_root_selector {
-                        let key = &property.name;
-                        if key.starts_with("--") {
-                            self.global_css_variables.insert(
-                                key.to_string(),
-                                CssVariable {
-                                    name: property.clone(),
-                                    value: value.clone(),
-                                    range,
-                                },
-                            );
-                        }
-                    }
-                    current_rule.declarations.push(Declaration {
-                        property: property.clone(),
-                        value: value.clone(),
-                    });
-                }
-            }
-            SemanticEvent::RootSelectorStart => {
-                self.in_root_selector = true;
-            }
-            SemanticEvent::RootSelectorEnd => {
-                self.in_root_selector = false;
-            }
-            SemanticEvent::AtProperty {
                 property,
                 value,
                 range,
             } => {
-                self.global_css_variables.insert(
-                    property.name.to_string(),
-                    CssVariable {
-                        name: property,
+                let is_global_var = self.is_in_root_selector && property.name.starts_with("--");
+
+                if let Some(current_rule) = self.current_rule_stack.last_mut() {
+                    if is_global_var {
+                        self.global_custom_variables.insert(
+                            property.name.clone(),
+                            CssGlobalCustomVariable::Root(CssDeclaration {
+                                property: property.clone(),
+                                value: value.clone(),
+                                range,
+                            }),
+                        );
+                    }
+                    current_rule.declarations.push(CssDeclaration {
+                        property,
                         value,
+                        range,
+                    });
+                }
+            }
+            SemanticEvent::RootSelectorStart => {
+                self.is_in_root_selector = true;
+            }
+            SemanticEvent::RootSelectorEnd => {
+                self.is_in_root_selector = false;
+            }
+            SemanticEvent::AtProperty {
+                property,
+                initial_value,
+                syntax,
+                inherits,
+                range,
+            } => {
+                self.global_custom_variables.insert(
+                    property.name.to_string(),
+                    CssGlobalCustomVariable::AtProperty {
+                        property,
+                        initial_value,
+                        syntax,
+                        inherits,
                         range,
                     },
                 );
