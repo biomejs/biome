@@ -122,7 +122,7 @@ mod tests {
     }
 
     #[test]
-    fn test_global_css_variables() {
+    fn test_global_custom_variables() {
         let parse = parse_css(
             r#"@property --item-size {
   syntax: "<percentage>";
@@ -140,7 +140,7 @@ mod tests {
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
-        let global_custom_variables = model.global_css_variables();
+        let global_custom_variables = model.global_custom_variables();
 
         assert_eq!(global_custom_variables.len(), 3);
 
@@ -159,7 +159,7 @@ mod tests {
 
         let root = parse.tree();
         let model = super::semantic_model(&root);
-        let global_custom_variables = model.global_css_variables();
+        let global_custom_variables = model.global_custom_variables();
 
         assert_eq!(global_custom_variables.len(), 1);
 
@@ -168,8 +168,9 @@ mod tests {
         assert!(item_size);
     }
 
+    #[ignore]
     #[test]
-    fn debug() {
+    fn quick_test() {
         let parse = parse_css(
             r#"@property --item-size {
   syntax: "<percentage>";
@@ -182,6 +183,6 @@ mod tests {
         let root = parse.tree();
         let model = super::semantic_model(&root);
         dbg!(&model.rules());
-        dbg!(&model.global_css_variables());
+        dbg!(&model.global_custom_variables());
     }
 }

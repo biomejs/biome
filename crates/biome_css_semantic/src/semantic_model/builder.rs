@@ -11,7 +11,7 @@ pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     rules: Vec<Rule>,
-    global_css_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
     current_rule_stack: Vec<Rule>,
     is_in_root_selector: bool,
 }
@@ -23,7 +23,7 @@ impl SemanticModelBuilder {
             node_by_range: FxHashMap::default(),
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
-            global_css_variables: FxHashMap::default(),
+            global_custom_variables: FxHashMap::default(),
             is_in_root_selector: false,
         }
     }
@@ -33,7 +33,7 @@ impl SemanticModelBuilder {
             root: self.root,
             node_by_range: self.node_by_range,
             rules: self.rules,
-            global_css_variables: self.global_css_variables,
+            global_custom_variables: self.global_custom_variables,
         };
         SemanticModel::new(data)
     }
@@ -92,7 +92,7 @@ impl SemanticModelBuilder {
 
                 if let Some(current_rule) = self.current_rule_stack.last_mut() {
                     if is_global_var {
-                        self.global_css_variables.insert(
+                        self.global_custom_variables.insert(
                             property.name.clone(),
                             CssGlobalCustomVariable::Root(CssDeclaration {
                                 property: property.clone(),
@@ -121,7 +121,7 @@ impl SemanticModelBuilder {
                 inherits,
                 range,
             } => {
-                self.global_css_variables.insert(
+                self.global_custom_variables.insert(
                     property.name.to_string(),
                     CssGlobalCustomVariable::AtProperty {
                         property,

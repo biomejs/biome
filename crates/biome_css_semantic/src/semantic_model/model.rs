@@ -34,8 +34,8 @@ impl SemanticModel {
         &self.data.rules
     }
 
-    pub fn global_css_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
-        &self.data.global_css_variables
+    pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
+        &self.data.global_custom_variables
     }
 }
 
@@ -51,7 +51,7 @@ pub(crate) struct SemanticModelData {
     /// List of all the css rules
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
-    pub(crate) global_css_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    pub(crate) global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
