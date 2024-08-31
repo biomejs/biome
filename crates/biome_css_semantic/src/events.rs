@@ -40,7 +40,7 @@ pub enum SemanticEvent {
 pub struct SemanticEventExtractor {
     stash: VecDeque<SemanticEvent>,
     current_rule_stack: Vec<TextRange>,
-    in_root_selector: bool,
+    is_in_root_selector: bool,
 }
 
 impl SemanticEventExtractor {
@@ -85,7 +85,7 @@ impl SemanticEventExtractor {
                                 range: property_name.text_range(),
                             },
                             value: CssValue {
-                                value: value.text_trimmed().to_string(),
+                                text: value.text_trimmed().to_string(),
                                 range: value.text_range(),
                             },
                             range: node.text_range(),
@@ -113,7 +113,7 @@ impl SemanticEventExtractor {
             AnyCssSelector::CssCompoundSelector(selector) => {
                 if selector.text() == ":root" {
                     self.stash.push_back(SemanticEvent::RootSelectorStart);
-                    self.in_root_selector = true;
+                    self.is_in_root_selector = true;
                 }
                 self.add_selector_event(selector.text().to_string(), selector.range())
             }
@@ -150,7 +150,7 @@ impl SemanticEventExtractor {
                                     range: property_name.text_range(),
                                 },
                                 value: CssValue {
-                                    value: p.value().text().to_string(),
+                                    text: p.value().text().to_string(),
                                     range: p.value().range(),
                                 },
                                 range: node.text_range(),
@@ -177,9 +177,9 @@ impl SemanticEventExtractor {
         ) {
             self.current_rule_stack.pop();
             self.stash.push_back(SemanticEvent::RuleEnd);
-            if self.in_root_selector {
+            if self.is_in_root_selector {
                 self.stash.push_back(SemanticEvent::RootSelectorEnd);
-                self.in_root_selector = false;
+                self.is_in_root_selector = false;
             }
         }
     }

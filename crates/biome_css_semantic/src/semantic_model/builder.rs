@@ -2,16 +2,18 @@ use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
-use super::model::{CssVariable, Declaration, Rule, Selector, SemanticModel, SemanticModelData};
+use super::model::{
+    CssCustomProperty, CssDeclaration, Rule, Selector, SemanticModel, SemanticModelData,
+};
 use crate::events::SemanticEvent;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     rules: Vec<Rule>,
-    global_css_variables: FxHashMap<String, CssVariable>,
+    global_css_variables: FxHashMap<String, CssCustomProperty>,
     current_rule_stack: Vec<Rule>,
-    in_root_selector: bool,
+    is_in_root_selector: bool,
 }
 
 impl SemanticModelBuilder {
@@ -22,7 +24,7 @@ impl SemanticModelBuilder {
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
             global_css_variables: FxHashMap::default(),
-            in_root_selector: false,
+            is_in_root_selector: false,
         }
     }
 
@@ -87,12 +89,12 @@ impl SemanticModelBuilder {
                 range,
             } => {
                 if let Some(current_rule) = self.current_rule_stack.last_mut() {
-                    if self.in_root_selector {
+                    if self.is_in_root_selector {
                         let key = &property.name;
                         if key.starts_with("--") {
                             self.global_css_variables.insert(
                                 key.to_string(),
-                                CssVariable {
+                                CssCustomProperty {
                                     name: property.clone(),
                                     value: value.clone(),
                                     range,
@@ -100,17 +102,18 @@ impl SemanticModelBuilder {
                             );
                         }
                     }
-                    current_rule.declarations.push(Declaration {
+                    current_rule.declarations.push(CssDeclaration {
                         property: property.clone(),
                         value: value.clone(),
+                        range,
                     });
                 }
             }
             SemanticEvent::RootSelectorStart => {
-                self.in_root_selector = true;
+                self.is_in_root_selector = true;
             }
             SemanticEvent::RootSelectorEnd => {
-                self.in_root_selector = false;
+                self.is_in_root_selector = false;
             }
             SemanticEvent::AtProperty {
                 property,
@@ -119,7 +122,7 @@ impl SemanticModelBuilder {
             } => {
                 self.global_css_variables.insert(
                     property.name.to_string(),
-                    CssVariable {
+                    CssCustomProperty {
                         name: property,
                         value,
                         range,
