@@ -67,8 +67,12 @@ impl SemanticModelBuilder {
             SemanticEvent::RuleEnd => {
                 if let Some(completed_rule) = self.current_rule_stack.pop() {
                     if let Some(parent_rule) = self.current_rule_stack.last_mut() {
+                        self.range_to_rule
+                            .insert(completed_rule.range, completed_rule.clone());
                         parent_rule.children.push(completed_rule);
                     } else {
+                        self.range_to_rule
+                            .insert(completed_rule.range, completed_rule.clone());
                         self.rules.push(completed_rule);
                     }
                 }

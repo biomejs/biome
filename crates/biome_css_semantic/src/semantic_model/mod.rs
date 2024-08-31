@@ -34,6 +34,7 @@ pub fn semantic_model(root: &CssRoot) -> SemanticModel {
 mod tests {
     use biome_css_parser::parse_css;
     use biome_css_parser::CssParserOptions;
+    use biome_rowan::TextRange;
 
     #[test]
     fn test_simple_ruleset() {
@@ -166,6 +167,67 @@ mod tests {
         let item_size = global_custom_variables.contains_key("--item-size");
 
         assert!(item_size);
+    }
+
+    #[test]
+    fn test_get_rule_by_range() {
+        let parse = parse_css(
+            r#"p {color: red; font-size: 12px;}"#,
+            CssParserOptions::default(),
+        );
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+
+        // range of the declaration 'red'
+        let range = TextRange::new(10.into(), 13.into());
+        let rule = model.get_rule_by_range(range).unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 2);
+
+        assert_eq!(rule.selectors[0].name, "p");
+        assert_eq!(rule.declarations[0].property.name, "color");
+        assert_eq!(rule.declarations[0].value.text, "red");
+
+        assert_eq!(rule.declarations[1].property.name, "font-size");
+        assert_eq!(rule.declarations[1].value.text, "12px");
+
+        let range = TextRange::new(0.into(), 1.into());
+        let rule = model.get_rule_by_range(range).unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 2);
+
+        assert_eq!(rule.selectors[0].name, "p");
+        assert_eq!(rule.declarations[0].property.name, "color");
+        assert_eq!(rule.declarations[0].value.text, "red");
+
+        assert_eq!(rule.declarations[1].property.name, "font-size");
+        assert_eq!(rule.declarations[1].value.text, "12px");
+    }
+
+    #[test]
+    fn test_nested_get_rule_by_range() {
+        let parse = parse_css(
+            r#"p { --foo: red; font-size: 12px;
+            .child { color: var(--foo)}
+            }"#,
+            CssParserOptions::default(),
+        );
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+
+        // range of the declaration 'blue' in '.child'
+        let range = TextRange::new(60.into(), 64.into());
+        let rule = model.get_rule_by_range(range).unwrap();
+        dbg!(&rule);
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 1);
+
+        assert_eq!(rule.selectors[0].name, ".child");
+
+        assert_eq!(rule.declarations[0].property.name, "color");
+        assert_eq!(rule.declarations[0].value.text, "var(--foo)");
     }
 
     #[ignore]

@@ -38,7 +38,7 @@ impl SemanticModel {
         &self.data.global_custom_variables
     }
 
-    pub fn find_rule_by_range(&self, target_range: TextRange) -> Option<&Rule> {
+    pub fn get_rule_by_range(&self, target_range: TextRange) -> Option<&Rule> {
         self.data
             .range_to_rule
             .iter()
@@ -80,7 +80,7 @@ pub(crate) struct SemanticModelData {
 /// │  }                                  │
 /// └─────────────────────────────────────┘
 ///
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Rule {
     /// The selectors associated with this rule.
     pub selectors: Vec<Selector>,
