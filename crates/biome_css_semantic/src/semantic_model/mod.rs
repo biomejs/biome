@@ -154,6 +154,21 @@ mod tests {
     }
 
     #[test]
+    fn test_empty_at_property() {
+        let parse = parse_css(r#"@property --item-size {}"#, CssParserOptions::default());
+
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+        let global_custom_variables = model.global_css_variables();
+
+        assert_eq!(global_custom_variables.len(), 1);
+
+        let item_size = global_custom_variables.contains_key("--item-size");
+
+        assert!(item_size);
+    }
+
+    #[test]
     fn debug() {
         let parse = parse_css(
             r#"@property --item-size {

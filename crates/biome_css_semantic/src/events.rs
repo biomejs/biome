@@ -31,7 +31,9 @@ pub enum SemanticEvent {
     /// Indicates the start of an `@property` rule
     AtProperty {
         property: CssProperty,
-        value: CssValue,
+        initial_value: Option<CssValue>,
+        syntax: Option<String>,
+        inherits: Option<bool>,
         range: TextRange,
     },
 }
@@ -121,6 +123,17 @@ impl SemanticEventExtractor {
         }
     }
 
+    /// Handles the `@property` rule, which defines custom CSS properties.
+    ///
+    /// ```css
+    /// @property --my-property {
+    ///   syntax: "<length>";
+    ///   inherits: true;
+    ///   initial-value: 0;
+    /// }
+    ///
+    /// @property --my-other-property {}
+    /// ```
     fn process_at_property(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         let property_name = match node.first_child() {
             Some(name) => name,
@@ -137,29 +150,48 @@ impl SemanticEventExtractor {
             None => return,
         };
 
-        for d in decls.declarations() {
-            if let Ok(declaration) = d.declaration() {
-                if let Ok(biome_css_syntax::AnyCssProperty::CssGenericProperty(p)) =
-                    declaration.property()
-                {
-                    if let Ok(name) = p.name() {
-                        if name.text() == "initial-value" {
-                            self.stash.push_back(SemanticEvent::AtProperty {
-                                property: CssProperty {
-                                    name: property_name.text_trimmed().to_string(),
-                                    range: property_name.text_range(),
-                                },
-                                value: CssValue {
-                                    text: p.value().text().to_string(),
-                                    range: p.value().range(),
-                                },
-                                range: node.text_range(),
+        let mut initial_value = None;
+        let mut syntax = None;
+        let mut inherits = None;
+
+        for declaration in decls
+            .declarations()
+            .into_iter()
+            .filter_map(|d| d.declaration().ok())
+        {
+            if let Ok(biome_css_syntax::AnyCssProperty::CssGenericProperty(prop)) =
+                declaration.property()
+            {
+                if let Ok(prop_name) = prop.name() {
+                    match prop_name.text().as_str() {
+                        "initial-value" => {
+                            initial_value = Some(CssValue {
+                                text: prop.value().text().to_string(),
+                                range: prop.value().range(),
                             });
                         }
+                        "syntax" => {
+                            syntax = Some(prop.value().text().to_string());
+                        }
+                        "inherits" => {
+                            inherits = Some(prop.value().text() == "true");
+                        }
+                        _ => {}
                     }
                 }
             }
         }
+
+        self.stash.push_back(SemanticEvent::AtProperty {
+            property: CssProperty {
+                name: property_name.text_trimmed().to_string(),
+                range: property_name.text_range(),
+            },
+            initial_value,
+            syntax,
+            inherits,
+            range: node.text_range(),
+        });
     }
 
     fn add_selector_event(&mut self, name: String, range: TextRange) {

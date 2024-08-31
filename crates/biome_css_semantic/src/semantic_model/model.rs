@@ -34,7 +34,7 @@ impl SemanticModel {
         &self.data.rules
     }
 
-    pub fn global_css_variables(&self) -> &FxHashMap<String, CssDeclaration> {
+    pub fn global_css_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
         &self.data.global_css_variables
     }
 }
@@ -51,7 +51,7 @@ pub(crate) struct SemanticModelData {
     /// List of all the css rules
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
-    pub(crate) global_css_variables: FxHashMap<String, CssDeclaration>,
+    pub(crate) global_css_variables: FxHashMap<String, CssGlobalCustomVariable>,
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -131,4 +131,29 @@ pub struct CssProperty {
 pub struct CssValue {
     pub text: String,
     pub range: TextRange,
+}
+
+/// Represents a CSS global custom variable declaration.
+/// This can be declared in the `:root` selector or using the `@property` rule.
+/// ```css
+/// :root {
+///   --custom-color: red;
+/// }
+///
+/// @property --item-size {
+///   syntax: "<percentage>";
+///   inherits: true;
+///   initial-value: 40%;
+/// }
+/// ```
+#[derive(Debug, Clone)]
+pub enum CssGlobalCustomVariable {
+    Root(CssDeclaration),
+    AtProperty {
+        property: CssProperty,
+        syntax: Option<String>,
+        inherits: Option<bool>,
+        initial_value: Option<CssValue>,
+        range: TextRange,
+    },
 }
