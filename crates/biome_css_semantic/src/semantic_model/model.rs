@@ -37,6 +37,15 @@ impl SemanticModel {
     pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
         &self.data.global_custom_variables
     }
+
+    pub fn find_rule_by_range(&self, target_range: TextRange) -> Option<&Rule> {
+        self.data
+            .range_to_rule
+            .iter()
+            .filter(|(rule_range, _)| rule_range.contains_range(target_range))
+            .min_by_key(|(rule_range, _)| rule_range.len())
+            .map(|(_, rule)| rule)
+    }
 }
 
 /// Contains the internal data of a `SemanticModel`.
@@ -52,6 +61,7 @@ pub(crate) struct SemanticModelData {
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
     pub(crate) global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    pub(crate) range_to_rule: FxHashMap<TextRange, Rule>,
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.

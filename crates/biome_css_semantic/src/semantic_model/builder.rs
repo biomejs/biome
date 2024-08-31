@@ -13,6 +13,7 @@ pub struct SemanticModelBuilder {
     rules: Vec<Rule>,
     global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
     current_rule_stack: Vec<Rule>,
+    range_to_rule: FxHashMap<TextRange, Rule>,
     is_in_root_selector: bool,
 }
 
@@ -24,6 +25,7 @@ impl SemanticModelBuilder {
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
+            range_to_rule: FxHashMap::default(),
             is_in_root_selector: false,
         }
     }
@@ -34,6 +36,7 @@ impl SemanticModelBuilder {
             node_by_range: self.node_by_range,
             rules: self.rules,
             global_custom_variables: self.global_custom_variables,
+            range_to_rule: self.range_to_rule,
         };
         SemanticModel::new(data)
     }
