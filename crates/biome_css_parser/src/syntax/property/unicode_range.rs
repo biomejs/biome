@@ -1,7 +1,9 @@
 use crate::lexer::{CssLexContext, CssReLexContext};
 use crate::parser::CssParser;
 use biome_css_syntax::CssSyntaxKind::{
-    self, CSS_BOGUS_UNICODE_RANGE_VALUE, CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL, CSS_UNICODE_CODEPOINT, CSS_UNICODE_CODEPOINT_LITERAL, CSS_UNICODE_RANGE, CSS_UNICODE_RANGE_INTERVAL, CSS_UNICODE_RANGE_WILDCARD, CSS_UNICODE_RANGE_WILDCARD_LITERAL
+    self, CSS_BOGUS_UNICODE_RANGE_VALUE, CSS_DIMENSION_VALUE, CSS_NUMBER_LITERAL,
+    CSS_UNICODE_CODEPOINT, CSS_UNICODE_CODEPOINT_LITERAL, CSS_UNICODE_RANGE,
+    CSS_UNICODE_RANGE_INTERVAL, CSS_UNICODE_RANGE_WILDCARD, CSS_UNICODE_RANGE_WILDCARD_LITERAL,
 };
 use biome_css_syntax::{TextRange, T};
 use biome_parser::diagnostic::{expected_any, expected_node, ParseDiagnostic};
@@ -18,10 +20,9 @@ const UNICODE: TokenSet<CssSyntaxKind> = token_set![
     CSS_DIMENSION_VALUE,
 ];
 
-
 /// Checks if the parser is positioned to potentially start parsing a Unicode range in CSS, identified by "U" or "u".
 pub(crate) fn is_at_unicode_range(p: &mut CssParser) -> bool {
-    matches!(p.cur_text(), "U" | "u") && p.nth_at_ts(1,UNICODE)
+    matches!(p.cur_text(), "U" | "u") && p.nth_at_ts(1, UNICODE)
 }
 
 /// Parses a Unicode range in CSS starting from "U+" or "u+".
