@@ -28,7 +28,7 @@ pub(crate) enum FileStatus {
     /// While handling the file, something happened
     Message(Message),
     /// A match was found while searching a file
-    Search(Message),
+    SearchResult(Message),
     /// File ignored, it should not be count as "handled"
     Ignored,
     /// Files that belong to other tools and shouldn't be touched
