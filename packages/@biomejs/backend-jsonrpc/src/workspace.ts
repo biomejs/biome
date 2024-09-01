@@ -1228,7 +1228,7 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
-	 * Disallow primitive type aliases, misleading or user defined types.
+	 * Disallow user defined types.
 	 */
 	noRestrictedTypes?: RuleFixConfiguration_for_NoRestrictedTypesOptions;
 	/**
@@ -2268,7 +2268,6 @@ export interface RestrictedImportsOptions {
 	paths: {};
 }
 export interface NoRestrictedTypesOptions {
-	extendDefaults?: boolean;
 	types: {};
 }
 export interface ConsistentMemberAccessibilityOptions {

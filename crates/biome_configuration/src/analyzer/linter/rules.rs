@@ -2944,7 +2944,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports:
         Option<RuleConfiguration<biome_js_analyze::options::NoRestrictedImports>>,
-    #[doc = "Disallow primitive type aliases, misleading or user defined types."]
+    #[doc = "Disallow user defined types."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_types:
         Option<RuleFixConfiguration<biome_js_analyze::options::NoRestrictedTypes>>,

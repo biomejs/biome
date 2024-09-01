@@ -7,7 +7,6 @@
 				"noRestrictedTypes": {
 					"level": "error",
 					"options": {
-						"extendDefaults": false,
 						"types": {}
                     }
 				}

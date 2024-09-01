@@ -14,6 +14,10 @@
 							},
 							"Bar": {
 								"message": "Replace Bar with Foo"
+							},
+							"InvalidUse": {
+								"message": "Do not use this type",
+								"use": "@"
 							}
 						}
                     }

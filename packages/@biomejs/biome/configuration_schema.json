@@ -1899,7 +1899,6 @@
 			"type": "object",
 			"required": ["types"],
 			"properties": {
-				"extendDefaults": { "type": ["boolean", "null"] },
 				"types": {
 					"type": "object",
 					"additionalProperties": {
@@ -2058,7 +2057,7 @@
 					]
 				},
 				"noRestrictedTypes": {
-					"description": "Disallow primitive type aliases, misleading or user defined types.",
+					"description": "Disallow user defined types.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoRestrictedTypesConfiguration" },
 						{ "type": "null" }
