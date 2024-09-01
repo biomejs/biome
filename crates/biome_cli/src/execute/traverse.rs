@@ -700,8 +700,8 @@ fn handle_file(ctx: &TraversalOptions, path: &BiomePath) {
         Ok(Ok(FileStatus::Unchanged)) => {
             ctx.increment_unchanged();
         }
-        Ok(Ok(FileStatus::Search(msg))) => {
-            ctx.increment_changed(path);
+        Ok(Ok(FileStatus::SearchResult(msg))) => {
+            ctx.increment_unchanged();
             ctx.increment_matches();
             ctx.push_message(msg);
         }
