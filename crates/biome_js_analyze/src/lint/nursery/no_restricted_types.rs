@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt::Display;
 
 use ::serde::{Deserialize, Serialize};
@@ -105,7 +106,7 @@ declare_lint_rule! {
     ///         "types": {
     ///            "Foo": {
     ///               "message": "Only bar is allowed",
-    ///               "fixWith": "bar"
+    ///               "use": "bar"
     ///             },
     ///             "OldAPI": {
     ///                 "message": "Use NewAPI instead"
@@ -128,7 +129,7 @@ declare_lint_rule! {
     ///     }
     /// }
     ///
-    pub NoRestrictedTypes {
+    pub NoRestrictedTypes { 
         version: "next",
         name: "noRestrictedTypes",
         language: "ts",
@@ -234,7 +235,7 @@ impl Rule for NoRestrictedTypes {
         let suggested_type = state.restricted_type.suggested_fix_type()?;
 
         let prev_token = state.reference_identifier.clone()?.value_token().ok()?;
-        let new_token = make::ident(suggested_type.as_str());
+        let new_token = make::ident(&suggested_type);
 
         mutation.replace_element(prev_token.into(), new_token.into());
 
@@ -260,7 +261,8 @@ pub struct NoRestrictedTypesOptions {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct CustomRestrictedType {
     message: String,
-    fix_with: Option<String>,
+    #[serde(rename = "use")]
+    use_instead: Option<String>,
 }
 
 declare_node_union! {
@@ -325,14 +327,14 @@ impl RestrictedType {
         })
     }
 
-    fn suggested_fix_type(&self) -> Option<String> {
+    fn suggested_fix_type(&self) -> Option<Cow<'static, str>> {
         Some(match self {
-            Self::BigInt => "bigint".to_string(),
-            Self::Boolean => "boolean".to_string(),
-            Self::Number => "number".to_string(),
-            Self::String => "string".to_string(),
-            Self::Symbol => "symbol".to_string(),
-            Self::Custom((_, data)) => data.fix_with.clone()?,
+            Self::BigInt => Cow::Borrowed("bigint"),
+            Self::Boolean => Cow::Borrowed("boolean"),
+            Self::Number => Cow::Borrowed("number"),
+            Self::String => Cow::Borrowed("string"),
+            Self::Symbol => Cow::Borrowed("symbol"),
+            Self::Custom((_, data)) => Cow::Owned(data.use_instead.clone()?),
             _ => return None,
         })
     }

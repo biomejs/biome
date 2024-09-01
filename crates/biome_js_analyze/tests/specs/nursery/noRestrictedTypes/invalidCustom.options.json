@@ -10,7 +10,7 @@
 						"types": {
 							"CustomType": {
 								"message": "Only CustomType2 is allowed",
-								"fixWith": "CustomType2"
+								"use": "CustomType2"
 							},
 							"Bar": {
 								"message": "Replace Bar with Foo"
