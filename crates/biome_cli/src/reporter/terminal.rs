@@ -235,11 +235,8 @@ impl<'a> fmt::Display for ConsoleTraversalSummary<'a> {
             }
         }
 
-        match self.0 {
-            TraversalMode::Search { .. } => {
-                fmt.write_markup(markup!(" "<Info>"Found "{self.1.matches}" matches."</Info>))?
-            },
-            _ => ()
+        if let TraversalMode::Search { .. } = self.0 {
+            fmt.write_markup(markup!(" "<Info>"Found "{self.1.matches}" matches."</Info>))?
         };
         Ok(())
     }
