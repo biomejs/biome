@@ -11,11 +11,13 @@ use crate::events::SemanticEvent;
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
+    /// List of all top-level rules in the CSS file
     rules: Vec<Rule>,
     global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
     /// Stack of rule IDs to keep track of the current rule hierarchy
     current_rule_stack: Vec<RuleId>,
     next_rule_id: RuleId,
+    /// Map to get the rule containing the given range of CST nodes
     range_to_rule: FxHashMap<TextRange, Rule>,
     rules_by_id: FxHashMap<RuleId, Rule>,
     /// Indicates if the current node is within a `:root` selector
@@ -84,14 +86,15 @@ impl SemanticModelBuilder {
                     }
                 }
 
-                self.rules_by_id.insert(new_rule_id, new_rule.clone());
+                self.rules_by_id.insert(new_rule_id, new_rule);
                 self.current_rule_stack.push(new_rule_id);
             }
             SemanticEvent::RuleEnd => {
                 if let Some(completed_rule) = self.current_rule_stack.pop() {
                     let completed_rule = &self.rules_by_id[&completed_rule];
+                    let has_parent = self.current_rule_stack.last().is_some();
 
-                    if self.current_rule_stack.last_mut().is_some() {
+                    if has_parent {
                         self.range_to_rule
                             .insert(completed_rule.range, completed_rule.clone());
                     } else {
