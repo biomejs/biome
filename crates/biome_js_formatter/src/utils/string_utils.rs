@@ -372,36 +372,13 @@ impl<'token> LiteralStringNormaliser<'token> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::quickcheck_utils::*;
     use crate::utils::FormatLiteralStringToken;
-    use biome_formatter::token::string::ToAsciiLowercaseCow;
     use biome_formatter::QuoteStyle;
     use biome_js_factory::JsSyntaxTreeBuilder;
     use biome_js_syntax::JsSyntaxKind::{JS_STRING_LITERAL, JS_STRING_LITERAL_EXPRESSION};
     use biome_js_syntax::{JsStringLiteralExpression, JsSyntaxToken};
     use biome_rowan::AstNode;
-    use quickcheck_macros::*;
     use std::borrow::Cow;
-
-    #[quickcheck]
-    fn to_ascii_lowercase_cow_always_returns_same_value_as_string_to_lowercase(txt: AsciiString) {
-        assert_eq!(
-            txt.to_lowercase(),
-            txt.to_ascii_lowercase_cow().into_owned()
-        );
-    }
-
-    #[quickcheck]
-    fn to_ascii_lowercase_cow_returns_borrowed_when_all_chars_are_lowercase(txt: AsciiString) {
-        let txt = txt.to_lowercase();
-        assert!(matches!(txt.to_ascii_lowercase_cow(), Cow::Borrowed(s) if s == txt));
-    }
-
-    #[quickcheck]
-    fn to_ascii_lowercase_cow_returns_owned_when_some_chars_are_not_lowercase(txt: AsciiString) {
-        let txt = std::format!("{txt}A"); //guarantees at least one uppercase letter
-        assert!(matches!(txt.to_ascii_lowercase_cow(), Cow::Owned(s) if s == txt.to_lowercase()));
-    }
 
     fn generate_syntax_token(input: &str) -> JsSyntaxToken {
         let mut tree_builder = JsSyntaxTreeBuilder::new();

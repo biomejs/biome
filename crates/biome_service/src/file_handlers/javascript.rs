@@ -1,7 +1,7 @@
 use super::{
-    search, ActionVisitor, AnalyzerCapabilities, CodeActionsParams, DebugCapabilities,
-    ExtensionHandler, FormatterCapabilities, LintParams, LintResults, LintVisitor, ParseResult,
-    ParserCapabilities, SearchCapabilities, SyntaxVisitor,
+    search, AnalyzerCapabilities, AnalyzerVisitorBuilder, CodeActionsParams, DebugCapabilities,
+    ExtensionHandler, FormatterCapabilities, LintParams, LintResults, ParseResult,
+    ParserCapabilities, SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::diagnostics::extension_error;
@@ -21,9 +21,8 @@ use crate::{
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Never,
-    QueryMatch, Queryable, RegistryVisitor, RuleCategoriesBuilder, RuleCategory, RuleError,
-    RuleFilter, RuleGroup,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
+    RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
 };
 use biome_configuration::javascript::JsxRuntime;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
@@ -33,7 +32,7 @@ use biome_formatter::{
 };
 use biome_fs::BiomePath;
 use biome_js_analyze::utils::rename::{RenameError, RenameSymbolExtensions};
-use biome_js_analyze::{analyze, analyze_with_inspect_matcher, visit_registry, ControlFlowGraph};
+use biome_js_analyze::{analyze, analyze_with_inspect_matcher, ControlFlowGraph};
 use biome_js_formatter::context::trailing_commas::TrailingCommas;
 use biome_js_formatter::context::{
     ArrowParentheses, BracketSameLine, JsFormatOptions, QuoteProperties, Semicolons,
@@ -48,7 +47,6 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
-use std::ffi::OsStr;
 use std::fmt::Debug;
 use tracing::{debug, debug_span, error, info, trace, trace_span};
 
@@ -233,26 +231,41 @@ impl ServiceLanguage for JsLanguage {
             );
         }
 
-        match path.extension().and_then(OsStr::to_str) {
-            Some("vue") => {
+        if let Some(filename) = path.file_name().map(|filename| filename.as_encoded_bytes()) {
+            if filename.ends_with(b".vue") {
                 globals.extend(
                     [
-                        "defineOptions",
-                        "defineModel",
-                        "withDefaults",
-                        "defineProps",
                         "defineEmits",
-                        "defineSlots",
                         "defineExpose",
+                        "defineModel",
+                        "defineOptions",
+                        "defineProps",
+                        "defineSlots",
+                        "withDefaults",
                     ]
-                    .map(ToOwned::to_owned),
+                    .map(str::to_string),
+                );
+            } else if filename.ends_with(b".astro") {
+                globals.extend(["Astro"].map(str::to_string));
+            } else if filename.ends_with(b".svelte")
+                || filename.ends_with(b".svelte.js")
+                || filename.ends_with(b".svelte.ts")
+            {
+                // Svelte 5 runes
+                globals.extend(
+                    [
+                        "$bindable",
+                        "$derived",
+                        "$effect",
+                        "$host",
+                        "$inspect",
+                        "$props",
+                        "$state",
+                    ]
+                    .map(str::to_string),
                 );
             }
-            Some("astro") => {
-                globals.extend(["Astro"].map(ToOwned::to_owned));
-            }
-            _ => {}
-        };
+        }
 
         let configuration = AnalyzerConfiguration {
             rules: global
@@ -425,27 +438,14 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 .workspace
                 .settings()
                 .as_ref()
-                .and_then(|settings| settings.as_rules(params.path.as_path()));
+                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
-            let mut enabled_rules = vec![];
-            let mut disabled_rules = vec![];
-            let mut syntax_visitor = SyntaxVisitor::default();
-            let mut lint_visitor = LintVisitor::new(
-                &params.only,
-                &params.skip,
-                params.workspace.settings(),
-                params.path.as_path(),
-            );
-            let mut action_visitor =
-                ActionVisitor::new(params.workspace.settings(), &params.categories);
-            visit_registry(&mut syntax_visitor);
-            visit_registry(&mut lint_visitor);
-            visit_registry(&mut action_visitor);
-            enabled_rules.extend(syntax_visitor.enabled_rules);
-            let (lint_enabled_rules, lint_disabled_rules) = lint_visitor.finish();
-            enabled_rules.extend(lint_enabled_rules);
-            disabled_rules.extend(lint_disabled_rules);
-            enabled_rules.extend(action_visitor.enabled_rules);
+            let (enabled_rules, disabled_rules) =
+                AnalyzerVisitorBuilder::new(params.workspace.settings())
+                    .with_syntax_rules()
+                    .with_linter_rules(&params.only, &params.skip, params.path.as_path())
+                    .with_assists_rules(&params.only, &params.skip, params.path.as_path())
+                    .finish();
 
             let filter = AnalysisFilter {
                 categories: params.categories,
@@ -533,32 +533,6 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
         })
 }
 
-struct ActionsVisitor<'a> {
-    enabled_rules: Vec<RuleFilter<'a>>,
-}
-
-impl RegistryVisitor<JsLanguage> for ActionsVisitor<'_> {
-    fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
-        if matches!(C::CATEGORY, RuleCategory::Action) {
-            C::record_groups(self);
-        }
-    }
-
-    fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
-        G::record_rules(self)
-    }
-
-    fn record_rule<R>(&mut self)
-    where
-        R: biome_analyze::Rule<Query: Queryable<Language = JsLanguage, Output: Clone>> + 'static,
-    {
-        self.enabled_rules.push(RuleFilter::Rule(
-            <R::Group as RuleGroup>::NAME,
-            R::METADATA.name,
-        ));
-    }
-}
-
 #[tracing::instrument(level = "debug", skip(params))]
 pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     let CodeActionsParams {
@@ -568,44 +542,31 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         path,
         manifest,
         language,
-        settings,
+        only,
+        skip,
     } = params;
     debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
-            let analyzer_options =
-                workspace.analyzer_options::<JsLanguage>(params.path, &params.language);
-            let rules = settings.as_rules(params.path);
+            let analyzer_options = workspace.analyzer_options::<JsLanguage>(path, &language);
             let mut actions = Vec::new();
-            let mut enabled_rules = Vec::new();
-            if settings.organize_imports.enabled {
-                enabled_rules.push(RuleFilter::Rule("correctness", "organizeImports"));
-            }
-            if let Some(rules) = rules.as_ref() {
-                let rules = rules.as_enabled_rules().into_iter().collect();
+            let (enabled_rules, disabled_rules) =
+                AnalyzerVisitorBuilder::new(params.workspace.settings())
+                    .with_syntax_rules()
+                    .with_linter_rules(&only, &skip, params.path.as_path())
+                    .with_assists_rules(&only, &skip, params.path.as_path())
+                    .finish();
 
-                // The rules in the assist category do not have configuration entries,
-                // always add them all to the enabled rules list
-                let mut visitor = ActionsVisitor {
-                    enabled_rules: rules,
-                };
-                visit_registry(&mut visitor);
-
-                enabled_rules.extend(visitor.enabled_rules);
-            }
-
-            let mut filter = if !enabled_rules.is_empty() {
-                AnalysisFilter::from_enabled_rules(enabled_rules.as_slice())
-            } else {
-                AnalysisFilter::default()
+            let filter = AnalysisFilter {
+                categories: RuleCategoriesBuilder::default()
+                    .with_syntax()
+                    .with_lint()
+                    .with_action()
+                    .build(),
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: &disabled_rules,
+                range,
             };
-
-            let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
-            if settings.organize_imports.enabled {
-                categories = categories.with_action();
-            }
-            filter.categories = categories.build();
-            filter.range = Some(range);
 
             let Some(source_type) = language.to_js_file_source() else {
                 error!("Could not determine the file source of the file");
@@ -654,25 +615,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     };
 
     // Compute final rules (taking `overrides` into account)
-    let rules = settings.as_rules(params.biome_path.as_path());
+    let rules = settings.as_linter_rules(params.biome_path.as_path());
 
-    let mut lint_visitor = LintVisitor::new(
-        &params.only,
-        &params.skip,
-        params.workspace.settings(),
-        params.biome_path.as_path(),
-    );
-    let mut syntax_visitor = SyntaxVisitor::default();
-    visit_registry(&mut lint_visitor);
-    visit_registry(&mut syntax_visitor);
-    let (mut enabled_rules, disabled_rules) = lint_visitor.finish();
-    enabled_rules.extend(syntax_visitor.enabled_rules);
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_syntax_rules()
+        .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .with_assists_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .finish();
 
     let filter = AnalysisFilter {
-        categories: RuleCategoriesBuilder::default()
-            .with_syntax()
-            .with_lint()
-            .build(),
+        categories: params.rule_categories,
         enabled_rules: Some(enabled_rules.as_slice()),
         disabled_rules: &disabled_rules,
         range: None,
@@ -911,7 +863,7 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
     let mut tree: AnyJsRoot = parse.tree();
 
     let filter = AnalysisFilter {
-        enabled_rules: Some(&[RuleFilter::Rule("correctness", "organizeImports")]),
+        enabled_rules: Some(&[RuleFilter::Rule("source", "organizeImports")]),
         categories: RuleCategoriesBuilder::default().with_action().build(),
         ..AnalysisFilter::default()
     };

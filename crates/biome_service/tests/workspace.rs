@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
     use biome_analyze::RuleCategories;
-    use biome_configuration::linter::{RuleGroup, RuleSelector};
+    use biome_configuration::analyzer::{RuleGroup, RuleSelector};
     use biome_fs::BiomePath;
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;
@@ -137,6 +137,19 @@ mod test {
             workspace.as_ref(),
             OpenFileParams {
                 path: BiomePath::new(".eslintrc.json"),
+                content: r#"{"a": 42}//comment"#.into(),
+                version: 0,
+                document_file_source: None,
+            },
+        )
+        .unwrap();
+        assert!(well_known_json_with_comments_file.format_file().is_ok());
+
+        // well-known json-with-comments file allows comments
+        let well_known_json_with_comments_file = FileGuard::open(
+            workspace.as_ref(),
+            OpenFileParams {
+                path: BiomePath::new("project/.vscode/settings.json"),
                 content: r#"{"a": 42}//comment"#.into(),
                 version: 0,
                 document_file_source: None,

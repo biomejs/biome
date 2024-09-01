@@ -13,6 +13,13 @@ pub struct ManifestServices {
 }
 
 impl ManifestServices {
+    pub(crate) fn name(&self) -> Option<&str> {
+        self.manifest
+            .as_ref()
+            .as_ref()
+            .and_then(|pkg| pkg.name.as_deref())
+    }
+
     pub(crate) fn is_dependency(&self, specifier: &str) -> bool {
         self.manifest
             .as_ref()

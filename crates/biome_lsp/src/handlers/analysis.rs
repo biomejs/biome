@@ -1,9 +1,10 @@
 use crate::converters::from_proto;
 use crate::converters::line_index::LineIndex;
+use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
 use anyhow::{Context, Result};
-use biome_analyze::{ActionCategory, SourceActionKind};
+use biome_analyze::{ActionCategory, RuleCategoriesBuilder, SourceActionKind};
 use biome_diagnostics::Applicability;
 use biome_fs::BiomePath;
 use biome_rowan::{TextRange, TextSize};
@@ -15,11 +16,12 @@ use biome_service::workspace::{
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
 use std::collections::HashMap;
+use std::ffi::OsStr;
 use std::ops::Sub;
 use tower_lsp::lsp_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse,
 };
-use tracing::{debug, trace};
+use tracing::{debug, info, trace};
 
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
 
@@ -37,7 +39,7 @@ fn fix_all_kind() -> CodeActionKind {
 pub(crate) fn code_actions(
     session: &Session,
     params: CodeActionParams,
-) -> Result<Option<CodeActionResponse>> {
+) -> Result<Option<CodeActionResponse>, LspError> {
     let url = params.text_document.uri.clone();
     let biome_path = session.file_path(&url)?;
 
@@ -45,6 +47,7 @@ pub(crate) fn code_actions(
         path: biome_path,
         features: FeaturesBuilder::new()
             .with_linter()
+            .with_assists()
             .with_organize_imports()
             .build(),
     })?;
@@ -53,7 +56,7 @@ pub(crate) fn code_actions(
         && !file_features.supports_organize_imports()
         && !file_features.supports_assists()
     {
-        debug!("Linter and organize imports are both disabled");
+        info!("Linter, assists and organize imports are disabled");
         return Ok(Some(Vec::new()));
     }
 
@@ -82,10 +85,10 @@ pub(crate) fn code_actions(
     let content = session.workspace.get_file_content(GetFileContentParams {
         path: biome_path.clone(),
     })?;
-    let offset = match biome_path.extension().and_then(|s| s.to_str()) {
-        Some("vue") => VueFileHandler::start(content.as_str()),
-        Some("astro") => AstroFileHandler::start(content.as_str()),
-        Some("svelte") => SvelteFileHandler::start(content.as_str()),
+    let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
+        Some(b"vue") => VueFileHandler::start(content.as_str()),
+        Some(b"astro") => AstroFileHandler::start(content.as_str()),
+        Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
         _ => None,
     };
     let cursor_range = from_proto::text_range(&doc.line_index, params.range, position_encoding)
@@ -111,7 +114,10 @@ pub(crate) fn code_actions(
     debug!("Cursor range {:?}", &cursor_range);
     let result = match session.workspace.pull_actions(PullActionsParams {
         path: biome_path.clone(),
-        range: cursor_range,
+        range: Some(cursor_range),
+        // TODO: compute skip and only based on configuration
+        skip: vec![],
+        only: vec![],
     }) {
         Ok(result) => result,
         Err(err) => {
@@ -165,7 +171,7 @@ pub(crate) fn code_actions(
             }
 
             // Filter out the refactor.* actions when assists are disabled
-            if action.category.matches("refactor") && !file_features.supports_assists() {
+            if action.category.matches("source") && !file_features.supports_assists() {
                 return None;
             }
             // Remove actions that do not match the categories requested by the
@@ -239,6 +245,11 @@ fn fix_all(
         should_format,
         only: vec![],
         skip: vec![],
+        rule_categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .with_action()
+            .build(),
     })?;
 
     if fixed.actions.is_empty() {

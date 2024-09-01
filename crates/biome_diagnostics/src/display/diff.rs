@@ -103,11 +103,11 @@ pub(super) fn print_diff(fmt: &mut fmt::Formatter<'_>, diff: &TextEdit) -> io::R
 /// This function scans the list of DiffOps that make up the `diff` and derives
 /// the following data structures:
 /// - `modified_lines` is the set of [LineKey] that contain at least one insert
-/// or delete operation
+///     or delete operation
 /// - `inserted_lines` maps a [LineKey] to the list of diff operations that
-/// happen on the corresponding line
+///     happen on the corresponding line
 /// - `before_line_to_after` maps line numbers in the old revision of the text
-/// to line numbers in the new revision
+///     to line numbers in the new revision
 /// - `after_line` counts the number of lines in the new revision of the document
 /// - `before_line` counts the number of lines in the old revision of the document
 fn process_diff_ops<'diff>(

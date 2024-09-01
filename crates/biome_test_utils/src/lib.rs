@@ -93,6 +93,15 @@ pub fn create_analyzer_options(
                 ReactClassic => Some(JsxRuntime::ReactClassic),
                 Transparent => Some(JsxRuntime::Transparent),
             };
+            analyzer_configuration.globals = configuration
+                .javascript
+                .as_ref()
+                .and_then(|js| {
+                    js.globals
+                        .as_ref()
+                        .map(|globals| globals.iter().cloned().collect())
+                })
+                .unwrap_or_default();
 
             settings
                 .merge_with_configuration(configuration, None, None, &[])

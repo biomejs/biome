@@ -57,7 +57,7 @@ fn generate_merge_newtype(ident: Ident) -> TokenStream {
     quote! {
         impl biome_deserialize::Merge for #ident {
             fn merge_with(&mut self, other: Self) {
-                self.0 = other.0;
+                biome_deserialize::Merge::merge_with(&mut self.0, other.0);
             }
         }
     }

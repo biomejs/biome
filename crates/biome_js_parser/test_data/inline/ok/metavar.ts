@@ -1,19 +1,19 @@
-import μdefaultImport from μsource;
-import { μnamedImport, type μnamedType } from μsource;
+import µdefaultImport from µsource;
+import { µnamedImport, type µnamedType } from µsource;
 
-μstatement;
+µstatement;
 
 function foo() {
-    μstatement;
-    const bar = μexpression;
+    µstatement;
+    const bar = µexpression;
 }
 
 class Foo {
-    μclassMember;
+    µclassMember;
 }
 
-const { μkey: key } = { μkey: μvalue };
+const { µkey: key } = { µkey: µvalue };
 
-function μfunctionName() {}
+function µfunctionName() {}
 
-type μType = μOtherType;
+type µType = µOtherType;

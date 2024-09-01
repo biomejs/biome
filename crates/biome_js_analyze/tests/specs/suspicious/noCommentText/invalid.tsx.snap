@@ -26,6 +26,7 @@ expression: invalid.tsx
         /* comment
         comment */
     </div>
+    <div>😀//😀 comment </div>
 </>
 
 ```
@@ -92,14 +93,14 @@ invalid.tsx:4:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.tsx:5:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:5:15 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Wrap comments inside children within braces.
   
     3 │     <div>/* comment */</div>
     4 │     <div>/** comment */</div>
   > 5 │     <div>text /* comment */</div>
-      │          ^^^^^^^^^^^^^^^^^^
+      │               ^^^^^^^^^^^^^
     6 │     <div>/* comment */ text</div>
     7 │     <div>
   
@@ -118,7 +119,7 @@ invalid.tsx:6:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
     4 │     <div>/** comment */</div>
     5 │     <div>text /* comment */</div>
   > 6 │     <div>/* comment */ text</div>
-      │          ^^^^^^^^^^^^^^^^^^
+      │          ^^^^^^^^^^^^^
     7 │     <div>
     8 │         text
   
@@ -130,20 +131,16 @@ invalid.tsx:6:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.tsx:7:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:9:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Wrap comments inside children within braces.
   
-     5 │     <div>text /* comment */</div>
-     6 │     <div>/* comment */ text</div>
-   > 7 │     <div>
-       │          
-   > 8 │         text
+     7 │     <div>
+     8 │         text
    > 9 │         // comment
-  > 10 │     </div>
-       │     
+       │         ^^^^^^^^^^
+    10 │     </div>
     11 │     <div>
-    12 │         /* comment */
   
   i Unsafe fix: Wrap the comments with braces
   
@@ -158,20 +155,16 @@ invalid.tsx:7:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.tsx:11:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:12:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Wrap comments inside children within braces.
   
-     9 │         // comment
     10 │     </div>
-  > 11 │     <div>
-       │          
+    11 │     <div>
   > 12 │         /* comment */
-  > 13 │         text
-  > 14 │     </div>
-       │     
-    15 │     <div>
-    16 │         // comment
+       │         ^^^^^^^^^^^^^
+    13 │         text
+    14 │     </div>
   
   i Unsafe fix: Wrap the comments with braces
   
@@ -181,20 +174,16 @@ invalid.tsx:11:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.tsx:15:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:16:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Wrap comments inside children within braces.
   
-    13 │         text
     14 │     </div>
-  > 15 │     <div>
-       │          
+    15 │     <div>
   > 16 │         // comment
-  > 17 │         text
-  > 18 │     </div>
-       │     
-    19 │     <div>
-    20 │         /* comment
+       │         ^^^^^^^^^^
+    17 │         text
+    18 │     </div>
   
   i Unsafe fix: Wrap the comments with braces
   
@@ -209,20 +198,18 @@ invalid.tsx:15:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.tsx:19:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.tsx:20:9 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Wrap comments inside children within braces.
   
-    17 │         text
     18 │     </div>
-  > 19 │     <div>
-       │          
+    19 │     <div>
   > 20 │         /* comment
+       │         ^^^^^^^^^^
   > 21 │         comment */
-  > 22 │     </div>
-       │     
-    23 │ </>
-    24 │ 
+       │         ^^^^^^^^^^
+    22 │     </div>
+    23 │     <div>😀//😀 comment </div>
   
   i Unsafe fix: Wrap the comments with braces
   
@@ -233,7 +220,31 @@ invalid.tsx:19:10 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━�
        20 │ + ········{/*·comment
        21 │ + ········comment·*/}
     22 22 │       </div>
-    23 23 │   </>
+    23 23 │       <div>😀//😀 comment </div>
+  
+
+```
+
+```
+invalid.tsx:23:11 lint/suspicious/noCommentText  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Wrap comments inside children within braces.
+  
+    21 │         comment */
+    22 │     </div>
+  > 23 │     <div>😀//😀 comment </div>
+       │            ^^^^^^^^^^^^^
+    24 │ </>
+    25 │ 
+  
+  i Unsafe fix: Wrap the comments with braces
+  
+    21 21 │           comment */
+    22 22 │       </div>
+    23    │ - ····<div>😀//😀·comment·</div>
+       23 │ + ····<div>😀{/*·😀·comment·*/}</div>
+    24 24 │   </>
+    25 25 │   
   
 
 ```

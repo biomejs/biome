@@ -19,7 +19,6 @@ use biome_css_syntax::{
 };
 use biome_formatter::comments::Comments;
 use biome_formatter::prelude::*;
-use biome_formatter::token::string::ToAsciiLowercaseCow;
 use biome_formatter::trivia::format_skipped_token_trivia;
 use biome_formatter::{
     write, CstFormatContext, FormatContext, FormatLanguage, FormatOwnedWithRule, FormatRefWithRule,
@@ -27,6 +26,7 @@ use biome_formatter::{
 };
 use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
+use biome_string_case::StrExtension;
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {

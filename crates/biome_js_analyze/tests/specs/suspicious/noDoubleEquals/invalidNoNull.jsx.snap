@@ -1,0 +1,38 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalidNoNull.jsx
+---
+# Input
+```jsx
+let a = <button
+    className="SomeManyClasses"
+    onClick={(event) => console.log(event.ctrlKey == null)}
+    style="color: red"
+>
+    Some content
+</button>;
+
+```
+
+# Diagnostics
+```
+invalidNoNull.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    1 │ let a = <button
+    2 │     className="SomeManyClasses"
+  > 3 │     onClick={(event) => console.log(event.ctrlKey == null)}
+      │                                                   ^^
+    4 │     style="color: red"
+    5 │ >
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    3 │ ····onClick={(event)·=>·console.log(event.ctrlKey·===·null)}
+      │                                                     +       
+
+```

@@ -12,17 +12,16 @@ tests_macros::gen_tests! {"tests/valid/**/*.{json,jsonc}", crate::run_valid_conf
 fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
-    let extension = input_file.extension().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    let result = match extension {
-        "json" => deserialize_from_json_str::<PartialConfiguration>(
+    let result = match input_file.extension().map(OsStr::as_encoded_bytes) {
+        Some(b"json") => deserialize_from_json_str::<PartialConfiguration>(
             input_code.as_str(),
             JsonParserOptions::default(),
             "",
         ),
-        "jsonc" => deserialize_from_json_str::<PartialConfiguration>(
+        Some(b"jsonc") => deserialize_from_json_str::<PartialConfiguration>(
             input_code.as_str(),
             JsonParserOptions::default()
                 .with_allow_comments()
@@ -63,17 +62,16 @@ fn run_invalid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
 fn run_valid_configurations(input: &'static str, _: &str, _: &str, _: &str) {
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
-    let extension = input_file.extension().and_then(OsStr::to_str).unwrap();
     let input_code = read_to_string(input_file)
         .unwrap_or_else(|err| panic!("failed to read {input_file:?}: {err:?}"));
 
-    let result = match extension {
-        "json" => deserialize_from_json_str::<PartialConfiguration>(
+    let result = match input_file.extension().map(OsStr::as_encoded_bytes) {
+        Some(b"json") => deserialize_from_json_str::<PartialConfiguration>(
             input_code.as_str(),
             JsonParserOptions::default(),
             "",
         ),
-        "jsonc" => deserialize_from_json_str::<PartialConfiguration>(
+        Some(b"jsonc") => deserialize_from_json_str::<PartialConfiguration>(
             input_code.as_str(),
             JsonParserOptions::default()
                 .with_allow_comments()

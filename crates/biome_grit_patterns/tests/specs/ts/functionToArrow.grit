@@ -1,0 +1,4 @@
+`function $name ($args) {}` as $func where {
+  $func => `const $name = ($args) => {}`,
+  $args <: contains `apple` => `mango`
+}

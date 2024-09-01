@@ -129,7 +129,7 @@ declare_lint_rule! {
     ///     }
     /// }
     ///
-    pub NoRestrictedTypes { 
+    pub NoRestrictedTypes {
         version: "next",
         name: "noRestrictedTypes",
         language: "ts",

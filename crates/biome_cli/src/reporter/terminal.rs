@@ -3,7 +3,10 @@ use crate::reporter::{DiagnosticsPayload, ReporterVisitor, TraversalSummary};
 use crate::Reporter;
 use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup, Console, ConsoleExt};
-use biome_diagnostics::PrintDiagnostic;
+use biome_diagnostics::advice::ListAdvice;
+use biome_diagnostics::{Diagnostic, PrintDiagnostic};
+use biome_fs::BiomePath;
+use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 
@@ -11,15 +14,43 @@ pub(crate) struct ConsoleReporter {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
+    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
 }
 
 impl Reporter for ConsoleReporter {
     fn write(self, visitor: &mut dyn ReporterVisitor) -> io::Result<()> {
+        let verbose = self.diagnostics_payload.verbose;
         visitor.report_diagnostics(&self.execution, self.diagnostics_payload)?;
         visitor.report_summary(&self.execution, self.summary)?;
+        if verbose {
+            visitor.report_handled_paths(self.evaluated_paths)?;
+        }
         Ok(())
     }
 }
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    tags(VERBOSE),
+    severity = Information,
+    message = "Files processed:"
+)]
+struct EvaluatedPathsDiagnostic {
+    #[advice]
+    list: ListAdvice<String>,
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    tags(VERBOSE),
+    severity = Information,
+    message = "Files fixed:"
+)]
+struct FixedPathsDiagnostic {
+    #[advice]
+    list: ListAdvice<String>,
+}
+
 pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
 
 impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
@@ -44,6 +75,36 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
 
         self.0.log(markup! {
             {ConsoleTraversalSummary(execution.traversal_mode(), &summary)}
+        });
+
+        Ok(())
+    }
+
+    fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
+        let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
+            list: ListAdvice {
+                list: evaluated_paths
+                    .iter()
+                    .map(|p| p.display().to_string())
+                    .collect(),
+            },
+        };
+
+        let fixed_paths_diagnostic = FixedPathsDiagnostic {
+            list: ListAdvice {
+                list: evaluated_paths
+                    .iter()
+                    .filter(|p| p.was_written())
+                    .map(|p| p.display().to_string())
+                    .collect(),
+            },
+        };
+
+        self.0.log(markup! {
+            {PrintDiagnostic::verbose(&evaluated_paths_diagnostic)}
+        });
+        self.0.log(markup! {
+            {PrintDiagnostic::verbose(&fixed_paths_diagnostic)}
         });
 
         Ok(())

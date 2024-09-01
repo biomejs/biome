@@ -5,7 +5,8 @@ pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
 use oxc_resolver::{Resolution, ResolveError};
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, Formatter};
+use std::collections::BTreeSet;
+use std::fmt::{Debug, Display, Formatter};
 use std::panic::RefUnwindSafe;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -292,19 +293,26 @@ pub trait FileSystemExt: FileSystem {
     }
 }
 
-impl<T: ?Sized> FileSystemExt for T where T: FileSystem {}
+impl<T: FileSystem + ?Sized> FileSystemExt for T {}
 
 type BoxedTraversal<'fs, 'scope> = Box<dyn FnOnce(&dyn TraversalScope<'scope>) + Send + 'fs>;
 
 pub trait TraversalScope<'scope> {
-    /// Spawn a new filesystem read task
+    /// Spawn a new filesystem read task.
     ///
-    /// If the provided path exists and is a file, then the [`handle_file`](TraversalContext::handle_file)
+    /// If the provided path exists and is a file, then the [`handle_file`](TraversalContext::handle_path)
     /// method of the provided [TraversalContext] will be called. If it's a
     /// directory, it will be recursively traversed and all the files the
-    /// [`can_handle`](TraversalContext::can_handle) method of the context
+    /// [TraversalContext::can_handle] method of the context
     /// returns true for will be handled as well
-    fn spawn(&self, context: &'scope dyn TraversalContext, path: PathBuf);
+    fn evaluate(&self, context: &'scope dyn TraversalContext, path: PathBuf);
+
+    /// Spawn a new filesystem read task.
+    ///
+    /// It's assumed that the provided already exist and was already evaluated via [TraversalContext::can_handle].
+    ///
+    /// This method will call [TraversalContext::handle_path].
+    fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf);
 }
 
 pub trait TraversalContext: Sync {
@@ -323,7 +331,14 @@ pub trait TraversalContext: Sync {
 
     /// This method will be called by the traversal for each file it finds
     /// where [TraversalContext::can_handle] returned true
-    fn handle_file(&self, path: &Path);
+    fn handle_path(&self, path: BiomePath);
+
+    /// This method will be called by the traversal for each file it finds
+    /// where [TraversalContext::store_path] returned true
+    fn store_path(&self, path: BiomePath);
+
+    /// Returns the paths that should be handled
+    fn evaluated_paths(&self) -> BTreeSet<BiomePath>;
 }
 
 impl<T> FileSystem for Arc<T>

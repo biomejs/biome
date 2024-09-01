@@ -334,7 +334,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
         _effects: &mut Vector<Effect<'a, GritQueryContext>>,
         _language: &<GritQueryContext as QueryContext>::Language<'a>,
     ) -> anyhow::Result<()> {
-        todo!()
+        bail!("Not implemented") // TODO: Implement rewriting
     }
 
     fn float(
@@ -503,14 +503,14 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
 
     fn linearized_text(
         &self,
-        _language: &<GritQueryContext as QueryContext>::Language<'a>,
+        _language: &GritTargetLanguage,
         _effects: &[Effect<'a, GritQueryContext>],
         _files: &FileRegistry<'a, GritQueryContext>,
         _memo: &mut HashMap<CodeRange, Option<String>>,
         _should_pad_snippet: bool,
         _logs: &mut AnalysisLogs,
-    ) -> Result<std::borrow::Cow<'a, str>> {
-        todo!()
+    ) -> Result<Cow<'a, str>> {
+        bail!("Not implemented") // TODO: Implement rewriting
     }
 
     fn matches_undefined(&self) -> bool {
@@ -540,7 +540,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
         _is_first: bool,
         _language: &GritTargetLanguage,
     ) -> Result<()> {
-        todo!()
+        bail!("Not implemented") // TODO: Implement insertion padding
     }
 
     fn position(&self, language: &GritTargetLanguage) -> Option<Range> {
@@ -581,29 +581,50 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
         language: &GritTargetLanguage,
     ) -> Result<Cow<'a, str>> {
         match self {
-            GritResolvedPattern::Binding(bindings) => Ok(bindings
+            Self::Binding(bindings) => Ok(bindings
                 .last()
                 .ok_or_else(|| anyhow!("cannot grab text of resolved_pattern with no binding"))?
                 .text(language)?
                 .into_owned()
                 .into()),
-            GritResolvedPattern::Snippets(snippets) => Ok(snippets
+            Self::Snippets(snippets) => Ok(snippets
                 .iter()
                 .try_fold(String::new(), |mut text, snippet| {
                     text.push_str(&snippet.text(state, language)?);
                     Ok::<String, Error>(text)
                 })?
                 .into()),
-            GritResolvedPattern::List(_) => todo!(),
-            GritResolvedPattern::Map(_) => todo!(),
-            GritResolvedPattern::File(file) => Ok(format!(
+            Self::List(list) => Ok(list
+                .iter()
+                .map(|pattern| pattern.text(state, language))
+                .collect::<Result<Vec<_>>>()?
+                .join(",")
+                .into()),
+            Self::Map(map) => Ok(format!(
+                "{{{}}}",
+                map.iter()
+                    .map(|(key, value)| {
+                        let value = value
+                            .text(state, language)
+                            .expect("failed to get text of map value");
+                        format!("\"{key}\": {value}")
+                    })
+                    .reduce(|mut acc, entry| {
+                        acc.push_str(", ");
+                        acc.push_str(&entry);
+                        acc
+                    })
+                    .unwrap_or_default()
+            )
+            .into()),
+            Self::File(file) => Ok(format!(
                 "{}:\n{}",
                 file.name(state).text(state, language)?,
                 file.body(state).text(state, language)?
             )
             .into()),
-            GritResolvedPattern::Files(_) => todo!(),
-            GritResolvedPattern::Constant(_) => todo!(),
+            Self::Files(files) => files.text(state, language),
+            Self::Constant(constant) => Ok(constant.to_string().into()),
         }
     }
 }

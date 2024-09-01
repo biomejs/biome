@@ -2,9 +2,9 @@ use std::borrow::Cow;
 
 use crate::prelude::*;
 
-use biome_formatter::token::string::ToAsciiLowercaseCow;
 use biome_formatter::write;
 use biome_js_syntax::{TsBigintLiteralType, TsBigintLiteralTypeFields};
+use biome_string_case::StrExtension;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsBigintLiteralType;

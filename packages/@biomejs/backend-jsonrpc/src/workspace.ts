@@ -6,7 +6,18 @@ export interface SupportsFeatureParams {
 }
 export type FeatureName = FeatureKind[];
 export interface BiomePath {
+	/**
+	 * Determines the kind of the file inside Biome. Some files are considered as configuration files, others as manifest files, and others as files to handle
+	 */
+	kind: FileKind;
+	/**
+	 * The path to the file
+	 */
 	path: string;
+	/**
+	 * Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
+	 */
+	was_written: boolean;
 }
 export type FeatureKind =
 	| "Format"
@@ -14,6 +25,16 @@ export type FeatureKind =
 	| "OrganizeImports"
 	| "Search"
 	| "Assists";
+export type FileKind = FileKind2[];
+/**
+ * The priority of the file
+ */
+export type FileKind2 =
+	| "Config"
+	| "Manifest"
+	| "Ignore"
+	| "Inspectable"
+	| "Handleable";
 export interface SupportsFeatureResult {
 	reason?: SupportKind;
 }
@@ -37,6 +58,10 @@ export interface PartialConfiguration {
 	 * A field for the [JSON schema](https://json-schema.org/) specification
 	 */
 	$schema?: string;
+	/**
+	 * Specific configuration for assists
+	 */
+	assists?: PartialAssistsConfiguration;
 	/**
 	 * Specific configuration for the Css language
 	 */
@@ -82,10 +107,32 @@ export interface PartialConfiguration {
 	 */
 	vcs?: PartialVcsConfiguration;
 }
+export interface PartialAssistsConfiguration {
+	/**
+	 * Whether Biome should fail in CLI if the assists were not applied to the code.
+	 */
+	actions?: Actions;
+	/**
+	 * Whether Biome should enable assists via LSP.
+	 */
+	enabled?: boolean;
+	/**
+	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
+	 */
+	ignore?: StringSet;
+	/**
+	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
+	 */
+	include?: StringSet;
+}
 /**
  * Options applied to CSS files
  */
 export interface PartialCssConfiguration {
+	/**
+	 * CSS assists options
+	 */
+	assists?: PartialCssAssists;
 	/**
 	 * CSS formatter options
 	 */
@@ -153,7 +200,7 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * The indent style.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation, 2 by default
 	 */
@@ -186,6 +233,10 @@ export interface PartialGraphqlConfiguration {
  */
 export interface PartialJavascriptConfiguration {
 	/**
+	 * Assists options
+	 */
+	assists?: PartialJavascriptAssists;
+	/**
 	 * Formatting options
 	 */
 	formatter?: PartialJavascriptFormatter;
@@ -213,6 +264,10 @@ If defined here, they should not emit diagnostics.
  * Options applied to JSON files
  */
 export interface PartialJsonConfiguration {
+	/**
+	 * Assists options
+	 */
+	assists?: PartialJsonAssists;
 	/**
 	 * Formatting options
 	 */
@@ -286,6 +341,18 @@ If Biome can't find the configuration, it will attempt to use the current workin
 	 */
 	useIgnoreFile?: boolean;
 }
+export interface Actions {
+	source?: Source;
+}
+/**
+ * Options that changes how the CSS assists behaves
+ */
+export interface PartialCssAssists {
+	/**
+	 * Control the assists for CSS files.
+	 */
+	enabled?: boolean;
+}
 /**
  * Options that changes how the CSS formatter behaves
  */
@@ -297,7 +364,7 @@ export interface PartialCssFormatter {
 	/**
 	 * The indent style applied to CSS (and its super languages) files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to CSS (and its super languages) files. Default to 2.
 	 */
@@ -320,7 +387,7 @@ export interface PartialCssFormatter {
  */
 export interface PartialCssLinter {
 	/**
-	 * Control the linter for CSS (and its super languages) files.
+	 * Control the linter for CSS files.
 	 */
 	enabled?: boolean;
 }
@@ -340,7 +407,7 @@ export interface PartialCssParser {
 export type AttributePosition = "auto" | "multiline";
 export type BracketSpacing = boolean;
 export type IndentWidth = number;
-export type PlainIndentStyle = "tab" | "space";
+export type IndentStyle = "tab" | "space";
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
@@ -363,7 +430,7 @@ export interface PartialGraphqlFormatter {
 	/**
 	 * The indent style applied to GraphQL files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to GraphQL files. Default to 2.
 	 */
@@ -387,6 +454,15 @@ export interface PartialGraphqlFormatter {
 export interface PartialGraphqlLinter {
 	/**
 	 * Control the formatter for GraphQL files.
+	 */
+	enabled?: boolean;
+}
+/**
+ * Linter options specific to the JavaScript linter
+ */
+export interface PartialJavascriptAssists {
+	/**
+	 * Control the linter for JavaScript (and its super languages) files.
 	 */
 	enabled?: boolean;
 }
@@ -421,7 +497,7 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
 	 */
@@ -484,6 +560,15 @@ These decorators belong to an old proposal, and they are subject to change.
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
 }
+/**
+ * Linter options specific to the JSON linter
+ */
+export interface PartialJsonAssists {
+	/**
+	 * Control the linter for JSON (and its super languages) files.
+	 */
+	enabled?: boolean;
+}
 export interface PartialJsonFormatter {
 	/**
 	 * Control the formatter for JSON (and its super languages) files.
@@ -496,7 +581,7 @@ export interface PartialJsonFormatter {
 	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
 	 */
@@ -593,6 +678,19 @@ export interface OverridePattern {
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
 export type VcsClientKind = "git";
+/**
+ * A list of rules that belong to this group
+ */
+export interface Source {
+	/**
+	 * Enforce props sorting in JSX elements.
+	 */
+	sortJsxProps?: RuleAssistConfiguration;
+	/**
+	 * Sorts the keys of a JSON object in natural order
+	 */
+	useSortedKeys?: RuleAssistConfiguration;
+}
 export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
@@ -629,7 +727,7 @@ export interface A11y {
 	/**
 	 * Disallow target="_blank" attribute without rel="noreferrer"
 	 */
-	noBlankTarget?: RuleFixConfiguration_for_Null;
+	noBlankTarget?: RuleFixConfiguration_for_AllowDomainOptions;
 	/**
 	 * Enforces that no distracting elements are used.
 	 */
@@ -782,7 +880,7 @@ export interface Complexity {
 	/**
 	 * Disallow unnecessary catch clauses.
 	 */
-	noUselessCatch?: RuleConfiguration_for_Null;
+	noUselessCatch?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary constructors.
 	 */
@@ -1070,10 +1168,6 @@ export interface Nursery {
 	 */
 	noDuplicateFontNames?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow two keys with the same name inside a JSON object.
-	 */
-	noDuplicateJsonKeys?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
@@ -1089,6 +1183,10 @@ export interface Nursery {
 	 * Disallow CSS empty blocks.
 	 */
 	noEmptyBlock?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow TypeScript enum.
+	 */
+	noEnum?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow variables from evolving into any type through reassignments.
 	 */
@@ -1113,10 +1211,6 @@ export interface Nursery {
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
-	/**
-	 * Disallows the use of irregular whitespace.
-	 */
-	noIrregularWhitespaceCss?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce that a label element or component has a text label and an associated input.
 	 */
@@ -1186,6 +1280,10 @@ export interface Nursery {
 	 */
 	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary escape sequence in regular expression literals.
+	 */
+	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary concatenation of string or template literals.
 	 */
 	noUselessStringConcat?: RuleFixConfiguration_for_Null;
@@ -1210,6 +1308,10 @@ export interface Nursery {
 	 */
 	useAdjacentOverloadSignatures?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce that ARIA properties are valid for the roles that are supported by the element.
+	 */
+	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
 	 */
 	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
@@ -1221,6 +1323,10 @@ export interface Nursery {
 	 * Disallows invalid named grid areas in CSS Grid Layouts.
 	 */
 	useConsistentGridAreas?: RuleConfiguration_for_Null;
+	/**
+	 * Require consistent accessibility modifiers on class properties and methods.
+	 */
+	useConsistentMemberAccessibility?: RuleConfiguration_for_ConsistentMemberAccessibilityOptions;
 	/**
 	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
 	 */
@@ -1600,7 +1706,7 @@ export interface Suspicious {
 	/**
 	 * Require the use of === and !==
 	 */
-	noDoubleEquals?: RuleFixConfiguration_for_Null;
+	noDoubleEquals?: RuleFixConfiguration_for_NoDoubleEqualsOptions;
 	/**
 	 * Disallow duplicate case labels.
 	 */
@@ -1614,9 +1720,9 @@ export interface Suspicious {
 	 */
 	noDuplicateJsxProps?: RuleConfiguration_for_Null;
 	/**
-	 * Prevents object literals having more than one property declaration for the same name.
+	 * Disallow two keys with the same name inside objects.
 	 */
-	noDuplicateObjectKeys?: RuleFixConfiguration_for_Null;
+	noDuplicateObjectKeys?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate function parameter name.
 	 */
@@ -1787,7 +1893,7 @@ export interface OverrideFormatterConfiguration {
 	/**
 	 * The indent style.
 	 */
-	indentStyle?: PlainIndentStyle;
+	indentStyle?: IndentStyle;
 	/**
 	 * The size of the indentation, 2 by default
 	 */
@@ -1817,9 +1923,13 @@ export interface OverrideOrganizeImportsConfiguration {
 	 */
 	enabled?: boolean;
 }
+export type RuleAssistConfiguration = "on" | "off";
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
+export type RuleFixConfiguration_for_AllowDomainOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_AllowDomainOptions;
 export type RuleConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_Null;
@@ -1844,6 +1954,9 @@ export type RuleConfiguration_for_RestrictedImportsOptions =
 export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
+export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
@@ -1865,6 +1978,9 @@ export type RuleConfiguration_for_FilenamingConventionOptions =
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
+export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
 export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
 export interface RuleWithFixOptions_for_Null {
 	/**
@@ -1879,6 +1995,20 @@ export interface RuleWithFixOptions_for_Null {
 	 * Rule's options
 	 */
 	options: null;
+}
+export interface RuleWithFixOptions_for_AllowDomainOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: AllowDomainOptions;
 }
 export interface RuleWithOptions_for_Null {
 	/**
@@ -1968,6 +2098,16 @@ export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	 */
 	options: NoRestrictedTypesOptions;
 }
+export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: ConsistentMemberAccessibilityOptions;
+}
 export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2054,10 +2194,30 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
 	 */
 	options: NamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoDoubleEqualsOptions;
+}
 /**
  * Used to identify the kind of code action emitted by a rule
  */
 export type FixKind = "none" | "safe" | "unsafe";
+export interface AllowDomainOptions {
+	/**
+	 * List of domains to allow `target="_blank"` without `rel="noreferrer"`
+	 */
+	allowDomains: string[];
+}
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
 	ignoreNonDom: boolean;
@@ -2110,6 +2270,9 @@ export interface RestrictedImportsOptions {
 export interface NoRestrictedTypesOptions {
 	extendDefaults?: boolean;
 	types: {};
+}
+export interface ConsistentMemberAccessibilityOptions {
+	accessibility: Accessibility;
 }
 export interface UseImportExtensionsOptions {
 	/**
@@ -2183,6 +2346,17 @@ export interface NamingConventionOptions {
 	 */
 	strictCase: boolean;
 }
+/**
+ * Rule's options
+ */
+export interface NoDoubleEqualsOptions {
+	/**
+	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.
+
+If `false`, no such exception will be made. 
+	 */
+	ignoreNull: boolean;
+}
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -2209,6 +2383,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult: StableHookResult;
 }
+export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export interface Convention {
@@ -2311,12 +2486,9 @@ export interface RegisterProjectFolderParams {
 	setAsCurrentWorkspace: boolean;
 }
 export type ProjectKey = string;
-export interface UpdateProjectParams {
-	path: BiomePath;
-}
-export interface OpenProjectParams {
+export interface SetManifestForProjectParams {
 	content: string;
-	path: BiomePath;
+	manifest_path: BiomePath;
 	version: number;
 }
 export interface OpenFileParams {
@@ -2551,18 +2723,17 @@ export type Category =
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
-	| "lint/nursery/noDuplicateJsonKeys"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
+	| "lint/nursery/noEnum"
 	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
-	| "lint/nursery/noIrregularWhitespaceCss"
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
@@ -2581,15 +2752,18 @@ export type Category =
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
+	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
+	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentGridAreas"
+	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useDeprecatedReason"
@@ -2714,7 +2888,7 @@ export type Category =
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useValidTypeof"
-	| "assists/nursery/useSortedKeys"
+	| "assists/source/useSortedKeys"
 	| "syntax/nursery/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -2723,8 +2897,10 @@ export type Category =
 	| "format"
 	| "check"
 	| "ci"
+	| "stdin"
 	| "configuration"
 	| "organizeImports"
+	| "assists"
 	| "migrate"
 	| "deserialize"
 	| "project"
@@ -2841,8 +3017,10 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
+	only: RuleCode[];
 	path: BiomePath;
-	range: TextRange;
+	range?: TextRange;
+	skip: RuleCode[];
 }
 export interface PullActionsResult {
 	actions: CodeAction[];
@@ -2929,6 +3107,7 @@ export interface FixFileParams {
 	fix_file_mode: FixFileMode;
 	only: RuleCode[];
 	path: BiomePath;
+	rule_categories: RuleCategories;
 	should_format: boolean;
 	skip: RuleCode[];
 }
@@ -2986,8 +3165,7 @@ export interface Workspace {
 	registerProjectFolder(
 		params: RegisterProjectFolderParams,
 	): Promise<ProjectKey>;
-	updateCurrentProject(params: UpdateProjectParams): Promise<void>;
-	openProject(params: OpenProjectParams): Promise<void>;
+	setManifestForProject(params: SetManifestForProjectParams): Promise<void>;
 	openFile(params: OpenFileParams): Promise<void>;
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
@@ -3020,11 +3198,8 @@ export function createWorkspace(transport: Transport): Workspace {
 		registerProjectFolder(params) {
 			return transport.request("biome/register_project_folder", params);
 		},
-		updateCurrentProject(params) {
-			return transport.request("biome/update_current_project", params);
-		},
-		openProject(params) {
-			return transport.request("biome/open_project", params);
+		setManifestForProject(params) {
+			return transport.request("biome/set_manifest_for_project", params);
 		},
 		openFile(params) {
 			return transport.request("biome/open_file", params);

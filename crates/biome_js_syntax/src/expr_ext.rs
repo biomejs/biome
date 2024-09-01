@@ -1767,7 +1767,7 @@ impl JsCallExpression {
     /// we need to check its [callee] and its [arguments].
     ///
     /// 1. The [callee] must contain a name or a chain of names that belongs to the
-    /// test frameworks, for example: `test()`, `test.only()`, etc.
+    ///     test frameworks, for example: `test()`, `test.only()`, etc.
     /// 2. The [arguments] should be at the least 2
     /// 3. The first argument has to be a string literal
     /// 4. The third argument, if present, has to be a number literal
@@ -2239,5 +2239,39 @@ mod test {
 
         let template = extract_template("fit.concurrent.skip.each``");
         assert!(template.is_test_each_pattern_callee());
+    }
+}
+
+declare_node_union! {
+    /// Subset of expressions supported by this rule.
+    ///
+    /// ## Examples
+    ///
+    /// - `JsStringLiteralExpression` &mdash; `"5"`
+    /// - `JsNumberLiteralExpression` &mdash; `5`
+    /// - `JsUnaryExpression` &mdash; `+5` | `-5`
+    ///
+    pub AnyNumberLikeExpression = JsStringLiteralExpression | JsNumberLiteralExpression | JsUnaryExpression
+}
+
+impl AnyNumberLikeExpression {
+    /// Returns the value of a number-like expression; it returns the expression
+    /// text for literal expressions. However, for unary expressions, it only
+    /// returns the value for signed numeric expressions.
+    pub fn value(&self) -> Option<String> {
+        match self {
+            AnyNumberLikeExpression::JsStringLiteralExpression(string_literal) => {
+                return Some(string_literal.inner_string_text().ok()?.to_string());
+            }
+            AnyNumberLikeExpression::JsNumberLiteralExpression(number_literal) => {
+                return Some(number_literal.value_token().ok()?.to_string());
+            }
+            AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
+                if unary_expression.is_signed_numeric_literal().ok()? {
+                    return Some(unary_expression.text());
+                }
+            }
+        }
+        None
     }
 }

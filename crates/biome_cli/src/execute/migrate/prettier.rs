@@ -12,7 +12,7 @@ use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
-use std::path::Path;
+use std::{ffi::OsStr, path::Path};
 
 use super::{eslint_eslint::ShorthandVec, node};
 
@@ -195,9 +195,9 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
         let line_width = LineWidth::try_from(value.print_width)?;
         let indent_width = IndentWidth::try_from(value.tab_width)?;
         let indent_style = if value.use_tabs {
-            biome_configuration::PlainIndentStyle::Tab
+            biome_formatter::IndentStyle::Tab
         } else {
-            biome_configuration::PlainIndentStyle::Space
+            biome_formatter::IndentStyle::Space
         };
         let formatter = biome_configuration::PartialFormatterConfiguration {
             indent_width: Some(indent_width),
@@ -297,9 +297,9 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
             };
             let indent_style = options.use_tabs.map(|use_tabs| {
                 if use_tabs {
-                    biome_configuration::PlainIndentStyle::Tab
+                    biome_formatter::IndentStyle::Tab
                 } else {
-                    biome_configuration::PlainIndentStyle::Space
+                    biome_formatter::IndentStyle::Space
                 }
             });
             let formatter = biome_configuration::OverrideFormatterConfiguration {
@@ -416,8 +416,7 @@ fn load_config(
     path: &Path,
     console: &mut dyn Console,
 ) -> Result<PrettierConfiguration, CliDiagnostic> {
-    let (deserialized, diagnostics) = match path.extension().and_then(|file_ext| file_ext.to_str())
-    {
+    let (deserialized, diagnostics) = match path.extension().and_then(OsStr::to_str) {
         None | Some("json") => {
             let mut file = fs.open_with_options(path, OpenOptions::default().read(true))?;
             let mut content = String::new();

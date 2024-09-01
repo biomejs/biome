@@ -36,6 +36,16 @@ ci.js organizeImports ━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+ci.js assists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Size of ci.js is 1.0 MiB which exceeds configured maximum of 1.0 MiB for this project.
+    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
+    Use the `files.maxSize` configuration to change the maximum size of files processed.
+  
+
+```
+
+```block
 ci.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Size of ci.js is 1.0 MiB which exceeds configured maximum of 1.0 MiB for this project.

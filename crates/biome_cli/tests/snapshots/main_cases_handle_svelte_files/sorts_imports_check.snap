@@ -42,6 +42,12 @@ file.svelte organizeImports ━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
+Skipped 1 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
+
+```
+
+```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
 ```

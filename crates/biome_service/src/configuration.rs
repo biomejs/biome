@@ -9,18 +9,21 @@ use biome_configuration::{
     PartialConfiguration,
 };
 use biome_console::markup;
-use biome_css_analyze::metadata as css_lint_metadata;
+use biome_css_analyze::METADATA as css_lint_metadata;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize::{Deserialized, Merge};
 use biome_diagnostics::{DiagnosticExt, Error, Severity};
 use biome_fs::{AutoSearchResult, ConfigName, FileSystem, OpenOptions};
-use biome_js_analyze::metadata as js_lint_metadata;
+use biome_graphql_analyze::METADATA as graphql_lint_metadata;
+use biome_js_analyze::METADATA as js_lint_metadata;
+use biome_json_analyze::METADATA as json_lint_metadata;
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::{parse_json, JsonParserOptions};
 use std::ffi::OsStr;
 use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::iter::FusedIterator;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
 
 /// Information regarding the configuration that was found.
@@ -156,15 +159,15 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// The configuration file will be read from the `file_system`. A [path hint](ConfigurationPathHint) should be provided.
 ///
 /// - If the path hint is a path to a file that is provided by the user, the function will try to load that file or error.
-/// The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
-/// deserialize it as a `.jsonc` file.
+///     The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
+///     deserialize it as a `.jsonc` file.
 ///
 /// - If the path hint is a path to a directory which is provided by the user, the function will try to find a `biome.json`
-/// or `biome.jsonc` file in order in that directory. And If it cannot find one, it will error.
+///     or `biome.jsonc` file in order in that directory. And If it cannot find one, it will error.
 ///
 /// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
-/// file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
-/// means Biome will use the default configuration.
+///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
+///     means Biome will use the default configuration.
 fn load_config(
     file_system: &DynRef<'_, dyn FileSystem>,
     base_path: ConfigurationPathHint,
@@ -184,11 +187,11 @@ fn load_config(
 
     // If the configuration path hint is from user and is a file path,
     // we'll load it directly
-    if let ConfigurationPathHint::FromUser(ref configuration_file_path) = base_path {
-        if file_system.path_is_file(configuration_file_path) {
-            let content = file_system.read_file_from_path(configuration_file_path)?;
-            let parser_options = match configuration_file_path.extension().and_then(OsStr::to_str) {
-                Some("json") => JsonParserOptions::default(),
+    if let ConfigurationPathHint::FromUser(ref config_file_path) = base_path {
+        if file_system.path_is_file(config_file_path) {
+            let content = file_system.read_file_from_path(config_file_path)?;
+            let parser_options = match config_file_path.extension().map(OsStr::as_encoded_bytes) {
+                Some(b"json") => JsonParserOptions::default(),
                 _ => JsonParserOptions::default()
                     .with_allow_comments()
                     .with_allow_trailing_commas(),
@@ -197,7 +200,7 @@ fn load_config(
                 deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
             return Ok(Some(ConfigurationPayload {
                 deserialized,
-                configuration_file_path: PathBuf::from(configuration_file_path),
+                configuration_file_path: PathBuf::from(config_file_path),
                 external_resolution_base_path,
             }));
         }
@@ -240,8 +243,8 @@ fn load_config(
     } {
         let AutoSearchResult { content, file_path } = auto_search_result;
 
-        let parser_options = match file_path.extension().and_then(OsStr::to_str) {
-            Some("json") => JsonParserOptions::default(),
+        let parser_options = match file_path.extension().map(OsStr::as_encoded_bytes) {
+            Some(b"json") => JsonParserOptions::default(),
             _ => JsonParserOptions::default()
                 .with_allow_comments()
                 .with_allow_trailing_commas(),
@@ -367,8 +370,10 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Path) -> AnalyzerRules {
     let overrides = &settings.override_settings;
     let mut analyzer_rules = AnalyzerRules::default();
     if let Some(rules) = linter_settings.rules.as_ref() {
-        push_to_analyzer_rules(rules, js_lint_metadata(), &mut analyzer_rules);
-        push_to_analyzer_rules(rules, css_lint_metadata(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, js_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, css_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
     }
 
     overrides.override_analyzer_rules(path, analyzer_rules)
@@ -465,8 +470,8 @@ impl PartialConfigurationExt for PartialConfiguration {
             let extend_configuration_file_path = if extend_entry_as_path.starts_with(".")
                 // TODO: Remove extension in Biome 2.0
                 || matches!(
-                    extend_entry_as_path.extension().and_then(OsStr::to_str),
-                    Some("json" | "jsonc")
+                    extend_entry_as_path.extension().map(OsStr::as_encoded_bytes),
+                    Some(b"json" | b"jsonc")
                 ) {
                 relative_resolution_base_path.join(extend_entry)
             } else {
@@ -512,9 +517,9 @@ impl PartialConfigurationExt for PartialConfiguration {
                 content.as_str(),
                 match extend_configuration_file_path
                     .extension()
-                    .and_then(OsStr::to_str)
+                    .map(OsStr::as_encoded_bytes)
                 {
-                    Some("json") => JsonParserOptions::default(),
+                    Some(b"json") => JsonParserOptions::default(),
                     _ => JsonParserOptions::default()
                         .with_allow_comments()
                         .with_allow_trailing_commas(),

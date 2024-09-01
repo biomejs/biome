@@ -260,17 +260,16 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
                         #(#methods)*
                     }
 
-                    #[cfg(feature = "serde")]
-                        impl Serialize for #name {
-                            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-                            where
-                            S: Serializer,
-                            {
-                                self.as_fields().serialize(serializer)
-                            }
+                    impl Serialize for #name {
+                        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+                        where
+                        S: Serializer,
+                        {
+                            self.as_fields().serialize(serializer)
+                        }
                     }
 
-                    #[cfg_attr(feature = "serde", derive(Serialize))]
+                    #[derive(Serialize)]
                     pub struct #slots_name {
                         #( pub #slot_fields, )*
                     }
@@ -537,8 +536,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             (
                 quote! {
                     // #[doc = #doc]
-                    #[derive(Clone, PartialEq, Eq, Hash)]
-                    #[cfg_attr(feature = "serde", derive(Serialize))]
+                    #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
                     pub enum #name {
                         #(#variants_for_union),*
                     }
@@ -642,8 +640,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
         let kind = format_ident!("{}", Case::Constant.convert(bogus_name));
 
         quote! {
-            #[derive(Clone, PartialEq, Eq, Hash)]
-            #[cfg_attr(feature = "serde", derive(Serialize))]
+            #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
             pub struct #ident {
                 syntax: SyntaxNode
             }
@@ -760,7 +757,6 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
 
         let list_impl = if list.separator.is_some() {
             quote! {
-                #[cfg(feature = "serde")]
                 impl Serialize for #list_name {
                     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
                         where
@@ -812,7 +808,6 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
             }
         } else {
             quote! {
-                #[cfg(feature = "serde")]
                 impl Serialize for #list_name {
                     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
                         where
@@ -885,9 +880,7 @@ pub fn generate_nodes(ast: &AstSrc, language_kind: LanguageKind) -> Result<Strin
     let language = language_kind.language();
 
     let serde_import = quote! {
-        #[cfg(feature = "serde")]
         use serde::{Serialize, Serializer};
-        #[cfg(feature = "serde")]
         use serde::ser::SerializeSeq;
     };
 

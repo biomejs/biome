@@ -83,6 +83,7 @@ use self::{
     where_compiler::WhereCompiler, within_compiler::WithinCompiler,
 };
 use crate::{grit_context::GritQueryContext, CompileError};
+use as_compiler::AsCompiler;
 use biome_grit_syntax::{AnyGritMaybeCurlyPattern, AnyGritPattern, GritSyntaxKind};
 use biome_rowan::AstNode as _;
 use grit_pattern_matcher::pattern::{DynamicPattern, DynamicSnippet, DynamicSnippetPart, Pattern};
@@ -177,7 +178,9 @@ impl PatternCompiler {
             AnyGritPattern::GritPatternAny(node) => Ok(Pattern::Any(Box::new(
                 AnyCompiler::from_node(node, context)?,
             ))),
-            AnyGritPattern::GritPatternAs(_) => todo!(),
+            AnyGritPattern::GritPatternAs(node) => Ok(Pattern::Where(Box::new(
+                AsCompiler::from_node(node, context)?,
+            ))),
             AnyGritPattern::GritPatternBefore(node) => Ok(Pattern::Before(Box::new(
                 BeforeCompiler::from_node(node, context)?,
             ))),

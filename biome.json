@@ -1,5 +1,21 @@
 {
   "$schema": "./packages/@biomejs/biome/configuration_schema.json",
+  "assists": {
+    "enabled": true,
+    "ignore": [
+      "./packages/@biomejs/biome/configuration_schema.json"
+    ],
+    "actions": {
+      "source": {
+        "useSortedKeys": "off"
+      }
+    }
+  },
+  "css": {
+    "linter": {
+      "enabled": true
+    }
+  },
   "files": {
     "ignore": [
       "crates/**",
@@ -11,11 +27,13 @@
       "**/__snapshots__",
       "**/undefined/**",
       "_fonts/**",
-      "packages/@biomejs/wasm-*"
+      "packages/@biomejs/wasm-*",
+      "benchmark/target/**"
     ],
     "include": [
       "packages/@biomejs/**",
-      "packages/tailwindcss-config-analyzer"
+      "packages/tailwindcss-config-analyzer/**",
+      "benchmark/**"
     ]
   },
   "formatter": {
@@ -29,11 +47,6 @@
       "lineWidth": 1
     }
   },
-  "vcs": {
-    "clientKind": "git",
-    "enabled": true,
-    "useIgnoreFile": true
-  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -45,5 +58,10 @@
   },
   "organizeImports": {
     "enabled": true
+  },
+  "vcs": {
+    "clientKind": "git",
+    "enabled": true,
+    "useIgnoreFile": true
   }
 }

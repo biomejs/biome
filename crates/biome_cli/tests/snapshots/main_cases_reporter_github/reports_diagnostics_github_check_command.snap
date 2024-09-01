@@ -44,38 +44,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-::error title=lint/suspicious/noDoubleEquals,file=main.ts,line=4,endLine=4,col=3,endColumn=5::Use === instead of ==
-```
-
-```block
-::error title=lint/suspicious/noDebugger,file=main.ts,line=6,endLine=6,col=1,endColumn=9::This is an unexpected use of the debugger statement.
-```
-
-```block
-::error title=lint/suspicious/noImplicitAnyLet,file=main.ts,line=8,endLine=8,col=5,endColumn=6::This variable implicitly has the any type.
-```
-
-```block
-::error title=lint/suspicious/noImplicitAnyLet,file=main.ts,line=9,endLine=9,col=7,endColumn=8::This variable implicitly has the any type.
-```
-
-```block
-::error title=lint/suspicious/noRedeclare,file=main.ts,line=2,endLine=2,col=10,endColumn=11::Shouldn't redeclare 'z'. Consider to delete it or rename it.
-```
-
-```block
-::error title=lint/suspicious/noRedeclare,file=main.ts,line=9,endLine=9,col=7,endColumn=8::Shouldn't redeclare 'f'. Consider to delete it or rename it.
-```
-
-```block
-
-```
-
-```block
-
-```
-
-```block
 ::error title=lint/suspicious/noDoubleEquals,file=index.ts,line=4,endLine=4,col=3,endColumn=5::Use === instead of ==
 ```
 
@@ -100,9 +68,41 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```
 
 ```block
-
+::error title=organizeImports,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Import statements could be sorted:
 ```
 
 ```block
+::error title=format,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Formatter would have printed the following content:
+```
 
+```block
+::error title=lint/suspicious/noDoubleEquals,file=main.ts,line=4,endLine=4,col=3,endColumn=5::Use === instead of ==
+```
+
+```block
+::error title=lint/suspicious/noDebugger,file=main.ts,line=6,endLine=6,col=1,endColumn=9::This is an unexpected use of the debugger statement.
+```
+
+```block
+::error title=lint/suspicious/noImplicitAnyLet,file=main.ts,line=8,endLine=8,col=5,endColumn=6::This variable implicitly has the any type.
+```
+
+```block
+::error title=lint/suspicious/noImplicitAnyLet,file=main.ts,line=9,endLine=9,col=7,endColumn=8::This variable implicitly has the any type.
+```
+
+```block
+::error title=lint/suspicious/noRedeclare,file=main.ts,line=2,endLine=2,col=10,endColumn=11::Shouldn't redeclare 'z'. Consider to delete it or rename it.
+```
+
+```block
+::error title=lint/suspicious/noRedeclare,file=main.ts,line=9,endLine=9,col=7,endColumn=8::Shouldn't redeclare 'f'. Consider to delete it or rename it.
+```
+
+```block
+::error title=organizeImports,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Import statements could be sorted:
+```
+
+```block
+::error title=format,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Formatter would have printed the following content:
 ```

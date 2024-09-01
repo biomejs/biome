@@ -1360,7 +1360,7 @@ fn does_not_format_if_disabled() {
         Args::from([("format"), ("--stdin-file-path"), ("mock.js")].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     let message = console
         .out_buffer
@@ -2642,7 +2642,6 @@ fn should_apply_different_formatting() {
         },
         "css": {
             "formatter": {
-                "enabled": true,
                 "lineWidth": 40,
                 "indentWidth": 6
             }

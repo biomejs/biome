@@ -268,9 +268,9 @@ pub trait Lexer<'src> {
     /// Check if the lexer starts a grit metavariable
     fn is_metavariable_start(&mut self) -> bool {
         let current_char = self.current_char_unchecked();
-        if current_char == 'μ' {
+        if current_char == 'µ' {
             let current_char_length = current_char.len_utf8();
-            // μ[a-zA-Z_][a-zA-Z0-9_]*
+            // µ[a-zA-Z_][a-zA-Z0-9_]*
             if matches!(
                 self.byte_at(current_char_length),
                 Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')
@@ -278,7 +278,7 @@ pub trait Lexer<'src> {
                 return true;
             }
 
-            // μ...
+            // µ...
             if self.byte_at(current_char_length) == Some(b'.')
                 && self.byte_at(current_char_length + 1) == Some(b'.')
                 && self.byte_at(current_char_length + 2) == Some(b'.')
@@ -289,20 +289,20 @@ pub trait Lexer<'src> {
         false
     }
 
-    /// Consume a grit metavariable(μ[a-zA-Z_][a-zA-Z0-9_]*|μ...)
-    /// https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388
+    /// Consume a grit metavariable(µ[a-zA-Z_][a-zA-Z0-9_]*|µ...)
+    /// <https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388>
     fn consume_metavariable<T>(&mut self, kind: T) -> T {
         debug_assert!(self.is_metavariable_start());
 
-        // SAFETY: We know the current character is μ.
+        // SAFETY: We know the current character is µ.
         let current_char = self.current_char_unchecked();
         self.advance(current_char.len_utf8());
 
         if self.current_byte() == Some(b'.') {
-            // SAFETY: We know that the current token is μ...
+            // SAFETY: We know that the current token is µ...
             self.advance(3);
         } else {
-            // μ[a-zA-Z_][a-zA-Z0-9_]*
+            // µ[a-zA-Z_][a-zA-Z0-9_]*
             self.advance(1);
             while let Some(chr) = self.current_byte() {
                 match chr {

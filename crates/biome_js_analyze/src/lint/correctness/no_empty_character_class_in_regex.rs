@@ -66,26 +66,26 @@ impl Rule for NoEmptyCharacterClassInRegex {
         let mut class_start_index = None;
         let mut is_negated_class = false;
         // We use `char_indices` to get the byte index of every character
-        let mut enumerated_char_iter = trimmed_text.char_indices();
+        let mut enumerated_char_iter = trimmed_text.bytes().enumerate();
         while let Some((i, ch)) = enumerated_char_iter.next() {
             match ch {
-                '\\' => {
+                b'\\' => {
                     // We eat the next character because it is escaped with `\`
                     enumerated_char_iter.next();
                 }
-                '[' => {
+                b'[' => {
                     // The `v` flag allows to embed a class in another class.
                     if class_start_index.is_none() || has_v_flag {
                         class_start_index = Some(i);
                         is_negated_class = false;
                     }
                 }
-                '^' => {
+                b'^' => {
                     if let Some(class_start_index) = class_start_index {
                         is_negated_class = (i - class_start_index) == 1;
                     }
                 }
-                ']' => {
+                b']' => {
                     if let Some(class_start_index) = class_start_index.take() {
                         let empty_class_len = if is_negated_class { 2 } else { 1 };
                         if (i - class_start_index) == empty_class_len {

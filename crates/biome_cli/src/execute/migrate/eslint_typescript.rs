@@ -6,6 +6,7 @@ use std::{cmp::Ordering, str::FromStr};
 use biome_deserialize::Deserializable;
 use biome_deserialize_macros::Deserializable;
 use biome_js_analyze::{
+    lint::nursery::use_consistent_member_accessibility,
     lint::style::{use_consistent_array_type, use_naming_convention},
     utils::regex::RestrictedRegex,
 };
@@ -40,6 +41,38 @@ impl From<ArrayType> for use_consistent_array_type::ConsistentArrayType {
                 use_consistent_array_type::ConsistentArrayType::Shorthand
             }
             ArrayType::Generic => use_consistent_array_type::ConsistentArrayType::Generic,
+        }
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+#[deserializable(unknown_fields = "allow")]
+pub(crate) struct ExplicitMemberAccessibilityOptions {
+    accessibility: Option<AccessibilityLevel>,
+}
+impl From<ExplicitMemberAccessibilityOptions>
+    for use_consistent_member_accessibility::ConsistentMemberAccessibilityOptions
+{
+    fn from(value: ExplicitMemberAccessibilityOptions) -> Self {
+        use_consistent_member_accessibility::ConsistentMemberAccessibilityOptions {
+            accessibility: value.accessibility.map(|x| x.into()).unwrap_or_default(),
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, Default, Deserializable)]
+pub(crate) enum AccessibilityLevel {
+    #[default]
+    #[deserializable(rename = "no-public")]
+    NoPublic,
+    Explicit,
+    None,
+}
+impl From<AccessibilityLevel> for use_consistent_member_accessibility::Accessibility {
+    fn from(value: AccessibilityLevel) -> Self {
+        match value {
+            AccessibilityLevel::NoPublic => Self::NoPublic,
+            AccessibilityLevel::Explicit => Self::Explicit,
+            AccessibilityLevel::None => Self::None,
         }
     }
 }

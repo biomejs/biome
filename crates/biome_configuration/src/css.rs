@@ -1,6 +1,5 @@
-use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -21,6 +20,10 @@ pub struct CssConfiguration {
     /// CSS linter options
     #[partial(type, bpaf(external(partial_css_linter), optional))]
     pub linter: CssLinter,
+
+    /// CSS assists options
+    #[partial(type, bpaf(external(partial_css_assists), optional))]
+    pub assists: CssAssists,
 }
 
 /// Options that changes how the CSS parser behaves
@@ -39,7 +42,7 @@ pub struct CssParser {
 }
 
 /// Options that changes how the CSS formatter behaves
-#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
@@ -50,7 +53,7 @@ pub struct CssFormatter {
 
     /// The indent style applied to CSS (and its super languages) files.
     #[partial(bpaf(long("css-formatter-indent-style"), argument("tab|space"), optional))]
-    pub indent_style: Option<PlainIndentStyle>,
+    pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to CSS (and its super languages) files. Default to 2.
     #[partial(bpaf(long("css-formatter-indent-width"), argument("NUMBER"), optional))]
@@ -69,6 +72,19 @@ pub struct CssFormatter {
     pub quote_style: QuoteStyle,
 }
 
+impl Default for CssFormatter {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            indent_style: Default::default(),
+            indent_width: Default::default(),
+            line_ending: Default::default(),
+            line_width: Default::default(),
+            quote_style: QuoteStyle::Double,
+        }
+    }
+}
+
 impl PartialCssFormatter {
     pub fn get_formatter_configuration(&self) -> CssFormatter {
         CssFormatter {
@@ -83,14 +99,20 @@ impl PartialCssFormatter {
 }
 
 /// Options that changes how the CSS linter behaves
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Default, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct CssLinter {
-    /// Control the linter for CSS (and its super languages) files.
+    /// Control the linter for CSS files.
     #[partial(bpaf(long("css-linter-enabled"), argument("true|false"), optional))]
     pub enabled: bool,
+}
+
+impl Default for CssLinter {
+    fn default() -> Self {
+        Self { enabled: true }
+    }
 }
 
 impl PartialCssLinter {
@@ -101,11 +123,22 @@ impl PartialCssLinter {
     }
 }
 
+/// Options that changes how the CSS assists behaves
+#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Default, Serialize)]
+#[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
+#[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
+#[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
+pub struct CssAssists {
+    /// Control the assists for CSS files.
+    #[partial(bpaf(long("css-assists-enabled"), argument("true|false"), optional))]
+    pub enabled: bool,
+}
+
 #[test]
 fn default_css() {
     let css_configuration = CssFormatter::default();
 
-    assert!(!css_configuration.enabled);
+    assert!(css_configuration.enabled);
     assert_eq!(css_configuration.indent_style, None);
     assert_eq!(css_configuration.indent_width, None);
     assert_eq!(css_configuration.line_ending, None);

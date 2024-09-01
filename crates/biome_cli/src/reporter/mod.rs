@@ -1,4 +1,5 @@
 pub(crate) mod github;
+pub(crate) mod gitlab;
 pub(crate) mod json;
 pub(crate) mod junit;
 pub(crate) mod summary;
@@ -6,7 +7,9 @@ pub(crate) mod terminal;
 
 use crate::execute::Execution;
 use biome_diagnostics::{Error, Severity};
+use biome_fs::BiomePath;
 use serde::Serialize;
+use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 
@@ -46,6 +49,12 @@ pub trait ReporterVisitor {
         execution: &Execution,
         summary: TraversalSummary,
     ) -> io::Result<()>;
+
+    /// Writes the paths that were handled during a run.
+    fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
+        let _ = evaluated_paths;
+        Ok(())
+    }
 
     /// Writes a diagnostics
     fn report_diagnostics(
