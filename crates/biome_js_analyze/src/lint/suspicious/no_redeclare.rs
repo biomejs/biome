@@ -141,8 +141,11 @@ fn check_redeclarations_in_single_scope(scope: &Scope, redeclarations: &mut Vec<
             for binding in function_scope.bindings() {
                 let id_binding = binding.tree();
                 if let Some(decl) = id_binding.declaration() {
-                    let name = id_binding.text();
-                    declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                    // Ignore the function itself.
+                    if !matches!(decl, AnyJsBindingDeclaration::JsFunctionExpression(_)) {
+                        let name = id_binding.text();
+                        declarations.insert(name, (id_binding.syntax().text_trimmed_range(), decl));
+                    }
                 }
             }
         }
