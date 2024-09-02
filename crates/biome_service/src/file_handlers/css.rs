@@ -156,6 +156,8 @@ impl ServiceLanguage for CssLanguage {
             globals: Vec::new(),
             preferred_quote,
             jsx_runtime: None,
+            jsx_factory: None,
+            jsx_fragment_factory: None,
         };
 
         AnalyzerOptions {

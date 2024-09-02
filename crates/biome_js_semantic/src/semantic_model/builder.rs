@@ -58,7 +58,11 @@ impl SemanticModelBuilder {
             | JSX_REFERENCE_IDENTIFIER
             | TS_TYPE_PARAMETER_NAME
             | TS_LITERAL_ENUM_MEMBER_NAME
-            | JS_IDENTIFIER_ASSIGNMENT => {
+            | JS_IDENTIFIER_ASSIGNMENT
+            | JSX_OPENING_ELEMENT
+            | JSX_OPENING_FRAGMENT
+            | JSX_SELF_CLOSING_ELEMENT => {
+                node.text_trimmed();
                 self.binding_node_by_start
                     .insert(node.text_trimmed_range().start(), node.clone());
             }

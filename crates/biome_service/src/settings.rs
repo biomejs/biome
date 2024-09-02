@@ -78,6 +78,7 @@ impl WorkspaceSettings {
     pub fn get_current_settings(&self) -> Option<&Settings> {
         trace!("Current key {:?}", self.current_project);
         let data = self.data.get(self.current_project);
+        // dbg!(data);
         if let Some(data) = data {
             Some(&data.settings)
         } else {
@@ -564,6 +565,8 @@ pub struct LanguageListSettings {
 
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
     fn from(javascript: JavascriptConfiguration) -> Self {
+        use crate::file_handlers::JsEnvironmentSettings;
+
         let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
 
         let formatter = javascript.formatter;
@@ -584,7 +587,11 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
             javascript.parser.unsafe_parameter_decorators_enabled;
 
         language_setting.globals = Some(javascript.globals.into_index_set());
-        language_setting.environment = javascript.jsx_runtime.into();
+        language_setting.environment = JsEnvironmentSettings {
+            jsx_runtime: javascript.jsx_runtime,
+            jsx_factory: javascript.jsx_factory,
+            jsx_fragment_factory: javascript.jsx_fragment_factory,
+        };
         language_setting.linter.enabled = Some(javascript.linter.enabled);
 
         language_setting
@@ -955,6 +962,49 @@ impl OverrideSettings {
                 }
             })
             .unwrap_or(base_setting)
+    }
+
+    pub fn override_jsx_factory(
+        &self,
+        path: &BiomePath,
+        base_setting: Option<&str>,
+    ) -> Option<String> {
+        self.patterns
+            .iter()
+            // Reverse the traversal as only the last override takes effect
+            .rev()
+            .find_map(|pattern| {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    pattern.languages.javascript.environment.jsx_factory.clone()
+                } else {
+                    None
+                }
+            })
+            .or_else(|| base_setting.map(ToOwned::to_owned))
+    }
+
+    pub fn override_jsx_fragment_factory(
+        &self,
+        path: &BiomePath,
+        base_setting: Option<&str>,
+    ) -> Option<String> {
+        self.patterns
+            .iter()
+            // Reverse the traversal as only the last override takes effect
+            .rev()
+            .find_map(|pattern| {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    pattern
+                        .languages
+                        .javascript
+                        .environment
+                        .jsx_fragment_factory
+                        .clone()
+                } else {
+                    None
+                }
+            })
+            .or_else(|| base_setting.map(ToOwned::to_owned))
     }
 
     /// It scans the current override rules and return the json format that of the first override is matched

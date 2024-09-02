@@ -42,6 +42,18 @@ pub struct JavascriptConfiguration {
     #[partial(bpaf(hide))]
     pub jsx_runtime: JsxRuntime,
 
+    /// Indicates the name of the factory function used to create React elements.
+    ///
+    /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
+    #[partial(bpaf(hide))]
+    pub jsx_factory: Option<String>,
+
+    /// Indicates the name of the factory function used to create React fragment elements.
+    ///
+    /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
+    #[partial(bpaf(hide))]
+    pub jsx_fragment_factory: Option<String>,
+
     #[partial(type, bpaf(external(partial_javascript_organize_imports), optional))]
     pub organize_imports: JavascriptOrganizeImports,
 }

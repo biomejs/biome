@@ -1,5 +1,6 @@
 //! Events emitted by the [SemanticEventExtractor] which are then constructed into the Semantic Model
 
+use biome_js_factory::make;
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
     inner_string_text, AnyJsIdentifierUsage, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode,
@@ -11,6 +12,7 @@ use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 use std::mem;
+use std::rc::Rc;
 use JsSyntaxKind::*;
 
 use crate::ScopeId;
@@ -157,6 +159,22 @@ pub struct SemanticEventExtractor {
     bindings: FxHashMap<BindingName, BindingInfo>,
     /// Type parameters bound in a `infer T` clause.
     infers: Vec<TsTypeParameterName>,
+    /// The factory used to create jsx elements.
+    jsx_factory: Option<Rc<str>>,
+    /// The factory used to create jsx fragments.
+    jsx_fragment_factory: Option<Rc<str>>,
+}
+
+impl SemanticEventExtractor {
+    pub fn with_jsx_factory(mut self, factory: Rc<str>) -> Self {
+        self.jsx_factory = Some(factory);
+        self
+    }
+
+    pub fn with_jsx_fragment_factory(mut self, factory: Rc<str>) -> Self {
+        self.jsx_fragment_factory = Some(factory);
+        self
+    }
 }
 
 /// A binding name is either a type or a value.
@@ -294,6 +312,26 @@ impl SemanticEventExtractor {
             | TS_TYPE_PARAMETER_NAME
             | TS_LITERAL_ENUM_MEMBER_NAME => {
                 self.enter_identifier_binding(&AnyJsIdentifierBinding::unwrap_cast(node.clone()));
+            }
+
+            JSX_OPENING_ELEMENT | JSX_SELF_CLOSING_ELEMENT => {
+                if let Some(factory) = self.jsx_factory.as_ref() {
+                    let ident = make::ident(factory);
+                    self.push_reference(
+                        BindingName::Value(ident.token_text_trimmed()),
+                        Reference::Read(node.text_trimmed_range()),
+                    );
+                }
+            }
+
+            JSX_OPENING_FRAGMENT => {
+                if let Some(factory) = self.jsx_fragment_factory.as_ref() {
+                    let ident = make::ident(factory);
+                    self.push_reference(
+                        BindingName::Value(ident.token_text_trimmed()),
+                        Reference::Read(node.text_trimmed_range()),
+                    );
+                }
             }
 
             JS_REFERENCE_IDENTIFIER | JSX_REFERENCE_IDENTIFIER | JS_IDENTIFIER_ASSIGNMENT => {
@@ -630,6 +668,7 @@ impl SemanticEventExtractor {
         let Ok(name_token) = node.value_token() else {
             return;
         };
+        dbg!(&node, &name_token, &range);
         let name = name_token.token_text_trimmed();
         match node {
             AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {

@@ -21,6 +21,8 @@ where
     options: &'a R::Options,
     preferred_quote: &'a PreferredQuote,
     jsx_runtime: Option<JsxRuntime>,
+    jsx_factory: Option<&'a str>,
+    jsx_fragment_factory: Option<&'a str>,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -37,6 +39,8 @@ where
         options: &'a R::Options,
         preferred_quote: &'a PreferredQuote,
         jsx_runtime: Option<JsxRuntime>,
+        jsx_factory: Option<&'a str>,
+        jsx_fragment_factory: Option<&'a str>,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -49,6 +53,8 @@ where
             options,
             preferred_quote,
             jsx_runtime,
+            jsx_factory,
+            jsx_fragment_factory,
         })
     }
 
@@ -137,6 +143,16 @@ where
     /// Returns the JSX runtime in use.
     pub fn jsx_runtime(&self) -> JsxRuntime {
         self.jsx_runtime.expect("jsx_runtime should be provided")
+    }
+
+    /// Returns the JSX factory in use.
+    pub fn jsx_factory(&self) -> Option<&str> {
+        self.jsx_factory
+    }
+
+    /// Returns the JSX fragment factory in use.
+    pub fn jsx_fragment_factory(&self) -> Option<&str> {
+        self.jsx_fragment_factory
     }
 
     /// Checks whether the provided text belongs to globals

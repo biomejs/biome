@@ -94,6 +94,8 @@ impl Rule for NoUnusedImports {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let binding = ctx.query();
         let declaration = binding.declaration()?;
+        let references = binding.all_references(ctx.model()).collect::<Vec<_>>();
+        (binding, &declaration, references);
         if !is_import(&declaration) {
             return None;
         }

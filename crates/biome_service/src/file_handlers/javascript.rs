@@ -89,11 +89,23 @@ pub struct JsOrganizeImportsSettings {}
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsEnvironmentSettings {
     pub jsx_runtime: JsxRuntime,
+    pub jsx_factory: Option<String>,
+    pub jsx_fragment_factory: Option<String>,
 }
 
-impl From<JsxRuntime> for JsEnvironmentSettings {
-    fn from(jsx_runtime: JsxRuntime) -> Self {
-        Self { jsx_runtime }
+impl From<(JsxRuntime, Option<String>, Option<String>)> for JsEnvironmentSettings {
+    fn from(
+        (jsx_runtime, jsx_factory, jsx_fragment_factory): (
+            JsxRuntime,
+            Option<String>,
+            Option<String>,
+        ),
+    ) -> Self {
+        Self {
+            jsx_runtime,
+            jsx_factory,
+            jsx_fragment_factory,
+        }
     }
 }
 
@@ -193,6 +205,7 @@ impl ServiceLanguage for JsLanguage {
         path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> AnalyzerOptions {
+        // dbg!(global.as_ref(), overrides.as_ref(), path);
         let preferred_quote =
             global
                 .and_then(|global| {
@@ -209,6 +222,8 @@ impl ServiceLanguage for JsLanguage {
                 .unwrap_or_default();
 
         let mut jsx_runtime = None;
+        let mut jsx_factory = None;
+        let mut jsx_fragment_factory = None;
         let mut globals = Vec::new();
 
         if let (Some(overrides), Some(global)) = (overrides, global) {
@@ -221,6 +236,26 @@ impl ServiceLanguage for JsLanguage {
                     JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
                     JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
                 },
+            );
+
+            jsx_factory = overrides.override_jsx_factory(
+                path,
+                global
+                    .languages
+                    .javascript
+                    .environment
+                    .jsx_factory
+                    .as_deref(),
+            );
+
+            jsx_fragment_factory = overrides.override_jsx_fragment_factory(
+                path,
+                global
+                    .languages
+                    .javascript
+                    .environment
+                    .jsx_fragment_factory
+                    .as_deref(),
             );
 
             globals.extend(
@@ -274,6 +309,8 @@ impl ServiceLanguage for JsLanguage {
             globals,
             preferred_quote,
             jsx_runtime,
+            jsx_factory: jsx_factory.as_deref().map(Into::into),
+            jsx_fragment_factory: jsx_fragment_factory.as_deref().map(Into::into),
         };
 
         AnalyzerOptions {

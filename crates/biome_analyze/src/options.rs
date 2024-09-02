@@ -4,6 +4,7 @@ use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
@@ -67,6 +68,16 @@ pub struct AnalyzerConfiguration {
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     pub jsx_runtime: Option<JsxRuntime>,
+
+    /// Indicates the name of the factory function used to create React elements.
+    ///
+    /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
+    pub jsx_factory: Option<Rc<str>>,
+
+    /// Indicates the name of the factory function used to create React fragment elements.
+    ///
+    /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
+    pub jsx_fragment_factory: Option<Rc<str>>,
 }
 
 /// A set of information useful to the analyzer infrastructure
@@ -90,6 +101,14 @@ impl AnalyzerOptions {
 
     pub fn jsx_runtime(&self) -> Option<JsxRuntime> {
         self.configuration.jsx_runtime
+    }
+
+    pub fn jsx_factory(&self) -> Option<&str> {
+        self.configuration.jsx_factory.as_deref()
+    }
+
+    pub fn jsx_fragment_factory(&self) -> Option<&str> {
+        self.configuration.jsx_fragment_factory.as_deref()
     }
 
     pub fn rule_options<R>(&self) -> Option<R::Options>
