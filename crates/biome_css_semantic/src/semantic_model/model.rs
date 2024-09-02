@@ -37,6 +37,20 @@ impl SemanticModel {
     pub fn global_custom_variables(&self) -> &FxHashMap<String, CssGlobalCustomVariable> {
         &self.data.global_custom_variables
     }
+
+    pub fn get_rule_by_id(&self, id: RuleId) -> Option<&Rule> {
+        self.data.rules_by_id.get(&id)
+    }
+
+    /// Returns the rule that contains the given range.
+    pub fn get_rule_by_range(&self, target_range: TextRange) -> Option<&Rule> {
+        self.data
+            .range_to_rule
+            .iter()
+            .filter(|(rule_range, _)| rule_range.contains_range(target_range))
+            .min_by_key(|(rule_range, _)| rule_range.len())
+            .map(|(_, rule)| rule)
+    }
 }
 
 /// Contains the internal data of a `SemanticModel`.
@@ -48,10 +62,14 @@ pub(crate) struct SemanticModelData {
     pub(crate) root: CssRoot,
     /// Map to each by its range
     pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
-    /// List of all the css rules
+    /// List of all top-level rules in the CSS document
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
     pub(crate) global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    /// Map of all the rules by their id
+    pub(crate) rules_by_id: FxHashMap<RuleId, Rule>,
+    /// Map of the range of each rule to the rule itself
+    pub(crate) range_to_rule: FxHashMap<TextRange, Rule>,
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.
@@ -70,14 +88,17 @@ pub(crate) struct SemanticModelData {
 /// │  }                                  │
 /// └─────────────────────────────────────┘
 ///
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Rule {
+    pub id: RuleId,
     /// The selectors associated with this rule.
     pub selectors: Vec<Selector>,
     /// The declarations within this rule.
     pub declarations: Vec<CssDeclaration>,
-    /// Any nested rules within this rule.
-    pub children: Vec<Rule>,
+    /// The id of the parent rule
+    pub parent_id: Option<RuleId>,
+    /// The ids of the child rules
+    pub child_ids: Vec<RuleId>,
     /// The text range of this rule in the source document.
     pub range: TextRange,
 }
@@ -156,4 +177,19 @@ pub enum CssGlobalCustomVariable {
         initial_value: Option<CssValue>,
         range: TextRange,
     },
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct RuleId(u32);
+
+impl RuleId {
+    pub fn new(index: usize) -> Self {
+        // SAFETY: We didn't handle files execedding `u32::MAX` bytes.
+        // Thus, it isn't possible to execedd `u32::MAX` bindings.
+        Self(index as u32)
+    }
+
+    pub fn index(self) -> usize {
+        self.0 as usize
+    }
 }
