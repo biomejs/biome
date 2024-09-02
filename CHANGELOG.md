@@ -541,6 +541,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- The JSON parser now allows comments in `jest.config.json`. Contributed by @Conaclos
+
 #### Bug fixes
 
 - Fix [#3287](https://github.com/biomejs/biome/issues/3287) nested selectors with pseudo-classes. Contributed by @denbezrukov
