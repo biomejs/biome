@@ -169,7 +169,7 @@ ignore             = "0.4.22"
 indexmap           = { version = "2.5.0", features = ["serde"] }
 insta              = "1.39.0"
 natord             = "1.0.9"
-oxc_resolver       = "1.10.2"
+oxc_resolver       = "1.11.0"
 proc-macro2        = "1.0.86"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"

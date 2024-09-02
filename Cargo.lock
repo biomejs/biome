@@ -2550,10 +2550,11 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "oxc_resolver"
-version = "1.10.2"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5f862ee8e1ba728378ac7e007de195ae00fbb21337ef152380c052cc07e2ee2"
+checksum = "e7fe4d07afdfcf6b1d7fb952e6691d82692a54b71964a377cf49f3e47dac283d"
 dependencies = [
+ "cfg-if",
  "dashmap 6.0.1",
  "dunce",
  "indexmap 2.5.0",
@@ -2562,6 +2563,7 @@ dependencies = [
  "rustc-hash 2.0.0",
  "serde",
  "serde_json",
+ "simdutf8",
  "thiserror",
  "tracing",
 ]
@@ -3311,6 +3313,12 @@ checksum = "d8229b473baa5980ac72ef434c4415e70c4b5e71b423043adb4ba059f89c99a1"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "simdutf8"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f27f6278552951f1f2b8cf9da965d10969b2efdea95a6ec47987ab46edfe263a"
 
 [[package]]
 name = "similar"
