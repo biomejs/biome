@@ -1312,7 +1312,7 @@
 		},
 		"Hook": {
 			"type": "object",
-			"required": ["name", "stableResult"],
+			"required": ["name"],
 			"properties": {
 				"closureIndex": {
 					"description": "The \"position\" of the closure function, starting from zero.\n\nFor example, for React's `useEffect()` hook, the closure index is 0.",
@@ -1329,7 +1329,10 @@
 				"name": { "description": "The name of the hook.", "type": "string" },
 				"stableResult": {
 					"description": "Whether the result of the hook is stable.\n\nSet to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the \"positions\" in the return array as stable.\n\nFor example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`.",
-					"allOf": [{ "$ref": "#/definitions/StableHookResult" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/StableHookResult" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
