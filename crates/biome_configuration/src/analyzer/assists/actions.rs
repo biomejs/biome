@@ -99,27 +99,40 @@ impl Actions {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Source {
+    #[doc = "Enforce props sorting in JSX elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub sort_jsx_props: Option<RuleAssistConfiguration>,
     #[doc = "Sorts the keys of a JSON object in natural order"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_keys: Option<RuleAssistConfiguration>,
 }
 impl Source {
     const GROUP_NAME: &'static str = "source";
-    pub(crate) const GROUP_RULES: &'static [&'static str] = &["useSortedKeys"];
+    pub(crate) const GROUP_RULES: &'static [&'static str] = &["sortJsxProps", "useSortedKeys"];
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.use_sorted_keys.as_ref() {
+        if let Some(rule) = self.sort_jsx_props.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_keys.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
         index_set
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.use_sorted_keys.as_ref() {
+        if let Some(rule) = self.sort_jsx_props.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_keys.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
         index_set
@@ -133,6 +146,7 @@ impl Source {
         rule_name: &str,
     ) -> Option<RuleAssistConfiguration> {
         match rule_name {
+            "sortJsxProps" => self.sort_jsx_props.as_ref().copied(),
             "useSortedKeys" => self.use_sorted_keys.as_ref().copied(),
             _ => None,
         }

@@ -9,11 +9,20 @@ console.log("");
 
 ```
 
+# Termination Message
+
+```block
+stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The contents aren't fixed. Use the `--fix` flag to fix them.
+  
+
+
+```
+
 # Emitted Messages
 
 ```block
 console.log("");
 
 ```
-
-

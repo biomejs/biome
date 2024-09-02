@@ -132,9 +132,8 @@ impl WorkspaceServer {
             let language = DocumentFileSource::from_path(path).or(file_source);
             WorkspaceError::source_file_not_supported(
                 language,
-                path.clone().display().to_string(),
-                path.clone()
-                    .extension()
+                path.display().to_string(),
+                path.extension()
                     .and_then(OsStr::to_str)
                     .map(|s| s.to_string()),
             )

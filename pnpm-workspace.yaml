@@ -1,2 +1,3 @@
 packages:
   - "packages/tailwindcss-config-analyzer"
+  - "benchmark"

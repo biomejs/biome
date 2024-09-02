@@ -10,6 +10,7 @@ use biome_service::workspace::{
     GetFileContentParams, SupportsFeatureParams,
 };
 use biome_service::{extension_error, WorkspaceError};
+use std::ffi::OsStr;
 use std::ops::{Add, Sub};
 use tower_lsp::lsp_types::*;
 use tracing::debug;
@@ -36,21 +37,20 @@ pub(crate) fn format(
         })?;
 
         let mut output = printed.into_code();
-        let file_extension = biome_path.extension().and_then(|s| s.to_str());
         let input = session.workspace.get_file_content(GetFileContentParams {
             path: biome_path.clone(),
         })?;
         if output.is_empty() {
             return Ok(None);
         }
-        match file_extension {
-            Some("astro") => {
+        match biome_path.extension().map(OsStr::as_encoded_bytes) {
+            Some(b"astro") => {
                 output = AstroFileHandler::output(input.as_str(), output.as_str());
             }
-            Some("vue") => {
+            Some(b"vue") => {
                 output = VueFileHandler::output(input.as_str(), output.as_str());
             }
-            Some("svelte") => {
+            Some(b"svelte") => {
                 output = SvelteFileHandler::output(input.as_str(), output.as_str());
             }
             _ => {}
@@ -104,10 +104,10 @@ pub(crate) fn format_range(
         let content = session.workspace.get_file_content(GetFileContentParams {
             path: biome_path.clone(),
         })?;
-        let offset = match biome_path.extension().and_then(|s| s.to_str()) {
-            Some("vue") => VueFileHandler::start(content.as_str()),
-            Some("astro") => AstroFileHandler::start(content.as_str()),
-            Some("svelte") => SvelteFileHandler::start(content.as_str()),
+        let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
+            Some(b"vue") => VueFileHandler::start(content.as_str()),
+            Some(b"astro") => AstroFileHandler::start(content.as_str()),
+            Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
             _ => None,
         };
         let format_range = if let Some(offset) = offset {

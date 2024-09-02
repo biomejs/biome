@@ -2,16 +2,26 @@ use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
-use super::model::{CssVariable, Declaration, Rule, Selector, SemanticModel, SemanticModelData};
+use super::model::{
+    CssDeclaration, CssGlobalCustomVariable, Rule, RuleId, Selector, SemanticModel,
+    SemanticModelData,
+};
 use crate::events::SemanticEvent;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
     node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
+    /// List of all top-level rules in the CSS file
     rules: Vec<Rule>,
-    global_css_variables: FxHashMap<String, CssVariable>,
-    current_rule_stack: Vec<Rule>,
-    in_root_selector: bool,
+    global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
+    /// Stack of rule IDs to keep track of the current rule hierarchy
+    current_rule_stack: Vec<RuleId>,
+    next_rule_id: RuleId,
+    /// Map to get the rule containing the given range of CST nodes
+    range_to_rule: FxHashMap<TextRange, Rule>,
+    rules_by_id: FxHashMap<RuleId, Rule>,
+    /// Indicates if the current node is within a `:root` selector
+    is_in_root_selector: bool,
 }
 
 impl SemanticModelBuilder {
@@ -21,8 +31,11 @@ impl SemanticModelBuilder {
             node_by_range: FxHashMap::default(),
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
-            global_css_variables: FxHashMap::default(),
-            in_root_selector: false,
+            global_custom_variables: FxHashMap::default(),
+            range_to_rule: FxHashMap::default(),
+            is_in_root_selector: false,
+            next_rule_id: RuleId::default(),
+            rules_by_id: FxHashMap::default(),
         }
     }
 
@@ -31,7 +44,9 @@ impl SemanticModelBuilder {
             root: self.root,
             node_by_range: self.node_by_range,
             rules: self.rules,
-            global_css_variables: self.global_css_variables,
+            global_custom_variables: self.global_custom_variables,
+            range_to_rule: self.range_to_rule,
+            rules_by_id: self.rules_by_id,
         };
         SemanticModel::new(data)
     }
@@ -51,20 +66,41 @@ impl SemanticModelBuilder {
     pub fn push_event(&mut self, event: SemanticEvent) {
         match event {
             SemanticEvent::RuleStart(range) => {
+                let new_rule_id = self.next_rule_id;
+                self.next_rule_id = RuleId::new(new_rule_id.index() + 1);
+
+                let parent_id = self.current_rule_stack.last().copied();
+
                 let new_rule = Rule {
+                    id: new_rule_id,
                     selectors: Vec::new(),
                     declarations: Vec::new(),
-                    children: Vec::new(),
                     range,
+                    parent_id,
+                    child_ids: Vec::new(),
                 };
-                self.current_rule_stack.push(new_rule);
+
+                if let Some(&parent_id) = self.current_rule_stack.last() {
+                    if let Some(parent_rule) = self.rules_by_id.get_mut(&parent_id) {
+                        parent_rule.child_ids.push(new_rule_id);
+                    }
+                }
+
+                self.rules_by_id.insert(new_rule_id, new_rule);
+                self.current_rule_stack.push(new_rule_id);
             }
             SemanticEvent::RuleEnd => {
                 if let Some(completed_rule) = self.current_rule_stack.pop() {
-                    if let Some(parent_rule) = self.current_rule_stack.last_mut() {
-                        parent_rule.children.push(completed_rule);
+                    let completed_rule = &self.rules_by_id[&completed_rule];
+                    let has_parent = self.current_rule_stack.last().is_some();
+
+                    if has_parent {
+                        self.range_to_rule
+                            .insert(completed_rule.range, completed_rule.clone());
                     } else {
-                        self.rules.push(completed_rule);
+                        self.range_to_rule
+                            .insert(completed_rule.range, completed_rule.clone());
+                        self.rules.push(completed_rule.clone());
                     }
                 }
             }
@@ -74,6 +110,7 @@ impl SemanticModelBuilder {
                 specificity,
             } => {
                 if let Some(current_rule) = self.current_rule_stack.last_mut() {
+                    let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
                     current_rule.selectors.push(Selector {
                         name,
                         range,
@@ -82,46 +119,51 @@ impl SemanticModelBuilder {
                 }
             }
             SemanticEvent::PropertyDeclaration {
-                ref property,
-                ref value,
-                range,
-            } => {
-                if let Some(current_rule) = self.current_rule_stack.last_mut() {
-                    if self.in_root_selector {
-                        let key = &property.name;
-                        if key.starts_with("--") {
-                            self.global_css_variables.insert(
-                                key.to_string(),
-                                CssVariable {
-                                    name: property.clone(),
-                                    value: value.clone(),
-                                    range,
-                                },
-                            );
-                        }
-                    }
-                    current_rule.declarations.push(Declaration {
-                        property: property.clone(),
-                        value: value.clone(),
-                    });
-                }
-            }
-            SemanticEvent::RootSelectorStart => {
-                self.in_root_selector = true;
-            }
-            SemanticEvent::RootSelectorEnd => {
-                self.in_root_selector = false;
-            }
-            SemanticEvent::AtProperty {
                 property,
                 value,
                 range,
             } => {
-                self.global_css_variables.insert(
-                    property.name.to_string(),
-                    CssVariable {
-                        name: property,
+                let is_global_var = self.is_in_root_selector && property.name.starts_with("--");
+
+                if let Some(current_rule) = self.current_rule_stack.last_mut() {
+                    let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
+                    if is_global_var {
+                        self.global_custom_variables.insert(
+                            property.name.clone(),
+                            CssGlobalCustomVariable::Root(CssDeclaration {
+                                property: property.clone(),
+                                value: value.clone(),
+                                range,
+                            }),
+                        );
+                    }
+                    current_rule.declarations.push(CssDeclaration {
+                        property,
                         value,
+                        range,
+                    });
+                }
+            }
+            SemanticEvent::RootSelectorStart => {
+                self.is_in_root_selector = true;
+            }
+            SemanticEvent::RootSelectorEnd => {
+                self.is_in_root_selector = false;
+            }
+            SemanticEvent::AtProperty {
+                property,
+                initial_value,
+                syntax,
+                inherits,
+                range,
+            } => {
+                self.global_custom_variables.insert(
+                    property.name.to_string(),
+                    CssGlobalCustomVariable::AtProperty {
+                        property,
+                        initial_value,
+                        syntax,
+                        inherits,
                         range,
                     },
                 );

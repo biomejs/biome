@@ -24,7 +24,12 @@ rayon             = { workspace = true }
 rustc-hash        = { workspace = true }
 schemars          = { workspace = true, optional = true }
 serde             = { workspace = true }
+smallvec          = { workspace = true }
 tracing           = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
 
 [features]
 serde = ["schemars", "biome_diagnostics/schema"]

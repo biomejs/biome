@@ -16,7 +16,7 @@ use std::fmt::Display;
 use crate::JsRuleAction;
 
 declare_lint_rule! {
-    /// Prevents object literals having more than one property declaration for the same name.
+    /// Disallow two keys with the same name inside objects.
     ///
     /// If an object property with the same name is defined multiple times (except when combining a getter with a setter), only the last definition makes it into the object and previous definitions are ignored, which is likely a mistake.
     ///

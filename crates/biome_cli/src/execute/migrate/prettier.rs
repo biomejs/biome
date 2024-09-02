@@ -12,7 +12,7 @@ use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
 use biome_json_parser::JsonParserOptions;
 use biome_service::DynRef;
-use std::path::Path;
+use std::{ffi::OsStr, path::Path};
 
 use super::{eslint_eslint::ShorthandVec, node};
 
@@ -416,8 +416,7 @@ fn load_config(
     path: &Path,
     console: &mut dyn Console,
 ) -> Result<PrettierConfiguration, CliDiagnostic> {
-    let (deserialized, diagnostics) = match path.extension().and_then(|file_ext| file_ext.to_str())
-    {
+    let (deserialized, diagnostics) = match path.extension().and_then(OsStr::to_str) {
         None | Some("json") => {
             let mut file = fs.open_with_options(path, OpenOptions::default().read(true))?;
             let mut content = String::new();

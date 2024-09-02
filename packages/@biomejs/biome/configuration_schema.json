@@ -311,6 +311,10 @@
 			},
 			"additionalProperties": false
 		},
+		"Accessibility": {
+			"type": "string",
+			"enum": ["noPublic", "explicit", "none"]
+		},
 		"Actions": {
 			"type": "object",
 			"properties": {
@@ -626,6 +630,20 @@
 			"required": ["syntax"],
 			"properties": {
 				"syntax": { "$ref": "#/definitions/ConsistentArrayType" }
+			},
+			"additionalProperties": false
+		},
+		"ConsistentMemberAccessibilityConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithConsistentMemberAccessibilityOptions" }
+			]
+		},
+		"ConsistentMemberAccessibilityOptions": {
+			"type": "object",
+			"required": ["accessibility"],
+			"properties": {
+				"accessibility": { "$ref": "#/definitions/Accessibility" }
 			},
 			"additionalProperties": false
 		},
@@ -1905,13 +1923,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateJsonKeys": {
-					"description": "Disallow two keys with the same name inside a JSON object.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateSelectorsKeyframeBlock": {
 					"description": "Disallow duplicate selectors within keyframe blocks.",
 					"anyOf": [
@@ -1935,6 +1946,13 @@
 				},
 				"noEmptyBlock": {
 					"description": "Disallow CSS empty blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEnum": {
+					"description": "Disallow TypeScript enum.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2165,6 +2183,15 @@
 					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentMemberAccessibility": {
+					"description": "Require consistent accessibility modifiers on class properties and methods.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/ConsistentMemberAccessibilityConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -2609,6 +2636,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithConsistentMemberAccessibilityOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/ConsistentMemberAccessibilityOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithDeprecatedHooksOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2933,6 +2977,13 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"sortJsxProps": {
+					"description": "Enforce props sorting in JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
 					"anyOf": [
@@ -3433,9 +3484,9 @@
 					]
 				},
 				"noDuplicateObjectKeys": {
-					"description": "Prevents object literals having more than one property declaration for the same name.",
+					"description": "Disallow two keys with the same name inside objects.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

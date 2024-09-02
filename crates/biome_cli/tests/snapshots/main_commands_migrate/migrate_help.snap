@@ -5,7 +5,7 @@ expression: content
 # Emitted Messages
 
 ```block
-It updates the configuration when there are breaking changes
+Updates the configuration when there are breaking changes.
 
 Usage: migrate [--write] [COMMAND ...]
 

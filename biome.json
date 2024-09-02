@@ -27,11 +27,13 @@
       "**/__snapshots__",
       "**/undefined/**",
       "_fonts/**",
-      "packages/@biomejs/wasm-*"
+      "packages/@biomejs/wasm-*",
+      "benchmark/target/**"
     ],
     "include": [
       "packages/@biomejs/**",
-      "packages/tailwindcss-config-analyzer"
+      "packages/tailwindcss-config-analyzer/**",
+      "benchmark/**"
     ]
   },
   "formatter": {

@@ -11,7 +11,7 @@ use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 use regex::{Match, Regex};
@@ -69,14 +69,13 @@ impl VueFileHandler {
         VUE_FENCE
             .captures(text)
             .and_then(|captures| {
-                match parse_lang_from_script_opening_tag(captures.name("opening")?.as_str()) {
-                    Language::JavaScript => {
-                        Some(JsFileSource::js_module().with_embedding_kind(EmbeddingKind::Vue))
-                    }
-                    Language::TypeScript { .. } => {
-                        Some(JsFileSource::ts().with_embedding_kind(EmbeddingKind::Vue))
-                    }
-                }
+                let (language, variant) =
+                    parse_lang_from_script_opening_tag(captures.name("opening")?.as_str());
+                Some(
+                    JsFileSource::from(language)
+                        .with_variant(variant)
+                        .with_embedding_kind(EmbeddingKind::Vue),
+                )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)
     }

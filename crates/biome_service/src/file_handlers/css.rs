@@ -37,7 +37,7 @@ use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use std::borrow::Cow;
 use tracing::{debug_span, error, info, trace_span};
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssFormatterSettings {
     pub line_ending: Option<LineEnding>,
@@ -46,19 +46,6 @@ pub struct CssFormatterSettings {
     pub indent_style: Option<IndentStyle>,
     pub quote_style: Option<QuoteStyle>,
     pub enabled: Option<bool>,
-}
-
-impl Default for CssFormatterSettings {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-            indent_style: Default::default(),
-            indent_width: Default::default(),
-            line_ending: Default::default(),
-            line_width: Default::default(),
-            quote_style: Default::default(),
-        }
-    }
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]

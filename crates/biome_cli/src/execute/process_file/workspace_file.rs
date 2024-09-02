@@ -4,6 +4,7 @@ use biome_diagnostics::{category, Error};
 use biome_fs::{BiomePath, File, OpenOptions};
 use biome_service::workspace::{FileGuard, OpenFileParams};
 use biome_service::{Workspace, WorkspaceError};
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 /// Small wrapper that holds information and operations around the current processed file
@@ -59,8 +60,8 @@ impl<'ctx, 'app> WorkspaceFile<'ctx, 'app> {
         self.guard().get_file_content()
     }
 
-    pub(crate) fn as_extension(&self) -> Option<&str> {
-        self.path.extension().and_then(|s| s.to_str())
+    pub(crate) fn as_extension(&self) -> Option<&OsStr> {
+        self.path.extension()
     }
 
     /// It updates the workspace file with `new_content`

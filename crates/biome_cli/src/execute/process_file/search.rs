@@ -31,6 +31,7 @@ pub(crate) fn search_with_guard<'ctx>(
 
             let input = workspace_file.input()?;
             let file_name = workspace_file.path.display().to_string();
+            let matches_len = result.matches.len();
 
             let search_results = Message::Diagnostics {
                 name: file_name,
@@ -42,7 +43,12 @@ pub(crate) fn search_with_guard<'ctx>(
                     .collect(),
                 skipped_diagnostics: 0,
             };
-            Ok(FileStatus::Message(search_results))
+
+            if matches_len > 0 {
+                Ok(FileStatus::SearchResult(search_results))
+            } else {
+                Ok(FileStatus::Message(search_results))
+            }
         },
     )
 }

@@ -20,7 +20,7 @@ expression: invalid.json
 
 # Diagnostics
 ```
-invalid.json:2:2 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:2:2 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The key foo was already declared.
   
@@ -63,7 +63,7 @@ invalid.json:2:2 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━
 ```
 
 ```
-invalid.json:7:3 lint/nursery/noDuplicateJsonKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:7:3 lint/suspicious/noDuplicateObjectKeys ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The key lorem was already declared.
   

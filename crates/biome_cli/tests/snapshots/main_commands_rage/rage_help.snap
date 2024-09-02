@@ -5,7 +5,7 @@ expression: content
 # Emitted Messages
 
 ```block
-Prints information for debugging
+Prints information for debugging.
 
 Usage: rage [--daemon-logs] [--formatter] [--linter]
 

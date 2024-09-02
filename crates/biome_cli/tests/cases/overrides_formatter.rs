@@ -303,7 +303,6 @@ fn complex_enable_disable_overrides() {
 }
 
 #[test]
-#[ignore = "Enable when we are ready to handle CSS files"]
 fn does_include_file_with_different_languages() {
     let mut console = BufferConsole::default();
     let mut fs = MemoryFileSystem::default();

@@ -66,12 +66,12 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
+use core::str;
 use enumflags2::{bitflags, BitFlags};
 #[cfg(feature = "schema")]
 use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
 use slotmap::{new_key_type, DenseSlotMap};
 use std::collections::HashMap;
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
 use tracing::debug;
@@ -101,22 +101,21 @@ pub struct FileFeaturesResult {
 impl FileFeaturesResult {
     /// Sorted array of files that should not be processed no matter the cases.
     /// These files are handled by other tools.
-    const PROTECTED_FILES: &'static [&'static str; 4] = &[
+    const PROTECTED_FILES: &'static [&'static [u8]] = &[
         // Composer
-        "composer.lock",
+        b"composer.lock",
         // NPM
-        "npm-shrinkwrap.json",
-        "package-lock.json",
+        b"npm-shrinkwrap.json",
+        b"package-lock.json",
         // Yarn
-        "yarn.lock",
+        b"yarn.lock",
     ];
 
     /// Checks whether this file is protected.
     /// A protected file is handled by a specific tool and should be ignored.
     pub(crate) fn is_protected_file(path: &Path) -> bool {
         path.file_name()
-            .and_then(OsStr::to_str)
-            .is_some_and(|file_name| FileFeaturesResult::PROTECTED_FILES.contains(&file_name))
+            .is_some_and(|filename| Self::PROTECTED_FILES.contains(&filename.as_encoded_bytes()))
     }
 
     /// By default, all features are not supported by a file.
@@ -1106,7 +1105,12 @@ impl<'app, W: Workspace + ?Sized> Drop for FileGuard<'app, W> {
 #[test]
 fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        assert!(
+            items[0] < items[1],
+            "{} < {}",
+            str::from_utf8(items[0]).unwrap(),
+            str::from_utf8(items[1]).unwrap()
+        );
     }
 }
 

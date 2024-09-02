@@ -5,6 +5,7 @@
 //! - shortcuts to open/write to the file
 use crate::ConfigName;
 use enumflags2::{bitflags, BitFlags};
+use smallvec::SmallVec;
 use std::cmp::Ordering;
 use std::ffi::OsStr;
 use std::fs::read_to_string;
@@ -41,8 +42,32 @@ pub enum FileKind {
 }
 
 #[derive(Debug, Clone, Hash, Ord, PartialOrd, Eq, PartialEq, Default)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize),
+    serde(
+        from = "smallvec::SmallVec<[FileKind; 5]>",
+        into = "smallvec::SmallVec<[FileKind; 5]>"
+    )
+)]
 pub struct FileKinds(BitFlags<FileKind>);
+
+impl From<SmallVec<[FileKind; 5]>> for FileKinds {
+    fn from(value: SmallVec<[FileKind; 5]>) -> Self {
+        value
+            .into_iter()
+            .fold(FileKinds::default(), |mut acc, kind| {
+                acc.insert(kind);
+                acc
+            })
+    }
+}
+
+impl From<FileKinds> for SmallVec<[FileKind; 5]> {
+    fn from(value: FileKinds) -> Self {
+        value.iter().collect()
+    }
+}
 
 impl Deref for FileKinds {
     type Target = BitFlags<FileKind>;
@@ -132,11 +157,6 @@ impl BiomePath {
     pub fn read_to_string(&self) -> io::Result<String> {
         let path = self.path.as_path();
         read_to_string(path)
-    }
-
-    /// Returns the extension of the path
-    pub fn extension_as_str(&self) -> Option<&str> {
-        self.extension().and_then(OsStr::to_str)
     }
 
     /// The priority of the file.
@@ -265,7 +285,7 @@ impl Aliases {
 
 #[cfg(test)]
 mod test {
-    use crate::path::FileKind;
+    use crate::path::{FileKind, FileKinds};
     use std::ffi::OsStr;
 
     #[test]
@@ -369,5 +389,23 @@ mod test {
             "src/tsconfig.json"
         );
         assert_eq!(iter.next().unwrap().display().to_string(), "src/README.md");
+    }
+
+    #[test]
+    #[cfg(feature = "serde")]
+    fn deserialize_file_kind_from_str() {
+        let result = serde_json::from_str::<FileKinds>("[\"Config\"]");
+        assert!(result.is_ok());
+        let file_kinds = result.unwrap();
+        assert!(file_kinds.contains(FileKind::Config));
+    }
+
+    #[test]
+    #[cfg(feature = "serde")]
+    fn serialize_file_kind_into_vec() {
+        let file_kinds = FileKinds::from(FileKind::Config);
+        let result = serde_json::to_string(&file_kinds);
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), "[\"Config\"]");
     }
 }

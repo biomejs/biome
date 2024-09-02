@@ -187,11 +187,11 @@ fn load_config(
 
     // If the configuration path hint is from user and is a file path,
     // we'll load it directly
-    if let ConfigurationPathHint::FromUser(ref configuration_file_path) = base_path {
-        if file_system.path_is_file(configuration_file_path) {
-            let content = file_system.read_file_from_path(configuration_file_path)?;
-            let parser_options = match configuration_file_path.extension().and_then(OsStr::to_str) {
-                Some("json") => JsonParserOptions::default(),
+    if let ConfigurationPathHint::FromUser(ref config_file_path) = base_path {
+        if file_system.path_is_file(config_file_path) {
+            let content = file_system.read_file_from_path(config_file_path)?;
+            let parser_options = match config_file_path.extension().map(OsStr::as_encoded_bytes) {
+                Some(b"json") => JsonParserOptions::default(),
                 _ => JsonParserOptions::default()
                     .with_allow_comments()
                     .with_allow_trailing_commas(),
@@ -200,7 +200,7 @@ fn load_config(
                 deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
             return Ok(Some(ConfigurationPayload {
                 deserialized,
-                configuration_file_path: PathBuf::from(configuration_file_path),
+                configuration_file_path: PathBuf::from(config_file_path),
                 external_resolution_base_path,
             }));
         }
@@ -243,8 +243,8 @@ fn load_config(
     } {
         let AutoSearchResult { content, file_path } = auto_search_result;
 
-        let parser_options = match file_path.extension().and_then(OsStr::to_str) {
-            Some("json") => JsonParserOptions::default(),
+        let parser_options = match file_path.extension().map(OsStr::as_encoded_bytes) {
+            Some(b"json") => JsonParserOptions::default(),
             _ => JsonParserOptions::default()
                 .with_allow_comments()
                 .with_allow_trailing_commas(),
@@ -470,8 +470,8 @@ impl PartialConfigurationExt for PartialConfiguration {
             let extend_configuration_file_path = if extend_entry_as_path.starts_with(".")
                 // TODO: Remove extension in Biome 2.0
                 || matches!(
-                    extend_entry_as_path.extension().and_then(OsStr::to_str),
-                    Some("json" | "jsonc")
+                    extend_entry_as_path.extension().map(OsStr::as_encoded_bytes),
+                    Some(b"json" | b"jsonc")
                 ) {
                 relative_resolution_base_path.join(extend_entry)
             } else {
@@ -517,9 +517,9 @@ impl PartialConfigurationExt for PartialConfiguration {
                 content.as_str(),
                 match extend_configuration_file_path
                     .extension()
-                    .and_then(OsStr::to_str)
+                    .map(OsStr::as_encoded_bytes)
                 {
-                    Some("json") => JsonParserOptions::default(),
+                    Some(b"json") => JsonParserOptions::default(),
                     _ => JsonParserOptions::default()
                         .with_allow_comments()
                         .with_allow_trailing_commas(),

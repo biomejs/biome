@@ -171,7 +171,7 @@ dependencies = [
  "crossbeam",
  "dashmap 6.0.1",
  "hdrhistogram",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "insta",
  "libc",
  "mimalloc",
@@ -215,7 +215,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "bpaf",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "insta",
  "oxc_resolver",
  "rustc-hash 1.1.0",
@@ -353,7 +353,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "enumflags2",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "schemars",
  "serde",
  "serde_json",
@@ -436,7 +436,7 @@ dependencies = [
  "cfg-if",
  "countme",
  "drop_bomb",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "insta",
  "rustc-hash 1.1.0",
  "schemars",
@@ -473,13 +473,15 @@ dependencies = [
  "crossbeam",
  "directories",
  "enumflags2",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "oxc_resolver",
  "parking_lot",
  "rayon",
  "rustc-hash 1.1.0",
  "schemars",
  "serde",
+ "serde_json",
+ "smallvec",
  "tracing",
 ]
 
@@ -761,7 +763,7 @@ dependencies = [
  "bitflags 2.6.0",
  "drop_bomb",
  "expect-test",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "quickcheck",
  "quickcheck_macros",
  "rustc-hash 1.1.0",
@@ -1033,7 +1035,7 @@ dependencies = [
  "enumflags2",
  "getrandom 0.2.15",
  "ignore",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "insta",
  "oxc_resolver",
  "regex",
@@ -1142,6 +1144,8 @@ dependencies = [
  "biome_rowan",
  "biome_unicode_table",
  "biome_yaml_syntax",
+ "quickcheck",
+ "quickcheck_macros",
  "tracing",
 ]
 
@@ -2121,9 +2125,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.4.0"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93ead53efc7ea8ed3cfb0c79fc8023fbb782a5432b52830b6518941cebe6505c"
+checksum = "68b900aa2f7301e21c36462b170ee99994de34dff39a4a6a528e80e7376d07e5"
 dependencies = [
  "equivalent",
  "hashbrown 0.14.5",
@@ -2546,18 +2550,20 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "oxc_resolver"
-version = "1.10.2"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5f862ee8e1ba728378ac7e007de195ae00fbb21337ef152380c052cc07e2ee2"
+checksum = "e7fe4d07afdfcf6b1d7fb952e6691d82692a54b71964a377cf49f3e47dac283d"
 dependencies = [
+ "cfg-if",
  "dashmap 6.0.1",
  "dunce",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "json-strip-comments",
  "once_cell",
  "rustc-hash 2.0.0",
  "serde",
  "serde_json",
+ "simdutf8",
  "thiserror",
  "tracing",
 ]
@@ -2779,7 +2785,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cfc1a6a5406a114913df2df8507998c755311b55b78584bed5f6e88f6417c4d4"
 dependencies = [
  "chrono",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "newtype-uuid",
  "quick-xml",
  "strip-ansi-escapes",
@@ -3157,7 +3163,7 @@ checksum = "09c024468a378b7e36765cd36702b7a90cc3cba11654f6685c8f233408e89e92"
 dependencies = [
  "dyn-clone",
  "indexmap 1.9.3",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "schemars_derive",
  "serde",
  "serde_json",
@@ -3241,7 +3247,7 @@ version = "1.0.127"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8043c06d9f82bd7271361ed64f415fe5e12a77fdb52e573e7f06a516dea329ad"
 dependencies = [
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "itoa",
  "memchr",
  "ryu",
@@ -3283,7 +3289,7 @@ version = "0.9.34+deprecated"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
 dependencies = [
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "itoa",
  "ryu",
  "serde",
@@ -3307,6 +3313,12 @@ checksum = "d8229b473baa5980ac72ef434c4415e70c4b5e71b423043adb4ba059f89c99a1"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "simdutf8"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f27f6278552951f1f2b8cf9da965d10969b2efdea95a6ec47987ab46edfe263a"
 
 [[package]]
 name = "similar"
@@ -3653,7 +3665,7 @@ version = "0.22.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3328d4f68a705b2a4498da1d580585d39a6510f98318a2cec3018a7ec61ddef"
 dependencies = [
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "serde",
  "serde_spanned",
  "toml_datetime",
