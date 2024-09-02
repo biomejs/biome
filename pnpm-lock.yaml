@@ -23,6 +23,12 @@ importers:
         specifier: 3.3.3
         version: 3.3.3
 
+  crates/biome_formatter_test/src/prettier:
+    dependencies:
+      prettier:
+        specifier: 3.3.3
+        version: 3.3.3
+
   packages/tailwindcss-config-analyzer:
     dependencies:
       tailwindcss:

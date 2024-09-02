@@ -1,7 +1,7 @@
-(`data:text/javascript,
+import.source(`data:text/javascript,
     console.log("RUN");
 `);
 
-(String.raw`data:text/javascript,
+import.source(String.raw`data:text/javascript,
     console.log("RUN");
 `);

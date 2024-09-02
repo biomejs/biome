@@ -1,0 +1,164 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/arrow/16067.ts
+---
+# Input
+
+```ts
+const foo1 = 
+  // comment
+  <T>() => () => 1;
+
+const foo2 = 
+  // comment
+  () => () => 1;
+
+const foo3 = 
+  // comment
+  <T>() => 1;
+
+foo(
+  // comment
+  <T>() => () => 1,
+);
+
+a ||
+  // comment
+  (<T>() => () => 1);
+
+void
+  // comment
+  (<T>() => () => 1);
+
+cond ?
+  // comment
+  <T>() => () => 1
+  :
+  // comment
+  <T>() => () => 1;
+
+foo4 = 
+  // comment
+  <T>() => () => 1;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,6 @@
+ const foo1 =
+   // comment
+-
+-    <T,>() =>
++    <T>() =>
+     () =>
+       1;
+ 
+@@ -11,41 +10,40 @@
+ 
+ const foo3 =
+   // comment
+-  <T,>() => 1;
++  <T>() => 1;
+ 
+ foo(
+   // comment
+-  <T,>() =>
++  <T>() =>
+     () =>
+       1,
+ );
+ 
+ a ||
+   // comment
+-  (<T,>() =>
++  (<T>() =>
+     () =>
+       1);
+ 
+ void (
+   // comment
+-  (<T,>() =>
++  (<T>() =>
+     () =>
+       1)
+ );
+ 
+ cond
+   ? // comment
+-    <T,>() =>
++    <T>() =>
+       () =>
+         1
+   : // comment
+-    <T,>() =>
++    <T>() =>
+       () =>
+         1;
+ 
+ foo4 =
+   // comment
+-
+-    <T,>() =>
++    <T>() =>
+     () =>
+       1;
+```
+
+# Output
+
+```ts
+const foo1 =
+  // comment
+    <T>() =>
+    () =>
+      1;
+
+const foo2 =
+  // comment
+  () => () => 1;
+
+const foo3 =
+  // comment
+  <T>() => 1;
+
+foo(
+  // comment
+  <T>() =>
+    () =>
+      1,
+);
+
+a ||
+  // comment
+  (<T>() =>
+    () =>
+      1);
+
+void (
+  // comment
+  (<T>() =>
+    () =>
+      1)
+);
+
+cond
+  ? // comment
+    <T>() =>
+      () =>
+        1
+  : // comment
+    <T>() =>
+      () =>
+        1;
+
+foo4 =
+  // comment
+    <T>() =>
+    () =>
+      1;
+```
