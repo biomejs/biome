@@ -2356,7 +2356,7 @@ Set to `true` to mark the identity of the hook's return value as stable, or use 
 
 For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
 	 */
-	stableResult: StableHookResult;
+	stableResult?: StableHookResult;
 }
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
