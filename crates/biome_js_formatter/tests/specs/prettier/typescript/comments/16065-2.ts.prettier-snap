@@ -1,0 +1,27 @@
+class Foo {
+  // PropertyDefinition
+  @decorator /* comment */
+  readonly propertyDefinition;
+
+  // TSAbstractPropertyDefinition
+  @decorator /* comment */
+  abstract abstractPropertyDefinition;
+
+  // TSAbstractMethodDefinition
+  @decorator /* comment */
+  abstract abstractMethodDefinition;
+
+  // MethodDefinition
+  @decorator /* comment */
+  private methodDefinition() {}
+
+  // AccessorProperty
+  @decorator /* comment */
+  accessor accessorProperty = 3;
+
+  constructor(
+    // TSParameterProperty
+    @decorator
+    readonly /* comment */ parameterProperty,
+  ) {}
+}

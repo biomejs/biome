@@ -15,10 +15,10 @@ use crate::{
     JsCallExpression, JsClassExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsComputedMemberName, JsConditionalExpression, JsExpressionStatement, JsForStatement,
     JsFunctionExpression, JsIdentifierExpression, JsImportCallExpression, JsImportMetaExpression,
-    JsInExpression, JsInstanceofExpression, JsLogicalExpression, JsMetavariable, JsNewExpression,
-    JsNewTargetExpression, JsNullLiteralExpression, JsNumberLiteralExpression, JsObjectExpression,
-    JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression, JsPreUpdateOperator,
-    JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
+    JsInExpression, JsInstanceofExpression, JsLogicalExpression, JsLogicalOperator, JsMetavariable,
+    JsNewExpression, JsNewTargetExpression, JsNullLiteralExpression, JsNumberLiteralExpression,
+    JsObjectExpression, JsParenthesizedExpression, JsPostUpdateExpression, JsPreUpdateExpression,
+    JsPreUpdateOperator, JsRegexLiteralExpression, JsSequenceExpression, JsStaticMemberExpression,
     JsStringLiteralExpression, JsSuperExpression, JsSyntaxKind, JsSyntaxNode, JsTemplateExpression,
     JsThisExpression, JsUnaryExpression, JsUnaryOperator, JsYieldExpression, JsxTagExpression,
     TsAsExpression, TsInstantiationExpression, TsNonNullAssertionExpression, TsSatisfiesExpression,
@@ -458,6 +458,15 @@ impl NeedsParentheses for JsLogicalExpression {
     fn needs_parentheses(&self) -> bool {
         if let Some(parent) = self.parent::<JsLogicalExpression>() {
             parent.operator() != self.operator()
+        } else if self
+            .operator()
+            .is_ok_and(|operator| operator == JsLogicalOperator::NullishCoalescing)
+            && self
+                .syntax()
+                .parent()
+                .is_some_and(|parent| parent.kind() == JsSyntaxKind::JS_CONDITIONAL_EXPRESSION)
+        {
+            true
         } else {
             binary_like_needs_parens(self.syntax())
         }

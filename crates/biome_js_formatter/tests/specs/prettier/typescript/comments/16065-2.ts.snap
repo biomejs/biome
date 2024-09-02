@@ -1,0 +1,137 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/comments/16065-2.ts
+---
+# Input
+
+```ts
+class Foo {
+  // PropertyDefinition
+  @decorator
+  readonly /* comment */ propertyDefinition;
+
+  // TSAbstractPropertyDefinition
+  @decorator
+  abstract /* comment */ abstractPropertyDefinition;
+
+  // TSAbstractMethodDefinition
+  @decorator
+  abstract /* comment */ abstractMethodDefinition;
+
+  // MethodDefinition
+  @decorator
+  private /* comment */ methodDefinition() {}
+
+  // AccessorProperty
+  @decorator
+  accessor /* comment */ accessorProperty = 3;
+
+  constructor(
+    // TSParameterProperty
+    @decorator
+    readonly /* comment */ parameterProperty,
+  ) {}
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,23 +1,23 @@
+ class Foo {
+   // PropertyDefinition
+-  @decorator /* comment */
+-  readonly propertyDefinition;
++  @decorator
++  readonly /* comment */ propertyDefinition;
+ 
+   // TSAbstractPropertyDefinition
+-  @decorator /* comment */
+-  abstract abstractPropertyDefinition;
++  @decorator
++  abstract /* comment */ abstractPropertyDefinition;
+ 
+   // TSAbstractMethodDefinition
+-  @decorator /* comment */
+-  abstract abstractMethodDefinition;
++  @decorator
++  abstract /* comment */ abstractMethodDefinition;
+ 
+   // MethodDefinition
+-  @decorator /* comment */
+-  private methodDefinition() {}
++  @decorator
++  private /* comment */ methodDefinition() {}
+ 
+   // AccessorProperty
+-  @decorator /* comment */
+-  accessor accessorProperty = 3;
++  @decorator
++  accessor /* comment */ accessorProperty = 3;
+ 
+   constructor(
+     // TSParameterProperty
+```
+
+# Output
+
+```ts
+class Foo {
+  // PropertyDefinition
+  @decorator
+  readonly /* comment */ propertyDefinition;
+
+  // TSAbstractPropertyDefinition
+  @decorator
+  abstract /* comment */ abstractPropertyDefinition;
+
+  // TSAbstractMethodDefinition
+  @decorator
+  abstract /* comment */ abstractMethodDefinition;
+
+  // MethodDefinition
+  @decorator
+  private /* comment */ methodDefinition() {}
+
+  // AccessorProperty
+  @decorator
+  accessor /* comment */ accessorProperty = 3;
+
+  constructor(
+    // TSParameterProperty
+    @decorator
+    readonly /* comment */ parameterProperty,
+  ) {}
+}
+```
+
+# Errors
+```
+16065-2.ts:8:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only abstract classes can have abstract members
+  
+     6 │   // TSAbstractPropertyDefinition
+     7 │   @decorator
+   > 8 │   abstract /* comment */ abstractPropertyDefinition;
+       │   ^^^^^^^^
+     9 │ 
+    10 │   // TSAbstractMethodDefinition
+  
+16065-2.ts:12:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Only abstract classes can have abstract members
+  
+    10 │   // TSAbstractMethodDefinition
+    11 │   @decorator
+  > 12 │   abstract /* comment */ abstractMethodDefinition;
+       │   ^^^^^^^^
+    13 │ 
+    14 │   // MethodDefinition
+  
+
+```

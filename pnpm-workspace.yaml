@@ -1,3 +1,4 @@
 packages:
   - "packages/tailwindcss-config-analyzer"
+  - "crates/biome_formatter_test/src/prettier"
   - "benchmark"
