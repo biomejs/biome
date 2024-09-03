@@ -2,7 +2,9 @@ use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, QueryMatch,
     Queryable, RuleKey, ServiceBag, SyntaxVisitor, Visitor, VisitorContext, VisitorFinishContext,
 };
-use biome_js_semantic::{SemanticEventExtractor, SemanticModel, SemanticModelBuilder};
+use biome_js_semantic::{
+    SemanticEventExtractor, SemanticEventExtractorContext, SemanticModel, SemanticModelBuilder,
+};
 use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode, TextRange, WalkEvent};
 use biome_rowan::AstNode;
 
@@ -103,11 +105,17 @@ impl SemanticModelBuilderVisitor {
 impl Visitor for SemanticModelBuilderVisitor {
     type Language = JsLanguage;
 
-    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, _ctx: VisitorContext<JsLanguage>) {
+    fn visit(&mut self, event: &WalkEvent<JsSyntaxNode>, ctx: VisitorContext<JsLanguage>) {
         match event {
             WalkEvent::Enter(node) => {
                 self.builder.push_node(node);
-                self.extractor.enter(node);
+                self.extractor.enter(
+                    node,
+                    &SemanticEventExtractorContext {
+                        jsx_factory: ctx.options.jsx_factory(),
+                        jsx_fragment_factory: ctx.options.jsx_fragment_factory(),
+                    },
+                );
             }
             WalkEvent::Leave(node) => {
                 self.extractor.leave(node);

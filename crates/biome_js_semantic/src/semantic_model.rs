@@ -11,7 +11,7 @@ mod scope;
 #[cfg(test)]
 mod tests;
 
-use crate::{SemanticEvent, SemanticEventExtractor};
+use crate::{SemanticEvent, SemanticEventExtractor, SemanticEventExtractorContext};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsRoot, JsIdentifierAssignment, JsIdentifierBinding, JsLanguage,
     JsReferenceIdentifier, JsSyntaxKind, JsSyntaxNode, JsxReferenceIdentifier, TextRange, TextSize,
@@ -42,6 +42,10 @@ pub use scope::*;
 pub struct SemanticModelOptions {
     /// All the allowed globals names
     pub globals: FxHashSet<String>,
+    /// The JSX factory name
+    pub jsx_factory: Option<String>,
+    /// The JSX fragment factory name
+    pub jsx_fragment_factory: Option<String>,
 }
 
 /// Build the complete [SemanticModel] of a parsed file.
@@ -50,18 +54,27 @@ pub fn semantic_model(root: &AnyJsRoot, options: SemanticModelOptions) -> Semant
     let mut extractor = SemanticEventExtractor::default();
     let mut builder = SemanticModelBuilder::new(root.clone());
 
-    let SemanticModelOptions { globals } = options;
+    let SemanticModelOptions {
+        globals,
+        jsx_factory,
+        jsx_fragment_factory,
+    } = options;
 
     for global in globals {
         builder.push_global(global);
     }
+
+    let ctx = SemanticEventExtractorContext {
+        jsx_factory: jsx_factory.as_deref(),
+        jsx_fragment_factory: jsx_fragment_factory.as_deref(),
+    };
 
     let root = root.syntax();
     for node in root.preorder() {
         match node {
             biome_js_syntax::WalkEvent::Enter(node) => {
                 builder.push_node(&node);
-                extractor.enter(&node);
+                extractor.enter(&node, &ctx);
             }
             biome_js_syntax::WalkEvent::Leave(node) => extractor.leave(&node),
         }

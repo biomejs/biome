@@ -12,7 +12,6 @@ use biome_rowan::{syntax::Preorder, AstNode, SyntaxNodeOptionExt, TokenText};
 use rustc_hash::FxHashMap;
 use std::collections::VecDeque;
 use std::mem;
-use std::rc::Rc;
 use JsSyntaxKind::*;
 
 use crate::ScopeId;
@@ -159,22 +158,6 @@ pub struct SemanticEventExtractor {
     bindings: FxHashMap<BindingName, BindingInfo>,
     /// Type parameters bound in a `infer T` clause.
     infers: Vec<TsTypeParameterName>,
-    /// The factory used to create jsx elements.
-    jsx_factory: Option<Rc<str>>,
-    /// The factory used to create jsx fragments.
-    jsx_fragment_factory: Option<Rc<str>>,
-}
-
-impl SemanticEventExtractor {
-    pub fn with_jsx_factory(mut self, factory: Rc<str>) -> Self {
-        self.jsx_factory = Some(factory);
-        self
-    }
-
-    pub fn with_jsx_fragment_factory(mut self, factory: Rc<str>) -> Self {
-        self.jsx_fragment_factory = Some(factory);
-        self
-    }
 }
 
 /// A binding name is either a type or a value.
@@ -300,10 +283,18 @@ struct Scope {
     is_in_strict_mode: bool,
 }
 
+#[derive(Default)]
+pub struct SemanticEventExtractorContext<'a> {
+    /// The factory used to create jsx elements.
+    pub jsx_factory: Option<&'a str>,
+    /// The factory used to create jsx fragments.
+    pub jsx_fragment_factory: Option<&'a str>,
+}
+
 impl SemanticEventExtractor {
     /// See [SemanticEvent] for a more detailed description of which events [JsSyntaxNode] generates.
     #[inline]
-    pub fn enter(&mut self, node: &JsSyntaxNode) {
+    pub fn enter(&mut self, node: &JsSyntaxNode, ctx: &SemanticEventExtractorContext) {
         // IMPORTANT: If you push a scope for a given node type, don't forget to
         // update `Self::leave`. You should also edit [SemanticModelBuilder::push_node].
         match node.kind() {
@@ -315,7 +306,7 @@ impl SemanticEventExtractor {
             }
 
             JSX_OPENING_ELEMENT | JSX_SELF_CLOSING_ELEMENT => {
-                if let Some(factory) = self.jsx_factory.as_ref() {
+                if let Some(factory) = ctx.jsx_factory.as_ref() {
                     let ident = make::ident(factory);
                     self.push_reference(
                         BindingName::Value(ident.token_text_trimmed()),
@@ -325,7 +316,7 @@ impl SemanticEventExtractor {
             }
 
             JSX_OPENING_FRAGMENT => {
-                if let Some(factory) = self.jsx_fragment_factory.as_ref() {
+                if let Some(factory) = ctx.jsx_fragment_factory.as_ref() {
                     let ident = make::ident(factory);
                     self.push_reference(
                         BindingName::Value(ident.token_text_trimmed()),
@@ -668,7 +659,6 @@ impl SemanticEventExtractor {
         let Ok(name_token) = node.value_token() else {
             return;
         };
-        dbg!(&node, &name_token, &range);
         let name = name_token.token_text_trimmed();
         match node {
             AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
@@ -1167,7 +1157,7 @@ impl Iterator for SemanticEventIterator {
                 use biome_js_syntax::WalkEvent::*;
                 match self.iter.next() {
                     Some(Enter(node)) => {
-                        self.extractor.enter(&node);
+                        self.extractor.enter(&node, &Default::default());
                     }
                     Some(Leave(node)) => {
                         self.extractor.leave(&node);
