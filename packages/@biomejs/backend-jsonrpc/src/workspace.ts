@@ -1228,6 +1228,10 @@ export interface Nursery {
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
 	/**
+	 * Disallow user defined types.
+	 */
+	noRestrictedTypes?: RuleFixConfiguration_for_NoRestrictedTypesOptions;
+	/**
 	 * Disallow shorthand properties that override related longhand properties.
 	 */
 	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
@@ -1947,6 +1951,9 @@ export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
@@ -2076,6 +2083,20 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 * Rule's options
 	 */
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoRestrictedTypesOptions;
 }
 export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	/**
@@ -2245,6 +2266,9 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+}
+export interface NoRestrictedTypesOptions {
+	types: {};
 }
 export interface ConsistentMemberAccessibilityOptions {
 	accessibility: Accessibility;
@@ -2714,6 +2738,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
