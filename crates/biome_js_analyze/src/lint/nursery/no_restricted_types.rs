@@ -7,10 +7,11 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
-use biome_js_syntax::{JsReferenceIdentifier, TextRange, TsReferenceType};
+use biome_js_syntax::TsReferenceType;
 use biome_rowan::BatchMutationExt;
 use biome_unicode_table::is_js_ident;
 use rustc_hash::FxHashMap;
+use biome_rowan::AstNode;
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -19,6 +20,8 @@ declare_lint_rule! {
     /// Disallow user defined types.
     ///
     /// This rule allows you to specify type names that you don’t want to use in your application.
+    /// 
+    /// To prevent use of commonly misleading types, you can refer to [noBannedTypes](https://biomejs.dev/linter/rules/no-banned-types/) 
     ///
     /// ## Options
     ///
@@ -59,7 +62,7 @@ declare_lint_rule! {
 
 impl Rule for NoRestrictedTypes {
     type Query = Ast<TsReferenceType>;
-    type State = State;
+    type State = CustomRestrictedType;
     type Signals = Option<Self::State>;
     type Options = NoRestrictedTypesOptions;
 
@@ -74,30 +77,30 @@ impl Rule for NoRestrictedTypes {
 
         let restricted_type = options.types.get(token_name)?.clone();
 
-        Some(State {
-            restricted_type,
-            range: identifier_token.text_trimmed_range(),
-            identifier: identifier.clone(),
-        })
+        Some(restricted_type)
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state.range,
-            markup! { {state.restricted_type.message} }.to_owned(),
+            ctx.query().range(),
+            markup! { {state.message} }.to_owned(),
         ))
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let suggested_type = &state.restricted_type.use_instead.clone()?;
+        let suggested_type = state.use_instead.as_ref()?;
         if !is_js_ident(suggested_type) {
             return None;
         }
 
         let mut mutation = ctx.root().begin();
 
-        let prev_token = state.identifier.clone().value_token().ok()?;
+        let ts_reference_type = ctx.query();
+        let ts_any_name = ts_reference_type.name().ok()?;
+        let identifier = ts_any_name.as_js_reference_identifier()?;
+        let prev_token = identifier.value_token().ok()?;
+
         let new_token = make::ident(suggested_type);
 
         mutation.replace_element(prev_token.into(), new_token.into());
@@ -125,12 +128,4 @@ pub struct CustomRestrictedType {
     message: String,
     #[serde(rename = "use")]
     use_instead: Option<String>,
-}
-
-pub struct State {
-    /// Name of the restricted type.
-    restricted_type: CustomRestrictedType,
-    /// Text range used to diagnostic the banned type.
-    range: TextRange,
-    identifier: JsReferenceIdentifier,
 }

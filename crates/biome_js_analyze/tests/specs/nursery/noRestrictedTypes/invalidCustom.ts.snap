@@ -97,7 +97,7 @@ invalidCustom.ts:7:77 lint/nursery/noRestrictedTypes  FIXABLE  ━━━━━�
   ! Only CustomType2 is allowed
   
   > 7 │ class Foo<T extends CustomType = String> extends Bar<CustomType> implements CustomType<Object> {
-      │                                                                             ^^^^^^^^^^
+      │                                                                             ^^^^^^^^^^^^^^^^^^
     8 │   constructor(foo: String | Object) {}
     9 │ 
   
@@ -121,7 +121,7 @@ invalidCustom.ts:10:11 lint/nursery/noRestrictedTypes  FIXABLE  ━━━━━�
      8 │   constructor(foo: String | Object) {}
      9 │ 
   > 10 │   exit(): CustomType<String> {
-       │           ^^^^^^^^^^
+       │           ^^^^^^^^^^^^^^^^^^
     11 │     const foo: String = 1 as CustomType;
     12 │   }
   
