@@ -105,7 +105,7 @@ $dir: 'fonts';
  #main {
    @import "example";
  }
-@@ -32,17 +26,11 @@
+@@ -32,17 +26,12 @@
  }
  #main {
    @import "example";
@@ -120,18 +120,20 @@ $dir: 'fonts';
  
  @import url("foo");
 -$dir: "fonts";
-+$dir: 'fonts'
++$
++dir: 'fonts'
 +;
  
  @import url("foo.css");
  @import url("foo.css");
-@@ -59,14 +47,9 @@
+@@ -58,15 +47,10 @@
  @import url("bluish.css") projection, tv;
  @import url("bluish.css") projection, tv;
- @import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
+ @import url("bluish.css") projection, tv;
+-@import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
 -  projection,
 -  tv;
--@import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
+ @import url("very-very-very-very-very-very-very-very-very-very-long-name.css")
 -  projection tv;
 +  projection, tv;
 +@import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
@@ -178,7 +180,8 @@ $dir: 'fonts';
 }
 
 @import url("foo");
-$dir: 'fonts'
+$
+dir: 'fonts'
 ;
 
 @import url("foo.css");
@@ -226,6 +229,16 @@ import.css:6:29 parse ━━━━━━━━━━━━━━━━━━━�
     8 │ 
   
   i Remove projection
+  
+import.css:42:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    41 │ @import url('foo');
+  > 42 │ $dir: 'fonts';
+       │ ^
+    43 │ 
+    44 │ @import url("foo.css");
   
 import.css:42:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -315,5 +328,5 @@ import.css:62:91 parse ━━━━━━━━━━━━━━━━━━━
 
 # Lines exceeding max width of 80 characters
 ```
-   51: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
+   52: @import url("very-very-very-very-very-very-very-very-very-very-long-name.css") projection tv;
 ```

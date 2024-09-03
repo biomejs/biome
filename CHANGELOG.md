@@ -555,6 +555,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- The CSS parser now accepts emoji in identifiers ([3627](https://github.com/biomejs/biome/issues/3627)).
+
+  The following code is now corretcly parsed:
+
+  ```css
+  p {
+    --🥔-color: red;
+    color: var(--🥔-color);
+  }
+  ```
+
+  Contributed by @Conaclos
+
 - Fix [#3287](https://github.com/biomejs/biome/issues/3287) nested selectors with pseudo-classes. Contributed by @denbezrukov
 
 - Fix [#3349](https://github.com/biomejs/biome/issues/3349) allow CSS multiple ampersand support. Contributed by @denbezrukov

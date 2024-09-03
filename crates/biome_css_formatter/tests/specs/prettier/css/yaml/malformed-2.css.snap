@@ -26,114 +26,26 @@ color:red
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,11 +1,14 @@
- ---
- foo: bar
+@@ -1,8 +1,4 @@
 ----
-+--
-+-
- 
- a {
+-foo: bar
+----
+-
+-a {
++--- foo:bar --- a {
    color: blue;
  }
  
----- .b {
-+---
-+
-+.b {
-   color: red;
- }
 ```
 
 # Output
 
 ```css
----
-foo: bar
---
--
-
-a {
+--- foo:bar --- a {
   color: blue;
 }
 
----
-
-.b {
+--- .b {
   color: red;
 }
-```
-
-# Errors
-```
-malformed-2.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '---'.
-  
-  > 1 │ ---
-      │ ^^^
-    2 │ foo: bar
-    3 │ ---
-  
-  i Expected a qualified rule, or an at rule here.
-  
-  > 1 │ ---
-      │ ^^^
-    2 │ foo: bar
-    3 │ ---
-  
-malformed-2.css:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '-'.
-  
-    1 │ ---
-    2 │ foo: bar
-  > 3 │ ---
-      │ ^
-    4 │ 
-    5 │ a {
-  
-  i Expected a compound selector here.
-  
-    1 │ ---
-    2 │ foo: bar
-  > 3 │ ---
-      │ ^
-    4 │ 
-    5 │ a {
-  
-malformed-2.css:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `-`
-  
-    1 │ ---
-    2 │ foo: bar
-  > 3 │ ---
-      │   ^
-    4 │ 
-    5 │ a {
-  
-  i Remove -
-  
-malformed-2.css:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '---'.
-  
-     7 │ }
-     8 │ 
-   > 9 │ ---
-       │ ^^^
-    10 │ 
-    11 │ .b {
-  
-  i Expected a qualified rule, or an at rule here.
-  
-     7 │ }
-     8 │ 
-   > 9 │ ---
-       │ ^^^
-    10 │ 
-    11 │ .b {
-  
-
 ```

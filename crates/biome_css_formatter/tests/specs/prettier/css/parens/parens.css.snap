@@ -854,27 +854,6 @@ parens.css:137:11 parse ━━━━━━━━━━━━━━━━━━�
   - custom property
   - function
   
-parens.css:138:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Unexpected value or character.
-  
-    136 │   prop38: ++1;
-    137 │   prop39: ++(1);
-  > 138 │   prop40: --1;
-        │           ^^^
-    139 │   prop41: --(1);
-    140 │   prop42: 1px+1px+1px+1px;
-  
-  i Expected one of:
-  
-  - identifier
-  - string
-  - number
-  - dimension
-  - ratio
-  - custom property
-  - function
-  
 parens.css:139:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.

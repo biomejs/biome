@@ -26,20 +26,22 @@ a:
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,9 @@
+@@ -1,9 +1,8 @@
  ---
 -hello: world
 -a:
 -  - 123
 -  - 666
+----
+-
+-.class {
 +hello:     world
 +a:       
 +            -
 +123
 +            - 666
- ---
- 
- .class {
++--- .class {
+ }
 ```
 
 # Output
@@ -51,30 +53,12 @@ a:
             -
 123
             - 666
----
-
-.class {
+--- .class {
 }
 ```
 
 # Errors
 ```
-dirty.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '---'.
-  
-  > 1 │ ---
-      │ ^^^
-    2 │ hello:     world
-    3 │ a:·······
-  
-  i Expected a qualified rule, or an at rule here.
-  
-  > 1 │ ---
-      │ ^^^
-    2 │ hello:     world
-    3 │ a:·······
-  
 dirty.css:4:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected value or character.

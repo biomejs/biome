@@ -954,13 +954,10 @@ impl<'src> CssLexer<'src> {
         debug_assert!(self.is_ident_start());
 
         let mut idx = 0;
-        let mut is_first = true;
         let mut only_ascii_used = true;
         // Repeatedly consume the next input code point from the stream.
         while let Some(current) = self.current_byte() {
-            if let Some(part) = self.consume_ident_part(current, is_first) {
-                is_first = false;
-
+            if let Some(part) = self.consume_ident_part(current) {
                 if only_ascii_used && !part.is_ascii() {
                     only_ascii_used = false;
                 }
@@ -982,45 +979,32 @@ impl<'src> CssLexer<'src> {
         (idx, only_ascii_used)
     }
 
-    /// Tries to consume a character that forms part of a CSS identifier.
+    /// Consume a character that forms part of a CSS identifier.
     ///
-    /// This function checks if `current` character conforms to the rules for forming
-    /// CSS identifiers, taking into account if it's the first character (`is_first`)
-    /// in the identifier as the first character has some specific rules (like it cannot start with a digit).
+    /// Before calling this function, you should make sure that there is a valid identifier start
+    /// using [Self::is_ident_start].
     ///
     /// Also handles CSS escape sequences in identifiers and attach appropriate diagnostics for invalid cases.
     ///
     /// Returns the consumed character wrapped in `Some` if it is part of an identifier,
     /// and `None` if it is not.
-    fn consume_ident_part(&mut self, current: u8, is_first: bool) -> Option<char> {
-        let dispatched = lookup_byte(current);
-
-        let chr = match dispatched {
-            MIN => {
+    fn consume_ident_part(&mut self, current: u8) -> Option<char> {
+        let chr = match lookup_byte(current) {
+            MIN | DIG | ZER => {
                 self.advance(1);
-                '-'
+                // SAFETY: We know that the current byte is a hyphen or a number.
+                current as char
             }
             // name code point
             UNI | IDT => {
                 // SAFETY: We know that the current byte is a valid unicode code point
                 let chr = self.current_char_unchecked();
-                let is_id = if is_first {
-                    is_css_id_start(chr)
-                } else {
-                    is_css_id_continue(chr)
-                };
-
-                if is_id {
+                if is_css_id_continue(chr) {
                     self.advance(chr.len_utf8());
                     chr
                 } else {
                     return None;
                 }
-            }
-            // SAFETY: We know that the current byte is a number and we can use cast.
-            DIG | ZER if !is_first => {
-                self.advance(1);
-                current as char
             }
             // U+005C REVERSE SOLIDUS (\)
             // If the first and second code points are a valid escape, continue consume.
@@ -1272,10 +1256,10 @@ impl<'src> CssLexer<'src> {
 
     /// Check if the lexer starts an identifier.
     fn is_ident_start(&self) -> bool {
+        // See https://drafts.csswg.org/css-syntax-3/#typedef-ident-token
         let Some(current) = self.current_byte() else {
             return false;
         };
-
         // Look at the first code point:
         match lookup_byte(current) {
             // U+002D HYPHEN-MINUS
@@ -1283,17 +1267,16 @@ impl<'src> CssLexer<'src> {
                 let Some(next) = self.peek_byte() else {
                     return false;
                 };
-
                 match lookup_byte(next) {
                     MIN => {
                         let Some(next) = self.byte_at(2) else {
                             return false;
                         };
-
                         match lookup_byte(next) {
+                            MIN | DIG | ZER => true,
                             // If the third code point is a name-start code point
                             // return true.
-                            UNI | IDT if is_css_id_start(self.char_unchecked_at(2)) => true,
+                            UNI | IDT if is_css_id_continue(self.char_unchecked_at(2)) => true,
                             // or the third and fourth code points are a valid escape
                             // return true.
                             BSL => self.is_valid_escape_at(3),
@@ -1314,7 +1297,6 @@ impl<'src> CssLexer<'src> {
             // If the first and second code points are a valid escape, return true. Otherwise,
             // return false.
             BSL => self.is_valid_escape_at(1),
-
             _ => false,
         }
     }
