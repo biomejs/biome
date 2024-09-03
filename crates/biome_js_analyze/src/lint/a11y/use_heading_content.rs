@@ -21,6 +21,11 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx,expect_diagnostic
+    /// <h1 aria-label="Screen reader content" aria-hidden>invisible content</h1>
+    /// ```
+    ///
+    ///
+    /// ```jsx,expect_diagnostic
     /// <h1></h1>
     /// ```
     ///
@@ -72,12 +77,13 @@ impl Rule for UseHeadingContent {
         let name = node.name().ok()?.name_value_token()?;
 
         if HEADING_ELEMENTS.contains(&name.text_trimmed()) {
-            if node.has_truthy_attribute("aria-label") {
-                return None;
-            }
-
             if node.has_truthy_attribute("aria-hidden") {
                 return Some(());
+            }
+
+            // When node has aria-label (and doesn't have `aria-hidden`), the label will be read by screen readers
+            if node.has_truthy_attribute("aria-label") {
+                return None;
             }
 
             if has_valid_heading_content(node) {
