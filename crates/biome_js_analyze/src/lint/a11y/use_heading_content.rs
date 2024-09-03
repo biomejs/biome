@@ -35,6 +35,10 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx
+    /// <h1 aria-label="Screen reader content"><div aria-hidden="true">invisible content</div></h1>
+    /// ```
+    ///
+    /// ```jsx
     /// <h1 dangerouslySetInnerHTML={{ __html: "heading" }} />
     /// ```
     ///
@@ -68,6 +72,10 @@ impl Rule for UseHeadingContent {
         let name = node.name().ok()?.name_value_token()?;
 
         if HEADING_ELEMENTS.contains(&name.text_trimmed()) {
+            if node.has_truthy_attribute("aria-label") {
+                return None;
+            }
+
             if node.has_truthy_attribute("aria-hidden") {
                 return Some(());
             }
