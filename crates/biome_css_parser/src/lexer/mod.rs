@@ -10,7 +10,8 @@ use biome_parser::lexer::{
 };
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::{
-    is_css_id_continue, is_css_id_start, lookup_byte, Dispatch, Dispatch::*,
+    is_css_non_ascii, lookup_byte,
+    Dispatch::{self, *},
 };
 use std::char::REPLACEMENT_CHARACTER;
 
@@ -319,7 +320,7 @@ impl<'src> CssLexer<'src> {
 
             LSS => self.consume_lss(),
 
-            IDT if self.peek_byte() == Some(b'=') => {
+            IDT | DOL if self.peek_byte() == Some(b'=') => {
                 self.advance(1);
                 self.consume_byte(T!["$="])
             }
@@ -461,7 +462,7 @@ impl<'src> CssLexer<'src> {
             return match dispatch {
                 // TLD byte covers `url(~package/tilde.css)`;
                 // HAS byte covers `url(#IDofSVGpath);`
-                IDT | UNI | PRD | SLH | ZER | DIG | TLD | HAS => self.consume_url_raw_value(),
+                IDT | DOL | UNI | PRD | SLH | ZER | DIG | TLD | HAS => self.consume_url_raw_value(),
                 _ => self.consume_token(current),
             };
         }
@@ -990,16 +991,16 @@ impl<'src> CssLexer<'src> {
     /// and `None` if it is not.
     fn consume_ident_part(&mut self, current: u8) -> Option<char> {
         let chr = match lookup_byte(current) {
-            MIN | DIG | ZER => {
+            IDT | MIN | DIG | ZER => {
                 self.advance(1);
                 // SAFETY: We know that the current byte is a hyphen or a number.
                 current as char
             }
             // name code point
-            UNI | IDT => {
+            UNI => {
                 // SAFETY: We know that the current byte is a valid unicode code point
                 let chr = self.current_char_unchecked();
-                if is_css_id_continue(chr) {
+                if is_css_non_ascii(chr) {
                     self.advance(chr.len_utf8());
                     chr
                 } else {
@@ -1273,26 +1274,28 @@ impl<'src> CssLexer<'src> {
                             return false;
                         };
                         match lookup_byte(next) {
-                            MIN | DIG | ZER => true,
+                            IDT | MIN | DIG | ZER => true,
                             // If the third code point is a name-start code point
                             // return true.
-                            UNI | IDT if is_css_id_continue(self.char_unchecked_at(2)) => true,
+                            UNI => is_css_non_ascii(self.char_unchecked_at(2)),
                             // or the third and fourth code points are a valid escape
                             // return true.
                             BSL => self.is_valid_escape_at(3),
                             _ => false,
                         }
                     }
+                    IDT => true,
                     // If the second code point is a name-start code point
                     // return true.
-                    UNI | IDT if is_css_id_start(self.peek_char_unchecked()) => true,
+                    UNI => is_css_non_ascii(self.peek_char_unchecked()),
                     // or the second and third code points are a valid escape
                     // return true.
                     BSL => self.is_valid_escape_at(2),
                     _ => false,
                 }
             }
-            UNI | IDT if is_css_id_start(self.current_char_unchecked()) => true,
+            IDT => true,
+            UNI => is_css_non_ascii(self.current_char_unchecked()),
             // U+005C REVERSE SOLIDUS (\)
             // If the first and second code points are a valid escape, return true. Otherwise,
             // return false.

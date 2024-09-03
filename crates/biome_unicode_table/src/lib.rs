@@ -12,15 +12,12 @@ pub fn is_html_id_start(c: char) -> bool {
     ID_Start(c)
 }
 
-/// Tests if `c` is a valid start of a CSS identifier
+/// Is `c` a CSS non-ascii character.
 #[inline]
-pub fn is_css_id_start(c: char) -> bool {
+pub fn is_css_non_ascii(c: char) -> bool {
     matches!(
         c as u32,
-        0x41..=0x5a // A-Z
-        | 0x5f // `_`
-        | 0x61..=0x7a // a-z
-        | 0xB7
+        0xB7
         | 0xc0..=0xd6
         | 0xd8..=0xf6
         | 0xf8..=0x37D
@@ -36,12 +33,6 @@ pub fn is_css_id_start(c: char) -> bool {
         | 0xFDF0..0xFFFD
         | 0x10000..
     )
-}
-
-/// Tests if `c` is a valid continuation of a CSS identifier.
-#[inline]
-pub fn is_css_id_continue(c: char) -> bool {
-    matches!(c, '0'..='9' | '-') || is_css_id_start(c)
 }
 
 /// Tests if `c` is a valid start of a js identifier
