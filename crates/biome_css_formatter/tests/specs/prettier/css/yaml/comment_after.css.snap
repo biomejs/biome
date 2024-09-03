@@ -21,82 +21,21 @@ description: Description
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,8 @@
- ---
- title: Title
- description: Description
+@@ -1,8 +1,2 @@
+----
+-title: Title
+-description: Description
 ----
 -
-+--
-+-
- /* comment */
- .something {
+-/* comment */
+-.something {
++--- title:Title description:Description --- /* comment */ .something {
  }
 ```
 
 # Output
 
 ```css
----
-title: Title
-description: Description
---
--
-/* comment */
-.something {
+--- title:Title description:Description --- /* comment */ .something {
 }
-```
-
-# Errors
-```
-comment_after.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '---'.
-  
-  > 1 │ ---
-      │ ^^^
-    2 │ title: Title
-    3 │ description: Description
-  
-  i Expected a qualified rule, or an at rule here.
-  
-  > 1 │ ---
-      │ ^^^
-    2 │ title: Title
-    3 │ description: Description
-  
-comment_after.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '-'.
-  
-    2 │ title: Title
-    3 │ description: Description
-  > 4 │ ---
-      │ ^
-    5 │ /* comment */
-    6 │ .something {
-  
-  i Expected a compound selector here.
-  
-    2 │ title: Title
-    3 │ description: Description
-  > 4 │ ---
-      │ ^
-    5 │ /* comment */
-    6 │ .something {
-  
-comment_after.css:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `-`
-  
-    2 │ title: Title
-    3 │ description: Description
-  > 4 │ ---
-      │   ^
-    5 │ /* comment */
-    6 │ .something {
-  
-  i Remove -
-  
-
 ```

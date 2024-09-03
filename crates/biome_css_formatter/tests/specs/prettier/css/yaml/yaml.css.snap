@@ -22,82 +22,22 @@ a {
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,7 +1,8 @@
- ---
- title: Title
- description: Description
+@@ -1,8 +1,3 @@
 ----
-+--
-+-
- 
- a {
+-title: Title
+-description: Description
+----
+-
+-a {
++--- title:Title description:Description --- a {
    color: red;
+ }
 ```
 
 # Output
 
 ```css
----
-title: Title
-description: Description
---
--
-
-a {
+--- title:Title description:Description --- a {
   color: red;
 }
-```
-
-# Errors
-```
-yaml.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '---'.
-  
-  > 1 │ ---
-      │ ^^^
-    2 │ title: Title
-    3 │ description: Description
-  
-  i Expected a qualified rule, or an at rule here.
-  
-  > 1 │ ---
-      │ ^^^
-    2 │ title: Title
-    3 │ description: Description
-  
-yaml.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '-'.
-  
-    2 │ title: Title
-    3 │ description: Description
-  > 4 │ ---
-      │ ^
-    5 │ 
-    6 │ a {
-  
-  i Expected a compound selector here.
-  
-    2 │ title: Title
-    3 │ description: Description
-  > 4 │ ---
-      │ ^
-    5 │ 
-    6 │ a {
-  
-yaml.css:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `-`
-  
-    2 │ title: Title
-    3 │ description: Description
-  > 4 │ ---
-      │   ^
-    5 │ 
-    6 │ a {
-  
-  i Remove -
-  
-
 ```
