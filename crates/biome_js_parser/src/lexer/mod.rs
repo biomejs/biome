@@ -852,7 +852,7 @@ impl<'src> JsLexer<'src> {
         let b = unsafe { self.current_unchecked() };
 
         match lookup_byte(b) {
-            IDT | DIG | ZER => Some((b as char, false)),
+            IDT | DOL | DIG | ZER => Some((b as char, false)),
             // FIXME: This should use ID_Continue, not XID_Continue
             UNI => {
                 let chr = self.current_char_unchecked();
@@ -920,7 +920,7 @@ impl<'src> JsLexer<'src> {
                     false
                 }
             }
-            IDT => true,
+            IDT | DOL => true,
             _ => false,
         }
     }
@@ -1880,7 +1880,7 @@ impl<'src> JsLexer<'src> {
                     ERROR_TOKEN
                 }
             }
-            IDT => self.resolve_identifier(byte as char),
+            IDT | DOL => self.resolve_identifier(byte as char),
             DIG => {
                 self.read_number(false);
                 self.verify_number_end()
