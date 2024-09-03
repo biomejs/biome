@@ -52,7 +52,7 @@ pub struct JavascriptConfiguration {
         bpaf(hide),
         serde(deserialize_with = "deserialize_optional_jsx_factory_from_string")
     )]
-    pub jsx_factory: Option<JsxFactory>,
+    pub jsx_factory: JsxFactory,
 
     /// Indicates the name of the factory function used to create React fragment elements.
     ///
@@ -61,7 +61,7 @@ pub struct JavascriptConfiguration {
         bpaf(hide),
         serde(deserialize_with = "deserialize_optional_jsx_factory_from_string")
     )]
-    pub jsx_fragment_factory: Option<JsxFactory>,
+    pub jsx_fragment_factory: JsxFactory,
 
     #[partial(type, bpaf(external(partial_javascript_organize_imports), optional))]
     pub organize_imports: JavascriptOrganizeImports,
@@ -172,10 +172,16 @@ fn parse_jsx_factory(value: &str) -> Option<JsxFactory> {
 }
 
 /// Indicates the type of runtime or transformation used for interpreting JSX.
-#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[derive(Bpaf, Clone, Debug, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct JsxFactory(pub String);
+
+impl Default for JsxFactory {
+    fn default() -> Self {
+        Self("React".to_string())
+    }
+}
 
 impl JsxFactory {
     pub fn into_string(self) -> String {

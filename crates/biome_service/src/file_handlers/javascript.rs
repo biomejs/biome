@@ -205,7 +205,6 @@ impl ServiceLanguage for JsLanguage {
         path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> AnalyzerOptions {
-        // dbg!(global.as_ref(), overrides.as_ref(), path);
         let preferred_quote =
             global
                 .and_then(|global| {

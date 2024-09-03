@@ -780,6 +780,7 @@ dependencies = [
 name = "biome_js_semantic"
 version = "0.5.7"
 dependencies = [
+ "biome_analyze",
  "biome_console",
  "biome_diagnostics",
  "biome_js_factory",

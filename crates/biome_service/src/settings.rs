@@ -78,7 +78,6 @@ impl WorkspaceSettings {
     pub fn get_current_settings(&self) -> Option<&Settings> {
         trace!("Current key {:?}", self.current_project);
         let data = self.data.get(self.current_project);
-        // dbg!(data);
         if let Some(data) = data {
             Some(&data.settings)
         } else {
@@ -589,8 +588,8 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.globals = Some(javascript.globals.into_index_set());
         language_setting.environment = JsEnvironmentSettings {
             jsx_runtime: javascript.jsx_runtime,
-            jsx_factory: javascript.jsx_factory,
-            jsx_fragment_factory: javascript.jsx_fragment_factory,
+            jsx_factory: Some(javascript.jsx_factory),
+            jsx_fragment_factory: Some(javascript.jsx_fragment_factory),
         };
         dbg!(&language_setting.environment);
         language_setting.linter.enabled = Some(javascript.linter.enabled);

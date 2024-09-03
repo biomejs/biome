@@ -1,12 +1,15 @@
 use crate::globals::{is_js_global, is_ts_global};
 use crate::services::semantic::SemanticServices;
 use biome_analyze::context::RuleContext;
+use biome_analyze::options::JsxRuntime;
 use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsFunction, JsFileSource, Language, TextRange, TsAsExpression, TsReferenceType,
 };
 use biome_rowan::AstNode;
+
+const REACT_JSX_FACTORY: &str = "React";
 
 declare_lint_rule! {
     /// Prevents the usage of variables that haven't been declared inside the document.
@@ -90,14 +93,26 @@ impl Rule for NoUndeclaredVariables {
                     let span = token.text_trimmed_range();
                     let text = text.to_string();
                     Some((span, text))
-                } else if let Some(jsx_like) = reference.as_jsx_like() {
-                    let jsx_factory = ctx.jsx_factory()?;
-                    let span = jsx_like.name_value_token()?.text_trimmed_range();
-                    Some((span, jsx_factory.to_string()))
-                } else if let Some(jsx_fragment) = reference.as_jsx_fragment() {
-                    let jsx_fragment_factory = ctx.jsx_fragment_factory()?;
-                    let span = jsx_fragment.l_angle_token().ok()?.text_trimmed_range();
-                    Some((span, jsx_fragment_factory.to_string()))
+                } else if ctx.jsx_runtime() == JsxRuntime::ReactClassic {
+                    if let Some(jsx_like) = reference.as_jsx_like() {
+                        let jsx_factory = ctx.jsx_factory()?;
+                        if jsx_factory == REACT_JSX_FACTORY {
+                            return None;
+                        }
+                        let span = jsx_like.name_value_token()?.text_trimmed_range();
+                        return Some((span, jsx_factory.to_string()));
+                    }
+
+                    if let Some(jsx_fragment) = reference.as_jsx_fragment() {
+                        let jsx_fragment_factory = ctx.jsx_fragment_factory()?;
+                        if jsx_fragment_factory == REACT_JSX_FACTORY {
+                            return None;
+                        }
+                        let span = jsx_fragment.l_angle_token().ok()?.text_trimmed_range();
+                        return Some((span, jsx_fragment_factory.to_string()));
+                    }
+
+                    None
                 } else {
                     None
                 }
