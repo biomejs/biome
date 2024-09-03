@@ -81,7 +81,7 @@ impl Rule for UseHeadingContent {
                 return Some(());
             }
 
-            // When node has aria-label (and doesn't have `aria-hidden`), the label will be read by screen readers
+            // When node has `aria-label` (and doesn't have `aria-hidden`), the label will be read by screen readers
             if node.has_truthy_attribute("aria-label") {
                 return None;
             }
