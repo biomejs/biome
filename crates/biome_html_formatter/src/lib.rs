@@ -9,7 +9,7 @@ pub use context::HtmlFormatOptions;
 use cst::FormatHtmlSyntaxNode;
 
 mod comments;
-mod context;
+pub mod context;
 mod cst;
 mod generated;
 mod html;
@@ -112,6 +112,7 @@ where
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct HtmlFormatLanguage {
     options: HtmlFormatOptions,
 }
