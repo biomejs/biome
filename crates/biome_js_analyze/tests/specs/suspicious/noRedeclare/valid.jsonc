@@ -11,5 +11,6 @@
 	"class C { static { var a; { let a; } } }",
 	"class C { static { let a; { let a; } } }",
 	"class C { static { { let a; } { let a; } } }",
-  "interface A { [index: string]: string; [index: number]: string; }"
+    "interface A { [index: string]: string; [index: number]: string; }",
+	"const foo = function foo() { const foo = 0; }"
 ]

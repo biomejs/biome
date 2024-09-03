@@ -51,17 +51,10 @@ CssRoot {
                         },
                     },
                     missing separator,
-                    CssMediaTypeQuery {
-                        modifier: missing (optional),
-                        ty: CssMediaType {
-                            value: CssIdentifier {
-                                value_token: IDENT@27..39 "$-breakpoint" [] [],
-                            },
-                        },
-                    },
-                    missing separator,
                     CssBogusMediaQuery {
                         items: [
+                            ERROR_TOKEN@27..28 "$" [] [],
+                            IDENT@28..39 "-breakpoint" [] [],
                             R_PAREN@39..41 ")" [] [Whitespace(" ")],
                         ],
                     },
@@ -349,14 +342,10 @@ CssRoot {
                   0: IDENT@8..27 "--umrel-breakpoints" [] []
               2: (empty)
           1: (empty)
-          2: CSS_MEDIA_TYPE_QUERY@27..39
-            0: (empty)
-            1: CSS_MEDIA_TYPE@27..39
-              0: CSS_IDENTIFIER@27..39
-                0: IDENT@27..39 "$-breakpoint" [] []
-          3: (empty)
-          4: CSS_BOGUS_MEDIA_QUERY@39..41
-            0: R_PAREN@39..41 ")" [] [Whitespace(" ")]
+          2: CSS_BOGUS_MEDIA_QUERY@27..41
+            0: ERROR_TOKEN@27..28 "$" [] []
+            1: IDENT@28..39 "-breakpoint" [] []
+            2: R_PAREN@39..41 ")" [] [Whitespace(" ")]
         2: CSS_RULE_BLOCK@41..43
           0: L_CURLY@41..42 "{" [] []
           1: CSS_RULE_LIST@42..42
@@ -534,25 +523,12 @@ CssRoot {
 ```
 at_rule_media_error.css:1:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `)` but instead found `$-breakpoint`
+  × unexpected character `$`
   
   > 1 │ @media (--umrel-breakpoints$-breakpoint) {}
-      │                            ^^^^^^^^^^^^
+      │                            ^
     2 │ 
     3 │ @media only screen and width <= 500px {
-  
-  i Remove $-breakpoint
-  
-at_rule_media_error.css:1:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `)`
-  
-  > 1 │ @media (--umrel-breakpoints$-breakpoint) {}
-      │                                        ^
-    2 │ 
-    3 │ @media only screen and width <= 500px {
-  
-  i Remove )
   
 at_rule_media_error.css:3:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 

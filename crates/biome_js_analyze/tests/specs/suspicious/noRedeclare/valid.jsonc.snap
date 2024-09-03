@@ -71,4 +71,7 @@ class C { static { { let a; } { let a; } } }
 interface A { [index: string]: string; [index: number]: string; }
 ```
 
-
+# Input
+```cjs
+const foo = function foo() { const foo = 0; }
+```

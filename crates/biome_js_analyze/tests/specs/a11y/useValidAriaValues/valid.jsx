@@ -14,6 +14,8 @@ var a = <span aria-invalid={false}></span>;
 var a = <span role="checkbox" aria-errormessage="someid" ></span>;
 var a = <span role="checkbox" aria-relevant="additions" ></span>;
 var a = <span role="checkbox" aria-relevant="additions all" ></span>;
+var a = <span role="checkbox" aria-relevant=" additions   all " ></span>;
 var a = <span aria-labelledby="id" ></span>;
 var a = <span aria-labelledby="fooId barId" ></span>;
 var a = <span aria-details="someid" ></span>;
+var a = <button type="button" aria-keyshortcuts="1">Click Me</button>;

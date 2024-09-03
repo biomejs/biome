@@ -22,7 +22,7 @@ Prettier is using Jest to run snapshot tests, and a node.js script is needed to
 extract these snapshots into plain files for use in the Rust tests. To update
 the snapshots:
 
-1. Clone the Prettier git repository locally
+1. Clone the Prettier git repository locally (https://github.com/prettier/prettier)
 2. Remove all the directories inside
    `crates/biome_js_formatter/tests/specs/prettier` to ensure all obsolete tests are
    removed

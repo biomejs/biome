@@ -466,7 +466,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) now correctly provides a code fix when unicode characters are used.
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer report a variable named as the function expression where it is declared. Contributed by @Conaclos
+
+- [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) now correctly provides a code fix when Unicode characters are used. Contributed by @Conaclos
+
+- [useValidAriaValues](https://biomejs.dev/linter/rules/use-valid-aria-values/) now correctly check property types ([3748](https://github.com/biomejs/biome/issues/3748)).
+
+  Properties that expect a string now accept arbitrary text.
+  An identifiers can now be made up of any characters except ASCII whitespace.
+  An identifier list can now be separated by any ASCII whitespace.
+
+  Contributed by @Conaclos
 
 - `useAdjacentOverloadSignatures` no longer reports a `#private` class member and a public class member that share the same name ([#3309](https://github.com/biomejs/biome/issues/3309)).
 
@@ -542,7 +552,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- The JSON parser now allows comments in `jest.config.json`. Contributed by @Conaclos
+
 #### Bug fixes
+
+- The CSS parser now accepts emoji in identifiers ([3627](https://github.com/biomejs/biome/issues/3627)).
+
+  The following code is now corretcly parsed:
+
+  ```css
+  p {
+    --🥔-color: red;
+    color: var(--🥔-color);
+  }
+  ```
+
+  Contributed by @Conaclos
 
 - Fix [#3287](https://github.com/biomejs/biome/issues/3287) nested selectors with pseudo-classes. Contributed by @denbezrukov
 

@@ -177,7 +177,6 @@ mod tests {
     use std::slice;
 
     use crate::lint::correctness::use_exhaustive_dependencies::{Hook, HooksOptions};
-    use crate::react::hooks::StableHookResult;
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
     #[ignore]
@@ -202,7 +201,7 @@ mod tests {
             name: "myEffect".to_string(),
             closure_index: Some(0),
             dependencies_index: Some(1),
-            stable_result: StableHookResult::None,
+            stable_result: None,
         };
         let rule_filter = RuleFilter::Rule("style", "useNodejsImportProtocol");
 
