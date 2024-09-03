@@ -8,10 +8,10 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::TsReferenceType;
+use biome_rowan::AstNode;
 use biome_rowan::BatchMutationExt;
 use biome_unicode_table::is_js_ident;
 use rustc_hash::FxHashMap;
-use biome_rowan::AstNode;
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -20,8 +20,8 @@ declare_lint_rule! {
     /// Disallow user defined types.
     ///
     /// This rule allows you to specify type names that you don’t want to use in your application.
-    /// 
-    /// To prevent use of commonly misleading types, you can refer to [noBannedTypes](https://biomejs.dev/linter/rules/no-banned-types/) 
+    ///
+    /// To prevent use of commonly misleading types, you can refer to [noBannedTypes](https://biomejs.dev/linter/rules/no-banned-types/)
     ///
     /// ## Options
     ///
@@ -56,7 +56,6 @@ declare_lint_rule! {
         ],
         recommended: false,
         fix_kind: FixKind::Safe,
-
     }
 }
 
