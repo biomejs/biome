@@ -3,8 +3,8 @@ use rustc_hash::FxHashMap;
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
+use std::ops::Deref;
 use std::path::PathBuf;
-use std::rc::Rc;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
@@ -52,6 +52,33 @@ impl AnalyzerRules {
     }
 }
 
+/// Jsx factory namespace
+#[derive(Debug)]
+pub struct JsxFactory(Box<str>);
+
+impl Deref for JsxFactory {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl JsxFactory {
+    /// Create a new [`JsxFactory`] from a factory name
+    // invariant: factory should only be an identifier
+    pub fn new(factory: String) -> Self {
+        debug_assert!(!factory.contains(['.', '[', ']']));
+        Self(factory.into_boxed_str())
+    }
+}
+
+impl From<String> for JsxFactory {
+    fn from(s: String) -> Self {
+        Self::new(s)
+    }
+}
+
 /// A data structured derived from the `biome.json` file
 #[derive(Debug, Default)]
 pub struct AnalyzerConfiguration {
@@ -72,12 +99,12 @@ pub struct AnalyzerConfiguration {
     /// Indicates the name of the factory function used to create React elements.
     ///
     /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
-    pub jsx_factory: Option<Rc<str>>,
+    pub jsx_factory: Option<JsxFactory>,
 
     /// Indicates the name of the factory function used to create React fragment elements.
     ///
     /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
-    pub jsx_fragment_factory: Option<Rc<str>>,
+    pub jsx_fragment_factory: Option<JsxFactory>,
 }
 
 /// A set of information useful to the analyzer infrastructure

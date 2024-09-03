@@ -62,7 +62,6 @@ impl SemanticModelBuilder {
             | JSX_OPENING_ELEMENT
             | JSX_OPENING_FRAGMENT
             | JSX_SELF_CLOSING_ELEMENT => {
-                node.text_trimmed();
                 self.binding_node_by_start
                     .insert(node.text_trimmed_range().start(), node.clone());
             }

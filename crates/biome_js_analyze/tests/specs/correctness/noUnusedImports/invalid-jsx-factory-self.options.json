@@ -1,0 +1,14 @@
+{
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUnusedImports": "error"
+      }
+    }
+  },
+  "javascript": {
+    "jsxRuntime": "reactClassic",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
+  }
+}

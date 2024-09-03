@@ -24,7 +24,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
     RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
 };
-use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::javascript::{JsxFactory, JsxRuntime};
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
     AttributePosition, BracketSpacing, FormatError, IndentStyle, IndentWidth, LineEnding,
@@ -89,16 +89,16 @@ pub struct JsOrganizeImportsSettings {}
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsEnvironmentSettings {
     pub jsx_runtime: JsxRuntime,
-    pub jsx_factory: Option<String>,
-    pub jsx_fragment_factory: Option<String>,
+    pub jsx_factory: Option<JsxFactory>,
+    pub jsx_fragment_factory: Option<JsxFactory>,
 }
 
-impl From<(JsxRuntime, Option<String>, Option<String>)> for JsEnvironmentSettings {
+impl From<(JsxRuntime, Option<JsxFactory>, Option<JsxFactory>)> for JsEnvironmentSettings {
     fn from(
         (jsx_runtime, jsx_factory, jsx_fragment_factory): (
             JsxRuntime,
-            Option<String>,
-            Option<String>,
+            Option<JsxFactory>,
+            Option<JsxFactory>,
         ),
     ) -> Self {
         Self {
@@ -240,12 +240,7 @@ impl ServiceLanguage for JsLanguage {
 
             jsx_factory = overrides.override_jsx_factory(
                 path,
-                global
-                    .languages
-                    .javascript
-                    .environment
-                    .jsx_factory
-                    .as_deref(),
+                global.languages.javascript.environment.jsx_factory.as_ref(),
             );
 
             jsx_fragment_factory = overrides.override_jsx_fragment_factory(
@@ -255,7 +250,7 @@ impl ServiceLanguage for JsLanguage {
                     .javascript
                     .environment
                     .jsx_fragment_factory
-                    .as_deref(),
+                    .as_ref(),
             );
 
             globals.extend(
@@ -309,8 +304,8 @@ impl ServiceLanguage for JsLanguage {
             globals,
             preferred_quote,
             jsx_runtime,
-            jsx_factory: jsx_factory.as_deref().map(Into::into),
-            jsx_fragment_factory: jsx_fragment_factory.as_deref().map(Into::into),
+            jsx_factory: jsx_factory.map(|f| f.into_string().into()),
+            jsx_fragment_factory: jsx_fragment_factory.map(|f| f.into_string().into()),
         };
 
         AnalyzerOptions {

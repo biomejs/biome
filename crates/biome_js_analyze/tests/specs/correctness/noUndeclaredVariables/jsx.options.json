@@ -1,0 +1,7 @@
+{
+  "javascript": {
+    "jsxRuntime": "reactClassic",
+    "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment"
+  }
+}

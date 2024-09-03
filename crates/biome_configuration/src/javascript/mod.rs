@@ -2,13 +2,16 @@ mod formatter;
 
 use std::str::FromStr;
 
+use biome_console::markup;
 use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
+use biome_js_parser::{parse_module, JsParserOptions};
+use biome_rowan::AstNode;
 use bpaf::Bpaf;
 pub use formatter::{
     partial_javascript_formatter, JavascriptFormatter, PartialJavascriptFormatter,
 };
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 /// A set of options applied to the JavaScript files
 #[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
@@ -45,14 +48,20 @@ pub struct JavascriptConfiguration {
     /// Indicates the name of the factory function used to create React elements.
     ///
     /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
-    #[partial(bpaf(hide))]
-    pub jsx_factory: Option<String>,
+    #[partial(
+        bpaf(hide),
+        serde(deserialize_with = "deserialize_optional_jsx_factory_from_string")
+    )]
+    pub jsx_factory: Option<JsxFactory>,
 
     /// Indicates the name of the factory function used to create React fragment elements.
     ///
     /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
-    #[partial(bpaf(hide))]
-    pub jsx_fragment_factory: Option<String>,
+    #[partial(
+        bpaf(hide),
+        serde(deserialize_with = "deserialize_optional_jsx_factory_from_string")
+    )]
+    pub jsx_fragment_factory: Option<JsxFactory>,
 
     #[partial(type, bpaf(external(partial_javascript_organize_imports), optional))]
     pub organize_imports: JavascriptOrganizeImports,
@@ -109,6 +118,96 @@ impl FromStr for JsxRuntime {
             "react-classic" | "reactClassic" => Ok(Self::ReactClassic),
             _ => Err("Unexpected value".to_string()),
         }
+    }
+}
+
+fn deserialize_optional_jsx_factory_from_string<'de, D>(
+    deserializer: D,
+) -> Result<Option<JsxFactory>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    match parse_jsx_factory(&s) {
+        Some(factory) => Ok(Some(factory)),
+        None => Err(serde::de::Error::custom(format!(
+            "expected valid identifier or qualified name, but received {s}"
+        ))),
+    }
+}
+
+fn parse_jsx_factory(value: &str) -> Option<JsxFactory> {
+    use biome_js_syntax::*;
+    let syntax = parse_module(value, JsParserOptions::default());
+    let item = syntax.try_tree()?.items().into_iter().next()?;
+    match item {
+        AnyJsModuleItem::AnyJsStatement(stmt) => {
+            match JsExpressionStatement::cast_ref(stmt.syntax())?
+                .expression()
+                .ok()?
+            {
+                AnyJsExpression::JsStaticMemberExpression(member) => {
+                    let mut expr = member.object().ok();
+                    while let Some(e) = expr {
+                        let syntax = e.into_syntax();
+                        if let Some(ident) = JsIdentifierExpression::cast_ref(&syntax) {
+                            return Some(JsxFactory(ident.text().to_owned()));
+                        } else if let Some(member) = JsStaticMemberExpression::cast_ref(&syntax) {
+                            expr = member.object().ok();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                AnyJsExpression::JsIdentifierExpression(ident) => {
+                    return Some(JsxFactory(ident.text().to_owned()));
+                }
+                _ => (),
+            }
+        }
+        _ => (),
+    }
+
+    None
+}
+
+/// Indicates the type of runtime or transformation used for interpreting JSX.
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Eq, Merge, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct JsxFactory(pub String);
+
+impl JsxFactory {
+    pub fn into_string(self) -> String {
+        self.0
+    }
+}
+
+impl biome_deserialize::Deserializable for JsxFactory {
+    fn deserialize(
+        value: &impl biome_deserialize::DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        let factory = biome_deserialize::Text::deserialize(value, name, diagnostics)?;
+        parse_jsx_factory(factory.text()).or_else(|| {
+            diagnostics.push(biome_deserialize::DeserializationDiagnostic::new(
+                markup!(
+                    "Incorrect value, expected "<Emphasis>{"identifier"}</Emphasis>" or "<Emphasis>{"qualified name"}</Emphasis>", but received "<Emphasis>{format_args!("{}", factory.text())}</Emphasis>"."
+                ),
+            ).with_range(value.range()));
+            None
+        })
+    }
+}
+
+impl FromStr for JsxFactory {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let factory = parse_jsx_factory(s).ok_or_else(|| {
+            format!("expected valid identifier or qualified name, but received {s}")
+        })?;
+        Ok(factory)
     }
 }
 

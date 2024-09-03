@@ -1,0 +1,31 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid-jsx-fragment-factory.jsx
+---
+# Input
+```jsx
+import { h, Fragment } from "preact";
+
+<></>;
+
+```
+
+# Diagnostics
+```
+invalid-jsx-fragment-factory.jsx:1:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+  > 1 │ import { h, Fragment } from "preact";
+      │          ^
+    2 │ 
+    3 │ <></>;
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    1 │ import·{·h,·Fragment·}·from·"preact";
+      │          ---                         
+
+```

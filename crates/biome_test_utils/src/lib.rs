@@ -95,6 +95,16 @@ pub fn create_analyzer_options(
                 ReactClassic => Some(JsxRuntime::ReactClassic),
                 Transparent => Some(JsxRuntime::Transparent),
             };
+            analyzer_configuration.jsx_factory = configuration
+                .javascript
+                .as_ref()
+                .and_then(|js| js.jsx_factory.clone().map(|f| f.into_string().into()));
+            analyzer_configuration.jsx_fragment_factory =
+                configuration.javascript.as_ref().and_then(|js| {
+                    js.jsx_fragment_factory
+                        .clone()
+                        .and_then(|f| Some(f.into_string().into()))
+                });
             analyzer_configuration.globals = configuration
                 .javascript
                 .as_ref()
