@@ -547,6 +547,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useDateNow": {
+					"description": "Use Date.now() to get the number of milliseconds since the Unix Epoch.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useFlatMap": {
 					"description": "Promotes the use of .flatMap() when map().flat() are used together.",
 					"anyOf": [
@@ -2241,13 +2248,6 @@
 						{
 							"$ref": "#/definitions/ConsistentMemberAccessibilityConfiguration"
 						},
-						{ "type": "null" }
-					]
-				},
-				"useDateNow": {
-					"description": "Use Date.now() to get the number of milliseconds since the Unix Epoch.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

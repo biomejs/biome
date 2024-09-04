@@ -1268,6 +1268,9 @@ pub struct Complexity {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_arrow_function:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseArrowFunction>>,
+    #[doc = "Use Date.now() to get the number of milliseconds since the Unix Epoch."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_date_now: Option<RuleFixConfiguration<biome_js_analyze::options::UseDateNow>>,
     #[doc = "Promotes the use of .flatMap() when map().flat() are used together."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_flat_map: Option<RuleFixConfiguration<biome_js_analyze::options::UseFlatMap>>,
@@ -1332,6 +1335,7 @@ impl Complexity {
         "noVoid",
         "noWith",
         "useArrowFunction",
+        "useDateNow",
         "useFlatMap",
         "useLiteralKeys",
         "useOptionalChain",
@@ -1389,11 +1393,11 @@ impl Complexity {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -1426,6 +1430,7 @@ impl Complexity {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -1565,34 +1570,39 @@ impl Complexity {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_flat_map.as_ref() {
+        if let Some(rule) = self.use_date_now.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_literal_keys.as_ref() {
+        if let Some(rule) = self.use_flat_map.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_optional_chain.as_ref() {
+        if let Some(rule) = self.use_literal_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_regex_literals.as_ref() {
+        if let Some(rule) = self.use_optional_chain.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_simple_number_keys.as_ref() {
+        if let Some(rule) = self.use_regex_literals.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_simplified_logic_expression.as_ref() {
+        if let Some(rule) = self.use_simple_number_keys.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
+            }
+        }
+        if let Some(rule) = self.use_simplified_logic_expression.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
         index_set
@@ -1722,34 +1732,39 @@ impl Complexity {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[23]));
             }
         }
-        if let Some(rule) = self.use_flat_map.as_ref() {
+        if let Some(rule) = self.use_date_now.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[24]));
             }
         }
-        if let Some(rule) = self.use_literal_keys.as_ref() {
+        if let Some(rule) = self.use_flat_map.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]));
             }
         }
-        if let Some(rule) = self.use_optional_chain.as_ref() {
+        if let Some(rule) = self.use_literal_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]));
             }
         }
-        if let Some(rule) = self.use_regex_literals.as_ref() {
+        if let Some(rule) = self.use_optional_chain.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]));
             }
         }
-        if let Some(rule) = self.use_simple_number_keys.as_ref() {
+        if let Some(rule) = self.use_regex_literals.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.use_simplified_logic_expression.as_ref() {
+        if let Some(rule) = self.use_simple_number_keys.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
+            }
+        }
+        if let Some(rule) = self.use_simplified_logic_expression.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]));
             }
         }
         index_set
@@ -1882,6 +1897,10 @@ impl Complexity {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useArrowFunction" => self
                 .use_arrow_function
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useDateNow" => self
+                .use_date_now
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useFlatMap" => self
@@ -3050,9 +3069,6 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_member_accessibility:
         Option<RuleConfiguration<biome_js_analyze::options::UseConsistentMemberAccessibility>>,
-    #[doc = "Use Date.now() to get the number of milliseconds since the Unix Epoch."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_date_now: Option<RuleFixConfiguration<biome_js_analyze::options::UseDateNow>>,
     #[doc = "Require the default clause in switch statements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_default_switch_clause:
@@ -3178,7 +3194,6 @@ impl Nursery {
         "useConsistentBuiltinInstantiation",
         "useConsistentCurlyBraces",
         "useConsistentMemberAccessibility",
-        "useDateNow",
         "useDefaultSwitchClause",
         "useDeprecatedReason",
         "useErrorMessage",
@@ -3247,11 +3262,11 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[33]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -3313,7 +3328,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -3540,94 +3554,89 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
-        if let Some(rule) = self.use_date_now.as_ref() {
+        if let Some(rule) = self.use_default_switch_clause.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
-        if let Some(rule) = self.use_default_switch_clause.as_ref() {
+        if let Some(rule) = self.use_deprecated_reason.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_deprecated_reason.as_ref() {
+        if let Some(rule) = self.use_error_message.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
             }
         }
-        if let Some(rule) = self.use_error_message.as_ref() {
+        if let Some(rule) = self.use_explicit_length_check.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
-        if let Some(rule) = self.use_explicit_length_check.as_ref() {
+        if let Some(rule) = self.use_focusable_interactive.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
             }
         }
-        if let Some(rule) = self.use_focusable_interactive.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_import_extensions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
-        if let Some(rule) = self.use_import_extensions.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
         }
-        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
+        if let Some(rule) = self.use_semantic_elements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
             }
         }
-        if let Some(rule) = self.use_semantic_elements.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_strict_mode.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
             }
         }
-        if let Some(rule) = self.use_strict_mode.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
-            }
-        }
         if let Some(rule) = self.use_valid_autocomplete.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
             }
         }
         index_set
@@ -3844,94 +3853,89 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
-        if let Some(rule) = self.use_date_now.as_ref() {
+        if let Some(rule) = self.use_default_switch_clause.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
-        if let Some(rule) = self.use_default_switch_clause.as_ref() {
+        if let Some(rule) = self.use_deprecated_reason.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_deprecated_reason.as_ref() {
+        if let Some(rule) = self.use_error_message.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
             }
         }
-        if let Some(rule) = self.use_error_message.as_ref() {
+        if let Some(rule) = self.use_explicit_length_check.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
-        if let Some(rule) = self.use_explicit_length_check.as_ref() {
+        if let Some(rule) = self.use_focusable_interactive.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
             }
         }
-        if let Some(rule) = self.use_focusable_interactive.as_ref() {
+        if let Some(rule) = self.use_generic_font_names.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_generic_font_names.as_ref() {
+        if let Some(rule) = self.use_import_extensions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
-        if let Some(rule) = self.use_import_extensions.as_ref() {
+        if let Some(rule) = self.use_import_restrictions.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
             }
         }
-        if let Some(rule) = self.use_import_restrictions.as_ref() {
+        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[50]));
             }
         }
-        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
+        if let Some(rule) = self.use_semantic_elements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[51]));
             }
         }
-        if let Some(rule) = self.use_semantic_elements.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[52]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_strict_mode.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[53]));
             }
         }
-        if let Some(rule) = self.use_strict_mode.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[54]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
-            }
-        }
         if let Some(rule) = self.use_valid_autocomplete.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
             }
         }
         index_set
@@ -4136,10 +4140,6 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentMemberAccessibility" => self
                 .use_consistent_member_accessibility
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useDateNow" => self
-                .use_date_now
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useDefaultSwitchClause" => self

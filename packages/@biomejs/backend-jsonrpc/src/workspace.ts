@@ -942,6 +942,10 @@ export interface Complexity {
 	 */
 	useArrowFunction?: RuleFixConfiguration_for_Null;
 	/**
+	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
+	 */
+	useDateNow?: RuleFixConfiguration_for_Null;
+	/**
 	 * Promotes the use of .flatMap() when map().flat() are used together.
 	 */
 	useFlatMap?: RuleFixConfiguration_for_Null;
@@ -1323,10 +1327,6 @@ export interface Nursery {
 	 * Require consistent accessibility modifiers on class properties and methods.
 	 */
 	useConsistentMemberAccessibility?: RuleConfiguration_for_ConsistentMemberAccessibilityOptions;
-	/**
-	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
-	 */
-	useDateNow?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require the default clause in switch statements.
 	 */
@@ -2692,6 +2692,7 @@ export type Category =
 	| "lint/complexity/noVoid"
 	| "lint/complexity/noWith"
 	| "lint/complexity/useArrowFunction"
+	| "lint/complexity/useDateNow"
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
 	| "lint/complexity/useOptionalChain"
@@ -2785,7 +2786,6 @@ export type Category =
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/useConsistentMemberAccessibility"
-	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useErrorMessage"

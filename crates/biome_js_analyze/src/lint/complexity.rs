@@ -26,6 +26,7 @@ pub mod no_useless_type_constraint;
 pub mod no_void;
 pub mod no_with;
 pub mod use_arrow_function;
+pub mod use_date_now;
 pub mod use_flat_map;
 pub mod use_literal_keys;
 pub mod use_optional_chain;
@@ -61,6 +62,7 @@ declare_lint_group! {
             self :: no_void :: NoVoid ,
             self :: no_with :: NoWith ,
             self :: use_arrow_function :: UseArrowFunction ,
+            self :: use_date_now :: UseDateNow ,
             self :: use_flat_map :: UseFlatMap ,
             self :: use_literal_keys :: UseLiteralKeys ,
             self :: use_optional_chain :: UseOptionalChain ,

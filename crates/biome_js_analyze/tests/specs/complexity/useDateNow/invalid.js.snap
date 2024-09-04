@@ -50,7 +50,7 @@ typeof+new Date();
 
 # Diagnostics
 ```
-invalid.js:1:12 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:12 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().getTime.
   
@@ -72,7 +72,7 @@ invalid.js:1:12 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:2:13 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().getTime.
   
@@ -96,7 +96,7 @@ invalid.js:2:13 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:3:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().getTime.
   
@@ -122,7 +122,7 @@ invalid.js:3:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:4:13 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().valueOf.
   
@@ -148,7 +148,7 @@ invalid.js:4:13 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:5:13 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().valueOf.
   
@@ -174,7 +174,7 @@ invalid.js:5:13 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:6:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().valueOf.
   
@@ -200,7 +200,7 @@ invalid.js:6:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:9:21 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:21 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of Number(new Date()).
   
@@ -225,7 +225,7 @@ invalid.js:9:21 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:10:26 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:26 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of Number(new Date()).
   
@@ -256,7 +256,7 @@ invalid.js:10:26 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:15:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -281,7 +281,7 @@ invalid.js:15:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:16:19 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:19 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -307,7 +307,7 @@ invalid.js:16:19 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:17:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -333,7 +333,7 @@ invalid.js:17:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:18:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -359,7 +359,7 @@ invalid.js:18:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:19:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -385,7 +385,7 @@ invalid.js:19:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:20:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -411,7 +411,7 @@ invalid.js:20:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:21:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:14 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -437,7 +437,7 @@ invalid.js:21:14 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:21:58 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:58 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -463,7 +463,7 @@ invalid.js:21:58 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:24:8 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -488,7 +488,7 @@ invalid.js:24:8 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:25:8 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -514,7 +514,7 @@ invalid.js:25:8 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:26:8 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -540,7 +540,7 @@ invalid.js:26:8 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:27:8 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:8 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -566,7 +566,7 @@ invalid.js:27:8 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:28:9 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:9 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -591,7 +591,7 @@ invalid.js:28:9 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:32:13 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:13 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -616,7 +616,7 @@ invalid.js:32:13 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:33:23 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:23 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -642,7 +642,7 @@ invalid.js:33:23 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:36:9 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:9 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -667,7 +667,7 @@ invalid.js:36:9 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:39:10 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:39:10 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -693,7 +693,7 @@ invalid.js:39:10 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.js:41:7 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:7 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
@@ -717,7 +717,7 @@ invalid.js:41:7 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.js:42:7 lint/nursery/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:7 lint/complexity/useDateNow  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use Date.now() instead of new Date().
   
