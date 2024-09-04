@@ -143,7 +143,7 @@ impl JsFormatSyntaxRewriter {
                     // Don't remove parentheses if the expression in js template element
                     || inner.grand_parent().is_some_and(|parent|
                         parent.grand_parent().is_some_and(|node|
-                            node.kind() == JsSyntaxKind::JS_TEMPLATE_ELEMENT 
+                            node.kind() == JsSyntaxKind::JS_TEMPLATE_ELEMENT
                         )
                     )
                     // Don't remove parentheses if the expression is a decorator
