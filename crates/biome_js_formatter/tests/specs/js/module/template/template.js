@@ -59,3 +59,14 @@ message = `this is a long messsage a simple interpolation without a linebreak \$
 message = \`whereas this messsage has a linebreak in the interpolation \${
   foo
 } <- like this`;
+
+// https://github.com/biomejs/biome/issues/3766
+const issus_3766 = `Lectures: ${doneCount}/${totalCount} | Mins: ${(doneSecs / 60).toFixed(
+    2,
+  )}/${(totalSecs / 60).toFixed(
+    2,
+  )}| Hours: ${(doneSecs / 3600).toFixed(
+    2,
+  )}/${(totalSecs / 3600).toFixed(
+    2,
+  )}`;
