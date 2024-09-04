@@ -778,6 +778,7 @@ dependencies = [
  "biome_unicode_table",
  "bitflags 2.6.0",
  "drop_bomb",
+ "enumflags2",
  "expect-test",
  "indexmap 2.5.0",
  "quickcheck",
