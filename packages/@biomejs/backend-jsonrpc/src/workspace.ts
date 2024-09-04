@@ -1150,7 +1150,7 @@ export interface Nursery {
 	/**
 	 * Disallow the use of console.
 	 */
-	noConsole?: RuleFixConfiguration_for_Null;
+	noConsole?: RuleFixConfiguration_for_NoConsoleOptions;
 	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
@@ -1945,6 +1945,9 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
+export type RuleFixConfiguration_for_NoConsoleOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoConsoleOptions;
 export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoLabelWithoutControlOptions;
@@ -2063,6 +2066,20 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 * Rule's options
 	 */
 	options: DeprecatedHooksOptions;
+}
+export interface RuleWithFixOptions_for_NoConsoleOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoConsoleOptions;
 }
 export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
 	/**
@@ -2244,6 +2261,12 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
+export interface NoConsoleOptions {
+	/**
+	 * Allowed calls on the console object.
+	 */
+	allow: string[];
+}
 export interface NoLabelWithoutControlOptions {
 	/**
 	 * Array of component names that should be considered the same as an `input` element.
