@@ -81,7 +81,7 @@ pub type NoEmptyPattern =
 pub type NoEmptyTypeParameters = < lint :: complexity :: no_empty_type_parameters :: NoEmptyTypeParameters as biome_analyze :: Rule > :: Options ;
 pub type NoEnum = <lint::nursery::no_enum::NoEnum as biome_analyze::Rule>::Options;
 pub type NoEvolvingTypes =
-    <lint::nursery::no_evolving_types::NoEvolvingTypes as biome_analyze::Rule>::Options;
+    <lint::suspicious::no_evolving_types::NoEvolvingTypes as biome_analyze::Rule>::Options;
 pub type NoExcessiveCognitiveComplexity = < lint :: complexity :: no_excessive_cognitive_complexity :: NoExcessiveCognitiveComplexity as biome_analyze :: Rule > :: Options ;
 pub type NoExcessiveNestedTestSuites = < lint :: complexity :: no_excessive_nested_test_suites :: NoExcessiveNestedTestSuites as biome_analyze :: Rule > :: Options ;
 pub type NoExplicitAny =

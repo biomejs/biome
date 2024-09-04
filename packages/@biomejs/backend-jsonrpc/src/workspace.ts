@@ -1188,10 +1188,6 @@ export interface Nursery {
 	 */
 	noEnum?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow variables from evolving into any type through reassignments.
-	 */
-	noEvolvingTypes?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow exporting an imported variable.
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
@@ -1739,6 +1735,10 @@ export interface Suspicious {
 	 * Disallow the declaration of empty interfaces.
 	 */
 	noEmptyInterface?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow variables from evolving into any type through reassignments.
+	 */
+	noEvolvingTypes?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the any type usage.
 	 */
@@ -2750,7 +2750,6 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEnum"
-	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
@@ -2878,6 +2877,7 @@ export type Category =
 	| "lint/suspicious/noDuplicateTestHooks"
 	| "lint/suspicious/noEmptyBlockStatements"
 	| "lint/suspicious/noEmptyInterface"
+	| "lint/suspicious/noEvolvingTypes"
 	| "lint/suspicious/noExplicitAny"
 	| "lint/suspicious/noExportsInTest"
 	| "lint/suspicious/noExtraNonNullAssertion"

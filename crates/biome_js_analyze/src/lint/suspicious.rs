@@ -25,6 +25,7 @@ pub mod no_duplicate_parameters;
 pub mod no_duplicate_test_hooks;
 pub mod no_empty_block_statements;
 pub mod no_empty_interface;
+pub mod no_evolving_types;
 pub mod no_explicit_any;
 pub mod no_exports_in_test;
 pub mod no_extra_non_null_assertion;
@@ -85,6 +86,7 @@ declare_lint_group! {
             self :: no_duplicate_test_hooks :: NoDuplicateTestHooks ,
             self :: no_empty_block_statements :: NoEmptyBlockStatements ,
             self :: no_empty_interface :: NoEmptyInterface ,
+            self :: no_evolving_types :: NoEvolvingTypes ,
             self :: no_explicit_any :: NoExplicitAny ,
             self :: no_exports_in_test :: NoExportsInTest ,
             self :: no_extra_non_null_assertion :: NoExtraNonNullAssertion ,

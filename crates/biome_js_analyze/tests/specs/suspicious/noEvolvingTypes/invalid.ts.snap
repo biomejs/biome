@@ -28,7 +28,7 @@ function ex() {
 
 # Diagnostics
 ```
-invalid.ts:1:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:1:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The type of this variable may evolve implicitly to any type, including the any type.
   
@@ -43,7 +43,7 @@ invalid.ts:1:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:2:7 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:7 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The type of this variable may evolve implicitly to any type, including the any type.
   
@@ -59,7 +59,7 @@ invalid.ts:2:7 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:3:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:3:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The type of this variable may evolve implicitly to any type, including the any type.
   
@@ -76,7 +76,7 @@ invalid.ts:3:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:5:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:5:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The type of this variable may evolve implicitly to any type, including the any type.
   
@@ -93,7 +93,7 @@ invalid.ts:5:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:9:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:5 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The type of this variable may evolve implicitly to any type, including the any type.
   
@@ -110,7 +110,7 @@ invalid.ts:9:5 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━
 ```
 
 ```
-invalid.ts:13:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:12 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The type of this variable may evolve implicitly to any type, including the any type.
   
@@ -127,7 +127,7 @@ invalid.ts:13:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:14:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:14:12 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The type of this variable may evolve implicitly to any type, including the any type.
   
@@ -143,7 +143,7 @@ invalid.ts:14:12 lint/nursery/noEvolvingTypes ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:15:16 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:15:16 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The type of this variable may evolve implicitly to any type, including the any type.
   
@@ -160,7 +160,7 @@ invalid.ts:15:16 lint/nursery/noEvolvingTypes ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:18:9 lint/nursery/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:18:9 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The type of this variable may evolve implicitly to any type, including the any type.
   

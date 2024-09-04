@@ -2007,13 +2007,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noEvolvingTypes": {
-					"description": "Disallow variables from evolving into any type through reassignments.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noExportedImports": {
 					"description": "Disallow exporting an imported variable.",
 					"anyOf": [
@@ -3609,6 +3602,13 @@
 					"description": "Disallow the declaration of empty interfaces.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEvolvingTypes": {
+					"description": "Disallow variables from evolving into any type through reassignments.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
