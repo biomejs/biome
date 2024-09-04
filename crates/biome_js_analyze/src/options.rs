@@ -294,7 +294,7 @@ pub type UseDefaultSwitchClauseLast = < lint :: suspicious :: use_default_switch
 pub type UseEnumInitializers =
     <lint::style::use_enum_initializers::UseEnumInitializers as biome_analyze::Rule>::Options;
 pub type UseErrorMessage =
-    <lint::nursery::use_error_message::UseErrorMessage as biome_analyze::Rule>::Options;
+    <lint::suspicious::use_error_message::UseErrorMessage as biome_analyze::Rule>::Options;
 pub type UseExhaustiveDependencies = < lint :: correctness :: use_exhaustive_dependencies :: UseExhaustiveDependencies as biome_analyze :: Rule > :: Options ;
 pub type UseExplicitLengthCheck = < lint :: style :: use_explicit_length_check :: UseExplicitLengthCheck as biome_analyze :: Rule > :: Options ;
 pub type UseExponentiationOperator = < lint :: style :: use_exponentiation_operator :: UseExponentiationOperator as biome_analyze :: Rule > :: Options ;

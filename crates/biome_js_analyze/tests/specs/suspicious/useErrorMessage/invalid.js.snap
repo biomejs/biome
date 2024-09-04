@@ -43,7 +43,7 @@ new AggregateError(errors, { foo });
 
 # Diagnostics
 ```
-invalid.js:1:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -58,7 +58,7 @@ invalid.js:1:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:2:12 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:12 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -74,7 +74,7 @@ invalid.js:2:12 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:3:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should not be an empty string.
   
@@ -91,7 +91,7 @@ invalid.js:3:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:4:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should not be an empty string.
   
@@ -108,7 +108,7 @@ invalid.js:4:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:6:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -125,7 +125,7 @@ invalid.js:6:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:7:14 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:14 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -141,7 +141,7 @@ invalid.js:7:14 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:8:18 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:18 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -158,7 +158,7 @@ invalid.js:8:18 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:9:15 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:15 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -175,7 +175,7 @@ invalid.js:9:15 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:10:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -192,7 +192,7 @@ invalid.js:10:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:11:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -209,7 +209,7 @@ invalid.js:11:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:12:14 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:14 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -226,7 +226,7 @@ invalid.js:12:14 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:13:13 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:13 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -243,7 +243,7 @@ invalid.js:13:13 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:15:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -260,7 +260,7 @@ invalid.js:15:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:16:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -276,7 +276,7 @@ invalid.js:16:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:17:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -293,7 +293,7 @@ invalid.js:17:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:18:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -310,7 +310,7 @@ invalid.js:18:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:19:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -327,7 +327,7 @@ invalid.js:19:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:21:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -344,7 +344,7 @@ invalid.js:21:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:22:16 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:16 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -361,7 +361,7 @@ invalid.js:22:16 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:24:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -378,7 +378,7 @@ invalid.js:24:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:25:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Provide an error message for the error.
   
@@ -394,7 +394,7 @@ invalid.js:25:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:26:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should not be an empty string.
   
@@ -411,7 +411,7 @@ invalid.js:26:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:27:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should not be an empty string.
   
@@ -428,7 +428,7 @@ invalid.js:27:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:28:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should not be an empty string.
   
@@ -445,7 +445,7 @@ invalid.js:28:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:30:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -462,7 +462,7 @@ invalid.js:30:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:31:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -478,7 +478,7 @@ invalid.js:31:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:33:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   
@@ -495,7 +495,7 @@ invalid.js:33:19 lint/nursery/useErrorMessage ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:34:19 lint/nursery/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:19 lint/suspicious/useErrorMessage ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Error message should be a string.
   

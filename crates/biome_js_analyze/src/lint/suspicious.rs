@@ -54,6 +54,7 @@ pub mod no_unsafe_declaration_merging;
 pub mod no_unsafe_negation;
 pub mod use_await;
 pub mod use_default_switch_clause_last;
+pub mod use_error_message;
 pub mod use_getter_return;
 pub mod use_is_array;
 pub mod use_namespace_keyword;
@@ -115,6 +116,7 @@ declare_lint_group! {
             self :: no_unsafe_negation :: NoUnsafeNegation ,
             self :: use_await :: UseAwait ,
             self :: use_default_switch_clause_last :: UseDefaultSwitchClauseLast ,
+            self :: use_error_message :: UseErrorMessage ,
             self :: use_getter_return :: UseGetterReturn ,
             self :: use_is_array :: UseIsArray ,
             self :: use_namespace_keyword :: UseNamespaceKeyword ,

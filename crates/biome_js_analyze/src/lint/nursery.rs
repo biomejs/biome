@@ -27,7 +27,6 @@ pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_member_accessibility;
 pub mod use_default_switch_clause;
-pub mod use_error_message;
 pub mod use_focusable_interactive;
 pub mod use_import_extensions;
 pub mod use_import_restrictions;
@@ -70,7 +69,6 @@ declare_lint_group! {
             self :: use_consistent_curly_braces :: UseConsistentCurlyBraces ,
             self :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility ,
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,
-            self :: use_error_message :: UseErrorMessage ,
             self :: use_focusable_interactive :: UseFocusableInteractive ,
             self :: use_import_extensions :: UseImportExtensions ,
             self :: use_import_restrictions :: UseImportRestrictions ,

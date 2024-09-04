@@ -1336,10 +1336,6 @@ export interface Nursery {
 	 */
 	useDeprecatedReason?: RuleConfiguration_for_Null;
 	/**
-	 * Enforce passing a message value when creating a built-in error.
-	 */
-	useErrorMessage?: RuleConfiguration_for_Null;
-	/**
 	 * Elements with an interactive role and interaction handlers must be focusable.
 	 */
 	useFocusableInteractive?: RuleConfiguration_for_Null;
@@ -1855,6 +1851,10 @@ export interface Suspicious {
 	 * Enforce default clauses in switch statements to be last
 	 */
 	useDefaultSwitchClauseLast?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce passing a message value when creating a built-in error.
+	 */
+	useErrorMessage?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce get methods to always return a value.
 	 */
@@ -2788,7 +2788,6 @@ export type Category =
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useDeprecatedReason"
-	| "lint/nursery/useErrorMessage"
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportExtensions"
@@ -2906,6 +2905,7 @@ export type Category =
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
+	| "lint/suspicious/useErrorMessage"
 	| "lint/suspicious/useGetterReturn"
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"

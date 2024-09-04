@@ -2265,13 +2265,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useErrorMessage": {
-					"description": "Enforce passing a message value when creating a built-in error.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useFocusableInteractive": {
 					"description": "Elements with an interactive role and interaction handlers must be focusable.",
 					"anyOf": [
@@ -3807,6 +3800,13 @@
 				},
 				"useDefaultSwitchClauseLast": {
 					"description": "Enforce default clauses in switch statements to be last",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useErrorMessage": {
+					"description": "Enforce passing a message value when creating a built-in error.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
