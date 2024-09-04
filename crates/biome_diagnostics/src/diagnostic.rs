@@ -177,22 +177,6 @@ pub(super) enum DiagnosticTag {
     Verbose = 1 << 4,
 }
 
-impl std::fmt::Display for DiagnosticTag {
-    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            fmt,
-            "{}",
-            match self {
-                DiagnosticTag::Fixable => "fixable",
-                DiagnosticTag::Internal => "internal",
-                DiagnosticTag::UnnecessaryCode => "unnecessary code",
-                DiagnosticTag::DeprecatedCode => "deprecated code",
-                DiagnosticTag::Verbose => "verbose",
-            }
-        )
-    }
-}
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct DiagnosticTags(BitFlags<DiagnosticTag>);
 impl DiagnosticTags {
