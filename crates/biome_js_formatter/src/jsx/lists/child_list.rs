@@ -43,9 +43,23 @@ impl FormatRule<JsxChildList> for FormatJsxChildList {
     }
 }
 
+/// The result of formatting the children of an [JsxChildList]. This is ultimately determined by [FormatJsxChildList::layout].
 #[derive(Debug)]
 pub(crate) enum FormatChildrenResult {
+    /// Force the children to be formatted over multiple lines.
+    ///
+    /// For example:
+    /// ```jsx
+    /// <div>
+    ///     <div>1</div>
+    ///     <div>2</div>
+    /// </div>
+    /// ```
+    ///
+    /// This usually occurs when the children are already formatted over multiple lines, or when the children contains another tag.
     ForceMultiline(FormatMultilineChildren),
+
+    /// Let the formatter determine whether the children should be formatted over multiple lines or if they can be kept on a single line.
     BestFitting {
         flat_children: FormatFlatChildren,
         expanded_children: FormatMultilineChildren,
