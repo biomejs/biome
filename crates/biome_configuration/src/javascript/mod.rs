@@ -45,18 +45,14 @@ pub struct JavascriptConfiguration {
     #[partial(bpaf(hide))]
     pub jsx_runtime: JsxRuntime,
 
-    /// Indicates the name of the factory function used to create React elements.
-    ///
-    /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
+    /// Indicates the name of the factory function used to create JSX elements.
     #[partial(
         bpaf(hide),
         serde(deserialize_with = "deserialize_optional_jsx_factory_from_string")
     )]
     pub jsx_factory: JsxFactory,
 
-    /// Indicates the name of the factory function used to create React fragment elements.
-    ///
-    /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
+    /// Indicates the name of the factory function used to create JSX fragments.
     #[partial(
         bpaf(hide),
         serde(deserialize_with = "deserialize_optional_jsx_factory_from_string")
@@ -171,7 +167,6 @@ fn parse_jsx_factory(value: &str) -> Option<JsxFactory> {
     None
 }
 
-/// Indicates the type of runtime or transformation used for interpreting JSX.
 #[derive(Bpaf, Clone, Debug, Deserialize, Eq, Merge, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]

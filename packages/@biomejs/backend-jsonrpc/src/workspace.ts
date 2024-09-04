@@ -247,6 +247,14 @@ If defined here, they should not emit diagnostics.
 	 */
 	globals?: StringSet;
 	/**
+	 * Indicates the name of the factory function used to create JSX elements.
+	 */
+	jsxFactory?: JsxFactory;
+	/**
+	 * Indicates the name of the factory function used to create JSX fragments.
+	 */
+	jsxFragmentFactory?: JsxFactory;
+	/**
 	 * Indicates the type of runtime or transformation used for interpreting JSX.
 	 */
 	jsxRuntime?: JsxRuntime;
@@ -535,6 +543,7 @@ export interface PartialJavascriptFormatter {
 	 */
 	trailingCommas?: TrailingCommas;
 }
+export type JsxFactory = string;
 /**
  * Indicates the type of runtime or transformation used for interpreting JSX.
  */

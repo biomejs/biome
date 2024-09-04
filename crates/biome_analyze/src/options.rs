@@ -96,12 +96,12 @@ pub struct AnalyzerConfiguration {
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     pub jsx_runtime: Option<JsxRuntime>,
 
-    /// Indicates the name of the factory function used to create React elements.
+    /// Indicates the name of the factory function used to create JSX elements.
     ///
     /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
     pub jsx_factory: Option<JsxFactory>,
 
-    /// Indicates the name of the factory function used to create React fragment elements.
+    /// Indicates the name of the factory function used to create JSX fragments.
     ///
     /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
     pub jsx_fragment_factory: Option<JsxFactory>,

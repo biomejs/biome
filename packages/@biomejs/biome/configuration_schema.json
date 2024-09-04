@@ -1375,6 +1375,14 @@
 					"description": "A list of global bindings that should be ignored by the analyzers\n\nIf defined here, they should not emit diagnostics.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
+				"jsxFactory": {
+					"description": "Indicates the name of the factory function used to create JSX elements.",
+					"anyOf": [{ "$ref": "#/definitions/JsxFactory" }, { "type": "null" }]
+				},
+				"jsxFragmentFactory": {
+					"description": "Indicates the name of the factory function used to create JSX fragments.",
+					"anyOf": [{ "$ref": "#/definitions/JsxFactory" }, { "type": "null" }]
+				},
 				"jsxRuntime": {
 					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
 					"anyOf": [{ "$ref": "#/definitions/JsxRuntime" }, { "type": "null" }]
@@ -1617,6 +1625,7 @@
 			},
 			"additionalProperties": false
 		},
+		"JsxFactory": { "type": "string" },
 		"JsxRuntime": {
 			"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
 			"oneOf": [
