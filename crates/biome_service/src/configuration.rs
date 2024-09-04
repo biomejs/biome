@@ -188,7 +188,6 @@ fn load_config(
     // If the configuration path hint is from user and is a file path,
     // we'll load it directly
     if let ConfigurationPathHint::FromUser(ref config_file_path) = base_path {
-        dbg!(config_file_path);
         if file_system.path_is_file(config_file_path) {
             let content = file_system.read_file_from_path(config_file_path)?;
             let parser_options = match config_file_path.extension().map(OsStr::as_encoded_bytes) {
@@ -199,7 +198,6 @@ fn load_config(
             };
             let deserialized =
                 deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
-            dbg!(&deserialized);
             return Ok(Some(ConfigurationPayload {
                 deserialized,
                 configuration_file_path: PathBuf::from(config_file_path),

@@ -591,7 +591,6 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
             jsx_factory: Some(javascript.jsx_factory),
             jsx_fragment_factory: Some(javascript.jsx_fragment_factory),
         };
-        dbg!(&language_setting.environment);
         language_setting.linter.enabled = Some(javascript.linter.enabled);
 
         language_setting
