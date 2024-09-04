@@ -37,15 +37,26 @@
 
 SyntaxElement = SyntaxElement
 
-Bogus = SyntaxElement*
+MarkdownBogus = SyntaxElement*
 
-Root = 
+MarkdownDocument = 
 	bom: 'UNICODE_BOM'?
-    value: AnyValue
+    value: AnyMarkdownBlock
     eof: 'EOF'
 
-AnyValue = NumberValueList
+AnyMarkdownBlock = MarkdownParagraph | MarkdownHeader | MarkdownList
 
-NumberValueList = NumberValue*
+MarkdownHeader = '#' MarkdownH1 '#'?
 
-NumberValue = value: 'number_literal'
+MarkdownH1 = '#' MarkdownH2 '#'? MarkdownParagraph?
+MarkdownH2 = '#' MarkdownH3 '#'? MarkdownParagraph?
+MarkdownH3 = '#' MarkdownH4 '#'? MarkdownParagraph?
+MarkdownH4 = '#' MarkdownH5 '#'? MarkdownParagraph?
+MarkdownH5 = '#' MarkdownH6 '#'? MarkdownParagraph?
+MarkdownH6 =  MarkdownParagraph?
+
+MarkdownList = MarkdownString*
+
+MarkdownParagraph = MarkdownString
+
+MarkdownString = value: 'markdown_string_literal'
