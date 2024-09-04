@@ -133,9 +133,10 @@ impl SemanticEvent {
 /// use biome_js_semantic::*;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
 /// let mut extractor = SemanticEventExtractor::default();
+/// let ctx = SemanticEventExtractorContext::default();
 /// for e in tree.syntax().preorder() {
 ///     match e {
-///         WalkEvent::Enter(node) => extractor.enter(&node),
+///         WalkEvent::Enter(node) => extractor.enter(&node, &ctx),
 ///         WalkEvent::Leave(node) => extractor.leave(&node),
 ///         _ => {}
 ///     }

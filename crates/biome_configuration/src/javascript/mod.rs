@@ -136,32 +136,24 @@ fn parse_jsx_factory(value: &str) -> Option<JsxFactory> {
     use biome_js_syntax::*;
     let syntax = parse_module(value, JsParserOptions::default());
     let item = syntax.try_tree()?.items().into_iter().next()?;
-    match item {
-        AnyJsModuleItem::AnyJsStatement(stmt) => {
-            match JsExpressionStatement::cast_ref(stmt.syntax())?
-                .expression()
-                .ok()?
-            {
-                AnyJsExpression::JsStaticMemberExpression(member) => {
-                    let mut expr = member.object().ok();
-                    while let Some(e) = expr {
-                        let syntax = e.into_syntax();
-                        if let Some(ident) = JsIdentifierExpression::cast_ref(&syntax) {
-                            return Some(JsxFactory(ident.text().to_owned()));
-                        } else if let Some(member) = JsStaticMemberExpression::cast_ref(&syntax) {
-                            expr = member.object().ok();
-                        } else {
-                            break;
-                        }
-                    }
+    if let AnyJsModuleItem::AnyJsStatement(stmt) = item {
+        let expr = JsExpressionStatement::cast_ref(stmt.syntax())?
+            .expression()
+            .ok()?;
+        if let AnyJsExpression::JsStaticMemberExpression(member) = expr {
+            let mut expr = member.object().ok();
+            while let Some(e) = expr {
+                if let Some(ident) = JsIdentifierExpression::cast_ref(e.syntax()) {
+                    return Some(JsxFactory(ident.text().clone()));
+                } else if let Some(member) = JsStaticMemberExpression::cast_ref(e.syntax()) {
+                    expr = member.object().ok();
+                } else {
+                    break;
                 }
-                AnyJsExpression::JsIdentifierExpression(ident) => {
-                    return Some(JsxFactory(ident.text().to_owned()));
-                }
-                _ => (),
             }
+        } else if let AnyJsExpression::JsIdentifierExpression(ident) = expr {
+            return Some(JsxFactory(ident.text().clone()));
         }
-        _ => (),
     }
 
     None

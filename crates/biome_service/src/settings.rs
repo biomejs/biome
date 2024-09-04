@@ -979,7 +979,7 @@ impl OverrideSettings {
                     None
                 }
             })
-            .or_else(|| base_setting.map(|f| f.clone()))
+            .or_else(|| base_setting.cloned())
     }
 
     pub fn override_jsx_fragment_factory(
@@ -1003,7 +1003,7 @@ impl OverrideSettings {
                     None
                 }
             })
-            .or_else(|| base_setting.map(|f| f.clone()))
+            .or_else(|| base_setting.cloned())
     }
 
     /// It scans the current override rules and return the json format that of the first override is matched

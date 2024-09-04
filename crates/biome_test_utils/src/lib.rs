@@ -103,7 +103,7 @@ pub fn create_analyzer_options(
                 configuration.javascript.as_ref().and_then(|js| {
                     js.jsx_fragment_factory
                         .clone()
-                        .and_then(|f| Some(f.into_string().into()))
+                        .map(|f| f.into_string().into())
                 });
             analyzer_configuration.globals = configuration
                 .javascript

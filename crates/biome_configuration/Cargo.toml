@@ -44,13 +44,13 @@ serde_json               = { workspace = true, features = ["raw_value"] }
 
 [features]
 schema = [
-	"dep:schemars",
-	"biome_js_analyze/schema",
-	"biome_css_analyze/schema",
-	"biome_formatter/serde",
-	"biome_json_syntax/schema",
-	"biome_css_syntax/schema",
-	"biome_graphql_syntax/schema",
+  "dep:schemars",
+  "biome_js_analyze/schema",
+  "biome_css_analyze/schema",
+  "biome_formatter/serde",
+  "biome_json_syntax/schema",
+  "biome_css_syntax/schema",
+  "biome_graphql_syntax/schema",
 ]
 
 [dev-dependencies]
