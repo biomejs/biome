@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_html_syntax::HtmlAttributeInitializerClause;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_html_syntax::{HtmlAttributeInitializerClause, HtmlAttributeInitializerClauseFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlAttributeInitializerClause;
 impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeInitializerClause {
@@ -9,6 +9,8 @@ impl FormatNodeRule<HtmlAttributeInitializerClause> for FormatHtmlAttributeIniti
         node: &HtmlAttributeInitializerClause,
         f: &mut HtmlFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let HtmlAttributeInitializerClauseFields { eq_token, value } = node.as_fields();
+
+        write![f, [eq_token.format(), value.format()]]
     }
 }
