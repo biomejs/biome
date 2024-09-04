@@ -16,7 +16,7 @@ switch (a) {
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Expected a default switch clause.
   
@@ -37,7 +37,7 @@ invalid.js:1:1 lint/nursery/useDefaultSwitchClause ━━━━━━━━━�
 ```
 
 ```
-invalid.js:6:1 lint/nursery/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Expected a default switch clause.
   

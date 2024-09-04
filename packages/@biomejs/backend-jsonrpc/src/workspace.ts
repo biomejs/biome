@@ -1328,10 +1328,6 @@ export interface Nursery {
 	 */
 	useConsistentMemberAccessibility?: RuleConfiguration_for_ConsistentMemberAccessibilityOptions;
 	/**
-	 * Require the default clause in switch statements.
-	 */
-	useDefaultSwitchClause?: RuleConfiguration_for_Null;
-	/**
 	 * Require specifying the reason argument when using @deprecated directive
 	 */
 	useDeprecatedReason?: RuleConfiguration_for_Null;
@@ -1542,6 +1538,10 @@ export interface Style {
 	 * Enforce default function parameters and optional function parameters to be last.
 	 */
 	useDefaultParameterLast?: RuleFixConfiguration_for_Null;
+	/**
+	 * Require the default clause in switch statements.
+	 */
+	useDefaultSwitchClause?: RuleConfiguration_for_Null;
 	/**
 	 * Require that each enum member value be explicitly initialized.
 	 */
@@ -2786,7 +2786,6 @@ export type Category =
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/useConsistentMemberAccessibility"
-	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
@@ -2831,6 +2830,7 @@ export type Category =
 	| "lint/style/useConsistentArrayType"
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
+	| "lint/style/useDefaultSwitchClause"
 	| "lint/style/useEnumInitializers"
 	| "lint/style/useExplicitLengthCheck"
 	| "lint/style/useExponentiationOperator"

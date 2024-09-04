@@ -2251,13 +2251,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useDefaultSwitchClause": {
-					"description": "Require the default clause in switch statements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useDeprecatedReason": {
 					"description": "Require specifying the reason argument when using @deprecated directive",
 					"anyOf": [
@@ -3254,6 +3247,13 @@
 					"description": "Enforce default function parameters and optional function parameters to be last.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDefaultSwitchClause": {
+					"description": "Require the default clause in switch statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
