@@ -558,6 +558,7 @@ enum NodeDialect {
     Css,
     Grit,
     Graphql,
+    Html,
 }
 
 impl NodeDialect {
@@ -570,6 +571,7 @@ impl NodeDialect {
             NodeDialect::Css,
             NodeDialect::Grit,
             NodeDialect::Graphql,
+            NodeDialect::Html,
         ]
     }
 
@@ -586,6 +588,7 @@ impl NodeDialect {
             NodeDialect::Css => "css",
             NodeDialect::Grit => "grit",
             NodeDialect::Graphql => "graphql",
+            NodeDialect::Html => "html",
         }
     }
 
@@ -598,6 +601,7 @@ impl NodeDialect {
             "Css" => NodeDialect::Css,
             "Grit" => NodeDialect::Grit,
             "Graphql" => NodeDialect::Graphql,
+            "Html" => NodeDialect::Html,
             _ => {
                 eprintln!("missing prefix {name}");
                 NodeDialect::Js
