@@ -240,7 +240,7 @@ pub type NoUselessLabel =
 pub type NoUselessLoneBlockStatements = < lint :: complexity :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements as biome_analyze :: Rule > :: Options ;
 pub type NoUselessRename =
     <lint::complexity::no_useless_rename::NoUselessRename as biome_analyze::Rule>::Options;
-pub type NoUselessStringConcat = < lint :: nursery :: no_useless_string_concat :: NoUselessStringConcat as biome_analyze :: Rule > :: Options ;
+pub type NoUselessStringConcat = < lint :: complexity :: no_useless_string_concat :: NoUselessStringConcat as biome_analyze :: Rule > :: Options ;
 pub type NoUselessSwitchCase =
     <lint::complexity::no_useless_switch_case::NoUselessSwitchCase as biome_analyze::Rule>::Options;
 pub type NoUselessTernary =

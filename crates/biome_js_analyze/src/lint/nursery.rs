@@ -19,7 +19,6 @@ pub mod no_substr;
 pub mod no_undeclared_dependencies;
 pub mod no_unused_function_parameters;
 pub mod no_useless_escape_in_regex;
-pub mod no_useless_string_concat;
 pub mod no_useless_undefined_initialization;
 pub mod no_yoda_expression;
 pub mod use_adjacent_overload_signatures;
@@ -65,7 +64,6 @@ declare_lint_group! {
             self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: no_unused_function_parameters :: NoUnusedFunctionParameters ,
             self :: no_useless_escape_in_regex :: NoUselessEscapeInRegex ,
-            self :: no_useless_string_concat :: NoUselessStringConcat ,
             self :: no_useless_undefined_initialization :: NoUselessUndefinedInitialization ,
             self :: no_yoda_expression :: NoYodaExpression ,
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,

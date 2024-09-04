@@ -24,7 +24,7 @@ const a = 1 + 1 + ""
 
 # Diagnostics
 ```
-invalid.js:1:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -46,7 +46,7 @@ invalid.js:1:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:2:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -70,7 +70,7 @@ invalid.js:2:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:3:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -96,7 +96,7 @@ invalid.js:3:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:4:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -122,7 +122,7 @@ invalid.js:4:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:5:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -148,7 +148,7 @@ invalid.js:5:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:6:26 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:26 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -174,7 +174,7 @@ invalid.js:6:26 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:7:27 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:27 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -200,7 +200,7 @@ invalid.js:7:27 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:8:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -226,7 +226,7 @@ invalid.js:8:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:9:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -252,7 +252,7 @@ invalid.js:9:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:10:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -278,7 +278,7 @@ invalid.js:10:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:11:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -304,7 +304,7 @@ invalid.js:11:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:12:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -330,7 +330,7 @@ invalid.js:12:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:13:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -356,7 +356,7 @@ invalid.js:13:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:14:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:11 lint/complexity/noUselessStringConcat  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   
@@ -382,7 +382,7 @@ invalid.js:14:11 lint/nursery/noUselessStringConcat  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:15:11 lint/nursery/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:11 lint/complexity/noUselessStringConcat ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Useless string concatenation.
   

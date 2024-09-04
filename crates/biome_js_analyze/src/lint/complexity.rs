@@ -18,6 +18,7 @@ pub mod no_useless_fragments;
 pub mod no_useless_label;
 pub mod no_useless_lone_block_statements;
 pub mod no_useless_rename;
+pub mod no_useless_string_concat;
 pub mod no_useless_switch_case;
 pub mod no_useless_ternary;
 pub mod no_useless_this_alias;
@@ -52,6 +53,7 @@ declare_lint_group! {
             self :: no_useless_label :: NoUselessLabel ,
             self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
             self :: no_useless_rename :: NoUselessRename ,
+            self :: no_useless_string_concat :: NoUselessStringConcat ,
             self :: no_useless_switch_case :: NoUselessSwitchCase ,
             self :: no_useless_ternary :: NoUselessTernary ,
             self :: no_useless_this_alias :: NoUselessThisAlias ,

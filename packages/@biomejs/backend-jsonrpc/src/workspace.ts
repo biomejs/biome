@@ -906,6 +906,10 @@ export interface Complexity {
 	 */
 	noUselessRename?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary concatenation of string or template literals.
+	 */
+	noUselessStringConcat?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow useless case in switch statements.
 	 */
 	noUselessSwitchCase?: RuleFixConfiguration_for_Null;
@@ -1283,10 +1287,6 @@ export interface Nursery {
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow unnecessary concatenation of string or template literals.
-	 */
-	noUselessStringConcat?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow initializing variables to undefined.
 	 */
@@ -2684,6 +2684,7 @@ export type Category =
 	| "lint/complexity/noUselessLabel"
 	| "lint/complexity/noUselessLoneBlockStatements"
 	| "lint/complexity/noUselessRename"
+	| "lint/complexity/noUselessStringConcat"
 	| "lint/complexity/noUselessSwitchCase"
 	| "lint/complexity/noUselessTernary"
 	| "lint/complexity/noUselessThisAlias"
@@ -2774,7 +2775,6 @@ export type Category =
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
-	| "lint/nursery/noUselessStringConcat"
 	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/noYodaExpression"
