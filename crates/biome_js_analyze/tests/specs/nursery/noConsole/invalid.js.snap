@@ -20,16 +20,16 @@ globalThis.console.warn();
 ```
 invalid.js:1:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console
+  ! Don't use console.
   
   > 1 │ console.log('hello world')
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ console.info('hello world')
     3 │ console.warn('hello world')
   
-  i Usage of console is disallowed.
+  i The use of console is often reserved for debugging.
   
-  i Unsafe fix: Remove console
+  i Unsafe fix: Remove console.
   
     1 │ console.log('hello·world')
       │ --------------------------
@@ -39,7 +39,7 @@ invalid.js:1:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:2:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console
+  ! Don't use console.
   
     1 │ console.log('hello world')
   > 2 │ console.info('hello world')
@@ -47,9 +47,9 @@ invalid.js:2:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
     3 │ console.warn('hello world')
     4 │ console.table('hello world')
   
-  i Usage of console is disallowed.
+  i The use of console is often reserved for debugging.
   
-  i Unsafe fix: Remove console
+  i Unsafe fix: Remove console.
   
      1 1 │   console.log('hello world')
      2   │ - console.info('hello·world')
@@ -62,7 +62,7 @@ invalid.js:2:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:3:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console
+  ! Don't use console.
   
     1 │ console.log('hello world')
     2 │ console.info('hello world')
@@ -71,9 +71,9 @@ invalid.js:3:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
     4 │ console.table('hello world')
     5 │ console.error('hello world')
   
-  i Usage of console is disallowed.
+  i The use of console is often reserved for debugging.
   
-  i Unsafe fix: Remove console
+  i Unsafe fix: Remove console.
   
      1 1 │   console.log('hello world')
      2 2 │   console.info('hello world')
@@ -87,7 +87,7 @@ invalid.js:3:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:4:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console
+  ! Don't use console.
   
     2 │ console.info('hello world')
     3 │ console.warn('hello world')
@@ -96,9 +96,9 @@ invalid.js:4:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
     5 │ console.error('hello world')
     6 │ console.nonExistent('hello world')
   
-  i Usage of console is disallowed.
+  i The use of console is often reserved for debugging.
   
-  i Unsafe fix: Remove console
+  i Unsafe fix: Remove console.
   
      2 2 │   console.info('hello world')
      3 3 │   console.warn('hello world')
@@ -112,7 +112,7 @@ invalid.js:4:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console
+  ! Don't use console.
   
     3 │ console.warn('hello world')
     4 │ console.table('hello world')
@@ -121,9 +121,9 @@ invalid.js:5:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
     6 │ console.nonExistent('hello world')
     7 │ console.log('with semicolon');
   
-  i Usage of console is disallowed.
+  i The use of console is often reserved for debugging.
   
-  i Unsafe fix: Remove console
+  i Unsafe fix: Remove console.
   
      3 3 │   console.warn('hello world')
      4 4 │   console.table('hello world')
@@ -137,7 +137,7 @@ invalid.js:5:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:6:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console
+  ! Don't use console.
   
     4 │ console.table('hello world')
     5 │ console.error('hello world')
@@ -146,9 +146,9 @@ invalid.js:6:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
     7 │ console.log('with semicolon');
     8 │ 
   
-  i Usage of console is disallowed.
+  i The use of console is often reserved for debugging.
   
-  i Unsafe fix: Remove console
+  i Unsafe fix: Remove console.
   
      4 4 │   console.table('hello world')
      5 5 │   console.error('hello world')
@@ -162,7 +162,7 @@ invalid.js:6:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:7:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console
+  ! Don't use console.
   
     5 │ console.error('hello world')
     6 │ console.nonExistent('hello world')
@@ -171,9 +171,9 @@ invalid.js:7:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
     8 │ 
     9 │ globalThis.console.warn();
   
-  i Usage of console is disallowed.
+  i The use of console is often reserved for debugging.
   
-  i Unsafe fix: Remove console
+  i Unsafe fix: Remove console.
   
      5 5 │   console.error('hello world')
      6 6 │   console.nonExistent('hello world')
@@ -187,7 +187,7 @@ invalid.js:7:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 invalid.js:9:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use console
+  ! Don't use console.
   
      7 │ console.log('with semicolon');
      8 │ 
@@ -195,9 +195,9 @@ invalid.js:9:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
   
-  i Usage of console is disallowed.
+  i The use of console is often reserved for debugging.
   
-  i Unsafe fix: Remove console
+  i Unsafe fix: Remove console.
   
      6 6 │   console.nonExistent('hello world')
      7 7 │   console.log('with semicolon');

@@ -478,6 +478,11 @@ impl Deserializable for Rules {
                     };
                     match rule_name.text() {
                         // Eslint rules with options that we handle
+                        "no-console" => {
+                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                                result.insert(Rule::NoConsole(conf));
+                            }
+                        }
                         "no-restricted-globals" => {
                             if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
                                 result.insert(Rule::NoRestrictedGlobals(conf));
@@ -529,6 +534,17 @@ impl Deserializable for Rules {
     }
 }
 
+#[derive(Debug, Default, Deserializable)]
+pub struct NoConsoleOptions {
+    /// Allowed calls on the console object.
+    pub allow: Vec<String>,
+}
+impl From<NoConsoleOptions> for biome_js_analyze::lint::nursery::no_console::NoConsoleOptions {
+    fn from(val: NoConsoleOptions) -> Self {
+        biome_js_analyze::lint::nursery::no_console::NoConsoleOptions { allow: val.allow }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) enum NoRestrictedGlobal {
     Plain(String),
@@ -568,6 +584,7 @@ pub(crate) enum Rule {
     Any(Cow<'static, str>, Severity),
     // Eslint rules with its options
     // We use this to configure equivalent Bione's rules.
+    NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     // Eslint plugins
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
@@ -583,6 +600,7 @@ impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {
         match self {
             Rule::Any(name, _) => name.clone(),
+            Rule::NoConsole(_) => Cow::Borrowed("no-console"),
             Rule::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Rule::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Rule::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
