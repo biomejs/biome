@@ -285,9 +285,9 @@ struct Scope {
 
 #[derive(Default)]
 pub struct SemanticEventExtractorContext<'a> {
-    /// The factory used to create jsx elements.
+    /// The factory used to create JSX elements.
     pub jsx_factory: Option<&'a str>,
-    /// The factory used to create jsx fragments.
+    /// The factory used to create JSX fragments.
     pub jsx_fragment_factory: Option<&'a str>,
 }
 
