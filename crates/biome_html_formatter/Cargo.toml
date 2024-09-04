@@ -1,0 +1,20 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_html_formatter"
+repository.workspace = true
+version              = "0.0.0"
+
+[dependencies]
+biome_diagnostics_categories = { workspace = true }
+biome_formatter              = { workspace = true }
+biome_html_syntax            = { workspace = true }
+biome_rowan                  = { workspace = true }
+biome_suppression            = { workspace = true }
+
+[lints]
+workspace = true

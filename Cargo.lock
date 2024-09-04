@@ -649,6 +649,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_html_formatter"
+version = "0.0.0"
+dependencies = [
+ "biome_diagnostics_categories",
+ "biome_formatter",
+ "biome_html_syntax",
+ "biome_rowan",
+ "biome_suppression",
+]
+
+[[package]]
 name = "biome_html_parser"
 version = "0.0.1"
 dependencies = [
