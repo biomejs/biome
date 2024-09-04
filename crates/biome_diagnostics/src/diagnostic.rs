@@ -180,10 +180,17 @@ pub(super) enum DiagnosticTag {
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct DiagnosticTags(BitFlags<DiagnosticTag>);
 impl DiagnosticTags {
+    /// This diagnostic has a fix suggestion.
     pub const FIXABLE: Self = Self(make_bitflags!(DiagnosticTag::{Fixable}));
+    /// This diagnostic results from an internal error.
     pub const INTERNAL: Self = Self(make_bitflags!(DiagnosticTag::{Internal}));
+    /// This diagnostic tags unused or unnecessary code, this may change
+    /// how the diagnostic is render in editors.
     pub const UNNECESSARY_CODE: Self = Self(make_bitflags!(DiagnosticTag::{UnnecessaryCode}));
+    /// This diagnostic tags deprecated or obsolete code, this may change
+    /// how the diagnostic is render in editors.
     pub const DEPRECATED_CODE: Self = Self(make_bitflags!(DiagnosticTag::{DeprecatedCode}));
+    /// This diagnostic is verbose and should be printed only if the `--verbose` option is provided
     pub const VERBOSE: Self = Self(make_bitflags!(DiagnosticTag::{Verbose}));
     pub const fn all() -> Self {
         Self(BitFlags::ALL)
