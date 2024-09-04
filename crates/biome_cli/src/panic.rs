@@ -11,8 +11,6 @@ pub fn setup_panic_handler() {
 }
 
 fn panic_handler(info: &PanicInfo) {
-    let bt = std::backtrace::Backtrace::force_capture();
-    eprintln!("{bt:#?}");
     // Buffer the error message to a string before printing it at once
     // to prevent it from getting mixed with other errors if multiple threads
     // panic at the same time
