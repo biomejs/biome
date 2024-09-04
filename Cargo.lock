@@ -654,8 +654,13 @@ version = "0.0.0"
 dependencies = [
  "biome_diagnostics_categories",
  "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
+ "biome_html_parser",
  "biome_html_syntax",
+ "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
 ]
 
@@ -1026,6 +1031,8 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_grit_patterns",
+ "biome_html_formatter",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_factory",
  "biome_js_formatter",

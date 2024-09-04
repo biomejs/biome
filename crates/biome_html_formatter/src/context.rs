@@ -1,8 +1,8 @@
 use std::{fmt, rc::Rc};
 
 use biome_formatter::{
-    printer::PrinterOptions, AttributePosition, CstFormatContext, FormatContext, FormatOptions,
-    IndentStyle, IndentWidth, LineEnding, LineWidth, TransformSourceMap,
+    printer::PrinterOptions, AttributePosition, BracketSpacing, CstFormatContext, FormatContext,
+    FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, TransformSourceMap,
 };
 use biome_html_syntax::HtmlLanguage;
 
@@ -131,7 +131,7 @@ impl FormatOptions for HtmlFormatOptions {
     }
 
     fn bracket_spacing(&self) -> biome_formatter::BracketSpacing {
-        todo!("Bracket spacing doesn't really make sense for HTML")
+        BracketSpacing::default()
     }
 
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {

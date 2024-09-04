@@ -7,6 +7,7 @@ use crate::parser::{HtmlLosslessTreeSink, HtmlParser};
 use crate::syntax::parse_root;
 use biome_html_syntax::{HtmlRoot, HtmlSyntaxNode};
 use biome_parser::diagnostic::ParseDiagnostic;
+use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 
 /// Parses the provided string as HTML program using the provided node cache.
@@ -85,9 +86,21 @@ impl HtmlParse {
     /// Convert this parse result into a typed AST node.
     ///
     /// # Panics
-    ///    
+    ///
     /// It panics if the node represented by this parse result mismatches.
     pub fn tree(&self) -> HtmlRoot {
         HtmlRoot::unwrap_cast(self.syntax())
+    }
+}
+
+impl From<HtmlParse> for AnyParse {
+    fn from(parse: HtmlParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        Self::new(
+            // SAFETY: the parser should always return a root node
+            root.as_send().unwrap(),
+            diagnostics,
+        )
     }
 }

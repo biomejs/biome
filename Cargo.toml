@@ -118,6 +118,8 @@ biome_grit_parser            = { version = "0.1.0", path = "./crates/biome_grit_
 biome_grit_patterns          = { version = "0.0.1", path = "./crates/biome_grit_patterns" }
 biome_grit_syntax            = { version = "0.5.7", path = "./crates/biome_grit_syntax" }
 biome_html_factory           = { version = "0.5.7", path = "./crates/biome_html_factory" }
+biome_html_formatter         = { version = "0.0.0", path = "./crates/biome_html_formatter" }
+biome_html_parser            = { version = "0.0.1", path = "./crates/biome_html_parser" }
 biome_html_syntax            = { version = "0.5.7", path = "./crates/biome_html_syntax" }
 biome_js_analyze             = { version = "0.5.7", path = "./crates/biome_js_analyze" }
 biome_js_factory             = { version = "0.5.7", path = "./crates/biome_js_factory" }
