@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt};
 
 use crate::JsRuleAction;
 
-use crate::lint::nursery::use_explicit_length_check::does_node_needs_space_before_child;
+use crate::lint::style::use_explicit_length_check::does_node_needs_space_before_child;
 
 declare_lint_rule! {
     /// Use `Date.now()` to get the number of milliseconds since the Unix Epoch.

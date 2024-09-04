@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -20,7 +20,8 @@ declare_lint_rule! {
     /// This rule enforces a specific style length comparisons to make them more clear.
     ///
     /// ## Zero comparison examples
-    /// Enforce comparison with === 0 when checking for zero length.
+    ///
+    /// Enforce comparison with `=== 0` when checking for zero length.
     ///
     /// ### Invalid
     ///
@@ -57,7 +58,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ## Non-zero comparison examples
-    /// Enforce comparison with > 0 when checking for non-zero length.
+    ///
+    /// Enforce comparison with `> 0` when checking for non-zero length.
     ///
     /// ### Invalid
     /// ```js,expect_diagnostic
@@ -111,11 +113,14 @@ declare_lint_rule! {
     /// ```
     ///
     /// ## Caveats
+    ///
     /// This rule assumes that the `length`/`size` property is always numeric, even if it actually is not.
     /// In the example below the rule will trigger a warning, even though the `size` property is a string.
+    ///
     /// ```js,expect_diagnostic
     /// const foo1 = { size: "small" }; if (foo1.size) {}
     /// ```
+    ///
     /// To properly handle this case, type inference would be required, which is not supported by Biome at the moment.
     /// We recommend disabling this rule when working with non-numeric `length`/`size` properties.
     ///
@@ -125,8 +130,6 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintUnicorn("explicit-length-check")],
-        source_kind: RuleSourceKind::Inspired,
-        recommended: false,
         fix_kind: FixKind::Unsafe,
     }
 }

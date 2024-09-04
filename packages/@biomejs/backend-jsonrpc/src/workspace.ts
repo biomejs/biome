@@ -1340,10 +1340,6 @@ export interface Nursery {
 	 */
 	useErrorMessage?: RuleConfiguration_for_Null;
 	/**
-	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
-	 */
-	useExplicitLengthCheck?: RuleFixConfiguration_for_Null;
-	/**
 	 * Elements with an interactive role and interaction handlers must be focusable.
 	 */
 	useFocusableInteractive?: RuleConfiguration_for_Null;
@@ -1554,6 +1550,10 @@ export interface Style {
 	 * Require that each enum member value be explicitly initialized.
 	 */
 	useEnumInitializers?: RuleFixConfiguration_for_Null;
+	/**
+	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
+	 */
+	useExplicitLengthCheck?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of Math.pow in favor of the ** operator.
 	 */
@@ -2789,7 +2789,6 @@ export type Category =
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useErrorMessage"
-	| "lint/nursery/useExplicitLengthCheck"
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportExtensions"
@@ -2834,6 +2833,7 @@ export type Category =
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useEnumInitializers"
+	| "lint/style/useExplicitLengthCheck"
 	| "lint/style/useExponentiationOperator"
 	| "lint/style/useExportType"
 	| "lint/style/useFilenamingConvention"

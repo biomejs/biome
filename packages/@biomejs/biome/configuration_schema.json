@@ -2272,13 +2272,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useExplicitLengthCheck": {
-					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useFocusableInteractive": {
 					"description": "Elements with an interactive role and interaction handlers must be focusable.",
 					"anyOf": [
@@ -3273,6 +3266,13 @@
 				},
 				"useEnumInitializers": {
 					"description": "Require that each enum member value be explicitly initialized.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useExplicitLengthCheck": {
+					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

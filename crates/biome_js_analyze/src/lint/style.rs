@@ -25,6 +25,7 @@ pub mod use_consistent_array_type;
 pub mod use_const;
 pub mod use_default_parameter_last;
 pub mod use_enum_initializers;
+pub mod use_explicit_length_check;
 pub mod use_exponentiation_operator;
 pub mod use_export_type;
 pub mod use_filenaming_convention;
@@ -73,6 +74,7 @@ declare_lint_group! {
             self :: use_const :: UseConst ,
             self :: use_default_parameter_last :: UseDefaultParameterLast ,
             self :: use_enum_initializers :: UseEnumInitializers ,
+            self :: use_explicit_length_check :: UseExplicitLengthCheck ,
             self :: use_exponentiation_operator :: UseExponentiationOperator ,
             self :: use_export_type :: UseExportType ,
             self :: use_filenaming_convention :: UseFilenamingConvention ,

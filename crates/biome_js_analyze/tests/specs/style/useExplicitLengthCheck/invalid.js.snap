@@ -54,7 +54,7 @@ class A {
 
 # Diagnostics
 ```
-invalid.js:1:16 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:16 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -71,7 +71,7 @@ invalid.js:1:16 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:2:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -89,7 +89,7 @@ invalid.js:2:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:3:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -113,7 +113,7 @@ invalid.js:3:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:4:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -137,7 +137,7 @@ invalid.js:4:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:5:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -161,7 +161,7 @@ invalid.js:5:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:6:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -185,7 +185,7 @@ invalid.js:6:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:7:8 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:8 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -209,7 +209,7 @@ invalid.js:7:8 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:8:23 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:23 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -228,7 +228,7 @@ invalid.js:8:23 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:9:25 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:25 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -252,7 +252,7 @@ invalid.js:9:25 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:10:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:17 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -276,7 +276,7 @@ invalid.js:10:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:11:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -300,7 +300,7 @@ invalid.js:11:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:12:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -324,7 +324,7 @@ invalid.js:12:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:12:20 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:20 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -343,7 +343,7 @@ invalid.js:12:20 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:13:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:18 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -367,7 +367,7 @@ invalid.js:13:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:14:20 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:20 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -391,7 +391,7 @@ invalid.js:14:20 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:15:29 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:29 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -410,7 +410,7 @@ invalid.js:15:29 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:16:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:18 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -434,7 +434,7 @@ invalid.js:16:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:17:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:18 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -453,7 +453,7 @@ invalid.js:17:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:18:21 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:21 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -477,7 +477,7 @@ invalid.js:18:21 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:19:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:18 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -496,7 +496,7 @@ invalid.js:19:18 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:20:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .size > 0 when checking .size is not zero.
   
@@ -515,7 +515,7 @@ invalid.js:20:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:21:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .size > 0 when checking .size is not zero.
   
@@ -534,7 +534,7 @@ invalid.js:21:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:21:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:17 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -553,7 +553,7 @@ invalid.js:21:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:23:23 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:23 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -577,7 +577,7 @@ invalid.js:23:23 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:24:22 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:22 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -601,7 +601,7 @@ invalid.js:24:22 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:25:28 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:28 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -625,7 +625,7 @@ invalid.js:25:28 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:26:24 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:26:24 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -649,7 +649,7 @@ invalid.js:26:24 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:27:25 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:25 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -673,7 +673,7 @@ invalid.js:27:25 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:28:7 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:7 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -697,7 +697,7 @@ invalid.js:28:7 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:29:7 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:7 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -721,7 +721,7 @@ invalid.js:29:7 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:30:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:30:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -745,7 +745,7 @@ invalid.js:30:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:31:13 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:13 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -769,7 +769,7 @@ invalid.js:31:13 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:32:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:5 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -793,7 +793,7 @@ invalid.js:32:5 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:33:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -817,7 +817,7 @@ invalid.js:33:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:34:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -841,7 +841,7 @@ invalid.js:34:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:35:3 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:35:3 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -865,7 +865,7 @@ invalid.js:35:3 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:36:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:36:17 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -889,7 +889,7 @@ invalid.js:36:17 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:37:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -913,7 +913,7 @@ invalid.js:37:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:38:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:38:15 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length === 0 when checking .length is zero.
   
@@ -937,7 +937,7 @@ invalid.js:38:15 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:42:13 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:13 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .length > 0 when checking .length is not zero.
   
@@ -956,7 +956,7 @@ invalid.js:42:13 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.js:43:16 lint/nursery/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:43:16 lint/style/useExplicitLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use .size === 0 when checking .size is zero.
   
