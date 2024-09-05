@@ -290,7 +290,7 @@ define_categories! {
     "assists/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
     // end assists rules
     ; // start syntax rules
-    "syntax/nursery/noTypeOnlyImportAttributes",
+    "syntax/correctness/noTypeOnlyImportAttributes",
     "syntax/correctness/noSuperWithoutExtends",
     "syntax/correctness/noInitializerWithDefinite",
     "syntax/correctness/noDuplicatePrivateClassMembers",

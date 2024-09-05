@@ -31,7 +31,6 @@ allowlist.options:5:17 deserialize ━━━━━━━━━━━━━━━
   
   - recommended
   - all
-  - noDoneCallback
   - noDuplicateAtImportRules
   - noDuplicateElseIf
   - noDuplicateFontNames
@@ -45,7 +44,6 @@ allowlist.options:5:17 deserialize ━━━━━━━━━━━━━━━
   - noInvalidDirectionInLinearGradient
   - noInvalidPositionAtImportRule
   - noIrregularWhitespace
-  - noReactSpecificProps
   - noRestrictedImports
   - noRestrictedTypes
   - noShorthandPropertyOverrides
@@ -60,7 +58,6 @@ allowlist.options:5:17 deserialize ━━━━━━━━━━━━━━━
   - noUnmatchableAnbSelector
   - noUselessEscapeInRegex
   - noValueAtRule
-  - noYodaExpression
   - useAdjacentOverloadSignatures
   - useAriaPropsSupportedByRole
   - useConsistentBuiltinInstantiation
@@ -68,13 +65,10 @@ allowlist.options:5:17 deserialize ━━━━━━━━━━━━━━━
   - useConsistentGridAreas
   - useConsistentMemberAccessibility
   - useDeprecatedReason
-  - useFocusableInteractive
   - useGenericFontNames
-  - useImportExtensions
   - useImportRestrictions
   - useSortedClasses
   - useStrictMode
-  - useTopLevelRegex
   - useTrimStartEnd
   - useValidAutocomplete
   

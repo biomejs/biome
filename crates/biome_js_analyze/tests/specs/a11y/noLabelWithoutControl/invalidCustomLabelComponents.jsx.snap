@@ -25,7 +25,6 @@ invalidCustomLabelComponents.options:7:5 deserialize ━━━━━━━━━
   
   - recommended
   - all
-  - noDoneCallback
   - noDuplicateAtImportRules
   - noDuplicateElseIf
   - noDuplicateFontNames
@@ -39,7 +38,6 @@ invalidCustomLabelComponents.options:7:5 deserialize ━━━━━━━━━
   - noInvalidDirectionInLinearGradient
   - noInvalidPositionAtImportRule
   - noIrregularWhitespace
-  - noReactSpecificProps
   - noRestrictedImports
   - noRestrictedTypes
   - noShorthandPropertyOverrides
@@ -54,7 +52,6 @@ invalidCustomLabelComponents.options:7:5 deserialize ━━━━━━━━━
   - noUnmatchableAnbSelector
   - noUselessEscapeInRegex
   - noValueAtRule
-  - noYodaExpression
   - useAdjacentOverloadSignatures
   - useAriaPropsSupportedByRole
   - useConsistentBuiltinInstantiation
@@ -62,13 +59,10 @@ invalidCustomLabelComponents.options:7:5 deserialize ━━━━━━━━━
   - useConsistentGridAreas
   - useConsistentMemberAccessibility
   - useDeprecatedReason
-  - useFocusableInteractive
   - useGenericFontNames
-  - useImportExtensions
   - useImportRestrictions
   - useSortedClasses
   - useStrictMode
-  - useTopLevelRegex
   - useTrimStartEnd
   - useValidAutocomplete
   
