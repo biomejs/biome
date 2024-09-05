@@ -44,19 +44,84 @@ MarkdownDocument =
     value: AnyMarkdownBlock
     eof: 'EOF'
 
-AnyMarkdownBlock = MarkdownParagraph | MarkdownHeader | MarkdownList
+AnyMarkdownBlock = AnyLeafBlock  | AnyContainerBlock
 
-MarkdownHeader = '#' MarkdownH1 '#'?
+AnyLeafBlock = MarkdownBreakBlock | AnyMarkdownHeader | AnyMakrdownSetextHeader 
+                | AnyCodeBlock | MarkdownHTMLBlock | MarkdownLinkBlock | MarkdownParagraph
 
-MarkdownH1 = '#' MarkdownH2 '#'? MarkdownParagraph?
-MarkdownH2 = '#' MarkdownH3 '#'? MarkdownParagraph?
-MarkdownH3 = '#' MarkdownH4 '#'? MarkdownParagraph?
-MarkdownH4 = '#' MarkdownH5 '#'? MarkdownParagraph?
-MarkdownH5 = '#' MarkdownH6 '#'? MarkdownParagraph?
+AnyContainerBlock = MarkdownQuote | MarkdownBulletListItem | MarkdownOrderListItem
+
+
+
+// h1..h6
+AnyMarkdownHeader = MarkdownH1 | MarkdownH2 | MarkdownH3| MarkdownH4| MarkdownH5| MarkdownH6
+
+MarkdownH1 = MarkdownParagraph?
+MarkdownH2 =  MarkdownParagraph?
+MarkdownH3 =  MarkdownParagraph?
+MarkdownH4 =  MarkdownParagraph?
+MarkdownH5 =  MarkdownParagraph?
 MarkdownH6 =  MarkdownParagraph?
 
-MarkdownList = MarkdownString*
+// setext title
+// foo
+// ===
+// bar
+// ---
+AnyMakrdownSetextHeader = MakrdownSetextH1 | MakrdownSetextH2
+MakrdownSetextH1 = MarkdownParagraph
+MakrdownSetextH2 = MarkdownParagraph
 
-MarkdownParagraph = MarkdownString
+// indented code blocks & fenced code blocks
+AnyCodeBlock = MarkdownIndentCodeBlock | MarkdownFencedCodeBlock
 
+// [    ] xxx
+MarkdownIndentCodeBlock = MarkdownString
+// ~~~ 
+// xxx
+// ~~~
+MarkdownFencedCodeBlock = MarkdownString
+
+// html block
+MarkdownHTMLBlock = MarkdownString 
+
+MarkdownLinkBlock = label: MarkdownString
+                url: MarkdownString
+                title: MarkdownString?
+
+MarkdownQuote = AnyMarkdownBlock
+
+MarkdownBulletListItem = MarkdownBulletList
+MarkdownOrderListItem = MarkdownBulletList
+
+
+MarkdownBulletList = AnyCodeBlock*
+MarkdownOrderList = AnyCodeBlock*
+
+
+MarkdownParagraph = MarkdownParagraphItemList
+
+MarkdownParagraphItemList = AnyMarkdownInline*
+
+AnyMarkdownInline = MarkdownInlineCode | MarkdownInlineEmphasis | MarkdownInlineLink | MarkdownInlineImage
+               |  MarkdownHTMLBlock | MarkdownHardLine | MarkdownSoftBreak
+                | MarkdownTextual
+MarkdownInlineCode = MarkdownString
+MarkdownInlineEmphasis = MarkdownString
+MarkdownInlineLink = label: MarkdownString
+                    url: MarkdownString
+                    title: MarkdownString?
+
+MarkdownInlineImage = alt: MarkdownString
+                    src: MarkdownString
+                    title: MarkdownString?
+
+MarkdownHardLine = value: 'markdown_hard_line_literal'
+MarkdownSoftBreak = value: 'markdown_soft_break_literal'
+MarkdownTextual = value: 'markdown_textual_literal'
 MarkdownString = value: 'markdown_string_literal'
+MarkdownIndent = value: 'markdown_indent_chunk_literal'
+// ***
+// ---
+// ___
+MarkdownBreakBlock = value: 'markdown_break_block_literal'

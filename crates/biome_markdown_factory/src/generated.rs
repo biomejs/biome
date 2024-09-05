@@ -3,4 +3,4 @@ pub(super) mod syntax_factory;
 #[rustfmt::skip]
 pub mod node_factory;
 
-pub use syntax_factory::DemoSyntaxFactory;
+pub use syntax_factory::MarkdownSyntaxFactory;

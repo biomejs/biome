@@ -13,18 +13,61 @@ pub enum MarkdownSyntaxKind {
     #[doc = r" Any Unicode BOM character that may be present at the start of"]
     #[doc = r" a file."]
     UNICODE_BOM,
-    PLUS,
-    CALC_KW,
-    NUMBER_LITERAL,
-    COMMENT,
+    L_ANGLE,
+    R_ANGLE,
+    L_PAREN,
+    R_PAREN,
+    L_BRACK,
+    R_BRACK,
+    SLASH,
+    EQ,
+    BANG,
+    MINUS,
+    STAR,
+    BACKTICK,
+    TILDE,
+    FALSE_KW,
+    MARKDOWN_HARD_LINE_LITERAL,
+    MARKDOWN_SOFT_BREAK_LITERAL,
+    MARKDOWN_TEXTUAL_LITERAL,
+    MARKDOWN_STRING_LITERAL,
+    MARKDOWN_INDENT_CHUNK_LITERAL,
+    MARKDOWN_BREAK_BLOCK_LITERAL,
     NEWLINE,
     WHITESPACE,
-    ERROR_TOKEN,
-    ANY_VALUE,
-    ROOT,
     BOGUS,
-    NUMBER_VALUE,
-    NUMBER_VALUE_LIST,
+    MARKDOWN_BOGUS,
+    MARKDOWN_DOCUMENT,
+    MARKDOWN_HEADER,
+    MARKDOWN_H1,
+    MARKDOWN_H2,
+    MARKDOWN_H3,
+    MARKDOWN_H4,
+    MARKDOWN_H5,
+    MARKDOWN_H6,
+    MAKRDOWN_SETEXT_H1,
+    MAKRDOWN_SETEXT_H2,
+    MARKDOWN_INDENT_CODE_BLOCK,
+    MARKDOWN_FENCED_CODE_BLOCK,
+    MARKDOWN_HTML_BLOCK,
+    MARKDOWN_LINK_BLOCK,
+    MARKDOWN_QUOTE,
+    MARKDOWN_ORDER_LIST_ITEM,
+    MARKDOWN_BULLET_LIST_ITEM,
+    MARKDOWN_BULLET_LIST,
+    MARKDOWN_ORDER_LIST,
+    MARKDOWN_PARAGRAPH,
+    MARKDOWN_PARAGRAPH_ITEM_LIST,
+    MARKDOWN_INLINE_CODE,
+    MARKDOWN_INLINE_EMPHASIS,
+    MARKDOWN_INLINE_LINK,
+    MARKDOWN_INLINE_IMAGE,
+    MARKDOWN_HARD_LINE,
+    MARKDOWN_SOFT_BREAK,
+    MARKDOWN_TEXTUAL,
+    MARKDOWN_STRING,
+    MARKDOWN_INDENT,
+    MARKDOWN_BREAK_BLOCK,
     #[doc(hidden)]
     __LAST,
 }
@@ -32,33 +75,51 @@ use self::MarkdownSyntaxKind::*;
 impl MarkdownSyntaxKind {
     pub const fn is_punct(self) -> bool {
         match self {
-            PLUS => true,
+            L_ANGLE | R_ANGLE | L_PAREN | R_PAREN | L_BRACK | R_BRACK | SLASH | EQ | BANG
+            | MINUS | STAR | BACKTICK | TILDE => true,
             _ => false,
         }
     }
     pub const fn is_literal(self) -> bool {
         match self {
-            NUMBER_LITERAL => true,
+            MARKDOWN_HARD_LINE_LITERAL
+            | MARKDOWN_SOFT_BREAK_LITERAL
+            | MARKDOWN_TEXTUAL_LITERAL
+            | MARKDOWN_STRING_LITERAL
+            | MARKDOWN_INDENT_CHUNK_LITERAL
+            | MARKDOWN_BREAK_BLOCK_LITERAL => true,
             _ => false,
         }
     }
     pub const fn is_list(self) -> bool {
         match self {
-            NUMBER_VALUE_LIST => true,
+            MARKDOWN_BULLET_LIST | MARKDOWN_ORDER_LIST | MARKDOWN_PARAGRAPH_ITEM_LIST => true,
             _ => false,
         }
     }
     pub fn from_keyword(ident: &str) -> Option<MarkdownSyntaxKind> {
         let kw = match ident {
-            "calc" => CALC_KW,
+            "false" => FALSE_KW,
             _ => return None,
         };
         Some(kw)
     }
     pub const fn to_string(&self) -> Option<&'static str> {
         let tok = match self {
-            PLUS => "+",
-            CALC_KW => "calc",
+            L_ANGLE => "<",
+            R_ANGLE => ">",
+            L_PAREN => "(",
+            R_PAREN => ")",
+            L_BRACK => "[",
+            R_BRACK => "]",
+            SLASH => "/",
+            EQ => "=",
+            BANG => "!",
+            MINUS => "-",
+            STAR => "*",
+            BACKTICK => "`",
+            TILDE => "~",
+            FALSE_KW => "false",
             _ => return None,
         };
         Some(tok)
@@ -66,4 +127,4 @@ impl MarkdownSyntaxKind {
 }
 #[doc = r" Utility macro for creating a SyntaxKind through simple macro syntax"]
 #[macro_export]
-macro_rules ! T { [+] => { $ crate :: MarkdownSyntaxKind :: PLUS } ; [calc] => { $ crate :: MarkdownSyntaxKind :: CALC_KW } ; [ident] => { $ crate :: MarkdownSyntaxKind :: IDENT } ; [EOF] => { $ crate :: MarkdownSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: MarkdownSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; }
+macro_rules ! T { [<] => { $ crate :: MarkdownSyntaxKind :: L_ANGLE } ; [>] => { $ crate :: MarkdownSyntaxKind :: R_ANGLE } ; ['('] => { $ crate :: MarkdownSyntaxKind :: L_PAREN } ; [')'] => { $ crate :: MarkdownSyntaxKind :: R_PAREN } ; ['['] => { $ crate :: MarkdownSyntaxKind :: L_BRACK } ; [']'] => { $ crate :: MarkdownSyntaxKind :: R_BRACK } ; [/] => { $ crate :: MarkdownSyntaxKind :: SLASH } ; [=] => { $ crate :: MarkdownSyntaxKind :: EQ } ; [!] => { $ crate :: MarkdownSyntaxKind :: BANG } ; [-] => { $ crate :: MarkdownSyntaxKind :: MINUS } ; [*] => { $ crate :: MarkdownSyntaxKind :: STAR } ; ['`'] => { $ crate :: MarkdownSyntaxKind :: BACKTICK } ; [~] => { $ crate :: MarkdownSyntaxKind :: TILDE } ; [false] => { $ crate :: MarkdownSyntaxKind :: FALSE_KW } ; [ident] => { $ crate :: MarkdownSyntaxKind :: IDENT } ; [EOF] => { $ crate :: MarkdownSyntaxKind :: EOF } ; [UNICODE_BOM] => { $ crate :: MarkdownSyntaxKind :: UNICODE_BOM } ; [#] => { $ crate :: MarkdownSyntaxKind :: HASH } ; }
