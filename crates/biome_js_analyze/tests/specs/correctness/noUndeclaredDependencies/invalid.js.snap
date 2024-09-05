@@ -12,7 +12,7 @@ require("notInstalled")
 
 # Diagnostics
 ```
-invalid.js:1:8 lint/nursery/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:8 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The current dependency isn't specified in your package.json.
   
@@ -29,7 +29,7 @@ invalid.js:1:8 lint/nursery/noUndeclaredDependencies ━━━━━━━━━
 ```
 
 ```
-invalid.js:2:1 lint/nursery/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The current dependency isn't specified in your package.json.
   
@@ -47,7 +47,7 @@ invalid.js:2:1 lint/nursery/noUndeclaredDependencies ━━━━━━━━━
 ```
 
 ```
-invalid.js:3:1 lint/nursery/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The current dependency isn't specified in your package.json.
   
@@ -63,5 +63,3 @@ invalid.js:3:1 lint/nursery/noUndeclaredDependencies ━━━━━━━━━
   
 
 ```
-
-

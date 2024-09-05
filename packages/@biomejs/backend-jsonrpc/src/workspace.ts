@@ -1075,6 +1075,10 @@ export interface Correctness {
 	 */
 	noSwitchDeclarations?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of dependencies that aren't specified in the package.json.
+	 */
+	noUndeclaredDependencies?: RuleConfiguration_for_Null;
+	/**
 	 * Prevents the usage of variables that haven't been declared inside the document.
 	 */
 	noUndeclaredVariables?: RuleConfiguration_for_Null;
@@ -1247,10 +1251,6 @@ export interface Nursery {
 	 * Enforce the use of String.slice() over String.substr() and String.substring().
 	 */
 	noSubstr?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow the use of dependencies that aren't specified in the package.json.
-	 */
-	noUndeclaredDependencies?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown CSS value functions.
 	 */
@@ -2723,6 +2723,7 @@ export type Category =
 	| "lint/correctness/noSetterReturn"
 	| "lint/correctness/noStringCaseMismatch"
 	| "lint/correctness/noSwitchDeclarations"
+	| "lint/correctness/noUndeclaredDependencies"
 	| "lint/correctness/noUndeclaredVariables"
 	| "lint/correctness/noUnnecessaryContinue"
 	| "lint/correctness/noUnreachable"
@@ -2765,7 +2766,6 @@ export type Category =
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
-	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"

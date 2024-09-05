@@ -24,6 +24,7 @@ pub mod no_self_assign;
 pub mod no_setter_return;
 pub mod no_string_case_mismatch;
 pub mod no_switch_declarations;
+pub mod no_undeclared_dependencies;
 pub mod no_undeclared_variables;
 pub mod no_unnecessary_continue;
 pub mod no_unreachable;
@@ -70,6 +71,7 @@ declare_lint_group! {
             self :: no_setter_return :: NoSetterReturn ,
             self :: no_string_case_mismatch :: NoStringCaseMismatch ,
             self :: no_switch_declarations :: NoSwitchDeclarations ,
+            self :: no_undeclared_dependencies :: NoUndeclaredDependencies ,
             self :: no_undeclared_variables :: NoUndeclaredVariables ,
             self :: no_unnecessary_continue :: NoUnnecessaryContinue ,
             self :: no_unreachable :: NoUnreachable ,
