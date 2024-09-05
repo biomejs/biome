@@ -41,6 +41,7 @@ pub mod no_import_assign;
 pub mod no_label_var;
 pub mod no_misleading_character_class;
 pub mod no_misleading_instantiator;
+pub mod no_misplaced_assertion;
 pub mod no_misrefactored_shorthand_assign;
 pub mod no_prototype_builtins;
 pub mod no_redeclare;
@@ -104,6 +105,7 @@ declare_lint_group! {
             self :: no_label_var :: NoLabelVar ,
             self :: no_misleading_character_class :: NoMisleadingCharacterClass ,
             self :: no_misleading_instantiator :: NoMisleadingInstantiator ,
+            self :: no_misplaced_assertion :: NoMisplacedAssertion ,
             self :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign ,
             self :: no_prototype_builtins :: NoPrototypeBuiltins ,
             self :: no_redeclare :: NoRedeclare ,

@@ -1224,10 +1224,6 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
-	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
-	 */
-	noMisplacedAssertion?: RuleConfiguration_for_Null;
-	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
 	noReactSpecificProps?: RuleFixConfiguration_for_Null;
@@ -1791,6 +1787,10 @@ export interface Suspicious {
 	 * Enforce proper usage of new and constructor.
 	 */
 	noMisleadingInstantiator?: RuleConfiguration_for_Null;
+	/**
+	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
+	 */
+	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow shorthand assign when variable appears on both sides.
 	 */
@@ -2758,7 +2758,6 @@ export type Category =
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
-	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
@@ -2891,6 +2890,7 @@ export type Category =
 	| "lint/suspicious/noLabelVar"
 	| "lint/suspicious/noMisleadingCharacterClass"
 	| "lint/suspicious/noMisleadingInstantiator"
+	| "lint/suspicious/noMisplacedAssertion"
 	| "lint/suspicious/noMisrefactoredShorthandAssign"
 	| "lint/suspicious/noPrototypeBuiltins"
 	| "lint/suspicious/noRedeclare"

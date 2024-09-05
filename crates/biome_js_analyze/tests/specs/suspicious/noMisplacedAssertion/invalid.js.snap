@@ -14,7 +14,7 @@ assertEquals(1, 1)
 
 # Diagnostics
 ```
-invalid.js:2:5 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:5 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assertion isn't inside a it(), test() or Deno.test() function call.
   
@@ -32,7 +32,7 @@ invalid.js:2:5 lint/nursery/noMisplacedAssertion ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assertion isn't inside a it(), test() or Deno.test() function call.
   
@@ -50,7 +50,7 @@ invalid.js:5:1 lint/nursery/noMisplacedAssertion ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:6:1 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assertion isn't inside a it(), test() or Deno.test() function call.
   

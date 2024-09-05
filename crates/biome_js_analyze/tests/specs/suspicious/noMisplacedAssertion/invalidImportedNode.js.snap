@@ -14,7 +14,7 @@ describe(() => {
 
 # Diagnostics
 ```
-invalidImportedNode.js:5:2 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidImportedNode.js:5:2 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assertion isn't inside a it(), test() or Deno.test() function call.
   

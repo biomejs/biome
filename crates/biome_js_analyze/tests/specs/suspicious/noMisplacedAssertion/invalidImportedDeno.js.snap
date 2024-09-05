@@ -14,7 +14,7 @@ Deno.test("url test", () => {
 
 # Diagnostics
 ```
-invalidImportedDeno.js:3:1 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidImportedDeno.js:3:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assertion isn't inside a it(), test() or Deno.test() function call.
   

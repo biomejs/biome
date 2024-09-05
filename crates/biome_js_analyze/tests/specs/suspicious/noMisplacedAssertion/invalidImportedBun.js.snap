@@ -11,7 +11,7 @@ expect("something").toBeTrue()
 
 # Diagnostics
 ```
-invalidImportedBun.js:3:1 lint/nursery/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidImportedBun.js:3:1 lint/suspicious/noMisplacedAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The assertion isn't inside a it(), test() or Deno.test() function call.
   

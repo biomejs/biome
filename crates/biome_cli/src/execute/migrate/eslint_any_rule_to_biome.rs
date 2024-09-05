@@ -473,10 +473,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 results.has_inspired_rules = true;
                 return false;
             }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .no_misplaced_assertion
                 .get_or_insert(Default::default());

@@ -2070,13 +2070,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noMisplacedAssertion": {
-					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noReactSpecificProps": {
 					"description": "Prevents React-specific JSX properties from being used.",
 					"anyOf": [
@@ -3698,6 +3691,13 @@
 				},
 				"noMisleadingInstantiator": {
 					"description": "Enforce proper usage of new and constructor.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noMisplacedAssertion": {
+					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

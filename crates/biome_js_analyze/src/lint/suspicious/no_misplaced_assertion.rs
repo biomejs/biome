@@ -177,7 +177,7 @@ impl Rule for NoMisplacedAssertion {
                 return None;
             }
 
-            let is_exeption = is_exception_for_expect(node);
+            let is_exception = is_exception_for_expect(node);
             let binding = model.binding(&assertion_call);
             if let Some(binding) = binding {
                 let ident = JsIdentifierBinding::cast_ref(binding.syntax())?;
@@ -193,11 +193,11 @@ impl Rule for NoMisplacedAssertion {
                             *specifier == source_text.text()
                         }
                     }))
-                    && !is_exeption
+                    && !is_exception
                 {
                     return Some(assertion_call.range());
                 }
-            } else if ASSERTION_FUNCTION_NAMES.contains(&call_text.text()) && !is_exeption {
+            } else if ASSERTION_FUNCTION_NAMES.contains(&call_text.text()) && !is_exception {
                 return Some(assertion_call.range());
             }
         }
