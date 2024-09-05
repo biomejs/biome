@@ -23,7 +23,6 @@ pub mod use_consistent_member_accessibility;
 pub mod use_focusable_interactive;
 pub mod use_import_extensions;
 pub mod use_import_restrictions;
-pub mod use_number_to_fixed_digits_argument;
 pub mod use_semantic_elements;
 pub mod use_sorted_classes;
 pub mod use_strict_mode;
@@ -58,7 +57,6 @@ declare_lint_group! {
             self :: use_focusable_interactive :: UseFocusableInteractive ,
             self :: use_import_extensions :: UseImportExtensions ,
             self :: use_import_restrictions :: UseImportRestrictions ,
-            self :: use_number_to_fixed_digits_argument :: UseNumberToFixedDigitsArgument ,
             self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_strict_mode :: UseStrictMode ,

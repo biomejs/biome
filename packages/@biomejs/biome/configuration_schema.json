@@ -2272,13 +2272,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useNumberToFixedDigitsArgument": {
-					"description": "Enforce using the digits argument with Number#toFixed().",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useSemanticElements": {
 					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.",
 					"anyOf": [
@@ -3828,6 +3821,13 @@
 				},
 				"useNamespaceKeyword": {
 					"description": "Require using the namespace keyword over the module keyword to declare TypeScript namespaces.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNumberToFixedDigitsArgument": {
+					"description": "Enforce using the digits argument with Number#toFixed().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

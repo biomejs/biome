@@ -60,6 +60,7 @@ pub mod use_error_message;
 pub mod use_getter_return;
 pub mod use_is_array;
 pub mod use_namespace_keyword;
+pub mod use_number_to_fixed_digits_argument;
 pub mod use_valid_typeof;
 
 declare_lint_group! {
@@ -124,6 +125,7 @@ declare_lint_group! {
             self :: use_getter_return :: UseGetterReturn ,
             self :: use_is_array :: UseIsArray ,
             self :: use_namespace_keyword :: UseNamespaceKeyword ,
+            self :: use_number_to_fixed_digits_argument :: UseNumberToFixedDigitsArgument ,
             self :: use_valid_typeof :: UseValidTypeof ,
         ]
      }

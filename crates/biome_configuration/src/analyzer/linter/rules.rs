@@ -3148,10 +3148,6 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_import_restrictions:
         Option<RuleConfiguration<biome_js_analyze::options::UseImportRestrictions>>,
-    #[doc = "Enforce using the digits argument with Number#toFixed()."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_number_to_fixed_digits_argument:
-        Option<RuleFixConfiguration<biome_js_analyze::options::UseNumberToFixedDigitsArgument>>,
     #[doc = "It detects the use of role attributes in JSX elements and suggests using semantic elements instead."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_semantic_elements:
@@ -3241,7 +3237,6 @@ impl Nursery {
         "useGenericFontNames",
         "useImportExtensions",
         "useImportRestrictions",
-        "useNumberToFixedDigitsArgument",
         "useSemanticElements",
         "useSortedClasses",
         "useStrictMode",
@@ -3302,8 +3297,8 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[36]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[37]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[38]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -3355,7 +3350,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -3577,49 +3571,44 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
             }
         }
-        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
+        if let Some(rule) = self.use_semantic_elements.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
-        if let Some(rule) = self.use_semantic_elements.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_strict_mode.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_strict_mode.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
-            }
-        }
         if let Some(rule) = self.use_valid_autocomplete.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
         index_set
@@ -3831,49 +3820,44 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]));
             }
         }
-        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
+        if let Some(rule) = self.use_semantic_elements.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
-        if let Some(rule) = self.use_semantic_elements.as_ref() {
+        if let Some(rule) = self.use_sorted_classes.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
         }
-        if let Some(rule) = self.use_sorted_classes.as_ref() {
+        if let Some(rule) = self.use_strict_mode.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_strict_mode.as_ref() {
+        if let Some(rule) = self.use_throw_new_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
             }
         }
-        if let Some(rule) = self.use_throw_new_error.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
-            }
-        }
         if let Some(rule) = self.use_valid_autocomplete.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[49]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[48]));
             }
         }
         index_set
@@ -4074,10 +4058,6 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useImportRestrictions" => self
                 .use_import_restrictions
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useNumberToFixedDigitsArgument" => self
-                .use_number_to_fixed_digits_argument
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSemanticElements" => self
@@ -5697,6 +5677,10 @@ pub struct Suspicious {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_namespace_keyword:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseNamespaceKeyword>>,
+    #[doc = "Enforce using the digits argument with Number#toFixed()."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_number_to_fixed_digits_argument:
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseNumberToFixedDigitsArgument>>,
     #[doc = "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_typeof: Option<RuleFixConfiguration<biome_js_analyze::options::UseValidTypeof>>,
@@ -5776,6 +5760,7 @@ impl Suspicious {
         "useGetterReturn",
         "useIsArray",
         "useNamespaceKeyword",
+        "useNumberToFixedDigitsArgument",
         "useValidTypeof",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
@@ -5882,7 +5867,7 @@ impl Suspicious {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[55]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -5944,6 +5929,7 @@ impl Suspicious {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[56]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -6250,9 +6236,14 @@ impl Suspicious {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
             }
         }
-        if let Some(rule) = self.use_valid_typeof.as_ref() {
+        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
+            }
+        }
+        if let Some(rule) = self.use_valid_typeof.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
             }
         }
         index_set
@@ -6549,9 +6540,14 @@ impl Suspicious {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[57]));
             }
         }
-        if let Some(rule) = self.use_valid_typeof.as_ref() {
+        if let Some(rule) = self.use_number_to_fixed_digits_argument.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[58]));
+            }
+        }
+        if let Some(rule) = self.use_valid_typeof.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[59]));
             }
         }
         index_set
@@ -6820,6 +6816,10 @@ impl Suspicious {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useNamespaceKeyword" => self
                 .use_namespace_keyword
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useNumberToFixedDigitsArgument" => self
+                .use_number_to_fixed_digits_argument
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useValidTypeof" => self

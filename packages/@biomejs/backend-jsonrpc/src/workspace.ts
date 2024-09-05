@@ -1340,10 +1340,6 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
 	/**
-	 * Enforce using the digits argument with Number#toFixed().
-	 */
-	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
-	/**
 	 * It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
 	 */
 	useSemanticElements?: RuleConfiguration_for_Null;
@@ -1867,6 +1863,10 @@ export interface Suspicious {
 	 * Require using the namespace keyword over the module keyword to declare TypeScript namespaces.
 	 */
 	useNamespaceKeyword?: RuleFixConfiguration_for_Null;
+	/**
+	 * Enforce using the digits argument with Number#toFixed().
+	 */
+	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
 	/**
 	 * This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions
 	 */
@@ -2790,7 +2790,6 @@ export type Category =
 	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useNumberToFixedDigitsArgument"
 	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
@@ -2909,6 +2908,7 @@ export type Category =
 	| "lint/suspicious/useGetterReturn"
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
+	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useValidTypeof"
 	| "assists/source/useSortedKeys"
 	| "syntax/nursery/noTypeOnlyImportAttributes"

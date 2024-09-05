@@ -165,7 +165,6 @@ define_categories! {
     "lint/nursery/useImportExtensions": "https://biomejs.dev/linter/rules/use-import-extensions",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
-    "lint/nursery/useNumberToFixedDigitsArgument": "https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument",
     "lint/nursery/useSemanticElements": "https://biomejs.dev/linter/rules/use-semantic-elements",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
     "lint/nursery/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
@@ -284,6 +283,7 @@ define_categories! {
     "lint/suspicious/useGetterReturn": "https://biomejs.dev/linter/rules/use-getter-return",
     "lint/suspicious/useIsArray": "https://biomejs.dev/linter/rules/use-is-array",
     "lint/suspicious/useNamespaceKeyword": "https://biomejs.dev/linter/rules/use-namespace-keyword",
+    "lint/suspicious/useNumberToFixedDigitsArgument": "https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
     // end lint rules
     // start assists rules

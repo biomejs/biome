@@ -15,7 +15,7 @@ const bigNumber = new BigNumber(1); const string3 = bigNumber.toFixed();
 
 # Diagnostics
 ```
-invalid.js:1:31 lint/nursery/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Specify the number of digits you want to appear after the decimal point.
   
@@ -32,7 +32,7 @@ invalid.js:1:31 lint/nursery/useNumberToFixedDigitsArgument  FIXABLE  ━━━�
 ```
 
 ```
-invalid.js:2:31 lint/nursery/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:31 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Specify the number of digits you want to appear after the decimal point.
   
@@ -50,7 +50,7 @@ invalid.js:2:31 lint/nursery/useNumberToFixedDigitsArgument  FIXABLE  ━━━�
 ```
 
 ```
-invalid.js:3:18 lint/nursery/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:18 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Specify the number of digits you want to appear after the decimal point.
   
@@ -69,7 +69,7 @@ invalid.js:3:18 lint/nursery/useNumberToFixedDigitsArgument  FIXABLE  ━━━�
 ```
 
 ```
-invalid.js:6:70 lint/nursery/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:70 lint/suspicious/useNumberToFixedDigitsArgument  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Specify the number of digits you want to appear after the decimal point.
   
