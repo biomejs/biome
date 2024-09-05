@@ -32,7 +32,7 @@ throw new Error() || "literal";
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -47,7 +47,7 @@ invalid.js:1:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:2:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -63,7 +63,7 @@ invalid.js:2:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:3:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -80,7 +80,7 @@ invalid.js:3:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:4:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -97,7 +97,7 @@ invalid.js:4:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:5:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -114,7 +114,7 @@ invalid.js:5:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:6:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -131,7 +131,7 @@ invalid.js:6:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:7:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -148,7 +148,7 @@ invalid.js:7:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:9:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -165,7 +165,7 @@ invalid.js:9:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:11:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -182,7 +182,7 @@ invalid.js:11:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:12:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -199,7 +199,7 @@ invalid.js:12:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:13:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -216,7 +216,7 @@ invalid.js:13:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:14:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -233,7 +233,7 @@ invalid.js:14:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:15:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -250,7 +250,7 @@ invalid.js:15:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:16:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -267,7 +267,7 @@ invalid.js:16:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:17:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -284,7 +284,7 @@ invalid.js:17:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:18:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -301,7 +301,7 @@ invalid.js:18:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:19:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -318,7 +318,7 @@ invalid.js:19:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:20:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -335,7 +335,7 @@ invalid.js:20:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:23:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   
@@ -350,7 +350,7 @@ invalid.js:23:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:24:1 lint/nursery/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:1 lint/style/useThrowOnlyError ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Throwing non-Error values is not allowed.
   

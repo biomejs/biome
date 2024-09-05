@@ -3179,10 +3179,6 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_throw_new_error:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseThrowNewError>>,
-    #[doc = "Disallow throwing non-Error values."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_throw_only_error:
-        Option<RuleConfiguration<biome_js_analyze::options::UseThrowOnlyError>>,
     #[doc = "Require regex literals to be declared at the top level."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<biome_js_analyze::options::UseTopLevelRegex>>,
@@ -3256,7 +3252,6 @@ impl Nursery {
         "useSortedClasses",
         "useStrictMode",
         "useThrowNewError",
-        "useThrowOnlyError",
         "useTopLevelRegex",
         "useTrimStartEnd",
         "useValidAutocomplete",
@@ -3361,7 +3356,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -3598,24 +3592,19 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
-            if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
-            }
-        }
         if let Some(rule) = self.use_valid_autocomplete.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
             }
         }
         index_set
@@ -3842,24 +3831,19 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_throw_only_error.as_ref() {
+        if let Some(rule) = self.use_top_level_regex.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
             }
         }
-        if let Some(rule) = self.use_top_level_regex.as_ref() {
+        if let Some(rule) = self.use_trim_start_end.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
-        if let Some(rule) = self.use_trim_start_end.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
-            }
-        }
         if let Some(rule) = self.use_valid_autocomplete.as_ref() {
             if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[47]));
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[46]));
             }
         }
         index_set
@@ -4072,10 +4056,6 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useThrowNewError" => self
                 .use_throw_new_error
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "useThrowOnlyError" => self
-                .use_throw_only_error
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useTopLevelRegex" => self
@@ -4605,6 +4585,10 @@ pub struct Style {
     #[doc = "Prefer template literals over string concatenation."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_template: Option<RuleFixConfiguration<biome_js_analyze::options::UseTemplate>>,
+    #[doc = "Disallow throwing non-Error values."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_throw_only_error:
+        Option<RuleConfiguration<biome_js_analyze::options::UseThrowOnlyError>>,
     #[doc = "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_while: Option<RuleFixConfiguration<biome_js_analyze::options::UseWhile>>,
@@ -4670,6 +4654,7 @@ impl Style {
         "useSingleCaseStatement",
         "useSingleVarDeclarator",
         "useTemplate",
+        "useThrowOnlyError",
         "useWhile",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
@@ -4722,7 +4707,7 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[40]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
     ];
     const ALL_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
@@ -4770,6 +4755,7 @@ impl Style {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]),
     ];
     #[doc = r" Retrieves the recommended rules"]
     pub(crate) fn is_recommended_true(&self) -> bool {
@@ -5006,9 +4992,14 @@ impl Style {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_while.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            }
+        }
+        if let Some(rule) = self.use_while.as_ref() {
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
         index_set
@@ -5235,9 +5226,14 @@ impl Style {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[43]));
             }
         }
-        if let Some(rule) = self.use_while.as_ref() {
+        if let Some(rule) = self.use_throw_only_error.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[44]));
+            }
+        }
+        if let Some(rule) = self.use_while.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[45]));
             }
         }
         index_set
@@ -5450,6 +5446,10 @@ impl Style {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useTemplate" => self
                 .use_template
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useThrowOnlyError" => self
+                .use_throw_only_error
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useWhile" => self

@@ -249,10 +249,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 results.has_inspired_rules = true;
                 return false;
             }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_throw_only_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -1071,10 +1068,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 results.has_inspired_rules = true;
                 return false;
             }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_throw_only_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }

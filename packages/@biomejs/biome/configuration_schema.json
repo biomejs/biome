@@ -2300,13 +2300,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useThrowOnlyError": {
-					"description": "Disallow throwing non-Error values.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useTopLevelRegex": {
 					"description": "Require regex literals to be declared at the top level.",
 					"anyOf": [
@@ -3380,6 +3373,13 @@
 					"description": "Prefer template literals over string concatenation.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useThrowOnlyError": {
+					"description": "Disallow throwing non-Error values.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

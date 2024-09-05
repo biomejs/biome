@@ -46,6 +46,7 @@ pub mod use_shorthand_function_type;
 pub mod use_single_case_statement;
 pub mod use_single_var_declarator;
 pub mod use_template;
+pub mod use_throw_only_error;
 pub mod use_while;
 
 declare_lint_group! {
@@ -96,6 +97,7 @@ declare_lint_group! {
             self :: use_single_case_statement :: UseSingleCaseStatement ,
             self :: use_single_var_declarator :: UseSingleVarDeclarator ,
             self :: use_template :: UseTemplate ,
+            self :: use_throw_only_error :: UseThrowOnlyError ,
             self :: use_while :: UseWhile ,
         ]
      }

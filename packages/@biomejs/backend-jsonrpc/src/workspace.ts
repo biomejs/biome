@@ -1356,10 +1356,6 @@ export interface Nursery {
 	 */
 	useThrowNewError?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow throwing non-Error values.
-	 */
-	useThrowOnlyError?: RuleConfiguration_for_Null;
-	/**
 	 * Require regex literals to be declared at the top level.
 	 */
 	useTopLevelRegex?: RuleConfiguration_for_Null;
@@ -1614,6 +1610,10 @@ export interface Style {
 	 * Prefer template literals over string concatenation.
 	 */
 	useTemplate?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow throwing non-Error values.
+	 */
+	useThrowOnlyError?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.
 	 */
@@ -2794,7 +2794,6 @@ export type Category =
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useThrowNewError"
-	| "lint/nursery/useThrowOnlyError"
 	| "lint/nursery/useTopLevelRegex"
 	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
@@ -2849,6 +2848,7 @@ export type Category =
 	| "lint/style/useSingleCaseStatement"
 	| "lint/style/useSingleVarDeclarator"
 	| "lint/style/useTemplate"
+	| "lint/style/useThrowOnlyError"
 	| "lint/style/useWhile"
 	| "lint/suspicious/noApproximativeNumericConstant"
 	| "lint/suspicious/noArrayIndexKey"
