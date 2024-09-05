@@ -817,6 +817,10 @@ export interface A11y {
 	 */
 	useMediaCaption?: RuleConfiguration_for_Null;
 	/**
+	 * It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
+	 */
+	useSemanticElements?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce that all anchors are valid, and they are navigable elements.
 	 */
 	useValidAnchor?: RuleConfiguration_for_Null;
@@ -1339,10 +1343,6 @@ export interface Nursery {
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
-	/**
-	 * It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
-	 */
-	useSemanticElements?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -2664,6 +2664,7 @@ export type Category =
 	| "lint/a11y/useKeyWithClickEvents"
 	| "lint/a11y/useKeyWithMouseEvents"
 	| "lint/a11y/useMediaCaption"
+	| "lint/a11y/useSemanticElements"
 	| "lint/a11y/useValidAnchor"
 	| "lint/a11y/useValidAriaProps"
 	| "lint/a11y/useValidAriaRole"
@@ -2790,7 +2791,6 @@ export type Category =
 	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useThrowNewError"

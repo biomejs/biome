@@ -9,8 +9,8 @@ use crate::services::aria::Aria;
 declare_lint_rule! {
     /// It detects the use of `role` attributes in JSX elements and suggests using semantic elements instead.
     ///
-    /// The `role` attribute is used to define the purpose of an element, but it should be used as a last resort. Using semantic elements like `<button>`, `<input>`, `<textarea>`, `<a>`, `<img>`, `<table>`, `<article>`, `<section>`, `<nav>`, `<aside>`, `<header>`, `<footer>`, `<main>`, `<figure>`, `<figcaption>`, `<details>`, `<summary>`, `<dialog>`, `<menu>`, `<menuitem>`, `<fieldset>`, `<legend>`, `<caption>`, `<colgroup>`, `<col>`, `<optgroup>`, `<option>`, `<select>`, `<datalist>`, `<output>`, `<progress>`, `<meter>`, `<time>`, `<audio>`, `<video>`, `<track>`, `<source>`, `<embed>`, `<object>`, `<param>`, `<iframe>`, `<canvas>`, `<map>`, `<area>`, `<svg>`, `<math>` are more accessible and provide better semantics.
-    ///
+    /// The `role` attribute is used to define the purpose of an element, but it should be used as a last resort.
+    /// Using semantic elements like `<button>`, `<nav>` and others are more accessible and provide better semantics.
     ///
     /// ## Examples
     ///
@@ -39,7 +39,7 @@ declare_lint_rule! {
         name: "useSemanticElements",
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("prefer-tag-over-role")],
-        recommended: true,
+        recommended: false,
     }
 }
 
@@ -62,10 +62,10 @@ impl Rule for UseSemanticElements {
             let aria_roles = ctx.aria_roles();
             let extract_attributes = ctx.extract_attributes(&node.attributes());
             let extract_attributes = ctx.convert_all_attribute_values(extract_attributes);
-            let is_not_interative =
+            let is_not_interactive =
                 aria_roles.is_not_interactive_element(element_name, extract_attributes);
 
-            if is_not_interative {
+            if is_not_interactive {
                 return Some(attr);
             }
         }

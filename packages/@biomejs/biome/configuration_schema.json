@@ -280,6 +280,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSemanticElements": {
+					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useValidAnchor": {
 					"description": "Enforce that all anchors are valid, and they are navigable elements.",
 					"anyOf": [
@@ -2267,13 +2274,6 @@
 				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useSemanticElements": {
-					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

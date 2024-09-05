@@ -57,7 +57,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <input type="checkbox">
@@ -75,7 +75,7 @@ invalid.jsx:2:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:3:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:3:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <input type="radio">
@@ -94,7 +94,7 @@ invalid.jsx:3:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:4:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:4:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <option>
@@ -113,7 +113,7 @@ invalid.jsx:4:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:5:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <select>
@@ -132,7 +132,7 @@ invalid.jsx:5:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:6:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:6:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <h1>
@@ -156,7 +156,7 @@ invalid.jsx:6:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:7:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:7:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <hr>
@@ -175,7 +175,7 @@ invalid.jsx:7:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:8:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <button>
@@ -195,7 +195,7 @@ invalid.jsx:8:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:9:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:9:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <article>
@@ -214,7 +214,7 @@ invalid.jsx:9:10 lint/nursery/useSemanticElements ━━━━━━━━━━
 ```
 
 ```
-invalid.jsx:10:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:10:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <dialog>
@@ -233,7 +233,7 @@ invalid.jsx:10:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:11:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:11:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <alert>
@@ -252,7 +252,7 @@ invalid.jsx:11:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:12:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:12:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <alert>
@@ -271,7 +271,7 @@ invalid.jsx:12:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:13:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:13:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <td>
@@ -290,7 +290,7 @@ invalid.jsx:13:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:14:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:14:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <th scope="col">
@@ -309,7 +309,7 @@ invalid.jsx:14:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:15:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:15:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <dd>
@@ -329,7 +329,7 @@ invalid.jsx:15:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:16:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:16:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <figure>
@@ -348,7 +348,7 @@ invalid.jsx:16:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:17:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:17:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <form>
@@ -367,7 +367,7 @@ invalid.jsx:17:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:18:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:18:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <graphics-object>
@@ -388,7 +388,7 @@ invalid.jsx:18:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:19:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:19:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <graphics-document>
@@ -410,7 +410,7 @@ invalid.jsx:19:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:20:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:20:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <table>
@@ -429,7 +429,7 @@ invalid.jsx:20:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:21:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:21:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <td>
@@ -448,7 +448,7 @@ invalid.jsx:21:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:22:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:22:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <fieldset>
@@ -467,7 +467,7 @@ invalid.jsx:22:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:23:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:23:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <img>
@@ -486,7 +486,7 @@ invalid.jsx:23:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:24:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:24:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <a>
@@ -506,7 +506,7 @@ invalid.jsx:24:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:25:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:25:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <ol>
@@ -526,7 +526,7 @@ invalid.jsx:25:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:26:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:26:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <select>
@@ -545,7 +545,7 @@ invalid.jsx:26:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:27:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:27:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <li>
@@ -564,7 +564,7 @@ invalid.jsx:27:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:28:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:28:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <nav>
@@ -583,7 +583,7 @@ invalid.jsx:28:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:29:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:29:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <tr>
@@ -602,7 +602,7 @@ invalid.jsx:29:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:30:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:30:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <tbody>
@@ -623,7 +623,7 @@ invalid.jsx:30:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:31:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:31:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <th scope="row">
@@ -642,7 +642,7 @@ invalid.jsx:31:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:32:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:32:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <input type="search">
@@ -661,7 +661,7 @@ invalid.jsx:32:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:33:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:33:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <input type="search">
@@ -680,7 +680,7 @@ invalid.jsx:33:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:34:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:34:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <table>
@@ -699,7 +699,7 @@ invalid.jsx:34:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:35:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:35:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <dt>
@@ -718,7 +718,7 @@ invalid.jsx:35:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:36:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:36:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <textarea>
@@ -738,7 +738,7 @@ invalid.jsx:36:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:37:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:37:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <div>
@@ -758,7 +758,7 @@ invalid.jsx:37:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:38:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:38:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <caption>
@@ -779,7 +779,7 @@ invalid.jsx:38:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:39:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:39:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <main>
@@ -798,7 +798,7 @@ invalid.jsx:39:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:40:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:40:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <time>
@@ -817,7 +817,7 @@ invalid.jsx:40:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:41:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:41:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <p>
@@ -836,7 +836,7 @@ invalid.jsx:41:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:42:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:42:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <aside>
@@ -855,7 +855,7 @@ invalid.jsx:42:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:43:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:43:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <blockquote>
@@ -874,7 +874,7 @@ invalid.jsx:43:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:44:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:44:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <dl>
@@ -893,7 +893,7 @@ invalid.jsx:44:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:45:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:45:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <output>
@@ -912,7 +912,7 @@ invalid.jsx:45:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:46:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:46:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <footer>
@@ -931,7 +931,7 @@ invalid.jsx:46:10 lint/nursery/useSemanticElements ━━━━━━━━━�
 ```
 
 ```
-invalid.jsx:47:10 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:47:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
     <section>

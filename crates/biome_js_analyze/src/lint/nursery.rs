@@ -23,7 +23,6 @@ pub mod use_consistent_member_accessibility;
 pub mod use_focusable_interactive;
 pub mod use_import_extensions;
 pub mod use_import_restrictions;
-pub mod use_semantic_elements;
 pub mod use_sorted_classes;
 pub mod use_strict_mode;
 pub mod use_throw_new_error;
@@ -57,7 +56,6 @@ declare_lint_group! {
             self :: use_focusable_interactive :: UseFocusableInteractive ,
             self :: use_import_extensions :: UseImportExtensions ,
             self :: use_import_restrictions :: UseImportRestrictions ,
-            self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_strict_mode :: UseStrictMode ,
             self :: use_throw_new_error :: UseThrowNewError ,

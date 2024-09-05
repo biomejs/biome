@@ -28,6 +28,7 @@ pub mod use_iframe_title;
 pub mod use_key_with_click_events;
 pub mod use_key_with_mouse_events;
 pub mod use_media_caption;
+pub mod use_semantic_elements;
 pub mod use_valid_anchor;
 pub mod use_valid_aria_props;
 pub mod use_valid_aria_role;
@@ -64,6 +65,7 @@ declare_lint_group! {
             self :: use_key_with_click_events :: UseKeyWithClickEvents ,
             self :: use_key_with_mouse_events :: UseKeyWithMouseEvents ,
             self :: use_media_caption :: UseMediaCaption ,
+            self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_valid_anchor :: UseValidAnchor ,
             self :: use_valid_aria_props :: UseValidAriaProps ,
             self :: use_valid_aria_role :: UseValidAriaRole ,
