@@ -741,6 +741,10 @@ export interface A11y {
 	 */
 	noInteractiveElementToNoninteractiveRole?: RuleFixConfiguration_for_Null;
 	/**
+	 * Enforce that a label element or component has a text label and an associated input.
+	 */
+	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
+	/**
 	 * Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
 	 */
 	noNoninteractiveElementToInteractiveRole?: RuleFixConfiguration_for_Null;
@@ -1219,10 +1223,6 @@ export interface Nursery {
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce that a label element or component has a text label and an associated input.
-	 */
-	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
 	/**
 	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
 	 */
@@ -1930,6 +1930,9 @@ export type RuleFixConfiguration_for_Null =
 export type RuleFixConfiguration_for_AllowDomainOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_AllowDomainOptions;
+export type RuleConfiguration_for_NoLabelWithoutControlOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoLabelWithoutControlOptions;
 export type RuleConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_Null;
@@ -1945,9 +1948,6 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
-export type RuleConfiguration_for_NoLabelWithoutControlOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoLabelWithoutControlOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -2013,6 +2013,16 @@ export interface RuleWithFixOptions_for_AllowDomainOptions {
 	 */
 	options: AllowDomainOptions;
 }
+export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoLabelWithoutControlOptions;
+}
 export interface RuleWithOptions_for_Null {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -2066,16 +2076,6 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 * Rule's options
 	 */
 	options: DeprecatedHooksOptions;
-}
-export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoLabelWithoutControlOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -2235,6 +2235,20 @@ export interface AllowDomainOptions {
 	 */
 	allowDomains: string[];
 }
+export interface NoLabelWithoutControlOptions {
+	/**
+	 * Array of component names that should be considered the same as an `input` element.
+	 */
+	inputComponents: string[];
+	/**
+	 * Array of attributes that should be treated as the `label` accessible text content.
+	 */
+	labelAttributes: string[];
+	/**
+	 * Array of component names that should be considered the same as a `label` element.
+	 */
+	labelComponents: string[];
+}
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
 	ignoreNonDom: boolean;
@@ -2261,20 +2275,6 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
-export interface NoLabelWithoutControlOptions {
-	/**
-	 * Array of component names that should be considered the same as an `input` element.
-	 */
-	inputComponents: string[];
-	/**
-	 * Array of attributes that should be treated as the `label` accessible text content.
-	 */
-	labelAttributes: string[];
-	/**
-	 * Array of component names that should be considered the same as a `label` element.
-	 */
-	labelComponents: string[];
-}
 /**
  * Options for the rule `noRestrictedImports`.
  */
@@ -2646,6 +2646,7 @@ export type Category =
 	| "lint/a11y/noDistractingElements"
 	| "lint/a11y/noHeaderScope"
 	| "lint/a11y/noInteractiveElementToNoninteractiveRole"
+	| "lint/a11y/noLabelWithoutControl"
 	| "lint/a11y/noNoninteractiveElementToInteractiveRole"
 	| "lint/a11y/noNoninteractiveTabindex"
 	| "lint/a11y/noPositiveTabindex"
@@ -2757,7 +2758,6 @@ export type Category =
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
-	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"

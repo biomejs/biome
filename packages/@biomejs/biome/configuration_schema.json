@@ -150,6 +150,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noLabelWithoutControl": {
+					"description": "Enforce that a label element or component has a text label and an associated input.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoLabelWithoutControlConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNoninteractiveElementToInteractiveRole": {
 					"description": "Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.",
 					"anyOf": [
@@ -2060,13 +2067,6 @@
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noLabelWithoutControl": {
-					"description": "Enforce that a label element or component has a text label and an associated input.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoLabelWithoutControlConfiguration" },
 						{ "type": "null" }
 					]
 				},

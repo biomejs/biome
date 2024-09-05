@@ -10,6 +10,7 @@ pub mod no_blank_target;
 pub mod no_distracting_elements;
 pub mod no_header_scope;
 pub mod no_interactive_element_to_noninteractive_role;
+pub mod no_label_without_control;
 pub mod no_noninteractive_element_to_interactive_role;
 pub mod no_noninteractive_tabindex;
 pub mod no_positive_tabindex;
@@ -45,6 +46,7 @@ declare_lint_group! {
             self :: no_distracting_elements :: NoDistractingElements ,
             self :: no_header_scope :: NoHeaderScope ,
             self :: no_interactive_element_to_noninteractive_role :: NoInteractiveElementToNoninteractiveRole ,
+            self :: no_label_without_control :: NoLabelWithoutControl ,
             self :: no_noninteractive_element_to_interactive_role :: NoNoninteractiveElementToInteractiveRole ,
             self :: no_noninteractive_tabindex :: NoNoninteractiveTabindex ,
             self :: no_positive_tabindex :: NoPositiveTabindex ,

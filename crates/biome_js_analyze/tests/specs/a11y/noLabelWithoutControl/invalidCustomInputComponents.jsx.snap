@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidCustomInputComponents.jsx
+---
+# Input
+```jsx
+<label><span><CustomInput /></span></label>;
+
+```
+
+# Diagnostics
+```
+invalidCustomInputComponents.options:7:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noLabelWithoutControl`.
+  
+    5 │ 		"rules": {
+    6 │ 			"nursery": {
+  > 7 │ 				"noLabelWithoutControl": {
+      │ 				^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 					"level": "error",
+    9 │ 					"options": {
+  
+  i Known keys:
+  
+  - recommended
+  - all
+  - noDoneCallback
+  - noDuplicateAtImportRules
+  - noDuplicateElseIf
+  - noDuplicateFontNames
+  - noDuplicateSelectorsKeyframeBlock
+  - noDuplicatedFields
+  - noDynamicNamespaceImportAccess
+  - noEmptyBlock
+  - noEnum
+  - noExportedImports
+  - noImportantInKeyframe
+  - noInvalidDirectionInLinearGradient
+  - noInvalidPositionAtImportRule
+  - noIrregularWhitespace
+  - noMisplacedAssertion
+  - noReactSpecificProps
+  - noRestrictedImports
+  - noRestrictedTypes
+  - noShorthandPropertyOverrides
+  - noStaticElementInteractions
+  - noSubstr
+  - noUndeclaredDependencies
+  - noUnknownFunction
+  - noUnknownMediaFeatureName
+  - noUnknownProperty
+  - noUnknownPseudoClassSelector
+  - noUnknownSelectorPseudoElement
+  - noUnknownUnit
+  - noUnmatchableAnbSelector
+  - noUnusedFunctionParameters
+  - noUselessEscapeInRegex
+  - noValueAtRule
+  - noYodaExpression
+  - useAdjacentOverloadSignatures
+  - useAriaPropsSupportedByRole
+  - useConsistentBuiltinInstantiation
+  - useConsistentCurlyBraces
+  - useConsistentGridAreas
+  - useConsistentMemberAccessibility
+  - useDeprecatedReason
+  - useFocusableInteractive
+  - useGenericFontNames
+  - useImportExtensions
+  - useImportRestrictions
+  - useNumberToFixedDigitsArgument
+  - useSemanticElements
+  - useSortedClasses
+  - useStrictMode
+  - useThrowNewError
+  - useThrowOnlyError
+  - useTopLevelRegex
+  - useTrimStartEnd
+  - useValidAutocomplete
+  
+
+```
+
+```
+invalidCustomInputComponents.jsx:1:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+  > 1 │ <label><span><CustomInput /></span></label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Consider adding an accessible text content to the label element.
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+```
