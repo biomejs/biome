@@ -11,7 +11,7 @@ expression: invalidMediaImportUpperCase.css
 
 # Diagnostics
 ```
-invalidMediaImportUpperCase.css:2:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━
+invalidMediaImportUpperCase.css:2:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━
 
   ! This @import is in the wrong position.
   

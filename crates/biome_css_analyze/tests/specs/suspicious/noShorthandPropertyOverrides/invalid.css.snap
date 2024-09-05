@@ -46,7 +46,7 @@ a { padding-left: 10px; padding-right: 10px; padding: 20px; }
 
 # Diagnostics
 ```
-invalid.css:1:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property padding after padding-left
   
@@ -59,7 +59,7 @@ invalid.css:1:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━
 ```
 
 ```
-invalid.css:3:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property border after border-width
   
@@ -74,7 +74,7 @@ invalid.css:3:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━
 ```
 
 ```
-invalid.css:5:24 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:24 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property border after border-color
   
@@ -89,7 +89,7 @@ invalid.css:5:24 lint/nursery/noShorthandPropertyOverrides ━━━━━━━
 ```
 
 ```
-invalid.css:7:27 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:7:27 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property border after border-style
   
@@ -104,7 +104,7 @@ invalid.css:7:27 lint/nursery/noShorthandPropertyOverrides ━━━━━━━
 ```
 
 ```
-invalid.css:9:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:9:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property border after border-image
   
@@ -119,7 +119,7 @@ invalid.css:9:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━━
 ```
 
 ```
-invalid.css:11:42 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:11:42 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property border after border-image-source
   
@@ -134,7 +134,7 @@ invalid.css:11:42 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:13:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:13:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property pAdDiNg after pAdDiNg-lEfT
   
@@ -149,7 +149,7 @@ invalid.css:13:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:15:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:15:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property PADDING after PADDING-LEFT
   
@@ -164,7 +164,7 @@ invalid.css:15:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:17:49 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:17:49 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property border after border-top-width
   
@@ -179,7 +179,7 @@ invalid.css:17:49 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:19:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:19:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property transition after transition-property
   
@@ -194,7 +194,7 @@ invalid.css:19:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:21:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:21:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property background after background-repeat
   
@@ -209,7 +209,7 @@ invalid.css:21:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:23:52 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:23:52 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property background after background-repeat
   
@@ -224,7 +224,7 @@ invalid.css:23:52 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:25:43 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:25:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property -webkit-transition after -webkit-transition-property
   
@@ -239,7 +239,7 @@ invalid.css:25:43 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:27:43 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:27:43 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property -webKIT-transition after -WEBKIT-transition-property
   
@@ -254,7 +254,7 @@ invalid.css:27:43 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:29:31 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:29:31 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property font after font-variant
   
@@ -269,7 +269,7 @@ invalid.css:29:31 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:31:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:31:35 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property font after font-variant
   
@@ -284,7 +284,7 @@ invalid.css:31:35 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:33:30 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:33:30 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property font after font-size-adjust
   
@@ -299,7 +299,7 @@ invalid.css:33:30 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:35:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:35:25 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property padding after padding-left
   
@@ -314,7 +314,7 @@ invalid.css:35:25 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:35:60 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:35:60 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property border after border-width
   
@@ -329,7 +329,7 @@ invalid.css:35:60 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:37:46 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:37:46 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property padding after padding-left
   
@@ -343,7 +343,7 @@ invalid.css:37:46 lint/nursery/noShorthandPropertyOverrides ━━━━━━�
 ```
 
 ```
-invalid.css:37:46 lint/nursery/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:37:46 lint/suspicious/noShorthandPropertyOverrides ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected shorthand property padding after padding-right
   

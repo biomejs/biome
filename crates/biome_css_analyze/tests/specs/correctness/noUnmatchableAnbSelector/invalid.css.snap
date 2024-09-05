@@ -23,7 +23,7 @@ a:nth-last-child(0),a:nth-last-child(n+5) ~ li {}
 
 # Diagnostics
 ```
-invalid.css:1:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -40,7 +40,7 @@ invalid.css:1:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 
 ```
-invalid.css:2:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -58,7 +58,7 @@ invalid.css:2:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 
 ```
-invalid.css:3:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -77,7 +77,7 @@ invalid.css:3:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 
 ```
-invalid.css:4:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -96,7 +96,7 @@ invalid.css:4:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 
 ```
-invalid.css:5:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -115,7 +115,7 @@ invalid.css:5:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 
 ```
-invalid.css:6:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -134,7 +134,7 @@ invalid.css:6:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 
 ```
-invalid.css:7:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:7:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -153,7 +153,7 @@ invalid.css:7:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 
 ```
-invalid.css:8:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -172,7 +172,7 @@ invalid.css:8:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 
 ```
-invalid.css:9:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:9:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -191,7 +191,7 @@ invalid.css:9:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━�
 ```
 
 ```
-invalid.css:10:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:10:18 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -210,7 +210,7 @@ invalid.css:10:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
 ```
 
 ```
-invalid.css:11:15 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:11:15 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -229,7 +229,7 @@ invalid.css:11:15 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
 ```
 
 ```
-invalid.css:12:20 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:12:20 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -248,7 +248,7 @@ invalid.css:12:20 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
 ```
 
 ```
-invalid.css:13:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:13:13 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   
@@ -267,7 +267,7 @@ invalid.css:13:13 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━
 ```
 
 ```
-invalid.css:14:18 lint/nursery/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:14:18 lint/correctness/noUnmatchableAnbSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This selector will never match any elements.
   

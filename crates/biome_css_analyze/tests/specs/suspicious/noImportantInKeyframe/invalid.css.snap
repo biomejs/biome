@@ -16,7 +16,7 @@ expression: invalid.css
 
 # Diagnostics
 ```
-invalid.css:6:16 lint/nursery/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:16 lint/suspicious/noImportantInKeyframe ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Using !important within keyframes declaration is completely ignored in some browsers.
   

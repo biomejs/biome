@@ -12,7 +12,7 @@ expression: invalidMultipleMedia.css
 
 # Diagnostics
 ```
-invalidMultipleMedia.css:3:2 lint/nursery/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidMultipleMedia.css:3:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Each @import should be unique unless differing by media queries.
   

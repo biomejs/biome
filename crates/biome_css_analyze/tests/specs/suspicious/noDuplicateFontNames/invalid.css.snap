@@ -14,7 +14,7 @@ b { font: normal 14px/32px -apple-system, BlinkMacSystemFont, sans-serif, sans-s
 
 # Diagnostics
 ```
-invalid.css:1:56 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:56 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate font names are redundant and unnecessary: sans-serif
   
@@ -29,7 +29,7 @@ invalid.css:1:56 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
 ```
 
 ```
-invalid.css:2:44 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:44 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate font names are redundant and unnecessary: Arial
   
@@ -45,7 +45,7 @@ invalid.css:2:44 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
 ```
 
 ```
-invalid.css:3:35 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:35 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate font names are redundant and unnecessary: LucidaGrande
   
@@ -62,7 +62,7 @@ invalid.css:3:35 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
 ```
 
 ```
-invalid.css:4:27 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:27 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate font names are redundant and unnecessary: Times
   
@@ -79,7 +79,7 @@ invalid.css:4:27 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
 ```
 
 ```
-invalid.css:5:39 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:39 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate font names are redundant and unnecessary: Arial
   
@@ -95,7 +95,7 @@ invalid.css:5:39 lint/nursery/noDuplicateFontNames ━━━━━━━━━�
 ```
 
 ```
-invalid.css:6:75 lint/nursery/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:75 lint/suspicious/noDuplicateFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate font names are redundant and unnecessary: sans-serif
   

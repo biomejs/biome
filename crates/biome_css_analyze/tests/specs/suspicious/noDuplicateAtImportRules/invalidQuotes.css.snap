@@ -11,7 +11,7 @@ expression: invalidQuotes.css
 
 # Diagnostics
 ```
-invalidQuotes.css:2:2 lint/nursery/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidQuotes.css:2:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Each @import should be unique unless differing by media queries.
   

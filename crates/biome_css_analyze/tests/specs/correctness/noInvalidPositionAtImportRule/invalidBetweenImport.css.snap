@@ -16,7 +16,7 @@ a {}
 
 # Diagnostics
 ```
-invalidBetweenImport.css:3:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidBetweenImport.css:3:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This @import is in the wrong position.
   
@@ -35,7 +35,7 @@ invalidBetweenImport.css:3:2 lint/nursery/noInvalidPositionAtImportRule ━━�
 ```
 
 ```
-invalidBetweenImport.css:4:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidBetweenImport.css:4:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This @import is in the wrong position.
   
@@ -54,7 +54,7 @@ invalidBetweenImport.css:4:2 lint/nursery/noInvalidPositionAtImportRule ━━�
 ```
 
 ```
-invalidBetweenImport.css:6:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidBetweenImport.css:6:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This @import is in the wrong position.
   
@@ -73,7 +73,7 @@ invalidBetweenImport.css:6:2 lint/nursery/noInvalidPositionAtImportRule ━━�
 ```
 
 ```
-invalidBetweenImport.css:7:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidBetweenImport.css:7:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This @import is in the wrong position.
   

@@ -11,7 +11,7 @@ expression: invalidUrls.css
 
 # Diagnostics
 ```
-invalidUrls.css:2:2 lint/nursery/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidUrls.css:2:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Each @import should be unique unless differing by media queries.
   

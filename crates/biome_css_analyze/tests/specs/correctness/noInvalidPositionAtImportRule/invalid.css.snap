@@ -12,7 +12,7 @@ a {}
 
 # Diagnostics
 ```
-invalid.css:2:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This @import is in the wrong position.
   
@@ -30,7 +30,7 @@ invalid.css:2:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━
 ```
 
 ```
-invalid.css:3:2 lint/nursery/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This @import is in the wrong position.
   

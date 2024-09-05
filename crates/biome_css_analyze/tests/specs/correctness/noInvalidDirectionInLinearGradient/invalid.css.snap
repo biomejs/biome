@@ -92,7 +92,7 @@ expression: invalid.css
 
 # Diagnostics
 ```
-invalid.css:2:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -110,7 +110,7 @@ invalid.css:2:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━
 ```
 
 ```
-invalid.css:5:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -129,7 +129,7 @@ invalid.css:5:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━
 ```
 
 ```
-invalid.css:8:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -148,7 +148,7 @@ invalid.css:8:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━
 ```
 
 ```
-invalid.css:11:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:11:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -167,7 +167,7 @@ invalid.css:11:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:14:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:14:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -186,7 +186,7 @@ invalid.css:14:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:17:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:17:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -205,7 +205,7 @@ invalid.css:17:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:20:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:20:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -224,7 +224,7 @@ invalid.css:20:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:23:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:23:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -243,7 +243,7 @@ invalid.css:23:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:26:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:26:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -262,7 +262,7 @@ invalid.css:26:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:29:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:29:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -281,7 +281,7 @@ invalid.css:29:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:32:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:32:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -300,7 +300,7 @@ invalid.css:32:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:35:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:35:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -319,7 +319,7 @@ invalid.css:35:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:38:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:38:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -338,7 +338,7 @@ invalid.css:38:30 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:41:38 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:41:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -357,7 +357,7 @@ invalid.css:41:38 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:44:35 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:44:35 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -376,7 +376,7 @@ invalid.css:44:35 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:47:33 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:47:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -395,7 +395,7 @@ invalid.css:47:33 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:50:52 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:50:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -414,7 +414,7 @@ invalid.css:50:52 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:53:49 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:53:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -433,7 +433,7 @@ invalid.css:53:49 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:56:47 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:56:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -452,7 +452,7 @@ invalid.css:56:47 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:59:38 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:59:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -471,7 +471,7 @@ invalid.css:59:38 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:62:49 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:62:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -490,7 +490,7 @@ invalid.css:62:49 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:66:33 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:66:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -509,7 +509,7 @@ invalid.css:66:33 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:69:52 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:69:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -528,7 +528,7 @@ invalid.css:69:52 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:73:49 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:73:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -547,7 +547,7 @@ invalid.css:73:49 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:77:47 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:77:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
@@ -566,7 +566,7 @@ invalid.css:77:47 lint/nursery/noInvalidDirectionInLinearGradient ━━━━�
 ```
 
 ```
-invalid.css:81:48 lint/nursery/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:81:48 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected nonstandard direction
   
