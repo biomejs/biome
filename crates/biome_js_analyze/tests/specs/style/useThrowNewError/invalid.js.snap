@@ -33,7 +33,7 @@ throw /**1**/ ( /**2**/ getGlobalThis().Error /**3 **/ )()
 
 # Diagnostics
 ```
-invalid.js:1:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -52,7 +52,7 @@ invalid.js:1:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:2:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -72,7 +72,7 @@ invalid.js:2:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:3:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -93,7 +93,7 @@ invalid.js:3:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:4:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -114,7 +114,7 @@ invalid.js:4:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:5:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -135,7 +135,7 @@ invalid.js:5:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:6:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -156,7 +156,7 @@ invalid.js:6:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:7:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -177,7 +177,7 @@ invalid.js:7:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:8:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new CustomError() instead of CustomError() when throwing an error.
   
@@ -198,7 +198,7 @@ invalid.js:8:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:9:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new FooBarBazError() instead of FooBarBazError() when throwing an error.
   
@@ -219,7 +219,7 @@ invalid.js:9:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━�
 ```
 
 ```
-invalid.js:10:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new ABCError() instead of ABCError() when throwing an error.
   
@@ -240,7 +240,7 @@ invalid.js:10:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:11:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Abc3Error() instead of Abc3Error() when throwing an error.
   
@@ -261,7 +261,7 @@ invalid.js:11:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:12:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new TypeError() instead of TypeError() when throwing an error.
   
@@ -282,7 +282,7 @@ invalid.js:12:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:13:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new EvalError() instead of EvalError() when throwing an error.
   
@@ -303,7 +303,7 @@ invalid.js:13:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:14:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new RangeError() instead of RangeError() when throwing an error.
   
@@ -324,7 +324,7 @@ invalid.js:14:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:15:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new ReferenceError() instead of ReferenceError() when throwing an error.
   
@@ -345,7 +345,7 @@ invalid.js:15:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:16:15 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:15 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new SyntaxError() instead of SyntaxError() when throwing an error.
   
@@ -366,7 +366,7 @@ invalid.js:16:15 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:17:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new URIError() instead of URIError() when throwing an error.
   
@@ -387,7 +387,7 @@ invalid.js:17:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:18:24 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:24 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new URIError() instead of URIError() when throwing an error.
   
@@ -408,7 +408,7 @@ invalid.js:18:24 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:19:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new URIError() instead of URIError() when throwing an error.
   
@@ -429,7 +429,7 @@ invalid.js:19:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:20:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -450,7 +450,7 @@ invalid.js:20:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:21:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -471,7 +471,7 @@ invalid.js:21:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:22:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -492,7 +492,7 @@ invalid.js:22:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:23:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:7 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   
@@ -513,7 +513,7 @@ invalid.js:23:7 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━
 ```
 
 ```
-invalid.js:24:15 lint/nursery/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:15 lint/style/useThrowNewError  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Use new Error() instead of Error() when throwing an error.
   

@@ -369,7 +369,7 @@ pub type UseStrictMode =
     <lint::nursery::use_strict_mode::UseStrictMode as biome_analyze::Rule>::Options;
 pub type UseTemplate = <lint::style::use_template::UseTemplate as biome_analyze::Rule>::Options;
 pub type UseThrowNewError =
-    <lint::nursery::use_throw_new_error::UseThrowNewError as biome_analyze::Rule>::Options;
+    <lint::style::use_throw_new_error::UseThrowNewError as biome_analyze::Rule>::Options;
 pub type UseThrowOnlyError =
     <lint::style::use_throw_only_error::UseThrowOnlyError as biome_analyze::Rule>::Options;
 pub type UseTopLevelRegex =

@@ -2293,13 +2293,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useThrowNewError": {
-					"description": "Require new when throwing an error.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useTopLevelRegex": {
 					"description": "Require regex literals to be declared at the top level.",
 					"anyOf": [
@@ -3371,6 +3364,13 @@
 				},
 				"useTemplate": {
 					"description": "Prefer template literals over string concatenation.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useThrowNewError": {
+					"description": "Require new when throwing an error.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

@@ -1489,10 +1489,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "unicorn/throw-new-error" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_throw_new_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }

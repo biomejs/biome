@@ -10,7 +10,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};
 
-use super::use_throw_new_error::convert_call_expression_to_new_expression;
+use crate::lint::style::use_throw_new_error::convert_call_expression_to_new_expression;
 
 declare_lint_rule! {
     /// Enforce the use of `new` for all builtins, except `String`, `Number`, `Boolean`, `Symbol` and `BigInt`.

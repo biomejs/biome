@@ -25,7 +25,6 @@ pub mod use_import_extensions;
 pub mod use_import_restrictions;
 pub mod use_sorted_classes;
 pub mod use_strict_mode;
-pub mod use_throw_new_error;
 pub mod use_top_level_regex;
 pub mod use_trim_start_end;
 pub mod use_valid_autocomplete;
@@ -57,7 +56,6 @@ declare_lint_group! {
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_strict_mode :: UseStrictMode ,
-            self :: use_throw_new_error :: UseThrowNewError ,
             self :: use_top_level_regex :: UseTopLevelRegex ,
             self :: use_trim_start_end :: UseTrimStartEnd ,
             self :: use_valid_autocomplete :: UseValidAutocomplete ,
