@@ -66,6 +66,9 @@ impl JsonFileSource {
         // Uses `strip-json-comments`, which doesn't allow trailing commas by default
         // https://github.com/jshint/jshint/blob/0a5644f8f529e252e7dd0c0d54334ae435b13de0/src/cli.js#L538
         b".jshintrc",
+        // Uses `strip-json-comments`, which doesn't allow trailing commas by default
+        // https://github.com/jestjs/jest/blob/bd1c6db7c15c23788ca3e09c919138e48dd3b28a/packages/jest-config/src/readConfigFileAndSetRootDir.ts#L46
+        b"jest.config.json",
         // Just strip comments
         // https://github.com/palantir/tslint/blob/285fc1db18d1fd24680d6a2282c6445abf1566ee/src/configuration.ts#L268
         b"tslint.json",

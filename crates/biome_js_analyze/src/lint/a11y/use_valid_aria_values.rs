@@ -118,8 +118,20 @@ impl Rule for UseValidAriaValues {
                     }
                 )
             }
-            AriaPropertyTypeEnum::Id |
-            AriaPropertyTypeEnum::Idlist |
+            AriaPropertyTypeEnum::Id => {
+                diagnostic.note(
+                    markup!{
+                        "The only supported value is an HTML identifier."
+                    }
+                )
+            }
+            AriaPropertyTypeEnum::Idlist => {
+                diagnostic.note(
+                    markup!{
+                        "The only supported value is a space-separated list of HTML identifiers."
+                    }
+                )
+            }
             AriaPropertyTypeEnum::String => {
                 diagnostic.note(
                     markup!{

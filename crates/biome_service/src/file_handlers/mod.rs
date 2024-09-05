@@ -45,6 +45,7 @@ use std::path::Path;
 mod astro;
 mod css;
 mod graphql;
+mod html;
 mod javascript;
 mod json;
 mod svelte;

@@ -176,6 +176,8 @@ pub type NoRestrictedGlobals =
     <lint::style::no_restricted_globals::NoRestrictedGlobals as biome_analyze::Rule>::Options;
 pub type NoRestrictedImports =
     <lint::nursery::no_restricted_imports::NoRestrictedImports as biome_analyze::Rule>::Options;
+pub type NoRestrictedTypes =
+    <lint::nursery::no_restricted_types::NoRestrictedTypes as biome_analyze::Rule>::Options;
 pub type NoSelfAssign =
     <lint::correctness::no_self_assign::NoSelfAssign as biome_analyze::Rule>::Options;
 pub type NoSelfCompare =
@@ -283,6 +285,7 @@ pub type UseCollapsedElseIf =
 pub type UseConsistentArrayType = < lint :: style :: use_consistent_array_type :: UseConsistentArrayType as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentBuiltinInstantiation = < lint :: nursery :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentCurlyBraces = < lint :: nursery :: use_consistent_curly_braces :: UseConsistentCurlyBraces as biome_analyze :: Rule > :: Options ;
+pub type UseConsistentMemberAccessibility = < lint :: nursery :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility as biome_analyze :: Rule > :: Options ;
 pub type UseConst = <lint::style::use_const::UseConst as biome_analyze::Rule>::Options;
 pub type UseDateNow = <lint::nursery::use_date_now::UseDateNow as biome_analyze::Rule>::Options;
 pub type UseDefaultParameterLast = < lint :: style :: use_default_parameter_last :: UseDefaultParameterLast as biome_analyze :: Rule > :: Options ;

@@ -311,6 +311,10 @@
 			},
 			"additionalProperties": false
 		},
+		"Accessibility": {
+			"type": "string",
+			"enum": ["noPublic", "explicit", "none"]
+		},
 		"Actions": {
 			"type": "object",
 			"properties": {
@@ -626,6 +630,20 @@
 			"required": ["syntax"],
 			"properties": {
 				"syntax": { "$ref": "#/definitions/ConsistentArrayType" }
+			},
+			"additionalProperties": false
+		},
+		"ConsistentMemberAccessibilityConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithConsistentMemberAccessibilityOptions" }
+			]
+		},
+		"ConsistentMemberAccessibilityOptions": {
+			"type": "object",
+			"required": ["accessibility"],
+			"properties": {
+				"accessibility": { "$ref": "#/definitions/Accessibility" }
 			},
 			"additionalProperties": false
 		},
@@ -1043,6 +1061,15 @@
 			},
 			"additionalProperties": false
 		},
+		"CustomRestrictedType": {
+			"type": "object",
+			"required": ["message"],
+			"properties": {
+				"message": { "type": "string" },
+				"use": { "type": ["string", "null"] }
+			},
+			"additionalProperties": false
+		},
 		"DeprecatedHooksConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1294,7 +1321,7 @@
 		},
 		"Hook": {
 			"type": "object",
-			"required": ["name", "stableResult"],
+			"required": ["name"],
 			"properties": {
 				"closureIndex": {
 					"description": "The \"position\" of the closure function, starting from zero.\n\nFor example, for React's `useEffect()` hook, the closure index is 0.",
@@ -1311,7 +1338,10 @@
 				"name": { "description": "The name of the hook.", "type": "string" },
 				"stableResult": {
 					"description": "Whether the result of the hook is stable.\n\nSet to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the \"positions\" in the return array as stable.\n\nFor example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`.",
-					"allOf": [{ "$ref": "#/definitions/StableHookResult" }]
+					"anyOf": [
+						{ "$ref": "#/definitions/StableHookResult" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -1826,6 +1856,24 @@
 			},
 			"additionalProperties": false
 		},
+		"NoConsoleConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoConsoleOptions" }
+			]
+		},
+		"NoConsoleOptions": {
+			"type": "object",
+			"required": ["allow"],
+			"properties": {
+				"allow": {
+					"description": "Allowed calls on the console object.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoDoubleEqualsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1871,6 +1919,25 @@
 			},
 			"additionalProperties": false
 		},
+		"NoRestrictedTypesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoRestrictedTypesOptions" }
+			]
+		},
+		"NoRestrictedTypesOptions": {
+			"type": "object",
+			"required": ["types"],
+			"properties": {
+				"types": {
+					"type": "object",
+					"additionalProperties": {
+						"$ref": "#/definitions/CustomRestrictedType"
+					}
+				}
+			},
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -1882,7 +1949,7 @@
 				"noConsole": {
 					"description": "Disallow the use of console.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/NoConsoleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2016,6 +2083,13 @@
 					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RestrictedImportsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noRestrictedTypes": {
+					"description": "Disallow user defined types.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoRestrictedTypesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2174,6 +2248,15 @@
 					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useConsistentMemberAccessibility": {
+					"description": "Require consistent accessibility modifiers on class properties and methods.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/ConsistentMemberAccessibilityConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -2618,6 +2701,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithConsistentMemberAccessibilityOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/ConsistentMemberAccessibilityOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithDeprecatedHooksOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2697,6 +2797,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoConsoleOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoConsoleOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithNoDoubleEqualsOptions": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2738,6 +2857,25 @@
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
 					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoRestrictedTypesOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoRestrictedTypesOptions" }]
 				}
 			},
 			"additionalProperties": false

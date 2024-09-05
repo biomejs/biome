@@ -13,6 +13,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### New features
+
+- Implement [nursery/useConsistentMemberAccessibility](https://github.com/biomejs/biome/issues/3271). Contributed by @seitarof
+
 #### Enhancements
 
 - Implement [css suppression action](https://github.com/biomejs/biome/issues/3278). Contributed by @togami2864
@@ -129,11 +133,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Migrating from Prettier or ESLint no longer overwrite the `overrides` field from the configuration ([#3544](https://github.com/biomejs/biome/issues/3544)). Contributed by @Conaclos
 
-- Fix JSX expressions for `noAriaHiddenOnFocusable` ([#3708](https://github.com/biomejs/biome/pull/3708)) . Contributed by @anthonyshew
+- Fix JSX expressions for `noAriaHiddenOnFocusable` ([#3708](https://github.com/biomejs/biome/pull/3708)). Contributed by @anthonyshew
 
-- Fix edge case for `<canvas>` elements that use `role="img"` ([#3728](https://github.com/biomejs/biome/pull/3728)) . Contributed by @anthonyshew
+- Fix edge case for `<canvas>` elements that use `role="img"` ([#3728](https://github.com/biomejs/biome/pull/3728)). Contributed by @anthonyshew
 
 - Fix [#3633](https://github.com/biomejs/biome/issues/3633), where diagnostics where incorrectly printed if the code has errors. Contributed by @ematipico
+
+- Allow `aria-label` on heading to prevent `useHeadingContent` diagnostic ([#3767](https://github.com/biomejs/biome/pull/3767)). Contributed by @anthonyshew
+
+- Fix edge case [#3791](https://github.com/biomejs/biome/issues/3791) for rule `noFocusedTests` being used with non-string-like expressions ([#3793](https://github.com/biomejs/biome/pull/3793)). Contributed by @h-a-n-a
 
 ### Configuration
 
@@ -296,6 +304,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [nursery/noRestrictedTypes](https://biomejs.dev/linter/no-restricted-types/). Contributed by @minht11
 - Add support for GraphQL linting. Contributed by @ematipico
 
 - Add [nursery/noDynamicNamespaceImportAccess](https://biomejs.dev/linter/no-dynamic-namespace-import-access/). Contributed by @minht11
@@ -321,6 +330,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noUselessEscapeInRegex](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/).
   Contributed by @Conaclos
+
+- Add [nursery/useConsistentMemberAccessibility](https://biomejs.dev/linter/rules/use-consistent-member-accessibility/). Contributed by @seitarof
 
 #### Enhancements
 
@@ -437,6 +448,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - The rule `noRedundantUseStrict` no longer reports `use strict` when the `package.json` marks the file as a script using the field `"type": "commonjs"`. Contributed by @ematipico
 
+- [noConsole](https://biomejs.dev/linter/rules/no-console/) now accepts an option that specifies some allowed calls on `console`. Contributed by @Conaclos
+
 #### Bug fixes
 
 - Don't request alt text for elements hidden from assistive technologies ([#3316](https://github.com/biomejs/biome/issues/3316)). Contributed by @robintown
@@ -459,7 +472,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) now correctly provides a code fix when unicode characters are used.
+- [noRedeclare](https://biomejs.dev/linter/rules/no-redeclare/) no longer report a variable named as the function expression where it is declared. Contributed by @Conaclos
+
+- [noMultipleSpacesInRegularExpressionLiterals](https://biomejs.dev/linter/rules/no-multiple-spaces-in-regular-expression-literals/) now correctly provides a code fix when Unicode characters are used. Contributed by @Conaclos
+
+- [useValidAriaValues](https://biomejs.dev/linter/rules/use-valid-aria-values/) now correctly check property types ([3748](https://github.com/biomejs/biome/issues/3748)).
+
+  Properties that expect a string now accept arbitrary text.
+  An identifiers can now be made up of any characters except ASCII whitespace.
+  An identifier list can now be separated by any ASCII whitespace.
+
+  Contributed by @Conaclos
 
 - `useAdjacentOverloadSignatures` no longer reports a `#private` class member and a public class member that share the same name ([#3309](https://github.com/biomejs/biome/issues/3309)).
 
@@ -535,7 +558,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- The JSON parser now allows comments in `jest.config.json`. Contributed by @Conaclos
+
 #### Bug fixes
+
+- The CSS parser now accepts emoji in identifiers ([3627](https://github.com/biomejs/biome/issues/3627)).
+
+  The following code is now corretcly parsed:
+
+  ```css
+  p {
+    --🥔-color: red;
+    color: var(--🥔-color);
+  }
+  ```
+
+  Contributed by @Conaclos
 
 - Fix [#3287](https://github.com/biomejs/biome/issues/3287) nested selectors with pseudo-classes. Contributed by @denbezrukov
 

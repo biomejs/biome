@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/postcss-plugins/postcss-simple-vars.css
 ---
-
 # Input
 
 ```css
@@ -79,27 +78,23 @@ color: @@(style)color123
 
 # Errors
 ```
+postcss-simple-vars.css:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+  > 1 │ background-color: $$(style)Color;
+      │                   ^
+    2 │ background-color: $$(style)Color Color122;
+    3 │ color: @@color;
+  
 postcss-simple-vars.css:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `$`
+  × unexpected character `$`
   
   > 1 │ background-color: $$(style)Color;
       │                    ^
     2 │ background-color: $$(style)Color Color122;
     3 │ color: @@color;
-  
-  i Remove $
-  
-postcss-simple-vars.css:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `(`
-  
-  > 1 │ background-color: $$(style)Color;
-      │                     ^
-    2 │ background-color: $$(style)Color Color122;
-    3 │ color: @@color;
-  
-  i Remove (
   
 postcss-simple-vars.css:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -145,29 +140,25 @@ postcss-simple-vars.css:1:33 parse ━━━━━━━━━━━━━━━
   
   i Remove ;
   
+postcss-simple-vars.css:2:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    1 │ background-color: $$(style)Color;
+  > 2 │ background-color: $$(style)Color Color122;
+      │                   ^
+    3 │ color: @@color;
+    4 │ font: 100% $font-stack;
+  
 postcss-simple-vars.css:2:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `$`
+  × unexpected character `$`
   
     1 │ background-color: $$(style)Color;
   > 2 │ background-color: $$(style)Color Color122;
       │                    ^
     3 │ color: @@color;
     4 │ font: 100% $font-stack;
-  
-  i Remove $
-  
-postcss-simple-vars.css:2:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `(`
-  
-    1 │ background-color: $$(style)Color;
-  > 2 │ background-color: $$(style)Color Color122;
-      │                     ^
-    3 │ color: @@color;
-    4 │ font: 100% $font-stack;
-  
-  i Remove (
   
 postcss-simple-vars.css:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -363,16 +354,27 @@ postcss-simple-vars.css:4:7 parse ━━━━━━━━━━━━━━━�
   
 postcss-simple-vars.css:4:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `$font-stack`
+  × unexpected character `$`
   
     2 │ background-color: $$(style)Color Color122;
     3 │ color: @@color;
   > 4 │ font: 100% $font-stack;
-      │            ^^^^^^^^^^^
+      │            ^
     5 │ background-color: darken(@link-color, 10%);
     6 │ border: 1px solid var(--border-color);
   
-  i Remove $font-stack
+postcss-simple-vars.css:4:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `font-stack`
+  
+    2 │ background-color: $$(style)Color Color122;
+    3 │ color: @@color;
+  > 4 │ font: 100% $font-stack;
+      │             ^^^^^^^^^^
+    5 │ background-color: darken(@link-color, 10%);
+    6 │ border: 1px solid var(--border-color);
+  
+  i Remove font-stack
   
 postcss-simple-vars.css:4:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -570,18 +572,16 @@ postcss-simple-vars.css:6:38 parse ━━━━━━━━━━━━━━━
   
   i Remove ;
   
-postcss-simple-vars.css:7:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+postcss-simple-vars.css:7:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × expected `,` but instead found `(`
+  × unexpected character `$`
   
     5 │ background-color: darken(@link-color, 10%);
     6 │ border: 1px solid var(--border-color);
   > 7 │ color: $(style)color;
-      │         ^
+      │        ^
     8 │ color: @@(style) color123;
     9 │ color: @@(style)color123;
-  
-  i Remove (
   
 postcss-simple-vars.css:7:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -854,5 +854,3 @@ postcss-simple-vars.css:9:25 parse ━━━━━━━━━━━━━━━
   
 
 ```
-
-

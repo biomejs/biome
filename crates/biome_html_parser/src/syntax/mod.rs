@@ -43,6 +43,10 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
         p.eat(T![doctype]);
     }
 
+    if p.at(T![html]) {
+        p.eat(T![html]);
+    }
+
     p.eat(T![>]);
 
     Present(m.complete(p, HTML_DIRECTIVE))

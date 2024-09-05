@@ -323,7 +323,7 @@ pub struct Hook {
     ///
     /// For example, for React's `useRef()` hook the value would be `true`,
     /// while for `useState()` it would be `[1]`.
-    pub stable_result: StableHookResult,
+    pub stable_result: Option<StableHookResult>,
 }
 
 impl DeserializableValidator for Hook {
@@ -358,12 +358,14 @@ impl ReactExtensiveDependenciesOptions {
     pub fn new(hooks: HooksOptions) -> Self {
         let mut result = ReactExtensiveDependenciesOptions::default();
         for hook in hooks.hooks {
-            if hook.stable_result != StableHookResult::None {
-                result.stable_config.insert(StableReactHookConfiguration {
-                    hook_name: hook.name.clone(),
-                    result: hook.stable_result,
-                    builtin: false,
-                });
+            if let Some(stable_result) = hook.stable_result {
+                if stable_result != StableHookResult::None {
+                    result.stable_config.insert(StableReactHookConfiguration {
+                        hook_name: hook.name.clone(),
+                        result: stable_result,
+                        builtin: false,
+                    });
+                }
             }
             if let (Some(closure_index), Some(dependencies_index)) =
                 (hook.closure_index, hook.dependencies_index)

@@ -73,6 +73,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_literal_keys.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@typescript-eslint/explicit-member-accessibility" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_consistent_member_accessibility
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@typescript-eslint/naming-convention" => {
             if !options.include_inspired {
                 results.has_inspired_rules = true;
@@ -173,6 +183,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .no_restricted_imports
                 .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@typescript-eslint/no-restricted-types" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_restricted_types.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@typescript-eslint/no-this-alias" => {

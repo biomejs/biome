@@ -1228,8 +1228,6 @@ fn eat_variable_declaration(
         declarator_context: context,
         remaining_declarator_range: None,
     };
-
-    debug_assert!(p.state().name_map.is_empty());
     let list = variable_declarator_list.parse_list(p);
 
     p.state_mut().name_map.clear();

@@ -1159,7 +1159,7 @@ export interface Nursery {
 	/**
 	 * Disallow the use of console.
 	 */
-	noConsole?: RuleFixConfiguration_for_Null;
+	noConsole?: RuleFixConfiguration_for_NoConsoleOptions;
 	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
@@ -1236,6 +1236,10 @@ export interface Nursery {
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
+	/**
+	 * Disallow user defined types.
+	 */
+	noRestrictedTypes?: RuleFixConfiguration_for_NoRestrictedTypesOptions;
 	/**
 	 * Disallow shorthand properties that override related longhand properties.
 	 */
@@ -1328,6 +1332,10 @@ export interface Nursery {
 	 * Disallows invalid named grid areas in CSS Grid Layouts.
 	 */
 	useConsistentGridAreas?: RuleConfiguration_for_Null;
+	/**
+	 * Require consistent accessibility modifiers on class properties and methods.
+	 */
+	useConsistentMemberAccessibility?: RuleConfiguration_for_ConsistentMemberAccessibilityOptions;
 	/**
 	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
 	 */
@@ -1946,12 +1954,21 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
+export type RuleFixConfiguration_for_NoConsoleOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoConsoleOptions;
 export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoLabelWithoutControlOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
+export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
+export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
 export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UseImportExtensionsOptions;
@@ -2059,6 +2076,20 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 */
 	options: DeprecatedHooksOptions;
 }
+export interface RuleWithFixOptions_for_NoConsoleOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoConsoleOptions;
+}
 export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -2078,6 +2109,30 @@ export interface RuleWithOptions_for_RestrictedImportsOptions {
 	 * Rule's options
 	 */
 	options: RestrictedImportsOptions;
+}
+export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoRestrictedTypesOptions;
+}
+export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: ConsistentMemberAccessibilityOptions;
 }
 export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
@@ -2215,6 +2270,12 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
+export interface NoConsoleOptions {
+	/**
+	 * Allowed calls on the console object.
+	 */
+	allow: string[];
+}
 export interface NoLabelWithoutControlOptions {
 	/**
 	 * Array of component names that should be considered the same as an `input` element.
@@ -2237,6 +2298,12 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+}
+export interface NoRestrictedTypesOptions {
+	types: {};
+}
+export interface ConsistentMemberAccessibilityOptions {
+	accessibility: Accessibility;
 }
 export interface UseImportExtensionsOptions {
 	/**
@@ -2345,8 +2412,9 @@ Set to `true` to mark the identity of the hook's return value as stable, or use 
 
 For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
 	 */
-	stableResult: StableHookResult;
+	stableResult?: StableHookResult;
 }
+export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
 export interface Convention {
@@ -2702,6 +2770,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
+	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
@@ -2725,6 +2794,7 @@ export type Category =
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentGridAreas"
+	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useDeprecatedReason"

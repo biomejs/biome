@@ -1,5 +1,5 @@
-https://raw.githubusercontent.com/pys5205/docker-pys/d1d026f3f3789f31f753661af0a0235776294287/package-lock.json
-https://raw.githubusercontent.com/miloyip/nativejson-benchmark/master/data/canada.json
-https://raw.githubusercontent.com/jshttp/mime-db/master/db.json
-https://raw.githubusercontent.com/ashtuchkin/iconv-lite/master/encodings/tables/big5-added.json
-https://raw.githubusercontent.com/ashtuchkin/iconv-lite/master/encodings/tables/eucjp.json
+https://cdn.jsdelivr.net/gh/pys5205/docker-pys@d1d026f3f3789f31f753661af0a0235776294287/package-lock.json
+https://cdn.jsdelivr.net/gh/miloyip/nativejson-benchmark@478d5727c2a4048e835a29c65adecc7d795360d5/data/canada.json
+https://cdn.jsdelivr.net/gh/jshttp/mime-db@ae4ada99c87c449c36c86fb8a08f549ee90361fb/db.json
+https://cdn.jsdelivr.net/gh/ashtuchkin/iconv-lite@928f7c68e1be51c1391c70dbee244fd32623f121/encodings/tables/big5-added.json
+https://cdn.jsdelivr.net/gh/ashtuchkin/iconv-lite@928f7c68e1be51c1391c70dbee244fd32623f121/encodings/tables/eucjp.json

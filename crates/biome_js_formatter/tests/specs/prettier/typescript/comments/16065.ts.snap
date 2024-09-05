@@ -1,0 +1,60 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/comments/16065.ts
+---
+# Input
+
+```ts
+class Foo {
+  constructor(
+    @decorator1
+    // comment1
+    readonly baz1: string,
+
+    @decorator2
+    // comment2
+    private baz2: string,
+  ) {}
+}
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,11 +1,11 @@
+ class Foo {
+   constructor(
+     @decorator1
+-    readonly // comment1
+-    baz1: string,
++    // comment1
++    readonly baz1: string,
+ 
+     @decorator2
+-    private // comment2
+-    baz2: string,
++    // comment2
++    private baz2: string,
+   ) {}
+ }
+```
+
+# Output
+
+```ts
+class Foo {
+  constructor(
+    @decorator1
+    // comment1
+    readonly baz1: string,
+
+    @decorator2
+    // comment2
+    private baz2: string,
+  ) {}
+}
+```

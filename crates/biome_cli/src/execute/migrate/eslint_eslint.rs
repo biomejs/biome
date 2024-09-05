@@ -478,6 +478,11 @@ impl Deserializable for Rules {
                     };
                     match rule_name.text() {
                         // Eslint rules with options that we handle
+                        "no-console" => {
+                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                                result.insert(Rule::NoConsole(conf));
+                            }
+                        }
                         "no-restricted-globals" => {
                             if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
                                 result.insert(Rule::NoRestrictedGlobals(conf));
@@ -492,6 +497,11 @@ impl Deserializable for Rules {
                         "@typescript-eslint/array-type" => {
                             if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
                                 result.insert(Rule::TypeScriptArrayType(conf));
+                            }
+                        }
+                        "@typescript-eslint/explicit-member-accessibility" => {
+                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                                result.insert(Rule::TypeScriptExplicitMemberAccessibility(conf));
                             }
                         }
                         "@typescript-eslint/naming-convention" => {
@@ -521,6 +531,17 @@ impl Deserializable for Rules {
             }
         }
         value.deserialize(Visitor, name, diagnostics)
+    }
+}
+
+#[derive(Debug, Default, Deserializable)]
+pub struct NoConsoleOptions {
+    /// Allowed calls on the console object.
+    pub allow: Vec<String>,
+}
+impl From<NoConsoleOptions> for biome_js_analyze::lint::nursery::no_console::NoConsoleOptions {
+    fn from(val: NoConsoleOptions) -> Self {
+        biome_js_analyze::lint::nursery::no_console::NoConsoleOptions { allow: val.allow }
     }
 }
 
@@ -563,10 +584,14 @@ pub(crate) enum Rule {
     Any(Cow<'static, str>, Severity),
     // Eslint rules with its options
     // We use this to configure equivalent Bione's rules.
+    NoConsole(RuleConf<Box<NoConsoleOptions>>),
     NoRestrictedGlobals(RuleConf<Box<NoRestrictedGlobal>>),
     // Eslint plugins
     Jsxa11yArioaRoles(RuleConf<Box<eslint_jsxa11y::AriaRoleOptions>>),
     TypeScriptArrayType(RuleConf<eslint_typescript::ArrayTypeOptions>),
+    TypeScriptExplicitMemberAccessibility(
+        RuleConf<eslint_typescript::ExplicitMemberAccessibilityOptions>,
+    ),
     TypeScriptNamingConvention(RuleConf<Box<eslint_typescript::NamingConventionSelection>>),
     UnicornFilenameCase(RuleConf<eslint_unicorn::FilenameCaseOptions>),
     // If you add new variants, don't forget to update [Rules::deserialize].
@@ -575,9 +600,13 @@ impl Rule {
     pub(crate) fn name(&self) -> Cow<'static, str> {
         match self {
             Rule::Any(name, _) => name.clone(),
+            Rule::NoConsole(_) => Cow::Borrowed("no-console"),
             Rule::NoRestrictedGlobals(_) => Cow::Borrowed("no-restricted-globals"),
             Rule::Jsxa11yArioaRoles(_) => Cow::Borrowed("jsx-a11y/aria-role"),
             Rule::TypeScriptArrayType(_) => Cow::Borrowed("@typescript-eslint/array-type"),
+            Rule::TypeScriptExplicitMemberAccessibility(_) => {
+                Cow::Borrowed("@typescript-eslint/explicit-member-accessibility")
+            }
             Rule::TypeScriptNamingConvention(_) => {
                 Cow::Borrowed("@typescript-eslint/naming-convention")
             }

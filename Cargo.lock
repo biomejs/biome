@@ -55,9 +55,9 @@ checksum = "b3d1d046238990b9cf5bcde22a3fb3584ee5cf65fb2765f454ed428c7a0063da"
 
 [[package]]
 name = "ascii_table"
-version = "4.0.3"
+version = "4.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c2bee9b9ee0e5768772e38c07ef0ba23a490d7e1336ec7207c25712a2661c55"
+checksum = "ed8a80a95ab122e7cc43bfde1d51949c89ff67e0c76eb795dc045003418473e2"
 
 [[package]]
 name = "async-trait"
@@ -171,7 +171,7 @@ dependencies = [
  "crossbeam",
  "dashmap 6.0.1",
  "hdrhistogram",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "insta",
  "libc",
  "mimalloc",
@@ -216,7 +216,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "bpaf",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "insta",
  "oxc_resolver",
  "rustc-hash 1.1.0",
@@ -354,7 +354,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "enumflags2",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "schemars",
  "serde",
  "serde_json",
@@ -383,8 +383,8 @@ dependencies = [
  "biome_rowan",
  "biome_text_edit",
  "biome_text_size",
- "bitflags 2.6.0",
  "bpaf",
+ "enumflags2",
  "insta",
  "oxc_resolver",
  "schemars",
@@ -437,7 +437,7 @@ dependencies = [
  "cfg-if",
  "countme",
  "drop_bomb",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "insta",
  "rustc-hash 1.1.0",
  "schemars",
@@ -474,7 +474,7 @@ dependencies = [
  "crossbeam",
  "directories",
  "enumflags2",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "oxc_resolver",
  "parking_lot",
  "rayon",
@@ -650,6 +650,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_html_formatter"
+version = "0.0.0"
+dependencies = [
+ "biome_diagnostics_categories",
+ "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
+ "biome_html_parser",
+ "biome_html_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_service",
+ "biome_suppression",
+]
+
+[[package]]
 name = "biome_html_parser"
 version = "0.0.1"
 dependencies = [
@@ -763,8 +779,9 @@ dependencies = [
  "biome_unicode_table",
  "bitflags 2.6.0",
  "drop_bomb",
+ "enumflags2",
  "expect-test",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "quickcheck",
  "quickcheck_macros",
  "rustc-hash 1.1.0",
@@ -1017,6 +1034,8 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_grit_patterns",
+ "biome_html_formatter",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_factory",
  "biome_js_formatter",
@@ -1037,7 +1056,7 @@ dependencies = [
  "enumflags2",
  "getrandom 0.2.15",
  "ignore",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "insta",
  "oxc_resolver",
  "regex",
@@ -1348,9 +1367,9 @@ checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
 name = "codspeed"
-version = "2.6.0"
+version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a104ac948e0188b921eb3fcbdd55dcf62e542df4c7ab7e660623f6288302089"
+checksum = "c370701439f48f9da21ce48e0505c7e24bfa046e8132a4867c36001df0ded99f"
 dependencies = [
  "colored",
  "libc",
@@ -1359,9 +1378,9 @@ dependencies = [
 
 [[package]]
 name = "codspeed-criterion-compat"
-version = "2.6.0"
+version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "722c36bdc62d9436d027256ce2627af81ac7a596dfc7d13d849d0d212448d7fe"
+checksum = "886eb6c3d782e1b45a2b282abbff5c9d1f21dcf36868979afff174bbc6c93b11"
 dependencies = [
  "codspeed",
  "colored",
@@ -2127,9 +2146,9 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.4.0"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "93ead53efc7ea8ed3cfb0c79fc8023fbb782a5432b52830b6518941cebe6505c"
+checksum = "68b900aa2f7301e21c36462b170ee99994de34dff39a4a6a528e80e7376d07e5"
 dependencies = [
  "equivalent",
  "hashbrown 0.14.5",
@@ -2552,18 +2571,20 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "oxc_resolver"
-version = "1.10.2"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5f862ee8e1ba728378ac7e007de195ae00fbb21337ef152380c052cc07e2ee2"
+checksum = "e7fe4d07afdfcf6b1d7fb952e6691d82692a54b71964a377cf49f3e47dac283d"
 dependencies = [
+ "cfg-if",
  "dashmap 6.0.1",
  "dunce",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "json-strip-comments",
  "once_cell",
  "rustc-hash 2.0.0",
  "serde",
  "serde_json",
+ "simdutf8",
  "thiserror",
  "tracing",
 ]
@@ -2740,20 +2761,9 @@ dependencies = [
 
 [[package]]
 name = "pulldown-cmark"
-version = "0.9.2"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d9cc634bc78768157b5cbfe988ffcd1dcba95cd2b2f03a88316c08c6d00ed63"
-dependencies = [
- "bitflags 1.3.2",
- "memchr",
- "unicase",
-]
-
-[[package]]
-name = "pulldown-cmark"
-version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d31cbfcd94884c3a67ec210c83efb06cb43674043458b0ad59f6947f8462c23"
+checksum = "666f0f59e259aea2d72e6012290c09877a780935cc3c18b1ceded41f3890d59c"
 dependencies = [
  "bitflags 2.6.0",
  "getopts",
@@ -2780,12 +2790,12 @@ dependencies = [
 
 [[package]]
 name = "quick-junit"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfc1a6a5406a114913df2df8507998c755311b55b78584bed5f6e88f6417c4d4"
+checksum = "62ffd2f9a162cfae131bed6d9d1ed60adced33be340a94f96952897d7cb0c240"
 dependencies = [
  "chrono",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "newtype-uuid",
  "quick-xml",
  "strip-ansi-escapes",
@@ -2795,9 +2805,9 @@ dependencies = [
 
 [[package]]
 name = "quick-xml"
-version = "0.31.0"
+version = "0.36.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1004a344b30a54e2ee58d66a71b32d2db2feb0a31f9a2d302bf0536f15de2a33"
+checksum = "96a05e2e8efddfa51a84ca47cec303fac86c8541b686d37cac5efc0e094417bc"
 dependencies = [
  "memchr",
 ]
@@ -3064,7 +3074,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_service",
- "pulldown-cmark 0.12.0",
+ "pulldown-cmark",
 ]
 
 [[package]]
@@ -3163,7 +3173,7 @@ checksum = "09c024468a378b7e36765cd36702b7a90cc3cba11654f6685c8f233408e89e92"
 dependencies = [
  "dyn-clone",
  "indexmap 1.9.3",
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "schemars_derive",
  "serde",
  "serde_json",
@@ -3247,7 +3257,7 @@ version = "1.0.127"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8043c06d9f82bd7271361ed64f415fe5e12a77fdb52e573e7f06a516dea329ad"
 dependencies = [
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "itoa",
  "memchr",
  "ryu",
@@ -3289,7 +3299,7 @@ version = "0.9.34+deprecated"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
 dependencies = [
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "itoa",
  "ryu",
  "serde",
@@ -3313,6 +3323,12 @@ checksum = "d8229b473baa5980ac72ef434c4415e70c4b5e71b423043adb4ba059f89c99a1"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "simdutf8"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f27f6278552951f1f2b8cf9da965d10969b2efdea95a6ec47987ab46edfe263a"
 
 [[package]]
 name = "similar"
@@ -3659,7 +3675,7 @@ version = "0.22.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3328d4f68a705b2a4498da1d580585d39a6510f98318a2cec3018a7ec61ddef"
 dependencies = [
- "indexmap 2.4.0",
+ "indexmap 2.5.0",
  "serde",
  "serde_spanned",
  "toml_datetime",
@@ -3954,9 +3970,9 @@ checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
 
 [[package]]
 name = "uuid"
-version = "1.8.0"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a183cf7feeba97b4dd1c0d46788634f6221d87fa961b305bed08c851829efcc0"
+checksum = "81dfa00651efa65069b0b6b651f4aaa31ba9e3c3ce0137aaad053604ee7e0314"
 
 [[package]]
 name = "valuable"
@@ -4437,7 +4453,7 @@ dependencies = [
  "bpaf",
  "git2",
  "proc-macro2",
- "pulldown-cmark 0.9.2",
+ "pulldown-cmark",
  "quote",
  "schemars",
  "serde",

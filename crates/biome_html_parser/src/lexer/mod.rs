@@ -2,8 +2,8 @@ mod tests;
 
 use crate::token_source::HtmlLexContext;
 use biome_html_syntax::HtmlSyntaxKind::{
-    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
-    UNICODE_BOM, WHITESPACE,
+    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
+    TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -149,6 +149,7 @@ impl<'src> HtmlLexer<'src> {
 
         match &buffer[..len] {
             b"doctype" | b"DOCTYPE" => DOCTYPE_KW,
+            b"html" | b"HTML" => HTML_KW,
             _ => HTML_LITERAL,
         }
     }
