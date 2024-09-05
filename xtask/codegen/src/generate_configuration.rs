@@ -7,7 +7,7 @@ use biome_js_syntax::JsLanguage;
 use biome_json_syntax::JsonLanguage;
 use biome_string_case::Case;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
-use pulldown_cmark::{Event, Parser, Tag};
+use pulldown_cmark::{Event, Parser, Tag, TagEnd};
 use quote::quote;
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -672,7 +672,7 @@ fn generate_group_struct(
                     }
 
                     Event::Start(Tag::Paragraph) => {}
-                    Event::End(Tag::Paragraph) => {
+                    Event::End(TagEnd::Paragraph) => {
                         break;
                     }
 
@@ -685,7 +685,7 @@ fn generate_group_struct(
                     },
 
                     Event::End(tag) => match tag {
-                        Tag::Strong | Tag::Paragraph => {
+                        TagEnd::Strong | TagEnd::Paragraph => {
                             continue;
                         }
                         _ => panic!("Unimplemented tag {:?}", { tag }),
