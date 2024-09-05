@@ -12,6 +12,7 @@ pub mod no_comment_text;
 pub mod no_compare_neg_zero;
 pub mod no_confusing_labels;
 pub mod no_confusing_void_type;
+pub mod no_console;
 pub mod no_console_log;
 pub mod no_const_enum;
 pub mod no_control_characters_in_regex;
@@ -74,6 +75,7 @@ declare_lint_group! {
             self :: no_compare_neg_zero :: NoCompareNegZero ,
             self :: no_confusing_labels :: NoConfusingLabels ,
             self :: no_confusing_void_type :: NoConfusingVoidType ,
+            self :: no_console :: NoConsole ,
             self :: no_console_log :: NoConsoleLog ,
             self :: no_const_enum :: NoConstEnum ,
             self :: no_control_characters_in_regex :: NoControlCharactersInRegex ,

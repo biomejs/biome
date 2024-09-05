@@ -1951,13 +1951,6 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noConsole": {
-					"description": "Disallow the use of console.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoConsoleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDoneCallback": {
 					"description": "Disallow using a callback in asynchronous tests and hooks.",
 					"anyOf": [
@@ -3504,6 +3497,13 @@
 					"description": "Disallow void type outside of generic or return types.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noConsole": {
+					"description": "Disallow the use of console.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoConsoleConfiguration" },
 						{ "type": "null" }
 					]
 				},

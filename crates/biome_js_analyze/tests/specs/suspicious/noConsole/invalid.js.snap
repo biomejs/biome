@@ -18,7 +18,7 @@ globalThis.console.warn();
 
 # Diagnostics
 ```
-invalid.js:1:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console.
   
@@ -37,7 +37,7 @@ invalid.js:1:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:2:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console.
   
@@ -60,7 +60,7 @@ invalid.js:2:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:3:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console.
   
@@ -85,7 +85,7 @@ invalid.js:3:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:4:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console.
   
@@ -110,7 +110,7 @@ invalid.js:4:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:5:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console.
   
@@ -135,7 +135,7 @@ invalid.js:5:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:6:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console.
   
@@ -160,7 +160,7 @@ invalid.js:6:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:7:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console.
   
@@ -185,7 +185,7 @@ invalid.js:7:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:9:1 lint/nursery/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use console.
   
