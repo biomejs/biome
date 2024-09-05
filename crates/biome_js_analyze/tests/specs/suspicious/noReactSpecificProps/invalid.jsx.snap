@@ -17,7 +17,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:2:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:2:6 lint/suspicious/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX attribute is specific to React.
   
@@ -47,7 +47,7 @@ invalid.jsx:2:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsx:5:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:5:6 lint/suspicious/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX attribute is specific to React.
   
@@ -78,7 +78,7 @@ invalid.jsx:5:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.jsx:8:6 lint/nursery/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:8:6 lint/suspicious/noReactSpecificProps  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This JSX attribute is specific to React.
   

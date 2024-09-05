@@ -1351,10 +1351,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "solidjs/no-react-specific-props" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .no_react_specific_props
                 .get_or_insert(Default::default());

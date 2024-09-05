@@ -1240,10 +1240,6 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
-	 * Prevents React-specific JSX properties from being used.
-	 */
-	noReactSpecificProps?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
 	noRestrictedImports?: RuleConfiguration_for_RestrictedImportsOptions;
@@ -1795,6 +1791,10 @@ export interface Suspicious {
 	 * Disallow direct use of Object.prototype builtins.
 	 */
 	noPrototypeBuiltins?: RuleConfiguration_for_Null;
+	/**
+	 * Prevents React-specific JSX properties from being used.
+	 */
+	noReactSpecificProps?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow variable, function, class, and type redeclarations in the same scope.
 	 */
@@ -2763,7 +2763,6 @@ export type Category =
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
-	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noShorthandPropertyOverrides"
@@ -2892,6 +2891,7 @@ export type Category =
 	| "lint/suspicious/noMisplacedAssertion"
 	| "lint/suspicious/noMisrefactoredShorthandAssign"
 	| "lint/suspicious/noPrototypeBuiltins"
+	| "lint/suspicious/noReactSpecificProps"
 	| "lint/suspicious/noRedeclare"
 	| "lint/suspicious/noRedundantUseStrict"
 	| "lint/suspicious/noSelfCompare"

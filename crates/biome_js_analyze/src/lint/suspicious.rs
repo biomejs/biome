@@ -44,6 +44,7 @@ pub mod no_misleading_instantiator;
 pub mod no_misplaced_assertion;
 pub mod no_misrefactored_shorthand_assign;
 pub mod no_prototype_builtins;
+pub mod no_react_specific_props;
 pub mod no_redeclare;
 pub mod no_redundant_use_strict;
 pub mod no_self_compare;
@@ -109,6 +110,7 @@ declare_lint_group! {
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,
             self :: no_misrefactored_shorthand_assign :: NoMisrefactoredShorthandAssign ,
             self :: no_prototype_builtins :: NoPrototypeBuiltins ,
+            self :: no_react_specific_props :: NoReactSpecificProps ,
             self :: no_redeclare :: NoRedeclare ,
             self :: no_redundant_use_strict :: NoRedundantUseStrict ,
             self :: no_self_compare :: NoSelfCompare ,
