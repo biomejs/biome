@@ -34,7 +34,7 @@ new Promise((accept, reject) => {
 
 # Diagnostics
 ```
-invalid.js:1:14 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:14 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   
@@ -56,7 +56,7 @@ invalid.js:1:14 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.js:6:15 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   
@@ -81,7 +81,7 @@ invalid.js:6:15 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.js:8:33 lint/nursery/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:33 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   
@@ -98,7 +98,7 @@ invalid.js:8:33 lint/nursery/noUnusedFunctionParameters ━━━━━━━━
 ```
 
 ```
-invalid.js:10:22 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:22 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   
@@ -124,7 +124,7 @@ invalid.js:10:22 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.js:15:13 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:13 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   
@@ -149,7 +149,7 @@ invalid.js:15:13 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.js:16:14 lint/nursery/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:14 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   
@@ -166,7 +166,7 @@ invalid.js:16:14 lint/nursery/noUnusedFunctionParameters ━━━━━━━�
 ```
 
 ```
-invalid.js:17:14 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:14 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   
@@ -192,7 +192,7 @@ invalid.js:17:14 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.js:18:12 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:12 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   
@@ -218,7 +218,7 @@ invalid.js:18:12 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━�
 ```
 
 ```
-invalid.js:23:15 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:23:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   

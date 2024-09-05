@@ -904,6 +904,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnusedFunctionParameters": {
+					"description": "Disallow unused function parameters.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnusedImports": {
 					"description": "Disallow unused imports.",
 					"anyOf": [
@@ -2165,13 +2172,6 @@
 					"description": "Disallow unmatchable An+B selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnusedFunctionParameters": {
-					"description": "Disallow unused function parameters.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

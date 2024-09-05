@@ -217,7 +217,7 @@ pub type NoUnsafeFinally =
 pub type NoUnsafeNegation =
     <lint::suspicious::no_unsafe_negation::NoUnsafeNegation as biome_analyze::Rule>::Options;
 pub type NoUnsafeOptionalChaining = < lint :: correctness :: no_unsafe_optional_chaining :: NoUnsafeOptionalChaining as biome_analyze :: Rule > :: Options ;
-pub type NoUnusedFunctionParameters = < lint :: nursery :: no_unused_function_parameters :: NoUnusedFunctionParameters as biome_analyze :: Rule > :: Options ;
+pub type NoUnusedFunctionParameters = < lint :: correctness :: no_unused_function_parameters :: NoUnusedFunctionParameters as biome_analyze :: Rule > :: Options ;
 pub type NoUnusedImports =
     <lint::correctness::no_unused_imports::NoUnusedImports as biome_analyze::Rule>::Options;
 pub type NoUnusedLabels =

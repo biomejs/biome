@@ -12,7 +12,7 @@ class D {
 
 # Diagnostics
 ```
-invalid.ts:2:4 lint/nursery/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:4 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This parameter is unused.
   

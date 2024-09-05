@@ -31,6 +31,7 @@ pub mod no_unreachable;
 pub mod no_unreachable_super;
 pub mod no_unsafe_finally;
 pub mod no_unsafe_optional_chaining;
+pub mod no_unused_function_parameters;
 pub mod no_unused_imports;
 pub mod no_unused_labels;
 pub mod no_unused_private_class_members;
@@ -78,6 +79,7 @@ declare_lint_group! {
             self :: no_unreachable_super :: NoUnreachableSuper ,
             self :: no_unsafe_finally :: NoUnsafeFinally ,
             self :: no_unsafe_optional_chaining :: NoUnsafeOptionalChaining ,
+            self :: no_unused_function_parameters :: NoUnusedFunctionParameters ,
             self :: no_unused_imports :: NoUnusedImports ,
             self :: no_unused_labels :: NoUnusedLabels ,
             self :: no_unused_private_class_members :: NoUnusedPrivateClassMembers ,

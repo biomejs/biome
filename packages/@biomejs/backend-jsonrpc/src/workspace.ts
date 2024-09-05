@@ -1103,6 +1103,10 @@ export interface Correctness {
 	 */
 	noUnsafeOptionalChaining?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unused function parameters.
+	 */
+	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow unused imports.
 	 */
 	noUnusedImports?: RuleFixConfiguration_for_Null;
@@ -1279,10 +1283,6 @@ export interface Nursery {
 	 * Disallow unmatchable An+B selectors.
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unused function parameters.
-	 */
-	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
@@ -2730,6 +2730,7 @@ export type Category =
 	| "lint/correctness/noUnreachableSuper"
 	| "lint/correctness/noUnsafeFinally"
 	| "lint/correctness/noUnsafeOptionalChaining"
+	| "lint/correctness/noUnusedFunctionParameters"
 	| "lint/correctness/noUnusedImports"
 	| "lint/correctness/noUnusedLabels"
 	| "lint/correctness/noUnusedPrivateClassMembers"
@@ -2773,7 +2774,6 @@ export type Category =
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
-	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/noYodaExpression"
