@@ -537,7 +537,9 @@ impl AnyJsFormalParameter {
     /// Returns the list of decorators of the parameter if the parameter is decorated.
     pub fn decorators(&self) -> Option<JsDecoratorList> {
         match self {
-            AnyJsFormalParameter::JsBogusParameter(_) => None,
+            AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
+                None
+            }
             AnyJsFormalParameter::JsFormalParameter(parameter) => Some(parameter.decorators()),
         }
     }
@@ -545,7 +547,9 @@ impl AnyJsFormalParameter {
     /// Returns the type annotation of the parameter if any.
     pub fn type_annotation(&self) -> Option<TsTypeAnnotation> {
         match self {
-            AnyJsFormalParameter::JsBogusParameter(_) => None,
+            AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
+                None
+            }
             AnyJsFormalParameter::JsFormalParameter(parameter) => parameter.type_annotation(),
         }
     }

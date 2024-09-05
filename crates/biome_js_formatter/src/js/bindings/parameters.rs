@@ -281,7 +281,9 @@ pub(crate) fn should_hug_function_parameters(
                     }
                 }
             }
-            AnyJsFormalParameter::JsBogusParameter(_) => return Err(FormatError::SyntaxError),
+            AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
+                return Err(FormatError::SyntaxError)
+            }
         };
 
         Ok(result)

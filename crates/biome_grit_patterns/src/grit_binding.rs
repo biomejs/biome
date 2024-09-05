@@ -55,7 +55,17 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
     /// more than one associated node.
     fn singleton(&self) -> Option<GritTargetNode<'a>> {
         match self {
-            Self::Node(node) => Some(node.clone()),
+            Self::Node(node) => {
+                if node.is_list() {
+                    let mut children = node.named_children();
+                    match (children.next(), children.next()) {
+                        (Some(only_child), None) => Some(only_child),
+                        _ => None,
+                    }
+                } else {
+                    Some(node.clone())
+                }
+            }
             Self::File(..) | Self::Range(..) | Self::Empty(..) | Self::Constant(..) => None,
         }
     }
@@ -189,7 +199,10 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
     }
 
     fn is_list(&self) -> bool {
-        self.as_node().map_or(false, |node| node.is_list())
+        match self {
+            Self::Node(node) => node.is_list(),
+            _ => false,
+        }
     }
 
     fn list_items(&self) -> Option<impl Iterator<Item = GritTargetNode<'a>> + Clone> {
@@ -268,15 +281,34 @@ fn are_equivalent(node1: &GritTargetNode, node2: &GritTargetNode) -> bool {
         return true;
     }
 
-    // If the node kinds are different, then the nodes are not equivalent.
-    // But if one of them is a list with a single node, we may still find a
-    // match against that node.
+    // If the node kinds are different, then the nodes are not equivalent,
+    // except in the presence of lists:
+    // - If both are a list, we don't care about the kind of the list, we just
+    //   compare the nodes individually.
+    // - If one of them is a list with a single node, we may still find a
+    //   match against that node.
     if node1.kind() != node2.kind() {
         return if node1.is_list() {
-            let mut children1 = node1.named_children();
-            match (children1.next(), children1.next()) {
-                (Some(only_child), None) => are_equivalent(&only_child, node2),
-                _ => false,
+            if node2.is_list() {
+                let mut children1 = node1.named_children();
+                let mut children2 = node2.named_children();
+                loop {
+                    match (children1.next(), children2.next()) {
+                        (Some(child1), Some(child2)) => {
+                            if !are_equivalent(&child1, &child2) {
+                                break false;
+                            }
+                        }
+                        (None, None) => break true,
+                        _ => break false,
+                    }
+                }
+            } else {
+                let mut children1 = node1.named_children();
+                match (children1.next(), children1.next()) {
+                    (Some(only_child), None) => are_equivalent(&only_child, node2),
+                    _ => false,
+                }
             }
         } else if node2.is_list() {
             let mut children2 = node2.named_children();

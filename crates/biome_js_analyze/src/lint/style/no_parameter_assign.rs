@@ -106,7 +106,9 @@ impl Rule for NoParameterAssign {
 fn binding_of(param: &AnyJsParameter) -> Option<AnyJsBindingPattern> {
     match param {
         AnyJsParameter::AnyJsFormalParameter(formal_param) => match &formal_param {
-            AnyJsFormalParameter::JsBogusParameter(_) => None,
+            AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
+                None
+            }
             AnyJsFormalParameter::JsFormalParameter(param) => param.binding().ok(),
         },
         AnyJsParameter::JsRestParameter(param) => param.binding().ok(),
