@@ -2000,13 +2000,6 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noDoneCallback": {
-					"description": "Disallow using a callback in asynchronous tests and hooks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateAtImportRules": {
 					"description": "Disallow duplicate @import rules.",
 					"anyOf": [
@@ -3066,6 +3059,13 @@
 				},
 				"noDefaultExport": {
 					"description": "Disallow default exports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDoneCallback": {
+					"description": "Disallow using a callback in asynchronous tests and hooks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

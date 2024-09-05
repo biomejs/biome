@@ -1184,10 +1184,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow using a callback in asynchronous tests and hooks.
-	 */
-	noDoneCallback?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow duplicate @import rules.
 	 */
 	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
@@ -1434,6 +1430,10 @@ export interface Style {
 	 * Disallow default exports.
 	 */
 	noDefaultExport?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow using a callback in asynchronous tests and hooks.
+	 */
+	noDoneCallback?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow implicit true values on JSX boolean attributes
 	 */
@@ -2749,7 +2749,6 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
@@ -2805,6 +2804,7 @@ export type Category =
 	| "lint/style/noArguments"
 	| "lint/style/noCommaOperator"
 	| "lint/style/noDefaultExport"
+	| "lint/style/noDoneCallback"
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"

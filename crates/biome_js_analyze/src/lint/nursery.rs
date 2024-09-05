@@ -2,7 +2,6 @@
 
 use biome_analyze::declare_lint_group;
 
-pub mod no_done_callback;
 pub mod no_duplicate_else_if;
 pub mod no_dynamic_namespace_import_access;
 pub mod no_enum;
@@ -30,7 +29,6 @@ declare_lint_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
-            self :: no_done_callback :: NoDoneCallback ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
             self :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccess ,
             self :: no_enum :: NoEnum ,

@@ -71,7 +71,7 @@ test.each``("something", ({ a, b }, done) => {});
 
 # Diagnostics
 ```
-invalid.js:1:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -86,7 +86,7 @@ invalid.js:1:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:4:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -103,7 +103,7 @@ invalid.js:4:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:7:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -120,7 +120,7 @@ invalid.js:7:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━
 ```
 
 ```
-invalid.js:10:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -137,7 +137,7 @@ invalid.js:10:20 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:13:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -154,7 +154,7 @@ invalid.js:13:20 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:14:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -171,7 +171,7 @@ invalid.js:14:20 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:15:29 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:29 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -188,7 +188,7 @@ invalid.js:15:29 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:18:29 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:29 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -205,7 +205,7 @@ invalid.js:18:29 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:21:26 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:26 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -222,7 +222,7 @@ invalid.js:21:26 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:24:26 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:26 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -239,7 +239,7 @@ invalid.js:24:26 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:25:35 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:25:35 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -256,7 +256,7 @@ invalid.js:25:35 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:28:20 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:20 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -273,7 +273,7 @@ invalid.js:28:20 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:31:12 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:31:12 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -290,7 +290,7 @@ invalid.js:31:12 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:34:12 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:12 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -307,7 +307,7 @@ invalid.js:34:12 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:37:13 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:13 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -324,7 +324,7 @@ invalid.js:37:13 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:40:11 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:40:11 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -341,7 +341,7 @@ invalid.js:40:11 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:41:12 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:41:12 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -358,7 +358,7 @@ invalid.js:41:12 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:42:21 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:42:21 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -375,7 +375,7 @@ invalid.js:42:21 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:45:21 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:45:21 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -392,7 +392,7 @@ invalid.js:45:21 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:48:18 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:48:18 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -409,7 +409,7 @@ invalid.js:48:18 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:51:18 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:51:18 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -426,7 +426,7 @@ invalid.js:51:18 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:52:27 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:52:27 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -443,7 +443,7 @@ invalid.js:52:27 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:55:13 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:55:13 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -460,7 +460,7 @@ invalid.js:55:13 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:58:13 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:58:13 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -477,7 +477,7 @@ invalid.js:58:13 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:61:35 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:61:35 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   
@@ -494,7 +494,7 @@ invalid.js:61:35 lint/nursery/noDoneCallback ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:62:37 lint/nursery/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:62:37 lint/style/noDoneCallback ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow using a callback in asynchronous tests and hooks.
   

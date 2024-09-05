@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -11,20 +11,20 @@ use biome_rowan::{AstNode, TextRange};
 declare_lint_rule! {
     /// Disallow using a callback in asynchronous tests and hooks.
     ///
-    /// This rule checks the function parameter of hooks & tests for use of the done argument, suggesting you return a promise instead.
+    /// This rule checks the function parameter of hooks and tests for use of the `done` argument, suggesting you return a promise instead.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// beforeEach(done => {
+    /// beforeEach((done) => {
     ///     // ...
     /// });
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// test('myFunction()', done => {
+    /// test('tets-name', (done) => {
     ///     // ...
     /// });
     /// ```
@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js
-    /// test('myFunction()', () => {
+    /// test('test-name', () => {
     ///     expect(myFunction()).toBeTruthy();
     /// });
     /// ```
@@ -49,7 +49,6 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         sources: &[RuleSource::EslintJest("no-done-callback")],
-        source_kind: RuleSourceKind::SameLogic,
     }
 }
 

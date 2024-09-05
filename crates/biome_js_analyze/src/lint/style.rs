@@ -5,6 +5,7 @@ use biome_analyze::declare_lint_group;
 pub mod no_arguments;
 pub mod no_comma_operator;
 pub mod no_default_export;
+pub mod no_done_callback;
 pub mod no_implicit_boolean;
 pub mod no_inferrable_types;
 pub mod no_namespace;
@@ -58,6 +59,7 @@ declare_lint_group! {
             self :: no_arguments :: NoArguments ,
             self :: no_comma_operator :: NoCommaOperator ,
             self :: no_default_export :: NoDefaultExport ,
+            self :: no_done_callback :: NoDoneCallback ,
             self :: no_implicit_boolean :: NoImplicitBoolean ,
             self :: no_inferrable_types :: NoInferrableTypes ,
             self :: no_namespace :: NoNamespace ,
