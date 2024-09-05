@@ -14334,6 +14334,7 @@ impl AnyJsForInitializer {
 pub enum AnyJsFormalParameter {
     JsBogusParameter(JsBogusParameter),
     JsFormalParameter(JsFormalParameter),
+    JsMetavariable(JsMetavariable),
 }
 impl AnyJsFormalParameter {
     pub fn as_js_bogus_parameter(&self) -> Option<&JsBogusParameter> {
@@ -14345,6 +14346,12 @@ impl AnyJsFormalParameter {
     pub fn as_js_formal_parameter(&self) -> Option<&JsFormalParameter> {
         match &self {
             AnyJsFormalParameter::JsFormalParameter(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsFormalParameter::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -32197,12 +32204,21 @@ impl From<JsFormalParameter> for AnyJsFormalParameter {
         AnyJsFormalParameter::JsFormalParameter(node)
     }
 }
+impl From<JsMetavariable> for AnyJsFormalParameter {
+    fn from(node: JsMetavariable) -> AnyJsFormalParameter {
+        AnyJsFormalParameter::JsMetavariable(node)
+    }
+}
 impl AstNode for AnyJsFormalParameter {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        JsBogusParameter::KIND_SET.union(JsFormalParameter::KIND_SET);
+    const KIND_SET: SyntaxKindSet<Language> = JsBogusParameter::KIND_SET
+        .union(JsFormalParameter::KIND_SET)
+        .union(JsMetavariable::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_BOGUS_PARAMETER | JS_FORMAL_PARAMETER)
+        matches!(
+            kind,
+            JS_BOGUS_PARAMETER | JS_FORMAL_PARAMETER | JS_METAVARIABLE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
@@ -32212,6 +32228,7 @@ impl AstNode for AnyJsFormalParameter {
             JS_FORMAL_PARAMETER => {
                 AnyJsFormalParameter::JsFormalParameter(JsFormalParameter { syntax })
             }
+            JS_METAVARIABLE => AnyJsFormalParameter::JsMetavariable(JsMetavariable { syntax }),
             _ => return None,
         };
         Some(res)
@@ -32220,12 +32237,14 @@ impl AstNode for AnyJsFormalParameter {
         match self {
             AnyJsFormalParameter::JsBogusParameter(it) => &it.syntax,
             AnyJsFormalParameter::JsFormalParameter(it) => &it.syntax,
+            AnyJsFormalParameter::JsMetavariable(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyJsFormalParameter::JsBogusParameter(it) => it.syntax,
             AnyJsFormalParameter::JsFormalParameter(it) => it.syntax,
+            AnyJsFormalParameter::JsMetavariable(it) => it.syntax,
         }
     }
 }
@@ -32234,6 +32253,7 @@ impl std::fmt::Debug for AnyJsFormalParameter {
         match self {
             AnyJsFormalParameter::JsBogusParameter(it) => std::fmt::Debug::fmt(it, f),
             AnyJsFormalParameter::JsFormalParameter(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsFormalParameter::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -32242,6 +32262,7 @@ impl From<AnyJsFormalParameter> for SyntaxNode {
         match n {
             AnyJsFormalParameter::JsBogusParameter(it) => it.into(),
             AnyJsFormalParameter::JsFormalParameter(it) => it.into(),
+            AnyJsFormalParameter::JsMetavariable(it) => it.into(),
         }
     }
 }

@@ -47,6 +47,14 @@ impl Matcher<GritQueryContext> for GritNodePattern {
         let Some(node) = binding.singleton() else {
             return Ok(false);
         };
+        if binding.is_list() {
+            return self.execute(
+                &ResolvedPattern::from_node_binding(node),
+                init_state,
+                context,
+                logs,
+            );
+        }
 
         if node.kind() != self.kind {
             return Ok(false);
@@ -158,13 +166,11 @@ impl Matcher<GritQueryContext> for GritLeafNodePattern {
         let Some(node) = binding.get_last_binding().and_then(Binding::singleton) else {
             return Ok(false);
         };
-        if let Some(class) = &self.equivalence_class {
-            Ok(class.are_equivalent(node.kind(), node.text()))
-        } else if self.kind != node.kind() {
-            Ok(false)
-        } else {
-            Ok(node.text() == self.text)
-        }
+
+        Ok(match &self.equivalence_class {
+            Some(class) => class.are_equivalent(node.kind(), node.text()),
+            None => node.kind() == self.kind && node.text() == self.text,
+        })
     }
 }
 

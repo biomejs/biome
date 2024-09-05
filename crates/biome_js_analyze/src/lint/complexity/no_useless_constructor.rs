@@ -145,7 +145,8 @@ impl Rule for NoUselessConstructor {
         for parameter in constructor.parameters().ok()?.parameters() {
             let decorators = match parameter.ok()? {
                 AnyJsConstructorParameter::AnyJsFormalParameter(
-                    AnyJsFormalParameter::JsBogusParameter(_),
+                    AnyJsFormalParameter::JsBogusParameter(_)
+                    | AnyJsFormalParameter::JsMetavariable(_),
                 )
                 | AnyJsConstructorParameter::TsPropertyParameter(_) => {
                     // Ignore constructors with Bogus parameters or parameter properties
