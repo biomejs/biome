@@ -713,7 +713,6 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "biome_unicode_table",
- "bitflags 2.6.0",
  "bitvec",
  "enumflags2",
  "insta",
@@ -776,7 +775,6 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_unicode_table",
- "bitflags 2.6.0",
  "drop_bomb",
  "enumflags2",
  "expect-test",
@@ -968,8 +966,8 @@ dependencies = [
  "biome_diagnostics",
  "biome_rowan",
  "biome_unicode_table",
- "bitflags 2.6.0",
  "drop_bomb",
+ "enumflags2",
  "unicode-bom",
 ]
 

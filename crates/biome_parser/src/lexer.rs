@@ -1,9 +1,10 @@
 use super::diagnostic::ParseDiagnostic;
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_unicode_table::{lookup_byte, Dispatch::WHS};
-use bitflags::bitflags;
+use enumflags2::{bitflags, make_bitflags, BitFlags};
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
+use std::ops::{BitOr, BitOrAssign};
 use unicode_bom::Bom;
 
 /// `Lexer` trait defines the necessary methods a lexer must implement.
@@ -760,24 +761,56 @@ impl<Kind: SyntaxKind> LexerCheckpoint<Kind> {
     }
 }
 
-bitflags! {
-    /// Flags for a lexed token.
-    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-    pub struct TokenFlags: u8 {
-        /// Indicates that there has been a line break between the last non-trivia token
-        const PRECEDING_LINE_BREAK = 1 << 0;
-
-        /// Indicates that an identifier contains an unicode escape sequence
-        const UNICODE_ESCAPE = 1 << 1;
-    }
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u8)]
+enum TokenFlag {
+    PrecedingLineBreak = 1 << 0,
+    UnicodeEscape = 1 << 1,
 }
 
+/// Flags for a lexed token.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct TokenFlags(BitFlags<TokenFlag>);
+
 impl TokenFlags {
-    pub const fn has_preceding_line_break(&self) -> bool {
+    /// Indicates that there has been a line break between the last non-trivia token
+    pub const PRECEDING_LINE_BREAK: Self = Self(make_bitflags!(TokenFlag::{PrecedingLineBreak}));
+
+    /// Indicates that an identifier contains an unicode escape sequence
+    pub const UNICODE_ESCAPE: Self = Self(make_bitflags!(TokenFlag::{UnicodeEscape}));
+
+    pub const fn empty() -> Self {
+        Self(BitFlags::EMPTY)
+    }
+
+    pub fn contains(&self, other: impl Into<TokenFlags>) -> bool {
+        self.0.contains(other.into().0)
+    }
+
+    pub fn set(&mut self, other: impl Into<TokenFlags>, cond: bool) {
+        self.0.set(other.into().0, cond)
+    }
+
+    pub fn has_preceding_line_break(&self) -> bool {
         self.contains(TokenFlags::PRECEDING_LINE_BREAK)
     }
 
-    pub const fn has_unicode_escape(&self) -> bool {
+    pub fn has_unicode_escape(&self) -> bool {
         self.contains(TokenFlags::UNICODE_ESCAPE)
+    }
+}
+
+impl BitOr for TokenFlags {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        TokenFlags(self.0 | rhs.0)
+    }
+}
+
+impl BitOrAssign for TokenFlags {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
     }
 }
