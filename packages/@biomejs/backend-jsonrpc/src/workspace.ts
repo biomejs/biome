@@ -1340,10 +1340,6 @@ export interface Nursery {
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
 	/**
-	 * Require regex literals to be declared at the top level.
-	 */
-	useTopLevelRegex?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
 	useTrimStartEnd?: RuleFixConfiguration_for_Null;
@@ -1380,6 +1376,10 @@ export interface Performance {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Require regex literals to be declared at the top level.
+	 */
+	useTopLevelRegex?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -2790,13 +2790,13 @@ export type Category =
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
-	| "lint/nursery/useTopLevelRegex"
 	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
 	| "lint/performance/noReExportAll"
+	| "lint/performance/useTopLevelRegex"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"

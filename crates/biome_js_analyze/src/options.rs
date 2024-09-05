@@ -372,7 +372,7 @@ pub type UseThrowNewError =
 pub type UseThrowOnlyError =
     <lint::style::use_throw_only_error::UseThrowOnlyError as biome_analyze::Rule>::Options;
 pub type UseTopLevelRegex =
-    <lint::nursery::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
+    <lint::performance::use_top_level_regex::UseTopLevelRegex as biome_analyze::Rule>::Options;
 pub type UseTrimStartEnd =
     <lint::nursery::use_trim_start_end::UseTrimStartEnd as biome_analyze::Rule>::Options;
 pub type UseValidAnchor =

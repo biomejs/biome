@@ -2272,13 +2272,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useTopLevelRegex": {
-					"description": "Require regex literals to be declared at the top level.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useTrimStartEnd": {
 					"description": "Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().",
 					"anyOf": [
@@ -2489,6 +2482,13 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useTopLevelRegex": {
+					"description": "Require regex literals to be declared at the top level.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
