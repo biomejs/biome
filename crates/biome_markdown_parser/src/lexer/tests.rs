@@ -2,7 +2,7 @@
 #![allow(unused_mut, unused_variables, unused_assignments)]
 
 use super::{Lexer, TextSize};
-use biome_demo_syntax::MarkdownSyntaxKind::{self, EOF};
+use biome_markdown_syntax::MarkdownSyntaxKind::{self, EOF};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -22,7 +22,7 @@ macro_rules! assert_lex {
         $(
             assert_eq!(
                 tokens[idx].kind,
-                biome_demo_syntax::MarkdownSyntaxKind::$kind,
+                biome_markdown_syntax::MarkdownSyntaxKind::$kind,
                 "expected token kind {}, but found {:?}",
                 stringify!($kind),
                 tokens[idx].kind,
@@ -99,28 +99,11 @@ fn empty() {
 
 
 #[test]
-fn plus() {
+fn textual() {
     assert_lex! {
         "+",
-        PLUS:1,
+        MARKDOWN_TEXTUAL_LITERAL:1,
         EOF:0,
     }
 }
 
-#[test]
-fn number() {
-    assert_lex! {
-        "123",
-        NUMBER_LITERAL:3,
-        EOF:0,
-    }
-}
-
-#[test]
-fn calc() {
-    assert_lex! {
-        "calc",
-        CALC_KW:4,
-        EOF:0,
-    }
-}

@@ -3,9 +3,8 @@ mod generated;
 mod syntax_node;
 
 pub use self::generated::*;
-use biome_rowan::RawSyntaxKind;
+use biome_rowan::{RawSyntaxKind, SyntaxKind, TriviaPieceKind};
 pub use syntax_node::*;
-
 
 impl From<u16> for MarkdownSyntaxKind {
     fn from(d: u16) -> MarkdownSyntaxKind {
@@ -44,10 +43,26 @@ impl biome_rowan::SyntaxKind for MarkdownSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        todo!()
+        matches!(self,MarkdownSyntaxKind::NEWLINE)
     }
 
     fn to_string(&self) -> Option<&'static str> {
         MarkdownSyntaxKind::to_string(self)
+    }
+}
+
+impl TryFrom<MarkdownSyntaxKind> for TriviaPieceKind {
+    type Error = ();
+
+    fn try_from(value: MarkdownSyntaxKind) -> Result<Self, Self::Error> {
+        if value.is_trivia() {
+            match value {
+                MarkdownSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
+                MarkdownSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
+                _ => unreachable!("Not Trivia"),
+            }
+        } else {
+            Err(())
+        }
     }
 }

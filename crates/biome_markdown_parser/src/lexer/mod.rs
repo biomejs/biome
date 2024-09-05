@@ -3,8 +3,9 @@
 #[rustfmt::skip]
 mod tests;
 
-use biome_demo_syntax::MarkdownSyntaxKind::{self, EOF};
-use biome_demo_syntax::T;
+use biome_markdown_syntax::MarkdownSyntaxKind;
+use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use biome_markdown_syntax::T;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::{TextLen, TextRange, TextSize};
 use biome_unicode_table::{is_js_id_continue, is_js_id_start, lookup_byte, Dispatch::*};
@@ -28,7 +29,13 @@ impl Token {
     }
 }
 
-/// An extremely fast, lookup table based, lossless Demo lexer
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
+pub enum MarkdownLexContext {
+    #[default]
+    Regular,
+}
+
+/// An extremely fast, lookup table based, lossless Markdown lexer
 #[derive(Debug)]
 pub(crate) struct Lexer<'src> {
     /// Source text
@@ -38,6 +45,8 @@ pub(crate) struct Lexer<'src> {
     position: usize,
 
     diagnostics: Vec<ParseDiagnostic>,
+
+    context: MarkdownLexContext,
 }
 
 impl<'src> Lexer<'src> {
@@ -47,6 +56,7 @@ impl<'src> Lexer<'src> {
             source: string,
             position: 0,
             diagnostics: vec![],
+            context: MarkdownLexContext::Regular,
         }
     }
 
@@ -57,6 +67,10 @@ impl<'src> Lexer<'src> {
 
     pub fn finish(self) -> Vec<ParseDiagnostic> {
         self.diagnostics
+    }
+
+    pub fn position(&self) -> usize {
+        self.position
     }
 
     /// Lexes the next token.
@@ -95,26 +109,81 @@ impl<'src> Lexer<'src> {
         self.advance(1);
         tok
     }
+    /// Returns the byte at position `self.position + offset` or `None` if it is out of bounds.
+    #[inline]
+    fn byte_at(&self, offset: usize) -> Option<u8> {
+        self.source()
+            .as_bytes()
+            .get(self.position() + offset)
+            .copied()
+    }
+
+    /// Peeks at the next byte
+    #[inline]
+    fn peek_byte(&self) -> Option<u8> {
+        self.byte_at(1)
+    }
+
+    /// Consume one newline or all whitespace until a non-whitespace or a newline is found.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary
+    fn consume_newline_or_whitespaces(&mut self) -> MarkdownSyntaxKind {
+        if self.consume_newline() {
+            NEWLINE
+        } else {
+            self.consume_whitespaces();
+            WHITESPACE
+        }
+    }
+    /// Consume just one newline/line break.
+    ///
+    /// ## Safety
+    /// Must be called at a valid UT8 char boundary
+    fn consume_newline(&mut self) -> bool {
+        self.assert_at_char_boundary();
+
+        match self.current_byte() {
+            Some(b'\n') => {
+                self.advance(1);
+                true
+            }
+            Some(b'\r') => {
+                if self.peek_byte() == Some(b'\n') {
+                    self.advance(2)
+                } else {
+                    self.advance(1)
+                }
+                true
+            }
+
+            _ => false,
+        }
+    }
 
     /// Consumes all whitespace until a non-whitespace or a newline is found.
     ///
     /// ## Safety
     /// Must be called at a valid UT8 char boundary
-    fn consume_whitespaces(&mut self) -> MarkdownSyntaxKind {
+    fn consume_whitespaces(&mut self) {
         self.assert_at_char_boundary();
+
         while let Some(byte) = self.current_byte() {
             let dispatch = lookup_byte(byte);
 
             match dispatch {
                 WHS => match byte {
-                    b'\t' | b' ' | b'\r' | b'\n' => self.advance(1),
+                    b'\t' | b' ' => self.advance(1),
+                    b'\r' | b'\n' => {
+                        break;
+                    }
                     _ => {
                         let start = self.text_position();
                         self.advance(1);
 
                         self.diagnostics.push(
                             ParseDiagnostic::new(
-                                "The JSON standard only allows tabs, whitespace, carriage return and line feed whitespace.",
+                                "The Markdown standard only allows tabs, whitespace, carriage return and line feed whitespace.",
                                 start..self.text_position(),
                             )
                             .with_hint("Use a regular whitespace character instead."),
@@ -125,7 +194,6 @@ impl<'src> Lexer<'src> {
                 _ => break,
             }
         }
-        MarkdownSyntaxKind::WHITESPACE
     }
 
     /// Get the UTF8 char which starts at the current byte
@@ -194,74 +262,23 @@ impl<'src> Lexer<'src> {
         // to do more aggressive optimizations on the match regarding how to map it to instructions
         let dispatched = lookup_byte(current);
         match dispatched {
-            WHS => self.consume_whitespaces(),
-            PLS => self.eat_byte(T![+]),
-            DIG => self.lex_number(current),
-            IDT => self.key_word(),
-            _ => self.eat_unexpected_character(),
+            WHS => self.consume_newline_or_whitespaces(),
+            _ => self.consume_textual(),
         }
     }
 
-    fn key_word(&mut self) -> MarkdownSyntaxKind {
-        self.assert_at_char_boundary();
-        let mut buf = [0u8; 22];
-        let mut idx = 0;
-        let chr = self.current_char_unchecked();
-        if let Some(buf) = buf.get_mut(idx..idx + 1) {
-            buf[0] = chr.to_ascii_lowercase() as u8;
-            idx += 1;
-        }
-        self.advance(chr.len_utf8());
-        while let Some(current) = self.current_byte() {
-            let dispatched = lookup_byte(current);
-            match dispatched {
-                IDT => {
-                    let chr = self.current_char_unchecked();
-                    self.advance(chr.len_utf8());
-                    if let Some(buf) = buf.get_mut(idx..idx + 1) {
-                        buf[0] = chr.to_ascii_lowercase() as u8;
-                        idx += 1;
-                    }
-                }
-                _ => break,
-            }
-        }
-        match &buf[..idx] {
-            b"calc" => MarkdownSyntaxKind::CALC_KW,
-            _ => MarkdownSyntaxKind::ERROR_TOKEN,
-        }
-    }
-
+    
     #[inline]
-    fn eat_unexpected_character(&mut self) -> MarkdownSyntaxKind {
+    fn consume_textual(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
         let char = self.current_char_unchecked();
-        let err = ParseDiagnostic::new(
-            format!("unexpected character `{char}`"),
-            self.text_position()..self.text_position() + char.text_len(),
-        );
-        self.diagnostics.push(err);
         self.advance(char.len_utf8());
 
-        MarkdownSyntaxKind::ERROR_TOKEN
+        MarkdownSyntaxKind::MARKDOWN_TEXTUAL_LITERAL
     }
-
-    /// Lexes a JSON number literal
-    fn lex_number(&mut self, current: u8) -> MarkdownSyntaxKind {
-        self.assert_at_char_boundary();
-
-        if current == b'-' {
-            self.advance(1);
-        }
-        loop {
-            match self.current_byte() {
-                Some(b'0'..=b'9') => self.advance(1),
-                _ => break,
-            }
-        }
-        MarkdownSyntaxKind::NUMBER_LITERAL
-    }
+    
+    
 }
 
 impl Iterator for Lexer<'_> {

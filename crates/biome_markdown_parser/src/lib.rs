@@ -1,51 +1,49 @@
-use biome_markdown_factory::DemoSyntaxFactory;
-use biome_markdown_syntax::{DemoLanguage, DemoSyntaxNode, Root};
+use biome_markdown_factory::MarkdownSyntaxFactory;
+use biome_markdown_syntax::{MarkdownDocument, MarkdownLanguage, MarkdownSyntaxNode};
 use biome_parser::{prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
-use parser::DemoParser;
+use parser::MarkdownParser;
 use syntax::parse_root;
 
 mod lexer;
 mod parser;
-mod token_source;
 mod syntax;
+mod token_source;
 
-pub(crate) type DemoLosslessTreeSink<'source> =
-    LosslessTreeSink<'source, DemoLanguage, DemoSyntaxFactory>;
+pub(crate) type MarkdownLosslessTreeSink<'source> =
+    LosslessTreeSink<'source, MarkdownLanguage, MarkdownSyntaxFactory>;
 
-pub fn parse_demo(source: &str) -> DemoParse {
+pub fn parse_markdown(source: &str) -> MarkdownParse {
     let mut cache = NodeCache::default();
-    parse_demo_with_cache(source, &mut cache)
+    parse_markdown_with_cache(source, &mut cache)
 }
 
-pub fn parse_demo_with_cache(source: &str, cache: &mut NodeCache) -> DemoParse {
+pub fn parse_markdown_with_cache(source: &str, cache: &mut NodeCache) -> MarkdownParse {
     tracing::debug_span!("Parsing phase").in_scope(move || {
-        let mut parser = DemoParser::new(source);
+        let mut parser = MarkdownParser::new(source);
 
         parse_root(&mut parser);
 
         let (events, diagnostics, trivia) = parser.finish();
 
-        let mut tree_sink = DemoLosslessTreeSink::with_cache(source, &trivia, cache);
+        let mut tree_sink = MarkdownLosslessTreeSink::with_cache(source, &trivia, cache);
         biome_parser::event::process(&mut tree_sink, events, diagnostics);
         let (green, diagnostics) = tree_sink.finish();
 
-        DemoParse::new(green, diagnostics)
+        MarkdownParse::new(green, diagnostics)
     })
 }
 
-
-
 /// A utility struct for managing the result of a parser job
 #[derive(Debug)]
-pub struct DemoParse {
-    root: DemoSyntaxNode,
+pub struct MarkdownParse {
+    root: MarkdownSyntaxNode,
     diagnostics: Vec<ParseDiagnostic>,
 }
 
-impl DemoParse {
-    pub fn new(root: DemoSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> DemoParse {
-        DemoParse { root, diagnostics }
+impl MarkdownParse {
+    pub fn new(root: MarkdownSyntaxNode, diagnostics: Vec<ParseDiagnostic>) -> MarkdownParse {
+        MarkdownParse { root, diagnostics }
     }
 
     /// The syntax node represented by this Parse result
@@ -67,7 +65,7 @@ impl DemoParse {
     /// # Ok(())
     /// # }
     /// ```
-    pub fn syntax(&self) -> DemoSyntaxNode {
+    pub fn syntax(&self) -> MarkdownSyntaxNode {
         self.root.clone()
     }
 
@@ -92,7 +90,7 @@ impl DemoParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> Root {
-        Root::unwrap_cast(self.syntax())
+    pub fn tree(&self) -> MarkdownDocument {
+        MarkdownDocument::unwrap_cast(self.syntax())
     }
 }

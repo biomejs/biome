@@ -1,10 +1,10 @@
-use biome_demo_syntax::kind::MarkdownSyntaxKind::ROOT;
+use biome_markdown_syntax::kind::MarkdownSyntaxKind::*;
 use biome_parser::Parser;
 
-use crate::DemoParser;
+use crate::MarkdownParser;
 
-pub(crate) fn parse_root(p: &mut DemoParser) {
+pub(crate) fn parse_root(p: &mut MarkdownParser) {
     let m = p.start();
 
-    m.complete(p, ROOT);
+    m.complete(p, MARKDOWN_DOCUMENT);
 }

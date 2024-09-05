@@ -1,6 +1,6 @@
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
-use biome_demo_parser::parse_demo;
+use biome_markdown_parser::parse_markdown;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_diagnostics::DiagnosticExt;
@@ -36,7 +36,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let content = fs::read_to_string(test_case_path)
         .expect("Expected test path to be a readable file in UTF8 encoding");
 
-    let parsed = parse_demo(&content);
+    let parsed = parse_markdown(&content);
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
@@ -126,7 +126,7 @@ pub fn quick_test() {
     let code = r#"
     "#;
 
-    let root = parse_demo(code);
+    let root = parse_markdown(code);
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
     if has_bogus_nodes_or_empty_slots(&syntax) {

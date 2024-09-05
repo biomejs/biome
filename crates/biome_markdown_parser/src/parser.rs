@@ -1,22 +1,22 @@
-use biome_demo_syntax::MarkdownSyntaxKind;
+use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
 use biome_parser::token_source::Trivia;
 use biome_parser::ParserContext;
 
-use crate::token_source::DemoTokenSource;
+use crate::token_source::MarkdownTokenSource;
 
-pub(crate) struct DemoParser<'source> {
+pub(crate) struct MarkdownParser<'source> {
     context: ParserContext<MarkdownSyntaxKind>,
-    source: DemoTokenSource<'source>,
+    source: MarkdownTokenSource<'source>,
 }
 
-impl<'source> DemoParser<'source> {
+impl<'source> MarkdownParser<'source> {
     pub fn new(source: &'source str) -> Self {
         Self {
             context: ParserContext::default(),
-            source: DemoTokenSource::from_str(source),
+            source: MarkdownTokenSource::from_str(source),
         }
     }
 
@@ -36,9 +36,9 @@ impl<'source> DemoParser<'source> {
     }
 }
 
-impl<'source> Parser for DemoParser<'source> {
+impl<'source> Parser for MarkdownParser<'source> {
     type Kind = MarkdownSyntaxKind;
-    type Source = DemoTokenSource<'source>;
+    type Source = MarkdownTokenSource<'source>;
 
     fn context(&self) -> &ParserContext<Self::Kind> {
         &self.context

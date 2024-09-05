@@ -68,26 +68,26 @@ MarkdownH6 =  MarkdownParagraph?
 // ===
 // bar
 // ---
-AnyMakrdownSetextHeader = MakrdownSetextH1 | MakrdownSetextH2
-MakrdownSetextH1 = MarkdownParagraph
-MakrdownSetextH2 = MarkdownParagraph
+AnyMakrdownSetextHeader = MarkdownSetextH1 | MarkdownSetextH2
+MarkdownSetextH1 = MarkdownParagraph
+MarkdownSetextH2 = MarkdownParagraph
 
 // indented code blocks & fenced code blocks
 AnyCodeBlock = MarkdownIndentCodeBlock | MarkdownFencedCodeBlock
 
 // [    ] xxx
-MarkdownIndentCodeBlock = MarkdownString
+MarkdownIndentCodeBlock = MarkdownTextual
 // ~~~ 
 // xxx
 // ~~~
-MarkdownFencedCodeBlock = MarkdownString
+MarkdownFencedCodeBlock = MarkdownTextual
 
 // html block
-MarkdownHTMLBlock = MarkdownString 
+MarkdownHTMLBlock = MarkdownTextual 
 
-MarkdownLinkBlock = label: MarkdownString
-                url: MarkdownString
-                title: MarkdownString?
+MarkdownLinkBlock = label: MarkdownTextual
+                url: MarkdownTextual
+                title: MarkdownTextual?
 
 MarkdownQuote = AnyMarkdownBlock
 
@@ -106,20 +106,19 @@ MarkdownParagraphItemList = AnyMarkdownInline*
 AnyMarkdownInline = MarkdownInlineCode | MarkdownInlineEmphasis | MarkdownInlineLink | MarkdownInlineImage
                |  MarkdownHTMLBlock | MarkdownHardLine | MarkdownSoftBreak
                 | MarkdownTextual
-MarkdownInlineCode = MarkdownString
-MarkdownInlineEmphasis = MarkdownString
-MarkdownInlineLink = label: MarkdownString
-                    url: MarkdownString
-                    title: MarkdownString?
+MarkdownInlineCode = MarkdownTextual
+MarkdownInlineEmphasis = MarkdownTextual
+MarkdownInlineLink = label: MarkdownTextual
+                    url: MarkdownTextual
+                    title: MarkdownTextual?
 
-MarkdownInlineImage = alt: MarkdownString
-                    src: MarkdownString
-                    title: MarkdownString?
+MarkdownInlineImage = alt: MarkdownTextual
+                    src: MarkdownTextual
+                    title: MarkdownTextual?
 
 MarkdownHardLine = value: 'markdown_hard_line_literal'
 MarkdownSoftBreak = value: 'markdown_soft_break_literal'
 MarkdownTextual = value: 'markdown_textual_literal'
-MarkdownString = value: 'markdown_string_literal'
 MarkdownIndent = value: 'markdown_indent_chunk_literal'
 // ***
 // ---

@@ -1,11 +1,11 @@
 use crate::lexer::{Lexer, Token};
-use biome_demo_syntax::MarkdownSyntaxKind;
+use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::prelude::TokenSource;
 use biome_parser::token_source::Trivia;
 use biome_rowan::{TextRange, TriviaPieceKind};
 
-pub(crate) struct DemoTokenSource<'source> {
+pub(crate) struct MarkdownTokenSource<'source> {
     lexer: Lexer<'source>,
     trivia: Vec<Trivia>,
     current: MarkdownSyntaxKind,
@@ -13,7 +13,7 @@ pub(crate) struct DemoTokenSource<'source> {
     preceding_line_break: bool,
 }
 
-impl<'source> DemoTokenSource<'source> {
+impl<'source> MarkdownTokenSource<'source> {
     pub fn from_str(source: &'source str) -> Self {
         let lexer = Lexer::from_str(source);
 
@@ -67,7 +67,7 @@ impl<'source> DemoTokenSource<'source> {
     }
 }
 
-impl<'source> TokenSource for DemoTokenSource<'source> {
+impl<'source> TokenSource for MarkdownTokenSource<'source> {
     type Kind = MarkdownSyntaxKind;
 
     fn current(&self) -> Self::Kind {

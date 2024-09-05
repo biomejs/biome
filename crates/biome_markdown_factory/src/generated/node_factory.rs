@@ -7,18 +7,6 @@ use biome_markdown_syntax::{
     MarkdownSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn makrdown_setext_h1(markdown_paragraph: MarkdownParagraph) -> MakrdownSetextH1 {
-    MakrdownSetextH1::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MAKRDOWN_SETEXT_H1,
-        [Some(SyntaxElement::Node(markdown_paragraph.into_syntax()))],
-    ))
-}
-pub fn makrdown_setext_h2(markdown_paragraph: MarkdownParagraph) -> MakrdownSetextH2 {
-    MakrdownSetextH2::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MAKRDOWN_SETEXT_H2,
-        [Some(SyntaxElement::Node(markdown_paragraph.into_syntax()))],
-    ))
-}
 pub fn markdown_break_block(value_token: SyntaxToken) -> MarkdownBreakBlock {
     MarkdownBreakBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_BREAK_BLOCK,
@@ -66,10 +54,10 @@ impl MarkdownDocumentBuilder {
         ))
     }
 }
-pub fn markdown_fenced_code_block(markdown_string: MarkdownString) -> MarkdownFencedCodeBlock {
+pub fn markdown_fenced_code_block(markdown_textual: MarkdownTextual) -> MarkdownFencedCodeBlock {
     MarkdownFencedCodeBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_FENCED_CODE_BLOCK,
-        [Some(SyntaxElement::Node(markdown_string.into_syntax()))],
+        [Some(SyntaxElement::Node(markdown_textual.into_syntax()))],
     ))
 }
 pub fn markdown_h1() -> MarkdownH1Builder {
@@ -204,10 +192,10 @@ impl MarkdownH6Builder {
         ))
     }
 }
-pub fn markdown_html_block(markdown_string: MarkdownString) -> MarkdownHTMLBlock {
+pub fn markdown_html_block(markdown_textual: MarkdownTextual) -> MarkdownHTMLBlock {
     MarkdownHTMLBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_HTML_BLOCK,
-        [Some(SyntaxElement::Node(markdown_string.into_syntax()))],
+        [Some(SyntaxElement::Node(markdown_textual.into_syntax()))],
     ))
 }
 pub fn markdown_hard_line(value_token: SyntaxToken) -> MarkdownHardLine {
@@ -222,27 +210,27 @@ pub fn markdown_indent(value_token: SyntaxToken) -> MarkdownIndent {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn markdown_indent_code_block(markdown_string: MarkdownString) -> MarkdownIndentCodeBlock {
+pub fn markdown_indent_code_block(markdown_textual: MarkdownTextual) -> MarkdownIndentCodeBlock {
     MarkdownIndentCodeBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_INDENT_CODE_BLOCK,
-        [Some(SyntaxElement::Node(markdown_string.into_syntax()))],
+        [Some(SyntaxElement::Node(markdown_textual.into_syntax()))],
     ))
 }
-pub fn markdown_inline_code(markdown_string: MarkdownString) -> MarkdownInlineCode {
+pub fn markdown_inline_code(markdown_textual: MarkdownTextual) -> MarkdownInlineCode {
     MarkdownInlineCode::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_INLINE_CODE,
-        [Some(SyntaxElement::Node(markdown_string.into_syntax()))],
+        [Some(SyntaxElement::Node(markdown_textual.into_syntax()))],
     ))
 }
-pub fn markdown_inline_emphasis(markdown_string: MarkdownString) -> MarkdownInlineEmphasis {
+pub fn markdown_inline_emphasis(markdown_textual: MarkdownTextual) -> MarkdownInlineEmphasis {
     MarkdownInlineEmphasis::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_INLINE_EMPHASIS,
-        [Some(SyntaxElement::Node(markdown_string.into_syntax()))],
+        [Some(SyntaxElement::Node(markdown_textual.into_syntax()))],
     ))
 }
 pub fn markdown_inline_image(
-    alt: MarkdownString,
-    src: MarkdownString,
+    alt: MarkdownTextual,
+    src: MarkdownTextual,
 ) -> MarkdownInlineImageBuilder {
     MarkdownInlineImageBuilder {
         alt,
@@ -251,12 +239,12 @@ pub fn markdown_inline_image(
     }
 }
 pub struct MarkdownInlineImageBuilder {
-    alt: MarkdownString,
-    src: MarkdownString,
-    title: Option<MarkdownString>,
+    alt: MarkdownTextual,
+    src: MarkdownTextual,
+    title: Option<MarkdownTextual>,
 }
 impl MarkdownInlineImageBuilder {
-    pub fn with_title(mut self, title: MarkdownString) -> Self {
+    pub fn with_title(mut self, title: MarkdownTextual) -> Self {
         self.title = Some(title);
         self
     }
@@ -273,8 +261,8 @@ impl MarkdownInlineImageBuilder {
     }
 }
 pub fn markdown_inline_link(
-    label: MarkdownString,
-    url: MarkdownString,
+    label: MarkdownTextual,
+    url: MarkdownTextual,
 ) -> MarkdownInlineLinkBuilder {
     MarkdownInlineLinkBuilder {
         label,
@@ -283,12 +271,12 @@ pub fn markdown_inline_link(
     }
 }
 pub struct MarkdownInlineLinkBuilder {
-    label: MarkdownString,
-    url: MarkdownString,
-    title: Option<MarkdownString>,
+    label: MarkdownTextual,
+    url: MarkdownTextual,
+    title: Option<MarkdownTextual>,
 }
 impl MarkdownInlineLinkBuilder {
-    pub fn with_title(mut self, title: MarkdownString) -> Self {
+    pub fn with_title(mut self, title: MarkdownTextual) -> Self {
         self.title = Some(title);
         self
     }
@@ -304,7 +292,10 @@ impl MarkdownInlineLinkBuilder {
         ))
     }
 }
-pub fn markdown_link_block(label: MarkdownString, url: MarkdownString) -> MarkdownLinkBlockBuilder {
+pub fn markdown_link_block(
+    label: MarkdownTextual,
+    url: MarkdownTextual,
+) -> MarkdownLinkBlockBuilder {
     MarkdownLinkBlockBuilder {
         label,
         url,
@@ -312,12 +303,12 @@ pub fn markdown_link_block(label: MarkdownString, url: MarkdownString) -> Markdo
     }
 }
 pub struct MarkdownLinkBlockBuilder {
-    label: MarkdownString,
-    url: MarkdownString,
-    title: Option<MarkdownString>,
+    label: MarkdownTextual,
+    url: MarkdownTextual,
+    title: Option<MarkdownTextual>,
 }
 impl MarkdownLinkBlockBuilder {
-    pub fn with_title(mut self, title: MarkdownString) -> Self {
+    pub fn with_title(mut self, title: MarkdownTextual) -> Self {
         self.title = Some(title);
         self
     }
@@ -357,15 +348,21 @@ pub fn markdown_quote(any_markdown_block: AnyMarkdownBlock) -> MarkdownQuote {
         [Some(SyntaxElement::Node(any_markdown_block.into_syntax()))],
     ))
 }
+pub fn markdown_setext_h1(markdown_paragraph: MarkdownParagraph) -> MarkdownSetextH1 {
+    MarkdownSetextH1::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_SETEXT_H1,
+        [Some(SyntaxElement::Node(markdown_paragraph.into_syntax()))],
+    ))
+}
+pub fn markdown_setext_h2(markdown_paragraph: MarkdownParagraph) -> MarkdownSetextH2 {
+    MarkdownSetextH2::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_SETEXT_H2,
+        [Some(SyntaxElement::Node(markdown_paragraph.into_syntax()))],
+    ))
+}
 pub fn markdown_soft_break(value_token: SyntaxToken) -> MarkdownSoftBreak {
     MarkdownSoftBreak::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_SOFT_BREAK,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
-pub fn markdown_string(value_token: SyntaxToken) -> MarkdownString {
-    MarkdownString::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MARKDOWN_STRING,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
