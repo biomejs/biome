@@ -5,7 +5,7 @@ publish = false
 version = "0.0.0"
 
 [dependencies]
-ascii_table        = "4.0.3"
+ascii_table        = "4.0.4"
 backtrace          = "0.3.73"
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
