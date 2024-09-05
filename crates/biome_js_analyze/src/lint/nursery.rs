@@ -20,7 +20,6 @@ pub mod use_aria_props_supported_by_role;
 pub mod use_consistent_builtin_instantiation;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_member_accessibility;
-pub mod use_focusable_interactive;
 pub mod use_import_restrictions;
 pub mod use_sorted_classes;
 pub mod use_strict_mode;
@@ -50,7 +49,6 @@ declare_lint_group! {
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_consistent_curly_braces :: UseConsistentCurlyBraces ,
             self :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility ,
-            self :: use_focusable_interactive :: UseFocusableInteractive ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_strict_mode :: UseStrictMode ,

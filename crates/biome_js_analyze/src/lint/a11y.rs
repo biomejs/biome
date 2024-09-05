@@ -22,6 +22,7 @@ pub mod use_anchor_content;
 pub mod use_aria_activedescendant_with_tabindex;
 pub mod use_aria_props_for_role;
 pub mod use_button_type;
+pub mod use_focusable_interactive;
 pub mod use_heading_content;
 pub mod use_html_lang;
 pub mod use_iframe_title;
@@ -59,6 +60,7 @@ declare_lint_group! {
             self :: use_aria_activedescendant_with_tabindex :: UseAriaActivedescendantWithTabindex ,
             self :: use_aria_props_for_role :: UseAriaPropsForRole ,
             self :: use_button_type :: UseButtonType ,
+            self :: use_focusable_interactive :: UseFocusableInteractive ,
             self :: use_heading_content :: UseHeadingContent ,
             self :: use_html_lang :: UseHtmlLang ,
             self :: use_iframe_title :: UseIframeTitle ,

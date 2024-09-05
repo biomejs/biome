@@ -13,7 +13,7 @@ expression: invalid.js
 
 # Diagnostics
 ```
-invalid.js:2:2 lint/nursery/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element with the interactive role "button" is not focusable.
   
@@ -31,7 +31,7 @@ invalid.js:2:2 lint/nursery/useFocusableInteractive ━━━━━━━━━�
 ```
 
 ```
-invalid.js:3:2 lint/nursery/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:2 lint/a11y/useFocusableInteractive ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The HTML element with the interactive role "tab" is not focusable.
   
