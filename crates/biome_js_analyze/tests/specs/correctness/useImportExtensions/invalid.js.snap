@@ -43,7 +43,7 @@ require("./foo")
 
 # Diagnostics
 ```
-invalid.js:1:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -65,7 +65,7 @@ invalid.js:1:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:2:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -89,7 +89,7 @@ invalid.js:2:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:3:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -110,7 +110,7 @@ invalid.js:3:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:6:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -135,7 +135,7 @@ invalid.js:6:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:7:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -161,7 +161,7 @@ invalid.js:7:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:8:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -187,7 +187,7 @@ invalid.js:8:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:9:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -213,7 +213,7 @@ invalid.js:9:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━�
 ```
 
 ```
-invalid.js:10:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -239,7 +239,7 @@ invalid.js:10:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:12:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -265,7 +265,7 @@ invalid.js:12:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:13:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -290,7 +290,7 @@ invalid.js:13:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:14:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -316,7 +316,7 @@ invalid.js:14:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:15:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -342,7 +342,7 @@ invalid.js:15:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:16:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:16:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -368,7 +368,7 @@ invalid.js:16:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:18:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:18:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -394,7 +394,7 @@ invalid.js:18:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:19:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -419,7 +419,7 @@ invalid.js:19:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:20:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:20:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -445,7 +445,7 @@ invalid.js:20:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:21:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:21:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -471,7 +471,7 @@ invalid.js:21:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:22:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:22:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -497,7 +497,7 @@ invalid.js:22:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:24:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -523,7 +523,7 @@ invalid.js:24:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:27:8 lint/nursery/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:27:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -539,7 +539,7 @@ invalid.js:27:8 lint/nursery/useImportExtensions ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:28:8 lint/nursery/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:28:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -556,7 +556,7 @@ invalid.js:28:8 lint/nursery/useImportExtensions ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:29:8 lint/nursery/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:29:8 lint/correctness/useImportExtensions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -573,7 +573,7 @@ invalid.js:29:8 lint/nursery/useImportExtensions ━━━━━━━━━━�
 ```
 
 ```
-invalid.js:32:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:32:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -598,7 +598,7 @@ invalid.js:32:8 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid.js:33:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:33:18 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   
@@ -624,7 +624,7 @@ invalid.js:33:18 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid.js:34:9 lint/nursery/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:34:9 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Add a file extension for relative imports.
   

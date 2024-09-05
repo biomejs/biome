@@ -1151,6 +1151,10 @@ export interface Correctness {
 	 */
 	useHookAtTopLevel?: RuleConfiguration_for_DeprecatedHooksOptions;
 	/**
+	 * Enforce file extensions for relative imports.
+	 */
+	useImportExtensions?: RuleFixConfiguration_for_UseImportExtensionsOptions;
+	/**
 	 * Require calls to isNaN() when checking for NaN.
 	 */
 	useIsNan?: RuleFixConfiguration_for_Null;
@@ -1335,10 +1339,6 @@ export interface Nursery {
 	 * Disallow a missing generic family keyword within font families.
 	 */
 	useGenericFontNames?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce file extensions for relative imports.
-	 */
-	useImportExtensions?: RuleFixConfiguration_for_UseImportExtensionsOptions;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1948,6 +1948,9 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
+export type RuleFixConfiguration_for_UseImportExtensionsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseImportExtensionsOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1957,9 +1960,6 @@ export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
-export type RuleFixConfiguration_for_UseImportExtensionsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseImportExtensionsOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -2077,6 +2077,20 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 */
 	options: DeprecatedHooksOptions;
 }
+export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseImportExtensionsOptions;
+}
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -2110,20 +2124,6 @@ export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	 * Rule's options
 	 */
 	options: ConsistentMemberAccessibilityOptions;
-}
-export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseImportExtensionsOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -2275,6 +2275,12 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
+export interface UseImportExtensionsOptions {
+	/**
+	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
+	 */
+	suggestedExtensions: {};
+}
 /**
  * Options for the rule `noRestrictedImports`.
  */
@@ -2289,12 +2295,6 @@ export interface NoRestrictedTypesOptions {
 }
 export interface ConsistentMemberAccessibilityOptions {
 	accessibility: Accessibility;
-}
-export interface UseImportExtensionsOptions {
-	/**
-	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
-	 */
-	suggestedExtensions: {};
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -2741,6 +2741,7 @@ export type Category =
 	| "lint/correctness/useArrayLiterals"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
+	| "lint/correctness/useImportExtensions"
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
@@ -2788,7 +2789,6 @@ export type Category =
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useFocusableInteractive"
 	| "lint/nursery/useGenericFontNames"
-	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useSortedClasses"

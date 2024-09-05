@@ -985,6 +985,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useImportExtensions": {
+					"description": "Enforce file extensions for relative imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImportExtensionsConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useIsNan": {
 					"description": "Require calls to isNaN() when checking for NaN.",
 					"anyOf": [
@@ -2262,13 +2269,6 @@
 					"description": "Disallow a missing generic family keyword within font families.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useImportExtensions": {
-					"description": "Enforce file extensions for relative imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseImportExtensionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
