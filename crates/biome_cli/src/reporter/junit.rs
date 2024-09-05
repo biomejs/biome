@@ -98,12 +98,14 @@ impl<'a> ReporterVisitor for JunitReporterVisitor<'a> {
                 if let Resource::File(path) = resource {
                     let mut test_suite = TestSuite::new(path);
                     case.extra
-                        .insert("line".to_string(), start.line_number.get().to_string());
-                    case.extra
-                        .insert("column".to_string(), start.column_number.get().to_string());
+                        .insert("line".into(), start.line_number.get().to_string().into());
+                    case.extra.insert(
+                        "column".into(),
+                        start.column_number.get().to_string().into(),
+                    );
                     test_suite
                         .extra
-                        .insert("package".to_string(), "org.biome".to_string());
+                        .insert("package".into(), "org.biome".into());
                     test_suite.add_test_case(case);
                     self.0.add_test_suite(test_suite);
                 }
