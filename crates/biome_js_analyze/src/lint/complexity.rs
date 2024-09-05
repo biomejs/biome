@@ -23,6 +23,7 @@ pub mod no_useless_switch_case;
 pub mod no_useless_ternary;
 pub mod no_useless_this_alias;
 pub mod no_useless_type_constraint;
+pub mod no_useless_undefined_initialization;
 pub mod no_void;
 pub mod no_with;
 pub mod use_arrow_function;
@@ -59,6 +60,7 @@ declare_lint_group! {
             self :: no_useless_ternary :: NoUselessTernary ,
             self :: no_useless_this_alias :: NoUselessThisAlias ,
             self :: no_useless_type_constraint :: NoUselessTypeConstraint ,
+            self :: no_useless_undefined_initialization :: NoUselessUndefinedInitialization ,
             self :: no_void :: NoVoid ,
             self :: no_with :: NoWith ,
             self :: use_arrow_function :: UseArrowFunction ,

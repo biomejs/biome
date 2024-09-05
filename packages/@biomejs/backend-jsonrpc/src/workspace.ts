@@ -926,6 +926,10 @@ export interface Complexity {
 	 */
 	noUselessTypeConstraint?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow initializing variables to undefined.
+	 */
+	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow the use of void operators, which is not a familiar operator.
 	 */
 	noVoid?: RuleConfiguration_for_Null;
@@ -1287,10 +1291,6 @@ export interface Nursery {
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow initializing variables to undefined.
-	 */
-	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow use of @value rule in css modules.
 	 */
@@ -2689,6 +2689,7 @@ export type Category =
 	| "lint/complexity/noUselessTernary"
 	| "lint/complexity/noUselessThisAlias"
 	| "lint/complexity/noUselessTypeConstraint"
+	| "lint/complexity/noUselessUndefinedInitialization"
 	| "lint/complexity/noVoid"
 	| "lint/complexity/noWith"
 	| "lint/complexity/useArrowFunction"
@@ -2775,7 +2776,6 @@ export type Category =
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
-	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"

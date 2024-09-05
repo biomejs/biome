@@ -25,7 +25,7 @@ let g
 
 # Diagnostics
 ```
-invalid.js:2:8 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:8 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! It's not necessary to initialize test2 to undefined.
   
@@ -45,7 +45,7 @@ invalid.js:2:8 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━
 ```
 
 ```
-invalid.js:3:7 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! It's not necessary to initialize c to undefined.
   
@@ -66,7 +66,7 @@ invalid.js:3:7 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━
 ```
 
 ```
-invalid.js:4:4 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:4 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! It's not necessary to initialize o to undefined.
   
@@ -87,7 +87,7 @@ invalid.js:4:4 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━
 ```
 
 ```
-invalid.js:7:8 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:8 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! It's not necessary to initialize i to undefined.
   
@@ -107,7 +107,7 @@ invalid.js:7:8 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━
 ```
 
 ```
-invalid.js:10:14 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:10:14 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! It's not necessary to initialize y to undefined.
   
@@ -133,7 +133,7 @@ invalid.js:10:14 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━�
 ```
 
 ```
-invalid.js:12:20 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:12:20 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! It's not necessary to initialize d to undefined.
   
@@ -154,7 +154,7 @@ invalid.js:12:20 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━�
 ```
 
 ```
-invalid.js:14:7 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:14:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! It's not necessary to initialize e to undefined.
   
@@ -180,7 +180,7 @@ invalid.js:14:7 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━�
 ```
 
 ```
-invalid.js:15:7 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:15:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! It's not necessary to initialize f to undefined.
   
@@ -205,7 +205,7 @@ invalid.js:15:7 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━�
 ```
 
 ```
-invalid.js:17:7 lint/nursery/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:17:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! It's not necessary to initialize g to undefined.
   

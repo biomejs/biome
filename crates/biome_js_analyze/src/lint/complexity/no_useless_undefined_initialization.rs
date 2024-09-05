@@ -1,6 +1,6 @@
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make::js_variable_declarator_list;
@@ -15,6 +15,7 @@ declare_lint_rule! {
     ///
     /// A variable that is declared and not initialized to any value automatically gets the value of `undefined`.
     /// It’s considered a best practice to avoid initializing variables to `undefined`.
+    ///
     /// Please note that any inline comments attached to the initialization value or variable will be moved at the end of the variable declaration on auto-fix.
     /// Please be also aware that this differs from Eslint's behaviour.
     ///
@@ -52,7 +53,6 @@ declare_lint_rule! {
         name: "noUselessUndefinedInitialization",
         language: "js",
         sources: &[RuleSource::Eslint("no-undef-init")],
-        source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Safe,
         recommended: false,
     }

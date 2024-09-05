@@ -522,6 +522,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessUndefinedInitialization": {
+					"description": "Disallow initializing variables to undefined.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVoid": {
 					"description": "Disallow the use of void operators, which is not a familiar operator.",
 					"anyOf": [
@@ -2177,13 +2184,6 @@
 				},
 				"noUselessEscapeInRegex": {
 					"description": "Disallow unnecessary escape sequence in regular expression literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessUndefinedInitialization": {
-					"description": "Disallow initializing variables to undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
