@@ -256,7 +256,7 @@ pub type NoVoidTypeReturn =
     <lint::correctness::no_void_type_return::NoVoidTypeReturn as biome_analyze::Rule>::Options;
 pub type NoWith = <lint::complexity::no_with::NoWith as biome_analyze::Rule>::Options;
 pub type NoYodaExpression =
-    <lint::nursery::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
+    <lint::style::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
 pub type OrganizeImports =
     <assists::source::organize_imports::OrganizeImports as biome_analyze::Rule>::Options;
 pub type SortJsxProps =

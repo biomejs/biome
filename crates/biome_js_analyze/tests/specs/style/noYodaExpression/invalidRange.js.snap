@@ -19,7 +19,7 @@ if (0 < a && b < max) {}
 
 # Diagnostics
 ```
-invalidRange.js:1:14 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:1:14 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
@@ -41,7 +41,7 @@ invalidRange.js:1:14 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalidRange.js:2:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:2:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
@@ -65,7 +65,7 @@ invalidRange.js:2:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalidRange.js:3:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:3:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
@@ -91,7 +91,7 @@ invalidRange.js:3:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalidRange.js:4:1 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:4:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
@@ -117,7 +117,7 @@ invalidRange.js:4:1 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalidRange.js:5:18 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:5:18 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
@@ -143,7 +143,7 @@ invalidRange.js:5:18 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalidRange.js:6:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:6:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
@@ -169,7 +169,7 @@ invalidRange.js:6:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalidRange.js:7:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:7:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
@@ -195,7 +195,7 @@ invalidRange.js:7:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalidRange.js:8:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:8:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
@@ -221,7 +221,7 @@ invalidRange.js:8:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalidRange.js:9:4 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:9:4 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   
@@ -247,7 +247,7 @@ invalidRange.js:9:4 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalidRange.js:10:5 lint/nursery/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidRange.js:10:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Avoid the use of yoda expressions.
   

@@ -1304,10 +1304,6 @@ export interface Nursery {
 	 */
 	noValueAtRule?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow the use of yoda expressions.
-	 */
-	noYodaExpression?: RuleFixConfiguration_for_Null;
-	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -1490,6 +1486,10 @@ export interface Style {
 	 * Disallow the use of var
 	 */
 	noVar?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow the use of yoda expressions.
+	 */
+	noYodaExpression?: RuleFixConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -2779,7 +2779,6 @@ export type Category =
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noValueAtRule"
-	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useBiomeSuppressionComment"
@@ -2819,6 +2818,7 @@ export type Category =
 	| "lint/style/noUnusedTemplateLiteral"
 	| "lint/style/noUselessElse"
 	| "lint/style/noVar"
+	| "lint/style/noYodaExpression"
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useBlockStatements"
 	| "lint/style/useCollapsedElseIf"

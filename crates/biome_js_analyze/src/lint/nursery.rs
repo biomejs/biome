@@ -14,7 +14,6 @@ pub mod no_restricted_types;
 pub mod no_static_element_interactions;
 pub mod no_substr;
 pub mod no_useless_escape_in_regex;
-pub mod no_yoda_expression;
 pub mod use_adjacent_overload_signatures;
 pub mod use_aria_props_supported_by_role;
 pub mod use_consistent_builtin_instantiation;
@@ -43,7 +42,6 @@ declare_lint_group! {
             self :: no_static_element_interactions :: NoStaticElementInteractions ,
             self :: no_substr :: NoSubstr ,
             self :: no_useless_escape_in_regex :: NoUselessEscapeInRegex ,
-            self :: no_yoda_expression :: NoYodaExpression ,
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
             self :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRole ,
             self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
