@@ -28,6 +28,7 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
+use biome_html_syntax::HtmlFileSource;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{
     EmbeddingKind, JsFileSource, JsLanguage, Language, LanguageVariant, TextRange, TextSize,
@@ -37,6 +38,7 @@ use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrExtension;
+use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
 use std::borrow::Cow;
 use std::ffi::OsStr;
@@ -61,6 +63,7 @@ pub enum DocumentFileSource {
     Json(JsonFileSource),
     Css(CssFileSource),
     Graphql(GraphqlFileSource),
+    Html(HtmlFileSource),
     #[default]
     Unknown,
 }
@@ -86,6 +89,12 @@ impl From<CssFileSource> for DocumentFileSource {
 impl From<GraphqlFileSource> for DocumentFileSource {
     fn from(value: GraphqlFileSource) -> Self {
         Self::Graphql(value)
+    }
+}
+
+impl From<HtmlFileSource> for DocumentFileSource {
+    fn from(value: HtmlFileSource) -> Self {
+        Self::Html(value)
     }
 }
 
@@ -132,6 +141,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+        if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -152,6 +164,9 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+        if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -293,6 +308,7 @@ impl DocumentFileSource {
             },
             DocumentFileSource::Json(_) | DocumentFileSource::Css(_) => true,
             DocumentFileSource::Graphql(_) => true,
+            DocumentFileSource::Html(_) => true,
             DocumentFileSource::Unknown => false,
         }
     }
@@ -324,6 +340,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
             }
             DocumentFileSource::Css(_) => fmt.write_markup(markup! { "CSS" }),
             DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
+            DocumentFileSource::Html(_) => fmt.write_markup(markup! { "HTML" }),
             DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -501,6 +518,7 @@ pub(crate) struct Features {
     svelte: SvelteFileHandler,
     unknown: UnknownFileHandler,
     graphql: GraphqlFileHandler,
+    html: HtmlFileHandler,
 }
 
 impl Features {
@@ -513,6 +531,7 @@ impl Features {
             vue: VueFileHandler {},
             svelte: SvelteFileHandler {},
             graphql: GraphqlFileHandler {},
+            html: HtmlFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -533,6 +552,7 @@ impl Features {
             DocumentFileSource::Json(_) => self.json.capabilities(),
             DocumentFileSource::Css(_) => self.css.capabilities(),
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
+            DocumentFileSource::Html(_) => self.html.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
     }

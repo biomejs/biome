@@ -24,6 +24,7 @@ biome_flags              = { workspace = true }
 biome_formatter          = { workspace = true, features = ["serde"] }
 biome_graphql_analyze    = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
+biome_html_syntax        = { workspace = true }
 biome_js_analyze         = { workspace = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }
 biome_js_syntax          = { workspace = true, features = ["schema"] }
@@ -50,6 +51,7 @@ schema = [
   "biome_json_syntax/schema",
   "biome_css_syntax/schema",
   "biome_graphql_syntax/schema",
+  "biome_html_syntax/schema",
 ]
 
 [dev-dependencies]
@@ -57,3 +59,7 @@ insta = { workspace = true }
 
 [lints]
 workspace = true
+
+[package.metadata.cargo-udeps.ignore]
+# currently technically not used, but needed in order to compile because of the `schema` feature
+normal = ["biome_html_syntax"]

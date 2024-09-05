@@ -206,6 +206,7 @@ dependencies = [
  "biome_formatter",
  "biome_graphql_analyze",
  "biome_graphql_syntax",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
  "biome_js_syntax",
@@ -662,6 +663,8 @@ dependencies = [
  "biome_rowan",
  "biome_service",
  "biome_suppression",
+ "countme",
+ "tests_macros",
 ]
 
 [[package]]
@@ -1031,6 +1034,7 @@ dependencies = [
  "biome_graphql_syntax",
  "biome_grit_patterns",
  "biome_html_formatter",
+ "biome_html_parser",
  "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_factory",
