@@ -141,6 +141,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Allow `aria-label` on heading to prevent `useHeadingContent` diagnostic ([#3767](https://github.com/biomejs/biome/pull/3767)). Contributed by @anthonyshew
 
+- Fix edge case [#3791](https://github.com/biomejs/biome/issues/3791) for rule `noFocusedTests` being used with non-string-like expressions ([#3793](https://github.com/biomejs/biome/pull/3793)). Contributed by @h-a-n-a
+
 ### Configuration
 
 - Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)).
