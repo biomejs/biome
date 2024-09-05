@@ -43,11 +43,11 @@ use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_parser::ParserProgress;
 use biome_rowan::{SyntaxKind, TextRange};
-use bitflags::bitflags;
 use drop_bomb::DebugDropBomb;
+use enumflags2::{bitflags, make_bitflags, BitFlags};
 use smallvec::SmallVec;
 use std::fmt::Debug;
-use std::ops::Add;
+use std::ops::{Add, BitOr, BitOrAssign};
 use std::slice::Iter;
 
 use super::function::LineBreak;
@@ -1888,36 +1888,75 @@ fn parse_modifier(p: &mut JsParser, constructor_parameter: bool) -> Option<Class
     }
 }
 
-bitflags! {
-    /// Bitflag of class member modifiers.
-    /// Useful to cheaply track all already seen modifiers of a member (instead of using a HashSet<ModifierKind>).
-    #[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
-    struct ModifierFlags: u16 {
-        const DECLARE       = 1 << 0;
-        const PRIVATE       = 1 << 1;
-        const PROTECTED     = 1 << 2;
-        const PUBLIC        = 1 << 3;
-        const STATIC        = 1 << 4;
-        const READONLY      = 1 << 5;
-        const ABSTRACT      = 1 << 6;
-        const OVERRIDE      = 1 << 7;
-        const PRIVATE_NAME  = 1 << 8;
-        const ACCESSOR      = 1 << 9;
-        const DECORATOR     = 1 << 10;
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u16)]
+enum ModifierFlag {
+    Declare = 1 << 0,
+    Private = 1 << 1,
+    Protected = 1 << 2,
+    Public = 1 << 3,
+    Static = 1 << 4,
+    Readonly = 1 << 5,
+    Abstract = 1 << 6,
+    Override = 1 << 7,
+    PrivateName = 1 << 8,
+    Accessor = 1 << 9,
+    Decorator = 1 << 10,
+}
 
-        const ACCESSIBILITY = ModifierFlags::PRIVATE.bits() | ModifierFlags::PROTECTED.bits() | ModifierFlags::PUBLIC.bits();
+/// Bitflag of class member modifiers.
+/// Useful to cheaply track all already seen modifiers of a member (instead of using a HashSet<ModifierKind>).
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+struct ModifierFlags(BitFlags<ModifierFlag>);
 
-        const ALL_MODIFIERS_EXCEPT_DECORATOR = ModifierFlags::DECLARE.bits()
-            | ModifierFlags::PRIVATE.bits()
-            | ModifierFlags::PROTECTED.bits()
-            | ModifierFlags::PUBLIC.bits()
-            | ModifierFlags::STATIC.bits()
-            | ModifierFlags::READONLY.bits()
-            | ModifierFlags::ABSTRACT.bits()
-            | ModifierFlags::OVERRIDE.bits()
-            | ModifierFlags::PRIVATE_NAME.bits()
-            | ModifierFlags::ACCESSOR.bits();
+impl ModifierFlags {
+    const DECLARE: Self = Self(make_bitflags!(ModifierFlag::{Declare}));
+    const PRIVATE: Self = Self(make_bitflags!(ModifierFlag::{Private}));
+    const PROTECTED: Self = Self(make_bitflags!(ModifierFlag::{Protected}));
+    const PUBLIC: Self = Self(make_bitflags!(ModifierFlag::{Public}));
+    const STATIC: Self = Self(make_bitflags!(ModifierFlag::{Static}));
+    const READONLY: Self = Self(make_bitflags!(ModifierFlag::{Readonly}));
+    const ABSTRACT: Self = Self(make_bitflags!(ModifierFlag::{Abstract}));
+    const OVERRIDE: Self = Self(make_bitflags!(ModifierFlag::{Override}));
+    const PRIVATE_NAME: Self = Self(make_bitflags!(ModifierFlag::{PrivateName}));
+    const ACCESSOR: Self = Self(make_bitflags!(ModifierFlag::{Accessor}));
+    const DECORATOR: Self = Self(make_bitflags!(ModifierFlag::{Decorator}));
 
+    const ACCESSIBILITY: Self = Self(make_bitflags!(ModifierFlag::{Private | Protected |  Public}));
+
+    const ALL_MODIFIERS_EXCEPT_DECORATOR: Self = Self(
+        make_bitflags!(ModifierFlag::{Declare | Private | Protected | Public | Static | Readonly | Abstract | Override | PrivateName | Accessor}),
+    );
+
+    pub const fn empty() -> Self {
+        Self(BitFlags::EMPTY)
+    }
+
+    pub fn contains(&self, other: impl Into<ModifierFlags>) -> bool {
+        self.0.contains(other.into().0)
+    }
+
+    pub fn intersects(&self, other: impl Into<ModifierFlags>) -> bool {
+        self.0.intersects(other.into().0)
+    }
+
+    pub fn set(&mut self, other: impl Into<ModifierFlags>, cond: bool) {
+        self.0.set(other.into().0, cond)
+    }
+}
+
+impl BitOr for ModifierFlags {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        ModifierFlags(self.0 | rhs.0)
+    }
+}
+
+impl BitOrAssign for ModifierFlags {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
     }
 }
 
