@@ -1188,10 +1188,6 @@ export interface Nursery {
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow duplicate names within font families.
-	 */
-	noDuplicateFontNames?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow duplicate selectors within keyframe blocks.
 	 */
 	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
@@ -1695,6 +1691,10 @@ export interface Suspicious {
 	 * Disallow duplicate class members.
 	 */
 	noDuplicateClassMembers?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate names within font families.
+	 */
+	noDuplicateFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents JSX properties to be assigned multiple times.
 	 */
@@ -2750,7 +2750,6 @@ export type Category =
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDuplicateElseIf"
-	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
@@ -2867,6 +2866,7 @@ export type Category =
 	| "lint/suspicious/noDuplicateAtImportRules"
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
+	| "lint/suspicious/noDuplicateFontNames"
 	| "lint/suspicious/noDuplicateJsxProps"
 	| "lint/suspicious/noDuplicateObjectKeys"
 	| "lint/suspicious/noDuplicateParameters"

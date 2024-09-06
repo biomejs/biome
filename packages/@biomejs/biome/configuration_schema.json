@@ -2007,13 +2007,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateFontNames": {
-					"description": "Disallow duplicate names within font families.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateSelectorsKeyframeBlock": {
 					"description": "Disallow duplicate selectors within keyframe blocks.",
 					"anyOf": [
@@ -3530,6 +3523,13 @@
 				},
 				"noDuplicateClassMembers": {
 					"description": "Disallow duplicate class members.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateFontNames": {
+					"description": "Disallow duplicate names within font families.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
