@@ -2,7 +2,6 @@
 
 use biome_analyze::declare_lint_group;
 
-pub mod no_empty_block;
 pub mod no_invalid_direction_in_linear_gradient;
 pub mod no_invalid_grid_areas;
 pub mod no_invalid_position_at_import_rule;
@@ -22,7 +21,6 @@ declare_lint_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
-            self :: no_empty_block :: NoEmptyBlock ,
             self :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradient ,
             self :: no_invalid_grid_areas :: NoInvalidGridAreas ,
             self :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule ,

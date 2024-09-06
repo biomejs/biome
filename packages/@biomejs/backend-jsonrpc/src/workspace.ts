@@ -1196,10 +1196,6 @@ export interface Nursery {
 	 */
 	noDynamicNamespaceImportAccess?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow CSS empty blocks.
-	 */
-	noEmptyBlock?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow TypeScript enum.
 	 */
 	noEnum?: RuleConfiguration_for_Null;
@@ -1707,6 +1703,10 @@ export interface Suspicious {
 	 * A describe block should not contain duplicate hooks.
 	 */
 	noDuplicateTestHooks?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow CSS empty blocks.
+	 */
+	noEmptyBlock?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty block statements and static blocks.
 	 */
@@ -2752,7 +2752,6 @@ export type Category =
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
-	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
@@ -2870,6 +2869,7 @@ export type Category =
 	| "lint/suspicious/noDuplicateParameters"
 	| "lint/suspicious/noDuplicateSelectorsKeyframeBlock"
 	| "lint/suspicious/noDuplicateTestHooks"
+	| "lint/suspicious/noEmptyBlock"
 	| "lint/suspicious/noEmptyBlockStatements"
 	| "lint/suspicious/noEmptyInterface"
 	| "lint/suspicious/noEvolvingTypes"

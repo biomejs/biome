@@ -2021,13 +2021,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noEmptyBlock": {
-					"description": "Disallow CSS empty blocks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noEnum": {
 					"description": "Disallow TypeScript enum.",
 					"anyOf": [
@@ -3551,6 +3544,13 @@
 				},
 				"noDuplicateTestHooks": {
 					"description": "A describe block should not contain duplicate hooks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptyBlock": {
+					"description": "Disallow CSS empty blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
