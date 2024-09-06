@@ -1188,10 +1188,6 @@ export interface Nursery {
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow duplicate selectors within keyframe blocks.
-	 */
-	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
-	/**
 	 * No duplicated fields in GraphQL operations.
 	 */
 	noDuplicatedFields?: RuleConfiguration_for_Null;
@@ -1707,6 +1703,10 @@ export interface Suspicious {
 	 * Disallow duplicate function parameter name.
 	 */
 	noDuplicateParameters?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate selectors within keyframe blocks.
+	 */
+	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
 	 * A describe block should not contain duplicate hooks.
 	 */
@@ -2750,7 +2750,6 @@ export type Category =
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noDuplicateElseIf"
-	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEmptyBlock"
@@ -2870,6 +2869,7 @@ export type Category =
 	| "lint/suspicious/noDuplicateJsxProps"
 	| "lint/suspicious/noDuplicateObjectKeys"
 	| "lint/suspicious/noDuplicateParameters"
+	| "lint/suspicious/noDuplicateSelectorsKeyframeBlock"
 	| "lint/suspicious/noDuplicateTestHooks"
 	| "lint/suspicious/noEmptyBlockStatements"
 	| "lint/suspicious/noEmptyInterface"

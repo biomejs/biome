@@ -2007,13 +2007,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noDuplicateSelectorsKeyframeBlock": {
-					"description": "Disallow duplicate selectors within keyframe blocks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicatedFields": {
 					"description": "No duplicated fields in GraphQL operations.",
 					"anyOf": [
@@ -3551,6 +3544,13 @@
 				},
 				"noDuplicateParameters": {
 					"description": "Disallow duplicate function parameter name.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateSelectorsKeyframeBlock": {
+					"description": "Disallow duplicate selectors within keyframe blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
