@@ -113,6 +113,7 @@ AnyJsStatement =
 	| TsExternalModuleDeclaration
 	| TsGlobalDeclaration
 	| TsImportEqualsDeclaration
+	| JsMetavariable
 
 JsBlockStatement =
 	'{'

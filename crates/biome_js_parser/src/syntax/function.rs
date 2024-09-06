@@ -1371,7 +1371,7 @@ pub(super) fn parse_parameters_list(
             progress.assert_progressing(p);
 
             if parse_metavariable(p).is_present() {
-                break;
+                continue;
             }
 
             let parameter = parse_parameter(
