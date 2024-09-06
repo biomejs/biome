@@ -14950,6 +14950,7 @@ pub enum AnyJsStatement {
     JsFunctionDeclaration(JsFunctionDeclaration),
     JsIfStatement(JsIfStatement),
     JsLabeledStatement(JsLabeledStatement),
+    JsMetavariable(JsMetavariable),
     JsReturnStatement(JsReturnStatement),
     JsSwitchStatement(JsSwitchStatement),
     JsThrowStatement(JsThrowStatement),
@@ -15056,6 +15057,12 @@ impl AnyJsStatement {
     pub fn as_js_labeled_statement(&self) -> Option<&JsLabeledStatement> {
         match &self {
             AnyJsStatement::JsLabeledStatement(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_js_metavariable(&self) -> Option<&JsMetavariable> {
+        match &self {
+            AnyJsStatement::JsMetavariable(item) => Some(item),
             _ => None,
         }
     }
@@ -34001,6 +34008,11 @@ impl From<JsLabeledStatement> for AnyJsStatement {
         AnyJsStatement::JsLabeledStatement(node)
     }
 }
+impl From<JsMetavariable> for AnyJsStatement {
+    fn from(node: JsMetavariable) -> AnyJsStatement {
+        AnyJsStatement::JsMetavariable(node)
+    }
+}
 impl From<JsReturnStatement> for AnyJsStatement {
     fn from(node: JsReturnStatement) -> AnyJsStatement {
         AnyJsStatement::JsReturnStatement(node)
@@ -34103,6 +34115,7 @@ impl AstNode for AnyJsStatement {
         .union(JsFunctionDeclaration::KIND_SET)
         .union(JsIfStatement::KIND_SET)
         .union(JsLabeledStatement::KIND_SET)
+        .union(JsMetavariable::KIND_SET)
         .union(JsReturnStatement::KIND_SET)
         .union(JsSwitchStatement::KIND_SET)
         .union(JsThrowStatement::KIND_SET)
@@ -34138,6 +34151,7 @@ impl AstNode for AnyJsStatement {
                 | JS_FUNCTION_DECLARATION
                 | JS_IF_STATEMENT
                 | JS_LABELED_STATEMENT
+                | JS_METAVARIABLE
                 | JS_RETURN_STATEMENT
                 | JS_SWITCH_STATEMENT
                 | JS_THROW_STATEMENT
@@ -34188,6 +34202,7 @@ impl AstNode for AnyJsStatement {
             JS_LABELED_STATEMENT => {
                 AnyJsStatement::JsLabeledStatement(JsLabeledStatement { syntax })
             }
+            JS_METAVARIABLE => AnyJsStatement::JsMetavariable(JsMetavariable { syntax }),
             JS_RETURN_STATEMENT => AnyJsStatement::JsReturnStatement(JsReturnStatement { syntax }),
             JS_SWITCH_STATEMENT => AnyJsStatement::JsSwitchStatement(JsSwitchStatement { syntax }),
             JS_THROW_STATEMENT => AnyJsStatement::JsThrowStatement(JsThrowStatement { syntax }),
@@ -34248,6 +34263,7 @@ impl AstNode for AnyJsStatement {
             AnyJsStatement::JsFunctionDeclaration(it) => &it.syntax,
             AnyJsStatement::JsIfStatement(it) => &it.syntax,
             AnyJsStatement::JsLabeledStatement(it) => &it.syntax,
+            AnyJsStatement::JsMetavariable(it) => &it.syntax,
             AnyJsStatement::JsReturnStatement(it) => &it.syntax,
             AnyJsStatement::JsSwitchStatement(it) => &it.syntax,
             AnyJsStatement::JsThrowStatement(it) => &it.syntax,
@@ -34284,6 +34300,7 @@ impl AstNode for AnyJsStatement {
             AnyJsStatement::JsFunctionDeclaration(it) => it.syntax,
             AnyJsStatement::JsIfStatement(it) => it.syntax,
             AnyJsStatement::JsLabeledStatement(it) => it.syntax,
+            AnyJsStatement::JsMetavariable(it) => it.syntax,
             AnyJsStatement::JsReturnStatement(it) => it.syntax,
             AnyJsStatement::JsSwitchStatement(it) => it.syntax,
             AnyJsStatement::JsThrowStatement(it) => it.syntax,
@@ -34322,6 +34339,7 @@ impl std::fmt::Debug for AnyJsStatement {
             AnyJsStatement::JsFunctionDeclaration(it) => std::fmt::Debug::fmt(it, f),
             AnyJsStatement::JsIfStatement(it) => std::fmt::Debug::fmt(it, f),
             AnyJsStatement::JsLabeledStatement(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsStatement::JsMetavariable(it) => std::fmt::Debug::fmt(it, f),
             AnyJsStatement::JsReturnStatement(it) => std::fmt::Debug::fmt(it, f),
             AnyJsStatement::JsSwitchStatement(it) => std::fmt::Debug::fmt(it, f),
             AnyJsStatement::JsThrowStatement(it) => std::fmt::Debug::fmt(it, f),
@@ -34360,6 +34378,7 @@ impl From<AnyJsStatement> for SyntaxNode {
             AnyJsStatement::JsFunctionDeclaration(it) => it.into(),
             AnyJsStatement::JsIfStatement(it) => it.into(),
             AnyJsStatement::JsLabeledStatement(it) => it.into(),
+            AnyJsStatement::JsMetavariable(it) => it.into(),
             AnyJsStatement::JsReturnStatement(it) => it.into(),
             AnyJsStatement::JsSwitchStatement(it) => it.into(),
             AnyJsStatement::JsThrowStatement(it) => it.into(),

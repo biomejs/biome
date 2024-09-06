@@ -5,7 +5,7 @@
 use super::binding::*;
 use super::class::is_at_ts_abstract_class_declaration;
 use super::expr::parse_expression;
-use super::metavariable::{is_at_metavariable, is_nth_at_metavariable};
+use super::metavariable::{is_at_metavariable, is_nth_at_metavariable, parse_metavariable};
 use super::module::parse_export;
 use super::typescript::*;
 use crate::parser::RecoveryResult;
@@ -906,6 +906,10 @@ pub(crate) fn parse_statements(p: &mut JsParser, stop_on_r_curly: bool, statemen
     while !p.at(EOF) {
         progress.assert_progressing(p);
         if stop_on_r_curly && p.at(T!['}']) {
+            break;
+        }
+
+        if parse_metavariable(p).is_present() {
             break;
         }
 
