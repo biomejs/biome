@@ -1099,6 +1099,10 @@ export interface Correctness {
 	 */
 	noUndeclaredVariables?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unmatchable An+B selectors.
+	 */
+	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
+	/**
 	 * Avoid using unnecessary continue.
 	 */
 	noUnnecessaryContinue?: RuleFixConfiguration_for_Null;
@@ -1263,10 +1267,6 @@ export interface Nursery {
 	 * Disallow unknown CSS units.
 	 */
 	noUnknownUnit?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unmatchable An+B selectors.
-	 */
-	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
@@ -2729,6 +2729,7 @@ export type Category =
 	| "lint/correctness/noSwitchDeclarations"
 	| "lint/correctness/noUndeclaredDependencies"
 	| "lint/correctness/noUndeclaredVariables"
+	| "lint/correctness/noUnmatchableAnbSelector"
 	| "lint/correctness/noUnnecessaryContinue"
 	| "lint/correctness/noUnreachable"
 	| "lint/correctness/noUnreachableSuper"
@@ -2769,7 +2770,6 @@ export type Category =
 	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
-	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"

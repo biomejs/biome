@@ -897,6 +897,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnmatchableAnbSelector": {
+					"description": "Disallow unmatchable An+B selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnnecessaryContinue": {
 					"description": "Avoid using unnecessary continue.",
 					"anyOf": [
@@ -2135,13 +2142,6 @@
 				},
 				"noUnknownUnit": {
 					"description": "Disallow unknown CSS units.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnmatchableAnbSelector": {
-					"description": "Disallow unmatchable An+B selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
