@@ -3,7 +3,6 @@
 use biome_analyze::declare_lint_group;
 
 pub mod no_invalid_grid_areas;
-pub mod no_invalid_position_at_import_rule;
 pub mod no_irregular_whitespace;
 pub mod no_shorthand_property_overrides;
 pub mod no_unknown_function;
@@ -21,7 +20,6 @@ declare_lint_group! {
         name : "nursery" ,
         rules : [
             self :: no_invalid_grid_areas :: NoInvalidGridAreas ,
-            self :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
             self :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides ,
             self :: no_unknown_function :: NoUnknownFunction ,

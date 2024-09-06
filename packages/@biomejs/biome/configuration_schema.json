@@ -806,6 +806,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidPositionAtImportRule": {
+					"description": "Disallow the use of @import at-rules in invalid positions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noInvalidUseBeforeDeclaration": {
 					"description": "Disallow the use of variables and function parameters before their declaration",
 					"anyOf": [
@@ -2044,13 +2051,6 @@
 				},
 				"noInvalidGridAreas": {
 					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noInvalidPositionAtImportRule": {
-					"description": "Disallow the use of @import at-rules in invalid positions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -11,7 +11,7 @@ pub type NoImportantInKeyframe = < lint :: suspicious :: no_important_in_keyfram
 pub type NoInvalidDirectionInLinearGradient = < lint :: correctness :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradient as biome_analyze :: Rule > :: Options ;
 pub type NoInvalidGridAreas =
     <lint::nursery::no_invalid_grid_areas::NoInvalidGridAreas as biome_analyze::Rule>::Options;
-pub type NoInvalidPositionAtImportRule = < lint :: nursery :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule as biome_analyze :: Rule > :: Options ;
+pub type NoInvalidPositionAtImportRule = < lint :: correctness :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule as biome_analyze :: Rule > :: Options ;
 pub type NoIrregularWhitespace =
     <lint::nursery::no_irregular_whitespace::NoIrregularWhitespace as biome_analyze::Rule>::Options;
 pub type NoShorthandPropertyOverrides = < lint :: nursery :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides as biome_analyze :: Rule > :: Options ;

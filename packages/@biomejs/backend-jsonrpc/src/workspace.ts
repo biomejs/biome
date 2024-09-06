@@ -1047,6 +1047,10 @@ export interface Correctness {
 	 */
 	noInvalidNewBuiltin?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of @import at-rules in invalid positions.
+	 */
+	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of variables and function parameters before their declaration
 	 */
 	noInvalidUseBeforeDeclaration?: RuleConfiguration_for_Null;
@@ -1211,10 +1215,6 @@ export interface Nursery {
 	 * Disallows invalid named grid areas in CSS Grid Layouts.
 	 */
 	noInvalidGridAreas?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow the use of @import at-rules in invalid positions.
-	 */
-	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
@@ -2716,6 +2716,7 @@ export type Category =
 	| "lint/correctness/noInvalidConstructorSuper"
 	| "lint/correctness/noInvalidDirectionInLinearGradient"
 	| "lint/correctness/noInvalidNewBuiltin"
+	| "lint/correctness/noInvalidPositionAtImportRule"
 	| "lint/correctness/noInvalidUseBeforeDeclaration"
 	| "lint/correctness/noNewSymbol"
 	| "lint/correctness/noNodejsModules"
@@ -2755,7 +2756,6 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
-	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noRestrictedImports"
