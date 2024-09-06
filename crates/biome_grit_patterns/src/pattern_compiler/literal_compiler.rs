@@ -44,7 +44,17 @@ impl LiteralCompiler {
                     debug_assert!(source.len() >= 2, "Literals must have quotes");
                     parse_snippet_content(&source[1..source.len() - 1], range, context, is_rhs)
                 }
-                AnyGritCodeSnippetSource::GritRawBacktickSnippetLiteral(_) => todo!(),
+                AnyGritCodeSnippetSource::GritRawBacktickSnippetLiteral(node) => {
+                    if !is_rhs {
+                        return Err(CompileError::InvalidRawSnippetPosition);
+                    }
+
+                    let token = node.value_token()?;
+                    let source = token.text_trimmed();
+                    let range = token.text_trimmed_range().to_byte_range();
+                    debug_assert!(source.starts_with("raw`") && source.ends_with('`'));
+                    parse_snippet_content(&source[4..source.len() - 1], range, context, is_rhs)
+                }
             },
             AnyGritLiteral::GritDoubleLiteral(node) => Ok(Pattern::FloatConstant(
                 FloatConstant::new(node.value_token()?.text_trimmed().parse().map_err(|err| {
