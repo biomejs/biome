@@ -48,9 +48,9 @@ declare_lint_rule! {
     ///                          "a a a"; }
     /// ```
     ///
-    pub UseConsistentGridAreas {
+    pub NoInvalidGridAreas {
         version: "next",
-        name: "useConsistentGridAreas",
+        name: "noInvalidGridAreas",
         language: "css",
         recommended: false,
         sources: &[RuleSource::Stylelint("named-grid-areas-no-invalid")],
@@ -73,7 +73,7 @@ pub struct UseConsistentGridAreasState {
     reason: GridAreaValidationError,
 }
 
-impl Rule for UseConsistentGridAreas {
+impl Rule for NoInvalidGridAreas {
     type Query = Ast<CssDeclarationOrRuleList>;
     type State = UseConsistentGridAreasState;
     type Signals = Option<Self::State>;

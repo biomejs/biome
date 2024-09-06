@@ -3031,8 +3031,8 @@ pub struct Nursery {
         Option<RuleFixConfiguration<biome_js_analyze::options::UseConsistentCurlyBraces>>,
     #[doc = "Disallows invalid named grid areas in CSS Grid Layouts."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_consistent_grid_areas:
-        Option<RuleConfiguration<biome_css_analyze::options::UseConsistentGridAreas>>,
+    pub no_invalid_grid_areas:
+        Option<RuleConfiguration<biome_css_analyze::options::NoInvalidGridAreas>>,
     #[doc = "Require consistent accessibility modifiers on class properties and methods."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_consistent_member_accessibility:
@@ -3165,7 +3165,7 @@ impl Nursery {
         "useAriaPropsSupportedByRole",
         "useConsistentBuiltinInstantiation",
         "useConsistentCurlyBraces",
-        "useConsistentGridAreas",
+        "noInvalidGridAreas",
         "useConsistentMemberAccessibility",
         "useDateNow",
         "useDefaultSwitchClause",
@@ -3531,7 +3531,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
-        if let Some(rule) = self.use_consistent_grid_areas.as_ref() {
+        if let Some(rule) = self.no_invalid_grid_areas.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
@@ -3845,7 +3845,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[41]));
             }
         }
-        if let Some(rule) = self.use_consistent_grid_areas.as_ref() {
+        if let Some(rule) = self.no_invalid_grid_areas.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[42]));
             }
@@ -4149,8 +4149,8 @@ impl Nursery {
                 .use_consistent_curly_braces
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "useConsistentGridAreas" => self
-                .use_consistent_grid_areas
+            "noInvalidGridAreas" => self
+                .no_invalid_grid_areas
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useConsistentMemberAccessibility" => self
