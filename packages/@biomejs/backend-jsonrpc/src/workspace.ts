@@ -1208,10 +1208,6 @@ export interface Nursery {
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow invalid !important within keyframe declarations
-	 */
-	noImportantInKeyframe?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow non-standard direction values for linear gradient functions.
 	 */
 	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
@@ -1767,6 +1763,10 @@ export interface Suspicious {
 	 * Disallow assigning to imported bindings
 	 */
 	noImportAssign?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow invalid !important within keyframe declarations
+	 */
+	noImportantInKeyframe?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow labels that share a name with a variable
 	 */
@@ -2755,7 +2755,6 @@ export type Category =
 	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
-	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
@@ -2885,6 +2884,7 @@ export type Category =
 	| "lint/suspicious/noGlobalIsNan"
 	| "lint/suspicious/noImplicitAnyLet"
 	| "lint/suspicious/noImportAssign"
+	| "lint/suspicious/noImportantInKeyframe"
 	| "lint/suspicious/noLabelVar"
 	| "lint/suspicious/noMisleadingCharacterClass"
 	| "lint/suspicious/noMisleadingInstantiator"

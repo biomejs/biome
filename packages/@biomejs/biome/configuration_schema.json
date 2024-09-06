@@ -2042,13 +2042,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noImportantInKeyframe": {
-					"description": "Disallow invalid !important within keyframe declarations",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noInvalidDirectionInLinearGradient": {
 					"description": "Disallow non-standard direction values for linear gradient functions.",
 					"anyOf": [
@@ -3656,6 +3649,13 @@
 				},
 				"noImportAssign": {
 					"description": "Disallow assigning to imported bindings",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImportantInKeyframe": {
+					"description": "Disallow invalid !important within keyframe declarations",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
