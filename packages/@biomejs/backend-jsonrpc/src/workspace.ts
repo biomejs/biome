@@ -1160,7 +1160,7 @@ export interface Nursery {
 	 */
 	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow duplicate custom properties within declaration blocks.
 	 */
 	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
 	/**

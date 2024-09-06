@@ -2879,7 +2879,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_at_import_rules:
         Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateAtImportRules>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow duplicate custom properties within declaration blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_custom_properties:
         Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateCustomProperties>>,

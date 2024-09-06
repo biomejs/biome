@@ -1959,7 +1959,7 @@
 					]
 				},
 				"noDuplicateCustomProperties": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow duplicate custom properties within declaration blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
