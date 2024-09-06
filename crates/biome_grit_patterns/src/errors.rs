@@ -24,6 +24,9 @@ pub enum CompileError {
     /// A metavariable was expected at the given range.
     InvalidMetavariableRange(ByteRange),
 
+    /// Raw snippets are only allowed on the right-hand side of a rule.
+    InvalidRawSnippetPosition,
+
     /// Regular expressions are not allowed on the right-hand side of a rule.
     InvalidRegexPosition,
 
@@ -90,6 +93,9 @@ impl Diagnostic for CompileError {
                 fmt.write_markup(markup! { "Duplicate parameters" })
             }
             CompileError::InvalidMetavariableRange(_) => {
+                fmt.write_markup(markup! { "Invalid range for metavariable" })
+            }
+            CompileError::InvalidRawSnippetPosition => {
                 fmt.write_markup(markup! { "Invalid range for metavariable" })
             }
             CompileError::InvalidRegexPosition => fmt.write_markup(
