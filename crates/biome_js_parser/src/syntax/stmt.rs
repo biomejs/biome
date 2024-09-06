@@ -910,7 +910,7 @@ pub(crate) fn parse_statements(p: &mut JsParser, stop_on_r_curly: bool, statemen
         }
 
         if parse_metavariable(p).is_present() {
-            break;
+            continue;
         }
 
         if parse_statement(p, StatementContext::StatementList)
