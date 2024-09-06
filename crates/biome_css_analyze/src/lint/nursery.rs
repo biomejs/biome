@@ -8,6 +8,7 @@ pub mod no_duplicate_selectors_keyframe_block;
 pub mod no_empty_block;
 pub mod no_important_in_keyframe;
 pub mod no_invalid_direction_in_linear_gradient;
+pub mod no_invalid_grid_areas;
 pub mod no_invalid_position_at_import_rule;
 pub mod no_irregular_whitespace;
 pub mod no_shorthand_property_overrides;
@@ -19,7 +20,6 @@ pub mod no_unknown_selector_pseudo_element;
 pub mod no_unknown_unit;
 pub mod no_unmatchable_anb_selector;
 pub mod no_value_at_rule;
-pub mod use_consistent_grid_areas;
 pub mod use_generic_font_names;
 
 declare_lint_group! {
@@ -32,6 +32,7 @@ declare_lint_group! {
             self :: no_empty_block :: NoEmptyBlock ,
             self :: no_important_in_keyframe :: NoImportantInKeyframe ,
             self :: no_invalid_direction_in_linear_gradient :: NoInvalidDirectionInLinearGradient ,
+            self :: no_invalid_grid_areas :: NoInvalidGridAreas ,
             self :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
             self :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides ,
@@ -43,7 +44,6 @@ declare_lint_group! {
             self :: no_unknown_unit :: NoUnknownUnit ,
             self :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelector ,
             self :: no_value_at_rule :: NoValueAtRule ,
-            self :: use_consistent_grid_areas :: UseConsistentGridAreas ,
             self :: use_generic_font_names :: UseGenericFontNames ,
         ]
      }

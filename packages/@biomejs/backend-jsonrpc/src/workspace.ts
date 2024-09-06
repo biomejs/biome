@@ -1204,6 +1204,10 @@ export interface Nursery {
 	 */
 	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
 	/**
+	 * Disallows invalid named grid areas in CSS Grid Layouts.
+	 */
+	noInvalidGridAreas?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of @import at-rules in invalid positions.
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
@@ -1319,10 +1323,6 @@ export interface Nursery {
 	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
 	 */
 	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallows invalid named grid areas in CSS Grid Layouts.
-	 */
-	useConsistentGridAreas?: RuleConfiguration_for_Null;
 	/**
 	 * Require consistent accessibility modifiers on class properties and methods.
 	 */
@@ -2784,7 +2784,7 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
-	| "lint/nursery/useConsistentGridAreas"
+	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"
