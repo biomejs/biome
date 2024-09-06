@@ -24,6 +24,9 @@ pub enum CompileError {
     /// A metavariable was expected at the given range.
     InvalidMetavariableRange(ByteRange),
 
+    /// Regular expressions are not allowed on the right-hand side of a rule.
+    InvalidRegexPosition,
+
     /// Incorrect reference to a metavariable.
     MetavariableNotFound(String),
 
@@ -89,6 +92,9 @@ impl Diagnostic for CompileError {
             CompileError::InvalidMetavariableRange(_) => {
                 fmt.write_markup(markup! { "Invalid range for metavariable" })
             }
+            CompileError::InvalidRegexPosition => fmt.write_markup(
+                markup! { "Regular expressions are not allowed on the right-hand side of a rule" },
+            ),
             CompileError::MetavariableNotFound(var) => {
                 fmt.write_markup(markup! { "Metavariable not found: "{{var}} })
             }
