@@ -33,7 +33,7 @@ impl RegistryVisitor<JsLanguage> for LintRulesVisitor {
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
-            .or_insert_with(BTreeMap::new)
+            .or_default()
             .insert(R::METADATA.name, R::METADATA);
     }
 }
@@ -52,7 +52,7 @@ impl RegistryVisitor<JsonLanguage> for LintRulesVisitor {
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
-            .or_insert_with(BTreeMap::new)
+            .or_default()
             .insert(R::METADATA.name, R::METADATA);
     }
 }
@@ -71,7 +71,7 @@ impl RegistryVisitor<CssLanguage> for LintRulesVisitor {
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
-            .or_insert_with(BTreeMap::new)
+            .or_default()
             .insert(R::METADATA.name, R::METADATA);
     }
 }
@@ -90,7 +90,7 @@ impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
-            .or_insert_with(BTreeMap::new)
+            .or_default()
             .insert(R::METADATA.name, R::METADATA);
     }
 }
@@ -114,7 +114,7 @@ impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
-            .or_insert_with(BTreeMap::new)
+            .or_default()
             .insert(R::METADATA.name, R::METADATA);
     }
 }
@@ -133,7 +133,7 @@ impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
-            .or_insert_with(BTreeMap::new)
+            .or_default()
             .insert(R::METADATA.name, R::METADATA);
     }
 }
@@ -152,7 +152,7 @@ impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
-            .or_insert_with(BTreeMap::new)
+            .or_default()
             .insert(R::METADATA.name, R::METADATA);
     }
 }
@@ -171,7 +171,7 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
     {
         self.groups
             .entry(<R::Group as RuleGroup>::NAME)
-            .or_insert_with(BTreeMap::new)
+            .or_default()
             .insert(R::METADATA.name, R::METADATA);
     }
 }
