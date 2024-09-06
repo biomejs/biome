@@ -4,7 +4,6 @@ use biome_analyze::declare_lint_group;
 
 pub mod no_invalid_grid_areas;
 pub mod no_irregular_whitespace;
-pub mod no_shorthand_property_overrides;
 pub mod no_unknown_function;
 pub mod no_unknown_media_feature_name;
 pub mod no_unknown_property;
@@ -20,7 +19,6 @@ declare_lint_group! {
         rules : [
             self :: no_invalid_grid_areas :: NoInvalidGridAreas ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
-            self :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides ,
             self :: no_unknown_function :: NoUnknownFunction ,
             self :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName ,
             self :: no_unknown_property :: NoUnknownProperty ,

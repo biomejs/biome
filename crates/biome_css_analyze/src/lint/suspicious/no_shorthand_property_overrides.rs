@@ -68,7 +68,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoShorthandPropertyOverrides {
-        version: "next",
+        version: "1.8.2",
         name: "noShorthandPropertyOverrides",
         language: "css",
         recommended: true,

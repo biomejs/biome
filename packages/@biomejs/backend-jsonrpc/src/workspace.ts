@@ -1232,10 +1232,6 @@ export interface Nursery {
 	 */
 	noRestrictedTypes?: RuleFixConfiguration_for_NoRestrictedTypesOptions;
 	/**
-	 * Disallow shorthand properties that override related longhand properties.
-	 */
-	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
 	noStaticElementInteractions?: RuleConfiguration_for_Null;
@@ -1811,6 +1807,10 @@ export interface Suspicious {
 	 * Disallow identifiers from shadowing restricted names.
 	 */
 	noShadowRestrictedNames?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow shorthand properties that override related longhand properties.
+	 */
+	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow disabled tests.
 	 */
@@ -2761,7 +2761,6 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
-	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noUnknownFunction"
@@ -2896,6 +2895,7 @@ export type Category =
 	| "lint/suspicious/noRedundantUseStrict"
 	| "lint/suspicious/noSelfCompare"
 	| "lint/suspicious/noShadowRestrictedNames"
+	| "lint/suspicious/noShorthandPropertyOverrides"
 	| "lint/suspicious/noSkippedTests"
 	| "lint/suspicious/noSparseArray"
 	| "lint/suspicious/noSuspiciousSemicolonInJsx"

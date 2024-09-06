@@ -2084,13 +2084,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noShorthandPropertyOverrides": {
-					"description": "Disallow shorthand properties that override related longhand properties.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noStaticElementInteractions": {
 					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.",
 					"anyOf": [
@@ -3733,6 +3726,13 @@
 				},
 				"noShadowRestrictedNames": {
 					"description": "Disallow identifiers from shadowing restricted names.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noShorthandPropertyOverrides": {
+					"description": "Disallow shorthand properties that override related longhand properties.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
