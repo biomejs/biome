@@ -792,6 +792,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidDirectionInLinearGradient": {
+					"description": "Disallow non-standard direction values for linear gradient functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noInvalidNewBuiltin": {
 					"description": "Disallow new operators with global non-constructor functions.",
 					"anyOf": [
@@ -2030,13 +2037,6 @@
 				},
 				"noExportedImports": {
 					"description": "Disallow exporting an imported variable.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noInvalidDirectionInLinearGradient": {
-					"description": "Disallow non-standard direction values for linear gradient functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

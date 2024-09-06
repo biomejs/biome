@@ -1039,6 +1039,10 @@ export interface Correctness {
 	 */
 	noInvalidConstructorSuper?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow non-standard direction values for linear gradient functions.
+	 */
+	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow new operators with global non-constructor functions.
 	 */
 	noInvalidNewBuiltin?: RuleFixConfiguration_for_Null;
@@ -1203,10 +1207,6 @@ export interface Nursery {
 	 * Disallow exporting an imported variable.
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow non-standard direction values for linear gradient functions.
-	 */
-	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows invalid named grid areas in CSS Grid Layouts.
 	 */
@@ -2714,6 +2714,7 @@ export type Category =
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidConstructorSuper"
+	| "lint/correctness/noInvalidDirectionInLinearGradient"
 	| "lint/correctness/noInvalidNewBuiltin"
 	| "lint/correctness/noInvalidUseBeforeDeclaration"
 	| "lint/correctness/noNewSymbol"
@@ -2754,7 +2755,6 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
-	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
