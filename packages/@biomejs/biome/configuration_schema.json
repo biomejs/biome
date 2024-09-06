@@ -2000,13 +2000,6 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
-				"noDuplicateAtImportRules": {
-					"description": "Disallow duplicate @import rules.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
 					"anyOf": [
@@ -3518,6 +3511,13 @@
 					"description": "Require the use of === and !==",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDoubleEqualsConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateAtImportRules": {
+					"description": "Disallow duplicate @import rules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

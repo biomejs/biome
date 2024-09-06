@@ -1184,10 +1184,6 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow duplicate @import rules.
-	 */
-	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
@@ -1687,6 +1683,10 @@ export interface Suspicious {
 	 * Require the use of === and !==
 	 */
 	noDoubleEquals?: RuleFixConfiguration_for_NoDoubleEqualsOptions;
+	/**
+	 * Disallow duplicate @import rules.
+	 */
+	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate case labels.
 	 */
@@ -2749,7 +2749,6 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
@@ -2865,6 +2864,7 @@ export type Category =
 	| "lint/suspicious/noControlCharactersInRegex"
 	| "lint/suspicious/noDebugger"
 	| "lint/suspicious/noDoubleEquals"
+	| "lint/suspicious/noDuplicateAtImportRules"
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
 	| "lint/suspicious/noDuplicateJsxProps"
