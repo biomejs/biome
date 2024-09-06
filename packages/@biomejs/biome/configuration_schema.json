@@ -1958,6 +1958,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateCustomProperties": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
 					"anyOf": [
