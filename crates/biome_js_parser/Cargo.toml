@@ -18,7 +18,6 @@ biome_js_syntax     = { workspace = true }
 biome_parser        = { workspace = true }
 biome_rowan         = { workspace = true }
 biome_unicode_table = { workspace = true }
-bitflags            = { workspace = true }
 drop_bomb           = "0.1.5"
 enumflags2          = { workspace = true }
 indexmap            = { workspace = true }
