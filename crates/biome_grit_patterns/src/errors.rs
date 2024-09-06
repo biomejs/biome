@@ -59,6 +59,9 @@ pub enum CompileError {
     /// Unknown function or predicate.
     UnknownFunctionOrPredicate(String),
 
+    /// Unknown target language.
+    UnknownTargetLanguage(String),
+
     /// Unknown variable.
     UnknownVariable(String),
 }
@@ -116,6 +119,9 @@ impl Diagnostic for CompileError {
             }
             CompileError::UnknownFunctionOrPredicate(name) => {
                 fmt.write_markup(markup! { "Unknown function or predicate: "{{name}} })
+            }
+            CompileError::UnknownTargetLanguage(lang) => {
+                fmt.write_markup(markup! { "Unknown target language: "{{lang}} })
             }
             CompileError::UnknownVariable(var) => {
                 fmt.write_markup(markup! { "Unknown variable: "{{var}} })
