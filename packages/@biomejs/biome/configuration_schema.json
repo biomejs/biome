@@ -2077,6 +2077,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noRequireImports": {
+					"description": "Use the newer ES6-style imports over require().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noRestrictedImports": {
 					"description": "Disallow specified modules when loaded by import or require.",
 					"anyOf": [

@@ -1,0 +1,43 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+require('node:fs')
+
+if (true) {
+    require('node:fs')
+}
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noRequireImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ES6-style `import`s instead of `require`.
+  
+  > 1 │ require('node:fs')
+      │ ^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ if (true) {
+  
+  i ES6-style `import` statements are more easily statically analyzable and tree-shakable compared to `require` imports.
+  
+
+```
+
+```
+invalid.js:4:5 lint/nursery/noRequireImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use ES6-style `import`s instead of `require`.
+  
+    3 │ if (true) {
+  > 4 │     require('node:fs')
+      │     ^^^^^^^^^^^^^^^^^^
+    5 │ }
+  
+  i ES6-style `import` statements are more easily statically analyzable and tree-shakable compared to `require` imports.
+  
+
+```
