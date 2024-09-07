@@ -145,6 +145,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Fix `useHookAtTopLevel` to avoid reporting diagnostics in non React projects [#3476](https://github.com/biomejs/biome/issues/3476). Contributed by @Javimtib92
+
 - `biome lint --write` now takes `--only` and `--skip` into account ([#3470](https://github.com/biomejs/biome/issues/3470)). Contributed by @Conaclos
 
 - Fix [#3368](https://github.com/biomejs/biome/issues/3368), now the reporter `github` tracks the diagnostics that belong to formatting and organize imports. Contributed by @ematipico

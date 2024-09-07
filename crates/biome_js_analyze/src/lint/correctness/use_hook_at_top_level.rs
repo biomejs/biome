@@ -1,4 +1,5 @@
 use crate::react::hooks::{is_react_component, is_react_hook, is_react_hook_call};
+use crate::services::manifest::ManifestServices;
 use crate::services::semantic::{SemanticModelBuilderVisitor, SemanticServices};
 use biome_analyze::RuleSource;
 use biome_analyze::{
@@ -19,6 +20,7 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsReturnStatement, JsSyntaxKind, JsSyntaxNode,
     JsTryFinallyStatement, TextRange,
 };
+use biome_project::PackageJson;
 use biome_rowan::{declare_node_union, AstNode, Language, SyntaxNode, WalkEvent};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -231,6 +233,12 @@ fn is_nested_function_inside_component_or_hook(function: &AnyJsFunctionOrMethod)
     })
 }
 
+fn is_within_react_project(manifest: &Option<PackageJson>) -> bool {
+    manifest.as_ref().map_or(false, |package_json| {
+        package_json.dependencies.contains("react")
+    })
+}
+
 /// Model for tracking which function calls are preceeded by an early return.
 ///
 /// The keys in the model are call sites and each value is the text range of an
@@ -330,6 +338,7 @@ impl Visitor for FunctionCallVisitor {
 pub struct FunctionCallServices {
     early_returns: EarlyReturnsModel,
     semantic_services: SemanticServices,
+    manifest_services: ManifestServices,
 }
 
 impl FunctionCallServices {
@@ -339,6 +348,10 @@ impl FunctionCallServices {
 
     fn semantic_model(&self) -> &SemanticModel {
         self.semantic_services.model()
+    }
+
+    fn manifest(&self) -> &Option<PackageJson> {
+        self.manifest_services.manifest.as_ref()
     }
 }
 
@@ -353,6 +366,7 @@ impl FromServices for FunctionCallServices {
         Ok(Self {
             early_returns: early_returns.clone(),
             semantic_services: SemanticServices::from_services(rule_key, services)?,
+            manifest_services: ManifestServices::from_services(rule_key, services)?,
         })
     }
 }
@@ -411,8 +425,14 @@ impl Rule for UseHookAtTopLevel {
             Err(_) => None,
         };
 
-        // Early return for any function call that's not a hook call:
-        if !is_react_hook_call(call) {
+        // Since we can't definitively know if a function is a React hook, we use the following heuristics:
+        //
+        // - Check if the function is within the scope of a react project by checking package.json
+        // - Verify if the call matches the pattern of a React hook
+        // If any of these checks fail, we assume it's not a React hook call and we return early:
+        let manifest = ctx.manifest();
+
+        if !is_within_react_project(manifest) || !is_react_hook_call(call) {
             return None;
         }
 
