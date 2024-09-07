@@ -42,7 +42,7 @@ declare_lint_rule! {
         name: "useFocusableInteractive",
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus")],
-        recommended: false,
+        recommended: true,
     }
 }
 

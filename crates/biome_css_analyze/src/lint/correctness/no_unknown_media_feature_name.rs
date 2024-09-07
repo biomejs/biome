@@ -70,7 +70,7 @@ declare_lint_rule! {
         version: "1.8.0",
         name: "noUnknownMediaFeatureName",
         language: "css",
-        recommended: false,
+        recommended: true,
         sources: &[RuleSource::Stylelint("media-feature-name-no-unknown")],
     }
 }

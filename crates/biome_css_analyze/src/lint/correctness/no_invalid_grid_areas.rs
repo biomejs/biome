@@ -52,7 +52,7 @@ declare_lint_rule! {
         version: "next",
         name: "noInvalidGridAreas",
         language: "css",
-        recommended: false,
+        recommended: true,
         sources: &[RuleSource::Stylelint("named-grid-areas-no-invalid")],
     }
 }

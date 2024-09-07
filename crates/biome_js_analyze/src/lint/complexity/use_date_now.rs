@@ -58,7 +58,7 @@ declare_lint_rule! {
         name: "useDateNow",
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-date-now")],
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Unsafe,
     }
 }
