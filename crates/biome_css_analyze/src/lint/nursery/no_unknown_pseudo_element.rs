@@ -48,16 +48,16 @@ declare_lint_rule! {
     /// input::-moz-placeholder {}
     /// ```
     ///
-    pub NoUnknownSelectorPseudoElement {
+    pub NoUnknownPseudoElement {
         version: "1.8.0",
-        name: "noUnknownSelectorPseudoElement",
+        name: "noUnknownPseudoElement",
         language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("selector-pseudo-element-no-unknown")],
     }
 }
 
-impl Rule for NoUnknownSelectorPseudoElement {
+impl Rule for NoUnknownPseudoElement {
     type Query = Ast<CssPseudoElementSelector>;
     type State = AnyCssPseudoElement;
     type Signals = Option<Self::State>;

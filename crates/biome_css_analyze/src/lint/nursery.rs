@@ -16,7 +16,7 @@ pub mod no_unknown_function;
 pub mod no_unknown_media_feature_name;
 pub mod no_unknown_property;
 pub mod no_unknown_pseudo_class;
-pub mod no_unknown_selector_pseudo_element;
+pub mod no_unknown_pseudo_element;
 pub mod no_unknown_unit;
 pub mod no_unmatchable_anb_selector;
 pub mod no_value_at_rule;
@@ -40,7 +40,7 @@ declare_lint_group! {
             self :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName ,
             self :: no_unknown_property :: NoUnknownProperty ,
             self :: no_unknown_pseudo_class :: NoUnknownPseudoClass ,
-            self :: no_unknown_selector_pseudo_element :: NoUnknownSelectorPseudoElement ,
+            self :: no_unknown_pseudo_element :: NoUnknownPseudoElement ,
             self :: no_unknown_unit :: NoUnknownUnit ,
             self :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelector ,
             self :: no_value_at_rule :: NoValueAtRule ,
