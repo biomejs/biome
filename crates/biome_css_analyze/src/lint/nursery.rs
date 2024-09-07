@@ -6,7 +6,6 @@ pub mod no_irregular_whitespace;
 pub mod no_unknown_pseudo_class_selector;
 pub mod no_unknown_selector_pseudo_element;
 pub mod no_value_at_rule;
-pub mod use_generic_font_names;
 
 declare_lint_group! {
     pub Nursery {
@@ -16,7 +15,6 @@ declare_lint_group! {
             self :: no_unknown_pseudo_class_selector :: NoUnknownPseudoClassSelector ,
             self :: no_unknown_selector_pseudo_element :: NoUnknownSelectorPseudoElement ,
             self :: no_value_at_rule :: NoValueAtRule ,
-            self :: use_generic_font_names :: UseGenericFontNames ,
         ]
      }
 }

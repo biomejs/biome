@@ -245,6 +245,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGenericFontNames": {
+					"description": "Disallow a missing generic family keyword within font families.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useHeadingContent": {
 					"description": "Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.",
 					"anyOf": [
@@ -2197,13 +2204,6 @@
 				},
 				"useDeprecatedReason": {
 					"description": "Require specifying the reason argument when using @deprecated directive",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useGenericFontNames": {
-					"description": "Disallow a missing generic family keyword within font families.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

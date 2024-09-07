@@ -28,4 +28,4 @@ pub type NoUnmatchableAnbSelector = < lint :: correctness :: no_unmatchable_anb_
 pub type NoValueAtRule =
     <lint::nursery::no_value_at_rule::NoValueAtRule as biome_analyze::Rule>::Options;
 pub type UseGenericFontNames =
-    <lint::nursery::use_generic_font_names::UseGenericFontNames as biome_analyze::Rule>::Options;
+    <lint::a11y::use_generic_font_names::UseGenericFontNames as biome_analyze::Rule>::Options;

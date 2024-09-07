@@ -797,6 +797,10 @@ export interface A11y {
 	 */
 	useFocusableInteractive?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow a missing generic family keyword within font families.
+	 */
+	useGenericFontNames?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
 	 */
 	useHeadingContent?: RuleConfiguration_for_Null;
@@ -1299,10 +1303,6 @@ export interface Nursery {
 	 * Require specifying the reason argument when using @deprecated directive
 	 */
 	useDeprecatedReason?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow a missing generic family keyword within font families.
-	 */
-	useGenericFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -2659,6 +2659,7 @@ export type Category =
 	| "lint/a11y/useAriaPropsForRole"
 	| "lint/a11y/useButtonType"
 	| "lint/a11y/useFocusableInteractive"
+	| "lint/a11y/useGenericFontNames"
 	| "lint/a11y/useHeadingContent"
 	| "lint/a11y/useHtmlLang"
 	| "lint/a11y/useIframeTitle"
@@ -2779,7 +2780,6 @@ export type Category =
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
-	| "lint/nursery/useGenericFontNames"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useSortedClasses"
