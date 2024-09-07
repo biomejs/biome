@@ -43,7 +43,7 @@ impl biome_rowan::SyntaxKind for MarkdownSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self,MarkdownSyntaxKind::NEWLINE)
+        matches!(self, MarkdownSyntaxKind::NEWLINE)
     }
 
     fn to_string(&self) -> Option<&'static str> {

@@ -5,14 +5,10 @@ mod tests;
 
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
-use biome_markdown_syntax::T;
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_rowan::{TextLen, TextRange, TextSize};
-use biome_unicode_table::{is_js_id_continue, is_js_id_start, lookup_byte, Dispatch::*};
+use biome_rowan::{TextRange, TextSize};
+use biome_unicode_table::{lookup_byte, Dispatch::*};
 use std::iter::FusedIterator;
-use std::ops::Add;
-use std::process::id;
-use unicode_bom::Bom;
 
 pub struct Token {
     kind: MarkdownSyntaxKind,
@@ -46,9 +42,11 @@ pub(crate) struct Lexer<'src> {
 
     diagnostics: Vec<ParseDiagnostic>,
 
+    #[allow(dead_code)]
     context: MarkdownLexContext,
 }
 
+#[allow(dead_code)]
 impl<'src> Lexer<'src> {
     /// Make a new lexer from a str, this is safe because strs are valid utf8
     pub fn from_str(string: &'src str) -> Self {
@@ -267,7 +265,6 @@ impl<'src> Lexer<'src> {
         }
     }
 
-    
     #[inline]
     fn consume_textual(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
@@ -277,8 +274,6 @@ impl<'src> Lexer<'src> {
 
         MarkdownSyntaxKind::MARKDOWN_TEXTUAL_LITERAL
     }
-    
-    
 }
 
 impl Iterator for Lexer<'_> {

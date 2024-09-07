@@ -9,3 +9,5 @@ pub use crate::generated::MarkdownSyntaxFactory;
 pub use biome_markdown_syntax as syntax;
 
 pub type DemoSyntaxTreeBuilder = TreeBuilder<'static, MarkdownLanguage, MarkdownSyntaxFactory>;
+
+pub mod make;

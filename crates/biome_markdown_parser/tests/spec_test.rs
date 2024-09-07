@@ -1,9 +1,9 @@
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
-use biome_markdown_parser::parse_markdown;
 use biome_diagnostics::display::PrintDiagnostic;
 use biome_diagnostics::termcolor;
 use biome_diagnostics::DiagnosticExt;
+use biome_markdown_parser::parse_markdown;
 use biome_rowan::SyntaxKind;
 use biome_test_utils::has_bogus_nodes_or_empty_slots;
 use std::fmt::Write;
@@ -40,7 +40,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
-    writeln!(snapshot, "\n## Input\n\n```json\n{content}\n```\n\n").unwrap();
+    writeln!(snapshot, "\n## Input\n\n```\n{content}\n```\n\n").unwrap();
 
     writeln!(
         snapshot,

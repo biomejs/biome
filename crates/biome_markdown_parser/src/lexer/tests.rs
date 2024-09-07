@@ -2,7 +2,6 @@
 #![allow(unused_mut, unused_variables, unused_assignments)]
 
 use super::{Lexer, TextSize};
-use biome_markdown_syntax::MarkdownSyntaxKind::{self, EOF};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
