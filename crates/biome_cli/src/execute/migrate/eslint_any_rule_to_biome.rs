@@ -946,7 +946,7 @@ pub(crate) fn migrate_eslint_any_rule(
         "no-new-native-nonconstructor" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
-                .no_invalid_new_builtin
+                .no_invalid_builtin_instantiation
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -956,10 +956,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "no-new-wrappers" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
                 .use_consistent_builtin_instantiation
                 .get_or_insert(Default::default());
@@ -1393,12 +1390,9 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "unicorn/new-for-builtins" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
-                .use_consistent_builtin_instantiation
+                .no_invalid_builtin_instantiation
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }

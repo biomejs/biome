@@ -1,69 +1,51 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::{
+    lint::correctness::no_invalid_builtin_instantiation::convert_new_expression_to_call_expression,
+    services::semantic::Semantic, JsRuleAction,
+};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
-use biome_js_factory::make;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, JsCallExpression, JsNewExpression, JsNewOrCallExpression,
+    global_identifier, static_value::StaticValue, AnyJsExpression, JsNewOrCallExpression,
 };
-use biome_rowan::{chain_trivia_pieces, AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt};
 
 use crate::lint::style::use_throw_new_error::convert_call_expression_to_new_expression;
 
 declare_lint_rule! {
-    /// Enforce the use of `new` for all builtins, except `String`, `Number`, `Boolean`, `Symbol` and `BigInt`.
+    /// Enforce the use of `new` for all builtins, except `String`, `Number` and `Boolean`.
     ///
-    /// `new Builtin()` and `Builtin()` work the same, but new should be preferred for consistency with other constructors.
+    /// `new Builtin()` and `Builtin()` work the same, but `new` should be preferred for consistency with other constructors.
     /// Enforces the use of new for following builtins:
     ///
     /// - AggregateError
     /// - Array
-    /// - ArrayBuffer
-    /// - BigInt64Array
-    /// - BigUint64Array
-    /// - DataView
     /// - Date
     /// - Error
     /// - EvalError
-    /// - FinalizationRegistry
-    /// - Float32Array
-    /// - Float64Array
-    /// - Function
-    /// - Int16Array
-    /// - Int32Array
-    /// - Int8Array
-    /// - Map
     /// - Object
     /// - Promise
-    /// - Proxy
     /// - RangeError
     /// - ReferenceError
     /// - RegExp
-    /// - Set
-    /// - SharedArrayBuffer
     /// - SyntaxError
     /// - TypeError
     /// - URIError
-    /// - Uint16Array
-    /// - Uint32Array
-    /// - Uint8Array
-    /// - Uint8ClampedArray
-    /// - WeakMap
-    /// - WeakRef
-    /// - WeakSet
     ///
-    /// Disallows the use of new for following builtins:
+    /// Disallows the use of `new` for following builtins:
     ///
-    /// - BigInt
     /// - Boolean
     /// - Number
     /// - String
-    /// - Symbol
     ///
     /// > These should not use `new` as that would create object wrappers for the primitive values, which is not what you want.
     /// > However, without `new` they can be useful for coercing a value to that type.
+    ///
+    /// Note that, builtins that require `new` to be instantiated and
+    /// builtins that require no `new` to be instantiated (`Symbol` and `BigInt`) are covered by the
+    /// [noInvalidBuiltinInstantiation](https://biomejs.dev/linter/rules/no-invalid-builtin-instantiation/) rule.
     ///
     /// ## Examples
     ///
@@ -77,12 +59,6 @@ declare_lint_rule! {
     /// const now = Date();
     /// ```
     ///
-    /// ```js,expect_diagnostic
-    /// const map = Map([
-    ///   ['foo', 'bar']
-    /// ]);
-    /// ```
-    ///
     /// ### Valid
     ///
     /// ```js
@@ -92,24 +68,16 @@ declare_lint_rule! {
     /// ```js
     /// const now = new Date();
     /// ```
-    ///
-    /// ```js
-    /// const map = new Map([
-    ///  ['foo', 'bar']
-    /// ]);
-    /// ```
-    ///
     pub UseConsistentBuiltinInstantiation {
         version: "1.7.2",
         name: "useConsistentBuiltinInstantiation",
         language: "js",
         sources: &[
-            RuleSource::EslintUnicorn("new-for-builtins"),
             RuleSource::Eslint("no-new-wrappers"),
-            // TODO: Add this source once `noInvalidNewBuiltin` is deprecated
-            //RuleSource::Eslint("no-new-native-nonconstructor")
+            // FIXME: uncomment once we allow multiple rules to have the same source.
+            //RuleSource::Eslint("no-new-native-nonconstructor"),
         ],
-        recommended: false,
+        recommended: true,
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -125,16 +93,14 @@ impl Rule for UseConsistentBuiltinInstantiation {
         let (callee, creation_rule) = extract_callee_and_rule(node)?;
         let (reference, name) = global_identifier(&callee.omit_parentheses())?;
 
-        let name_text = name.text();
-
         if creation_rule
             .forbidden_builtins_list()
-            .binary_search(&name_text)
+            .binary_search(&name.text())
             .is_ok()
         {
             return ctx.model().binding(&reference).is_none().then_some(
                 UseConsistentBuiltinInstantiationState {
-                    name: name_text.to_string(),
+                    name,
                     creation_rule,
                 },
             );
@@ -145,8 +111,7 @@ impl Rule for UseConsistentBuiltinInstantiation {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-
-        let name = &state.name;
+        let name = state.name.text();
 
         let (use_this, instead_of) = match state.creation_rule {
             BuiltinCreationRule::MustUseNew => ("new ", ""),
@@ -164,9 +129,7 @@ impl Rule for UseConsistentBuiltinInstantiation {
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
-
         let mut mutation = ctx.root().begin();
-
         match node {
             JsNewOrCallExpression::JsNewExpression(node) => {
                 let call_expression = convert_new_expression_to_call_expression(node)?;
@@ -200,43 +163,21 @@ impl Rule for UseConsistentBuiltinInstantiation {
 const BUILTINS_REQUIRING_NEW: &[&str] = &[
     "AggregateError",
     "Array",
-    "ArrayBuffer",
-    "BigInt64Array",
-    "BigUint64Array",
-    "DataView",
     "Date",
     "Error",
     "EvalError",
-    "FinalizationRegistry",
-    "Float32Array",
-    "Float64Array",
-    "Function",
-    "Int16Array",
-    "Int32Array",
-    "Int8Array",
-    "Map",
     "Object",
     "Promise",
-    "Proxy",
     "RangeError",
     "ReferenceError",
     "RegExp",
-    "Set",
-    "SharedArrayBuffer",
     "SyntaxError",
     "TypeError",
     "URIError",
-    "Uint16Array",
-    "Uint32Array",
-    "Uint8Array",
-    "Uint8ClampedArray",
-    "WeakMap",
-    "WeakRef",
-    "WeakSet",
 ];
 
 /// Sorted array of builtins that should not use new keyword.
-const BUILTINS_NOT_REQUIRING_NEW: &[&str] = &["BigInt", "Boolean", "Number", "String", "Symbol"];
+const BUILTINS_NOT_REQUIRING_NEW: &[&str] = &["Boolean", "Number", "String"];
 
 enum BuiltinCreationRule {
     MustUseNew,
@@ -253,7 +194,7 @@ impl BuiltinCreationRule {
 }
 
 pub struct UseConsistentBuiltinInstantiationState {
-    name: String,
+    name: StaticValue,
     creation_rule: BuiltinCreationRule,
 }
 
@@ -267,18 +208,6 @@ fn extract_callee_and_rule(
     let callee = node.callee().ok()?;
 
     Some((callee, rule))
-}
-
-fn convert_new_expression_to_call_expression(expr: &JsNewExpression) -> Option<JsCallExpression> {
-    let new_token = expr.new_token().ok()?;
-    let mut callee = expr.callee().ok()?;
-    if new_token.has_leading_comments() || new_token.has_trailing_comments() {
-        callee = callee.prepend_trivia_pieces(chain_trivia_pieces(
-            new_token.leading_trivia().pieces(),
-            new_token.trailing_trivia().pieces(),
-        ))?;
-    }
-    Some(make::js_call_expression(callee, expr.arguments()?).build())
 }
 
 #[test]

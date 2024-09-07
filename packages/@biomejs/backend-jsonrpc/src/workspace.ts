@@ -1039,6 +1039,10 @@ export interface Correctness {
 	 */
 	noInnerDeclarations?: RuleConfiguration_for_Null;
 	/**
+	 * Ensure that builtins are correctly instantiated.
+	 */
+	noInvalidBuiltinInstantiation?: RuleFixConfiguration_for_Null;
+	/**
 	 * Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors.
 	 */
 	noInvalidConstructorSuper?: RuleConfiguration_for_Null;
@@ -1288,10 +1292,6 @@ export interface Nursery {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
-	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
-	 */
-	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
-	/**
 	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
 	 */
 	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
@@ -1482,6 +1482,10 @@ export interface Style {
 	 * Require consistently using either T\[] or Array\<T>
 	 */
 	useConsistentArrayType?: RuleFixConfiguration_for_ConsistentArrayTypeOptions;
+	/**
+	 * Enforce the use of new for all builtins, except String, Number and Boolean.
+	 */
+	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
 	/**
 	 * Require const declarations for variables that are only assigned once.
 	 */
@@ -2714,6 +2718,7 @@ export type Category =
 	| "lint/correctness/noFlatMapIdentity"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
+	| "lint/correctness/noInvalidBuiltinInstantiation"
 	| "lint/correctness/noInvalidConstructorSuper"
 	| "lint/correctness/noInvalidDirectionInLinearGradient"
 	| "lint/correctness/noInvalidGridAreas"
@@ -2776,7 +2781,6 @@ export type Category =
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
@@ -2816,6 +2820,7 @@ export type Category =
 	| "lint/style/useBlockStatements"
 	| "lint/style/useCollapsedElseIf"
 	| "lint/style/useConsistentArrayType"
+	| "lint/style/useConsistentBuiltinInstantiation"
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
 	| "lint/style/useDefaultSwitchClause"

@@ -24,6 +24,7 @@ pub mod use_as_const_assertion;
 pub mod use_block_statements;
 pub mod use_collapsed_else_if;
 pub mod use_consistent_array_type;
+pub mod use_consistent_builtin_instantiation;
 pub mod use_const;
 pub mod use_default_parameter_last;
 pub mod use_default_switch_clause;
@@ -78,6 +79,7 @@ declare_lint_group! {
             self :: use_block_statements :: UseBlockStatements ,
             self :: use_collapsed_else_if :: UseCollapsedElseIf ,
             self :: use_consistent_array_type :: UseConsistentArrayType ,
+            self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_const :: UseConst ,
             self :: use_default_parameter_last :: UseDefaultParameterLast ,
             self :: use_default_switch_clause :: UseDefaultSwitchClause ,

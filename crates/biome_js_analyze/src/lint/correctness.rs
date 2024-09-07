@@ -12,6 +12,7 @@ pub mod no_empty_pattern;
 pub mod no_flat_map_identity;
 pub mod no_global_object_calls;
 pub mod no_inner_declarations;
+pub mod no_invalid_builtin_instantiation;
 pub mod no_invalid_constructor_super;
 pub mod no_invalid_new_builtin;
 pub mod no_invalid_use_before_declaration;
@@ -61,6 +62,7 @@ declare_lint_group! {
             self :: no_flat_map_identity :: NoFlatMapIdentity ,
             self :: no_global_object_calls :: NoGlobalObjectCalls ,
             self :: no_inner_declarations :: NoInnerDeclarations ,
+            self :: no_invalid_builtin_instantiation :: NoInvalidBuiltinInstantiation ,
             self :: no_invalid_constructor_super :: NoInvalidConstructorSuper ,
             self :: no_invalid_new_builtin :: NoInvalidNewBuiltin ,
             self :: no_invalid_use_before_declaration :: NoInvalidUseBeforeDeclaration ,
