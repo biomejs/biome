@@ -1,9 +1,9 @@
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::JsCallExpression;
+use biome_js_syntax::{global_identifier, JsCallExpression};
 use biome_rowan::AstNode;
+
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Use the newer ES6-style imports over require().
@@ -40,7 +40,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoRequireImports {
-    type Query = Ast<JsCallExpression>;
+    type Query = Semantic<JsCallExpression>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
@@ -48,12 +48,13 @@ impl Rule for NoRequireImports {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
         let callee = expression.callee().ok()?;
-        let name = callee.as_js_reference_identifier()?.value_token().ok()?;
-        if name.text_trimmed() == "require" {
-            Some(())
-        } else {
-            None
+        let (reference, name) = global_identifier(&callee.omit_parentheses())?;
+
+        if name.text() == "require" && ctx.model().binding(&reference).is_none() {
+            return Some(());
         }
+
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
