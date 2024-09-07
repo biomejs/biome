@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnknownPseudoClassSelector {
-        version: "next",
+        version: "1.9.9",
         name: "noUnknownPseudoClassSelector",
         language: "css",
         recommended: true,

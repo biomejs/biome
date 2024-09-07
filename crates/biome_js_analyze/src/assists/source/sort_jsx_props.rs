@@ -40,7 +40,7 @@ declare_source_rule! {
     /// ```
     ///
     pub SortJsxProps {
-        version: "next",
+        version: "1.9.0",
         name: "sortJsxProps",
         language: "js",
         recommended: false,

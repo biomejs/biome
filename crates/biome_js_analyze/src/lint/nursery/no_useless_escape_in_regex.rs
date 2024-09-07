@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// /[\b]/
     /// ```
     pub NoUselessEscapeInRegex {
-        version: "next",
+        version: "1.9.0",
         name: "noUselessEscapeInRegex",
         language: "js",
         sources: &[RuleSource::Eslint("no-useless-escape")],

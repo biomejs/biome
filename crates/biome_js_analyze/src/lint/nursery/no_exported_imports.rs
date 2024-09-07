@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoExportedImports {
-        version: "next",
+        version: "1.9.0",
         name: "noExportedImports",
         language: "js",
         recommended: false,

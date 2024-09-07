@@ -29,7 +29,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub UseDeprecatedReason {
-        version: "next",
+        version: "1.9.0",
         name: "useDeprecatedReason",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("require-deprecation-reason")],

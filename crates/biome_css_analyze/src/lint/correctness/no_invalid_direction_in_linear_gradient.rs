@@ -42,7 +42,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInvalidDirectionInLinearGradient {
-        version: "next",
+        version: "1.9.9",
         name: "noInvalidDirectionInLinearGradient",
         language: "css",
         recommended: true,

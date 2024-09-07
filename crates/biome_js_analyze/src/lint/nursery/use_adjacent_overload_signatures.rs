@@ -87,7 +87,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseAdjacentOverloadSignatures {
-        version: "next",
+        version: "1.9.0",
         name: "useAdjacentOverloadSignatures",
         language: "js",
         sources: &[
