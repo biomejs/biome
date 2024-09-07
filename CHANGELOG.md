@@ -23,6 +23,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add support of comments in `turbo.json`. Contributed by @Netail
 - Implement [semantic model for CSS](https://github.com/biomejs/biome/pull/3546). Contributed by @togami2864
 - Integrate CSS semantic model into the analyzer. Contributed by @togami2864
+- Rename `use-consistent-grid-areas` to `no-invalid-grid-areas` by @togami2864
+- Rename `no_unknown_pseudo_class_selector` to `no_unknown_pseudo_class` by @togami2864
+- Rename `no_unknown_selector_pseudo_element` to `no_unknown_pseudo_element` by @togami2864
 
 ### CLI
 
