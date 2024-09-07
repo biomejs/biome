@@ -40,6 +40,7 @@ declare_lint_rule! {
         name: "useSingleCaseStatement",
         language: "js",
         recommended: false,
+        deprecated: "Use the rule noSwitchDeclarations instead",
         fix_kind: FixKind::Unsafe,
     }
 }
