@@ -12,9 +12,7 @@
 								"message": "Only CustomType2 is allowed",
 								"use": "CustomType2"
 							},
-							"Bar": {
-								"message": "Replace Bar with Foo"
-							},
+							"Bar": "Replace Bar with Foo",
 							"InvalidUse": {
 								"message": "Do not use this type",
 								"use": "@"
