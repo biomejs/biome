@@ -1266,11 +1266,11 @@ export interface Nursery {
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
-	noUnknownPseudoClassSelector?: RuleConfiguration_for_Null;
+	noUnknownPseudoClass?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
-	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
+	noUnknownPseudoElement?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown CSS units.
 	 */
@@ -2769,8 +2769,8 @@ export type Category =
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
-	| "lint/nursery/noUnknownPseudoClassSelector"
-	| "lint/nursery/noUnknownSelectorPseudoElement"
+	| "lint/nursery/noUnknownPseudoClass"
+	| "lint/nursery/noUnknownPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"

@@ -23,6 +23,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add support of comments in `turbo.json`. Contributed by @Netail
 - Implement [semantic model for CSS](https://github.com/biomejs/biome/pull/3546). Contributed by @togami2864
 - Integrate CSS semantic model into the analyzer. Contributed by @togami2864
+- Rename `use-consistent-grid-areas` to `no-invalid-grid-areas` by @togami2864
+- Rename `no_unknown_pseudo_class_selector` to `no_unknown_pseudo_class` by @togami2864
+- Rename `no_unknown_selector_pseudo_element` to `no_unknown_pseudo_element` by @togami2864
 
 ### CLI
 
@@ -1212,7 +1215,7 @@ New rules are incubated in the nursery group. Once stable, we promote them to a 
 - Add [nursery/noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function). [#2570](https://github.com/biomejs/biome/pull/2570) Contributed by @neokidev
 - Add [nursery/noUnknownMediaFeatureName](https://biomejs.dev/linter/rules/no-unknown-media-feature-name). [#2751](https://github.com/biomejs/biome/issues/2751) Contributed by @Kazuhiro-Mimaki
 - Add [nursery/noUnknownProperty](https://biomejs.dev/linter/rules/no-unknown-property). [#2755](https://github.com/biomejs/biome/pull/2755) Contributed by @chansuke
-- Add [nursery/noUnknownSelectorPseudoElement](https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element). [#2655](https://github.com/biomejs/biome/issues/2655) Contributed by @keita-hino
+- Add [nursery/noUnknownPseudoElement](https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element). [#2655](https://github.com/biomejs/biome/issues/2655) Contributed by @keita-hino
 - Add [nursery/noUnknownUnit](https://biomejs.dev/linter/rules/no-unknown-unit). [#2535](https://github.com/biomejs/biome/issues/2535) Contributed by @neokidev
 - Add [nursery/noUnmatchableAnbSelector](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector). [#2706](https://github.com/biomejs/biome/issues/2706) Contributed by @togami2864
 - Add [nursery/useGenericFontNames](https://biomejs.dev/linter/rules/use-generic-font-names). [#2573](https://github.com/biomejs/biome/pull/2573) Contributed by @togami2864
