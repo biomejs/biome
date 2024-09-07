@@ -2981,8 +2981,8 @@ pub struct Nursery {
         Option<RuleConfiguration<biome_css_analyze::options::NoUnknownProperty>>,
     #[doc = "Disallow unknown pseudo-class selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_unknown_pseudo_class_selector:
-        Option<RuleConfiguration<biome_css_analyze::options::NoUnknownPseudoClassSelector>>,
+    pub no_unknown_pseudo_class:
+        Option<RuleConfiguration<biome_css_analyze::options::NoUnknownPseudoClass>>,
     #[doc = "Disallow unknown pseudo-element selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_selector_pseudo_element:
@@ -3152,7 +3152,7 @@ impl Nursery {
         "noUnknownFunction",
         "noUnknownMediaFeatureName",
         "noUnknownProperty",
-        "noUnknownPseudoClassSelector",
+        "noUnknownPseudoClass",
         "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
         "noUnmatchableAnbSelector",
@@ -3201,7 +3201,7 @@ impl Nursery {
         "noShorthandPropertyOverrides",
         "noUnknownFunction",
         "noUnknownProperty",
-        "noUnknownPseudoClassSelector",
+        "noUnknownPseudoClass",
         "noUnknownSelectorPseudoElement",
         "noUnknownUnit",
         "noUnmatchableAnbSelector",
@@ -3466,7 +3466,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.no_unknown_pseudo_class_selector.as_ref() {
+        if let Some(rule) = self.no_unknown_pseudo_class.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
@@ -3780,7 +3780,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]));
             }
         }
-        if let Some(rule) = self.no_unknown_pseudo_class_selector.as_ref() {
+        if let Some(rule) = self.no_unknown_pseudo_class.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]));
             }
@@ -4097,8 +4097,8 @@ impl Nursery {
                 .no_unknown_property
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noUnknownPseudoClassSelector" => self
-                .no_unknown_pseudo_class_selector
+            "noUnknownPseudoClass" => self
+                .no_unknown_pseudo_class
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownSelectorPseudoElement" => self

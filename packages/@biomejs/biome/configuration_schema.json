@@ -2140,7 +2140,7 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnknownPseudoClassSelector": {
+				"noUnknownPseudoClass": {
 					"description": "Disallow unknown pseudo-class selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
