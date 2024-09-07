@@ -1043,6 +1043,10 @@ export interface Correctness {
 	 */
 	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
 	/**
+	 * Disallows invalid named grid areas in CSS Grid Layouts.
+	 */
+	noInvalidGridAreas?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow new operators with global non-constructor functions.
 	 */
 	noInvalidNewBuiltin?: RuleFixConfiguration_for_Null;
@@ -1215,10 +1219,6 @@ export interface Nursery {
 	 * Disallow exporting an imported variable.
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
-	/**
-	 * Disallows invalid named grid areas in CSS Grid Layouts.
-	 */
-	noInvalidGridAreas?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
@@ -2715,6 +2715,7 @@ export type Category =
 	| "lint/correctness/noInnerDeclarations"
 	| "lint/correctness/noInvalidConstructorSuper"
 	| "lint/correctness/noInvalidDirectionInLinearGradient"
+	| "lint/correctness/noInvalidGridAreas"
 	| "lint/correctness/noInvalidNewBuiltin"
 	| "lint/correctness/noInvalidPositionAtImportRule"
 	| "lint/correctness/noInvalidUseBeforeDeclaration"
@@ -2776,7 +2777,6 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
-	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useGenericFontNames"
