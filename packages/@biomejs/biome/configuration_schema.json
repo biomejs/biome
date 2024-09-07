@@ -911,6 +911,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownMediaFeatureName": {
+					"description": "Disallow unknown media feature names.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnmatchableAnbSelector": {
 					"description": "Disallow unmatchable An+B selectors.",
 					"anyOf": [
@@ -2102,13 +2109,6 @@
 					"description": "Enforce the use of String.slice() over String.substr() and String.substring().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnknownMediaFeatureName": {
-					"description": "Disallow unknown media feature names.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

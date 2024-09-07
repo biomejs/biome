@@ -17,7 +17,7 @@ pub type NoIrregularWhitespace =
 pub type NoShorthandPropertyOverrides = < lint :: suspicious :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownFunction =
     <lint::correctness::no_unknown_function::NoUnknownFunction as biome_analyze::Rule>::Options;
-pub type NoUnknownMediaFeatureName = < lint :: nursery :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName as biome_analyze :: Rule > :: Options ;
+pub type NoUnknownMediaFeatureName = < lint :: correctness :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownProperty =
     <lint::nursery::no_unknown_property::NoUnknownProperty as biome_analyze::Rule>::Options;
 pub type NoUnknownPseudoClassSelector = < lint :: nursery :: no_unknown_pseudo_class_selector :: NoUnknownPseudoClassSelector as biome_analyze :: Rule > :: Options ;
