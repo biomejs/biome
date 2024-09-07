@@ -249,11 +249,11 @@ impl Deserializable for Union {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        if value.is_type(DeserializableTypes::BOOL) {
-            biome_deserialize::Deserializable::deserialize(value, rule_name, diagnostics)
+        if value.visitable_type()? == DeserializableType::Bool {
+            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
                 .map(Self::Bool)
         } else {
-            biome_deserialize::Deserializable::deserialize(value, rule_name, diagnostics)
+            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
                 .map(Self::Str)
         }
     }
