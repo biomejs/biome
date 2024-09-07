@@ -38,8 +38,8 @@ declare_lint_rule! {
         version: "next",
         name: "noDuplicateCustomProperties",
         language: "css",
-        recommended: false,
-        sources: &[RuleSource::Stylelint("declaration-block-no-duplicate-properties")],
+        recommended: true,
+        sources: &[RuleSource::Stylelint("declaration-block-no-duplicate-custom-properties")],
     }
 }
 
