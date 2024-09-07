@@ -49,18 +49,17 @@ impl MarkdownParse {
     /// The syntax node represented by this Parse result
     ///
     /// ```
-    /// # use biome_css_parser::parse_css;
-    /// # use biome_css_syntax::CssSyntaxKind;
+    /// # use biome_markdown_parser::parse_markdown;
+    /// # use biome_markdown_syntax::MarkdownSyntaxKind;
     /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};
     ///
     /// # fn main() -> Result<(), SyntaxError> {
-    /// use biome_css_syntax::CssSyntaxKind;
-    /// use biome_css_parser::CssParserOptions;
-    /// let parse = parse_css(r#""#, CssParserOptions::default());
+    /// use biome_markdown_syntax::MarkdownSyntaxKind;
+    /// let parse = parse_markdown(r#""#);
     ///
-    /// let root_value = parse.tree().rules();
+    /// let root_value = parse.tree();
     ///
-    /// assert_eq!(root_value.syntax().kind(), CssSyntaxKind::CSS_RULE_LIST);
+    /// assert_eq!(root_value.syntax().kind(), MarkdownSyntaxKind::MARKDOWN_DOCUMENT);
     ///
     /// # Ok(())
     /// # }
