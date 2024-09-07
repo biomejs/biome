@@ -19,7 +19,7 @@ pub type NoUnknownFunction =
     <lint::correctness::no_unknown_function::NoUnknownFunction as biome_analyze::Rule>::Options;
 pub type NoUnknownMediaFeatureName = < lint :: correctness :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownProperty =
-    <lint::nursery::no_unknown_property::NoUnknownProperty as biome_analyze::Rule>::Options;
+    <lint::correctness::no_unknown_property::NoUnknownProperty as biome_analyze::Rule>::Options;
 pub type NoUnknownPseudoClassSelector = < lint :: nursery :: no_unknown_pseudo_class_selector :: NoUnknownPseudoClassSelector as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownSelectorPseudoElement = < lint :: nursery :: no_unknown_selector_pseudo_element :: NoUnknownSelectorPseudoElement as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownUnit =

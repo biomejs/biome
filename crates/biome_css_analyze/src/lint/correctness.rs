@@ -7,6 +7,7 @@ pub mod no_invalid_grid_areas;
 pub mod no_invalid_position_at_import_rule;
 pub mod no_unknown_function;
 pub mod no_unknown_media_feature_name;
+pub mod no_unknown_property;
 pub mod no_unmatchable_anb_selector;
 
 declare_lint_group! {
@@ -18,6 +19,7 @@ declare_lint_group! {
             self :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule ,
             self :: no_unknown_function :: NoUnknownFunction ,
             self :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName ,
+            self :: no_unknown_property :: NoUnknownProperty ,
             self :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelector ,
         ]
      }
