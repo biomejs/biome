@@ -950,7 +950,6 @@ dependencies = [
  "insta",
  "quickcheck",
  "quickcheck_macros",
- "tests_macros",
  "tracing",
  "unicode-bom",
 ]
