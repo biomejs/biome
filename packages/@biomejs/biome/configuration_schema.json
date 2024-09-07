@@ -925,6 +925,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownUnit": {
+					"description": "Disallow unknown CSS units.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnmatchableAnbSelector": {
 					"description": "Disallow unmatchable An+B selectors.",
 					"anyOf": [
@@ -2128,13 +2135,6 @@
 				},
 				"noUnknownSelectorPseudoElement": {
 					"description": "Disallow unknown pseudo-element selectors.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnknownUnit": {
-					"description": "Disallow unknown CSS units.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

@@ -1115,6 +1115,10 @@ export interface Correctness {
 	 */
 	noUnknownProperty?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown CSS units.
+	 */
+	noUnknownUnit?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unmatchable An+B selectors.
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
@@ -1259,10 +1263,6 @@ export interface Nursery {
 	 * Disallow unknown pseudo-element selectors.
 	 */
 	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unknown CSS units.
-	 */
-	noUnknownUnit?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
@@ -2733,6 +2733,7 @@ export type Category =
 	| "lint/correctness/noUnknownFunction"
 	| "lint/correctness/noUnknownMediaFeatureName"
 	| "lint/correctness/noUnknownProperty"
+	| "lint/correctness/noUnknownUnit"
 	| "lint/correctness/noUnmatchableAnbSelector"
 	| "lint/correctness/noUnnecessaryContinue"
 	| "lint/correctness/noUnreachable"
@@ -2769,7 +2770,6 @@ export type Category =
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
-	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"
