@@ -1103,6 +1103,10 @@ export interface Correctness {
 	 */
 	noUndeclaredVariables?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown CSS value functions.
+	 */
+	noUnknownFunction?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unmatchable An+B selectors.
 	 */
 	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
@@ -1239,10 +1243,6 @@ export interface Nursery {
 	 * Enforce the use of String.slice() over String.substr() and String.substring().
 	 */
 	noSubstr?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow unknown CSS value functions.
-	 */
-	noUnknownFunction?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown media feature names.
 	 */
@@ -2730,6 +2730,7 @@ export type Category =
 	| "lint/correctness/noSwitchDeclarations"
 	| "lint/correctness/noUndeclaredDependencies"
 	| "lint/correctness/noUndeclaredVariables"
+	| "lint/correctness/noUnknownFunction"
 	| "lint/correctness/noUnmatchableAnbSelector"
 	| "lint/correctness/noUnnecessaryContinue"
 	| "lint/correctness/noUnreachable"
@@ -2764,7 +2765,6 @@ export type Category =
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
-	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnknownPseudoClassSelector"

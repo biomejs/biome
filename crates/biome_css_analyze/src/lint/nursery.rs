@@ -3,7 +3,6 @@
 use biome_analyze::declare_lint_group;
 
 pub mod no_irregular_whitespace;
-pub mod no_unknown_function;
 pub mod no_unknown_media_feature_name;
 pub mod no_unknown_property;
 pub mod no_unknown_pseudo_class_selector;
@@ -17,7 +16,6 @@ declare_lint_group! {
         name : "nursery" ,
         rules : [
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
-            self :: no_unknown_function :: NoUnknownFunction ,
             self :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName ,
             self :: no_unknown_property :: NoUnknownProperty ,
             self :: no_unknown_pseudo_class_selector :: NoUnknownPseudoClassSelector ,
