@@ -16,102 +16,6 @@ enum Pattern {
     Contains(&'static str),
 }
 
-// Workaround: Since I couldn't figure out how to declare them inline,
-// declare the LazyLock patterns separately
-static SLACK_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}").unwrap()
-});
-
-static GENERIC_SECRET_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[sS][eE][cC][rR][eE][tT].*['\"][0-9a-zA-Z]{32,45}['\"]"#).unwrap()
-});
-
-static GENERIC_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[aA][pP][iI][_]?[kK][eE][yY].*['\"][0-9a-zA-Z]{32,45}['\"]"#).unwrap()
-});
-
-static SLACK_WEBHOOK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"https://hooks\.slack\.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}",
-    )
-    .unwrap()
-});
-
-static GITHUB_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[gG][iI][tT][hH][uU][bB].*['\"][0-9a-zA-Z]{35,40}['\"]"#).unwrap()
-});
-
-static TWITTER_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[tT][wW][iI][tT][tT][eE][rR].*['\"][0-9a-zA-Z]{35,44}['\"]"#).unwrap()
-});
-
-static FACEBOOK_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*['\"][0-9a-f]{32}['\"]"#).unwrap()
-});
-
-static HEROKU_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"[hH][eE][rR][oO][kK][uU].*[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}",
-    )
-    .unwrap()
-});
-
-static PASSWORD_IN_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[a-zA-Z]{3,10}://[^/\s:@]{3,20}:[^/\s:@]{3,20}@.{1,100}['"\s]"#).unwrap()
-});
-
-static GOOGLE_SERVICE_ACCOUNT_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#""type": "service_account""#).unwrap());
-
-static TWILIO_API_KEY_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"SK[a-z0-9]{32}"#).unwrap());
-
-static GOOGLE_OAUTH_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#""client_secret":"[a-zA-Z0-9-_]{24}""#).unwrap());
-
-static AWS_API_KEY_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"AKIA[0-9A-Z]{16}").unwrap());
-
-// List of sensitive patterns, with comments
-static SENSITIVE_PATTERNS: &[(Pattern, &str)] = &[
-    (Pattern::Regex(&SLACK_TOKEN_REGEX), "Slack Token"),
-    (Pattern::Regex(&GENERIC_SECRET_REGEX), "Generic Secret"),
-    (Pattern::Regex(&GENERIC_API_KEY_REGEX), "Generic API Key"),
-    (Pattern::Regex(&SLACK_WEBHOOK_REGEX), "Slack Webhook"),
-    (Pattern::Regex(&GITHUB_TOKEN_REGEX), "GitHub"),
-    (Pattern::Regex(&TWITTER_OAUTH_REGEX), "Twitter OAuth"),
-    (Pattern::Regex(&FACEBOOK_OAUTH_REGEX), "Facebook OAuth"),
-    (Pattern::Regex(&GOOGLE_OAUTH_REGEX), "Google OAuth"),
-    (Pattern::Regex(&AWS_API_KEY_REGEX), "AWS API Key"),
-    (Pattern::Regex(&HEROKU_API_KEY_REGEX), "Heroku API Key"),
-    (Pattern::Regex(&PASSWORD_IN_URL_REGEX), "Password in URL"),
-    (
-        Pattern::Regex(&GOOGLE_SERVICE_ACCOUNT_REGEX),
-        "Google (GCP) Service-account",
-    ),
-    (Pattern::Regex(&TWILIO_API_KEY_REGEX), "Twilio API Key"),
-    (
-        Pattern::Contains("-----BEGIN RSA PRIVATE KEY-----"),
-        "RSA Private Key",
-    ),
-    (
-        Pattern::Contains("-----BEGIN OPENSSH PRIVATE KEY-----"),
-        "SSH (OPENSSH) Private Key",
-    ),
-    (
-        Pattern::Contains("-----BEGIN DSA PRIVATE KEY-----"),
-        "SSH (DSA) Private Key",
-    ),
-    (
-        Pattern::Contains("-----BEGIN EC PRIVATE KEY-----"),
-        "SSH (EC) Private Key",
-    ),
-    (
-        Pattern::Contains("-----BEGIN PGP PRIVATE KEY BLOCK-----"),
-        "PGP Private Key Block",
-    ),
-];
-
 // TODO: Try to get this to work in JavaScript comments as well
 declare_lint_rule! {
     /// Disallow usage of sensitive data such as API keys and tokens.
@@ -224,6 +128,102 @@ impl Rule for NoSecrets {
         )
     }
 }
+
+// Workaround: Since I couldn't figure out how to declare them inline,
+// declare the LazyLock patterns separately
+static SLACK_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}").unwrap()
+});
+
+static GENERIC_SECRET_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[sS][eE][cC][rR][eE][tT].*['\"][0-9a-zA-Z]{32,45}['\"]"#).unwrap()
+});
+
+static GENERIC_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[aA][pP][iI][_]?[kK][eE][yY].*['\"][0-9a-zA-Z]{32,45}['\"]"#).unwrap()
+});
+
+static SLACK_WEBHOOK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"https://hooks\.slack\.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}",
+    )
+    .unwrap()
+});
+
+static GITHUB_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[gG][iI][tT][hH][uU][bB].*['\"][0-9a-zA-Z]{35,40}['\"]"#).unwrap()
+});
+
+static TWITTER_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[tT][wW][iI][tT][tT][eE][rR].*['\"][0-9a-zA-Z]{35,44}['\"]"#).unwrap()
+});
+
+static FACEBOOK_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*['\"][0-9a-f]{32}['\"]"#).unwrap()
+});
+
+static HEROKU_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"[hH][eE][rR][oO][kK][uU].*[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}",
+    )
+    .unwrap()
+});
+
+static PASSWORD_IN_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[a-zA-Z]{3,10}://[^/\s:@]{3,20}:[^/\s:@]{3,20}@.{1,100}['"\s]"#).unwrap()
+});
+
+static GOOGLE_SERVICE_ACCOUNT_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#""type": "service_account""#).unwrap());
+
+static TWILIO_API_KEY_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"SK[a-z0-9]{32}"#).unwrap());
+
+static GOOGLE_OAUTH_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#""client_secret":"[a-zA-Z0-9-_]{24}""#).unwrap());
+
+static AWS_API_KEY_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"AKIA[0-9A-Z]{16}").unwrap());
+
+// List of sensitive patterns, with comments
+static SENSITIVE_PATTERNS: &[(Pattern, &str)] = &[
+    (Pattern::Regex(&SLACK_TOKEN_REGEX), "Slack Token"),
+    (Pattern::Regex(&GENERIC_SECRET_REGEX), "Generic Secret"),
+    (Pattern::Regex(&GENERIC_API_KEY_REGEX), "Generic API Key"),
+    (Pattern::Regex(&SLACK_WEBHOOK_REGEX), "Slack Webhook"),
+    (Pattern::Regex(&GITHUB_TOKEN_REGEX), "GitHub"),
+    (Pattern::Regex(&TWITTER_OAUTH_REGEX), "Twitter OAuth"),
+    (Pattern::Regex(&FACEBOOK_OAUTH_REGEX), "Facebook OAuth"),
+    (Pattern::Regex(&GOOGLE_OAUTH_REGEX), "Google OAuth"),
+    (Pattern::Regex(&AWS_API_KEY_REGEX), "AWS API Key"),
+    (Pattern::Regex(&HEROKU_API_KEY_REGEX), "Heroku API Key"),
+    (Pattern::Regex(&PASSWORD_IN_URL_REGEX), "Password in URL"),
+    (
+        Pattern::Regex(&GOOGLE_SERVICE_ACCOUNT_REGEX),
+        "Google (GCP) Service-account",
+    ),
+    (Pattern::Regex(&TWILIO_API_KEY_REGEX), "Twilio API Key"),
+    (
+        Pattern::Contains("-----BEGIN RSA PRIVATE KEY-----"),
+        "RSA Private Key",
+    ),
+    (
+        Pattern::Contains("-----BEGIN OPENSSH PRIVATE KEY-----"),
+        "SSH (OPENSSH) Private Key",
+    ),
+    (
+        Pattern::Contains("-----BEGIN DSA PRIVATE KEY-----"),
+        "SSH (DSA) Private Key",
+    ),
+    (
+        Pattern::Contains("-----BEGIN EC PRIVATE KEY-----"),
+        "SSH (EC) Private Key",
+    ),
+    (
+        Pattern::Contains("-----BEGIN PGP PRIVATE KEY BLOCK-----"),
+        "PGP Private Key Block",
+    ),
+];
 
 fn is_high_entropy(text: &str) -> bool {
     let entropy = calculate_shannon_entropy(text);
