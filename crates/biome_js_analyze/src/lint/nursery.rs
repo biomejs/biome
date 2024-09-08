@@ -13,6 +13,7 @@ pub mod no_exported_imports;
 pub mod no_irregular_whitespace;
 pub mod no_label_without_control;
 pub mod no_misplaced_assertion;
+pub mod no_process_env;
 pub mod no_react_specific_props;
 pub mod no_restricted_imports;
 pub mod no_restricted_types;
@@ -62,6 +63,7 @@ declare_lint_group! {
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
             self :: no_label_without_control :: NoLabelWithoutControl ,
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,
+            self :: no_process_env :: NoProcessEnv ,
             self :: no_react_specific_props :: NoReactSpecificProps ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_restricted_types :: NoRestrictedTypes ,

@@ -2090,6 +2090,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noProcessEnv": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noReactSpecificProps": {
 					"description": "Prevents React-specific JSX properties from being used.",
 					"anyOf": [

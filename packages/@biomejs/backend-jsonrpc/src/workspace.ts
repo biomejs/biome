@@ -1232,6 +1232,10 @@ export interface Nursery {
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noProcessEnv?: RuleConfiguration_for_Null;
+	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
 	noReactSpecificProps?: RuleFixConfiguration_for_Null;
@@ -2779,6 +2783,7 @@ export type Category =
 	| "lint/nursery/noLabelWithoutControl"
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"

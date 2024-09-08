@@ -2947,6 +2947,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misplaced_assertion:
         Option<RuleConfiguration<biome_js_analyze::options::NoMisplacedAssertion>>,
+    #[doc = "Succinct description of the rule."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_process_env: Option<RuleConfiguration<biome_js_analyze::options::NoProcessEnv>>,
     #[doc = "Prevents React-specific JSX properties from being used."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_react_specific_props:
@@ -3154,6 +3157,7 @@ impl Nursery {
         "noIrregularWhitespace",
         "noLabelWithoutControl",
         "noMisplacedAssertion",
+        "noProcessEnv",
         "noReactSpecificProps",
         "noRestrictedImports",
         "noRestrictedTypes",
@@ -4111,6 +4115,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noMisplacedAssertion" => self
                 .no_misplaced_assertion
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noProcessEnv" => self
+                .no_process_env
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noReactSpecificProps" => self
