@@ -30,7 +30,12 @@ invalid.js:1:19 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     2 │ const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
     3 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
   
-  i AWS API Key
+  i Type of secret detected: AWS API Key
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -46,7 +51,12 @@ invalid.js:2:20 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     3 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
     4 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
   
-  i High entropy value detected
+  i Type of secret detected: The string has a high entropy value
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -63,7 +73,12 @@ invalid.js:3:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     4 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
     5 │ const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
   
-  i RSA Private Key
+  i Type of secret detected: RSA Private Key
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -80,7 +95,12 @@ invalid.js:4:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     5 │ const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
     6 │ const githubToken = "github_pat_1234567890abcdefghijklmnopqrstuvwxyz";
   
-  i High entropy value detected
+  i Type of secret detected: The string has a high entropy value
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -97,7 +117,12 @@ invalid.js:5:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     6 │ const githubToken = "github_pat_1234567890abcdefghijklmnopqrstuvwxyz";
     7 │ const clientSecret = "abcdefghijklmnopqrstuvwxyz"
   
-  i High entropy value detected
+  i Type of secret detected: The string has a high entropy value
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -114,7 +139,12 @@ invalid.js:6:21 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     7 │ const clientSecret = "abcdefghijklmnopqrstuvwxyz"
     8 │ const herokuApiKey = "heroku_api_key_1234abcd-1234-1234-1234-1234abcd5678";
   
-  i High entropy value detected
+  i Type of secret detected: The string has a high entropy value
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -131,7 +161,12 @@ invalid.js:7:22 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     8 │ const herokuApiKey = "heroku_api_key_1234abcd-1234-1234-1234-1234abcd5678";
     9 │ const genericSecret = "secret_1234567890abcdefghijklmnopqrstuvwxyz";
   
-  i High entropy value detected
+  i Type of secret detected: The string has a high entropy value
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -148,7 +183,12 @@ invalid.js:9:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     10 │ const genericApiKey = "api_key_1234567890abcdefghijklmnopqrstuvwxyz";
     11 │ const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
   
-  i High entropy value detected
+  i Type of secret detected: The string has a high entropy value
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -165,7 +205,12 @@ invalid.js:10:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     11 │ const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
     12 │ const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
   
-  i High entropy value detected
+  i Type of secret detected: The string has a high entropy value
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -182,7 +227,12 @@ invalid.js:11:18 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     12 │ const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
     13 │ const dbUrl = "postgres://user:password123@example.com:5432/dbname";
   
-  i Slack Webhook
+  i Type of secret detected: Slack Webhook
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -198,7 +248,12 @@ invalid.js:12:22 lint/nursery/noSecrets ━━━━━━━━━━━━━�
        │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ const dbUrl = "postgres://user:password123@example.com:5432/dbname";
   
-  i Twilio API Key
+  i Type of secret detected: Twilio API Key
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```
@@ -213,7 +268,12 @@ invalid.js:13:15 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   > 13 │ const dbUrl = "postgres://user:password123@example.com:5432/dbname";
        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Password in URL
+  i Type of secret detected: Password in URL
+  
+  i Storing secrets in source code is a security risk. Consider the following steps:
+    1. Remove the secret from your code.
+    2. If needed, use environment variables or a secure secret management system to store sensitive data.
+    3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment.
   
 
 ```

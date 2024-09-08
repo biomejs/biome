@@ -16,8 +16,8 @@ enum Pattern {
     Contains(&'static str),
 }
 
-/// Workaround: Since I couldn't figure out how to declare them inline,
-/// declare the LazyLock patterns separately
+// Workaround: Since I couldn't figure out how to declare them inline,
+// declare the LazyLock patterns separately
 static SLACK_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}").unwrap()
 });
@@ -158,10 +158,10 @@ impl Rule for NoSecrets {
         let num_threads = 4;
         let patterns_per_thread = (SENSITIVE_PATTERNS.len() + num_threads - 1) / num_threads;
 
-        /// Since regex matching is expensive, we run in threads
-        /// - Added a mutex for "found", i.e. I want to exit early if any pattern matches or string contains is found
-        /// - Currently hardcoded to 4 threads. Can be adjusted later.
-        /// - I do realize that it might be overkill for smaller strings. Maybe can check that in future.
+        // Since regex matching is expensive, we run in threads
+        // - Added a mutex for "found", i.e. I want to exit early if any pattern matches or string contains is found
+        // - Currently hardcoded to 4 threads. Can be adjusted later.
+        // - I do realize that it might be overkill for smaller strings. Maybe can check that in future.
         let handles: Vec<_> = SENSITIVE_PATTERNS
             .chunks(patterns_per_thread)
             .map(|chunk| {
@@ -229,7 +229,6 @@ fn is_high_entropy(text: &str) -> bool {
     let entropy = calculate_shannon_entropy(text);
     entropy > 4.5 // TODO: Make this optional, or controllable
 }
-
 
 /// Inspired by https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/utils.js#L93
 /// Adapted from https://docs.rs/entropy/latest/src/entropy/lib.rs.html#14-33
