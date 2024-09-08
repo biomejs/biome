@@ -102,7 +102,13 @@ fn is_high_entropy(text: &str) -> bool {
     entropy > 4.5  // TODO: Make this optional, or controllable
 }
 
-// TODO: See if we can use an external crate to do this
+/**
+ * From https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/utils.js#L93
+ * Calculates Shannon entropy to measure the randomness of data. High entropy values indicate potentially
+ * secret or sensitive information, as such data is typically more random and less predictable than regular text.
+ * Useful for detecting API keys, passwords, and other secrets within code or configuration files.
+ * @param {*} str
+ */
 fn calculate_shannon_entropy(data: &str) -> f64 {
     let mut freq = [0usize; 256];
     let mut len = 0usize;
