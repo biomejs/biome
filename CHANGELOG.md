@@ -362,7 +362,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noConsole](https://biomejs.dev/linter/rules/no-console/) now accepts an option that specifies some allowed calls on `console`. Contributed by @Conaclos
 
-- Add an `ignoreNull` option for [noDoubleEquals](https://biomejs.dev/linter/rules/no-double-equals/). 
+- Add an `ignoreNull` option for [noDoubleEquals](https://biomejs.dev/linter/rules/no-double-equals/).
 
   By default the rule allows loose comparisons against `null`.
   The option `ignoreNull` can be set to `false` for reporting loose comparison against `null`.
@@ -847,7 +847,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
-- Add [noUnknownPseudoClass](https://biomejs.dev/linter/rules/no-unknown-pseudo-class/). Contributed by  @tunamaguro 
+- Add [noUnknownPseudoClass](https://biomejs.dev/linter/rules/no-unknown-pseudo-class/). Contributed by  @tunamaguro
 
 #### Bug fixes
 
