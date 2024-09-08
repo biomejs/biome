@@ -122,6 +122,8 @@ pub enum RuleSource {
     EslintMysticatea(&'static str),
     /// Rules from [Eslint Plugin Barrel Files](https://github.com/thepassle/eslint-plugin-barrel-files)
     EslintBarrelFiles(&'static str),
+    /// Rules from [Eslint Plugin N](https://github.com/eslint-community/eslint-plugin-n)
+    EslintN(&'static str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
     Stylelint(&'static str),
 }
@@ -152,6 +154,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintUnusedImports(_) => write!(f, "eslint-plugin-unused-imports"),
             Self::EslintMysticatea(_) => write!(f, "@mysticatea/eslint-plugin"),
             Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
+            Self::EslintN(_) => write!(f, "eslint-plugin-n"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
         }
     }
@@ -199,6 +202,7 @@ impl RuleSource {
             | Self::EslintUnusedImports(rule_name)
             | Self::EslintMysticatea(rule_name)
             | Self::EslintBarrelFiles(rule_name)
+            | Self::EslintN(rule_name)
             | Self::Stylelint(rule_name) => rule_name,
         }
     }
@@ -221,6 +225,7 @@ impl RuleSource {
             Self::EslintUnusedImports(rule_name) => format!("unused-imports/{rule_name}"),
             Self::EslintMysticatea(rule_name) => format!("@mysticatea/{rule_name}"),
             Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
+            Self::EslintN(rule_name) => format!("n/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
         }
     }
@@ -244,6 +249,7 @@ impl RuleSource {
             Self::EslintUnusedImports(rule_name) => format!("https://github.com/sweepline/eslint-plugin-unused-imports/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintMysticatea(rule_name) => format!("https://github.com/mysticatea/eslint-plugin/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
+            Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
         }
     }

@@ -1,35 +1,45 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsStaticMemberExpression, JsSyntaxKind};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow the use of `process.env`.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// The `process.env` object in Node.js stores configuration settings. Using it directly throughout a project can cause problems:
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// 1. It's harder to maintain
+    /// 2. It can lead to conflicts in team development
+    /// 3. It complicates deployment across multiple servers
+    ///
+    /// A better practice is to keep all settings in one configuration file and reference it throughout the project.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// if (process.env.NODE_ENV === 'development') {
+    ///   // ...
+    /// }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// // var a = 1;
+    /// const config = require('./config');
+    /// if (config.NODE_ENV === 'development') {
+    ///   // ...
+    /// }
     /// ```
     ///
     pub NoProcessEnv {
         version: "next",
         name: "noProcessEnv",
         language: "js",
+        sources: &[RuleSource::EslintN("no-process-env")],
         recommended: false,
     }
 }
