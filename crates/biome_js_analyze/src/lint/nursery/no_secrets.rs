@@ -59,7 +59,7 @@ impl Rule for NoSecrets {
 
         // TODO: Either take this as an option, or calculate it statically from the SENSITIVE_PATTERNS
         // Currently it is just an arbitrary value derived from the lengths in invalid.js
-        if text.len() < 24 {
+        if text.len() < 20 {
             return None;
         }
 
