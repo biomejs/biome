@@ -57,6 +57,12 @@ impl Rule for NoSecrets {
         let token = node.value_token().ok()?;
         let text = Arc::new(token.text().to_string());
 
+        // TODO: Either take this as an option, or calculate it statically from the SENSITIVE_PATTERNS
+        // Currently it is just an arbitrary value derived from the lengths in invalid.js
+        if text.len() < 24 {
+            return None;
+        }
+
         let result = Arc::new(Mutex::new(None));
         let found = Arc::new(Mutex::new(false));
         let num_threads = 4;
