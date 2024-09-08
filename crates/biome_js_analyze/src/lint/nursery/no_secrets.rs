@@ -26,7 +26,7 @@ const SENSITIVE_PATTERNS: &[&str] = &[
     r#"[a-zA-Z]{3,10}://[^/\s:@]{3,20}:[^/\s:@]{3,20}@.{1,100}['"\s]"#,  // Password in URL
 ];
 
-// @TODO: Try to get this to work in comments as well
+// TODO: Try to get this to work in JavaScript comments as well
 declare_lint_rule! {
     /// Disallow usage of sensitive data such as API keys and tokens.
     ///
@@ -92,17 +92,17 @@ impl Rule for NoSecrets {
                 rule_category!(),
                 node.range(),
                 markup! { "Potential secret found." }
-            ).note(markup! { "This looks like a sensitive value such as an API key or token." }) // @TODO: Give a more detailed response on the *type* of API Key/token (based on the SENSITIVE PATTERNS)
+            ).note(markup! { "This looks like a sensitive value such as an API key or token." }) // TODO: Give a more detailed response on the *type* of API Key/token (based on the SENSITIVE PATTERNS)
         )
     }
 }
 
 fn is_high_entropy(text: &str) -> bool {
     let entropy = calculate_shannon_entropy(text);
-    entropy > 4.5  // @TODO: Make this optional
+    entropy > 4.5  // TODO: Make this optional, or controllable
 }
 
-// @TODO: See if we can use an external crate to do this
+// TODO: See if we can use an external crate to do this
 fn calculate_shannon_entropy(data: &str) -> f64 {
     let mut freq = [0usize; 256];
     let mut len = 0usize;

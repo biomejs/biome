@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
+var a = 1;
+const userName = 'testUser';
+let count = 10;
+var nonSecret = "hello world"
+```
