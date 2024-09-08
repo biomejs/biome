@@ -16,8 +16,8 @@ enum Pattern {
     Contains(&'static str),
 }
 
-// Workaround: Since I couldn't figure out how to declare them inline,
-// declare the LazyLock patterns separately
+/// Workaround: Since I couldn't figure out how to declare them inline,
+/// declare the LazyLock patterns separately
 static SLACK_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}").unwrap()
 });
@@ -158,12 +158,10 @@ impl Rule for NoSecrets {
         let num_threads = 4;
         let patterns_per_thread = (SENSITIVE_PATTERNS.len() + num_threads - 1) / num_threads;
 
-        // Since regex matching is expensive, we run in threads
-        // - Added a mutex for "found", i.e. I want to exit early if any
-        // pattern matches or string contains is found
-        // - Currently hardcoded to 4 threads. Can be adjusted later.
-        // - I do realize that it might be overkill for smaller strings.
-        // Maybe can check that in future.
+        /// Since regex matching is expensive, we run in threads
+        /// - Added a mutex for "found", i.e. I want to exit early if any pattern matches or string contains is found
+        /// - Currently hardcoded to 4 threads. Can be adjusted later.
+        /// - I do realize that it might be overkill for smaller strings. Maybe can check that in future.
         let handles: Vec<_> = SENSITIVE_PATTERNS
             .chunks(patterns_per_thread)
             .map(|chunk| {
@@ -202,7 +200,7 @@ impl Rule for NoSecrets {
         }
 
         if is_high_entropy(&text) {
-            Some("High entropy value detected")
+            Some("The string has a high entropy value")
         } else {
             None
         }
@@ -216,7 +214,13 @@ impl Rule for NoSecrets {
                 node.range(),
                 markup! { "Potential secret found." },
             )
-            .note(markup! { {state} }),
+            .note(markup! { "Type of secret detected: " {state} })
+            .note(markup! {
+                "Storing secrets in source code is a security risk. Consider the following steps:"
+                "\n1. Remove the secret from your code."
+                "\n2. If needed, use environment variables or a secure secret management system to store sensitive data."
+                "\n3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment."
+            })
         )
     }
 }
@@ -226,14 +230,13 @@ fn is_high_entropy(text: &str) -> bool {
     entropy > 4.5 // TODO: Make this optional, or controllable
 }
 
-/**
- * Inspired by https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/utils.js#L93
- * Adapted from https://docs.rs/entropy/latest/src/entropy/lib.rs.html#14-33
- * Calculates Shannon entropy to measure the randomness of data. High entropy values indicate potentially
- * secret or sensitive information, as such data is typically more random and less predictable than regular text.
- * Useful for detecting API keys, passwords, and other secrets within code or configuration files.
- * @param {*} str
- */
+
+/// Inspired by https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/utils.js#L93
+/// Adapted from https://docs.rs/entropy/latest/src/entropy/lib.rs.html#14-33
+/// Calculates Shannon entropy to measure the randomness of data. High entropy values indicate potentially
+/// secret or sensitive information, as such data is typically more random and less predictable than regular text.
+/// Useful for detecting API keys, passwords, and other secrets within code or configuration files.
+/// @param {*} str
 fn calculate_shannon_entropy(data: &str) -> f64 {
     let mut freq = [0usize; 256];
     let mut len = 0usize;
