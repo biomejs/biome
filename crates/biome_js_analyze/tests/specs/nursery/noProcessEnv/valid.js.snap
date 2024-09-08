@@ -1,5 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
 /* should not generate diagnostics */
 let a = Process.env;
 let a = process[env];
 let a = process.nextTick;
 let a = process.execArgv;
+
+```

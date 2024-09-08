@@ -1,3 +1,3 @@
-var a = 1;
-a = 2;
-a = 3;
+let a = process.env;
+let a = process.env.ENV;
+let a = f(process.env);
