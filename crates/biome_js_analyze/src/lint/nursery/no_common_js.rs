@@ -8,10 +8,10 @@ use biome_rowan::{declare_node_union, AstNode};
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow use of CommonJs module system in favor of ES6 style imports.
+    /// Disallow use of CommonJs module system in favor of ESM style imports.
     ///
-    /// ES6-style `import`s are modern alternative to CommonJS `require` imports. Supported by all modern browsers and Node.js versions.
-    /// Tooling can more easily statically analyze and tree-shake ES6-style `import`s compared to CommonJs.
+    /// ESM-style `import`s are modern alternative to CommonJS `require` imports. Supported by all modern browsers and Node.js versions.
+    /// Tooling can more easily statically analyze and tree-shake ESM `import`s compared to CommonJs.
     ///
     /// ## Examples
     ///
@@ -42,8 +42,15 @@ declare_lint_rule! {
     /// export default { a: 'b' };
     /// ```
     ///
+    /// ## Caveats
+    ///
+    /// Rule is automatically disabled inside `.cjs` and `.cts` files, because they are explicitly CommonJs files.
+    ///
+    /// This rule could be helpful if you are migrating from CommonJs to ESM,
+    /// but if you wish to continue using CommonJs, you can safely disable it.
+    ///
     pub NoCommonJs {
-        version: "next",
+        version: "1.9.0",
         name: "noCommonJs",
         language: "js",
         sources: &[
@@ -61,6 +68,12 @@ impl Rule for NoCommonJs {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let file_ext = ctx.file_path().extension().and_then(|ext| ext.to_str())?;
+        // cjs and cts files can only use CommonJs modules
+        if file_ext == "cjs" || file_ext == "cts" {
+            return None;
+        }
+
         let expression = ctx.query();
         let (reference, is_export) = match expression {
             CommonJsImportExport::JsCallExpression(node) => {
@@ -90,11 +103,11 @@ impl Rule for NoCommonJs {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Use ES6-style "<Emphasis>{es_name}</Emphasis>"s instead of "<Emphasis>{common_js_name}</Emphasis>"."
+                    "Use ESM "<Emphasis>{es_name}</Emphasis>"s instead of "<Emphasis>{common_js_name}</Emphasis>"."
                 },
             )
             .note(markup! {
-                "ES6-style "<Emphasis>{es_name}</Emphasis>" statements are more easily statically analyzable and tree-shakable compared to CommonJs "<Emphasis>{common_js_name}</Emphasis>"."
+                "ESM-style "<Emphasis>{es_name}</Emphasis>" statements are more easily statically analyzable and tree-shakable compared to CommonJs "<Emphasis>{common_js_name}</Emphasis>"."
             }),
         )
     }
@@ -120,10 +133,12 @@ fn is_common_js_exports(node: &JsStaticMemberAssignment) -> Option<JsReferenceId
     let (reference, name) = global_identifier(&object.omit_parentheses())?;
     let object_name = name.text();
 
+    // exports.*
     if object_name == "exports" {
         return Some(reference);
     }
 
+    // module.exports.*
     if object_name != "module" {
         return None;
     }

@@ -1148,7 +1148,7 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Disallow use of CommonJs module system in favor of ES6 style imports.
+	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
 	/**

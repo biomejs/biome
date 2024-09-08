@@ -19,14 +19,14 @@ exports.path = 'path'
 ```
 invalid.js:1:1 lint/nursery/noCommonJs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use ES6-style imports instead of require.
+  ! Use ESM imports instead of require.
   
   > 1 │ require('node:fs')
       │ ^^^^^^^^^^^^^^^^^^
     2 │ 
     3 │ if (true) {
   
-  i ES6-style import statements are more easily statically analyzable and tree-shakable compared to CommonJs require.
+  i ESM-style import statements are more easily statically analyzable and tree-shakable compared to CommonJs require.
   
 
 ```
@@ -34,7 +34,7 @@ invalid.js:1:1 lint/nursery/noCommonJs ━━━━━━━━━━━━━�
 ```
 invalid.js:4:5 lint/nursery/noCommonJs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use ES6-style imports instead of require.
+  ! Use ESM imports instead of require.
   
     3 │ if (true) {
   > 4 │     require('node:fs')
@@ -42,7 +42,7 @@ invalid.js:4:5 lint/nursery/noCommonJs ━━━━━━━━━━━━━�
     5 │ }
     6 │ 
   
-  i ES6-style import statements are more easily statically analyzable and tree-shakable compared to CommonJs require.
+  i ESM-style import statements are more easily statically analyzable and tree-shakable compared to CommonJs require.
   
 
 ```
@@ -50,7 +50,7 @@ invalid.js:4:5 lint/nursery/noCommonJs ━━━━━━━━━━━━━�
 ```
 invalid.js:7:1 lint/nursery/noCommonJs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use ES6-style exports instead of module.exports.
+  ! Use ESM exports instead of module.exports.
   
     5 │ }
     6 │ 
@@ -59,7 +59,7 @@ invalid.js:7:1 lint/nursery/noCommonJs ━━━━━━━━━━━━━�
     8 │ exports.path = 'path'
     9 │ 
   
-  i ES6-style export statements are more easily statically analyzable and tree-shakable compared to CommonJs module.exports.
+  i ESM-style export statements are more easily statically analyzable and tree-shakable compared to CommonJs module.exports.
   
 
 ```
@@ -67,14 +67,14 @@ invalid.js:7:1 lint/nursery/noCommonJs ━━━━━━━━━━━━━�
 ```
 invalid.js:8:1 lint/nursery/noCommonJs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Use ES6-style exports instead of module.exports.
+  ! Use ESM exports instead of module.exports.
   
     7 │ module.exports = 'path'
   > 8 │ exports.path = 'path'
       │ ^^^^^^^^^^^^
     9 │ 
   
-  i ES6-style export statements are more easily statically analyzable and tree-shakable compared to CommonJs module.exports.
+  i ESM-style export statements are more easily statically analyzable and tree-shakable compared to CommonJs module.exports.
   
 
 ```

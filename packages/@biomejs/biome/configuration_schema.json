@@ -1938,7 +1938,7 @@
 					"type": ["boolean", "null"]
 				},
 				"noCommonJs": {
-					"description": "Disallow use of CommonJs module system in favor of ES6 style imports.",
+					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
