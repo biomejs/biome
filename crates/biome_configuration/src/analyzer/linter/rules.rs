@@ -2869,7 +2869,7 @@ pub struct Nursery {
     #[doc = r" It enables ALL rules for this group."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub all: Option<bool>,
-    #[doc = "Use the newer ES6-style imports over require()."]
+    #[doc = "Disallow use of CommonJs module system in favor of ES6 style imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_common_js: Option<RuleConfiguration<biome_js_analyze::options::NoCommonJs>>,
     #[doc = "Disallow the use of console."]

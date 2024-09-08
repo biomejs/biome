@@ -1938,7 +1938,7 @@
 					"type": ["boolean", "null"]
 				},
 				"noCommonJs": {
-					"description": "Use the newer ES6-style imports over require().",
+					"description": "Disallow use of CommonJs module system in favor of ES6 style imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

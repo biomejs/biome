@@ -1148,7 +1148,7 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
-	 * Use the newer ES6-style imports over require().
+	 * Disallow use of CommonJs module system in favor of ES6 style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
 	/**
@@ -2766,7 +2766,6 @@ export type Category =
 	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noReactSpecificProps"
-	| "lint/nursery/noRequireImports"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noShorthandPropertyOverrides"
