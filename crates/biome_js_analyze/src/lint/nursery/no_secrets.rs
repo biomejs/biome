@@ -35,8 +35,6 @@ declare_lint_rule! {
     /// This rule checks for high-entropy strings and matches common patterns
     /// for secrets, such as AWS keys, Slack tokens, and private keys.
     ///
-    /// Inspired by the ESLint [no-secrets/no-secrets](https://github.com/nickdeis/eslint-plugin-no-secrets) rule.
-    ///
     /// ## Examples
     ///
     /// ### Invalid
