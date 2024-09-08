@@ -1232,7 +1232,7 @@ export interface Nursery {
 	 */
 	noMisplacedAssertion?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow the use of process.env.
 	 */
 	noProcessEnv?: RuleConfiguration_for_Null;
 	/**

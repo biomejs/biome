@@ -2091,7 +2091,7 @@
 					]
 				},
 				"noProcessEnv": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow the use of process.env.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

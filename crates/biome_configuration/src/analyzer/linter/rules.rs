@@ -2947,7 +2947,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_misplaced_assertion:
         Option<RuleConfiguration<biome_js_analyze::options::NoMisplacedAssertion>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow the use of process.env."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_process_env: Option<RuleConfiguration<biome_js_analyze::options::NoProcessEnv>>,
     #[doc = "Prevents React-specific JSX properties from being used."]
