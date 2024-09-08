@@ -335,7 +335,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - Add [nursery/useConsistentMemberAccessibility](https://biomejs.dev/linter/rules/use-consistent-member-accessibility/). Contributed by @seitarof
-- Add [nursery/noRequireImports](https://biomejs.dev/linter/rules/no-require-imports/). Contributed by @minht11
+- Add [nursery/noCommonJs](https://biomejs.dev/linter/rules/no-common-js/). Contributed by @minht11
 
 #### Enhancements
 
