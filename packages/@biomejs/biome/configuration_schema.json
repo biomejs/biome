@@ -2091,6 +2091,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSecrets": {
+					"description": "Searches for potential secrets/keys in code.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noShorthandPropertyOverrides": {
 					"description": "Disallow shorthand properties that override related longhand properties.",
 					"anyOf": [
