@@ -38,7 +38,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
     let formatted_ast = format!("{:#?}", parsed.tree());
 
     let mut snapshot = String::new();
-    writeln!(snapshot, "\n## Input\n\n```css\n{content}\n```\n\n").unwrap();
+    writeln!(snapshot, "\n## Input\n\n```html\n{content}\n```\n\n").unwrap();
 
     writeln!(
         snapshot,
