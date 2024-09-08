@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_lint_group;
 
+pub mod no_common_js;
 pub mod no_console;
 pub mod no_done_callback;
 pub mod no_duplicate_else_if;
@@ -13,7 +14,6 @@ pub mod no_irregular_whitespace;
 pub mod no_label_without_control;
 pub mod no_misplaced_assertion;
 pub mod no_react_specific_props;
-pub mod no_require_imports;
 pub mod no_restricted_imports;
 pub mod no_restricted_types;
 pub mod no_static_element_interactions;
@@ -50,6 +50,7 @@ declare_lint_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
+            self :: no_common_js :: NoCommonJs ,
             self :: no_console :: NoConsole ,
             self :: no_done_callback :: NoDoneCallback ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
@@ -61,7 +62,6 @@ declare_lint_group! {
             self :: no_label_without_control :: NoLabelWithoutControl ,
             self :: no_misplaced_assertion :: NoMisplacedAssertion ,
             self :: no_react_specific_props :: NoReactSpecificProps ,
-            self :: no_require_imports :: NoRequireImports ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_restricted_types :: NoRestrictedTypes ,
             self :: no_static_element_interactions :: NoStaticElementInteractions ,

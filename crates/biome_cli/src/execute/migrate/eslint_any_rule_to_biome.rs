@@ -180,7 +180,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group.no_require_imports.get_or_insert(Default::default());
+            let rule = group.no_common_js.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@typescript-eslint/no-restricted-imports" => {
@@ -414,6 +414,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .use_import_restrictions
                 .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "import/no-commonjs" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_common_js.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "import/no-default-export" => {

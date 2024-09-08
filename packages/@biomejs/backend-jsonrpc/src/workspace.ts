@@ -1148,6 +1148,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Use the newer ES6-style imports over require().
+	 */
+	noCommonJs?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleFixConfiguration_for_NoConsoleOptions;
@@ -1227,10 +1231,6 @@ export interface Nursery {
 	 * Prevents React-specific JSX properties from being used.
 	 */
 	noReactSpecificProps?: RuleFixConfiguration_for_Null;
-	/**
-	 * Use the newer ES6-style imports over require().
-	 */
-	noRequireImports?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
@@ -2744,6 +2744,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"

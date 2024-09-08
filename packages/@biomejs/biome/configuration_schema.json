@@ -1937,6 +1937,13 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
+				"noCommonJs": {
+					"description": "Use the newer ES6-style imports over require().",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConsole": {
 					"description": "Disallow the use of console.",
 					"anyOf": [
@@ -2074,13 +2081,6 @@
 					"description": "Prevents React-specific JSX properties from being used.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noRequireImports": {
-					"description": "Use the newer ES6-style imports over require().",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
