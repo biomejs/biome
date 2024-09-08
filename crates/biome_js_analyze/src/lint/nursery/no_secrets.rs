@@ -1,10 +1,11 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
 use biome_console::markup;
-// use biome_js_syntax::JsStringLiteral;
+
 use biome_js_syntax::JsStringLiteralExpression;
 
-use biome_rowan::{AstNode};
+use biome_rowan::AstNode;
 use regex::Regex;
+use std::sync::LazyLock;
 
 // List of sensitive patterns
 const SENSITIVE_PATTERNS: &[&str] = &[
@@ -72,7 +73,7 @@ impl Rule for NoSecrets {
         let text = token.text();
 
         for pattern in SENSITIVE_PATTERNS {
-            let re = Regex::new(pattern).unwrap();
+            let re = LazyLock::new(|| Regex::new(pattern).unwrap());
             if re.is_match(&text) {
                 return Some(());
             }
