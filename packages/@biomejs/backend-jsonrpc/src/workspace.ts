@@ -1236,7 +1236,7 @@ export interface Nursery {
 	 */
 	noRestrictedTypes?: RuleFixConfiguration_for_NoRestrictedTypesOptions;
 	/**
-	 * Searches for potential secrets/keys in code.
+	 * Disallow usage of sensitive data such as API keys and tokens.
 	 */
 	noSecrets?: RuleConfiguration_for_Null;
 	/**

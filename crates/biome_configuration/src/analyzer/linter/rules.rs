@@ -2952,7 +2952,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_types:
         Option<RuleFixConfiguration<biome_js_analyze::options::NoRestrictedTypes>>,
-    #[doc = "Searches for potential secrets/keys in code."]
+    #[doc = "Disallow usage of sensitive data such as API keys and tokens."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_secrets: Option<RuleConfiguration<biome_js_analyze::options::NoSecrets>>,
     #[doc = "Disallow shorthand properties that override related longhand properties."]
