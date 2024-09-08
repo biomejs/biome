@@ -1,0 +1,224 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+const apiKey = '12345';
+const password = 'mySecretPassword';
+var secret = "AKIA1234567890EXAMPLE"
+const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
+const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
+const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+const githubToken = "github_pat_1234567890abcdefghijklmnopqrstuvwxyz";
+const clientSecret = "abcdefghijklmnopqrstuvwxyz"
+const herokuApiKey = "heroku_api_key_1234abcd-1234-1234-1234-1234abcd5678";
+const genericSecret = "secret_1234567890abcdefghijklmnopqrstuvwxyz";
+const genericApiKey = "api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
+const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
+const dbUrl = "postgres://user:password123@example.com:5432/dbname";
+```
+
+# Diagnostics
+```
+invalid.js:3:14 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+    1 │ const apiKey = '12345';
+    2 │ const password = 'mySecretPassword';
+  > 3 │ var secret = "AKIA1234567890EXAMPLE"
+      │              ^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+    5 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:4:20 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+    2 │ const password = 'mySecretPassword';
+    3 │ var secret = "AKIA1234567890EXAMPLE"
+  > 4 │ const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
+    6 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:5:23 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+    3 │ var secret = "AKIA1234567890EXAMPLE"
+    4 │ const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+  > 5 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
+    7 │ const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:6:23 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+    4 │ const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+    5 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
+  > 6 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+    8 │ const githubToken = "github_pat_1234567890abcdefghijklmnopqrstuvwxyz";
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:7:23 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+    5 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
+    6 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
+  > 7 │ const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+      │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ const githubToken = "github_pat_1234567890abcdefghijklmnopqrstuvwxyz";
+    9 │ const clientSecret = "abcdefghijklmnopqrstuvwxyz"
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:8:21 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+     6 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
+     7 │ const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+   > 8 │ const githubToken = "github_pat_1234567890abcdefghijklmnopqrstuvwxyz";
+       │                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ const clientSecret = "abcdefghijklmnopqrstuvwxyz"
+    10 │ const herokuApiKey = "heroku_api_key_1234abcd-1234-1234-1234-1234abcd5678";
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:9:22 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+     7 │ const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+     8 │ const githubToken = "github_pat_1234567890abcdefghijklmnopqrstuvwxyz";
+   > 9 │ const clientSecret = "abcdefghijklmnopqrstuvwxyz"
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ const herokuApiKey = "heroku_api_key_1234abcd-1234-1234-1234-1234abcd5678";
+    11 │ const genericSecret = "secret_1234567890abcdefghijklmnopqrstuvwxyz";
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:11:23 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+     9 │ const clientSecret = "abcdefghijklmnopqrstuvwxyz"
+    10 │ const herokuApiKey = "heroku_api_key_1234abcd-1234-1234-1234-1234abcd5678";
+  > 11 │ const genericSecret = "secret_1234567890abcdefghijklmnopqrstuvwxyz";
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ const genericApiKey = "api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+    13 │ const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:12:23 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+    10 │ const herokuApiKey = "heroku_api_key_1234abcd-1234-1234-1234-1234abcd5678";
+    11 │ const genericSecret = "secret_1234567890abcdefghijklmnopqrstuvwxyz";
+  > 12 │ const genericApiKey = "api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    13 │ const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
+    14 │ const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:13:18 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+    11 │ const genericSecret = "secret_1234567890abcdefghijklmnopqrstuvwxyz";
+    12 │ const genericApiKey = "api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+  > 13 │ const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
+       │                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
+    15 │ const dbUrl = "postgres://user:password123@example.com:5432/dbname";
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:14:22 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+    12 │ const genericApiKey = "api_key_1234567890abcdefghijklmnopqrstuvwxyz";
+    13 │ const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
+  > 14 │ const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
+       │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ const dbUrl = "postgres://user:password123@example.com:5432/dbname";
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```
+
+```
+invalid.js:15:15 lint/nursery/noSecrets ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Potential secret found.
+  
+    13 │ const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
+    14 │ const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
+  > 15 │ const dbUrl = "postgres://user:password123@example.com:5432/dbname";
+       │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i This looks like a sensitive value such as an API key or token.
+  
+
+```

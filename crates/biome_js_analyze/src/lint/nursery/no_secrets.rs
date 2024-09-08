@@ -1,7 +1,9 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind};
 use biome_console::markup;
-use biome_js_syntax::JsIdentifierBinding;
-use biome_rowan::AstNode;
+// use biome_js_syntax::JsStringLiteral;
+use biome_js_syntax::JsStringLiteralExpression;
+
+use biome_rowan::{AstNode};
 use regex::Regex;
 
 // List of sensitive patterns
@@ -59,27 +61,27 @@ declare_lint_rule! {
 }
 
 impl Rule for NoSecrets {
-    type Query = Ast<JsIdentifierBinding>;
+    type Query = Ast<JsStringLiteralExpression>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let Some(token) = node.value_token().ok() else {
+            return None;
+        };
+        let text = token.text();
 
-        if let Some(string_literal) = node.syntax().first_token() {
-            let value = string_literal.text().to_string();
-
-            for pattern in SENSITIVE_PATTERNS {
-                let re = Regex::new(pattern).unwrap();
-                if re.is_match(&value) {
-                    return Some(());
-                }
-            }
-
-            if is_high_entropy(&value) {
+        for pattern in SENSITIVE_PATTERNS {
+            let re = Regex::new(pattern).unwrap();
+            if re.is_match(&text) {
                 return Some(());
             }
+        }
+
+        if is_high_entropy(&text) {
+            return Some(());
         }
 
         None
