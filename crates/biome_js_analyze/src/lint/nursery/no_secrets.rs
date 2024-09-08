@@ -7,28 +7,109 @@ use biome_js_syntax::JsStringLiteralExpression;
 
 use biome_rowan::AstNode;
 use regex::Regex;
-use std::sync::LazyLock;
 
-// List of sensitive patterns
-const SENSITIVE_PATTERNS: &[&str] = &[
-    r"xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}", // Slack Token
-    r"-----BEGIN RSA PRIVATE KEY-----",                         // RSA Private Key
-    r"-----BEGIN OPENSSH PRIVATE KEY-----",                     // SSH (OPENSSH) Private Key
-    r"-----BEGIN DSA PRIVATE KEY-----",                         // SSH (DSA) Private Key
-    r"-----BEGIN EC PRIVATE KEY-----",                          // SSH (EC) Private Key
-    r"-----BEGIN PGP PRIVATE KEY BLOCK-----",                   // PGP Private Key Block
-    r#"[fF][aA][cC][eE][bB][oO][oO][kK].*['\"][0-9a-f]{32}['\"]"#, // Facebook OAuth
-    r#"[tT][wW][iI][tT][tT][eE][rR].*['\"][0-9a-zA-Z]{35,44}['\"]"#, // Twitter OAuth
-    r#"[gG][iI][tT][hH][uU][bB].*['\"][0-9a-zA-Z]{35,40}['\"]"#, // GitHub
-    r#""client_secret":"[a-zA-Z0-9-_]{24}""#,                   // Google OAuth
-    r"AKIA[0-9A-Z]{16}",                                        // AWS API Key
-    r"[hH][eE][rR][oO][kK][uU].*[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}", // Heroku API Key
-    r#"[sS][eE][cC][rR][eE][tT].*['\"][0-9a-zA-Z]{32,45}['\"]"#, // Generic Secret
-    r#"[aA][pP][iI][_]?[kK][eE][yY].*['\"][0-9a-zA-Z]{32,45}['\"]"#, // Generic API Key
-    r"https://hooks\.slack\.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}", // Slack Webhook
-    r#""type": "service_account""#, // Google (GCP) Service-account
-    r"SK[a-z0-9]{32}",              // Twilio API Key
-    r#"[a-zA-Z]{3,10}://[^/\s:@]{3,20}:[^/\s:@]{3,20}@.{1,100}['"\s]"#, // Password in URL
+use std::sync::{Arc, LazyLock, Mutex};
+use std::thread;
+
+enum Pattern {
+    Regex(&'static LazyLock<Regex>),
+    Contains(&'static str),
+}
+
+// Workaround: Since I couldn't figure out how to declare them inline,
+// declare the LazyLock patterns separately
+static SLACK_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}").unwrap()
+});
+
+static GENERIC_SECRET_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[sS][eE][cC][rR][eE][tT].*['\"][0-9a-zA-Z]{32,45}['\"]"#).unwrap()
+});
+
+static GENERIC_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[aA][pP][iI][_]?[kK][eE][yY].*['\"][0-9a-zA-Z]{32,45}['\"]"#).unwrap()
+});
+
+static SLACK_WEBHOOK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"https://hooks\.slack\.com/services/T[a-zA-Z0-9_]{8}/B[a-zA-Z0-9_]{8}/[a-zA-Z0-9_]{24}",
+    )
+    .unwrap()
+});
+
+static GITHUB_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[gG][iI][tT][hH][uU][bB].*['\"][0-9a-zA-Z]{35,40}['\"]"#).unwrap()
+});
+
+static TWITTER_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[tT][wW][iI][tT][tT][eE][rR].*['\"][0-9a-zA-Z]{35,44}['\"]"#).unwrap()
+});
+
+static FACEBOOK_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*['\"][0-9a-f]{32}['\"]"#).unwrap()
+});
+
+static HEROKU_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"[hH][eE][rR][oO][kK][uU].*[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}",
+    )
+    .unwrap()
+});
+
+static PASSWORD_IN_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"[a-zA-Z]{3,10}://[^/\s:@]{3,20}:[^/\s:@]{3,20}@.{1,100}['"\s]"#).unwrap()
+});
+
+static GOOGLE_SERVICE_ACCOUNT_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#""type": "service_account""#).unwrap());
+
+static TWILIO_API_KEY_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"SK[a-z0-9]{32}"#).unwrap());
+
+static GOOGLE_OAUTH_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#""client_secret":"[a-zA-Z0-9-_]{24}""#).unwrap());
+
+static AWS_API_KEY_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"AKIA[0-9A-Z]{16}").unwrap());
+
+// List of sensitive patterns, with comments
+static SENSITIVE_PATTERNS: &[(Pattern, &str)] = &[
+    (Pattern::Regex(&SLACK_TOKEN_REGEX), "Slack Token"),
+    (Pattern::Regex(&GENERIC_SECRET_REGEX), "Generic Secret"),
+    (Pattern::Regex(&GENERIC_API_KEY_REGEX), "Generic API Key"),
+    (Pattern::Regex(&SLACK_WEBHOOK_REGEX), "Slack Webhook"),
+    (Pattern::Regex(&GITHUB_TOKEN_REGEX), "GitHub"),
+    (Pattern::Regex(&TWITTER_OAUTH_REGEX), "Twitter OAuth"),
+    (Pattern::Regex(&FACEBOOK_OAUTH_REGEX), "Facebook OAuth"),
+    (Pattern::Regex(&GOOGLE_OAUTH_REGEX), "Google OAuth"),
+    (Pattern::Regex(&AWS_API_KEY_REGEX), "AWS API Key"),
+    (Pattern::Regex(&HEROKU_API_KEY_REGEX), "Heroku API Key"),
+    (Pattern::Regex(&PASSWORD_IN_URL_REGEX), "Password in URL"),
+    (
+        Pattern::Regex(&GOOGLE_SERVICE_ACCOUNT_REGEX),
+        "Google (GCP) Service-account",
+    ),
+    (Pattern::Regex(&TWILIO_API_KEY_REGEX), "Twilio API Key"),
+    (
+        Pattern::Contains("-----BEGIN RSA PRIVATE KEY-----"),
+        "RSA Private Key",
+    ),
+    (
+        Pattern::Contains("-----BEGIN OPENSSH PRIVATE KEY-----"),
+        "SSH (OPENSSH) Private Key",
+    ),
+    (
+        Pattern::Contains("-----BEGIN DSA PRIVATE KEY-----"),
+        "SSH (DSA) Private Key",
+    ),
+    (
+        Pattern::Contains("-----BEGIN EC PRIVATE KEY-----"),
+        "SSH (EC) Private Key",
+    ),
+    (
+        Pattern::Contains("-----BEGIN PGP PRIVATE KEY BLOCK-----"),
+        "PGP Private Key Block",
+    ),
 ];
 
 // TODO: Try to get this to work in JavaScript comments as well
@@ -63,32 +144,71 @@ declare_lint_rule! {
 
 impl Rule for NoSecrets {
     type Query = Ast<JsStringLiteralExpression>;
-    type State = ();
+    type State = &'static str;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let Some(token) = node.value_token().ok() else {
-            return None;
-        };
-        let text = token.text();
+        let token = node.value_token().ok()?;
+        let text = Arc::new(token.text().to_string());
 
-        for pattern in SENSITIVE_PATTERNS {
-            let re = LazyLock::new(|| Regex::new(pattern).unwrap());
-            if re.is_match(&text) {
-                return Some(());
-            }
+        let result = Arc::new(Mutex::new(None));
+        let found = Arc::new(Mutex::new(false));
+        let num_threads = 4;
+        let patterns_per_thread = (SENSITIVE_PATTERNS.len() + num_threads - 1) / num_threads;
+
+        // Since regex matching is expensive, we run in threads
+        // - Added a mutex for "found", i.e. I want to exit early if any
+        // pattern matches or string contains is found
+        // - Currently hardcoded to 4 threads. Can be adjusted later.
+        // - I do realize that it might be overkill for smaller strings.
+        // Maybe can check that in future.
+        let handles: Vec<_> = SENSITIVE_PATTERNS
+            .chunks(patterns_per_thread)
+            .map(|chunk| {
+                let text = Arc::clone(&text);
+                let result = Arc::clone(&result);
+                let found = Arc::clone(&found);
+                thread::spawn(move || {
+                    for (pattern, comment) in chunk {
+                        if *found.lock().unwrap() {
+                            return;
+                        }
+                        let matched = match pattern {
+                            Pattern::Regex(re) => re.is_match(&text),
+                            Pattern::Contains(substring) => text.contains(substring),
+                        };
+                        if matched {
+                            let mut guard = result.lock().unwrap();
+                            if guard.is_none() {
+                                *guard = Some(*comment);
+                                *found.lock().unwrap() = true;
+                            }
+                            return;
+                        }
+                    }
+                })
+            })
+            .collect();
+
+        for handle in handles {
+            handle.join().unwrap();
+        }
+
+        let guard = result.lock().unwrap();
+        if let Some(comment) = *guard {
+            return Some(comment);
         }
 
         if is_high_entropy(&text) {
-            return Some(());
+            Some("High entropy value detected")
+        } else {
+            None
         }
-
-        None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
         Some(
             RuleDiagnostic::new(
@@ -96,7 +216,7 @@ impl Rule for NoSecrets {
                 node.range(),
                 markup! { "Potential secret found." },
             )
-            .note(markup! { "This looks like a sensitive value such as an API key or token." }), // TODO: Give a more detailed response on the *type* of API Key/token (based on the SENSITIVE PATTERNS)
+            .note(markup! { {state} }),
         )
     }
 }
@@ -107,7 +227,8 @@ fn is_high_entropy(text: &str) -> bool {
 }
 
 /**
- * From https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/utils.js#L93
+ * Inspired by https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/utils.js#L93
+ * Adapted from https://docs.rs/entropy/latest/src/entropy/lib.rs.html#14-33
  * Calculates Shannon entropy to measure the randomness of data. High entropy values indicate potentially
  * secret or sensitive information, as such data is typically more random and less predictable than regular text.
  * Useful for detecting API keys, passwords, and other secrets within code or configuration files.

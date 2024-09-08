@@ -1,6 +1,4 @@
-const apiKey = '12345';
-const password = 'mySecretPassword';
-var secret = "AKIA1234567890EXAMPLE"
+const awsApiKey = "AKIA1234567890EXAMPLE"
 const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
 const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
 const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
