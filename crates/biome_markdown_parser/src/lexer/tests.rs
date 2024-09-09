@@ -1,7 +1,10 @@
 #![cfg(test)]
 #![allow(unused_mut, unused_variables, unused_assignments)]
 
-use super::{Lexer, TextSize};
+use biome_parser::lexer::Lexer;
+use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use crate::lexer::MarkdownLexContext;
+use super::{MarkdownLexer, TextSize};
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -11,33 +14,37 @@ use std::time::Duration;
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
     ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
-        let mut lexer = Lexer::from_str($src);
+        let mut lexer = MarkdownLexer::from_str($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
 
         let mut new_str = String::with_capacity($src.len());
-        let tokens: Vec<_> = lexer.collect();
+        let mut tokens = vec![];
 
+        while lexer.next_token(MarkdownLexContext::default()) != EOF {
+            tokens.push((lexer.current(), lexer.current_range()));
+        }
+        
         $(
             assert_eq!(
-                tokens[idx].kind,
+                tokens[idx].0,
                 biome_markdown_syntax::MarkdownSyntaxKind::$kind,
                 "expected token kind {}, but found {:?}",
                 stringify!($kind),
-                tokens[idx].kind,
+                tokens[idx].0,
             );
 
             assert_eq!(
-                tokens[idx].range.len(),
+                tokens[idx].1.len(),
                 TextSize::from($len),
                 "expected token length of {}, but found {:?} for token {:?}",
                 $len,
-                tokens[idx].range.len(),
-                tokens[idx].kind,
+                tokens[idx].1.len(),
+                tokens[idx].0,
             );
 
-            new_str.push_str(&$src[tokens[idx].range]);
-            tok_idx += tokens[idx].range.len();
+            new_str.push_str(&$src[tokens[idx].1]);
+            tok_idx += tokens[idx].1.len();
 
             idx += 1;
         )*
@@ -47,7 +54,7 @@ macro_rules! assert_lex {
                 "expected {} tokens but lexer returned {}, first unexpected token is '{:?}'",
                 idx,
                 tokens.len(),
-                tokens[idx].kind
+                tokens[idx].0
             );
         } else {
             assert_eq!(idx, tokens.len());
@@ -66,8 +73,12 @@ fn losslessness(string: String) -> bool {
     let cloned = string.clone();
     let (sender, receiver) = channel();
     thread::spawn(move || {
-        let mut lexer = Lexer::from_str(&cloned);
-        let tokens: Vec<_> = lexer.map(|token| token.range).collect();
+        let mut lexer = MarkdownLexer::from_str(&cloned);
+        let mut tokens = vec![];
+
+        while lexer.next_token(MarkdownLexContext::default()) != EOF {
+            tokens.push(lexer.current_range());
+        }
 
         sender
             .send(tokens)
@@ -92,17 +103,14 @@ fn losslessness(string: String) -> bool {
 fn empty() {
     assert_lex! {
         "",
-        EOF:0
     }
 }
-
 
 #[test]
 fn textual() {
     assert_lex! {
         "+",
         MARKDOWN_TEXTUAL_LITERAL:1,
-        EOF:0,
     }
 }
 

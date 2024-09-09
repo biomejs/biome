@@ -44,6 +44,8 @@ MarkdownDocument =
     value: AnyMarkdownBlock
     eof: 'EOF'
 
+MarkdownBlockList = AnyMarkdownBlock*
+
 AnyMarkdownBlock = AnyLeafBlock  | AnyContainerBlock
 
 AnyLeafBlock = MarkdownBreakBlock | AnyMarkdownHeader | AnyMakrdownSetextHeader 

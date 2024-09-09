@@ -3144,6 +3144,88 @@ impl From<MarkdownBogus> for SyntaxElement {
     }
 }
 #[derive(Clone, Eq, PartialEq, Hash)]
+pub struct MarkdownBlockList {
+    syntax_list: SyntaxList,
+}
+impl MarkdownBlockList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for MarkdownBlockList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_BLOCK_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_BLOCK_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<MarkdownBlockList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(MarkdownBlockList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for MarkdownBlockList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for MarkdownBlockList {
+    type Language = Language;
+    type Node = AnyMarkdownBlock;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for MarkdownBlockList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("MarkdownBlockList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &MarkdownBlockList {
+    type Item = AnyMarkdownBlock;
+    type IntoIter = AstNodeListIterator<Language, AnyMarkdownBlock>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for MarkdownBlockList {
+    type Item = AnyMarkdownBlock;
+    type IntoIter = AstNodeListIterator<Language, AnyMarkdownBlock>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct MarkdownBulletList {
     syntax_list: SyntaxList,
 }

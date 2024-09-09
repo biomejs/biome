@@ -3,7 +3,7 @@ use biome_markdown_syntax::{MarkdownDocument, MarkdownLanguage, MarkdownSyntaxNo
 use biome_parser::{prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 use parser::MarkdownParser;
-use syntax::parse_root;
+use syntax::parse_document;
 
 mod lexer;
 mod parser;
@@ -22,7 +22,7 @@ pub fn parse_markdown_with_cache(source: &str, cache: &mut NodeCache) -> Markdow
     tracing::debug_span!("Parsing phase").in_scope(move || {
         let mut parser = MarkdownParser::new(source);
 
-        parse_root(&mut parser);
+        parse_document(&mut parser);
 
         let (events, diagnostics, trivia) = parser.finish();
 

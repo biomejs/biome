@@ -3,27 +3,14 @@
 #[rustfmt::skip]
 mod tests;
 
-use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use biome_markdown_syntax::{MarkdownSyntaxKind, T};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_rowan::{TextRange, TextSize};
+use biome_parser::lexer::{
+    LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
+};
+use biome_rowan::TextSize;
 use biome_unicode_table::{lookup_byte, Dispatch::*};
-use std::iter::FusedIterator;
-
-pub struct Token {
-    kind: MarkdownSyntaxKind,
-    range: TextRange,
-}
-
-impl Token {
-    pub fn kind(&self) -> MarkdownSyntaxKind {
-        self.kind
-    }
-
-    pub fn range(&self) -> TextRange {
-        self.range
-    }
-}
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
 pub enum MarkdownLexContext {
@@ -31,70 +18,166 @@ pub enum MarkdownLexContext {
     Regular,
 }
 
+impl LexContext for MarkdownLexContext {
+    /// Returns true if this is [CssLexContext::Regular]
+    fn is_regular(&self) -> bool {
+        matches!(self, MarkdownLexContext::Regular)
+    }
+}
+
+/// Context in which the [CssLexContext]'s current should be re-lexed.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum MarkdownReLexContext {
+    #[allow(dead_code)]
+    Regular,
+    // /// See [CssLexContext::UnicodeRange]
+    // UnicodeRange,
+}
+
 /// An extremely fast, lookup table based, lossless Markdown lexer
 #[derive(Debug)]
-pub(crate) struct Lexer<'src> {
+pub(crate) struct MarkdownLexer<'src> {
     /// Source text
     source: &'src str,
 
     /// The start byte position in the source text of the next token.
     position: usize,
 
-    diagnostics: Vec<ParseDiagnostic>,
+    /// `true` if there has been a line break between the last non-trivia token and the next non-trivia token.
+    after_newline: bool,
 
-    #[allow(dead_code)]
-    context: MarkdownLexContext,
+    /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
+    unicode_bom_length: usize,
+
+    /// Byte offset of the current token from the start of the source.
+    ///
+    /// The range of the current token can be computed by `self.position - self.current_start`
+    current_start: TextSize,
+
+    /// The kind of the current token
+    current_kind: MarkdownSyntaxKind,
+
+    /// Flags for the current token
+    current_flags: TokenFlags,
+
+    diagnostics: Vec<ParseDiagnostic>,
 }
 
-#[allow(dead_code)]
-impl<'src> Lexer<'src> {
-    /// Make a new lexer from a str, this is safe because strs are valid utf8
-    pub fn from_str(string: &'src str) -> Self {
-        Self {
-            source: string,
-            position: 0,
-            diagnostics: vec![],
-            context: MarkdownLexContext::Regular,
-        }
-    }
+impl<'src> Lexer<'src> for MarkdownLexer<'src> {
+    const NEWLINE: Self::Kind = NEWLINE;
 
-    /// Returns the source code
-    pub fn source(&self) -> &'src str {
+    const WHITESPACE: Self::Kind = WHITESPACE;
+    type Kind = MarkdownSyntaxKind;
+    type LexContext = MarkdownLexContext;
+    type ReLexContext = MarkdownReLexContext;
+
+    fn source(&self) -> &'src str {
         self.source
     }
 
-    pub fn finish(self) -> Vec<ParseDiagnostic> {
-        self.diagnostics
+    fn current(&self) -> Self::Kind {
+        self.current_kind
     }
 
-    pub fn position(&self) -> usize {
+    fn position(&self) -> usize {
         self.position
     }
 
-    /// Lexes the next token.
-    ///
-    /// ## Return
-    /// Returns its kind and any potential error.
-    pub(crate) fn next_token(&mut self) -> Option<Token> {
-        let start = self.text_position();
+    fn current_start(&self) -> TextSize {
+        self.current_start
+    }
 
-        match self.current_byte() {
-            Some(current) => {
-                let kind = self.lex_token(current);
-                debug_assert!(start < self.text_position(), "Lexer did not progress");
-                Some(Token {
-                    kind,
-                    range: TextRange::new(start, self.text_position()),
-                })
-            }
-            None if self.position == self.source.len() => {
-                self.advance(1);
-                Some(Token {
-                    kind: EOF,
-                    range: TextRange::new(start, start),
-                })
-            }
-            None => None,
+    fn push_diagnostic(&mut self, diagnostic: ParseDiagnostic) {
+        self.diagnostics.push(diagnostic);
+    }
+
+    fn next_token(&mut self, _context: Self::LexContext) -> Self::Kind {
+        self.current_start = self.text_position();
+        self.current_flags = TokenFlags::empty();
+
+        let kind = match self.current_byte() {
+            Some(current) => self.consume_token(current),
+            None => EOF,
+        };
+        self.current_kind = kind;
+
+        kind
+    }
+
+    fn has_preceding_line_break(&self) -> bool {
+        self.current_flags.has_preceding_line_break()
+    }
+
+    fn has_unicode_escape(&self) -> bool {
+        self.current_flags.has_unicode_escape()
+    }
+
+    fn rewind(&mut self, checkpoint: LexerCheckpoint<Self::Kind>) {
+        let LexerCheckpoint {
+            position,
+            current_start,
+            current_flags,
+            current_kind,
+            after_line_break,
+            unicode_bom_length,
+            diagnostics_pos,
+        } = checkpoint;
+
+        let new_pos = u32::from(position) as usize;
+
+        self.position = new_pos;
+        self.current_kind = current_kind;
+        self.current_start = current_start;
+        self.current_flags = current_flags;
+        self.after_newline = after_line_break;
+        self.unicode_bom_length = unicode_bom_length;
+        self.diagnostics.truncate(diagnostics_pos as usize);
+    }
+
+    fn finish(self) -> Vec<ParseDiagnostic> {
+        self.diagnostics
+    }
+
+    fn current_flags(&self) -> TokenFlags {
+        self.current_flags
+    }
+
+    #[inline]
+    fn advance_char_unchecked(&mut self) {
+        let c = self.current_char_unchecked();
+        self.position += c.len_utf8();
+    }
+
+    /// Advances the current position by `n` bytes.
+    #[inline]
+    fn advance(&mut self, n: usize) {
+        self.position += n;
+    }
+}
+
+impl<'src> MarkdownLexer<'src> {
+    /// Make a new lexer from a str, this is safe because strs are valid utf8
+    pub fn from_str(source: &'src str) -> Self {
+        Self {
+            source,
+            after_newline: false,
+            unicode_bom_length: 0,
+            current_kind: TOMBSTONE,
+            current_start: TextSize::from(0),
+            current_flags: TokenFlags::empty(),
+            position: 0,
+            diagnostics: vec![],
+        }
+    }
+
+    pub(crate) fn consume_token(&mut self, current: u8) -> MarkdownSyntaxKind {
+        let dispatched = lookup_byte(current);
+        match dispatched {
+            WHS => self.consume_newline_or_whitespace(),
+            MUL => self.consume_byte(T![*]),
+            MIN => self.consume_byte(T![-]),
+            IDT => self.consume_byte(T![_]),
+            _ => self.consume_textual(),
         }
     }
 
@@ -103,6 +186,7 @@ impl<'src> Lexer<'src> {
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
+    #[allow(dead_code)]
     fn eat_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
         tok
@@ -126,25 +210,25 @@ impl<'src> Lexer<'src> {
     ///
     /// ## Safety
     /// Must be called at a valid UT8 char boundary
-    fn consume_newline_or_whitespaces(&mut self) -> MarkdownSyntaxKind {
-        if self.consume_newline() {
-            NEWLINE
-        } else {
-            self.consume_whitespaces();
-            WHITESPACE
+    fn consume_newline_or_whitespace(&mut self) -> MarkdownSyntaxKind {
+        match self.current_byte() {
+            Some(b'\n' | b'\r') => self.consume_newline(),
+            Some(b' ') => self.consume_whitespace(),
+            Some(b'\t') => self.consume_tab(),
+            _ => self.consume_textual(),
         }
     }
+
     /// Consume just one newline/line break.
     ///
     /// ## Safety
     /// Must be called at a valid UT8 char boundary
-    fn consume_newline(&mut self) -> bool {
+    fn consume_newline(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
         match self.current_byte() {
             Some(b'\n') => {
                 self.advance(1);
-                true
             }
             Some(b'\r') => {
                 if self.peek_byte() == Some(b'\n') {
@@ -152,46 +236,32 @@ impl<'src> Lexer<'src> {
                 } else {
                     self.advance(1)
                 }
-                true
             }
-
-            _ => false,
+            _ => unreachable!(),
         }
+        NEWLINE
     }
 
     /// Consumes all whitespace until a non-whitespace or a newline is found.
     ///
     /// ## Safety
     /// Must be called at a valid UT8 char boundary
-    fn consume_whitespaces(&mut self) {
+    fn consume_whitespace(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+        while let Some(b' ') = self.current_byte() {
+            self.advance(1);
+        }
+
+        WHITESPACE
+    }
+
+    fn consume_tab(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
 
-        while let Some(byte) = self.current_byte() {
-            let dispatch = lookup_byte(byte);
-
-            match dispatch {
-                WHS => match byte {
-                    b'\t' | b' ' => self.advance(1),
-                    b'\r' | b'\n' => {
-                        break;
-                    }
-                    _ => {
-                        let start = self.text_position();
-                        self.advance(1);
-
-                        self.diagnostics.push(
-                            ParseDiagnostic::new(
-                                "The Markdown standard only allows tabs, whitespace, carriage return and line feed whitespace.",
-                                start..self.text_position(),
-                            )
-                            .with_hint("Use a regular whitespace character instead."),
-                        )
-                    }
-                },
-
-                _ => break,
-            }
+        if matches!(self.current_byte(), Some(b'\t')) {
+            self.advance(1)
         }
+        TAB
     }
 
     /// Get the UTF8 char which starts at the current byte
@@ -250,21 +320,6 @@ impl<'src> Lexer<'src> {
         self.position >= self.source.len()
     }
 
-    /// Lexes the next token
-    ///
-    /// Guaranteed to not be at the end of the file
-    // A lookup table of `byte -> fn(l: &mut Lexer) -> Token` is exponentially slower than this approach
-    fn lex_token(&mut self, current: u8) -> MarkdownSyntaxKind {
-        // The speed difference comes from the difference in table size, a 2kb table is easily fit into cpu cache
-        // While a 16kb table will be ejected from cache very often leading to slowdowns, this also allows LLVM
-        // to do more aggressive optimizations on the match regarding how to map it to instructions
-        let dispatched = lookup_byte(current);
-        match dispatched {
-            WHS => self.consume_newline_or_whitespaces(),
-            _ => self.consume_textual(),
-        }
-    }
-
     #[inline]
     fn consume_textual(&mut self) -> MarkdownSyntaxKind {
         self.assert_at_char_boundary();
@@ -274,14 +329,48 @@ impl<'src> Lexer<'src> {
 
         MarkdownSyntaxKind::MARKDOWN_TEXTUAL_LITERAL
     }
-}
 
-impl Iterator for Lexer<'_> {
-    type Item = Token;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.next_token()
+    /// Bumps the current byte and creates a lexed token of the passed in kind
+    fn consume_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
+        self.advance(1);
+        tok
     }
 }
 
-impl FusedIterator for Lexer<'_> {}
+impl<'src> ReLexer<'src> for MarkdownLexer<'src> {
+    fn re_lex(&mut self, context: Self::ReLexContext) -> Self::Kind {
+        let old_position = self.position;
+        self.position = u32::from(self.current_start) as usize;
+
+        let re_lexed_kind = match self.current_byte() {
+            Some(current) => match context {
+                MarkdownReLexContext::Regular => self.consume_token(current),
+                // MarkdownReLexContext::UnicodeRange => self.consume_unicode_range_token(current),
+            },
+            None => EOF,
+        };
+
+        if self.current() == re_lexed_kind {
+            // Didn't re-lex anything. Return existing token again
+            self.position = old_position;
+        } else {
+            self.current_kind = re_lexed_kind;
+        }
+
+        re_lexed_kind
+    }
+}
+
+impl<'src> LexerWithCheckpoint<'src> for MarkdownLexer<'src> {
+    fn checkpoint(&self) -> LexerCheckpoint<Self::Kind> {
+        LexerCheckpoint {
+            position: TextSize::from(self.position as u32),
+            current_start: self.current_start,
+            current_flags: self.current_flags,
+            current_kind: self.current_kind,
+            after_line_break: self.after_newline,
+            unicode_bom_length: self.unicode_bom_length,
+            diagnostics_pos: self.diagnostics.len() as u32,
+        }
+    }
+}

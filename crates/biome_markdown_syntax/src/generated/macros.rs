@@ -124,6 +124,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MarkdownBogus::new_unchecked(node) };
                     $body
                 }
+                $crate::MarkdownSyntaxKind::MARKDOWN_BLOCK_LIST => {
+                    let $pattern = unsafe { $crate::MarkdownBlockList::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MARKDOWN_BULLET_LIST => {
                     let $pattern = unsafe { $crate::MarkdownBulletList::new_unchecked(node) };
                     $body

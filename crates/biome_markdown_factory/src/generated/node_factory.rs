@@ -372,6 +372,18 @@ pub fn markdown_textual(value_token: SyntaxToken) -> MarkdownTextual {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn markdown_block_list<I>(items: I) -> MarkdownBlockList
+where
+    I: IntoIterator<Item = AnyMarkdownBlock>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MarkdownBlockList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_BLOCK_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn markdown_bullet_list<I>(items: I) -> MarkdownBulletList
 where
     I: IntoIterator<Item = AnyCodeBlock>,

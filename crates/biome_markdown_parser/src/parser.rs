@@ -1,11 +1,11 @@
 use biome_markdown_syntax::MarkdownSyntaxKind;
-use biome_parser::diagnostic::merge_diagnostics;
 use biome_parser::event::Event;
 use biome_parser::prelude::*;
 use biome_parser::token_source::Trivia;
 use biome_parser::ParserContext;
+use biome_parser::{diagnostic::merge_diagnostics, ParserContextCheckpoint};
 
-use crate::token_source::MarkdownTokenSource;
+use crate::token_source::{MarkdownTokenSource, MarkdownTokenSourceCheckpoint};
 
 pub(crate) struct MarkdownParser<'source> {
     context: ParserContext<MarkdownSyntaxKind>,
@@ -18,6 +18,20 @@ impl<'source> MarkdownParser<'source> {
             context: ParserContext::default(),
             source: MarkdownTokenSource::from_str(source),
         }
+    }
+    #[allow(dead_code)]
+    pub fn checkpoint(&self) -> MarkdownParserCheckpoint {
+        MarkdownParserCheckpoint {
+            context: self.context.checkpoint(),
+            source: self.source.checkpoint(),
+        }
+    }
+    #[allow(dead_code)]
+    pub fn rewind(&mut self, checkpoint: MarkdownParserCheckpoint) {
+        let MarkdownParserCheckpoint { context, source } = checkpoint;
+
+        self.context.rewind(context);
+        self.source.rewind(source);
     }
 
     pub fn finish(
@@ -55,4 +69,10 @@ impl<'source> Parser for MarkdownParser<'source> {
     fn source_mut(&mut self) -> &mut Self::Source {
         &mut self.source
     }
+}
+
+#[allow(dead_code)]
+pub struct MarkdownParserCheckpoint {
+    pub(super) context: ParserContextCheckpoint,
+    pub(super) source: MarkdownTokenSourceCheckpoint,
 }

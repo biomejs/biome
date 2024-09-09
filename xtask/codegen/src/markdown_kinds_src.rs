@@ -16,6 +16,8 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         ("*", "STAR"),
         ("`", "BACKTICK"),
         ("~", "TILDE"),
+        ("   ", "WHITESPACE3"),
+        ("_", "UNDERSCORE"),
     ],
     keywords: &["false"],
     literals: &[
@@ -26,13 +28,14 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MARKDOWN_INDENT_CHUNK_LITERAL",
         "MARKDOWN_BREAK_BLOCK_LITERAL",
     ],
-    tokens: &["NEWLINE", "WHITESPACE"],
+    tokens: &["NEWLINE", "WHITESPACE", "TAB"],
     nodes: &[
         // Bogus nodes
         "BOGUS",
         "MARKDOWN_BOGUS",
         // node
         "MARKDOWN_DOCUMENT",
+        "MARKDOWN_BLOCK_LIST",
         "MARKDOWN_HEADER",
         "MARKDOWN_H1",
         "MARKDOWN_H2",

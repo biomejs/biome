@@ -565,6 +565,9 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MARKDOWN_TEXTUAL, children)
             }
+            MARKDOWN_BLOCK_LIST => {
+                Self::make_node_list_syntax(kind, children, AnyMarkdownBlock::can_cast)
+            }
             MARKDOWN_BULLET_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCodeBlock::can_cast)
             }
