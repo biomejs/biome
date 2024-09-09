@@ -46,24 +46,6 @@ impl MarkdownParse {
         MarkdownParse { root, diagnostics }
     }
 
-    /// The syntax node represented by this Parse result
-    ///
-    /// ```
-    /// # use biome_markdown_parser::parse_markdown;
-    /// # use biome_markdown_syntax::MarkdownSyntaxKind;
-    /// # use biome_rowan::{AstNode, AstNodeList, SyntaxError};
-    ///
-    /// # fn main() -> Result<(), SyntaxError> {
-    /// use biome_markdown_syntax::MarkdownSyntaxKind;
-    /// let parse = parse_markdown(r#""#);
-    ///
-    /// let root_value = parse.tree();
-    ///
-    /// assert_eq!(root_value.syntax().kind(), MarkdownSyntaxKind::MARKDOWN_DOCUMENT);
-    ///
-    /// # Ok(())
-    /// # }
-    /// ```
     pub fn syntax(&self) -> MarkdownSyntaxNode {
         self.root.clone()
     }

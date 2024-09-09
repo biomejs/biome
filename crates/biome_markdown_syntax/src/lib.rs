@@ -19,11 +19,11 @@ impl biome_rowan::SyntaxKind for MarkdownSyntaxKind {
     const EOF: Self = MarkdownSyntaxKind::EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(self, MarkdownSyntaxKind::BOGUS)
+        matches!(self, MarkdownSyntaxKind::MARKDOWN_BOGUS)
     }
 
     fn to_bogus(&self) -> Self {
-        todo!()
+        Self::MARKDOWN_BOGUS
     }
 
     fn to_raw(&self) -> biome_rowan::RawSyntaxKind {

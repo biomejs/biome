@@ -19,18 +19,17 @@ pub enum MarkdownLexContext {
 }
 
 impl LexContext for MarkdownLexContext {
-    /// Returns true if this is [CssLexContext::Regular]
+    /// Returns true if this is [MarkdownLexContext::Regular]
     fn is_regular(&self) -> bool {
         matches!(self, MarkdownLexContext::Regular)
     }
 }
 
-/// Context in which the [CssLexContext]'s current should be re-lexed.
+/// Context in which the [MarkdownLexContext]'s current should be re-lexed.
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum MarkdownReLexContext {
     #[allow(dead_code)]
     Regular,
-    // /// See [CssLexContext::UnicodeRange]
     // UnicodeRange,
 }
 
