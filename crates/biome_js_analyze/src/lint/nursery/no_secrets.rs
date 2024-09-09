@@ -70,7 +70,6 @@ impl Rule for NoSecrets {
         let handles: Vec<_> = SENSITIVE_PATTERNS
             .chunks(patterns_per_thread)
             .filter(|chunk| {
-                // Only spawn a thread if the string is long enough for any pattern in this chunk
                 chunk.iter().any(|(_, _, min_len)| text.len() >= *min_len)
             })
             .map(|chunk| {
@@ -146,13 +145,11 @@ static SLACK_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}").unwrap()
 });
 
-static GENERIC_SECRET_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[sS][eE][cC][rR][eE][tT].*[0-9a-zA-Z]{32,45}"#).unwrap()
-});
+static GENERIC_SECRET_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"[sS][eE][cC][rR][eE][tT].*[0-9a-zA-Z]{32,45}"#).unwrap());
 
-static GENERIC_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[aA][pP][iI][_]?[kK][eE][yY].*[0-9a-zA-Z]{32,45}"#).unwrap()
-});
+static GENERIC_API_KEY_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"[aA][pP][iI][_]?[kK][eE][yY].*[0-9a-zA-Z]{32,45}"#).unwrap());
 
 static SLACK_WEBHOOK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
@@ -161,17 +158,14 @@ static SLACK_WEBHOOK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     .unwrap()
 });
 
-static GITHUB_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[gG][iI][tT][hH][uU][bB].*[0-9a-zA-Z]{35,40}"#).unwrap()
-});
+static GITHUB_TOKEN_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"[gG][iI][tT][hH][uU][bB].*[0-9a-zA-Z]{35,40}"#).unwrap());
 
-static TWITTER_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[tT][wW][iI][tT][tT][eE][rR].*[0-9a-zA-Z]{35,44}"#).unwrap()
-});
+static TWITTER_OAUTH_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"[tT][wW][iI][tT][tT][eE][rR].*[0-9a-zA-Z]{35,44}"#).unwrap());
 
-static FACEBOOK_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*[0-9a-f]{32}"#).unwrap()
-});
+static FACEBOOK_OAUTH_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*[0-9a-f]{32}"#).unwrap());
 
 static HEROKU_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
