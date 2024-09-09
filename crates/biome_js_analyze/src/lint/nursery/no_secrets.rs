@@ -8,7 +8,7 @@ use biome_js_syntax::JsStringLiteralExpression;
 use biome_rowan::AstNode;
 use regex::Regex;
 
-use std::sync::{Arc, LazyLock, Mutex};
+use std::sync::{Arc, LazyLock, Mutex, Once};
 use std::thread;
 
 enum Pattern {
@@ -57,9 +57,9 @@ impl Rule for NoSecrets {
         let token = node.value_token().ok()?;
         let text = Arc::new(token.text().to_string());
 
-        // TODO: Either take this as an option, or calculate it statically from the SENSITIVE_PATTERNS
-        // Currently it is just an arbitrary value derived from the lengths in invalid.js
-        if text.len() < 20 {
+        // Skip processing if the string is less than the shortest possible length
+        let min_pattern_len = get_min_pattern_len();
+        if text.len() < min_pattern_len {
             return None;
         }
 
@@ -68,25 +68,32 @@ impl Rule for NoSecrets {
         let num_threads = 4;
         let patterns_per_thread = (SENSITIVE_PATTERNS.len() + num_threads - 1) / num_threads;
 
-        // Since regex matching is expensive, we run in threads
-        // - Added a mutex for "found", i.e. I want to exit early if any pattern matches or string contains is found
-        // - Currently hardcoded to 4 threads. Can be adjusted later.
-        // - I do realize that it might be overkill for smaller strings. Maybe can check that in future.
         let handles: Vec<_> = SENSITIVE_PATTERNS
             .chunks(patterns_per_thread)
+            .filter(|chunk| {
+                // Only spawn a thread if the string is long enough for any pattern in this chunk
+                chunk.iter().any(|(_, _, min_len)| text.len() >= *min_len)
+            })
             .map(|chunk| {
                 let text = Arc::clone(&text);
                 let result = Arc::clone(&result);
                 let found = Arc::clone(&found);
                 thread::spawn(move || {
-                    for (pattern, comment) in chunk {
+                    for (pattern, comment, min_len) in chunk {
                         if *found.lock().unwrap() {
                             return;
                         }
+
+                        // Skip this pattern if the string length is shorter than required
+                        if text.len() < *min_len {
+                            continue;
+                        }
+
                         let matched = match pattern {
                             Pattern::Regex(re) => re.is_match(&text),
                             Pattern::Contains(substring) => text.contains(substring),
                         };
+
                         if matched {
                             let mut guard = result.lock().unwrap();
                             if guard.is_none() {
@@ -192,44 +199,75 @@ static AWS_API_KEY_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"AKIA[0-9A-Z]{16}").unwrap());
 
 // List of sensitive patterns, with comments
-static SENSITIVE_PATTERNS: &[(Pattern, &str)] = &[
-    (Pattern::Regex(&SLACK_TOKEN_REGEX), "Slack Token"),
-    (Pattern::Regex(&GENERIC_SECRET_REGEX), "Generic Secret"),
-    (Pattern::Regex(&GENERIC_API_KEY_REGEX), "Generic API Key"),
-    (Pattern::Regex(&SLACK_WEBHOOK_REGEX), "Slack Webhook"),
-    (Pattern::Regex(&GITHUB_TOKEN_REGEX), "GitHub"),
-    (Pattern::Regex(&TWITTER_OAUTH_REGEX), "Twitter OAuth"),
-    (Pattern::Regex(&FACEBOOK_OAUTH_REGEX), "Facebook OAuth"),
-    (Pattern::Regex(&GOOGLE_OAUTH_REGEX), "Google OAuth"),
-    (Pattern::Regex(&AWS_API_KEY_REGEX), "AWS API Key"),
-    (Pattern::Regex(&HEROKU_API_KEY_REGEX), "Heroku API Key"),
-    (Pattern::Regex(&PASSWORD_IN_URL_REGEX), "Password in URL"),
+static SENSITIVE_PATTERNS: &[(Pattern, &str, usize)] = &[
+    (Pattern::Regex(&SLACK_TOKEN_REGEX), "Slack Token", 32),
+    (Pattern::Regex(&GENERIC_SECRET_REGEX), "Generic Secret", 32),
+    (
+        Pattern::Regex(&GENERIC_API_KEY_REGEX),
+        "Generic API Key",
+        32,
+    ),
+    (Pattern::Regex(&SLACK_WEBHOOK_REGEX), "Slack Webhook", 24),
+    (Pattern::Regex(&GITHUB_TOKEN_REGEX), "GitHub", 35),
+    (Pattern::Regex(&TWITTER_OAUTH_REGEX), "Twitter OAuth", 35),
+    (Pattern::Regex(&FACEBOOK_OAUTH_REGEX), "Facebook OAuth", 32),
+    (Pattern::Regex(&GOOGLE_OAUTH_REGEX), "Google OAuth", 24),
+    (Pattern::Regex(&AWS_API_KEY_REGEX), "AWS API Key", 16),
+    (Pattern::Regex(&HEROKU_API_KEY_REGEX), "Heroku API Key", 12),
+    (
+        Pattern::Regex(&PASSWORD_IN_URL_REGEX),
+        "Password in URL",
+        14,
+    ),
     (
         Pattern::Regex(&GOOGLE_SERVICE_ACCOUNT_REGEX),
         "Google (GCP) Service-account",
+        14,
     ),
-    (Pattern::Regex(&TWILIO_API_KEY_REGEX), "Twilio API Key"),
+    (Pattern::Regex(&TWILIO_API_KEY_REGEX), "Twilio API Key", 32),
     (
         Pattern::Contains("-----BEGIN RSA PRIVATE KEY-----"),
         "RSA Private Key",
+        64,
     ),
     (
         Pattern::Contains("-----BEGIN OPENSSH PRIVATE KEY-----"),
         "SSH (OPENSSH) Private Key",
+        64,
     ),
     (
         Pattern::Contains("-----BEGIN DSA PRIVATE KEY-----"),
         "SSH (DSA) Private Key",
+        64,
     ),
     (
         Pattern::Contains("-----BEGIN EC PRIVATE KEY-----"),
         "SSH (EC) Private Key",
+        64,
     ),
     (
         Pattern::Contains("-----BEGIN PGP PRIVATE KEY BLOCK-----"),
         "PGP Private Key Block",
+        64,
     ),
 ];
+
+static mut MIN_PATTERN_LEN: Option<usize> = None;
+static INIT: Once = Once::new();
+
+// TODO: Consider u8 instead of usize for a smaller footprint
+fn get_min_pattern_len() -> usize {
+    INIT.call_once(|| unsafe {
+        MIN_PATTERN_LEN = Some(
+            SENSITIVE_PATTERNS
+                .iter()
+                .map(|(_, _, len)| *len)
+                .min()
+                .unwrap_or(0),
+        );
+    });
+    unsafe { MIN_PATTERN_LEN.unwrap_or(0) }
+}
 
 fn is_high_entropy(text: &str) -> bool {
     let entropy = calculate_shannon_entropy(text);
