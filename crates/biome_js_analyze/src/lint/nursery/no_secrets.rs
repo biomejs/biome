@@ -82,6 +82,8 @@ impl Rule for NoSecrets {
                             return;
                         }
 
+                        // TODO: Benchmark if this is even needed, since we already only spawn threads for
+                        // strings where text.len() >= *min_len
                         if text.len() < *min_len {
                             continue;
                         }
