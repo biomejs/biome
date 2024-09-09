@@ -17,6 +17,8 @@ declare_lint_rule! {
     /// This rule checks for high-entropy strings and matches common patterns
     /// for secrets, such as AWS keys, Slack tokens, and private keys.
     ///
+    /// While this rule is helpful, it's not infallible. Always review your code carefully and consider implementing additional security measures like automated secret scanning in your CI/CD and git pipeline, such as GitGuardian or GitHub protections.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -62,7 +64,7 @@ impl Rule for NoSecrets {
             }
 
             let matched = match &sensitive_pattern.pattern {
-                Pattern::Regex(re) => re.is_match(&text),
+                Pattern::Regex(re) => re.is_match(text),
                 Pattern::Contains(substring) => text.contains(substring),
             };
 
@@ -71,7 +73,7 @@ impl Rule for NoSecrets {
             }
         }
 
-        if is_high_entropy(&text) {
+        if is_high_entropy(text) {
             Some("The string has a high entropy value")
         } else {
             None
