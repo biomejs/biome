@@ -19,4 +19,27 @@ export const Component2 = () => (
     </div>
 );
 
+export const C = <svg role="img" aria-label="Description of your SVG image">
+</svg>;
+
+```
+
+# Diagnostics
+```
+valid.jsx:16:23 lint/nursery/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The elements with the following roles can be changed to the following elements:
+    <img>
+  
+  
+    14 │ );
+    15 │ 
+  > 16 │ export const C = <svg role="img" aria-label="Description of your SVG image">
+       │                       ^^^^^^^^^^
+    17 │ </svg>;
+    18 │ 
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
 ```
