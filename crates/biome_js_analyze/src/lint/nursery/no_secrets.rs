@@ -22,13 +22,13 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var secret = "AKIA1234567890EXAMPLE";
+    /// const secret = "AKIA1234567890EXAMPLE";
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// var nonSecret = "hello world";
+    /// const nonSecret = "hello world";
     /// ```
     pub NoSecrets {
         version: "next",
