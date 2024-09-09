@@ -2098,6 +2098,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSecrets": {
+					"description": "Disallow usage of sensitive data such as API keys and tokens.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noShorthandPropertyOverrides": {
 					"description": "Disallow shorthand properties that override related longhand properties.",
 					"anyOf": [
