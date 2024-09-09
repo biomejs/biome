@@ -10,11 +10,6 @@ use regex::Regex;
 
 use std::sync::{LazyLock, Once};
 
-enum Pattern {
-    Regex(&'static LazyLock<Regex>),
-    Contains(&'static str),
-}
-
 // TODO: Try to get this to work in JavaScript comments as well
 declare_lint_rule! {
     /// Disallow usage of sensitive data such as API keys and tokens.
@@ -54,29 +49,29 @@ impl Rule for NoSecrets {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let token = node.value_token().ok()?;
-        let text = token.text();
+        let text = token.text().to_string();
 
         let min_pattern_len = get_min_pattern_len();
         if text.len() < min_pattern_len {
             return None;
         }
 
-        for (pattern, comment, min_len) in SENSITIVE_PATTERNS {
-            if text.len() < *min_len {
+        for sensitive_pattern in SENSITIVE_PATTERNS.iter() {
+            if text.len() < sensitive_pattern.min_len {
                 continue;
             }
 
-            let matched = match pattern {
-                Pattern::Regex(re) => re.is_match(text),
+            let matched = match &sensitive_pattern.pattern {
+                Pattern::Regex(re) => re.is_match(&text),
                 Pattern::Contains(substring) => text.contains(substring),
             };
 
             if matched {
-                return Some(*comment);
+                return Some(sensitive_pattern.comment);
             }
         }
 
-        if is_high_entropy(text) {
+        if is_high_entropy(&text) {
             Some("The string has a high entropy value")
         } else {
             None
@@ -94,7 +89,7 @@ impl Rule for NoSecrets {
             .note(markup! { "Type of secret detected: " {state} })
             .note(markup! {
                 "Storing secrets in source code is a security risk. Consider the following steps:"
-                "\n1. Remove the secret from your code."
+                "\n1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree."
                 "\n2. If needed, use environment variables or a secure secret management system to store sensitive data."
                 "\n3. If this is a false positive, consider adding an inline disable comment."
             })
@@ -148,69 +143,116 @@ static GOOGLE_OAUTH_REGEX: LazyLock<Regex> =
 static AWS_API_KEY_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"AKIA[0-9A-Z]{16}").unwrap());
 
-// List of sensitive patterns, with comments
-static SENSITIVE_PATTERNS: &[(Pattern, &str, usize)] = &[
-    (Pattern::Regex(&SLACK_TOKEN_REGEX), "Slack Token", 32),
-    (Pattern::Regex(&SLACK_WEBHOOK_REGEX), "Slack Webhook", 24),
-    (Pattern::Regex(&GITHUB_TOKEN_REGEX), "GitHub", 35),
-    (Pattern::Regex(&TWITTER_OAUTH_REGEX), "Twitter OAuth", 35),
-    (Pattern::Regex(&FACEBOOK_OAUTH_REGEX), "Facebook OAuth", 32),
-    (Pattern::Regex(&GOOGLE_OAUTH_REGEX), "Google OAuth", 24),
-    (Pattern::Regex(&AWS_API_KEY_REGEX), "AWS API Key", 16),
-    (Pattern::Regex(&HEROKU_API_KEY_REGEX), "Heroku API Key", 12),
-    (
-        Pattern::Regex(&PASSWORD_IN_URL_REGEX),
-        "Password in URL",
-        14,
-    ),
-    (
-        Pattern::Regex(&GOOGLE_SERVICE_ACCOUNT_REGEX),
-        "Google (GCP) Service-account",
-        14,
-    ),
-    (Pattern::Regex(&TWILIO_API_KEY_REGEX), "Twilio API Key", 32),
-    (
-        Pattern::Contains("-----BEGIN RSA PRIVATE KEY-----"),
-        "RSA Private Key",
-        64,
-    ),
-    (
-        Pattern::Contains("-----BEGIN OPENSSH PRIVATE KEY-----"),
-        "SSH (OPENSSH) Private Key",
-        64,
-    ),
-    (
-        Pattern::Contains("-----BEGIN DSA PRIVATE KEY-----"),
-        "SSH (DSA) Private Key",
-        64,
-    ),
-    (
-        Pattern::Contains("-----BEGIN EC PRIVATE KEY-----"),
-        "SSH (EC) Private Key",
-        64,
-    ),
-    (
-        Pattern::Contains("-----BEGIN PGP PRIVATE KEY BLOCK-----"),
-        "PGP Private Key Block",
-        64,
-    ),
+enum Pattern {
+    Regex(&'static LazyLock<Regex>),
+    Contains(&'static str),
+}
+
+struct SensitivePattern {
+    pattern: Pattern,
+    comment: &'static str,
+    min_len: usize,
+}
+
+static SENSITIVE_PATTERNS: &[SensitivePattern] = &[
+    SensitivePattern {
+        pattern: Pattern::Regex(&SLACK_TOKEN_REGEX),
+        comment: "Slack Token",
+        min_len: 32,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&SLACK_WEBHOOK_REGEX),
+        comment: "Slack Webhook",
+        min_len: 24,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&GITHUB_TOKEN_REGEX),
+        comment: "GitHub",
+        min_len: 35,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&TWITTER_OAUTH_REGEX),
+        comment: "Twitter OAuth",
+        min_len: 35,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&FACEBOOK_OAUTH_REGEX),
+        comment: "Facebook OAuth",
+        min_len: 32,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&GOOGLE_OAUTH_REGEX),
+        comment: "Google OAuth",
+        min_len: 24,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&AWS_API_KEY_REGEX),
+        comment: "AWS API Key",
+        min_len: 16,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&HEROKU_API_KEY_REGEX),
+        comment: "Heroku API Key",
+        min_len: 12,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&PASSWORD_IN_URL_REGEX),
+        comment: "Password in URL",
+        min_len: 14,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&GOOGLE_SERVICE_ACCOUNT_REGEX),
+        comment: "Google (GCP) Service-account",
+        min_len: 14,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&TWILIO_API_KEY_REGEX),
+        comment: "Twilio API Key",
+        min_len: 32,
+    },
+    SensitivePattern {
+        pattern: Pattern::Contains("-----BEGIN RSA PRIVATE KEY-----"),
+        comment: "RSA Private Key",
+        min_len: 64,
+    },
+    SensitivePattern {
+        pattern: Pattern::Contains("-----BEGIN OPENSSH PRIVATE KEY-----"),
+        comment: "SSH (OPENSSH) Private Key",
+        min_len: 64,
+    },
+    SensitivePattern {
+        pattern: Pattern::Contains("-----BEGIN DSA PRIVATE KEY-----"),
+        comment: "SSH (DSA) Private Key",
+        min_len: 64,
+    },
+    SensitivePattern {
+        pattern: Pattern::Contains("-----BEGIN EC PRIVATE KEY-----"),
+        comment: "SSH (EC) Private Key",
+        min_len: 64,
+    },
+    SensitivePattern {
+        pattern: Pattern::Contains("-----BEGIN PGP PRIVATE KEY BLOCK-----"),
+        comment: "PGP Private Key Block",
+        min_len: 64,
+    },
 ];
 
 static mut MIN_PATTERN_LEN: Option<usize> = None;
 static INIT: Once = Once::new();
 
-// TODO: Consider u8 instead of usize for a smaller footprint
 fn get_min_pattern_len() -> usize {
-    INIT.call_once(|| unsafe {
-        MIN_PATTERN_LEN = Some(
-            SENSITIVE_PATTERNS
-                .iter()
-                .map(|(_, _, len)| *len)
-                .min()
-                .unwrap_or(0),
-        );
-    });
-    unsafe { MIN_PATTERN_LEN.unwrap_or(0) }
+    unsafe {
+        INIT.call_once(|| {
+            MIN_PATTERN_LEN = Some(
+                SENSITIVE_PATTERNS
+                    .iter()
+                    .map(|pattern| pattern.min_len)
+                    .min()
+                    .unwrap_or(0),
+            );
+        });
+        MIN_PATTERN_LEN.unwrap_or(0)
+    }
 }
 
 fn is_high_entropy(text: &str) -> bool {
