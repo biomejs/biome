@@ -8,7 +8,7 @@ use biome_js_syntax::JsStringLiteralExpression;
 use biome_rowan::AstNode;
 use regex::Regex;
 
-use std::sync::{LazyLock, Once};
+use std::sync::LazyLock;
 
 // TODO: Try to get this to work in JavaScript comments as well
 declare_lint_rule! {
@@ -53,8 +53,7 @@ impl Rule for NoSecrets {
         let token = node.value_token().ok()?;
         let text = token.text();
 
-        let min_pattern_len = get_min_pattern_len();
-        if text.len() < min_pattern_len {
+        if text.len() < MIN_PATTERN_LEN {
             return None;
         }
 
@@ -98,6 +97,8 @@ impl Rule for NoSecrets {
         )
     }
 }
+
+const HIGH_ENTROPY_THRESHOLD: f64 = 4.5;
 
 // Workaround: Since I couldn't figure out how to declare them inline,
 // declare the LazyLock patterns separately
@@ -239,27 +240,11 @@ static SENSITIVE_PATTERNS: &[SensitivePattern] = &[
     },
 ];
 
-static mut MIN_PATTERN_LEN: Option<usize> = None;
-static INIT: Once = Once::new();
-
-fn get_min_pattern_len() -> usize {
-    unsafe {
-        INIT.call_once(|| {
-            MIN_PATTERN_LEN = Some(
-                SENSITIVE_PATTERNS
-                    .iter()
-                    .map(|pattern| pattern.min_len)
-                    .min()
-                    .unwrap_or(0),
-            );
-        });
-        MIN_PATTERN_LEN.unwrap_or(0)
-    }
-}
+const MIN_PATTERN_LEN: usize = 12;
 
 fn is_high_entropy(text: &str) -> bool {
     let entropy = calculate_shannon_entropy(text);
-    entropy > 4.5 // TODO: Make this optional, or controllable
+    entropy > HIGH_ENTROPY_THRESHOLD // TODO: Make this optional, or controllable
 }
 
 /// Inspired by https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/utils.js#L93
@@ -269,10 +254,9 @@ fn is_high_entropy(text: &str) -> bool {
 /// Useful for detecting API keys, passwords, and other secrets within code or configuration files.
 fn calculate_shannon_entropy(data: &str) -> f64 {
     let mut freq = [0usize; 256];
-    let mut len = 0usize;
+    let len = data.len();
     for &byte in data.as_bytes() {
         freq[byte as usize] += 1;
-        len += 1;
     }
 
     let mut entropy = 0.0;
@@ -284,4 +268,20 @@ fn calculate_shannon_entropy(data: &str) -> f64 {
     }
 
     entropy
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_min_pattern_len() {
+        let actual_min_pattern_len = SENSITIVE_PATTERNS
+            .iter()
+            .map(|pattern| pattern.min_len)
+            .min()
+            .unwrap_or(0);
+
+        let initialized_min_pattern_len = MIN_PATTERN_LEN;
+        assert_eq!(initialized_min_pattern_len, actual_min_pattern_len, "The initialized MIN_PATTERN_LEN value is not correct. Please ensure it's the smallest possible number from the SENSITIVE_PATTERNS.");
+    }
 }
