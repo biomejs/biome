@@ -17,6 +17,7 @@ const genericApiKey = "api_key_1234567890abcdefghijklmnopqrstuvwxyz";
 const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
 const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
 const dbUrl = "postgres://user:password123@example.com:5432/dbname";
+
 ```
 
 # Diagnostics
@@ -247,6 +248,7 @@ invalid.js:12:22 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   > 12 │ const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
        │                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     13 │ const dbUrl = "postgres://user:password123@example.com:5432/dbname";
+    14 │ 
   
   i Type of secret detected: Twilio API Key
   
@@ -267,6 +269,7 @@ invalid.js:13:15 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     12 │ const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
   > 13 │ const dbUrl = "postgres://user:password123@example.com:5432/dbname";
        │               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
   
   i Type of secret detected: Password in URL
   
