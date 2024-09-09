@@ -8,7 +8,7 @@
   "license": "MIT OR Apache-2.0",
   "type": "module",
   "engines": {
-	"node": ">20.0.0"
+    "node": ">20.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "8.3.0",

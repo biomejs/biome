@@ -14,7 +14,7 @@ use schemars::JsonSchema;
 use crate::JsRuleAction;
 
 declare_lint_rule! {
-    /// Require the use of `===` and `!==`
+    /// Require the use of `===` and `!==`.
     ///
     /// It is generally bad practice to use `==` for comparison instead of
     /// `===`. Double operators will trigger implicit [type coercion](https://developer.mozilla.org/en-US/docs/Glossary/Type_coercion)

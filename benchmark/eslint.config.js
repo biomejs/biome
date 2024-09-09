@@ -82,7 +82,6 @@ export default [
 			"no-dupe-args": "error",
 			"no-empty": "error",
 			"no-empty-static-block": "error",
-			"no-empty-static-block": "error",
 			"no-empty-function": "error",
 			"no-fallthrough": "error",
 			"no-func-assign": "error",

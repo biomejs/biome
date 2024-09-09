@@ -1708,7 +1708,7 @@ export interface Suspicious {
 	 */
 	noDebugger?: RuleFixConfiguration_for_Null;
 	/**
-	 * Require the use of === and !==
+	 * Require the use of === and !==.
 	 */
 	noDoubleEquals?: RuleFixConfiguration_for_NoDoubleEqualsOptions;
 	/**
