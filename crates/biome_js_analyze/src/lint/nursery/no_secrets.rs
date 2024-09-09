@@ -147,11 +147,11 @@ static SLACK_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 static GENERIC_SECRET_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[sS][eE][cC][rR][eE][tT].*['\"][0-9a-zA-Z]{32,45}['\"]"#).unwrap()
+    Regex::new(r#"[sS][eE][cC][rR][eE][tT].*[0-9a-zA-Z]{32,45}"#).unwrap()
 });
 
 static GENERIC_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[aA][pP][iI][_]?[kK][eE][yY].*['\"][0-9a-zA-Z]{32,45}['\"]"#).unwrap()
+    Regex::new(r#"[aA][pP][iI][_]?[kK][eE][yY].*[0-9a-zA-Z]{32,45}"#).unwrap()
 });
 
 static SLACK_WEBHOOK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
@@ -162,15 +162,15 @@ static SLACK_WEBHOOK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 static GITHUB_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[gG][iI][tT][hH][uU][bB].*['\"][0-9a-zA-Z]{35,40}['\"]"#).unwrap()
+    Regex::new(r#"[gG][iI][tT][hH][uU][bB].*[0-9a-zA-Z]{35,40}"#).unwrap()
 });
 
 static TWITTER_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[tT][wW][iI][tT][tT][eE][rR].*['\"][0-9a-zA-Z]{35,44}['\"]"#).unwrap()
+    Regex::new(r#"[tT][wW][iI][tT][tT][eE][rR].*[0-9a-zA-Z]{35,44}"#).unwrap()
 });
 
 static FACEBOOK_OAUTH_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*['\"][0-9a-f]{32}['\"]"#).unwrap()
+    Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*[0-9a-f]{32}"#).unwrap()
 });
 
 static HEROKU_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
