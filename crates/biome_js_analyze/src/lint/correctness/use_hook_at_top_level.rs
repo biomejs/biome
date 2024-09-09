@@ -234,7 +234,7 @@ fn is_nested_function_inside_component_or_hook(function: &AnyJsFunctionOrMethod)
 }
 
 fn is_within_react_project(manifest: &Option<PackageJson>) -> bool {
-    manifest.as_ref().map_or(false, |package_json| {
+    manifest.as_ref().map_or(true, |package_json| {
         package_json.dependencies.contains("react")
     })
 }
