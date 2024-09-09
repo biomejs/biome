@@ -159,7 +159,7 @@ biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-anyhow             = "1.0.86"
+anyhow             = "1.0.87"
 bpaf               = { version = "0.9.13", features = ["derive"] }
 countme            = "3.0.1"
 crossbeam          = "0.8.4"
