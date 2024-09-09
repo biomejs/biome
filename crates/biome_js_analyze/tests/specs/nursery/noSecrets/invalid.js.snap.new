@@ -6,7 +6,7 @@ expression: invalid.js
 # Input
 ```jsx
 const awsApiKey = "AKIA1234567890EXAMPLE"
-const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+const slackToken = "xoxb-not-a-real-token-this-will-not-work";
 const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
 const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
 const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
@@ -28,7 +28,7 @@ invalid.js:1:19 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   
   > 1 │ const awsApiKey = "AKIA1234567890EXAMPLE"
       │                   ^^^^^^^^^^^^^^^^^^^^^^^
-    2 │ const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+    2 │ const slackToken = "xoxb-not-a-real-token-this-will-not-work";
     3 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
   
   i Type of secret detected: AWS API Key
@@ -47,12 +47,12 @@ invalid.js:2:20 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   ! Potential secret found.
   
     1 │ const awsApiKey = "AKIA1234567890EXAMPLE"
-  > 2 │ const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
-      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 2 │ const slackToken = "xoxb-not-a-real-token-this-will-not-work";
+      │                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
     4 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
   
-  i Type of secret detected: The string has a high entropy value
+  i Type of secret detected: Slack Token
   
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code.
@@ -68,7 +68,7 @@ invalid.js:3:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   ! Potential secret found.
   
     1 │ const awsApiKey = "AKIA1234567890EXAMPLE"
-    2 │ const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+    2 │ const slackToken = "xoxb-not-a-real-token-this-will-not-work";
   > 3 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     4 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
@@ -89,14 +89,14 @@ invalid.js:4:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
 
   ! Potential secret found.
   
-    2 │ const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+    2 │ const slackToken = "xoxb-not-a-real-token-this-will-not-work";
     3 │ const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
   > 4 │ const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
       │                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";
     6 │ const githubToken = "github_pat_1234567890abcdefghijklmnopqrstuvwxyz";
   
-  i Type of secret detected: The string has a high entropy value
+  i Type of secret detected: Facebook OAuth
   
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code.
@@ -118,7 +118,7 @@ invalid.js:5:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     6 │ const githubToken = "github_pat_1234567890abcdefghijklmnopqrstuvwxyz";
     7 │ const clientSecret = "abcdefghijklmnopqrstuvwxyz"
   
-  i Type of secret detected: Generic API Key
+  i Type of secret detected: Twitter OAuth
   
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code.
@@ -184,7 +184,7 @@ invalid.js:9:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     10 │ const genericApiKey = "api_key_1234567890abcdefghijklmnopqrstuvwxyz";
     11 │ const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
   
-  i Type of secret detected: Generic Secret
+  i Type of secret detected: The string has a high entropy value
   
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code.
@@ -206,7 +206,7 @@ invalid.js:10:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
     11 │ const slackKey = "https://hooks.slack.com/services/T12345678/B12345678/abcdefghijklmnopqrstuvwx"
     12 │ const twilioApiKey = "SK1234567890abcdefghijklmnopqrstuv";
   
-  i Type of secret detected: Generic API Key
+  i Type of secret detected: The string has a high entropy value
   
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code.

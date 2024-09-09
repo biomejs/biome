@@ -1,5 +1,5 @@
 const awsApiKey = "AKIA1234567890EXAMPLE"
-const slackToken = "xoxb-123456789012-123456789012-abcdefghijklmnopqrstuvwx";
+const slackToken = "xoxb-not-a-real-token-this-will-not-work";
 const rsaPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA1234567890..."
 const facebookToken = "facebook_app_id_12345abcde67890fghij12345";
 const twitterApiKey = "twitter_api_key_1234567890abcdefghijklmnopqrstuvwxyz";

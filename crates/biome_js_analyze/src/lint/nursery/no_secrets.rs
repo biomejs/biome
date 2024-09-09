@@ -142,14 +142,8 @@ impl Rule for NoSecrets {
 // Workaround: Since I couldn't figure out how to declare them inline,
 // declare the LazyLock patterns separately
 static SLACK_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}").unwrap()
+    Regex::new(r"xox[baprs]-([0-9a-zA-Z]{10,48})?").unwrap()
 });
-
-static GENERIC_SECRET_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"[sS][eE][cC][rR][eE][tT].*[0-9a-zA-Z]{32,45}"#).unwrap());
-
-static GENERIC_API_KEY_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"[aA][pP][iI][_]?[kK][eE][yY].*[0-9a-zA-Z]{32,45}"#).unwrap());
 
 static SLACK_WEBHOOK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
@@ -165,7 +159,7 @@ static TWITTER_OAUTH_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"[tT][wW][iI][tT][tT][eE][rR].*[0-9a-zA-Z]{35,44}"#).unwrap());
 
 static FACEBOOK_OAUTH_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*[0-9a-f]{32}"#).unwrap());
+    LazyLock::new(|| Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*(?:.{0,42})"#).unwrap());
 
 static HEROKU_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
@@ -179,13 +173,13 @@ static PASSWORD_IN_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 });
 
 static GOOGLE_SERVICE_ACCOUNT_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#""type": "service_account""#).unwrap());
+    LazyLock::new(|| Regex::new(r#"(?:^|[,\s])"type"\s*:\s*(?:['"]service_account['"']|service_account)(?:[,\s]|$)"#).unwrap());
 
 static TWILIO_API_KEY_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"SK[a-z0-9]{32}"#).unwrap());
 
 static GOOGLE_OAUTH_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#""client_secret":"[a-zA-Z0-9-_]{24}""#).unwrap());
+    LazyLock::new(|| Regex::new(r#"ya29\\.[0-9A-Za-z\\-_]+"#).unwrap());
 
 static AWS_API_KEY_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"AKIA[0-9A-Z]{16}").unwrap());
@@ -193,12 +187,6 @@ static AWS_API_KEY_REGEX: LazyLock<Regex> =
 // List of sensitive patterns, with comments
 static SENSITIVE_PATTERNS: &[(Pattern, &str, usize)] = &[
     (Pattern::Regex(&SLACK_TOKEN_REGEX), "Slack Token", 32),
-    (Pattern::Regex(&GENERIC_SECRET_REGEX), "Generic Secret", 32),
-    (
-        Pattern::Regex(&GENERIC_API_KEY_REGEX),
-        "Generic API Key",
-        32,
-    ),
     (Pattern::Regex(&SLACK_WEBHOOK_REGEX), "Slack Webhook", 24),
     (Pattern::Regex(&GITHUB_TOKEN_REGEX), "GitHub", 35),
     (Pattern::Regex(&TWITTER_OAUTH_REGEX), "Twitter OAuth", 35),
@@ -271,7 +259,6 @@ fn is_high_entropy(text: &str) -> bool {
 /// Calculates Shannon entropy to measure the randomness of data. High entropy values indicate potentially
 /// secret or sensitive information, as such data is typically more random and less predictable than regular text.
 /// Useful for detecting API keys, passwords, and other secrets within code or configuration files.
-/// @param {*} str
 fn calculate_shannon_entropy(data: &str) -> f64 {
     let mut freq = [0usize; 256];
     let mut len = 0usize;
