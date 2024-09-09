@@ -57,7 +57,6 @@ impl Rule for NoSecrets {
         let token = node.value_token().ok()?;
         let text = Arc::new(token.text().to_string());
 
-        // Skip processing if the string is less than the shortest possible length
         let min_pattern_len = get_min_pattern_len();
         if text.len() < min_pattern_len {
             return None;
@@ -84,7 +83,6 @@ impl Rule for NoSecrets {
                             return;
                         }
 
-                        // Skip this pattern if the string length is shorter than required
                         if text.len() < *min_len {
                             continue;
                         }
