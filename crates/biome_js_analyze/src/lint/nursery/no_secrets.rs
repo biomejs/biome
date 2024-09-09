@@ -49,7 +49,7 @@ impl Rule for NoSecrets {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let token = node.value_token().ok()?;
-        let text = token.text().to_string();
+        let text = token.text();
 
         let min_pattern_len = get_min_pattern_len();
         if text.len() < min_pattern_len {
