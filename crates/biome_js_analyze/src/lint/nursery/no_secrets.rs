@@ -8,8 +8,7 @@ use biome_js_syntax::JsStringLiteralExpression;
 use biome_rowan::AstNode;
 use regex::Regex;
 
-use std::sync::{Arc, LazyLock, Mutex, Once};
-use std::thread;
+use std::sync::{LazyLock, Once};
 
 enum Pattern {
     Regex(&'static LazyLock<Regex>),
@@ -55,65 +54,29 @@ impl Rule for NoSecrets {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let token = node.value_token().ok()?;
-        let text = Arc::new(token.text().to_string());
+        let text = token.text();
 
         let min_pattern_len = get_min_pattern_len();
         if text.len() < min_pattern_len {
             return None;
         }
 
-        let result = Arc::new(Mutex::new(None));
-        let found = Arc::new(Mutex::new(false));
-        let num_threads = 4;
-        let patterns_per_thread = (SENSITIVE_PATTERNS.len() + num_threads - 1) / num_threads;
+        for (pattern, comment, min_len) in SENSITIVE_PATTERNS {
+            if text.len() < *min_len {
+                continue;
+            }
 
-        let handles: Vec<_> = SENSITIVE_PATTERNS
-            .chunks(patterns_per_thread)
-            .filter(|chunk| chunk.iter().any(|(_, _, min_len)| text.len() >= *min_len))
-            .map(|chunk| {
-                let text = Arc::clone(&text);
-                let result = Arc::clone(&result);
-                let found = Arc::clone(&found);
-                thread::spawn(move || {
-                    for (pattern, comment, min_len) in chunk {
-                        if *found.lock().unwrap() {
-                            return;
-                        }
+            let matched = match pattern {
+                Pattern::Regex(re) => re.is_match(text),
+                Pattern::Contains(substring) => text.contains(substring),
+            };
 
-                        // TODO: Benchmark if this is even needed, since we already only spawn threads for
-                        // strings where text.len() >= *min_len
-                        if text.len() < *min_len {
-                            continue;
-                        }
-
-                        let matched = match pattern {
-                            Pattern::Regex(re) => re.is_match(&text),
-                            Pattern::Contains(substring) => text.contains(substring),
-                        };
-
-                        if matched {
-                            let mut guard = result.lock().unwrap();
-                            if guard.is_none() {
-                                *guard = Some(*comment);
-                                *found.lock().unwrap() = true;
-                            }
-                            return;
-                        }
-                    }
-                })
-            })
-            .collect();
-
-        for handle in handles {
-            handle.join().unwrap();
+            if matched {
+                return Some(*comment);
+            }
         }
 
-        let guard = result.lock().unwrap();
-        if let Some(comment) = *guard {
-            return Some(comment);
-        }
-
-        if is_high_entropy(&text) {
+        if is_high_entropy(text) {
             Some("The string has a high entropy value")
         } else {
             None
@@ -133,7 +96,7 @@ impl Rule for NoSecrets {
                 "Storing secrets in source code is a security risk. Consider the following steps:"
                 "\n1. Remove the secret from your code."
                 "\n2. If needed, use environment variables or a secure secret management system to store sensitive data."
-                "\n3. If this is a false positive, consider adjusting the rule configuration or adding an inline disable comment."
+                "\n3. If this is a false positive, consider adding an inline disable comment."
             })
         )
     }
@@ -141,9 +104,8 @@ impl Rule for NoSecrets {
 
 // Workaround: Since I couldn't figure out how to declare them inline,
 // declare the LazyLock patterns separately
-static SLACK_TOKEN_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"xox[baprs]-([0-9a-zA-Z]{10,48})?").unwrap()
-});
+static SLACK_TOKEN_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"xox[baprs]-([0-9a-zA-Z]{10,48})?").unwrap());
 
 static SLACK_WEBHOOK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(
@@ -172,8 +134,10 @@ static PASSWORD_IN_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"[a-zA-Z]{3,10}://[^/\s:@]{3,20}:[^/\s:@]{3,20}@.{1,100}['"\s]"#).unwrap()
 });
 
-static GOOGLE_SERVICE_ACCOUNT_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r#"(?:^|[,\s])"type"\s*:\s*(?:['"]service_account['"']|service_account)(?:[,\s]|$)"#).unwrap());
+static GOOGLE_SERVICE_ACCOUNT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"(?:^|[,\s])"type"\s*:\s*(?:['"]service_account['"']|service_account)(?:[,\s]|$)"#)
+        .unwrap()
+});
 
 static TWILIO_API_KEY_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"SK[a-z0-9]{32}"#).unwrap());
