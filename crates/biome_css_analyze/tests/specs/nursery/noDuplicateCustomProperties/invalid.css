@@ -1,0 +1,8 @@
+a { --custom-property: 1; --custom-property: 2; }
+a { --custom-property: 1; color: pink; --custom-property: 1; }
+a { --custom-property: 1; --cUstOm-prOpErtY: 1; color: pink; --cUstOm-prOpErtY: 1; }
+a { --custom-property: pink; { &:hover { --custom-property: orange; --custom-property: black; } } }
+a { --custom-property: pink; @media { --custom-property: orange; --custom-property: black; } }
+@media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } }
+a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; --custom-property: white; } } }
+a { --custom-property: pink; @media { --custom-property: orange; .foo { --custom-property: black; --custom-property: white; } } }

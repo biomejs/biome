@@ -2882,6 +2882,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_at_import_rules:
         Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateAtImportRules>>,
+    #[doc = "Disallow duplicate custom properties within declaration blocks."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_duplicate_custom_properties:
+        Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateCustomProperties>>,
     #[doc = "Disallow duplicate conditions in if-else-if chains"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_else_if:
@@ -3130,6 +3134,7 @@ impl Nursery {
         "noConsole",
         "noDoneCallback",
         "noDuplicateAtImportRules",
+        "noDuplicateCustomProperties",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateSelectorsKeyframeBlock",
@@ -3193,6 +3198,7 @@ impl Nursery {
     const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noDoneCallback",
         "noDuplicateAtImportRules",
+        "noDuplicateCustomProperties",
         "noDuplicateElseIf",
         "noDuplicateFontNames",
         "noDuplicateSelectorsKeyframeBlock",
@@ -4010,6 +4016,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateAtImportRules" => self
                 .no_duplicate_at_import_rules
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noDuplicateCustomProperties" => self
+                .no_duplicate_custom_properties
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noDuplicateElseIf" => self

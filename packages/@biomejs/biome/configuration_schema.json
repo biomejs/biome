@@ -1965,6 +1965,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateCustomProperties": {
+					"description": "Disallow duplicate custom properties within declaration blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
 					"anyOf": [
