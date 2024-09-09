@@ -133,12 +133,11 @@ function benchmarkLinter(biomeBin, options) {
 }
 
 function shellOption() {
-	if (process.platform == "win32") {
+	if (process.platform === "win32") {
 		// Use Powershell so that it is possible to set an environment variable for a single command (ugh!)
 		return "powershell";
-	} else {
-		return "default";
 	}
+	return "default";
 }
 
 function withEnvVariable(name, value, command) {

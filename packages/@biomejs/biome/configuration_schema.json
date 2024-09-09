@@ -3557,7 +3557,7 @@
 					]
 				},
 				"noDoubleEquals": {
-					"description": "Require the use of === and !==",
+					"description": "Require the use of === and !==.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDoubleEqualsConfiguration" },
 						{ "type": "null" }

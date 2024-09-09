@@ -5642,7 +5642,7 @@ pub struct Suspicious {
     #[doc = "Disallow the use of debugger"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_debugger: Option<RuleFixConfiguration<biome_js_analyze::options::NoDebugger>>,
-    #[doc = "Require the use of === and !=="]
+    #[doc = "Require the use of === and !==."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_double_equals: Option<RuleFixConfiguration<biome_js_analyze::options::NoDoubleEquals>>,
     #[doc = "Disallow duplicate case labels."]
