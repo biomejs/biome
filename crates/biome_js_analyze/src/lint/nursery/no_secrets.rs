@@ -69,9 +69,7 @@ impl Rule for NoSecrets {
 
         let handles: Vec<_> = SENSITIVE_PATTERNS
             .chunks(patterns_per_thread)
-            .filter(|chunk| {
-                chunk.iter().any(|(_, _, min_len)| text.len() >= *min_len)
-            })
+            .filter(|chunk| chunk.iter().any(|(_, _, min_len)| text.len() >= *min_len))
             .map(|chunk| {
                 let text = Arc::clone(&text);
                 let result = Arc::clone(&result);
