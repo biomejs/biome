@@ -45,7 +45,7 @@ a {
 ```diff
 --- Prettier
 +++ Biome
-@@ -13,17 +13,17 @@
+@@ -13,17 +13,19 @@
    content: url(https://example.com/\)\).jpg);
    content: url(https://example.com/\(\(.jpg);
    content: url(https://example.com/\ \ .jpg);
@@ -57,22 +57,19 @@ a {
 +  content: url(https://example.com/\ \ .jpg   );
  
 -  background: no-repeat url(https://example.com/\)\).jpg),
--    no-repeat url(https://example.com/\(\(.jpg),
--    no-repeat url(https://example.com/\ \ .jpg),
++  background:
++    no-repeat url(https://example.com/\)\).jpg),
+     no-repeat url(https://example.com/\(\(.jpg),
+     no-repeat url(https://example.com/\ \ .jpg),
 -    no-repeat url(   https://example.com/\)\).jpg   ),
 -    no-repeat url(   https://example.com/\(\(.jpg   ),
 -    no-repeat url(   https://example.com/\ \ .jpg   ),
--    no-repeat url(foo.ttf?query=foo,bar,),
--    no-repeat url(foo.woff2?foo=rgb\(255,255,0\))
--    no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
-+  background: no-repeat url(https://example.com/\)\).jpg), no-repeat
-+    url(https://example.com/\(\(.jpg), no-repeat
-+    url(https://example.com/\ \ .jpg), no-repeat
-+    url(https://example.com/\)\).jpg   ), no-repeat
-+    url(https://example.com/\(\(.jpg   ), no-repeat
-+    url(https://example.com/\ \ .jpg   ), no-repeat url(foo.ttf?query=foo,bar,),
-+    no-repeat url(foo.woff2?foo=rgb\(255,255,0\)) no-repeat
-+    url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
++    no-repeat url(https://example.com/\)\).jpg   ),
++    no-repeat url(https://example.com/\(\(.jpg   ),
++    no-repeat url(https://example.com/\ \ .jpg   ),
+     no-repeat url(foo.ttf?query=foo,bar,),
+     no-repeat url(foo.woff2?foo=rgb\(255,255,0\))
+     no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
 +  ;
  }
 ```
@@ -99,14 +96,16 @@ a {
   content: url(https://example.com/\(\(.jpg   );
   content: url(https://example.com/\ \ .jpg   );
 
-  background: no-repeat url(https://example.com/\)\).jpg), no-repeat
-    url(https://example.com/\(\(.jpg), no-repeat
-    url(https://example.com/\ \ .jpg), no-repeat
-    url(https://example.com/\)\).jpg   ), no-repeat
-    url(https://example.com/\(\(.jpg   ), no-repeat
-    url(https://example.com/\ \ .jpg   ), no-repeat url(foo.ttf?query=foo,bar,),
-    no-repeat url(foo.woff2?foo=rgb\(255,255,0\)) no-repeat
-    url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
+  background:
+    no-repeat url(https://example.com/\)\).jpg),
+    no-repeat url(https://example.com/\(\(.jpg),
+    no-repeat url(https://example.com/\ \ .jpg),
+    no-repeat url(https://example.com/\)\).jpg   ),
+    no-repeat url(https://example.com/\(\(.jpg   ),
+    no-repeat url(https://example.com/\ \ .jpg   ),
+    no-repeat url(foo.ttf?query=foo,bar,),
+    no-repeat url(foo.woff2?foo=rgb\(255,255,0\))
+    no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
   ;
 }
 ```
@@ -193,5 +192,5 @@ url.css:30:3 parse ━━━━━━━━━━━━━━━━━━━━�
 # Lines exceeding max width of 80 characters
 ```
     7:   src: url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
-   27:     url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
+   29:     no-repeat url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);
 ```
