@@ -1,5 +1,8 @@
 use crate::diagnostics::CompilerDiagnostic;
 use crate::grit_context::{GritExecContext, GritQueryContext, GritTargetFile};
+use crate::grit_definitions::{
+    compile_definitions, scan_definitions, Definitions, ScannedDefinitionInfo,
+};
 use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_tree::GritTargetTree;
@@ -39,6 +42,9 @@ const GLOBAL_VARS: [(&str, usize); 4] = [
 #[derive(Clone, Debug)]
 pub struct GritQuery {
     pub pattern: Pattern<GritQueryContext>,
+
+    /// Definitions for named patterns, predicates and functions.
+    pub definitions: Definitions,
 
     /// Diagnostics discovered during compilation of the query.
     pub diagnostics: Vec<CompilerDiagnostic>,
@@ -91,16 +97,28 @@ impl GritQuery {
 
     pub fn from_node(
         root: GritRoot,
-        path: Option<&Path>,
+        source_path: Option<&Path>,
         lang: GritTargetLanguage,
     ) -> Result<Self, CompileError> {
-        let context = CompilationContext::new(path, lang);
+        let ScannedDefinitionInfo {
+            pattern_definition_info,
+            predicate_definition_info,
+            function_definition_info,
+        } = scan_definitions(root.definitions())?;
+
+        let context = CompilationContext {
+            source_path,
+            lang,
+            pattern_definition_info,
+            predicate_definition_info,
+            function_definition_info,
+        };
 
         let mut vars_array = vec![GLOBAL_VARS
             .iter()
             .map(|global_var| VariableSourceLocations {
                 name: global_var.0.to_string(),
-                file: path
+                file: source_path
                     .map(Path::to_string_lossy)
                     .map_or_else(|| "unnamed".to_owned(), |p| p.to_string()),
                 locations: BTreeSet::new(),
@@ -124,22 +142,23 @@ impl GritQuery {
             &mut diagnostics,
         );
 
+        let mut definitions = compile_definitions(root.definitions(), &mut node_context)?;
+
         let pattern = PatternCompiler::from_node(
             &root.pattern().ok_or(CompileError::MissingPattern)?,
             &mut node_context,
         )?;
 
-        let mut pattern_definitions = Vec::new();
         let pattern = auto_wrap_pattern(
             pattern,
-            &mut pattern_definitions,
+            &mut definitions.patterns,
             true,
             None,
             &mut node_context,
             None,
         )?;
 
-        let name = path
+        let name = source_path
             .and_then(Path::file_stem)
             .map(OsStr::to_string_lossy)
             .map(|stem| stem.into_owned());
@@ -148,6 +167,7 @@ impl GritQuery {
 
         Ok(Self {
             pattern,
+            definitions,
             name,
             language,
             diagnostics,

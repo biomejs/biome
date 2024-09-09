@@ -18,8 +18,17 @@ pub enum CompileError {
     /// A metavariables was discovered in an unexpected context.
     UnexpectedMetavariable,
 
+    /// If a function with the same name is defined multiple times.
+    DuplicateFunctionDefinition(String),
+
     /// If a function or bubble pattern has multiple parameters with the same name.
     DuplicateParameters,
+
+    /// If a function with the same name is defined multiple times.
+    DuplicatePatternDefinition(String),
+
+    /// If a function with the same name is defined multiple times.
+    DuplicatePredicateDefinition(String),
 
     /// A metavariable was expected at the given range.
     InvalidMetavariableRange(ByteRange),
@@ -89,8 +98,17 @@ impl Diagnostic for CompileError {
             CompileError::UnexpectedMetavariable => {
                 fmt.write_markup(markup! { "Unexpected metavariable" })
             }
+            CompileError::DuplicateFunctionDefinition(name) => {
+                fmt.write_markup(markup! { "Duplicate function definition: "{{name}} })
+            }
             CompileError::DuplicateParameters => {
                 fmt.write_markup(markup! { "Duplicate parameters" })
+            }
+            CompileError::DuplicatePatternDefinition(name) => {
+                fmt.write_markup(markup! { "Duplicate pattern definition: "{{name}} })
+            }
+            CompileError::DuplicatePredicateDefinition(name) => {
+                fmt.write_markup(markup! { "Duplicate predicate definition: "{{name}} })
             }
             CompileError::InvalidMetavariableRange(_) => {
                 fmt.write_markup(markup! { "Invalid range for metavariable" })
