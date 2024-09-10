@@ -33,7 +33,7 @@ declare_lint_rule! {
     /// const nonSecret = "hello world";
     /// ```
     pub NoSecrets {
-        version: "next",
+        version: "1.9.0",
         name: "noSecrets",
         language: "js",
         recommended: false,
