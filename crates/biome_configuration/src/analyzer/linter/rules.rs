@@ -2959,6 +2959,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_types:
         Option<RuleFixConfiguration<biome_js_analyze::options::NoRestrictedTypes>>,
+    #[doc = "Disallow usage of sensitive data such as API keys and tokens."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_secrets: Option<RuleConfiguration<biome_js_analyze::options::NoSecrets>>,
     #[doc = "Disallow shorthand properties that override related longhand properties."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_shorthand_property_overrides:
@@ -3154,6 +3157,7 @@ impl Nursery {
         "noReactSpecificProps",
         "noRestrictedImports",
         "noRestrictedTypes",
+        "noSecrets",
         "noShorthandPropertyOverrides",
         "noStaticElementInteractions",
         "noSubstr",
@@ -4108,6 +4112,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noRestrictedTypes" => self
                 .no_restricted_types
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noSecrets" => self
+                .no_secrets
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noShorthandPropertyOverrides" => self
@@ -5661,7 +5669,7 @@ pub struct Suspicious {
     #[doc = "Disallow the use of debugger"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_debugger: Option<RuleFixConfiguration<biome_js_analyze::options::NoDebugger>>,
-    #[doc = "Require the use of === and !=="]
+    #[doc = "Require the use of === and !==."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_double_equals: Option<RuleFixConfiguration<biome_js_analyze::options::NoDoubleEquals>>,
     #[doc = "Disallow duplicate case labels."]

@@ -2105,6 +2105,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSecrets": {
+					"description": "Disallow usage of sensitive data such as API keys and tokens.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noShorthandPropertyOverrides": {
 					"description": "Disallow shorthand properties that override related longhand properties.",
 					"anyOf": [
@@ -3564,7 +3571,7 @@
 					]
 				},
 				"noDoubleEquals": {
-					"description": "Require the use of === and !==",
+					"description": "Require the use of === and !==.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDoubleEqualsConfiguration" },
 						{ "type": "null" }

@@ -65,7 +65,7 @@ class WasmError extends Error {
 	 *
 	 * It might be useful, but the first like of the stack trace contains the error
 	 */
-	public stackTrace: string;
+	stackTrace: string;
 	private constructor(stackTrace: string) {
 		super();
 		this.stackTrace = stackTrace;

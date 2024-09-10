@@ -190,3 +190,17 @@ fn element_with_attributes() {
         R_ANGLE: 1,
     }
 }
+
+#[test]
+fn html_element() {
+    assert_lex! {
+        "<html></html>",
+        L_ANGLE: 1,
+        HTML_LITERAL: 4,
+        R_ANGLE: 1,
+        L_ANGLE: 1,
+        SLASH: 1,
+        HTML_LITERAL: 4,
+        R_ANGLE: 1,
+    }
+}
