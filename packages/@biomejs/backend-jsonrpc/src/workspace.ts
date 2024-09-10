@@ -2536,7 +2536,8 @@ export type DocumentFileSource =
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
-	| { Graphql: GraphqlFileSource };
+	| { Graphql: GraphqlFileSource }
+	| { Html: HtmlFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -2556,6 +2557,9 @@ export interface CssFileSource {
 }
 export interface GraphqlFileSource {
 	variant: GraphqlVariant;
+}
+export interface HtmlFileSource {
+	variant: HtmlVariant;
 }
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
@@ -2582,6 +2586,7 @@ export type CssVariant = "Standard";
  * The style of GraphQL contained in the file.
  */
 export type GraphqlVariant = "Standard";
+export type HtmlVariant = "Standard" | "Astro";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
