@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// In the example above, the rule will emit a diagnostics if tried to use `Foo` or `OldAPI` are used.
+    /// In the example above, the rule will emit a diagnostics if `Foo` or `OldAPI` are used.
     ///
     pub NoRestrictedTypes {
         version: "next",
@@ -76,15 +76,7 @@ impl Rule for NoRestrictedTypes {
 
         let restricted_type = options.types.get(token_name)?.clone();
 
-        let resolved_restriction = match restricted_type {
-            CustomRestrictedType::Plain(message) => CustomRestrictedTypeOptions {
-                message,
-                use_instead: None,
-            },
-            CustomRestrictedType::WithOptions(options) => options,
-        };
-
-        Some(resolved_restriction)
+        Some(restricted_type.into())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -161,6 +153,18 @@ pub struct CustomRestrictedTypeOptions {
 pub enum CustomRestrictedType {
     Plain(String),
     WithOptions(CustomRestrictedTypeOptions),
+}
+
+impl From<CustomRestrictedType> for CustomRestrictedTypeOptions {
+    fn from(options: CustomRestrictedType) -> Self {
+        match options {
+            CustomRestrictedType::Plain(message) => CustomRestrictedTypeOptions {
+                message,
+                use_instead: None,
+            },
+            CustomRestrictedType::WithOptions(options) => options,
+        }
+    }
 }
 
 impl Deserializable for CustomRestrictedType {
