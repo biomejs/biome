@@ -77,7 +77,7 @@ declare_lint_rule! {
             // FIXME: uncomment once we allow multiple rules to have the same source.
             //RuleSource::Eslint("no-new-native-nonconstructor"),
         ],
-        recommended: true,
+        recommended: false,
         fix_kind: FixKind::Unsafe,
     }
 }
