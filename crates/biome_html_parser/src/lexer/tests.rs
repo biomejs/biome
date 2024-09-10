@@ -150,6 +150,21 @@ fn element() {
 }
 
 #[test]
+fn element_with_text() {
+    assert_lex! {
+        "<div>abcdefghijklmnopqrstuvwxyz!@_-:;</div>",
+        L_ANGLE: 1,
+        HTML_LITERAL: 3,
+        R_ANGLE: 1,
+        HTML_LITERAL: 32,
+        L_ANGLE: 1,
+        SLASH: 1,
+        HTML_LITERAL: 3,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
 fn doctype_with_quirk() {
     assert_lex! {
         "<!DOCTYPE HTML>",
@@ -187,6 +202,18 @@ fn element_with_attributes() {
         HTML_LITERAL: 5,
         EQ:1,
         HTML_STRING_LITERAL: 19,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn element_with_dashed_attributes() {
+    assert_lex! {
+        "<div aria-hidden>",
+        L_ANGLE: 1,
+        HTML_LITERAL: 3,
+        WHITESPACE: 1,
+        HTML_LITERAL: 11,
         R_ANGLE: 1,
     }
 }

@@ -64,7 +64,10 @@ impl<'src> HtmlLexer<'src> {
             b'!' => self.consume_byte(T![!]),
             b'=' => self.consume_byte(T![=]),
             b'\'' | b'"' => self.consume_string_literal(current),
-            _ if is_identifier_byte(current) => self.consume_identifier(current),
+            // TODO: differentiate between attribute names and identifiers
+            _ if is_identifier_byte(current) || is_attribute_name_byte(current) => {
+                self.consume_identifier(current)
+            }
             _ => {
                 if self.position == 0 {
                     if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
@@ -141,7 +144,7 @@ impl<'src> HtmlLexer<'src> {
         self.advance_byte_or_char(first);
 
         while let Some(byte) = self.current_byte() {
-            if is_identifier_byte(byte) {
+            if is_identifier_byte(byte) || is_attribute_name_byte(byte) {
                 if len < BUFFER_SIZE {
                     buffer[len] = byte;
                     len += 1;
@@ -434,7 +437,18 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
 }
 
 fn is_identifier_byte(byte: u8) -> bool {
+    // https://html.spec.whatwg.org/#elements-2
     byte.is_ascii_alphanumeric()
+}
+
+fn is_attribute_name_byte(byte: u8) -> bool {
+    // https://html.spec.whatwg.org/#attributes-2
+    byte.is_ascii()
+        && !byte.is_ascii_control()
+        && !matches!(
+            byte,
+            b' ' | b'\t' | b'\n' | b'"' | b'\'' | b'>' | b'<' | b'/' | b'='
+        )
 }
 
 #[derive(Copy, Clone, Debug)]
