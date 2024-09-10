@@ -41,7 +41,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoSubstr {
-        version: "next",
+        version: "1.8.2",
         name: "noSubstr",
         language: "js",
         recommended: false,
