@@ -738,12 +738,8 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "no-console" => {
-            if !options.include_inspired {
-                results.has_inspired_rules = true;
-                return false;
-            }
             let group = rules.suspicious.get_or_insert_with(Default::default);
-            let rule = group.no_console_log.get_or_insert(Default::default());
+            let rule = group.no_console.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "no-const-assign" => {

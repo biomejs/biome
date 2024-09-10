@@ -339,6 +339,7 @@ The following JavaScript rules are promoted:
 
 - `correctness/noInvalidNewBuiltin` is deprecated. Use [correctness/noInvalidBuiltinInstantiation](https://biomejs.dev/linter/rules/no-invalid-builtin-instantiation/) instead.
 - `style/useSingleCaseStatement` is deprecated. Use [correctness/noSwitchDeclarations](https://biomejs.dev/linter/rules/no-switch-declarations/) instead.
+- `suspicious/noConsoleLog` is deprecated. Use [suspicious/noConsole](https://biomejs.dev/linter/rules/no-console/) instead.
 
 #### New features
 
