@@ -1062,6 +1062,12 @@
 			"additionalProperties": false
 		},
 		"CustomRestrictedType": {
+			"anyOf": [
+				{ "type": "string" },
+				{ "$ref": "#/definitions/CustomRestrictedTypeOptions" }
+			]
+		},
+		"CustomRestrictedTypeOptions": {
 			"type": "object",
 			"required": ["message"],
 			"properties": {
