@@ -60,6 +60,8 @@ declare_lint_rule! {
 type GridAreasProp = (String, TextRange);
 type GridAreasProps = Vec<(TokenText, TextRange)>;
 
+const GRID_AREA_PROPERTIES: [&str; 3] = ["grid", "grid-template", "grid-template-areas"];
+
 #[derive(Debug)]
 enum GridAreaValidationError {
     EmptyGridArea,
@@ -85,15 +87,21 @@ impl Rule for NoInvalidGridAreas {
         let plain_grid_areas_props = node
             .into_iter()
             .filter_map(|item| {
-                let grid_props = item
+                let binding = item
                     .as_css_declaration_with_semicolon()?
                     .declaration()
                     .ok()?
                     .property()
-                    .ok()?
-                    .as_css_generic_property()?
-                    .value();
-                Some(grid_props)
+                    .ok()?;
+
+                let decl = binding.as_css_generic_property()?;
+                let name = decl.name().ok()?.as_css_identifier()?.value_token().ok()?;
+
+                if GRID_AREA_PROPERTIES.contains(&name.text()) {
+                    let grid_props = decl.value();
+                    return Some(grid_props);
+                }
+                None
             })
             .flat_map(|grid_props| {
                 grid_props

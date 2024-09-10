@@ -67,3 +67,17 @@ describe("something", () => {
 		it("is fine", () => {});
 	});
 });
+
+describe("hello", () => {
+	beforeEach(() => {});
+
+	describe.each(['hello'])(
+		"given an input %p",
+		() => {
+			beforeEach(() => {});
+
+			it("should be fine", () => {});
+		},
+	);
+});
+

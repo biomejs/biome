@@ -1224,6 +1224,14 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow use of CommonJs module system in favor of ESM style imports.
+	 */
+	noCommonJs?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate custom properties within declaration blocks.
+	 */
+	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
@@ -1256,6 +1264,10 @@ export interface Nursery {
 	 */
 	noRestrictedTypes?: RuleFixConfiguration_for_NoRestrictedTypesOptions;
 	/**
+	 * Disallow usage of sensitive data such as API keys and tokens.
+	 */
+	noSecrets?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
 	noStaticElementInteractions?: RuleConfiguration_for_Null;
@@ -1266,11 +1278,11 @@ export interface Nursery {
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
-	noUnknownPseudoClassSelector?: RuleConfiguration_for_Null;
+	noUnknownPseudoClass?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
-	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
+	noUnknownPseudoElement?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
@@ -1664,7 +1676,7 @@ export interface Suspicious {
 	 */
 	noDebugger?: RuleFixConfiguration_for_Null;
 	/**
-	 * Require the use of === and !==
+	 * Require the use of === and !==.
 	 */
 	noDoubleEquals?: RuleFixConfiguration_for_NoDoubleEqualsOptions;
 	/**
@@ -2528,7 +2540,8 @@ export type DocumentFileSource =
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
-	| { Graphql: GraphqlFileSource };
+	| { Graphql: GraphqlFileSource }
+	| { Html: HtmlFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -2548,6 +2561,9 @@ export interface CssFileSource {
 }
 export interface GraphqlFileSource {
 	variant: GraphqlVariant;
+}
+export interface HtmlFileSource {
+	variant: HtmlVariant;
 }
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
@@ -2574,6 +2590,7 @@ export type CssVariant = "Standard";
  * The style of GraphQL contained in the file.
  */
 export type GraphqlVariant = "Standard";
+export type HtmlVariant = "Standard" | "Astro";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
@@ -2709,9 +2726,9 @@ export type Category =
 	| "lint/complexity/useSimpleNumberKeys"
 	| "lint/complexity/useSimplifiedLogicExpression"
 	| "lint/correctness/noChildrenProp"
-	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstantCondition"
 	| "lint/correctness/noConstantMathMinMaxClamp"
+	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
@@ -2763,19 +2780,39 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
-	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noCommonJs"
+	| "lint/nursery/noConsole"
+	| "lint/nursery/noDoneCallback"
+	| "lint/nursery/noDuplicateAtImportRules"
+	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicatedFields"
+	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noImportantInKeyframe"
+	| "lint/nursery/noInvalidDirectionInLinearGradient"
+	| "lint/nursery/noInvalidGridAreas"
+	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
+	| "lint/nursery/noSecrets"
+	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
+	| "lint/nursery/noUndeclaredDependencies"
+	| "lint/nursery/noUnknownFunction"
+	| "lint/nursery/noUnknownMediaFeatureName"
+	| "lint/nursery/noUnknownProperty"
+	| "lint/nursery/noUnknownPseudoClass"
 	| "lint/nursery/noUnknownPseudoClassSelector"
+	| "lint/nursery/noUnknownPseudoElement"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
+	| "lint/nursery/noUnknownUnit"
+	| "lint/nursery/noUnmatchableAnbSelector"
+	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"
@@ -2887,8 +2924,8 @@ export type Category =
 	| "lint/suspicious/noGlobalIsFinite"
 	| "lint/suspicious/noGlobalIsNan"
 	| "lint/suspicious/noImplicitAnyLet"
-	| "lint/suspicious/noImportAssign"
 	| "lint/suspicious/noImportantInKeyframe"
+	| "lint/suspicious/noImportAssign"
 	| "lint/suspicious/noLabelVar"
 	| "lint/suspicious/noMisleadingCharacterClass"
 	| "lint/suspicious/noMisleadingInstantiator"

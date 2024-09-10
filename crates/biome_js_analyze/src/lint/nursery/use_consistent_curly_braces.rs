@@ -45,7 +45,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseConsistentCurlyBraces {
-        version: "1.9.0",
+        version: "1.8.2",
         name: "useConsistentCurlyBraces",
         language: "jsx",
         recommended: false,

@@ -574,8 +574,9 @@ impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
     pub(crate) fn increment_unchanged(&self) {
         self.unchanged.fetch_add(1, Ordering::Relaxed);
     }
-    pub(crate) fn increment_matches(&self) {
-        self.matches.fetch_add(1, Ordering::Relaxed);
+
+    pub(crate) fn increment_matches(&self, num_matches: usize) {
+        self.matches.fetch_add(num_matches, Ordering::Relaxed);
     }
 
     /// Send a message to the display thread
@@ -700,9 +701,9 @@ fn handle_file(ctx: &TraversalOptions, path: &BiomePath) {
         Ok(Ok(FileStatus::Unchanged)) => {
             ctx.increment_unchanged();
         }
-        Ok(Ok(FileStatus::SearchResult(msg))) => {
+        Ok(Ok(FileStatus::SearchResult(num_matches, msg))) => {
             ctx.increment_unchanged();
-            ctx.increment_matches();
+            ctx.increment_matches(num_matches);
             ctx.push_message(msg);
         }
         Ok(Ok(FileStatus::Message(msg))) => {

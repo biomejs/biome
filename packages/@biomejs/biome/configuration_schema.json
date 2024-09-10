@@ -1195,6 +1195,12 @@
 			"additionalProperties": false
 		},
 		"CustomRestrictedType": {
+			"anyOf": [
+				{ "type": "string" },
+				{ "$ref": "#/definitions/CustomRestrictedTypeOptions" }
+			]
+		},
+		"CustomRestrictedTypeOptions": {
 			"type": "object",
 			"required": ["message"],
 			"properties": {
@@ -2070,6 +2076,20 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
+				"noCommonJs": {
+					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateCustomProperties": {
+					"description": "Disallow duplicate custom properties within declaration blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
 					"anyOf": [
@@ -2126,6 +2146,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noSecrets": {
+					"description": "Disallow usage of sensitive data such as API keys and tokens.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noStaticElementInteractions": {
 					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.",
 					"anyOf": [
@@ -2140,14 +2167,14 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnknownPseudoClassSelector": {
+				"noUnknownPseudoClass": {
 					"description": "Disallow unknown pseudo-class selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"noUnknownSelectorPseudoElement": {
+				"noUnknownPseudoElement": {
 					"description": "Disallow unknown pseudo-element selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
@@ -3480,7 +3507,7 @@
 					]
 				},
 				"noDoubleEquals": {
-					"description": "Require the use of === and !==",
+					"description": "Require the use of === and !==.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDoubleEqualsConfiguration" },
 						{ "type": "null" }

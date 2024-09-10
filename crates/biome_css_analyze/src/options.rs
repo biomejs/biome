@@ -3,6 +3,7 @@
 use crate::lint;
 
 pub type NoDuplicateAtImportRules = < lint :: suspicious :: no_duplicate_at_import_rules :: NoDuplicateAtImportRules as biome_analyze :: Rule > :: Options ;
+pub type NoDuplicateCustomProperties = < lint :: nursery :: no_duplicate_custom_properties :: NoDuplicateCustomProperties as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateFontNames = < lint :: suspicious :: no_duplicate_font_names :: NoDuplicateFontNames as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateSelectorsKeyframeBlock = < lint :: suspicious :: no_duplicate_selectors_keyframe_block :: NoDuplicateSelectorsKeyframeBlock as biome_analyze :: Rule > :: Options ;
 pub type NoEmptyBlock =
@@ -20,8 +21,9 @@ pub type NoUnknownFunction =
 pub type NoUnknownMediaFeatureName = < lint :: correctness :: no_unknown_media_feature_name :: NoUnknownMediaFeatureName as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownProperty =
     <lint::correctness::no_unknown_property::NoUnknownProperty as biome_analyze::Rule>::Options;
-pub type NoUnknownPseudoClassSelector = < lint :: nursery :: no_unknown_pseudo_class_selector :: NoUnknownPseudoClassSelector as biome_analyze :: Rule > :: Options ;
-pub type NoUnknownSelectorPseudoElement = < lint :: nursery :: no_unknown_selector_pseudo_element :: NoUnknownSelectorPseudoElement as biome_analyze :: Rule > :: Options ;
+pub type NoUnknownPseudoClass =
+    <lint::nursery::no_unknown_pseudo_class::NoUnknownPseudoClass as biome_analyze::Rule>::Options;
+pub type NoUnknownPseudoElement = < lint :: nursery :: no_unknown_pseudo_element :: NoUnknownPseudoElement as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownUnit =
     <lint::correctness::no_unknown_unit::NoUnknownUnit as biome_analyze::Rule>::Options;
 pub type NoUnmatchableAnbSelector = < lint :: correctness :: no_unmatchable_anb_selector :: NoUnmatchableAnbSelector as biome_analyze :: Rule > :: Options ;

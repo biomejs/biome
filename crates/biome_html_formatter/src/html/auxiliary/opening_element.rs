@@ -1,10 +1,27 @@
 use crate::prelude::*;
-use biome_html_syntax::HtmlOpeningElement;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_html_syntax::{HtmlOpeningElement, HtmlOpeningElementFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlOpeningElement;
 impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
     fn fmt_fields(&self, node: &HtmlOpeningElement, f: &mut HtmlFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let HtmlOpeningElementFields {
+            l_angle_token,
+            name,
+            attributes,
+            r_angle_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                l_angle_token.format(),
+                name.format(),
+                attributes.format(),
+                r_angle_token.format(),
+            ]
+        )?;
+
+        Ok(())
     }
 }

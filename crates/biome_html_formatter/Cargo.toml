@@ -22,6 +22,8 @@ biome_fs             = { workspace = true }
 biome_html_parser    = { workspace = true }
 biome_parser         = { workspace = true }
 biome_service        = { workspace = true }
+countme              = { workspace = true, features = ["enable"] }
+tests_macros         = { workspace = true }
 
 [lints]
 workspace = true

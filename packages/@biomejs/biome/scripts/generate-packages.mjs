@@ -59,7 +59,9 @@ function copyBinaryToNativePackage(platform, arch) {
 	const binaryTarget = resolve(packageRoot, `biome${ext}`);
 
 	if (!fs.existsSync(binarySource)) {
-		console.error(`Source for binary for ${buildName} not found at: ${binarySource}`);
+		console.error(
+			`Source for binary for ${buildName} not found at: ${binarySource}`,
+		);
 		process.exit(1);
 	}
 

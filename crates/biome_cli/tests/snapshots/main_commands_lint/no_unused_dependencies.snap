@@ -63,6 +63,8 @@ biome.json:7:9 deserialize ━━━━━━━━━━━━━━━━━�
   
   - recommended
   - all
+  - noCommonJs
+  - noDuplicateCustomProperties
   - noDuplicateElseIf
   - noDuplicatedFields
   - noDynamicNamespaceImportAccess
@@ -71,10 +73,11 @@ biome.json:7:9 deserialize ━━━━━━━━━━━━━━━━━�
   - noIrregularWhitespace
   - noRestrictedImports
   - noRestrictedTypes
+  - noSecrets
   - noStaticElementInteractions
   - noSubstr
-  - noUnknownPseudoClassSelector
-  - noUnknownSelectorPseudoElement
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
   - noUselessEscapeInRegex
   - noValueAtRule
   - useAdjacentOverloadSignatures

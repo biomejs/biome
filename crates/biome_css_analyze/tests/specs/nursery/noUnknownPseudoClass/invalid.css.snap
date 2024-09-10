@@ -24,7 +24,7 @@ b > .foo:error { }
 
 # Diagnostics
 ```
-invalid.css:1:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:3 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class unknown 
   
@@ -39,7 +39,7 @@ invalid.css:1:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━�
 ```
 
 ```
-invalid.css:2:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:3 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class Unknown 
   
@@ -55,7 +55,7 @@ invalid.css:2:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━�
 ```
 
 ```
-invalid.css:3:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:3 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class uNkNoWn 
   
@@ -72,7 +72,7 @@ invalid.css:3:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━�
 ```
 
 ```
-invalid.css:4:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:3 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class UNKNOWN 
   
@@ -89,7 +89,7 @@ invalid.css:4:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━�
 ```
 
 ```
-invalid.css:5:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:3 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class pseudo-class 
   
@@ -106,7 +106,7 @@ invalid.css:5:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━�
 ```
 
 ```
-invalid.css:6:15 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:15 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class noot 
   
@@ -123,7 +123,7 @@ invalid.css:6:15 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 
 ```
-invalid.css:7:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:7:3 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class unknown 
   
@@ -140,7 +140,7 @@ invalid.css:7:3 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━�
 ```
 
 ```
-invalid.css:9:10 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:9:10 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class error 
   
@@ -157,7 +157,7 @@ invalid.css:9:10 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 
 ```
-invalid.css:10:39 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:10:39 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class unknown 
   
@@ -174,7 +174,7 @@ invalid.css:10:39 lint/nursery/noUnknownPseudoClassSelector ━━━━━━�
 ```
 
 ```
-invalid.css:11:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:11:2 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class first 
   
@@ -191,7 +191,7 @@ invalid.css:11:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 
 ```
-invalid.css:12:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:12:2 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class slotted 
   
@@ -208,7 +208,7 @@ invalid.css:12:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 
 ```
-invalid.css:13:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:13:2 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class placeholder 
   
@@ -225,7 +225,7 @@ invalid.css:13:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 
 ```
-invalid.css:14:14 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:14:14 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class unknown 
   
@@ -242,7 +242,7 @@ invalid.css:14:14 lint/nursery/noUnknownPseudoClassSelector ━━━━━━�
 ```
 
 ```
-invalid.css:15:11 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:15:11 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class unknown 
   
@@ -258,7 +258,7 @@ invalid.css:15:11 lint/nursery/noUnknownPseudoClassSelector ━━━━━━�
 ```
 
 ```
-invalid.css:16:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:16:2 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class horizontal 
   
@@ -273,7 +273,7 @@ invalid.css:16:2 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━
 ```
 
 ```
-invalid.css:16:13 lint/nursery/noUnknownPseudoClassSelector ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:16:13 lint/nursery/noUnknownPseudoClass ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown pseudo-class decrement 
   

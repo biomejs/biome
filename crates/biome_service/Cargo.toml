@@ -33,6 +33,7 @@ biome_graphql_parser     = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
 biome_grit_patterns      = { workspace = true }
 biome_html_formatter     = { workspace = true }
+biome_html_parser        = { workspace = true }
 biome_html_syntax        = { workspace = true }
 biome_js_analyze         = { workspace = true }
 biome_js_factory         = { workspace = true, optional = true }

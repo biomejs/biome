@@ -4,7 +4,7 @@ expression: snapshot
 ---
 ## Input
 
-```css
+```html
 <div>
 	<div>
 		some text

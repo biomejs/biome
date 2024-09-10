@@ -1,18 +1,18 @@
 use crate::comments::CssComments;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
-use biome_formatter::FormatResult;
 use biome_formatter::{write, CstFormatContext};
+use biome_formatter::{FormatOptions, FormatResult};
 
 use crate::prelude::*;
 use crate::CssFormatter;
-use biome_rowan::{AstNode, AstNodeList};
+use biome_rowan::{AstNode, AstNodeList, TextSize};
 
 pub(crate) fn write_component_value_list<N, I>(node: &N, f: &mut CssFormatter) -> FormatResult<()>
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
     I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
 {
-    let layout = get_value_list_layout(node, f.context().comments());
+    let layout = get_value_list_layout(node, f.context().comments(), f);
 
     // Check if any of the elements in the list have a leading newline.
     // We skip the first element because it is the first element in the list and should not be considered.
@@ -43,7 +43,10 @@ where
                         .map_or(false, |node| node.kind() == CssSyntaxKind::COMMA);
 
                     if !is_comma {
-                        if matches!(layout, ValueListLayout::PreserveInline) {
+                        if matches!(
+                            layout,
+                            ValueListLayout::PreserveInline | ValueListLayout::OnePerLine
+                        ) {
                             let has_leading_newline = element.syntax().has_leading_newline();
 
                             if has_leading_newline {
@@ -83,8 +86,14 @@ where
         ValueListLayout::SingleValue => {
             write!(f, [values])
         }
-        // TODO: Add formatting for one-per-line once comma-separated lists are supported.
-        ValueListLayout::OnePerLine => write!(f, [format_verbatim_node(node.syntax())]),
+        ValueListLayout::OnePerLine => {
+            let content = format_once(|f| {
+                write!(f, [hard_line_break()])?;
+                write!(f, [values])
+            });
+
+            write!(f, [group(&indent(&content))])
+        }
     }
 }
 
@@ -147,7 +156,6 @@ pub(crate) enum ValueListLayout {
     ///     Arial,
     ///     sans-serif;
     /// ```
-    #[allow(unused)]
     OnePerLine,
 }
 
@@ -155,7 +163,11 @@ pub(crate) enum ValueListLayout {
 /// Until the parser supports comma-separated lists, this will always return
 /// [ValueListLayout::Fill], since all space-separated lists are intentionally
 /// printed compactly.
-pub(crate) fn get_value_list_layout<N, I>(list: &N, _: &CssComments) -> ValueListLayout
+pub(crate) fn get_value_list_layout<N, I>(
+    list: &N,
+    _: &CssComments,
+    f: &CssFormatter,
+) -> ValueListLayout
 where
     N: AstNodeList<Language = CssLanguage, Node = I> + AstNode<Language = CssLanguage>,
     I: AstNode<Language = CssLanguage> + IntoFormat<CssFormatContext>,
@@ -171,11 +183,30 @@ where
             name.starts_with("grid-template") || name == "grid"
         });
 
+    let text_size: TextSize = list
+        .iter()
+        .filter(|x| x.range().len() > TextSize::from(1))
+        .map(|x| x.range().len())
+        .sum();
+    let value_count = list
+        .iter()
+        .filter(|x| x.range().len() > TextSize::from(1))
+        .count();
+
+    let is_comma_separated = list
+        .iter()
+        .any(|x| CssGenericDelimiter::cast_ref(x.syntax()).is_some());
+
     // TODO: Check for comments, check for the types of elements in the list, etc.
     if is_grid_property {
         ValueListLayout::PreserveInline
     } else if list.len() == 1 {
         ValueListLayout::SingleValue
+    } else if is_comma_separated
+        && value_count > 12
+        && text_size >= TextSize::from(f.options().line_width().value() as u32)
+    {
+        ValueListLayout::OnePerLine
     } else {
         ValueListLayout::Fill
     }
