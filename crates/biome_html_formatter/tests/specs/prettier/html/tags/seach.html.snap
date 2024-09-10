@@ -1,0 +1,182 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/seach.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+<header>
+  <h1><a href="/">My fancy blog</a></h1>
+  ...
+  <search>
+    <form action="search.php">
+      <label for="query">Find an article</label>
+      <input id="query" name="q" type="search">
+      <button type="submit">Go!</button>
+    </form>
+  </search>
+
+  <SEARCH></SEARCH>
+</header>
+</body>
+</html>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,24 +1,24 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html lang="en">
+-  <head>
+-    <meta charset="UTF-8" />
+-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-    <title>Document</title>
+-  </head>
+-  <body>
+-    <header>
+-      <h1><a href="/">My fancy blog</a></h1>
+-      ...
+-      <search>
+-        <form action="search.php">
+-          <label for="query">Find an article</label>
+-          <input id="query" name="q" type="search" />
+-          <button type="submit">Go!</button>
+-        </form>
+-      </search>
++<head>
++  <meta charset="UTF-8">
++  <meta http-equiv="X-UA-Compatible" content="IE=edge">
++  <meta name="viewport" content="width=device-width, initial-scale=1.0">
++  <title>Document</title>
++</head>
++<body>
++<header>
++  <h1><a href="/">My fancy blog</a></h1>
++  ...
++  <search>
++    <form action="search.php">
++      <label for="query">Find an article</label>
++      <input id="query" name="q" type="search">
++      <button type="submit">Go!</button>
++    </form>
++  </search>
+ 
+-      <search></search>
+-    </header>
+-  </body>
+-</html>
++  <SEARCH></SEARCH>
++</header>
++</body>
++</html>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+<header>
+  <h1><a href="/">My fancy blog</a></h1>
+  ...
+  <search>
+    <form action="search.php">
+      <label for="query">Find an article</label>
+      <input id="query" name="q" type="search">
+      <button type="submit">Go!</button>
+    </form>
+  </search>
+
+  <SEARCH></SEARCH>
+</header>
+</body>
+</html>```
+
+# Errors
+```
+seach.html:5:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    3 │ <head>
+    4 │   <meta charset="UTF-8">
+  > 5 │   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      │             ^
+    6 │   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    7 │   <title>Document</title>
+  
+seach.html:12:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+    10 │ <header>
+    11 │   <h1><a href="/">My fancy blog</a></h1>
+  > 12 │   ...
+       │   ^
+    13 │   <search>
+    14 │     <form action="search.php">
+  
+seach.html:12:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+    10 │ <header>
+    11 │   <h1><a href="/">My fancy blog</a></h1>
+  > 12 │   ...
+       │    ^
+    13 │   <search>
+    14 │     <form action="search.php">
+  
+seach.html:12:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+    10 │ <header>
+    11 │   <h1><a href="/">My fancy blog</a></h1>
+  > 12 │   ...
+       │     ^
+    13 │   <search>
+    14 │     <form action="search.php">
+  
+seach.html:25:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+    23 │ </body>
+    24 │ </html>
+  > 25 │ 
+       │ 
+  
+  i Expected a closing tag here.
+  
+    23 │ </body>
+    24 │ </html>
+  > 25 │ 
+       │ 
+  
+
+```

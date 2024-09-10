@@ -1,0 +1,291 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/class-bem1.html
+---
+# Input
+
+```html
+<div class="ProviderMeasuresContainer__heading-row
+  d-flex
+  flex-column flex-lg-row
+  justify-content-start justify-content-lg-between
+  align-items-start align-items-lg-center">Foo</div>
+
+<div  class="a-bem-block a-bem-block--with-modifer ">
+<div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block" >
+<div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element">
+</div></div> </div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,15 +1,10 @@
+-<div
+-  class="ProviderMeasuresContainer__heading-row d-flex flex-column flex-lg-row justify-content-start justify-content-lg-between align-items-start align-items-lg-center"
+->
+-  Foo
+-</div>
++<div class="ProviderMeasuresContainer__heading-row
++  d-flex
++  flex-column flex-lg-row
++  justify-content-start justify-content-lg-between
++  align-items-start align-items-lg-center">Foo</div>
+ 
+-<div class="a-bem-block a-bem-block--with-modifer">
+-  <div
+-    class="a-bem-block__element a-bem-block__element--with-modifer also-another-block"
+-  >
+-    <div
+-      class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element"
+-    ></div>
+-  </div>
+-</div>
++<div  class="a-bem-block a-bem-block--with-modifer ">
++<div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block" >
++<div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element">
++</div></div> </div>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<div class="ProviderMeasuresContainer__heading-row
+  d-flex
+  flex-column flex-lg-row
+  justify-content-start justify-content-lg-between
+  align-items-start align-items-lg-center">Foo</div>
+
+<div  class="a-bem-block a-bem-block--with-modifer ">
+<div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block" >
+<div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element">
+</div></div> </div>```
+
+# Errors
+```
+class-bem1.html:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+  > 1 │ <div class="ProviderMeasuresContainer__heading-row
+      │            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │   d-flex
+    3 │   flex-column flex-lg-row
+  
+  i The closing quote must be on the same line.
+  
+class-bem1.html:2:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    1 │ <div class="ProviderMeasuresContainer__heading-row
+  > 2 │   d-flex
+      │    ^
+    3 │   flex-column flex-lg-row
+    4 │   justify-content-start justify-content-lg-between
+  
+class-bem1.html:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    1 │ <div class="ProviderMeasuresContainer__heading-row
+    2 │   d-flex
+  > 3 │   flex-column flex-lg-row
+      │       ^
+    4 │   justify-content-start justify-content-lg-between
+    5 │   align-items-start align-items-lg-center">Foo</div>
+  
+class-bem1.html:3:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    1 │ <div class="ProviderMeasuresContainer__heading-row
+    2 │   d-flex
+  > 3 │   flex-column flex-lg-row
+      │                   ^
+    4 │   justify-content-start justify-content-lg-between
+    5 │   align-items-start align-items-lg-center">Foo</div>
+  
+class-bem1.html:3:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    1 │ <div class="ProviderMeasuresContainer__heading-row
+    2 │   d-flex
+  > 3 │   flex-column flex-lg-row
+      │                      ^
+    4 │   justify-content-start justify-content-lg-between
+    5 │   align-items-start align-items-lg-center">Foo</div>
+  
+class-bem1.html:4:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    2 │   d-flex
+    3 │   flex-column flex-lg-row
+  > 4 │   justify-content-start justify-content-lg-between
+      │          ^
+    5 │   align-items-start align-items-lg-center">Foo</div>
+    6 │ 
+  
+class-bem1.html:4:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    2 │   d-flex
+    3 │   flex-column flex-lg-row
+  > 4 │   justify-content-start justify-content-lg-between
+      │                  ^
+    5 │   align-items-start align-items-lg-center">Foo</div>
+    6 │ 
+  
+class-bem1.html:4:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    2 │   d-flex
+    3 │   flex-column flex-lg-row
+  > 4 │   justify-content-start justify-content-lg-between
+      │                                ^
+    5 │   align-items-start align-items-lg-center">Foo</div>
+    6 │ 
+  
+class-bem1.html:4:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    2 │   d-flex
+    3 │   flex-column flex-lg-row
+  > 4 │   justify-content-start justify-content-lg-between
+      │                                        ^
+    5 │   align-items-start align-items-lg-center">Foo</div>
+    6 │ 
+  
+class-bem1.html:4:43 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    2 │   d-flex
+    3 │   flex-column flex-lg-row
+  > 4 │   justify-content-start justify-content-lg-between
+      │                                           ^
+    5 │   align-items-start align-items-lg-center">Foo</div>
+    6 │ 
+  
+class-bem1.html:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    3 │   flex-column flex-lg-row
+    4 │   justify-content-start justify-content-lg-between
+  > 5 │   align-items-start align-items-lg-center">Foo</div>
+      │        ^
+    6 │ 
+    7 │ <div  class="a-bem-block a-bem-block--with-modifer ">
+  
+class-bem1.html:5:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    3 │   flex-column flex-lg-row
+    4 │   justify-content-start justify-content-lg-between
+  > 5 │   align-items-start align-items-lg-center">Foo</div>
+      │              ^
+    6 │ 
+    7 │ <div  class="a-bem-block a-bem-block--with-modifer ">
+  
+class-bem1.html:5:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    3 │   flex-column flex-lg-row
+    4 │   justify-content-start justify-content-lg-between
+  > 5 │   align-items-start align-items-lg-center">Foo</div>
+      │                          ^
+    6 │ 
+    7 │ <div  class="a-bem-block a-bem-block--with-modifer ">
+  
+class-bem1.html:5:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    3 │   flex-column flex-lg-row
+    4 │   justify-content-start justify-content-lg-between
+  > 5 │   align-items-start align-items-lg-center">Foo</div>
+      │                                ^
+    6 │ 
+    7 │ <div  class="a-bem-block a-bem-block--with-modifer ">
+  
+class-bem1.html:5:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    3 │   flex-column flex-lg-row
+    4 │   justify-content-start justify-content-lg-between
+  > 5 │   align-items-start align-items-lg-center">Foo</div>
+      │                                   ^
+    6 │ 
+    7 │ <div  class="a-bem-block a-bem-block--with-modifer ">
+  
+class-bem1.html:5:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    3 │   flex-column flex-lg-row
+    4 │   justify-content-start justify-content-lg-between
+  > 5 │   align-items-start align-items-lg-center">Foo</div>
+      │                                          ^^^^^^^^^^^
+    6 │ 
+    7 │ <div  class="a-bem-block a-bem-block--with-modifer ">
+  
+  i The closing quote must be on the same line.
+  
+class-bem1.html:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    5 │   align-items-start align-items-lg-center">Foo</div>
+    6 │ 
+  > 7 │ <div  class="a-bem-block a-bem-block--with-modifer ">
+      │ ^
+    8 │ <div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block" >
+    9 │ <div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element">
+  
+  i Expected an attribute here.
+  
+    5 │   align-items-start align-items-lg-center">Foo</div>
+    6 │ 
+  > 7 │ <div  class="a-bem-block a-bem-block--with-modifer ">
+      │ ^
+    8 │ <div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block" >
+    9 │ <div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element">
+  
+class-bem1.html:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+     9 │ <div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element">
+    10 │ </div></div> </div>
+  > 11 │ 
+       │ 
+  
+  i Expected a closing tag here.
+  
+     9 │ <div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element">
+    10 │ </div></div> </div>
+  > 11 │ 
+       │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    8: <div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block" >
+    9: <div  class="a-bem-block__element a-bem-block__element--with-modifer also-another-block__element">
+```

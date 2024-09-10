@@ -1,0 +1,158 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/class-bem2.html
+---
+# Input
+
+```html
+<div class="news__header widget__content">
+  <div class="news__tabs">
+    <h1 class="news__tab-wrapper news__head-item">
+      <a
+        class="home-link home-link_blue_yes news__tab news__tab_selected_yes mix-tabber__tab mix-tabber__tab_selected_yes"
+        tabindex="0"
+        aria-selected="true"
+        aria-controls="news_panel_news"
+        data-key="news"
+        id="news_tab_news"
+        data-stat-link="news.tab.link.news"
+        data-stat-select="news.tab.select.news"
+        target="_blank"
+        role="tab"
+        href="https://yandex.ru/news?msid=1581089780.29024.161826.172442&mlid=1581088893.glob_225"
+        rel="noopener"
+        >...</a
+      >
+    </h1>
+  </div>
+</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -18,4 +18,4 @@
+       >
+     </h1>
+   </div>
+-</div>
++</div>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<div class="news__header widget__content">
+  <div class="news__tabs">
+    <h1 class="news__tab-wrapper news__head-item">
+      <a
+        class="home-link home-link_blue_yes news__tab news__tab_selected_yes mix-tabber__tab mix-tabber__tab_selected_yes"
+        tabindex="0"
+        aria-selected="true"
+        aria-controls="news_panel_news"
+        data-key="news"
+        id="news_tab_news"
+        data-stat-link="news.tab.link.news"
+        data-stat-select="news.tab.select.news"
+        target="_blank"
+        role="tab"
+        href="https://yandex.ru/news?msid=1581089780.29024.161826.172442&mlid=1581088893.glob_225"
+        rel="noopener"
+        >...</a
+      >
+    </h1>
+  </div>
+</div>```
+
+# Errors
+```
+class-bem2.html:7:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    5 │         class="home-link home-link_blue_yes news__tab news__tab_selected_yes mix-tabber__tab mix-tabber__tab_selected_yes"
+    6 │         tabindex="0"
+  > 7 │         aria-selected="true"
+      │             ^
+    8 │         aria-controls="news_panel_news"
+    9 │         data-key="news"
+  
+class-bem2.html:8:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+     6 │         tabindex="0"
+     7 │         aria-selected="true"
+   > 8 │         aria-controls="news_panel_news"
+       │             ^
+     9 │         data-key="news"
+    10 │         id="news_tab_news"
+  
+class-bem2.html:9:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+     7 │         aria-selected="true"
+     8 │         aria-controls="news_panel_news"
+   > 9 │         data-key="news"
+       │             ^
+    10 │         id="news_tab_news"
+    11 │         data-stat-link="news.tab.link.news"
+  
+class-bem2.html:11:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+     9 │         data-key="news"
+    10 │         id="news_tab_news"
+  > 11 │         data-stat-link="news.tab.link.news"
+       │             ^
+    12 │         data-stat-select="news.tab.select.news"
+    13 │         target="_blank"
+  
+class-bem2.html:11:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+     9 │         data-key="news"
+    10 │         id="news_tab_news"
+  > 11 │         data-stat-link="news.tab.link.news"
+       │                  ^
+    12 │         data-stat-select="news.tab.select.news"
+    13 │         target="_blank"
+  
+class-bem2.html:12:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    10 │         id="news_tab_news"
+    11 │         data-stat-link="news.tab.link.news"
+  > 12 │         data-stat-select="news.tab.select.news"
+       │             ^
+    13 │         target="_blank"
+    14 │         role="tab"
+  
+class-bem2.html:12:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    10 │         id="news_tab_news"
+    11 │         data-stat-link="news.tab.link.news"
+  > 12 │         data-stat-select="news.tab.select.news"
+       │                  ^
+    13 │         target="_blank"
+    14 │         role="tab"
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    5:         class="home-link home-link_blue_yes news__tab news__tab_selected_yes mix-tabber__tab mix-tabber__tab_selected_yes"
+   15:         href="https://yandex.ru/news?msid=1581089780.29024.161826.172442&mlid=1581088893.glob_225"
+```

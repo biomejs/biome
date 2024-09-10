@@ -1,0 +1,1419 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/style.html
+---
+# Input
+
+```html
+<div style="
+
+color:
+#fFf
+
+"></div>
+
+<div style=" "></div>
+<div style></div>
+
+<div style="
+
+all: initial;display: block;
+contain: content;text-align: center;
+
+
+
+background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+max-width: 500px;margin: 0 auto;
+border-radius: 8px;transition: transform .2s ease-out;
+
+"></div>
+
+
+
+<div style="
+background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+"></div>
+
+<div style="   color : red;
+            display    :inline ">
+  </div>
+
+
+<div style="  
+
+color: green;
+
+display: inline 
+
+">
+  </div>
+
+<div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 
+style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+ attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  </div>
+
+<div style="{{ ...styles }}" 
+></div>
+
+<div style="color: red; {{ otherStyles }}"
+></div>
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,75 +1,54 @@
+-<div style="color: #fff"></div>
++<div style="
++
++color:
++#fFf
++
++"></div>
+ 
+-<div style=""></div>
++<div style=" "></div>
+ <div style></div>
+ 
+-<div
+-  style="
+-    all: initial;
+-    display: block;
+-    contain: content;
+-    text-align: center;
++<div style="
+ 
+-    background: linear-gradient(
+-      to left,
+-      hotpink,
+-      #fff00f,
+-      #ccc,
+-      hsla(240, 100%, 50%, 0.05),
+-      transparent
+-    );
+-    background: linear-gradient(to left, hsla(240, 100%, 50%, 0.05), red);
+-    max-width: 500px;
+-    margin: 0 auto;
+-    border-radius: 8px;
+-    transition: transform 0.2s ease-out;
+-  "
+-></div>
++all: initial;display: block;
++contain: content;text-align: center;
+ 
+-<div
+-  style="
+-    background: linear-gradient(
+-      to left,
+-      hotpink,
+-      hsla(240, 100%, 50%, 0.05),
+-      transparent
+-    );
+-  "
+-></div>
+ 
+-<div style="color: red; display: inline"></div>
+ 
+-<div
+-  style="
+-    color: green;
++background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
++background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
++max-width: 500px;margin: 0 auto;
++border-radius: 8px;transition: transform .2s ease-out;
+ 
+-    display: inline;
+-  "
+-></div>
++"></div>
+ 
+-<div
+-  attribute-1
+-  attribute-2
+-  attribute-3
+-  attribute-4
+-  attribute-5
+-  attribute-6
+-  attribute-7
+-  style="
+-    css-prop-1: css-value;
+-    css-prop-2: css-value;
+-    css-prop-3: css-value;
+-    css-prop-4: css-value;
+-  "
+-  attribute-1
+-  attribute-2
+-  attribute-3
+-  attribute-4
+-  attribute-5
+-  attribute-6
+-  attribute-7
+-></div>
+ 
+-<div style="{{ ...styles }}"></div>
+ 
+-<div style="color: red; {{ otherStyles }}"></div>
++<div style="
++background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
++"></div>
++
++<div style="   color : red;
++            display    :inline ">
++  </div>
++
++
++<div style="  
++
++color: green;
++
++display: inline 
++
++">
++  </div>
++
++<div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 
++style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
++ attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
++  </div>
++
++<div style="{{ ...styles }}" 
++></div>
++
++<div style="color: red; {{ otherStyles }}"
++></div>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<div style="
+
+color:
+#fFf
+
+"></div>
+
+<div style=" "></div>
+<div style></div>
+
+<div style="
+
+all: initial;display: block;
+contain: content;text-align: center;
+
+
+
+background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+max-width: 500px;margin: 0 auto;
+border-radius: 8px;transition: transform .2s ease-out;
+
+"></div>
+
+
+
+<div style="
+background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+"></div>
+
+<div style="   color : red;
+            display    :inline ">
+  </div>
+
+
+<div style="  
+
+color: green;
+
+display: inline 
+
+">
+  </div>
+
+<div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 
+style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+ attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  </div>
+
+<div style="{{ ...styles }}" 
+></div>
+
+<div style="color: red; {{ otherStyles }}"
+></div>```
+
+# Errors
+```
+style.html:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+  > 1 │ <div style="
+      │            ^
+    2 │ 
+    3 │ color:
+  
+  i The closing quote must be on the same line.
+  
+style.html:3:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    1 │ <div style="
+    2 │ 
+  > 3 │ color:
+      │      ^
+    4 │ #fFf
+    5 │ 
+  
+style.html:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `#`
+  
+    3 │ color:
+  > 4 │ #fFf
+      │ ^
+    5 │ 
+    6 │ "></div>
+  
+style.html:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    4 │ #fFf
+    5 │ 
+  > 6 │ "></div>
+      │ ^^^^^^^^
+    7 │ 
+    8 │ <div style=" "></div>
+  
+  i The closing quote must be on the same line.
+  
+style.html:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+     6 │ "></div>
+     7 │ 
+   > 8 │ <div style=" "></div>
+       │ ^
+     9 │ <div style></div>
+    10 │ 
+  
+  i Expected an attribute here.
+  
+     6 │ "></div>
+     7 │ 
+   > 8 │ <div style=" "></div>
+       │ ^
+     9 │ <div style></div>
+    10 │ 
+  
+style.html:11:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+     9 │ <div style></div>
+    10 │ 
+  > 11 │ <div style="
+       │            ^
+    12 │ 
+    13 │ all: initial;display: block;
+  
+  i The closing quote must be on the same line.
+  
+style.html:13:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    11 │ <div style="
+    12 │ 
+  > 13 │ all: initial;display: block;
+       │    ^
+    14 │ contain: content;text-align: center;
+    15 │ 
+  
+style.html:13:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    11 │ <div style="
+    12 │ 
+  > 13 │ all: initial;display: block;
+       │             ^
+    14 │ contain: content;text-align: center;
+    15 │ 
+  
+style.html:13:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    11 │ <div style="
+    12 │ 
+  > 13 │ all: initial;display: block;
+       │                     ^
+    14 │ contain: content;text-align: center;
+    15 │ 
+  
+style.html:13:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    11 │ <div style="
+    12 │ 
+  > 13 │ all: initial;display: block;
+       │                            ^
+    14 │ contain: content;text-align: center;
+    15 │ 
+  
+style.html:14:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    13 │ all: initial;display: block;
+  > 14 │ contain: content;text-align: center;
+       │        ^
+    15 │ 
+  
+style.html:14:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    13 │ all: initial;display: block;
+  > 14 │ contain: content;text-align: center;
+       │                 ^
+    15 │ 
+  
+style.html:14:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    13 │ all: initial;display: block;
+  > 14 │ contain: content;text-align: center;
+       │                      ^
+    15 │ 
+  
+style.html:14:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    13 │ all: initial;display: block;
+  > 14 │ contain: content;text-align: center;
+       │                            ^
+    15 │ 
+  
+style.html:14:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    13 │ all: initial;display: block;
+  > 14 │ contain: content;text-align: center;
+       │                                    ^
+    15 │ 
+  
+style.html:18:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │           ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                   ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `(`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                            ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                    ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                             ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `#`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                               ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:54 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                      ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `#`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                        ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:60 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                            ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:66 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `(`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                  ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:70 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                      ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:75 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                           ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:76 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                            ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:80 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                                ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:81 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                                 ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:83 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                                   ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:86 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `)`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                                      ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:87 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                                       ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:100 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `)`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                                                    ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:18:101 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+  > 18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                                                     ^
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  
+style.html:19:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │           ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                   ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `(`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                            ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                    ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `(`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                          ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:46 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                              ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                                   ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:52 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                                    ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                                        ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                                         ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:59 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                                           ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:62 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `)`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                                              ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:63 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                                               ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:68 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `)`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                                                    ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:19:69 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+  > 19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+       │                                                                     ^
+    20 │ max-width: 500px;margin: 0 auto;
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+  
+style.html:20:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+  > 20 │ max-width: 500px;margin: 0 auto;
+       │    ^
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+    22 │ 
+  
+style.html:20:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+  > 20 │ max-width: 500px;margin: 0 auto;
+       │          ^
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+    22 │ 
+  
+style.html:20:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+  > 20 │ max-width: 500px;margin: 0 auto;
+       │                 ^
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+    22 │ 
+  
+style.html:20:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+  > 20 │ max-width: 500px;margin: 0 auto;
+       │                        ^
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+    22 │ 
+  
+style.html:20:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    18 │ background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+  > 20 │ max-width: 500px;margin: 0 auto;
+       │                                ^
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+    22 │ 
+  
+style.html:21:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  > 21 │ border-radius: 8px;transition: transform .2s ease-out;
+       │       ^
+    22 │ 
+    23 │ "></div>
+  
+style.html:21:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  > 21 │ border-radius: 8px;transition: transform .2s ease-out;
+       │              ^
+    22 │ 
+    23 │ "></div>
+  
+style.html:21:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  > 21 │ border-radius: 8px;transition: transform .2s ease-out;
+       │                   ^
+    22 │ 
+    23 │ "></div>
+  
+style.html:21:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  > 21 │ border-radius: 8px;transition: transform .2s ease-out;
+       │                              ^
+    22 │ 
+    23 │ "></div>
+  
+style.html:21:42 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  > 21 │ border-radius: 8px;transition: transform .2s ease-out;
+       │                                          ^
+    22 │ 
+    23 │ "></div>
+  
+style.html:21:50 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  > 21 │ border-radius: 8px;transition: transform .2s ease-out;
+       │                                                  ^
+    22 │ 
+    23 │ "></div>
+  
+style.html:21:54 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    19 │ background: linear-gradient(to left, hsla(240, 100%, 50%, .05), red);
+    20 │ max-width: 500px;margin: 0 auto;
+  > 21 │ border-radius: 8px;transition: transform .2s ease-out;
+       │                                                      ^
+    22 │ 
+    23 │ "></div>
+  
+style.html:23:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    21 │ border-radius: 8px;transition: transform .2s ease-out;
+    22 │ 
+  > 23 │ "></div>
+       │ ^^^^^^^^
+    24 │ 
+  
+  i The closing quote must be on the same line.
+  
+style.html:27:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+  > 27 │ <div style="
+       │ ^
+    28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+    29 │ "></div>
+  
+  i Expected an attribute here.
+  
+  > 27 │ <div style="
+       │ ^
+    28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+    29 │ "></div>
+  
+style.html:27:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+  > 27 │ <div style="
+       │            ^
+    28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+    29 │ "></div>
+  
+  i The closing quote must be on the same line.
+  
+style.html:28:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │           ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                   ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `(`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                            ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                    ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                             ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `(`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                   ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:55 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                       ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:60 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                            ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:61 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                             ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:65 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `%`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                 ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:66 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                  ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:68 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                    ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:71 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `)`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                       ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:72 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                        ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:85 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `)`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                                     ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:28:86 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    27 │ <div style="
+  > 28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+       │                                                                                      ^
+    29 │ "></div>
+    30 │ 
+  
+style.html:29:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    27 │ <div style="
+    28 │ background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+  > 29 │ "></div>
+       │ ^^^^^^^^
+    30 │ 
+    31 │ <div style="   color : red;
+  
+  i The closing quote must be on the same line.
+  
+style.html:31:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    29 │ "></div>
+    30 │ 
+  > 31 │ <div style="   color : red;
+       │ ^
+    32 │             display    :inline ">
+    33 │   </div>
+  
+  i Expected an attribute here.
+  
+    29 │ "></div>
+    30 │ 
+  > 31 │ <div style="   color : red;
+       │ ^
+    32 │             display    :inline ">
+    33 │   </div>
+  
+style.html:31:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    29 │ "></div>
+    30 │ 
+  > 31 │ <div style="   color : red;
+       │            ^^^^^^^^^^^^^^^^
+    32 │             display    :inline ">
+    33 │   </div>
+  
+  i The closing quote must be on the same line.
+  
+style.html:32:24 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    31 │ <div style="   color : red;
+  > 32 │             display    :inline ">
+       │                        ^
+    33 │   </div>
+    34 │ 
+  
+style.html:32:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    31 │ <div style="   color : red;
+  > 32 │             display    :inline ">
+       │                                ^^
+    33 │   </div>
+    34 │ 
+  
+  i The closing quote must be on the same line.
+  
+style.html:33:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    31 │ <div style="   color : red;
+    32 │             display    :inline ">
+  > 33 │   </div>
+       │   ^
+    34 │ 
+  
+  i Expected an attribute here.
+  
+    31 │ <div style="   color : red;
+    32 │             display    :inline ">
+  > 33 │   </div>
+       │   ^
+    34 │ 
+  
+style.html:36:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+  > 36 │ <div style="··
+       │            ^^^
+    37 │ 
+    38 │ color: green;
+  
+  i The closing quote must be on the same line.
+  
+style.html:38:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    36 │ <div style="··
+    37 │ 
+  > 38 │ color: green;
+       │      ^
+    39 │ 
+    40 │ display: inline·
+  
+style.html:38:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `;`
+  
+    36 │ <div style="··
+    37 │ 
+  > 38 │ color: green;
+       │             ^
+    39 │ 
+    40 │ display: inline·
+  
+style.html:40:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `:`
+  
+    38 │ color: green;
+    39 │ 
+  > 40 │ display: inline·
+       │        ^
+    41 │ 
+    42 │ ">
+  
+style.html:42:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    40 │ display: inline·
+    41 │ 
+  > 42 │ ">
+       │ ^^
+    43 │   </div>
+    44 │ 
+  
+  i The closing quote must be on the same line.
+  
+style.html:43:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    42 │ ">
+  > 43 │   </div>
+       │   ^
+    44 │ 
+    45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+  
+  i Expected an attribute here.
+  
+    42 │ ">
+  > 43 │   </div>
+       │   ^
+    44 │ 
+    45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+  
+style.html:45:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    43 │   </div>
+    44 │ 
+  > 45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+       │               ^
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+    47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  
+style.html:45:27 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    43 │   </div>
+    44 │ 
+  > 45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+       │                           ^
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+    47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  
+style.html:45:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    43 │   </div>
+    44 │ 
+  > 45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+       │                                       ^
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+    47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  
+style.html:45:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    43 │   </div>
+    44 │ 
+  > 45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+       │                                                   ^
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+    47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  
+style.html:45:63 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    43 │   </div>
+    44 │ 
+  > 45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+       │                                                               ^
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+    47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  
+style.html:45:75 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    43 │   </div>
+    44 │ 
+  > 45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+       │                                                                           ^
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+    47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  
+style.html:45:87 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    43 │   </div>
+    44 │ 
+  > 45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+       │                                                                                       ^
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+    47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+  
+style.html:47:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+  > 47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+       │           ^
+    48 │   </div>
+    49 │ 
+  
+style.html:47:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+  > 47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+       │                       ^
+    48 │   </div>
+    49 │ 
+  
+style.html:47:35 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+  > 47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+       │                                   ^
+    48 │   </div>
+    49 │ 
+  
+style.html:47:47 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+  > 47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+       │                                               ^
+    48 │   </div>
+    49 │ 
+  
+style.html:47:59 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+  > 47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+       │                                                           ^
+    48 │   </div>
+    49 │ 
+  
+style.html:47:71 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+  > 47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+       │                                                                       ^
+    48 │   </div>
+    49 │ 
+  
+style.html:47:83 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    45 │ <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7·
+    46 │ style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+  > 47 │  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+       │                                                                                   ^
+    48 │   </div>
+    49 │ 
+  
+style.html:54:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+    53 │ <div style="color: red; {{ otherStyles }}"
+  > 54 │ ></div>
+       │        
+  
+  i Expected a closing tag here.
+  
+    53 │ <div style="color: red; {{ otherStyles }}"
+  > 54 │ ></div>
+       │        
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   18: background: linear-gradient(to left, hotpink, #FFF00F, #ccc, hsla(240, 100%, 50%, .05), transparent);
+   28: background: linear-gradient(to left, hotpink, hsla(240, 100%, 50%, .05), transparent);
+   45: <div attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 
+   46: style="css-prop-1: css-value;css-prop-2: css-value;css-prop-3: css-value;css-prop-4: css-value;"
+   47:  attribute-1 attribute-2 attribute-3 attribute-4 attribute-5 attribute-6 attribute-7 >
+```

@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+      blink {
+        display: none;
+      }
+    </style>
+  </head>
+  <body></body>
+</html>

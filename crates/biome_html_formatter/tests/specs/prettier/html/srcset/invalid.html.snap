@@ -1,0 +1,174 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/srcset/invalid.html
+---
+# Input
+
+```html
+<img src="a"
+srcset="
+ should-not-format  400w 100h,
+       should-not-format  500w 200h
+"
+ alt=""/>
+
+<img src="a"
+srcset="
+ should-not-format ,, should-not-format 0q,,,
+"
+ alt=""/>
+
+<img src="a"
+srcset=",,,"/>
+
+<img src="a"
+srcset="   "/>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,20 +1,18 @@
+-<img
+-  src="a"
+-  srcset="
++<img src="a"
++srcset="
+  should-not-format  400w 100h,
+        should-not-format  500w 200h
+ "
+-  alt=""
+-/>
++ alt=""/>
+ 
+-<img
+-  src="a"
+-  srcset="
++<img src="a"
++srcset="
+  should-not-format ,, should-not-format 0q,,,
+ "
+-  alt=""
+-/>
++ alt=""/>
+ 
+-<img src="a" srcset=",,," />
++<img src="a"
++srcset=",,,"/>
+ 
+-<img src="a" srcset="   " />
++<img src="a"
++srcset="   "/>
+```
+
+# Output
+
+```html
+<img src="a"
+srcset="
+ should-not-format  400w 100h,
+       should-not-format  500w 200h
+"
+ alt=""/>
+
+<img src="a"
+srcset="
+ should-not-format ,, should-not-format 0q,,,
+"
+ alt=""/>
+
+<img src="a"
+srcset=",,,"/>
+
+<img src="a"
+srcset="   "/>
+```
+
+# Errors
+```
+invalid.html:2:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    1 │ <img src="a"
+  > 2 │ srcset="
+      │        ^
+    3 │  should-not-format  400w 100h,
+    4 │        should-not-format  500w 200h
+  
+  i The closing quote must be on the same line.
+  
+invalid.html:3:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    1 │ <img src="a"
+    2 │ srcset="
+  > 3 │  should-not-format  400w 100h,
+      │        ^
+    4 │        should-not-format  500w 200h
+    5 │ "
+  
+invalid.html:3:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    1 │ <img src="a"
+    2 │ srcset="
+  > 3 │  should-not-format  400w 100h,
+      │            ^
+    4 │        should-not-format  500w 200h
+    5 │ "
+  
+invalid.html:3:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    1 │ <img src="a"
+    2 │ srcset="
+  > 3 │  should-not-format  400w 100h,
+      │                              ^
+    4 │        should-not-format  500w 200h
+    5 │ "
+  
+invalid.html:4:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    2 │ srcset="
+    3 │  should-not-format  400w 100h,
+  > 4 │        should-not-format  500w 200h
+      │              ^
+    5 │ "
+    6 │  alt=""/>
+  
+invalid.html:4:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    2 │ srcset="
+    3 │  should-not-format  400w 100h,
+  > 4 │        should-not-format  500w 200h
+      │                  ^
+    5 │ "
+    6 │  alt=""/>
+  
+invalid.html:5:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    3 │  should-not-format  400w 100h,
+    4 │        should-not-format  500w 200h
+  > 5 │ "
+      │ ^
+    6 │  alt=""/>
+    7 │ 
+  
+  i The closing quote must be on the same line.
+  
+
+```

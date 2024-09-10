@@ -1,0 +1,111 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/bracket-same-line/inline.html
+---
+# Input
+
+```html
+
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"></span>
+<span  class="a">text</span>
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span  class="a">text</span><span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,22 +1,12 @@
+-<span
+-  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+->
+-  text
++<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
++text
+ </span>
+-<span
+-  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+-></span>
+-<span class="a">text</span>
+-<span
+-  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+->
+-  text
++<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"></span>
++<span  class="a">text</span>
++<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
++text
+ </span>
+-<span class="a">text</span
+-><span
+-  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+->
+-  text
++<span  class="a">text</span><span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
++text
+ </span>
+-<span class="a">text</span><span class="a">text</span><span class="a">text</span
+-><span class="a">text</span><span class="a">text</span>
++<span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span>
+```
+
+# Output
+
+```html
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"></span>
+<span  class="a">text</span>
+<span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span  class="a">text</span><span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+text
+</span>
+<span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span>
+```
+
+# Errors
+```
+inline.html:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `_`
+  
+  > 2 │ <span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+      │           ^
+    3 │ text
+    4 │ </span>
+  
+inline.html:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `_`
+  
+  > 2 │ <span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+      │                ^
+    3 │ text
+    4 │ </span>
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: <span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+    4: <span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"></span>
+    6: <span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+    9: <span  class="a">text</span><span long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+   12: <span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span><span  class="a">text</span>
+```

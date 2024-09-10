@@ -1,0 +1,66 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/marquee.html
+---
+# Input
+
+```html
+<marquee>This text will scroll from right to left</marquee>
+
+<marquee direction="up">This text will scroll from bottom to top</marquee>
+
+<marquee
+  direction="down"
+  width="250"
+  height="200"
+  behavior="alternate"
+  style="border:solid">
+  <marquee behavior="alternate"> This text will bounce </marquee>
+</marquee>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,10 @@
+-<marquee>This text will scroll from right to left</marquee>
+-
+-<marquee direction="up">This text will scroll from bottom to top</marquee>
++<marquee>This text will scroll from right to left</marquee><marquee direction="up">This text will scroll from bottom to top</marquee>
+ 
+ <marquee
+   direction="down"
+   width="250"
+   height="200"
+   behavior="alternate"
+-  style="border: solid"
+->
+-  <marquee behavior="alternate">This text will bounce</marquee>
++  style="border:solid">
++  <marquee behavior="alternate"> This text will bounce </marquee>
+ </marquee>
+```
+
+# Output
+
+```html
+<marquee>This text will scroll from right to left</marquee><marquee direction="up">This text will scroll from bottom to top</marquee>
+
+<marquee
+  direction="down"
+  width="250"
+  height="200"
+  behavior="alternate"
+  style="border:solid">
+  <marquee behavior="alternate"> This text will bounce </marquee>
+</marquee>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: <marquee>This text will scroll from right to left</marquee><marquee direction="up">This text will scroll from bottom to top</marquee>
+```
