@@ -30,6 +30,7 @@ pub type NoCommaOperator =
     <lint::style::no_comma_operator::NoCommaOperator as biome_analyze::Rule>::Options;
 pub type NoCommentText =
     <lint::suspicious::no_comment_text::NoCommentText as biome_analyze::Rule>::Options;
+pub type NoCommonJs = <lint::nursery::no_common_js::NoCommonJs as biome_analyze::Rule>::Options;
 pub type NoCompareNegZero =
     <lint::suspicious::no_compare_neg_zero::NoCompareNegZero as biome_analyze::Rule>::Options;
 pub type NoConfusingLabels =

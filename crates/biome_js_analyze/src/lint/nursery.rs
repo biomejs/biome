@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_lint_group;
 
+pub mod no_common_js;
 pub mod no_console;
 pub mod no_done_callback;
 pub mod no_duplicate_else_if;
@@ -50,6 +51,7 @@ declare_lint_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
+            self :: no_common_js :: NoCommonJs ,
             self :: no_console :: NoConsole ,
             self :: no_done_callback :: NoDoneCallback ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,

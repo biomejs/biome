@@ -1148,6 +1148,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow use of CommonJs module system in favor of ESM style imports.
+	 */
+	noCommonJs?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of console.
 	 */
 	noConsole?: RuleFixConfiguration_for_NoConsoleOptions;
@@ -2748,6 +2752,7 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
