@@ -208,6 +208,7 @@ dependencies = [
  "biome_graphql_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
+ "biome_js_parser",
  "biome_js_syntax",
  "biome_json_analyze",
  "biome_json_formatter",
@@ -796,6 +797,7 @@ version = "0.5.7"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
+ "biome_js_factory",
  "biome_js_parser",
  "biome_js_syntax",
  "biome_rowan",

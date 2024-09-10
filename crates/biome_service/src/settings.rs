@@ -3,7 +3,7 @@ use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assists::AssistsConfiguration;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
-use biome_configuration::javascript::JsxRuntime;
+use biome_configuration::javascript::{JsxFactory, JsxRuntime};
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
@@ -564,6 +564,8 @@ pub struct LanguageListSettings {
 
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
     fn from(javascript: JavascriptConfiguration) -> Self {
+        use crate::file_handlers::JsEnvironmentSettings;
+
         let mut language_setting: LanguageSettings<JsLanguage> = LanguageSettings::default();
 
         let formatter = javascript.formatter;
@@ -584,7 +586,11 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
             javascript.parser.unsafe_parameter_decorators_enabled;
 
         language_setting.globals = Some(javascript.globals.into_index_set());
-        language_setting.environment = javascript.jsx_runtime.into();
+        language_setting.environment = JsEnvironmentSettings {
+            jsx_runtime: javascript.jsx_runtime,
+            jsx_factory: Some(javascript.jsx_factory),
+            jsx_fragment_factory: Some(javascript.jsx_fragment_factory),
+        };
         language_setting.linter.enabled = Some(javascript.linter.enabled);
 
         language_setting
@@ -955,6 +961,49 @@ impl OverrideSettings {
                 }
             })
             .unwrap_or(base_setting)
+    }
+
+    pub fn override_jsx_factory(
+        &self,
+        path: &BiomePath,
+        base_setting: Option<&JsxFactory>,
+    ) -> Option<JsxFactory> {
+        self.patterns
+            .iter()
+            // Reverse the traversal as only the last override takes effect
+            .rev()
+            .find_map(|pattern| {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    pattern.languages.javascript.environment.jsx_factory.clone()
+                } else {
+                    None
+                }
+            })
+            .or_else(|| base_setting.cloned())
+    }
+
+    pub fn override_jsx_fragment_factory(
+        &self,
+        path: &BiomePath,
+        base_setting: Option<&JsxFactory>,
+    ) -> Option<JsxFactory> {
+        self.patterns
+            .iter()
+            // Reverse the traversal as only the last override takes effect
+            .rev()
+            .find_map(|pattern| {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    pattern
+                        .languages
+                        .javascript
+                        .environment
+                        .jsx_fragment_factory
+                        .clone()
+                } else {
+                    None
+                }
+            })
+            .or_else(|| base_setting.cloned())
     }
 
     /// It scans the current override rules and return the json format that of the first override is matched

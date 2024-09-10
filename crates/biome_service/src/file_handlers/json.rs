@@ -140,6 +140,8 @@ impl ServiceLanguage for JsonLanguage {
             globals: vec![],
             preferred_quote: PreferredQuote::Double,
             jsx_runtime: Default::default(),
+            jsx_factory: None,
+            jsx_fragment_factory: None,
         };
         AnalyzerOptions {
             configuration,

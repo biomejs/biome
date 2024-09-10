@@ -1,4 +1,7 @@
-use biome_js_syntax::{AnyJsFunction, AnyJsIdentifierUsage, JsCallExpression};
+use biome_js_syntax::{
+    jsx_ext::AnyJsxElement, AnyJsFunction, AnyJsIdentifierUsage, JsCallExpression,
+    JsxOpeningFragment,
+};
 
 use super::*;
 use std::rc::Rc;
@@ -189,8 +192,16 @@ impl UnresolvedReference {
         &self.data.binding_node_by_start[&reference.range.start()]
     }
 
-    pub fn tree(&self) -> AnyJsIdentifierUsage {
-        AnyJsIdentifierUsage::unwrap_cast(self.syntax().clone())
+    pub fn as_js_identifier(&self) -> Option<AnyJsIdentifierUsage> {
+        AnyJsIdentifierUsage::try_cast(self.syntax().clone()).ok()
+    }
+
+    pub fn as_jsx_like(&self) -> Option<AnyJsxElement> {
+        AnyJsxElement::try_cast(self.syntax().clone()).ok()
+    }
+
+    pub fn as_jsx_fragment(&self) -> Option<JsxOpeningFragment> {
+        JsxOpeningFragment::try_cast(self.syntax().clone()).ok()
     }
 
     pub fn range(&self) -> TextRange {

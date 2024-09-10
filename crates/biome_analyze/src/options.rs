@@ -3,6 +3,7 @@ use rustc_hash::FxHashMap;
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
+use std::ops::Deref;
 use std::path::PathBuf;
 
 /// A convenient new type data structure to store the options that belong to a rule
@@ -51,6 +52,33 @@ impl AnalyzerRules {
     }
 }
 
+/// Jsx factory namespace
+#[derive(Debug)]
+pub struct JsxFactory(Box<str>);
+
+impl Deref for JsxFactory {
+    type Target = str;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl JsxFactory {
+    /// Create a new [`JsxFactory`] from a factory name
+    // invariant: factory should only be an identifier
+    pub fn new(factory: String) -> Self {
+        debug_assert!(!factory.contains(['.', '[', ']']));
+        Self(factory.into_boxed_str())
+    }
+}
+
+impl From<String> for JsxFactory {
+    fn from(s: String) -> Self {
+        Self::new(s)
+    }
+}
+
 /// A data structured derived from the `biome.json` file
 #[derive(Debug, Default)]
 pub struct AnalyzerConfiguration {
@@ -67,6 +95,16 @@ pub struct AnalyzerConfiguration {
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     pub jsx_runtime: Option<JsxRuntime>,
+
+    /// Indicates the name of the factory function used to create JSX elements.
+    ///
+    /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
+    pub jsx_factory: Option<JsxFactory>,
+
+    /// Indicates the name of the factory function used to create JSX fragments.
+    ///
+    /// Ignored if `jsx_runtime` is not set to [`JsxRuntime::ReactClassic`].
+    pub jsx_fragment_factory: Option<JsxFactory>,
 }
 
 /// A set of information useful to the analyzer infrastructure
@@ -90,6 +128,14 @@ impl AnalyzerOptions {
 
     pub fn jsx_runtime(&self) -> Option<JsxRuntime> {
         self.configuration.jsx_runtime
+    }
+
+    pub fn jsx_factory(&self) -> Option<&str> {
+        self.configuration.jsx_factory.as_deref()
+    }
+
+    pub fn jsx_fragment_factory(&self) -> Option<&str> {
+        self.configuration.jsx_fragment_factory.as_deref()
     }
 
     pub fn rule_options<R>(&self) -> Option<R::Options>

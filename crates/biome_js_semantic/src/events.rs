@@ -1,5 +1,6 @@
 //! Events emitted by the [SemanticEventExtractor] which are then constructed into the Semantic Model
 
+use biome_js_factory::make;
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
     inner_string_text, AnyJsIdentifierUsage, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode,
@@ -132,9 +133,10 @@ impl SemanticEvent {
 /// use biome_js_semantic::*;
 /// let tree = parse("let a = 1", JsFileSource::js_script(), JsParserOptions::default());
 /// let mut extractor = SemanticEventExtractor::default();
+/// let ctx = SemanticEventExtractorContext::default();
 /// for e in tree.syntax().preorder() {
 ///     match e {
-///         WalkEvent::Enter(node) => extractor.enter(&node),
+///         WalkEvent::Enter(node) => extractor.enter(&node, &ctx),
 ///         WalkEvent::Leave(node) => extractor.leave(&node),
 ///         _ => {}
 ///     }
@@ -282,10 +284,18 @@ struct Scope {
     is_in_strict_mode: bool,
 }
 
+#[derive(Default)]
+pub struct SemanticEventExtractorContext<'a> {
+    /// The factory used to create JSX elements.
+    pub jsx_factory: Option<&'a str>,
+    /// The factory used to create JSX fragments.
+    pub jsx_fragment_factory: Option<&'a str>,
+}
+
 impl SemanticEventExtractor {
     /// See [SemanticEvent] for a more detailed description of which events [JsSyntaxNode] generates.
     #[inline]
-    pub fn enter(&mut self, node: &JsSyntaxNode) {
+    pub fn enter(&mut self, node: &JsSyntaxNode, ctx: &SemanticEventExtractorContext) {
         // IMPORTANT: If you push a scope for a given node type, don't forget to
         // update `Self::leave`. You should also edit [SemanticModelBuilder::push_node].
         match node.kind() {
@@ -294,6 +304,26 @@ impl SemanticEventExtractor {
             | TS_TYPE_PARAMETER_NAME
             | TS_LITERAL_ENUM_MEMBER_NAME => {
                 self.enter_identifier_binding(&AnyJsIdentifierBinding::unwrap_cast(node.clone()));
+            }
+
+            JSX_OPENING_ELEMENT | JSX_SELF_CLOSING_ELEMENT => {
+                if let Some(factory) = ctx.jsx_factory.as_ref() {
+                    let ident = make::ident(factory);
+                    self.push_reference(
+                        BindingName::Value(ident.token_text_trimmed()),
+                        Reference::Read(node.text_trimmed_range()),
+                    );
+                }
+            }
+
+            JSX_OPENING_FRAGMENT => {
+                if let Some(factory) = ctx.jsx_fragment_factory.as_ref() {
+                    let ident = make::ident(factory);
+                    self.push_reference(
+                        BindingName::Value(ident.token_text_trimmed()),
+                        Reference::Read(node.text_trimmed_range()),
+                    );
+                }
             }
 
             JS_REFERENCE_IDENTIFIER | JSX_REFERENCE_IDENTIFIER | JS_IDENTIFIER_ASSIGNMENT => {
@@ -1128,7 +1158,7 @@ impl Iterator for SemanticEventIterator {
                 use biome_js_syntax::WalkEvent::*;
                 match self.iter.next() {
                     Some(Enter(node)) => {
-                        self.extractor.enter(&node);
+                        self.extractor.enter(&node, &Default::default());
                     }
                     Some(Leave(node)) => {
                         self.extractor.leave(&node);

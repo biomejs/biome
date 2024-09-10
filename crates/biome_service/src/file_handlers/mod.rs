@@ -37,7 +37,7 @@ use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrExtension;
-pub use javascript::JsFormatterSettings;
+pub use javascript::{JsEnvironmentSettings, JsFormatterSettings};
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::Path;

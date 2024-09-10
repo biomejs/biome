@@ -357,6 +357,8 @@ where
             &options,
             preferred_quote,
             self.options.jsx_runtime(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
         )
         .ok()?;
 
@@ -388,6 +390,8 @@ where
             &options,
             self.options.preferred_quote(),
             self.options.jsx_runtime(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
         )
         .ok();
         if let Some(ctx) = ctx {
@@ -434,6 +438,8 @@ where
             &options,
             self.options.preferred_quote(),
             self.options.jsx_runtime(),
+            self.options.jsx_factory(),
+            self.options.jsx_fragment_factory(),
         )
         .ok();
         if let Some(ctx) = ctx {

@@ -43,6 +43,8 @@ pub fn create_analyzer_options(
         globals: vec![],
         preferred_quote: PreferredQuote::Double,
         jsx_runtime: Some(JsxRuntime::Transparent),
+        jsx_factory: None,
+        jsx_fragment_factory: None,
     };
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
@@ -93,6 +95,16 @@ pub fn create_analyzer_options(
                 ReactClassic => Some(JsxRuntime::ReactClassic),
                 Transparent => Some(JsxRuntime::Transparent),
             };
+            analyzer_configuration.jsx_factory = configuration
+                .javascript
+                .as_ref()
+                .and_then(|js| js.jsx_factory.clone().map(|f| f.into_string().into()));
+            analyzer_configuration.jsx_fragment_factory =
+                configuration.javascript.as_ref().and_then(|js| {
+                    js.jsx_fragment_factory
+                        .clone()
+                        .map(|f| f.into_string().into())
+                });
             analyzer_configuration.globals = configuration
                 .javascript
                 .as_ref()

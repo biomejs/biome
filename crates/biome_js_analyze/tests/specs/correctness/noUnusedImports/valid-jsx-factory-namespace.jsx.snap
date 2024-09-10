@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 113
+expression: jsx-factory-namespace.jsx
+---
+# Input
+```jsx
+import * as preact from "preact";
+
+<div />;
+
+```
