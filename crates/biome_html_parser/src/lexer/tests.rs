@@ -157,7 +157,7 @@ fn doctype_with_quirk() {
         BANG: 1,
         DOCTYPE_KW: 7,
         WHITESPACE: 1,
-        HTML_LITERAL: 4,
+        HTML_KW: 4,
         R_ANGLE: 1,
     }
 }
@@ -170,7 +170,7 @@ fn doctype_with_quirk_and_system() {
         BANG: 1,
         DOCTYPE_KW: 7,
         WHITESPACE: 1,
-        HTML_LITERAL: 4,
+        HTML_KW: 4,
         WHITESPACE: 1,
         HTML_STRING_LITERAL: 44,
         R_ANGLE: 1,
@@ -187,6 +187,20 @@ fn element_with_attributes() {
         HTML_LITERAL: 5,
         EQ:1,
         HTML_STRING_LITERAL: 19,
+        R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn html_element() {
+    assert_lex! {
+        "<html></html>",
+        L_ANGLE: 1,
+        HTML_LITERAL: 4,
+        R_ANGLE: 1,
+        L_ANGLE: 1,
+        SLASH: 1,
+        HTML_LITERAL: 4,
         R_ANGLE: 1,
     }
 }

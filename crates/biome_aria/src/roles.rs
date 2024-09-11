@@ -1174,6 +1174,23 @@ impl<'a> AriaRoles {
             return false;
         }
 
+        // Allow SVG elements with role="img" attribute
+        // This is recommended for accessibility purposes
+        // Example:
+        // ```
+        // <svg role="img" aria-label="Description of your SVG image"></svg>;
+        // ```
+        // For more information, see:
+        // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role#svg_and_roleimg
+        if element_name == "svg"
+            && attributes
+                .as_ref()
+                .and_then(|a| a.get("role"))
+                .map_or(false, |values| values.iter().any(|x| x == "img"))
+        {
+            return false;
+        }
+
         // SVG elements, by default, do not have interactive semantics.
         // They are primarily used for graphics and visual rendering. While they can be made interactive with additional
         // attributes and JavaScript, inherently they don't provide user interaction capabilities.

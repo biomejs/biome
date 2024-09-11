@@ -127,7 +127,8 @@ Global options applied to all commands
                               console output is determined to be incompatible
         --use-server          Connect to a running instance of the Biome daemon server.
         --verbose             Print additional diagnostics, and some diagnostics show more
-                              information.
+                              information. Also, print out what files were processed and which ones
+                              were modified.
         --config-path=PATH    Set the file path to the configuration file, or the directory path to
                               find `biome.json` or `biome.jsonc`. If used, it disables the default
                               configuration file resolution.

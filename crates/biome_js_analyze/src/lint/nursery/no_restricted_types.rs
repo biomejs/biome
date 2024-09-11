@@ -5,7 +5,9 @@ use biome_analyze::{
     declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_deserialize_macros::Deserializable;
+use biome_deserialize::{
+    Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic,
+};
 use biome_js_factory::make;
 use biome_js_syntax::TsReferenceType;
 use biome_rowan::AstNode;
@@ -37,15 +39,13 @@ declare_lint_rule! {
     ///               "message": "Only bar is allowed",
     ///               "use": "bar"
     ///             },
-    ///             "OldAPI": {
-    ///                 "message": "Use NewAPI instead"
-    ///             }
+    ///             "OldAPI": "Use NewAPI instead"
     ///         }
     ///     }
     /// }
     /// ```
     ///
-    /// In the example above, the rule will emit a diagnostics if tried to use `Foo` or `OldAPI` are used.
+    /// In the example above, the rule will emit a diagnostics if `Foo` or `OldAPI` are used.
     ///
     pub NoRestrictedTypes {
         version: "next",
@@ -61,7 +61,7 @@ declare_lint_rule! {
 
 impl Rule for NoRestrictedTypes {
     type Query = Ast<TsReferenceType>;
-    type State = CustomRestrictedType;
+    type State = CustomRestrictedTypeOptions;
     type Signals = Option<Self::State>;
     type Options = NoRestrictedTypesOptions;
 
@@ -76,7 +76,7 @@ impl Rule for NoRestrictedTypes {
 
         let restricted_type = options.types.get(token_name)?.clone();
 
-        Some(restricted_type)
+        Some(restricted_type.into())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -113,18 +113,72 @@ impl Rule for NoRestrictedTypes {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    biome_deserialize_macros::Deserializable,
+    Deserialize,
+    Serialize,
+    Eq,
+    PartialEq,
+)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoRestrictedTypesOptions {
     types: FxHashMap<String, CustomRestrictedType>,
 }
 
-#[derive(Debug, Clone, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(
+    Debug,
+    Clone,
+    Default,
+    biome_deserialize_macros::Deserializable,
+    Deserialize,
+    Serialize,
+    Eq,
+    PartialEq,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct CustomRestrictedType {
+pub struct CustomRestrictedTypeOptions {
     message: String,
     #[serde(rename = "use")]
     use_instead: Option<String>,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(untagged)]
+pub enum CustomRestrictedType {
+    Plain(String),
+    WithOptions(CustomRestrictedTypeOptions),
+}
+
+impl From<CustomRestrictedType> for CustomRestrictedTypeOptions {
+    fn from(options: CustomRestrictedType) -> Self {
+        match options {
+            CustomRestrictedType::Plain(message) => CustomRestrictedTypeOptions {
+                message,
+                use_instead: None,
+            },
+            CustomRestrictedType::WithOptions(options) => options,
+        }
+    }
+}
+
+impl Deserializable for CustomRestrictedType {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        if value.visitable_type()? == DeserializableType::Str {
+            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
+                .map(Self::Plain)
+        } else {
+            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
+                .map(Self::WithOptions)
+        }
+    }
 }

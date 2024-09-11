@@ -310,7 +310,8 @@ impl AnyMember {
             },
             AnyMember::TsPropertyParameter(ts_property) => {
                 match ts_property.formal_parameter().ok()? {
-                    AnyJsFormalParameter::JsBogusParameter(_) => None,
+                    AnyJsFormalParameter::JsBogusParameter(_)
+                    | AnyJsFormalParameter::JsMetavariable(_) => None,
                     AnyJsFormalParameter::JsFormalParameter(param) => Some(
                         param
                             .binding()
@@ -348,7 +349,8 @@ impl AnyMember {
             },
             AnyMember::TsPropertyParameter(ts_property) => {
                 match ts_property.formal_parameter().ok()? {
-                    AnyJsFormalParameter::JsBogusParameter(_) => None,
+                    AnyJsFormalParameter::JsBogusParameter(_)
+                    | AnyJsFormalParameter::JsMetavariable(_) => None,
                     AnyJsFormalParameter::JsFormalParameter(param) => Some(
                         param
                             .binding()

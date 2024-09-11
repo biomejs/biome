@@ -12,3 +12,6 @@ export const Component2 = () => (
         hello world
     </div>
 );
+
+export const C = <svg role="img" aria-label="Description of your SVG image">
+</svg>;

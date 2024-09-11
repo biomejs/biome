@@ -1,10 +1,10 @@
 use crate::prelude::*;
 use biome_js_syntax::JsFileSource;
 use biome_rowan::{TextRange, TextSize};
-use bitflags::bitflags;
+use enumflags2::{bitflags, make_bitflags, BitFlags};
 use indexmap::IndexMap;
 use rustc_hash::FxHashSet;
-use std::ops::{Deref, DerefMut, Range};
+use std::ops::{BitOr, BitOrAssign, Deref, DerefMut, Range, Sub};
 
 type LabelSet = IndexMap<String, LabelledItem>;
 
@@ -359,17 +359,32 @@ impl ChangeParserState for EnableStrictMode {
     }
 }
 
-bitflags! {
-    #[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u8)]
+enum SignatureFlag {
+    Async = 1 << 0,
+    Generator = 1 << 1,
+    Constructor = 1 << 2,
+}
 
-    /// Flags describing the context of a function.
-    pub(crate) struct SignatureFlags: u8 {
-        /// Is the function in an async context
-        const ASYNC 		= 1 << 0;
-        /// Is the function in a generator context
-        const GENERATOR 	= 1 << 1;
-        /// Is the function a constructor (or constructor context)
-        const CONSTRUCTOR 	= 1 << 2;
+#[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
+pub(crate) struct SignatureFlags(BitFlags<SignatureFlag>);
+
+impl SignatureFlags {
+    /// Is the function in an async context
+    pub const ASYNC: Self = Self(make_bitflags!(SignatureFlag::{Async}));
+    /// Is the function in a generator context
+    pub const GENERATOR: Self = Self(make_bitflags!(SignatureFlag::{Generator}));
+    /// Is the function a constructor (or constructor context)
+    pub const CONSTRUCTOR: Self = Self(make_bitflags!(SignatureFlag::{Constructor}));
+
+    pub const fn empty() -> Self {
+        Self(BitFlags::EMPTY)
+    }
+
+    pub fn contains(&self, other: impl Into<SignatureFlags>) -> bool {
+        self.0.contains(other.into().0)
     }
 }
 
@@ -393,48 +408,108 @@ impl From<SignatureFlags> for ParsingContextFlags {
     }
 }
 
-bitflags! {
-    /// Flags representing the parsing state.
-    /// The reasons to use flags instead of individual boolean fields on `ParserState` are:
-    /// * It's possible to use bit masks to define what state should be inherited. For example,
-    ///   functions inherit whether they're defined inside a parameter but override the `in_async` flag
-    /// * It's easier to snapshot the previous state. Individual boolean fields would require that a change
-    ///   snapshots each individual boolean field to allow restoring the previous state. With bitflags, all that
-    ///   is needed is to copy away the flags field and restore it after.
-    #[derive(Debug, Copy, Default, Clone, Eq, PartialEq)]
-    pub(crate) struct ParsingContextFlags: u8 {
-        /// Whether the parser is in a generator function like `function* a() {}`
-        /// Matches the `Yield` parameter in the ECMA spec
-        const IN_GENERATOR = 1 << 0;
-        /// Whether the parser is inside a function
-        const IN_FUNCTION = 1 << 1;
-        /// Whatever the parser is inside a constructor
-        const IN_CONSTRUCTOR = 1 << 2;
+impl BitOr for SignatureFlags {
+    type Output = Self;
 
-        /// Is async allowed in this context. Either because it's an async function or top level await is supported.
-        /// Equivalent to the `Async` generator in the ECMA spec
-        const IN_ASYNC = 1 << 3;
+    fn bitor(self, rhs: Self) -> Self::Output {
+        SignatureFlags(self.0 | rhs.0)
+    }
+}
 
-        /// Whether the parser is parsing a top-level statement (not inside a class, function, parameter) or not
-        const TOP_LEVEL = 1 << 4;
+impl BitOrAssign for SignatureFlags {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
+    }
+}
 
-        /// Whether the parser is in an iteration or switch statement and
-        /// `break` is allowed.
-        const BREAK_ALLOWED = 1 << 5;
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u8)]
+enum ParsingContextFlag {
+    InGenerator = 1 << 0,
+    InFunction = 1 << 1,
+    InConstructor = 1 << 2,
+    InAsync = 1 << 3,
+    TopLevel = 1 << 4,
+    BreakAllowed = 1 << 5,
+    ContinueAllowed = 1 << 6,
+    AmbientContext = 1 << 7,
+}
 
-        /// Whether the parser is in an iteration statement and `continue` is allowed.
-        const CONTINUE_ALLOWED = 1 << 6;
+/// Flags representing the parsing state.
+/// The reasons to use flags instead of individual boolean fields on `ParserState` are:
+/// * It's possible to use bit masks to define what state should be inherited. For example,
+///   functions inherit whether they're defined inside a parameter but override the `in_async` flag
+/// * It's easier to snapshot the previous state. Individual boolean fields would require that a change
+///   snapshots each individual boolean field to allow restoring the previous state. With bitflags, all that
+///   is needed is to copy away the flags field and restore it after.
+#[derive(Debug, Copy, Default, Clone, Eq, PartialEq)]
+pub(crate) struct ParsingContextFlags(BitFlags<ParsingContextFlag>);
 
-        /// Whatever the parser is in a TypeScript ambient context
-        const AMBIENT_CONTEXT = 1 << 7;
+impl ParsingContextFlags {
+    /// Whether the parser is in a generator function like `function* a() {}`
+    /// Matches the `Yield` parameter in the ECMA spec
+    const IN_GENERATOR: Self = Self(make_bitflags!(ParsingContextFlag::{InGenerator}));
+    /// Whether the parser is inside a function
+    const IN_FUNCTION: Self = Self(make_bitflags!(ParsingContextFlag::{InFunction}));
+    /// Whatever the parser is inside a constructor
+    const IN_CONSTRUCTOR: Self = Self(make_bitflags!(ParsingContextFlag::{InConstructor}));
 
-        const LOOP = Self::BREAK_ALLOWED.bits() | Self::CONTINUE_ALLOWED.bits();
+    /// Is async allowed in this context. Either because it's an async function or top level await is supported.
+    /// Equivalent to the `Async` generator in the ECMA spec
+    const IN_ASYNC: Self = Self(make_bitflags!(ParsingContextFlag::{InAsync}));
 
-        /// Bitmask of all the flags that must be reset (shouldn't be inherited) when the parser enters a function
-        const FUNCTION_RESET_MASK = Self::BREAK_ALLOWED.bits() | Self::CONTINUE_ALLOWED.bits() | Self::IN_CONSTRUCTOR.bits() | Self::IN_ASYNC.bits() | Self::IN_GENERATOR.bits() | Self::TOP_LEVEL.bits();
+    /// Whether the parser is parsing a top-level statement (not inside a class, function, parameter) or not
+    const TOP_LEVEL: Self = Self(make_bitflags!(ParsingContextFlag::{TopLevel}));
 
-        /// Bitmask of all the flags that must be reset (shouldn't be inherited) when entering parameters.
-        const PARAMETER_RESET_MASK = Self::IN_CONSTRUCTOR.bits() | Self::IN_FUNCTION.bits() | Self::TOP_LEVEL.bits() | Self::IN_GENERATOR.bits() | Self::IN_ASYNC.bits();
+    /// Whether the parser is in an iteration or switch statement and
+    /// `break` is allowed.
+    const BREAK_ALLOWED: Self = Self(make_bitflags!(ParsingContextFlag::{BreakAllowed}));
+
+    /// Whether the parser is in an iteration statement and `continue` is allowed.
+    const CONTINUE_ALLOWED: Self = Self(make_bitflags!(ParsingContextFlag::{ContinueAllowed}));
+
+    /// Whether the parser is in a TypeScript ambient context
+    const AMBIENT_CONTEXT: Self = Self(make_bitflags!(ParsingContextFlag::{AmbientContext}));
+
+    /// Bitmask of all the flags that must be reset (shouldn't be inherited) when the parser enters a function
+    const FUNCTION_RESET_MASK: Self = Self(
+        make_bitflags!(ParsingContextFlag::{BreakAllowed | ContinueAllowed | InConstructor | InAsync | InGenerator | TopLevel }),
+    );
+
+    /// Bitmask of all the flags that must be reset (shouldn't be inherited) when entering parameters.
+    const PARAMETER_RESET_MASK: Self = Self(
+        make_bitflags!(ParsingContextFlag::{InConstructor | InFunction | TopLevel | InGenerator | InAsync }),
+    );
+
+    pub const fn empty() -> Self {
+        Self(BitFlags::EMPTY)
+    }
+
+    pub fn contains(&self, other: impl Into<ParsingContextFlags>) -> bool {
+        self.0.contains(other.into().0)
+    }
+}
+
+impl BitOr for ParsingContextFlags {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        ParsingContextFlags(self.0 | rhs.0)
+    }
+}
+
+impl BitOrAssign for ParsingContextFlags {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
+    }
+}
+
+impl Sub for ParsingContextFlags {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self(self.0 & !rhs.0)
     }
 }
 

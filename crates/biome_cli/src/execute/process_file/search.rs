@@ -44,11 +44,7 @@ pub(crate) fn search_with_guard<'ctx>(
                 skipped_diagnostics: 0,
             };
 
-            if matches_len > 0 {
-                Ok(FileStatus::SearchResult(search_results))
-            } else {
-                Ok(FileStatus::Message(search_results))
-            }
+            Ok(FileStatus::SearchResult(matches_len, search_results))
         },
     )
 }

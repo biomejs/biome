@@ -52,7 +52,7 @@ impl Rule for UseSemanticElements {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        let role_attribute = node.find_attribute_by_name("role").unwrap();
+        let role_attribute = node.find_attribute_by_name("role").ok().flatten();
 
         if let Some(attr) = role_attribute {
             // check is not interactive element

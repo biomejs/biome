@@ -116,7 +116,6 @@ export default [
 			"no-dupe-args": "error",
 			"no-empty": "error",
 			"no-empty-static-block": "error",
-			"no-empty-static-block": "error",
 			"@typescript-eslint/no-empty-function": "error",
 			"@typescript-eslint/no-empty-interface": "error",
 			"@typescript-eslint/no-explicit-any": "error",

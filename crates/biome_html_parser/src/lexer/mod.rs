@@ -2,8 +2,8 @@ mod tests;
 
 use crate::token_source::HtmlLexContext;
 use biome_html_syntax::HtmlSyntaxKind::{
-    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
-    UNICODE_BOM, WHITESPACE,
+    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
+    TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -33,6 +33,8 @@ pub(crate) struct HtmlLexer<'src> {
     after_newline: bool,
 
     unicode_bom_length: usize,
+
+    after_doctype: bool,
 }
 
 impl<'src> HtmlLexer<'src> {
@@ -47,13 +49,17 @@ impl<'src> HtmlLexer<'src> {
             after_newline: false,
             current_flags: TokenFlags::empty(),
             unicode_bom_length: 0,
+            after_doctype: false,
         }
     }
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'<' => self.consume_l_angle(),
-            b'>' => self.consume_byte(T![>]),
+            b'>' => {
+                self.after_doctype = false;
+                self.consume_byte(T![>])
+            }
             b'/' => self.consume_byte(T![/]),
             b'!' => self.consume_byte(T![!]),
             b'=' => self.consume_byte(T![=]),
@@ -148,7 +154,11 @@ impl<'src> HtmlLexer<'src> {
         }
 
         match &buffer[..len] {
-            b"doctype" | b"DOCTYPE" => DOCTYPE_KW,
+            b"doctype" | b"DOCTYPE" => {
+                self.after_doctype = true;
+                DOCTYPE_KW
+            }
+            b"html" | b"HTML" if self.after_doctype => HTML_KW,
             _ => HTML_LITERAL,
         }
     }
@@ -241,10 +251,10 @@ impl<'src> HtmlLexer<'src> {
     fn consume_l_angle(&mut self) -> HtmlSyntaxKind {
         self.assert_byte(b'<');
 
-        if !self.at_start_comment() {
-            self.consume_byte(T![<])
-        } else {
+        if self.at_start_comment() {
             self.consume_comment()
+        } else {
+            self.consume_byte(T![<])
         }
     }
 

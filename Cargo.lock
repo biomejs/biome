@@ -49,15 +49,15 @@ checksum = "15c4c2c83f81532e5845a733998b6971faca23490340a418e9b72a3ec9de12ea"
 
 [[package]]
 name = "anyhow"
-version = "1.0.86"
+version = "1.0.87"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b3d1d046238990b9cf5bcde22a3fb3584ee5cf65fb2765f454ed428c7a0063da"
+checksum = "10f00e1f6e58a40e807377c75c6a7f97bf9044fab57816f2414e6f5f4499d7b8"
 
 [[package]]
 name = "ascii_table"
-version = "4.0.3"
+version = "4.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c2bee9b9ee0e5768772e38c07ef0ba23a490d7e1336ec7207c25712a2661c55"
+checksum = "ed8a80a95ab122e7cc43bfde1d51949c89ff67e0c76eb795dc045003418473e2"
 
 [[package]]
 name = "async-trait"
@@ -206,6 +206,7 @@ dependencies = [
  "biome_formatter",
  "biome_graphql_analyze",
  "biome_graphql_syntax",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_formatter",
  "biome_js_syntax",
@@ -382,8 +383,8 @@ dependencies = [
  "biome_rowan",
  "biome_text_edit",
  "biome_text_size",
- "bitflags 2.6.0",
  "bpaf",
+ "enumflags2",
  "insta",
  "oxc_resolver",
  "schemars",
@@ -654,9 +655,16 @@ version = "0.0.0"
 dependencies = [
  "biome_diagnostics_categories",
  "biome_formatter",
+ "biome_formatter_test",
+ "biome_fs",
+ "biome_html_parser",
  "biome_html_syntax",
+ "biome_parser",
  "biome_rowan",
+ "biome_service",
  "biome_suppression",
+ "countme",
+ "tests_macros",
 ]
 
 [[package]]
@@ -708,7 +716,6 @@ dependencies = [
  "biome_suppression",
  "biome_test_utils",
  "biome_unicode_table",
- "bitflags 2.6.0",
  "bitvec",
  "enumflags2",
  "insta",
@@ -771,8 +778,8 @@ dependencies = [
  "biome_parser",
  "biome_rowan",
  "biome_unicode_table",
- "bitflags 2.6.0",
  "drop_bomb",
+ "enumflags2",
  "expect-test",
  "indexmap 2.5.0",
  "quickcheck",
@@ -998,8 +1005,8 @@ dependencies = [
  "biome_diagnostics",
  "biome_rowan",
  "biome_unicode_table",
- "bitflags 2.6.0",
  "drop_bomb",
+ "enumflags2",
  "unicode-bom",
 ]
 
@@ -1062,6 +1069,9 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_grit_patterns",
+ "biome_html_formatter",
+ "biome_html_parser",
+ "biome_html_syntax",
  "biome_js_analyze",
  "biome_js_factory",
  "biome_js_formatter",
@@ -1240,9 +1250,9 @@ dependencies = [
 
 [[package]]
 name = "bpaf"
-version = "0.9.12"
+version = "0.9.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3280efcf6d66bc77c2cf9b67dc8acee47a217d9be67dd590b3230dffe663724d"
+checksum = "0eb12bae07c4142b840ff2a892d3abd94124f30672293f5b466f38624077aadb"
 dependencies = [
  "bpaf_derive",
  "owo-colors",
@@ -1251,9 +1261,9 @@ dependencies = [
 
 [[package]]
 name = "bpaf_derive"
-version = "0.5.10"
+version = "0.5.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a8d5b11f7fa1068e5bbac8ab6c8c2c6940047f69185987446b60c995d4bf89c"
+checksum = "cf95d9c7e6aba67f8fc07761091e93254677f4db9e27197adecebc7039a58722"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1393,9 +1403,9 @@ checksum = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961"
 
 [[package]]
 name = "codspeed"
-version = "2.6.0"
+version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3a104ac948e0188b921eb3fcbdd55dcf62e542df4c7ab7e660623f6288302089"
+checksum = "c370701439f48f9da21ce48e0505c7e24bfa046e8132a4867c36001df0ded99f"
 dependencies = [
  "colored",
  "libc",
@@ -1404,9 +1414,9 @@ dependencies = [
 
 [[package]]
 name = "codspeed-criterion-compat"
-version = "2.6.0"
+version = "2.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "722c36bdc62d9436d027256ce2627af81ac7a596dfc7d13d849d0d212448d7fe"
+checksum = "886eb6c3d782e1b45a2b282abbff5c9d1f21dcf36868979afff174bbc6c93b11"
 dependencies = [
  "codspeed",
  "colored",
@@ -2018,9 +2028,9 @@ checksum = "d2fabcfbdc87f4758337ca535fb41a6d701b65693ce38287d856d1674551ec9b"
 
 [[package]]
 name = "globset"
-version = "0.4.14"
+version = "0.4.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57da3b9b5b85bd66f31093f8c408b90a74431672542466497dcbdfdc02034be1"
+checksum = "15f1ce686646e7f1e19bf7d5533fe443a45dbfb990e00629110797578b42fb19"
 dependencies = [
  "aho-corasick",
  "bstr",
@@ -2131,9 +2141,9 @@ dependencies = [
 
 [[package]]
 name = "ignore"
-version = "0.4.22"
+version = "0.4.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b46810df39e66e925525d6e38ce1e7f6e1d208f72dc39757880fcb66e2c58af1"
+checksum = "6d89fd380afde86567dfba715db065673989d6253f42b88179abd3eae47bda4b"
 dependencies = [
  "crossbeam-deque",
  "globset",
@@ -2787,20 +2797,9 @@ dependencies = [
 
 [[package]]
 name = "pulldown-cmark"
-version = "0.9.2"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d9cc634bc78768157b5cbfe988ffcd1dcba95cd2b2f03a88316c08c6d00ed63"
-dependencies = [
- "bitflags 1.3.2",
- "memchr",
- "unicase",
-]
-
-[[package]]
-name = "pulldown-cmark"
-version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4d31cbfcd94884c3a67ec210c83efb06cb43674043458b0ad59f6947f8462c23"
+checksum = "666f0f59e259aea2d72e6012290c09877a780935cc3c18b1ceded41f3890d59c"
 dependencies = [
  "bitflags 2.6.0",
  "getopts",
@@ -2827,9 +2826,9 @@ dependencies = [
 
 [[package]]
 name = "quick-junit"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cfc1a6a5406a114913df2df8507998c755311b55b78584bed5f6e88f6417c4d4"
+checksum = "62ffd2f9a162cfae131bed6d9d1ed60adced33be340a94f96952897d7cb0c240"
 dependencies = [
  "chrono",
  "indexmap 2.5.0",
@@ -2842,9 +2841,9 @@ dependencies = [
 
 [[package]]
 name = "quick-xml"
-version = "0.31.0"
+version = "0.36.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1004a344b30a54e2ee58d66a71b32d2db2feb0a31f9a2d302bf0536f15de2a33"
+checksum = "96a05e2e8efddfa51a84ca47cec303fac86c8541b686d37cac5efc0e094417bc"
 dependencies = [
  "memchr",
 ]
@@ -3111,7 +3110,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_service",
- "pulldown-cmark 0.12.0",
+ "pulldown-cmark",
 ]
 
 [[package]]
@@ -4007,9 +4006,9 @@ checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
 
 [[package]]
 name = "uuid"
-version = "1.8.0"
+version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a183cf7feeba97b4dd1c0d46788634f6221d87fa961b305bed08c851829efcc0"
+checksum = "81dfa00651efa65069b0b6b651f4aaa31ba9e3c3ce0137aaad053604ee7e0314"
 
 [[package]]
 name = "valuable"
@@ -4490,7 +4489,7 @@ dependencies = [
  "bpaf",
  "git2",
  "proc-macro2",
- "pulldown-cmark 0.9.2",
+ "pulldown-cmark",
  "quote",
  "schemars",
  "serde",

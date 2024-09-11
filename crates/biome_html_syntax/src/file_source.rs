@@ -1,13 +1,19 @@
 use biome_rowan::FileSourceError;
 use std::{ffi::OsStr, path::Path};
 
-#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub struct HtmlFileSource {
     #[allow(unused)]
     variant: HtmlVariant,
 }
 
-#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[derive(
+    Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
+)]
 enum HtmlVariant {
     #[default]
     Standard,

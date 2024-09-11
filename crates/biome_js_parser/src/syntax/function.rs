@@ -29,6 +29,8 @@ use biome_js_syntax::{JsSyntaxKind, TextRange, T};
 use biome_parser::ParserProgress;
 use biome_rowan::SyntaxKind;
 
+use super::metavariable::parse_metavariable;
+
 /// A function declaration, this could be async and or a generator. This takes a marker
 /// because you need to first advance over async or start a marker and feed it in.
 // test js function_decl
@@ -1367,6 +1369,10 @@ pub(super) fn parse_parameters_list(
             }
 
             progress.assert_progressing(p);
+
+            if parse_metavariable(p).is_present() {
+                continue;
+            }
 
             let parameter = parse_parameter(
                 p,

@@ -1148,9 +1148,13 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Disallow use of CommonJs module system in favor of ESM style imports.
+	 */
+	noCommonJs?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of console.
 	 */
-	noConsole?: RuleFixConfiguration_for_Null;
+	noConsole?: RuleFixConfiguration_for_NoConsoleOptions;
 	/**
 	 * Disallow using a callback in asynchronous tests and hooks.
 	 */
@@ -1159,6 +1163,10 @@ export interface Nursery {
 	 * Disallow duplicate @import rules.
 	 */
 	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate custom properties within declaration blocks.
+	 */
+	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
@@ -1204,6 +1212,10 @@ export interface Nursery {
 	 */
 	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
 	/**
+	 * Disallows invalid named grid areas in CSS Grid Layouts.
+	 */
+	noInvalidGridAreas?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of @import at-rules in invalid positions.
 	 */
 	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
@@ -1231,6 +1243,10 @@ export interface Nursery {
 	 * Disallow user defined types.
 	 */
 	noRestrictedTypes?: RuleFixConfiguration_for_NoRestrictedTypesOptions;
+	/**
+	 * Disallow usage of sensitive data such as API keys and tokens.
+	 */
+	noSecrets?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow shorthand properties that override related longhand properties.
 	 */
@@ -1262,11 +1278,11 @@ export interface Nursery {
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
-	noUnknownPseudoClassSelector?: RuleConfiguration_for_Null;
+	noUnknownPseudoClass?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-element selectors.
 	 */
-	noUnknownSelectorPseudoElement?: RuleConfiguration_for_Null;
+	noUnknownPseudoElement?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown CSS units.
 	 */
@@ -1319,10 +1335,6 @@ export interface Nursery {
 	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
 	 */
 	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallows invalid named grid areas in CSS Grid Layouts.
-	 */
-	useConsistentGridAreas?: RuleConfiguration_for_Null;
 	/**
 	 * Require consistent accessibility modifiers on class properties and methods.
 	 */
@@ -1704,7 +1716,7 @@ export interface Suspicious {
 	 */
 	noDebugger?: RuleFixConfiguration_for_Null;
 	/**
-	 * Require the use of === and !==
+	 * Require the use of === and !==.
 	 */
 	noDoubleEquals?: RuleFixConfiguration_for_NoDoubleEqualsOptions;
 	/**
@@ -1945,6 +1957,9 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
+export type RuleFixConfiguration_for_NoConsoleOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoConsoleOptions;
 export type RuleConfiguration_for_NoLabelWithoutControlOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoLabelWithoutControlOptions;
@@ -2063,6 +2078,20 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 * Rule's options
 	 */
 	options: DeprecatedHooksOptions;
+}
+export interface RuleWithFixOptions_for_NoConsoleOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoConsoleOptions;
 }
 export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
 	/**
@@ -2244,6 +2273,12 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
+export interface NoConsoleOptions {
+	/**
+	 * Allowed calls on the console object.
+	 */
+	allow: string[];
+}
 export interface NoLabelWithoutControlOptions {
 	/**
 	 * Array of component names that should be considered the same as an `input` element.
@@ -2501,7 +2536,8 @@ export type DocumentFileSource =
 	| { Js: JsFileSource }
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
-	| { Graphql: GraphqlFileSource };
+	| { Graphql: GraphqlFileSource }
+	| { Html: HtmlFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -2521,6 +2557,9 @@ export interface CssFileSource {
 }
 export interface GraphqlFileSource {
 	variant: GraphqlVariant;
+}
+export interface HtmlFileSource {
+	variant: HtmlVariant;
 }
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
@@ -2547,6 +2586,7 @@ export type CssVariant = "Standard";
  * The style of GraphQL contained in the file.
  */
 export type GraphqlVariant = "Standard";
+export type HtmlVariant = "Standard" | "Astro";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
@@ -2717,9 +2757,11 @@ export type Category =
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
 	| "lint/nursery/noColorInvalidHex"
+	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
+	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDuplicateFontNames"
 	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
@@ -2731,6 +2773,7 @@ export type Category =
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
+	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noLabelWithoutControl"
@@ -2739,6 +2782,7 @@ export type Category =
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
+	| "lint/nursery/noSecrets"
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
@@ -2746,8 +2790,8 @@ export type Category =
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
-	| "lint/nursery/noUnknownPseudoClassSelector"
-	| "lint/nursery/noUnknownSelectorPseudoElement"
+	| "lint/nursery/noUnknownPseudoClass"
+	| "lint/nursery/noUnknownPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
@@ -2761,7 +2805,6 @@ export type Category =
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
-	| "lint/nursery/useConsistentGridAreas"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDateNow"
 	| "lint/nursery/useDefaultSwitchClause"

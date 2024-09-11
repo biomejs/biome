@@ -24,6 +24,12 @@ pub enum CompileError {
     /// A metavariable was expected at the given range.
     InvalidMetavariableRange(ByteRange),
 
+    /// Raw snippets are only allowed on the right-hand side of a rule.
+    InvalidRawSnippetPosition,
+
+    /// Regular expressions are not allowed on the right-hand side of a rule.
+    InvalidRegexPosition,
+
     /// Incorrect reference to a metavariable.
     MetavariableNotFound(String),
 
@@ -59,6 +65,9 @@ pub enum CompileError {
     /// Unknown function or predicate.
     UnknownFunctionOrPredicate(String),
 
+    /// Unknown target language.
+    UnknownTargetLanguage(String),
+
     /// Unknown variable.
     UnknownVariable(String),
 }
@@ -86,6 +95,12 @@ impl Diagnostic for CompileError {
             CompileError::InvalidMetavariableRange(_) => {
                 fmt.write_markup(markup! { "Invalid range for metavariable" })
             }
+            CompileError::InvalidRawSnippetPosition => {
+                fmt.write_markup(markup! { "Invalid range for metavariable" })
+            }
+            CompileError::InvalidRegexPosition => fmt.write_markup(
+                markup! { "Regular expressions are not allowed on the right-hand side of a rule" },
+            ),
             CompileError::MetavariableNotFound(var) => {
                 fmt.write_markup(markup! { "Metavariable not found: "{{var}} })
             }
@@ -116,6 +131,9 @@ impl Diagnostic for CompileError {
             }
             CompileError::UnknownFunctionOrPredicate(name) => {
                 fmt.write_markup(markup! { "Unknown function or predicate: "{{name}} })
+            }
+            CompileError::UnknownTargetLanguage(lang) => {
+                fmt.write_markup(markup! { "Unknown target language: "{{lang}} })
             }
             CompileError::UnknownVariable(var) => {
                 fmt.write_markup(markup! { "Unknown variable: "{{var}} })

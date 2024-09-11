@@ -56,9 +56,9 @@ declare_lint_rule! {
     /// input:-moz-placeholder {}
     /// ```
     ///
-    pub NoUnknownPseudoClassSelector {
-        version: "next",
-        name: "noUnknownPseudoClassSelector",
+    pub NoUnknownPseudoClass {
+        version: "1.8.0",
+        name: "noUnknownPseudoClass",
         language: "css",
         recommended: true,
         sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown")],
@@ -105,7 +105,7 @@ pub struct NoUnknownPseudoClassSelectorState {
     class_type: PseudoClassType,
 }
 
-impl Rule for NoUnknownPseudoClassSelector {
+impl Rule for NoUnknownPseudoClass {
     type Query = Ast<AnyPseudoLike>;
     type State = NoUnknownPseudoClassSelectorState;
     type Signals = Option<Self::State>;

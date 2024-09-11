@@ -433,6 +433,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
+- [Vo Hoang Long @vohoanglong0107](https://github.com/vohoanglong0107)
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Yusuke Abe @chansuke](https://github.com/chansuke)

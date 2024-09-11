@@ -30,6 +30,7 @@ pub type NoCommaOperator =
     <lint::style::no_comma_operator::NoCommaOperator as biome_analyze::Rule>::Options;
 pub type NoCommentText =
     <lint::suspicious::no_comment_text::NoCommentText as biome_analyze::Rule>::Options;
+pub type NoCommonJs = <lint::nursery::no_common_js::NoCommonJs as biome_analyze::Rule>::Options;
 pub type NoCompareNegZero =
     <lint::suspicious::no_compare_neg_zero::NoCompareNegZero as biome_analyze::Rule>::Options;
 pub type NoConfusingLabels =
@@ -178,6 +179,7 @@ pub type NoRestrictedImports =
     <lint::nursery::no_restricted_imports::NoRestrictedImports as biome_analyze::Rule>::Options;
 pub type NoRestrictedTypes =
     <lint::nursery::no_restricted_types::NoRestrictedTypes as biome_analyze::Rule>::Options;
+pub type NoSecrets = <lint::nursery::no_secrets::NoSecrets as biome_analyze::Rule>::Options;
 pub type NoSelfAssign =
     <lint::correctness::no_self_assign::NoSelfAssign as biome_analyze::Rule>::Options;
 pub type NoSelfCompare =

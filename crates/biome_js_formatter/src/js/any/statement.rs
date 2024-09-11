@@ -23,6 +23,7 @@ impl FormatRule<AnyJsStatement> for FormatAnyJsStatement {
             AnyJsStatement::JsFunctionDeclaration(node) => node.format().fmt(f),
             AnyJsStatement::JsIfStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsLabeledStatement(node) => node.format().fmt(f),
+            AnyJsStatement::JsMetavariable(node) => node.format().fmt(f),
             AnyJsStatement::JsReturnStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsSwitchStatement(node) => node.format().fmt(f),
             AnyJsStatement::JsThrowStatement(node) => node.format().fmt(f),

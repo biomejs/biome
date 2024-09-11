@@ -113,6 +113,7 @@ AnyJsStatement =
 	| TsExternalModuleDeclaration
 	| TsGlobalDeclaration
 	| TsImportEqualsDeclaration
+	| JsMetavariable
 
 JsBlockStatement =
 	'{'
@@ -1602,6 +1603,7 @@ JsParameterList = (AnyJsParameter (',' AnyJsParameter)* ','?)
 AnyJsFormalParameter =
 	JsFormalParameter
 	| JsBogusParameter
+	| JsMetavariable
 
 AnyJsParameter =
 	AnyJsFormalParameter

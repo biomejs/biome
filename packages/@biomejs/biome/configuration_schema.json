@@ -1062,6 +1062,12 @@
 			"additionalProperties": false
 		},
 		"CustomRestrictedType": {
+			"anyOf": [
+				{ "type": "string" },
+				{ "$ref": "#/definitions/CustomRestrictedTypeOptions" }
+			]
+		},
+		"CustomRestrictedTypeOptions": {
 			"type": "object",
 			"required": ["message"],
 			"properties": {
@@ -1847,6 +1853,24 @@
 			},
 			"additionalProperties": false
 		},
+		"NoConsoleConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoConsoleOptions" }
+			]
+		},
+		"NoConsoleOptions": {
+			"type": "object",
+			"required": ["allow"],
+			"properties": {
+				"allow": {
+					"description": "Allowed calls on the console object.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoDoubleEqualsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -1919,10 +1943,17 @@
 					"description": "It enables ALL rules for this group.",
 					"type": ["boolean", "null"]
 				},
+				"noCommonJs": {
+					"description": "Disallow use of CommonJs module system in favor of ESM style imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConsole": {
 					"description": "Disallow the use of console.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/NoConsoleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1935,6 +1966,13 @@
 				},
 				"noDuplicateAtImportRules": {
 					"description": "Disallow duplicate @import rules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateCustomProperties": {
+					"description": "Disallow duplicate custom properties within declaration blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2017,6 +2055,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidGridAreas": {
+					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noInvalidPositionAtImportRule": {
 					"description": "Disallow the use of @import at-rules in invalid positions.",
 					"anyOf": [
@@ -2063,6 +2108,13 @@
 					"description": "Disallow user defined types.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoRestrictedTypesConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noSecrets": {
+					"description": "Disallow usage of sensitive data such as API keys and tokens.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2115,14 +2167,14 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnknownPseudoClassSelector": {
+				"noUnknownPseudoClass": {
 					"description": "Disallow unknown pseudo-class selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
-				"noUnknownSelectorPseudoElement": {
+				"noUnknownPseudoElement": {
 					"description": "Disallow unknown pseudo-element selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
@@ -2214,13 +2266,6 @@
 					"description": "This rule enforces consistent use of curly braces inside JSX attributes and JSX children.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useConsistentGridAreas": {
-					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2766,6 +2811,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NamingConventionOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoConsoleOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoConsoleOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3513,7 +3577,7 @@
 					]
 				},
 				"noDoubleEquals": {
-					"description": "Require the use of === and !==",
+					"description": "Require the use of === and !==.",
 					"anyOf": [
 						{ "$ref": "#/definitions/NoDoubleEqualsConfiguration" },
 						{ "type": "null" }

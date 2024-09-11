@@ -93,3 +93,8 @@ L-CSS:
 - changed-files:
   - any-glob-to-any-file:
     - crates/biome_css_*/**
+
+L-HTML:
+- changed-files:
+  - any-glob-to-any-file:
+    - crates/biome_html_*/**
