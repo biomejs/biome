@@ -8,7 +8,9 @@ pub use biome_rowan::{TextLen, TextRange, TextSize, TokenAtOffset, TriviaPieceKi
 pub use file_source::HtmlFileSource;
 pub use syntax_node::*;
 
-use crate::HtmlSyntaxKind::{HTML_BOGUS, HTML_BOGUS_ATTRIBUTE};
+use crate::HtmlSyntaxKind::{
+    HTML_BOGUS, HTML_BOGUS_ATTRIBUTE, HTML_BOGUS_ELEMENT, HTML_CLOSING_ELEMENT,
+};
 use biome_rowan::{AstNode, RawSyntaxKind, SyntaxKind, TokenText};
 
 impl From<u16> for HtmlSyntaxKind {
@@ -51,7 +53,8 @@ impl biome_rowan::SyntaxKind for HtmlSyntaxKind {
     fn to_bogus(&self) -> Self {
         match self {
             kind if AnyHtmlAttribute::can_cast(*kind) => HTML_BOGUS_ATTRIBUTE,
-            kind if AnyHtmlElement::can_cast(*kind) => HTML_BOGUS_ATTRIBUTE,
+            kind if AnyHtmlElement::can_cast(*kind) => HTML_BOGUS_ELEMENT,
+            HTML_CLOSING_ELEMENT => HTML_BOGUS_ELEMENT,
 
             _ => HTML_BOGUS,
         }
