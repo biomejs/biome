@@ -4533,7 +4533,6 @@ impl Style {
     const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noArguments",
         "noCommaOperator",
-        "noDoneCallback",
         "noInferrableTypes",
         "noNonNullAssertion",
         "noParameterAssign",
@@ -4560,7 +4559,6 @@ impl Style {
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),

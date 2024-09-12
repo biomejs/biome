@@ -47,7 +47,7 @@ declare_lint_rule! {
         version: "1.6.1",
         name: "noDoneCallback",
         language: "js",
-        recommended: true,
+        recommended: false,
         sources: &[RuleSource::EslintJest("no-done-callback")],
     }
 }
