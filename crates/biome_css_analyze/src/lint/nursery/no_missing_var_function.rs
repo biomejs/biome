@@ -1,31 +1,114 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleBlock;
+use biome_css_syntax::{AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssSyntaxKind};
 use biome_rowan::AstNode;
 
+use crate::services::semantic::Semantic;
+
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow missing var function for css variables.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// This rule has the following limitations:
+    /// - It only reports custom properties that are defined within the same source.
+    /// - It does not check properties that can contain author-defined identifiers. It ignores the following
+    ///   - `animation`
+    ///   - `animation-name`
+    ///   - `counter-increment`
+    ///   - `counter-reset`
+    ///   - `counter-set`
+    ///   - `grid-column`
+    ///   - `grid-column-end`
+    ///   - `grid-column-start`
+    ///   - `grid-row`
+    ///   - `grid-row-end`
+    ///   - `grid-row-start`
+    ///   - `list-style`
+    ///   - `list-style-type`
+    ///   - `transition`
+    ///   - `transition-property`
+    ///   - `view-transition-name`
+    ///   - `will-change`
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// p {}
+    /// a {
+    ///   --foo: red;
+    ///   color: --foo;
+    /// }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// .parent {
+    ///   --foo: red;
+    ///   .child {
+    ///     color: --foo;
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// @property --bar {}
+    ///
+    /// a {
+    ///   color: --bar;
+    /// }
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// :root {
+    ///   --baz: 0;
+    /// }
+    ///
+    /// a {
+    ///   --foo: --baz;
+    /// }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```css
     /// p {
-    ///   color: red;
+    ///   color: var(--foo);
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// p {
+    ///   --foo: red;
+    ///   color: var(--foo);
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// p {
+    ///   color: --foo;
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// *:root {
+    /// --global: red;
+    /// }
+    ///
+    /// a {
+    ///     color: var(--global);
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// @property --global-value {}
+    /// a {
+    ///   color: var(--global-value);
+    /// }
+    /// ```
+    ///
+    /// ```css
+    /// a {
+    ///   view-transition-name: --bbb;
     /// }
     /// ```
     ///
@@ -33,41 +116,132 @@ declare_lint_rule! {
         version: "next",
         name: "noMissingVarFunction",
         language: "css",
-        recommended: false,
+        recommended: true,
+        sources: &[RuleSource::Stylelint("custom-property-no-missing-var-function")],
     }
 }
 
+pub const IGNORED_PROPERTIES: [&str; 17] = [
+    "animation",
+    "animation-name",
+    "counter-increment",
+    "counter-reset",
+    "counter-set",
+    "grid-column",
+    "grid-column-end",
+    "grid-column-start",
+    "grid-row",
+    "grid-row-end",
+    "grid-row-start",
+    "list-style",
+    "list-style-type",
+    "transition",
+    "transition-property",
+    "view-transition-name",
+    "will-change",
+];
+
 impl Rule for NoMissingVarFunction {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
-    type State = CssDeclarationOrRuleBlock;
+    type Query = Semantic<CssDashedIdentifier>;
+    type State = CssDashedIdentifier;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        if node.items().into_iter().next().is_none() {
+        if is_wrapped_in_var(node) {
+            return None;
+        }
+
+        let property_name = get_property_name(node)?;
+        let custom_variable_name = node.text();
+
+        if IGNORED_PROPERTIES.contains(&property_name.as_str()) {
+            return None;
+        }
+
+        let model = ctx.model();
+        let rule = model.get_rule_by_range(node.range())?;
+
+        if rule
+            .declarations
+            .iter()
+            .any(|decl| decl.property.name == custom_variable_name)
+        {
             return Some(node.clone());
         }
+
+        let mut parent_id = rule.parent_id;
+        while let Some(id) = parent_id {
+            let parent_rule = model.get_rule_by_id(id)?;
+            if parent_rule
+                .declarations
+                .iter()
+                .any(|decl| decl.property.name == custom_variable_name)
+            {
+                return Some(node.clone());
+            }
+            parent_id = parent_rule.parent_id;
+        }
+
+        if model
+            .global_custom_variables()
+            .contains_key(&custom_variable_name)
+        {
+            return Some(node.clone());
+        }
+
         None
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         let span = node.range();
+        let custom_variable_name = node.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected empty block is not allowed"
+                    "CSS variables '"<Emphasis>{custom_variable_name}</Emphasis>"' is used without the 'var()' function"
                 },
             )
             .note(markup! {
-                    "This note will give you more information."
+                    "CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility."
             }),
         )
     }
+}
+
+fn is_wrapped_in_var(node: &CssDashedIdentifier) -> bool {
+    let mut current_node = node.syntax().parent();
+    while let Some(parent) = current_node {
+        match parent.kind() {
+            // Ignore declarations of custom properties
+            // e.g. `--custom-property: {}`
+            CssSyntaxKind::CSS_GENERIC_PROPERTY => return true,
+            // e.g `color: --custom-property;`
+            //             ^^^^^^^^^^^^^^^^ CSS_GENERIC_COMPONENT_VALUE_LIST
+            CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => return false,
+            CssSyntaxKind::CSS_FUNCTION => return parent.text().starts_with("var"),
+            _ => {}
+        }
+        current_node = parent.parent();
+    }
+    false
+}
+
+fn get_property_name(node: &CssDashedIdentifier) -> Option<String> {
+    let mut current_node = node.syntax().parent();
+    while let Some(parent) = current_node {
+        if let Some(node) = CssDeclaration::cast(parent.clone()) {
+            let prop = node.property().ok()?;
+            match prop {
+                AnyCssProperty::CssBogusProperty(_) => return None,
+                AnyCssProperty::CssComposesProperty(prop) => return Some(prop.name().ok()?.text()),
+                AnyCssProperty::CssGenericProperty(prop) => return Some(prop.name().ok()?.text()),
+            }
+        }
+        current_node = parent.parent();
+    }
+    None
 }
