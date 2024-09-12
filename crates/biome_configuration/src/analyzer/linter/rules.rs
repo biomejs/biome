@@ -3301,7 +3301,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_irregular_whitespace:
         Option<RuleConfiguration<biome_css_analyze::options::NoIrregularWhitespace>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow missing var function for css variables."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_missing_var_function:
         Option<RuleConfiguration<biome_css_analyze::options::NoMissingVarFunction>>,
@@ -3428,6 +3428,7 @@ impl Nursery {
         "noDuplicateCustomProperties",
         "noDuplicateElseIf",
         "noDuplicatedFields",
+        "noMissingVarFunction",
         "noUnknownPseudoClass",
         "noUnknownPseudoElement",
         "noUselessEscapeInRegex",
@@ -3440,6 +3441,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),

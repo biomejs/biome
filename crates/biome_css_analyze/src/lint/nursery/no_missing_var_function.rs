@@ -9,8 +9,9 @@ declare_lint_rule! {
     /// Disallow missing var function for css variables.
     ///
     /// This rule has the following limitations:
-    /// - It only reports custom properties that are defined within the same source.
-    /// - It does not check properties that can contain author-defined identifiers. It ignores the following
+    /// - It only reports custom properties that are defined and accesible within the same source.
+    /// - It does not check properties that can contain author-defined identifiers.
+    /// - It ignores the following properties:
     ///   - `animation`
     ///   - `animation-name`
     ///   - `counter-increment`
@@ -28,7 +29,6 @@ declare_lint_rule! {
     ///   - `transition-property`
     ///   - `view-transition-name`
     ///   - `will-change`
-    ///
     ///
     /// ## Examples
     ///

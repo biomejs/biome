@@ -2133,7 +2133,7 @@
 					]
 				},
 				"noMissingVarFunction": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow missing var function for css variables.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

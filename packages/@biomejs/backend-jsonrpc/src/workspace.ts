@@ -1256,7 +1256,7 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow missing var function for css variables.
 	 */
 	noMissingVarFunction?: RuleConfiguration_for_Null;
 	/**
