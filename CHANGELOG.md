@@ -133,6 +133,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix edge case [#3791](https://github.com/biomejs/biome/issues/3791) for rule `noFocusedTests` being used with non-string-like expressions ([#3793](https://github.com/biomejs/biome/pull/3793)). Contributed by @h-a-n-a
 
+- Fix optional ARIA properties for `role="separator"` in `useAriaPropsForRole` ([#3856](https://github.com/biomejs/biome/pull/3856)). Contributed by @anthonyshew
+
 ### Configuration
 
 - Add support for loading configuration from `.editorconfig` files ([#1724](https://github.com/biomejs/biome/issues/1724)).
@@ -418,7 +420,7 @@ The following JavaScript rules are promoted:
 
 - [noConsole](https://biomejs.dev/linter/rules/no-console/) now accepts an option that specifies some allowed calls on `console`. Contributed by @Conaclos
 
-- Add an `ignoreNull` option for [noDoubleEquals](https://biomejs.dev/linter/rules/no-double-equals/). 
+- Add an `ignoreNull` option for [noDoubleEquals](https://biomejs.dev/linter/rules/no-double-equals/).
 
   By default the rule allows loose comparisons against `null`.
   The option `ignoreNull` can be set to `false` for reporting loose comparison against `null`.
@@ -903,7 +905,7 @@ The following JavaScript rules are promoted:
 
 #### New features
 
-- Add [noUnknownPseudoClass](https://biomejs.dev/linter/rules/no-unknown-pseudo-class/). Contributed by  @tunamaguro 
+- Add [noUnknownPseudoClass](https://biomejs.dev/linter/rules/no-unknown-pseudo-class/). Contributed by  @tunamaguro
 
 #### Bug fixes
 
