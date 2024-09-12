@@ -36,7 +36,7 @@ a { unicode-range: U+0100-024F; }
 
 # Diagnostics
 ```
-invalid.css:1:18 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:18 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pp
   
@@ -58,7 +58,7 @@ invalid.css:1:18 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 
 ```
-invalid.css:2:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:15 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: xpx
   
@@ -81,7 +81,7 @@ invalid.css:2:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 
 ```
-invalid.css:3:18 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:18 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: remm
   
@@ -105,7 +105,7 @@ invalid.css:3:18 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 
 ```
-invalid.css:4:19 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:19 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: remm
   
@@ -129,7 +129,7 @@ invalid.css:4:19 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 
 ```
-invalid.css:5:19 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:19 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -153,7 +153,7 @@ invalid.css:5:19 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 
 ```
-invalid.css:6:19 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:19 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -177,7 +177,7 @@ invalid.css:6:19 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 
 ```
-invalid.css:7:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:7:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -201,7 +201,7 @@ invalid.css:7:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 
 ```
-invalid.css:8:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -225,7 +225,7 @@ invalid.css:8:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 
 ```
-invalid.css:9:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:9:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -249,7 +249,7 @@ invalid.css:9:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━
 ```
 
 ```
-invalid.css:10:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:10:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -273,7 +273,7 @@ invalid.css:10:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:11:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:11:22 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -297,7 +297,7 @@ invalid.css:11:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:12:33 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:12:33 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -321,7 +321,7 @@ invalid.css:12:33 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:13:28 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:13:28 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -345,7 +345,7 @@ invalid.css:13:28 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:14:29 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:14:29 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -369,7 +369,7 @@ invalid.css:14:29 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:15:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:15:20 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -393,7 +393,7 @@ invalid.css:15:20 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:16:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:16:22 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   
@@ -417,7 +417,7 @@ invalid.css:16:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:17:47 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:17:47 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: PIX
   
@@ -441,7 +441,7 @@ invalid.css:17:47 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:18:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:18:22 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: REMS
   
@@ -465,7 +465,7 @@ invalid.css:18:22 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:19:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:19:15 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pz
   
@@ -489,7 +489,7 @@ invalid.css:19:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:20:14 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:20:14 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: r9
   
@@ -513,7 +513,7 @@ invalid.css:20:14 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:21:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:21:15 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: x
   
@@ -537,7 +537,7 @@ invalid.css:21:15 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:22:44 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:22:44 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: x
   
@@ -561,7 +561,7 @@ invalid.css:22:44 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:23:60 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:23:60 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: x
   
@@ -585,7 +585,7 @@ invalid.css:23:60 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:24:66 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:24:66 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: x
   
@@ -609,7 +609,7 @@ invalid.css:24:66 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:25:80 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:25:80 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: x
   
@@ -633,7 +633,7 @@ invalid.css:25:80 lint/nursery/noUnknownUnit ━━━━━━━━━━━�
 ```
 
 ```
-invalid.css:26:46 lint/nursery/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:26:46 lint/correctness/noUnknownUnit ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown unit: pix
   

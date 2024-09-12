@@ -31,6 +31,8 @@ allowlist.options:5:17 deserialize ━━━━━━━━━━━━━━━
   
   - recommended
   - all
+  - noCommonJs
+  - noDuplicateCustomProperties
   - noDuplicateElseIf
   - noDuplicatedFields
   - noDynamicNamespaceImportAccess
@@ -39,24 +41,18 @@ allowlist.options:5:17 deserialize ━━━━━━━━━━━━━━━
   - noIrregularWhitespace
   - noRestrictedImports
   - noRestrictedTypes
+  - noSecrets
   - noStaticElementInteractions
   - noSubstr
-  - noUnknownFunction
-  - noUnknownMediaFeatureName
-  - noUnknownProperty
-  - noUnknownPseudoClassSelector
-  - noUnknownSelectorPseudoElement
-  - noUnknownUnit
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
   - noUselessEscapeInRegex
   - noValueAtRule
   - useAdjacentOverloadSignatures
   - useAriaPropsSupportedByRole
-  - useConsistentBuiltinInstantiation
   - useConsistentCurlyBraces
-  - useConsistentGridAreas
   - useConsistentMemberAccessibility
   - useDeprecatedReason
-  - useGenericFontNames
   - useImportRestrictions
   - useSortedClasses
   - useStrictMode

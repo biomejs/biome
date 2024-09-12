@@ -11,7 +11,7 @@ a { width: calc(10% * unknown(1)); }
 
 # Diagnostics
 ```
-invalid.css:1:16 lint/nursery/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:16 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown function: unknown
   
@@ -28,7 +28,7 @@ invalid.css:1:16 lint/nursery/noUnknownFunction ━━━━━━━━━━�
 ```
 
 ```
-invalid.css:2:16 lint/nursery/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:16 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown function: UNKNOWN
   
@@ -45,7 +45,7 @@ invalid.css:2:16 lint/nursery/noUnknownFunction ━━━━━━━━━━�
 ```
 
 ```
-invalid.css:3:23 lint/nursery/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:23 lint/correctness/noUnknownFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected unknown function: unknown
   

@@ -37,7 +37,7 @@ a { grid-template-areas: "a a a"
 
 # Diagnostics
 ```
-invalid.css:1:26 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Empty grid areas are not allowed.
   
@@ -52,7 +52,7 @@ invalid.css:1:26 lint/nursery/noInvalidGridAreas ━━━━━━━━━━�
 ```
 
 ```
-invalid.css:2:26 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:26 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Inconsistent cell count in grid areas are not allowed.
   
@@ -68,7 +68,7 @@ invalid.css:2:26 lint/nursery/noInvalidGridAreas ━━━━━━━━━━�
 ```
 
 ```
-invalid.css:4:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Empty grid areas are not allowed.
   
@@ -87,7 +87,7 @@ invalid.css:4:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━�
 ```
 
 ```
-invalid.css:6:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate filled in rectangle are not allowed.
   
@@ -106,7 +106,7 @@ invalid.css:6:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━�
 ```
 
 ```
-invalid.css:11:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:11:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate filled in rectangle are not allowed.
   
@@ -125,7 +125,7 @@ invalid.css:11:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━
 ```
 
 ```
-invalid.css:15:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:15:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate filled in rectangle are not allowed.
   
@@ -144,7 +144,7 @@ invalid.css:15:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━
 ```
 
 ```
-invalid.css:17:35 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:17:35 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate filled in rectangle are not allowed.
   
@@ -163,7 +163,7 @@ invalid.css:17:35 lint/nursery/noInvalidGridAreas ━━━━━━━━━━
 ```
 
 ```
-invalid.css:21:35 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:21:35 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Inconsistent cell count in grid areas are not allowed.
   
@@ -182,7 +182,7 @@ invalid.css:21:35 lint/nursery/noInvalidGridAreas ━━━━━━━━━━
 ```
 
 ```
-invalid.css:24:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:24:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate filled in rectangle are not allowed.
   
@@ -201,7 +201,7 @@ invalid.css:24:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━
 ```
 
 ```
-invalid.css:27:33 lint/nursery/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:27:33 lint/correctness/noInvalidGridAreas ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate filled in rectangle are not allowed.
   

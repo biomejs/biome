@@ -16,7 +16,7 @@ a {
 
 # Diagnostics
 ```
-invalid.css:2:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unknown property is not allowed.
   
@@ -34,7 +34,7 @@ invalid.css:2:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━
 ```
 
 ```
-invalid.css:6:3 lint/nursery/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unknown property is not allowed.
   

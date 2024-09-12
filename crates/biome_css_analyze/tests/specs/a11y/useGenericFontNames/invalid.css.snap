@@ -15,7 +15,7 @@ a { font: 1em Lucida Grande, Arial, "sans-serif" }
 
 # Diagnostics
 ```
-invalid.css:1:18 lint/nursery/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:1:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Generic font family missing.
   
@@ -37,7 +37,7 @@ invalid.css:1:18 lint/nursery/useGenericFontNames ━━━━━━━━━━
 ```
 
 ```
-invalid.css:2:44 lint/nursery/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:2:44 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Generic font family missing.
   
@@ -60,7 +60,7 @@ invalid.css:2:44 lint/nursery/useGenericFontNames ━━━━━━━━━━
 ```
 
 ```
-invalid.css:3:18 lint/nursery/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Generic font family missing.
   
@@ -84,7 +84,7 @@ invalid.css:3:18 lint/nursery/useGenericFontNames ━━━━━━━━━━
 ```
 
 ```
-invalid.css:4:18 lint/nursery/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:4:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Generic font family missing.
   
@@ -108,7 +108,7 @@ invalid.css:4:18 lint/nursery/useGenericFontNames ━━━━━━━━━━
 ```
 
 ```
-invalid.css:5:39 lint/nursery/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:5:39 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Generic font family missing.
   
@@ -132,7 +132,7 @@ invalid.css:5:39 lint/nursery/useGenericFontNames ━━━━━━━━━━
 ```
 
 ```
-invalid.css:6:43 lint/nursery/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:43 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Generic font family missing.
   
@@ -155,7 +155,7 @@ invalid.css:6:43 lint/nursery/useGenericFontNames ━━━━━━━━━━
 ```
 
 ```
-invalid.css:7:37 lint/nursery/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:7:37 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Generic font family missing.
   
