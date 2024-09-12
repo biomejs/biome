@@ -68,17 +68,17 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     if p.at(T![/]) {
         p.bump(T![/]);
-        p.expect(T![>]);
+        p.expect_with_context(T![>], HtmlLexContext::OutsideTag);
         Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT))
     } else {
         if should_be_self_closing {
             if p.at(T![/]) {
                 p.bump(T![/]);
             }
-            p.expect(T![>]);
+            p.expect_with_context(T![>], HtmlLexContext::OutsideTag);
             return Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT));
         }
-        p.expect_with_context(T![>], HtmlLexContext::ElementList);
+        p.expect_with_context(T![>], HtmlLexContext::OutsideTag);
         let opening = m.complete(p, HTML_OPENING_ELEMENT);
         loop {
             ElementList.parse_list(p);
@@ -128,7 +128,7 @@ impl ParseNodeList for ElementList {
             T![<] => parse_element(p),
             HTML_LITERAL => {
                 let m = p.start();
-                p.bump(HTML_LITERAL);
+                p.bump_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
                 Present(m.complete(p, HTML_CONTENT))
             }
             _ => Absent,
