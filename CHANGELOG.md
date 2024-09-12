@@ -314,7 +314,7 @@ The following JavaScript rules are promoted:
 
 - [a11y/noLabelWithoutControl](https://biomejs.dev/linter/rules/no-label-without-control/)
 - [a11y/useFocusableInteractive](https://biomejs.dev/linter/rules/use-focusable-interactive/)
-- [accessibility/useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/)
+- [a11y/useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/)
 - [complexity/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/)
 - [complexity/noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/)
 - [complexity/useDateNow](https://biomejs.dev/linter/rules/use-date-now/)

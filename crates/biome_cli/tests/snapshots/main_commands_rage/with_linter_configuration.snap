@@ -85,7 +85,6 @@ Linter:
   complexity/useSimpleNumberKeys
   suspicious/noCommentText
   complexity/noExcessiveNestedTestSuites
-  complexity/useDateNow
   complexity/noUselessLabel
   complexity/noUselessCatch
   complexity/noUselessFragments

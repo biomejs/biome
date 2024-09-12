@@ -9,7 +9,7 @@ expression: renamedRuleAndNewRule.json
     "rules": {
       "nursery": {
         "noExcessiveNestedTestSuites": "error",
-        "oldName": "error"
+        "useConsistentGridAreas": "error"
       }
     }
   }
@@ -27,7 +27,7 @@ renamedRuleAndNewRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━�
     4 │       "nursery": {
   > 5 │         "noExcessiveNestedTestSuites": "error",
       │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    6 │         "oldName": "error"
+    6 │         "useConsistentGridAreas": "error"
     7 │       }
   
   i Unsafe fix: Move the rule to the new stable group.
@@ -36,9 +36,9 @@ renamedRuleAndNewRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━�
      3  3 │       "rules": {
      4    │ - ······"nursery":·{
      5    │ - ········"noExcessiveNestedTestSuites":·"error",
-     6    │ - ········"oldName":·"error"
+     6    │ - ········"useConsistentGridAreas":·"error"
         4 │ + ······"nursery":{
-        5 │ + ········"oldName":·"error"},
+        5 │ + ········"useConsistentGridAreas":·"error"},
         6 │ + ······"complexity":{
         7 │ + ········"noExcessiveNestedTestSuites":·"error"
      7  8 │         }
@@ -50,12 +50,12 @@ renamedRuleAndNewRule.json:5:9 migrate  FIXABLE  ━━━━━━━━━━�
 ```
 renamedRuleAndNewRule.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This rule has been promoted to suspicious/noSuspiciousSemicolonInJsx.
+  ! This rule has been promoted to correctness/noInvalidGridAreas.
   
     4 │       "nursery": {
     5 │         "noExcessiveNestedTestSuites": "error",
-  > 6 │         "oldName": "error"
-      │         ^^^^^^^^^^^^^^^^^^
+  > 6 │         "useConsistentGridAreas": "error"
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │       }
     8 │     }
   
@@ -65,11 +65,11 @@ renamedRuleAndNewRule.json:6:9 migrate  FIXABLE  ━━━━━━━━━━�
      3  3 │       "rules": {
      4    │ - ······"nursery":·{
      5    │ - ········"noExcessiveNestedTestSuites":·"error",
-     6    │ - ········"oldName":·"error"
+     6    │ - ········"useConsistentGridAreas":·"error"
         4 │ + ······"nursery":{
         5 │ + ········"noExcessiveNestedTestSuites":·"error"},
-        6 │ + ······"suspicious":{
-        7 │ + ········"noSuspiciousSemicolonInJsx":·"error"
+        6 │ + ······"correctness":{
+        7 │ + ········"noInvalidGridAreas":·"error"
      7  8 │         }
      8  9 │       }
   
