@@ -71,6 +71,7 @@ biome.json:7:9 deserialize ━━━━━━━━━━━━━━━━━�
   - noEnum
   - noExportedImports
   - noIrregularWhitespace
+  - noMissingVarFunction
   - noRestrictedImports
   - noRestrictedTypes
   - noSecrets

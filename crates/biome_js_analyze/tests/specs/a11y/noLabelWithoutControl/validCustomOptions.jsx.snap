@@ -36,6 +36,7 @@ validCustomOptions.options:7:5 deserialize ━━━━━━━━━━━━�
   - noEnum
   - noExportedImports
   - noIrregularWhitespace
+  - noMissingVarFunction
   - noRestrictedImports
   - noRestrictedTypes
   - noSecrets

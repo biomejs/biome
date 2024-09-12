@@ -66,7 +66,6 @@ a {
     color: --gggg;
 }
 
-
 /* case 9 */
 .parent {
     --foo: red;
@@ -249,16 +248,16 @@ invalid.css:60:12 lint/nursery/noMissingVarFunction ━━━━━━━━━�
 ```
 
 ```
-invalid.css:68:14 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:67:14 lint/nursery/noMissingVarFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! CSS variables '--foo' is used without the 'var()' function
   
-    66 │     --foo: red;
-    67 │     .child {
-  > 68 │       color: --foo;
+    65 │     --foo: red;
+    66 │     .child {
+  > 67 │       color: --foo;
        │              ^^^^^
-    69 │     }
-    70 │ };
+    68 │     }
+    69 │ };
   
   i CSS variables should be used with the 'var()' function to ensure proper fallback behavior and browser compatibility.
   
