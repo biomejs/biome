@@ -9,6 +9,50 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+#### New features
+
+#### Enhancements
+
+### CLI
+
+#### New features
+
+#### Enhancements
+
+#### Bug fixes
+
+### Configuration
+
+### Editors
+
+#### Bug fixes
+
+#### Enhancements
+
+#### Bug fixes
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add [nursery/noMissingVarFunction](https://biomejs.dev/linter/rules/no-missing-var-function). Contributed by @michellocana
+
+#### Enhancements
+
+#### Bug fixes
+
+### Parser
+
+#### Enhancements
+
+#### Bug fixes
+
 ## v1.9.0 (2024-09-12)
 
 ### Analyzer
