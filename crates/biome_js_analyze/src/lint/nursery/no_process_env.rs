@@ -70,7 +70,7 @@ impl Rule for NoProcessEnv {
                 },
             )
             .note(markup! {
-                "The use of "<Emphasis>"process.env"</Emphasis>" is discouraged; use a centralized configuration file instead for better maintainability and deployment consistency."
+                "Use a centralized configuration file instead for better maintainability and deployment consistency."
             }),
         )
     }
