@@ -319,6 +319,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noIrreguluarWhitespace](https://biomejs.dev/linter/rules/no-irreguluar-whitespace/). Contributed by @DerTimonius
 
+- Add [nursery/noProcessEnv](https://biomejs.dev/linter/rules/no-process-env/). Contributed by @unvalley
+
 #### Enhancements
 
 - Rename `nursery/noUnknownSelectorPseudoElement` to `nursery/noUnknownPseudoElement`. Contributed by @togami2864
