@@ -101,7 +101,6 @@ impl Rule for UseAriaPropsForRole {
                 .ok()?;
 
             let role = roles.get_role(name.text());
-
             let missing_aria_props: Vec<_> = role
                 .into_iter()
                 .flat_map(|role| role.properties())

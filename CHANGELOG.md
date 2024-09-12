@@ -133,7 +133,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix edge case [#3791](https://github.com/biomejs/biome/issues/3791) for rule `noFocusedTests` being used with non-string-like expressions ([#3793](https://github.com/biomejs/biome/pull/3793)). Contributed by @h-a-n-a
 
-- Fix optional ARIA properties for role="separator" in useAriaPropsForRole ([#3856](https://github.com/biomejs/biome/pull/3856)). Contributed by @anthonyshew
+- Fix optional ARIA properties for `role="separator"` in `useAriaPropsForRole` ([#3856](https://github.com/biomejs/biome/pull/3856)). Contributed by @anthonyshew
 
 ### Configuration
 
