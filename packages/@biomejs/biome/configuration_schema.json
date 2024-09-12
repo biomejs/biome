@@ -150,6 +150,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noLabelWithoutControl": {
+					"description": "Enforce that a label element or component has a text label and an associated input.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoLabelWithoutControlConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noNoninteractiveElementToInteractiveRole": {
 					"description": "Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.",
 					"anyOf": [
@@ -231,6 +238,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useFocusableInteractive": {
+					"description": "Elements with an interactive role and interaction handlers must be focusable.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGenericFontNames": {
+					"description": "Disallow a missing generic family keyword within font families.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useHeadingContent": {
 					"description": "Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.",
 					"anyOf": [
@@ -268,6 +289,13 @@
 				},
 				"useMediaCaption": {
 					"description": "Enforces that audio and video elements must have a track for captions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useSemanticElements": {
+					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -487,6 +515,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessStringConcat": {
+					"description": "Disallow unnecessary concatenation of string or template literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessSwitchCase": {
 					"description": "Disallow useless case in switch statements.",
 					"anyOf": [
@@ -515,6 +550,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessUndefinedInitialization": {
+					"description": "Disallow initializing variables to undefined.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noVoid": {
 					"description": "Disallow the use of void operators, which is not a familiar operator.",
 					"anyOf": [
@@ -535,6 +577,13 @@
 				},
 				"useArrowFunction": {
 					"description": "Use arrow functions over function expressions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useDateNow": {
+					"description": "Use Date.now() to get the number of milliseconds since the Unix Epoch.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -743,8 +792,29 @@
 						{ "type": "null" }
 					]
 				},
+				"noInvalidBuiltinInstantiation": {
+					"description": "Ensure that builtins are correctly instantiated.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noInvalidConstructorSuper": {
 					"description": "Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidDirectionInLinearGradient": {
+					"description": "Disallow non-standard direction values for linear gradient functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidGridAreas": {
+					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -754,6 +824,13 @@
 					"description": "Disallow new operators with global non-constructor functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noInvalidPositionAtImportRule": {
+					"description": "Disallow the use of @import at-rules in invalid positions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -827,8 +904,50 @@
 						{ "type": "null" }
 					]
 				},
+				"noUndeclaredDependencies": {
+					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUndeclaredVariables": {
 					"description": "Prevents the usage of variables that haven't been declared inside the document.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownFunction": {
+					"description": "Disallow unknown CSS value functions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownMediaFeatureName": {
+					"description": "Disallow unknown media feature names.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownProperty": {
+					"description": "Disallow unknown properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownUnit": {
+					"description": "Disallow unknown CSS units.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnmatchableAnbSelector": {
+					"description": "Disallow unmatchable An+B selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -866,6 +985,13 @@
 					"description": "Disallow the use of optional chaining in contexts where the undefined value is not allowed.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnusedFunctionParameters": {
+					"description": "Disallow unused function parameters.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -933,6 +1059,13 @@
 					"description": "Enforce that all React hooks are being called from the Top Level component functions.",
 					"anyOf": [
 						{ "$ref": "#/definitions/DeprecatedHooksConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useImportExtensions": {
+					"description": "Enforce file extensions for relative imports.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseImportExtensionsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1950,27 +2083,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noConsole": {
-					"description": "Disallow the use of console.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoConsoleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDoneCallback": {
-					"description": "Disallow using a callback in asynchronous tests and hooks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateAtImportRules": {
-					"description": "Disallow duplicate @import rules.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noDuplicateCustomProperties": {
 					"description": "Disallow duplicate custom properties within declaration blocks.",
 					"anyOf": [
@@ -1980,20 +2092,6 @@
 				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateFontNames": {
-					"description": "Disallow duplicate names within font families.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noDuplicateSelectorsKeyframeBlock": {
-					"description": "Disallow duplicate selectors within keyframe blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2013,22 +2111,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noEmptyBlock": {
-					"description": "Disallow CSS empty blocks.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noEnum": {
 					"description": "Disallow TypeScript enum.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noEvolvingTypes": {
-					"description": "Disallow variables from evolving into any type through reassignments.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2041,59 +2125,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noImportantInKeyframe": {
-					"description": "Disallow invalid !important within keyframe declarations",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noInvalidDirectionInLinearGradient": {
-					"description": "Disallow non-standard direction values for linear gradient functions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noInvalidGridAreas": {
-					"description": "Disallows invalid named grid areas in CSS Grid Layouts.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noInvalidPositionAtImportRule": {
-					"description": "Disallow the use of @import at-rules in invalid positions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noLabelWithoutControl": {
-					"description": "Enforce that a label element or component has a text label and an associated input.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoLabelWithoutControlConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noMisplacedAssertion": {
-					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noReactSpecificProps": {
-					"description": "Prevents React-specific JSX properties from being used.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2118,13 +2153,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noShorthandPropertyOverrides": {
-					"description": "Disallow shorthand properties that override related longhand properties.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noStaticElementInteractions": {
 					"description": "Enforce that static, visible elements (such as \\<div>) that have click handlers use the valid role attribute.",
 					"anyOf": [
@@ -2136,34 +2164,6 @@
 					"description": "Enforce the use of String.slice() over String.substr() and String.substring().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUndeclaredDependencies": {
-					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnknownFunction": {
-					"description": "Disallow unknown CSS value functions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnknownMediaFeatureName": {
-					"description": "Disallow unknown media feature names.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnknownProperty": {
-					"description": "Disallow unknown properties.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2181,43 +2181,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noUnknownUnit": {
-					"description": "Disallow unknown CSS units.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnmatchableAnbSelector": {
-					"description": "Disallow unmatchable An+B selectors.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUnusedFunctionParameters": {
-					"description": "Disallow unused function parameters.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noUselessEscapeInRegex": {
 					"description": "Disallow unnecessary escape sequence in regular expression literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessStringConcat": {
-					"description": "Disallow unnecessary concatenation of string or template literals.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noUselessUndefinedInitialization": {
-					"description": "Disallow initializing variables to undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -2227,13 +2192,6 @@
 					"description": "Disallow use of @value rule in css modules.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noYodaExpression": {
-					"description": "Disallow the use of yoda expressions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2255,13 +2213,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useConsistentBuiltinInstantiation": {
-					"description": "Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useConsistentCurlyBraces": {
 					"description": "This rule enforces consistent use of curly braces inside JSX attributes and JSX children.",
 					"anyOf": [
@@ -2278,20 +2229,6 @@
 						{ "type": "null" }
 					]
 				},
-				"useDateNow": {
-					"description": "Use Date.now() to get the number of milliseconds since the Unix Epoch.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useDefaultSwitchClause": {
-					"description": "Require the default clause in switch statements.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useDeprecatedReason": {
 					"description": "Require specifying the reason argument when using @deprecated directive",
 					"anyOf": [
@@ -2299,57 +2236,8 @@
 						{ "type": "null" }
 					]
 				},
-				"useErrorMessage": {
-					"description": "Enforce passing a message value when creating a built-in error.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useExplicitLengthCheck": {
-					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useFocusableInteractive": {
-					"description": "Elements with an interactive role and interaction handlers must be focusable.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useGenericFontNames": {
-					"description": "Disallow a missing generic family keyword within font families.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useImportExtensions": {
-					"description": "Enforce file extensions for relative imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/UseImportExtensionsConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useNumberToFixedDigitsArgument": {
-					"description": "Enforce using the digits argument with Number#toFixed().",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useSemanticElements": {
-					"description": "It detects the use of role attributes in JSX elements and suggests using semantic elements instead.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2366,27 +2254,6 @@
 					"description": "Enforce the use of the directive \"use strict\" in script files.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useThrowNewError": {
-					"description": "Require new when throwing an error.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useThrowOnlyError": {
-					"description": "Disallow throwing non-Error values.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"useTopLevelRegex": {
-					"description": "Require regex literals to be declared at the top level.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2600,6 +2467,13 @@
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
+				},
+				"useTopLevelRegex": {
+					"description": "Require regex literals to be declared at the top level.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -3168,6 +3042,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDoneCallback": {
+					"description": "Disallow using a callback in asynchronous tests and hooks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImplicitBoolean": {
 					"description": "Disallow implicit true values on JSX boolean attributes",
 					"anyOf": [
@@ -3259,6 +3140,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noYodaExpression": {
+					"description": "Disallow the use of yoda expressions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"recommended": {
 					"description": "It enables the recommended rules for this group",
 					"type": ["boolean", "null"]
@@ -3291,6 +3179,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useConsistentBuiltinInstantiation": {
+					"description": "Enforce the use of new for all builtins, except String, Number and Boolean.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useConst": {
 					"description": "Require const declarations for variables that are only assigned once.",
 					"anyOf": [
@@ -3305,8 +3200,22 @@
 						{ "type": "null" }
 					]
 				},
+				"useDefaultSwitchClause": {
+					"description": "Require the default clause in switch statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useEnumInitializers": {
 					"description": "Require that each enum member value be explicitly initialized.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useExplicitLengthCheck": {
+					"description": "Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -3445,6 +3354,20 @@
 						{ "type": "null" }
 					]
 				},
+				"useThrowNewError": {
+					"description": "Require new when throwing an error.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useThrowOnlyError": {
+					"description": "Disallow throwing non-Error values.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useWhile": {
 					"description": "Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.",
 					"anyOf": [
@@ -3548,6 +3471,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noConsole": {
+					"description": "Disallow the use of console.",
+					"anyOf": [
+						{ "$ref": "#/definitions/NoConsoleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noConsoleLog": {
 					"description": "Disallow the use of console.log",
 					"anyOf": [
@@ -3583,6 +3513,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateAtImportRules": {
+					"description": "Disallow duplicate @import rules.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateCase": {
 					"description": "Disallow duplicate case labels.",
 					"anyOf": [
@@ -3592,6 +3529,13 @@
 				},
 				"noDuplicateClassMembers": {
 					"description": "Disallow duplicate class members.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateFontNames": {
+					"description": "Disallow duplicate names within font families.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -3618,8 +3562,22 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateSelectorsKeyframeBlock": {
+					"description": "Disallow duplicate selectors within keyframe blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateTestHooks": {
 					"description": "A describe block should not contain duplicate hooks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEmptyBlock": {
+					"description": "Disallow CSS empty blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -3636,6 +3594,13 @@
 					"description": "Disallow the declaration of empty interfaces.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noEvolvingTypes": {
+					"description": "Disallow variables from evolving into any type through reassignments.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3716,6 +3681,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noImportantInKeyframe": {
+					"description": "Disallow invalid !important within keyframe declarations",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noLabelVar": {
 					"description": "Disallow labels that share a name with a variable",
 					"anyOf": [
@@ -3737,6 +3709,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noMisplacedAssertion": {
+					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noMisrefactoredShorthandAssign": {
 					"description": "Disallow shorthand assign when variable appears on both sides.",
 					"anyOf": [
@@ -3748,6 +3727,13 @@
 					"description": "Disallow direct use of Object.prototype builtins.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noReactSpecificProps": {
+					"description": "Prevents React-specific JSX properties from being used.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3774,6 +3760,13 @@
 				},
 				"noShadowRestrictedNames": {
 					"description": "Disallow identifiers from shadowing restricted names.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noShorthandPropertyOverrides": {
+					"description": "Disallow shorthand properties that override related longhand properties.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -3839,6 +3832,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useErrorMessage": {
+					"description": "Enforce passing a message value when creating a built-in error.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGetterReturn": {
 					"description": "Enforce get methods to always return a value.",
 					"anyOf": [
@@ -3855,6 +3855,13 @@
 				},
 				"useNamespaceKeyword": {
 					"description": "Require using the namespace keyword over the module keyword to declare TypeScript namespaces.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNumberToFixedDigitsArgument": {
+					"description": "Enforce using the digits argument with Number#toFixed().",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

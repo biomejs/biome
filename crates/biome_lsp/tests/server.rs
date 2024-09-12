@@ -1497,7 +1497,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
             "linter": { "enabled": true }
         },
         "linter": {
-            "rules": { "nursery": { "noUnknownProperty": "error" } }
+            "rules": { "correctness": { "noUnknownProperty": "error" } }
         }
     }"#;
 
@@ -1548,7 +1548,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
                     },
                     severity: Some(lsp::DiagnosticSeverity::ERROR),
                     code: Some(lsp::NumberOrString::String(String::from(
-                        "lint/nursery/noUnknownProperty"
+                        "lint/correctness/noUnknownProperty"
                     ))),
                     code_description: Some(CodeDescription {
                         href: Url::parse("https://biomejs.dev/linter/rules/no-unknown-property")

@@ -9,7 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## v1.9.0 (2024-09-12)
 
 ### Analyzer
 
@@ -286,6 +286,62 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 ### Linter
+
+#### Promoted rules
+
+New rules are incubated in the nursery group.
+Once stable, we promote them to a stable group.
+
+The following CSS rules are promoted:
+
+- [a11y/useGenericFontNames](https://biomejs.dev/linter/rules/use-generic-font-names/)
+- [correctness/noInvalidDirectionInLinearGradient](https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient/)
+- [correctness/noInvalidGridAreas](https://biomejs.dev/linter/rules/no-invalid-grid-areas/)
+- [correctness/noInvalidPositionAtImportRule](https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule/)
+- [correctness/noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function/)
+- [correctness/noUnknownMediaFeatureName](https://biomejs.dev/linter/rules/no-unknown-media-feature-name/)
+- [correctness/noUnknownProperty](https://biomejs.dev/linter/rules/no-unknown-property/)
+- [correctness/noUnknownUnit](https://biomejs.dev/linter/rules/no-unknown-unit/)
+- [correctness/noUnmatchableAnbSelector](https://biomejs.dev/linter/rules/no-unmatchable-anb-selector/)
+- [suspicious/noDuplicateAtImportRules](https://biomejs.dev/linter/rules/no-duplicate-at-import-rules/)
+- [suspicious/noDuplicateFontNames](https://biomejs.dev/linter/rules/no-duplicate-font-names/)
+- [suspicious/noDuplicateSelectorsKeyframeBlock](https://biomejs.dev/linter/rules/no-duplicate-selectors-keyframe-block/)
+- [suspicious/noEmptyBlock](https://biomejs.dev/linter/rules/no-empty-block/)
+- [suspicious/noImportantInKeyframe](https://biomejs.dev/linter/rules/no-important-in-keyframe/)
+- [suspicious/noShorthandPropertyOverrides](https://biomejs.dev/linter/rules/no-shorthand-property-overrides/)
+
+The following JavaScript rules are promoted:
+
+- [a11y/noLabelWithoutControl](https://biomejs.dev/linter/rules/no-label-without-control/)
+- [a11y/useFocusableInteractive](https://biomejs.dev/linter/rules/use-focusable-interactive/)
+- [a11y/useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/)
+- [complexity/noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/)
+- [complexity/noUselessUndefinedInitialization](https://biomejs.dev/linter/rules/no-useless-undefined-initialization/)
+- [complexity/useDateNow](https://biomejs.dev/linter/rules/use-date-now/)
+- [correctness/noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/)
+- [correctness/noInvalidBuiltinInstantiation](https://biomejs.dev/linter/rules/no-invalid-builtin-instantiation/)
+- [correctness/noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/)
+- [correctness/useImportExtensions](https://biomejs.dev/linter/rules/use-import-extensions/)
+- [performance/useTopLevelRegex](https://biomejs.dev/linter/rules/use-top-level-regex/)
+- [style/noDoneCallback](https://biomejs.dev/linter/rules/no-done-callback/)
+- [style/noYodaExpression](https://biomejs.dev/linter/rules/no-yoda-expression/)
+- [style/useConsistentBuiltinInstantiation](https://biomejs.dev/linter/rules/use-consistent-builtin-instantiation/)
+- [style/useDefaultSwitchClause](https://biomejs.dev/linter/rules/use-default-switch-clause/)
+- [style/useExplicitLengthCheck](https://biomejs.dev/linter/rules/use-explicit-length-check/)
+- [style/useThrowNewError](https://biomejs.dev/linter/rules/use-throw-new-error/)
+- [style/useThrowOnlyError](https://biomejs.dev/linter/rules/use-throw-only-error/)
+- [suspicious/noConsole](https://biomejs.dev/linter/rules/no-console/)
+- [suspicious/noEvolvingTypes](https://biomejs.dev/linter/rules/no-evolving-types/)
+- [suspicious/noMisplacedAssertion](https://biomejs.dev/linter/rules/no-misplaced-assertion/)
+- [suspicious/noReactSpecificProps](https://biomejs.dev/linter/rules/no-react-specific-props/)
+- [suspicious/useErrorMessage](https://biomejs.dev/linter/rules/use-error-message/)
+- [suspicious/useNumberToFixedDigitsArgument](https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument/)
+
+#### Deprecated rules
+
+- `correctness/noInvalidNewBuiltin` is deprecated. Use [correctness/noInvalidBuiltinInstantiation](https://biomejs.dev/linter/rules/no-invalid-builtin-instantiation/) instead.
+- `style/useSingleCaseStatement` is deprecated. Use [correctness/noSwitchDeclarations](https://biomejs.dev/linter/rules/no-switch-declarations/) instead.
+- `suspicious/noConsoleLog` is deprecated. Use [suspicious/noConsole](https://biomejs.dev/linter/rules/no-console/) instead.
 
 #### New features
 

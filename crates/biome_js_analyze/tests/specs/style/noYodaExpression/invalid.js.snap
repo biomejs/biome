@@ -1,0 +1,838 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+if ("red" == value) {}
+if (true === value) {}
+if (5 != value) {}
+if (5n != value) {}
+if (null !== value) {}
+if ("red" <= value) {}
+if (`red` <= value) {}
+if (`red` <= `${foo}`) {}
+if (`red` <= `${"red"}`) {}
+if (true >= value) {}
+var foo = (5 < value) ? true : false
+function foo() { return (null > value); }
+if (-1 < str.indexOf(substr)) {}
+if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+if (((((((5)))))) === ((((((((((foo))))))))))) {}
+while (0 === (a));
+while (0 === (a = b));
+async function foo() { return 1 < await bar() }
+function *foo() { yield(1) < a }
+function *foo() { yield((1)) < a }
+function *foo() { yield 1 < a }
+function *foo() { yield/**/1 < a }
+function *foo() { yield(1) < ++a }
+function *foo() { yield(1) < (a) }
+x=1 < a
+0 < f()in obj
+1 > x++instanceof foo
+false <= ((x))in foo
+false <= ((x)) in foo
+1 > x===foo
+1 > x
+
+```
+
+# Diagnostics
+```
+invalid.js:1:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+  > 1 │ if ("red" == value) {}
+      │     ^^^^^^^^^^^^^^
+    2 │ if (true === value) {}
+    3 │ if (5 != value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     1    │ - if·("red"·==·value)·{}
+        1 │ + if·(value·==·"red")·{}
+     2  2 │   if (true === value) {}
+     3  3 │   if (5 != value) {}
+  
+
+```
+
+```
+invalid.js:2:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    1 │ if ("red" == value) {}
+  > 2 │ if (true === value) {}
+      │     ^^^^^^^^^^^^^^
+    3 │ if (5 != value) {}
+    4 │ if (5n != value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     1  1 │   if ("red" == value) {}
+     2    │ - if·(true·===·value)·{}
+        2 │ + if·(value·===·true)·{}
+     3  3 │   if (5 != value) {}
+     4  4 │   if (5n != value) {}
+  
+
+```
+
+```
+invalid.js:3:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    1 │ if ("red" == value) {}
+    2 │ if (true === value) {}
+  > 3 │ if (5 != value) {}
+      │     ^^^^^^^^^^
+    4 │ if (5n != value) {}
+    5 │ if (null !== value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     1  1 │   if ("red" == value) {}
+     2  2 │   if (true === value) {}
+     3    │ - if·(5·!=·value)·{}
+        3 │ + if·(value·!=·5)·{}
+     4  4 │   if (5n != value) {}
+     5  5 │   if (null !== value) {}
+  
+
+```
+
+```
+invalid.js:4:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    2 │ if (true === value) {}
+    3 │ if (5 != value) {}
+  > 4 │ if (5n != value) {}
+      │     ^^^^^^^^^^^
+    5 │ if (null !== value) {}
+    6 │ if ("red" <= value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     2  2 │   if (true === value) {}
+     3  3 │   if (5 != value) {}
+     4    │ - if·(5n·!=·value)·{}
+        4 │ + if·(value·!=·5n)·{}
+     5  5 │   if (null !== value) {}
+     6  6 │   if ("red" <= value) {}
+  
+
+```
+
+```
+invalid.js:5:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    3 │ if (5 != value) {}
+    4 │ if (5n != value) {}
+  > 5 │ if (null !== value) {}
+      │     ^^^^^^^^^^^^^^
+    6 │ if ("red" <= value) {}
+    7 │ if (`red` <= value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     3  3 │   if (5 != value) {}
+     4  4 │   if (5n != value) {}
+     5    │ - if·(null·!==·value)·{}
+        5 │ + if·(value·!==·null)·{}
+     6  6 │   if ("red" <= value) {}
+     7  7 │   if (`red` <= value) {}
+  
+
+```
+
+```
+invalid.js:6:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    4 │ if (5n != value) {}
+    5 │ if (null !== value) {}
+  > 6 │ if ("red" <= value) {}
+      │     ^^^^^^^^^^^^^^
+    7 │ if (`red` <= value) {}
+    8 │ if (`red` <= `${foo}`) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     4  4 │   if (5n != value) {}
+     5  5 │   if (null !== value) {}
+     6    │ - if·("red"·<=·value)·{}
+        6 │ + if·(value·>=·"red")·{}
+     7  7 │   if (`red` <= value) {}
+     8  8 │   if (`red` <= `${foo}`) {}
+  
+
+```
+
+```
+invalid.js:7:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    5 │ if (null !== value) {}
+    6 │ if ("red" <= value) {}
+  > 7 │ if (`red` <= value) {}
+      │     ^^^^^^^^^^^^^^
+    8 │ if (`red` <= `${foo}`) {}
+    9 │ if (`red` <= `${"red"}`) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     5  5 │   if (null !== value) {}
+     6  6 │   if ("red" <= value) {}
+     7    │ - if·(`red`·<=·value)·{}
+        7 │ + if·(value·>=·`red`)·{}
+     8  8 │   if (`red` <= `${foo}`) {}
+     9  9 │   if (`red` <= `${"red"}`) {}
+  
+
+```
+
+```
+invalid.js:8:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+     6 │ if ("red" <= value) {}
+     7 │ if (`red` <= value) {}
+   > 8 │ if (`red` <= `${foo}`) {}
+       │     ^^^^^^^^^^^^^^^^^
+     9 │ if (`red` <= `${"red"}`) {}
+    10 │ if (true >= value) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     6  6 │   if ("red" <= value) {}
+     7  7 │   if (`red` <= value) {}
+     8    │ - if·(`red`·<=·`${foo}`)·{}
+        8 │ + if·(`${foo}`·>=·`red`)·{}
+     9  9 │   if (`red` <= `${"red"}`) {}
+    10 10 │   if (true >= value) {}
+  
+
+```
+
+```
+invalid.js:9:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+     7 │ if (`red` <= value) {}
+     8 │ if (`red` <= `${foo}`) {}
+   > 9 │ if (`red` <= `${"red"}`) {}
+       │     ^^^^^^^^^^^^^^^^^^^
+    10 │ if (true >= value) {}
+    11 │ var foo = (5 < value) ? true : false
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     7  7 │   if (`red` <= value) {}
+     8  8 │   if (`red` <= `${foo}`) {}
+     9    │ - if·(`red`·<=·`${"red"}`)·{}
+        9 │ + if·(`${"red"}`·>=·`red`)·{}
+    10 10 │   if (true >= value) {}
+    11 11 │   var foo = (5 < value) ? true : false
+  
+
+```
+
+```
+invalid.js:10:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+     8 │ if (`red` <= `${foo}`) {}
+     9 │ if (`red` <= `${"red"}`) {}
+  > 10 │ if (true >= value) {}
+       │     ^^^^^^^^^^^^^
+    11 │ var foo = (5 < value) ? true : false
+    12 │ function foo() { return (null > value); }
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     8  8 │   if (`red` <= `${foo}`) {}
+     9  9 │   if (`red` <= `${"red"}`) {}
+    10    │ - if·(true·>=·value)·{}
+       10 │ + if·(value·<=·true)·{}
+    11 11 │   var foo = (5 < value) ? true : false
+    12 12 │   function foo() { return (null > value); }
+  
+
+```
+
+```
+invalid.js:11:12 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+     9 │ if (`red` <= `${"red"}`) {}
+    10 │ if (true >= value) {}
+  > 11 │ var foo = (5 < value) ? true : false
+       │            ^^^^^^^^^
+    12 │ function foo() { return (null > value); }
+    13 │ if (-1 < str.indexOf(substr)) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+     9  9 │   if (`red` <= `${"red"}`) {}
+    10 10 │   if (true >= value) {}
+    11    │ - var·foo·=·(5·<·value)·?·true·:·false
+       11 │ + var·foo·=·(value·>·5)·?·true·:·false
+    12 12 │   function foo() { return (null > value); }
+    13 13 │   if (-1 < str.indexOf(substr)) {}
+  
+
+```
+
+```
+invalid.js:12:26 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    10 │ if (true >= value) {}
+    11 │ var foo = (5 < value) ? true : false
+  > 12 │ function foo() { return (null > value); }
+       │                          ^^^^^^^^^^^^
+    13 │ if (-1 < str.indexOf(substr)) {}
+    14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    10 10 │   if (true >= value) {}
+    11 11 │   var foo = (5 < value) ? true : false
+    12    │ - function·foo()·{·return·(null·>·value);·}
+       12 │ + function·foo()·{·return·(value·<·null);·}
+    13 13 │   if (-1 < str.indexOf(substr)) {}
+    14 14 │   if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+  
+
+```
+
+```
+invalid.js:13:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    11 │ var foo = (5 < value) ? true : false
+    12 │ function foo() { return (null > value); }
+  > 13 │ if (-1 < str.indexOf(substr)) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+    15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    11 11 │   var foo = (5 < value) ? true : false
+    12 12 │   function foo() { return (null > value); }
+    13    │ - if·(-1·<·str.indexOf(substr))·{}
+       13 │ + if·(str.indexOf(substr)·>·-1)·{}
+    14 14 │   if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+    15 15 │   if (((((((5)))))) === ((((((((((foo))))))))))) {}
+  
+
+```
+
+```
+invalid.js:14:14 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    12 │ function foo() { return (null > value); }
+    13 │ if (-1 < str.indexOf(substr)) {}
+  > 14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+       │              ^^^^^^^^^^^^^^^^^^^^^^^
+    15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+    16 │ while (0 === (a));
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    12 12 │   function foo() { return (null > value); }
+    13 13 │   if (-1 < str.indexOf(substr)) {}
+    14    │ - if·(·/*·a·*/·0·/*·b·*/·<·/*·c·*/·foo·/*·d·*/·)·{}
+       14 │ + if·(·/*·a·*/·foo·/*·b·*/·>·/*·c·*/·0·/*·d·*/·)·{}
+    15 15 │   if (((((((5)))))) === ((((((((((foo))))))))))) {}
+    16 16 │   while (0 === (a));
+  
+
+```
+
+```
+invalid.js:15:5 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    13 │ if (-1 < str.indexOf(substr)) {}
+    14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+  > 15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ while (0 === (a));
+    17 │ while (0 === (a = b));
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    13 13 │   if (-1 < str.indexOf(substr)) {}
+    14 14 │   if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+    15    │ - if·(((((((5))))))·===·((((((((((foo)))))))))))·{}
+       15 │ + if·(((((((((((foo))))))))))·===·((((((5)))))))·{}
+    16 16 │   while (0 === (a));
+    17 17 │   while (0 === (a = b));
+  
+
+```
+
+```
+invalid.js:16:8 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    14 │ if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+    15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+  > 16 │ while (0 === (a));
+       │        ^^^^^^^^^
+    17 │ while (0 === (a = b));
+    18 │ async function foo() { return 1 < await bar() }
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    14 14 │   if ( /* a */ 0 /* b */ < /* c */ foo /* d */ ) {}
+    15 15 │   if (((((((5)))))) === ((((((((((foo))))))))))) {}
+    16    │ - while·(0·===·(a));
+       16 │ + while·((a)·===·0);
+    17 17 │   while (0 === (a = b));
+    18 18 │   async function foo() { return 1 < await bar() }
+  
+
+```
+
+```
+invalid.js:17:8 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    15 │ if (((((((5)))))) === ((((((((((foo))))))))))) {}
+    16 │ while (0 === (a));
+  > 17 │ while (0 === (a = b));
+       │        ^^^^^^^^^^^^^
+    18 │ async function foo() { return 1 < await bar() }
+    19 │ function *foo() { yield(1) < a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    15 15 │   if (((((((5)))))) === ((((((((((foo))))))))))) {}
+    16 16 │   while (0 === (a));
+    17    │ - while·(0·===·(a·=·b));
+       17 │ + while·((a·=·b)·===·0);
+    18 18 │   async function foo() { return 1 < await bar() }
+    19 19 │   function *foo() { yield(1) < a }
+  
+
+```
+
+```
+invalid.js:18:31 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    16 │ while (0 === (a));
+    17 │ while (0 === (a = b));
+  > 18 │ async function foo() { return 1 < await bar() }
+       │                               ^^^^^^^^^^^^^^^
+    19 │ function *foo() { yield(1) < a }
+    20 │ function *foo() { yield((1)) < a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    16 16 │   while (0 === (a));
+    17 17 │   while (0 === (a = b));
+    18    │ - async·function·foo()·{·return·1·<·await·bar()·}
+       18 │ + async·function·foo()·{·return·await·bar()·>·1·}
+    19 19 │   function *foo() { yield(1) < a }
+    20 20 │   function *foo() { yield((1)) < a }
+  
+
+```
+
+```
+invalid.js:19:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    17 │ while (0 === (a = b));
+    18 │ async function foo() { return 1 < await bar() }
+  > 19 │ function *foo() { yield(1) < a }
+       │                        ^^^^^^^
+    20 │ function *foo() { yield((1)) < a }
+    21 │ function *foo() { yield 1 < a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    17 17 │   while (0 === (a = b));
+    18 18 │   async function foo() { return 1 < await bar() }
+    19    │ - function·*foo()·{·yield(1)·<·a·}
+       19 │ + function·*foo()·{·yield·a·>·(1)·}
+    20 20 │   function *foo() { yield((1)) < a }
+    21 21 │   function *foo() { yield 1 < a }
+  
+
+```
+
+```
+invalid.js:20:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    18 │ async function foo() { return 1 < await bar() }
+    19 │ function *foo() { yield(1) < a }
+  > 20 │ function *foo() { yield((1)) < a }
+       │                        ^^^^^^^^^
+    21 │ function *foo() { yield 1 < a }
+    22 │ function *foo() { yield/**/1 < a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    18 18 │   async function foo() { return 1 < await bar() }
+    19 19 │   function *foo() { yield(1) < a }
+    20    │ - function·*foo()·{·yield((1))·<·a·}
+       20 │ + function·*foo()·{·yield·a·>·((1))·}
+    21 21 │   function *foo() { yield 1 < a }
+    22 22 │   function *foo() { yield/**/1 < a }
+  
+
+```
+
+```
+invalid.js:21:25 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    19 │ function *foo() { yield(1) < a }
+    20 │ function *foo() { yield((1)) < a }
+  > 21 │ function *foo() { yield 1 < a }
+       │                         ^^^^^
+    22 │ function *foo() { yield/**/1 < a }
+    23 │ function *foo() { yield(1) < ++a }
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    19 19 │   function *foo() { yield(1) < a }
+    20 20 │   function *foo() { yield((1)) < a }
+    21    │ - function·*foo()·{·yield·1·<·a·}
+       21 │ + function·*foo()·{·yield·a·>·1·}
+    22 22 │   function *foo() { yield/**/1 < a }
+    23 23 │   function *foo() { yield(1) < ++a }
+  
+
+```
+
+```
+invalid.js:22:28 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    20 │ function *foo() { yield((1)) < a }
+    21 │ function *foo() { yield 1 < a }
+  > 22 │ function *foo() { yield/**/1 < a }
+       │                            ^^^^^
+    23 │ function *foo() { yield(1) < ++a }
+    24 │ function *foo() { yield(1) < (a) }
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    20 20 │   function *foo() { yield((1)) < a }
+    21 21 │   function *foo() { yield 1 < a }
+    22    │ - function·*foo()·{·yield/**/1·<·a·}
+       22 │ + function·*foo()·{·yield/**/a·>·1·}
+    23 23 │   function *foo() { yield(1) < ++a }
+    24 24 │   function *foo() { yield(1) < (a) }
+  
+
+```
+
+```
+invalid.js:23:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    21 │ function *foo() { yield 1 < a }
+    22 │ function *foo() { yield/**/1 < a }
+  > 23 │ function *foo() { yield(1) < ++a }
+       │                        ^^^^^^^^^
+    24 │ function *foo() { yield(1) < (a) }
+    25 │ x=1 < a
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    21 21 │   function *foo() { yield 1 < a }
+    22 22 │   function *foo() { yield/**/1 < a }
+    23    │ - function·*foo()·{·yield(1)·<·++a·}
+       23 │ + function·*foo()·{·yield·++a·>·(1)·}
+    24 24 │   function *foo() { yield(1) < (a) }
+    25 25 │   x=1 < a
+  
+
+```
+
+```
+invalid.js:24:24 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    22 │ function *foo() { yield/**/1 < a }
+    23 │ function *foo() { yield(1) < ++a }
+  > 24 │ function *foo() { yield(1) < (a) }
+       │                        ^^^^^^^^^
+    25 │ x=1 < a
+    26 │ 0 < f()in obj
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    22 22 │   function *foo() { yield/**/1 < a }
+    23 23 │   function *foo() { yield(1) < ++a }
+    24    │ - function·*foo()·{·yield(1)·<·(a)·}
+       24 │ + function·*foo()·{·yield·(a)·>·(1)·}
+    25 25 │   x=1 < a
+    26 26 │   0 < f()in obj
+  
+
+```
+
+```
+invalid.js:25:3 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    23 │ function *foo() { yield(1) < ++a }
+    24 │ function *foo() { yield(1) < (a) }
+  > 25 │ x=1 < a
+       │   ^^^^^
+    26 │ 0 < f()in obj
+    27 │ 1 > x++instanceof foo
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    23 23 │   function *foo() { yield(1) < ++a }
+    24 24 │   function *foo() { yield(1) < (a) }
+    25    │ - x=1·<·a
+       25 │ + x=a·>·1·
+    26 26 │   0 < f()in obj
+    27 27 │   1 > x++instanceof foo
+  
+
+```
+
+```
+invalid.js:26:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    24 │ function *foo() { yield(1) < (a) }
+    25 │ x=1 < a
+  > 26 │ 0 < f()in obj
+       │ ^^^^^^^
+    27 │ 1 > x++instanceof foo
+    28 │ false <= ((x))in foo
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    24 24 │   function *foo() { yield(1) < (a) }
+    25 25 │   x=1 < a
+    26    │ - 0·<·f()in·obj
+       26 │ + f()·>·0·in·obj
+    27 27 │   1 > x++instanceof foo
+    28 28 │   false <= ((x))in foo
+  
+
+```
+
+```
+invalid.js:27:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    25 │ x=1 < a
+    26 │ 0 < f()in obj
+  > 27 │ 1 > x++instanceof foo
+       │ ^^^^^^^
+    28 │ false <= ((x))in foo
+    29 │ false <= ((x)) in foo
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    25 25 │   x=1 < a
+    26 26 │   0 < f()in obj
+    27    │ - 1·>·x++instanceof·foo
+       27 │ + x++·<·1·instanceof·foo
+    28 28 │   false <= ((x))in foo
+    29 29 │   false <= ((x)) in foo
+  
+
+```
+
+```
+invalid.js:28:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    26 │ 0 < f()in obj
+    27 │ 1 > x++instanceof foo
+  > 28 │ false <= ((x))in foo
+       │ ^^^^^^^^^^^^^^
+    29 │ false <= ((x)) in foo
+    30 │ 1 > x===foo
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    26 26 │   0 < f()in obj
+    27 27 │   1 > x++instanceof foo
+    28    │ - false·<=·((x))in·foo
+       28 │ + ((x))·>=·false·in·foo
+    29 29 │   false <= ((x)) in foo
+    30 30 │   1 > x===foo
+  
+
+```
+
+```
+invalid.js:29:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    27 │ 1 > x++instanceof foo
+    28 │ false <= ((x))in foo
+  > 29 │ false <= ((x)) in foo
+       │ ^^^^^^^^^^^^^^
+    30 │ 1 > x===foo
+    31 │ 1 > x
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    27 27 │   1 > x++instanceof foo
+    28 28 │   false <= ((x))in foo
+    29    │ - false·<=·((x))·in·foo
+       29 │ + ((x))·>=·false·in·foo
+    30 30 │   1 > x===foo
+    31 31 │   1 > x
+  
+
+```
+
+```
+invalid.js:30:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    28 │ false <= ((x))in foo
+    29 │ false <= ((x)) in foo
+  > 30 │ 1 > x===foo
+       │ ^^^^^
+    31 │ 1 > x
+    32 │ 
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    28 28 │   false <= ((x))in foo
+    29 29 │   false <= ((x)) in foo
+    30    │ - 1·>·x===foo
+       30 │ + x·<·1·===foo
+    31 31 │   1 > x
+    32 32 │   
+  
+
+```
+
+```
+invalid.js:31:1 lint/style/noYodaExpression  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Avoid the use of yoda expressions.
+  
+    29 │ false <= ((x)) in foo
+    30 │ 1 > x===foo
+  > 31 │ 1 > x
+       │ ^^^^^
+    32 │ 
+  
+  i Yoda expressions can be confusing to some people, invert the expression operands for better readability.
+  
+  i Safe fix: Flip the operators of the expression.
+  
+    29 29 │   false <= ((x)) in foo
+    30 30 │   1 > x===foo
+    31    │ - 1·>·x
+       31 │ + x·<·1·
+    32 32 │   
+  
+
+```

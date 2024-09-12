@@ -741,6 +741,10 @@ export interface A11y {
 	 */
 	noInteractiveElementToNoninteractiveRole?: RuleFixConfiguration_for_Null;
 	/**
+	 * Enforce that a label element or component has a text label and an associated input.
+	 */
+	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
+	/**
 	 * Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.
 	 */
 	noNoninteractiveElementToInteractiveRole?: RuleFixConfiguration_for_Null;
@@ -789,6 +793,14 @@ export interface A11y {
 	 */
 	useButtonType?: RuleConfiguration_for_Null;
 	/**
+	 * Elements with an interactive role and interaction handlers must be focusable.
+	 */
+	useFocusableInteractive?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow a missing generic family keyword within font families.
+	 */
+	useGenericFontNames?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce that heading elements (h1, h2, etc.) have content and that the content is accessible to screen readers. Accessible means that it is not hidden using the aria-hidden prop.
 	 */
 	useHeadingContent?: RuleConfiguration_for_Null;
@@ -812,6 +824,10 @@ export interface A11y {
 	 * Enforces that audio and video elements must have a track for captions.
 	 */
 	useMediaCaption?: RuleConfiguration_for_Null;
+	/**
+	 * It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
+	 */
+	useSemanticElements?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce that all anchors are valid, and they are navigable elements.
 	 */
@@ -906,6 +922,10 @@ export interface Complexity {
 	 */
 	noUselessRename?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary concatenation of string or template literals.
+	 */
+	noUselessStringConcat?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow useless case in switch statements.
 	 */
 	noUselessSwitchCase?: RuleFixConfiguration_for_Null;
@@ -922,6 +942,10 @@ export interface Complexity {
 	 */
 	noUselessTypeConstraint?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow initializing variables to undefined.
+	 */
+	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow the use of void operators, which is not a familiar operator.
 	 */
 	noVoid?: RuleConfiguration_for_Null;
@@ -937,6 +961,10 @@ export interface Complexity {
 	 * Use arrow functions over function expressions.
 	 */
 	useArrowFunction?: RuleFixConfiguration_for_Null;
+	/**
+	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
+	 */
+	useDateNow?: RuleFixConfiguration_for_Null;
 	/**
 	 * Promotes the use of .flatMap() when map().flat() are used together.
 	 */
@@ -1011,13 +1039,29 @@ export interface Correctness {
 	 */
 	noInnerDeclarations?: RuleConfiguration_for_Null;
 	/**
+	 * Ensure that builtins are correctly instantiated.
+	 */
+	noInvalidBuiltinInstantiation?: RuleFixConfiguration_for_Null;
+	/**
 	 * Prevents the incorrect use of super() inside classes. It also checks whether a call super() is missing from classes that extends other constructors.
 	 */
 	noInvalidConstructorSuper?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow non-standard direction values for linear gradient functions.
+	 */
+	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
+	/**
+	 * Disallows invalid named grid areas in CSS Grid Layouts.
+	 */
+	noInvalidGridAreas?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow new operators with global non-constructor functions.
 	 */
 	noInvalidNewBuiltin?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow the use of @import at-rules in invalid positions.
+	 */
+	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the use of variables and function parameters before their declaration
 	 */
@@ -1059,9 +1103,33 @@ export interface Correctness {
 	 */
 	noSwitchDeclarations?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of dependencies that aren't specified in the package.json.
+	 */
+	noUndeclaredDependencies?: RuleConfiguration_for_Null;
+	/**
 	 * Prevents the usage of variables that haven't been declared inside the document.
 	 */
 	noUndeclaredVariables?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown CSS value functions.
+	 */
+	noUnknownFunction?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown media feature names.
+	 */
+	noUnknownMediaFeatureName?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown properties.
+	 */
+	noUnknownProperty?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown CSS units.
+	 */
+	noUnknownUnit?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unmatchable An+B selectors.
+	 */
+	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
 	/**
 	 * Avoid using unnecessary continue.
 	 */
@@ -1082,6 +1150,10 @@ export interface Correctness {
 	 * Disallow the use of optional chaining in contexts where the undefined value is not allowed.
 	 */
 	noUnsafeOptionalChaining?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unused function parameters.
+	 */
+	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unused imports.
 	 */
@@ -1123,6 +1195,10 @@ export interface Correctness {
 	 */
 	useHookAtTopLevel?: RuleConfiguration_for_DeprecatedHooksOptions;
 	/**
+	 * Enforce file extensions for relative imports.
+	 */
+	useImportExtensions?: RuleFixConfiguration_for_UseImportExtensionsOptions;
+	/**
 	 * Require calls to isNaN() when checking for NaN.
 	 */
 	useIsNan?: RuleFixConfiguration_for_Null;
@@ -1152,18 +1228,6 @@ export interface Nursery {
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow the use of console.
-	 */
-	noConsole?: RuleFixConfiguration_for_NoConsoleOptions;
-	/**
-	 * Disallow using a callback in asynchronous tests and hooks.
-	 */
-	noDoneCallback?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow duplicate @import rules.
-	 */
-	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow duplicate custom properties within declaration blocks.
 	 */
 	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
@@ -1171,14 +1235,6 @@ export interface Nursery {
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow duplicate names within font families.
-	 */
-	noDuplicateFontNames?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow duplicate selectors within keyframe blocks.
-	 */
-	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
 	/**
 	 * No duplicated fields in GraphQL operations.
 	 */
@@ -1188,53 +1244,17 @@ export interface Nursery {
 	 */
 	noDynamicNamespaceImportAccess?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow CSS empty blocks.
-	 */
-	noEmptyBlock?: RuleConfiguration_for_Null;
-	/**
 	 * Disallow TypeScript enum.
 	 */
 	noEnum?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow variables from evolving into any type through reassignments.
-	 */
-	noEvolvingTypes?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow exporting an imported variable.
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow invalid !important within keyframe declarations
-	 */
-	noImportantInKeyframe?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow non-standard direction values for linear gradient functions.
-	 */
-	noInvalidDirectionInLinearGradient?: RuleConfiguration_for_Null;
-	/**
-	 * Disallows invalid named grid areas in CSS Grid Layouts.
-	 */
-	noInvalidGridAreas?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow the use of @import at-rules in invalid positions.
-	 */
-	noInvalidPositionAtImportRule?: RuleConfiguration_for_Null;
-	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce that a label element or component has a text label and an associated input.
-	 */
-	noLabelWithoutControl?: RuleConfiguration_for_NoLabelWithoutControlOptions;
-	/**
-	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
-	 */
-	noMisplacedAssertion?: RuleConfiguration_for_Null;
-	/**
-	 * Prevents React-specific JSX properties from being used.
-	 */
-	noReactSpecificProps?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow specified modules when loaded by import or require.
 	 */
@@ -1248,10 +1268,6 @@ export interface Nursery {
 	 */
 	noSecrets?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow shorthand properties that override related longhand properties.
-	 */
-	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
 	noStaticElementInteractions?: RuleConfiguration_for_Null;
@@ -1259,22 +1275,6 @@ export interface Nursery {
 	 * Enforce the use of String.slice() over String.substr() and String.substring().
 	 */
 	noSubstr?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow the use of dependencies that aren't specified in the package.json.
-	 */
-	noUndeclaredDependencies?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unknown CSS value functions.
-	 */
-	noUnknownFunction?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unknown media feature names.
-	 */
-	noUnknownMediaFeatureName?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unknown properties.
-	 */
-	noUnknownProperty?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
@@ -1284,37 +1284,13 @@ export interface Nursery {
 	 */
 	noUnknownPseudoElement?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow unknown CSS units.
-	 */
-	noUnknownUnit?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unmatchable An+B selectors.
-	 */
-	noUnmatchableAnbSelector?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow unused function parameters.
-	 */
-	noUnusedFunctionParameters?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
 	/**
-	 * Disallow unnecessary concatenation of string or template literals.
-	 */
-	noUselessStringConcat?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow initializing variables to undefined.
-	 */
-	noUselessUndefinedInitialization?: RuleFixConfiguration_for_Null;
-	/**
 	 * Disallow use of @value rule in css modules.
 	 */
 	noValueAtRule?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow the use of yoda expressions.
-	 */
-	noYodaExpression?: RuleFixConfiguration_for_Null;
 	/**
 	 * It enables the recommended rules for this group
 	 */
@@ -1328,10 +1304,6 @@ export interface Nursery {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
-	 * Enforce the use of new for all builtins, except String, Number, Boolean, Symbol and BigInt.
-	 */
-	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
-	/**
 	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
 	 */
 	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
@@ -1340,49 +1312,13 @@ export interface Nursery {
 	 */
 	useConsistentMemberAccessibility?: RuleConfiguration_for_ConsistentMemberAccessibilityOptions;
 	/**
-	 * Use Date.now() to get the number of milliseconds since the Unix Epoch.
-	 */
-	useDateNow?: RuleFixConfiguration_for_Null;
-	/**
-	 * Require the default clause in switch statements.
-	 */
-	useDefaultSwitchClause?: RuleConfiguration_for_Null;
-	/**
 	 * Require specifying the reason argument when using @deprecated directive
 	 */
 	useDeprecatedReason?: RuleConfiguration_for_Null;
 	/**
-	 * Enforce passing a message value when creating a built-in error.
-	 */
-	useErrorMessage?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
-	 */
-	useExplicitLengthCheck?: RuleFixConfiguration_for_Null;
-	/**
-	 * Elements with an interactive role and interaction handlers must be focusable.
-	 */
-	useFocusableInteractive?: RuleConfiguration_for_Null;
-	/**
-	 * Disallow a missing generic family keyword within font families.
-	 */
-	useGenericFontNames?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce file extensions for relative imports.
-	 */
-	useImportExtensions?: RuleFixConfiguration_for_UseImportExtensionsOptions;
-	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
-	/**
-	 * Enforce using the digits argument with Number#toFixed().
-	 */
-	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
-	/**
-	 * It detects the use of role attributes in JSX elements and suggests using semantic elements instead.
-	 */
-	useSemanticElements?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -1391,18 +1327,6 @@ export interface Nursery {
 	 * Enforce the use of the directive "use strict" in script files.
 	 */
 	useStrictMode?: RuleFixConfiguration_for_Null;
-	/**
-	 * Require new when throwing an error.
-	 */
-	useThrowNewError?: RuleFixConfiguration_for_Null;
-	/**
-	 * Disallow throwing non-Error values.
-	 */
-	useThrowOnlyError?: RuleConfiguration_for_Null;
-	/**
-	 * Require regex literals to be declared at the top level.
-	 */
-	useTopLevelRegex?: RuleConfiguration_for_Null;
 	/**
 	 * Enforce the use of String.trimStart() and String.trimEnd() over String.trimLeft() and String.trimRight().
 	 */
@@ -1440,6 +1364,10 @@ export interface Performance {
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
+	/**
+	 * Require regex literals to be declared at the top level.
+	 */
+	useTopLevelRegex?: RuleConfiguration_for_Null;
 }
 /**
  * A list of rules that belong to this group
@@ -1486,6 +1414,10 @@ export interface Style {
 	 * Disallow default exports.
 	 */
 	noDefaultExport?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow using a callback in asynchronous tests and hooks.
+	 */
+	noDoneCallback?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow implicit true values on JSX boolean attributes
 	 */
@@ -1539,6 +1471,10 @@ export interface Style {
 	 */
 	noVar?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of yoda expressions.
+	 */
+	noYodaExpression?: RuleFixConfiguration_for_Null;
+	/**
 	 * It enables the recommended rules for this group
 	 */
 	recommended?: boolean;
@@ -1559,6 +1495,10 @@ export interface Style {
 	 */
 	useConsistentArrayType?: RuleFixConfiguration_for_ConsistentArrayTypeOptions;
 	/**
+	 * Enforce the use of new for all builtins, except String, Number and Boolean.
+	 */
+	useConsistentBuiltinInstantiation?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require const declarations for variables that are only assigned once.
 	 */
 	useConst?: RuleFixConfiguration_for_Null;
@@ -1567,9 +1507,17 @@ export interface Style {
 	 */
 	useDefaultParameterLast?: RuleFixConfiguration_for_Null;
 	/**
+	 * Require the default clause in switch statements.
+	 */
+	useDefaultSwitchClause?: RuleConfiguration_for_Null;
+	/**
 	 * Require that each enum member value be explicitly initialized.
 	 */
 	useEnumInitializers?: RuleFixConfiguration_for_Null;
+	/**
+	 * Enforce explicitly comparing the length, size, byteLength or byteOffset property of a value.
+	 */
+	useExplicitLengthCheck?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow the use of Math.pow in favor of the ** operator.
 	 */
@@ -1647,6 +1595,14 @@ export interface Style {
 	 */
 	useTemplate?: RuleFixConfiguration_for_Null;
 	/**
+	 * Require new when throwing an error.
+	 */
+	useThrowNewError?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow throwing non-Error values.
+	 */
+	useThrowOnlyError?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the use of while loops instead of for loops when the initializer and update expressions are not needed.
 	 */
 	useWhile?: RuleFixConfiguration_for_Null;
@@ -1700,6 +1656,10 @@ export interface Suspicious {
 	 */
 	noConfusingVoidType?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow the use of console.
+	 */
+	noConsole?: RuleFixConfiguration_for_NoConsoleOptions;
+	/**
 	 * Disallow the use of console.log
 	 */
 	noConsoleLog?: RuleFixConfiguration_for_Null;
@@ -1720,6 +1680,10 @@ export interface Suspicious {
 	 */
 	noDoubleEquals?: RuleFixConfiguration_for_NoDoubleEqualsOptions;
 	/**
+	 * Disallow duplicate @import rules.
+	 */
+	noDuplicateAtImportRules?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate case labels.
 	 */
 	noDuplicateCase?: RuleConfiguration_for_Null;
@@ -1727,6 +1691,10 @@ export interface Suspicious {
 	 * Disallow duplicate class members.
 	 */
 	noDuplicateClassMembers?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate names within font families.
+	 */
+	noDuplicateFontNames?: RuleConfiguration_for_Null;
 	/**
 	 * Prevents JSX properties to be assigned multiple times.
 	 */
@@ -1740,9 +1708,17 @@ export interface Suspicious {
 	 */
 	noDuplicateParameters?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate selectors within keyframe blocks.
+	 */
+	noDuplicateSelectorsKeyframeBlock?: RuleConfiguration_for_Null;
+	/**
 	 * A describe block should not contain duplicate hooks.
 	 */
 	noDuplicateTestHooks?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow CSS empty blocks.
+	 */
+	noEmptyBlock?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow empty block statements and static blocks.
 	 */
@@ -1751,6 +1727,10 @@ export interface Suspicious {
 	 * Disallow the declaration of empty interfaces.
 	 */
 	noEmptyInterface?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow variables from evolving into any type through reassignments.
+	 */
+	noEvolvingTypes?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow the any type usage.
 	 */
@@ -1796,6 +1776,10 @@ export interface Suspicious {
 	 */
 	noImportAssign?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow invalid !important within keyframe declarations
+	 */
+	noImportantInKeyframe?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow labels that share a name with a variable
 	 */
 	noLabelVar?: RuleConfiguration_for_Null;
@@ -1808,6 +1792,10 @@ export interface Suspicious {
 	 */
 	noMisleadingInstantiator?: RuleConfiguration_for_Null;
 	/**
+	 * Checks that the assertion function, for example expect, is placed inside an it() function call.
+	 */
+	noMisplacedAssertion?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow shorthand assign when variable appears on both sides.
 	 */
 	noMisrefactoredShorthandAssign?: RuleFixConfiguration_for_Null;
@@ -1815,6 +1803,10 @@ export interface Suspicious {
 	 * Disallow direct use of Object.prototype builtins.
 	 */
 	noPrototypeBuiltins?: RuleConfiguration_for_Null;
+	/**
+	 * Prevents React-specific JSX properties from being used.
+	 */
+	noReactSpecificProps?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow variable, function, class, and type redeclarations in the same scope.
 	 */
@@ -1831,6 +1823,10 @@ export interface Suspicious {
 	 * Disallow identifiers from shadowing restricted names.
 	 */
 	noShadowRestrictedNames?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow shorthand properties that override related longhand properties.
+	 */
+	noShorthandPropertyOverrides?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow disabled tests.
 	 */
@@ -1868,6 +1864,10 @@ export interface Suspicious {
 	 */
 	useDefaultSwitchClauseLast?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce passing a message value when creating a built-in error.
+	 */
+	useErrorMessage?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce get methods to always return a value.
 	 */
 	useGetterReturn?: RuleConfiguration_for_Null;
@@ -1879,6 +1879,10 @@ export interface Suspicious {
 	 * Require using the namespace keyword over the module keyword to declare TypeScript namespaces.
 	 */
 	useNamespaceKeyword?: RuleFixConfiguration_for_Null;
+	/**
+	 * Enforce using the digits argument with Number#toFixed().
+	 */
+	useNumberToFixedDigitsArgument?: RuleFixConfiguration_for_Null;
 	/**
 	 * This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions
 	 */
@@ -1942,6 +1946,9 @@ export type RuleFixConfiguration_for_Null =
 export type RuleFixConfiguration_for_AllowDomainOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_AllowDomainOptions;
+export type RuleConfiguration_for_NoLabelWithoutControlOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoLabelWithoutControlOptions;
 export type RuleConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_Null;
@@ -1957,12 +1964,9 @@ export type RuleConfiguration_for_HooksOptions =
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
-export type RuleFixConfiguration_for_NoConsoleOptions =
+export type RuleFixConfiguration_for_UseImportExtensionsOptions =
 	| RulePlainConfiguration
-	| RuleWithFixOptions_for_NoConsoleOptions;
-export type RuleConfiguration_for_NoLabelWithoutControlOptions =
-	| RulePlainConfiguration
-	| RuleWithOptions_for_NoLabelWithoutControlOptions;
+	| RuleWithFixOptions_for_UseImportExtensionsOptions;
 export type RuleConfiguration_for_RestrictedImportsOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_RestrictedImportsOptions;
@@ -1972,9 +1976,6 @@ export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
-export type RuleFixConfiguration_for_UseImportExtensionsOptions =
-	| RulePlainConfiguration
-	| RuleWithFixOptions_for_UseImportExtensionsOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -1993,6 +1994,9 @@ export type RuleConfiguration_for_FilenamingConventionOptions =
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
+export type RuleFixConfiguration_for_NoConsoleOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_NoConsoleOptions;
 export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
@@ -2024,6 +2028,16 @@ export interface RuleWithFixOptions_for_AllowDomainOptions {
 	 * Rule's options
 	 */
 	options: AllowDomainOptions;
+}
+export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoLabelWithoutControlOptions;
 }
 export interface RuleWithOptions_for_Null {
 	/**
@@ -2079,7 +2093,7 @@ export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	 */
 	options: DeprecatedHooksOptions;
 }
-export interface RuleWithFixOptions_for_NoConsoleOptions {
+export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
 	 */
@@ -2091,17 +2105,7 @@ export interface RuleWithFixOptions_for_NoConsoleOptions {
 	/**
 	 * Rule's options
 	 */
-	options: NoConsoleOptions;
-}
-export interface RuleWithOptions_for_NoLabelWithoutControlOptions {
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: NoLabelWithoutControlOptions;
+	options: UseImportExtensionsOptions;
 }
 export interface RuleWithOptions_for_RestrictedImportsOptions {
 	/**
@@ -2136,20 +2140,6 @@ export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	 * Rule's options
 	 */
 	options: ConsistentMemberAccessibilityOptions;
-}
-export interface RuleWithFixOptions_for_UseImportExtensionsOptions {
-	/**
-	 * The kind of the code actions emitted by the rule
-	 */
-	fix?: FixKind;
-	/**
-	 * The severity of the emitted diagnostics by the rule
-	 */
-	level: RulePlainConfiguration;
-	/**
-	 * Rule's options
-	 */
-	options: UseImportExtensionsOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -2223,6 +2213,20 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
 	 */
 	options: NamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_NoConsoleOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoConsoleOptions;
+}
 export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2246,6 +2250,20 @@ export interface AllowDomainOptions {
 	 * List of domains to allow `target="_blank"` without `rel="noreferrer"`
 	 */
 	allowDomains: string[];
+}
+export interface NoLabelWithoutControlOptions {
+	/**
+	 * Array of component names that should be considered the same as an `input` element.
+	 */
+	inputComponents: string[];
+	/**
+	 * Array of attributes that should be treated as the `label` accessible text content.
+	 */
+	labelAttributes: string[];
+	/**
+	 * Array of component names that should be considered the same as a `label` element.
+	 */
+	labelComponents: string[];
 }
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];
@@ -2273,25 +2291,11 @@ export interface HooksOptions {
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
  */
 export interface DeprecatedHooksOptions {}
-export interface NoConsoleOptions {
+export interface UseImportExtensionsOptions {
 	/**
-	 * Allowed calls on the console object.
+	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
 	 */
-	allow: string[];
-}
-export interface NoLabelWithoutControlOptions {
-	/**
-	 * Array of component names that should be considered the same as an `input` element.
-	 */
-	inputComponents: string[];
-	/**
-	 * Array of attributes that should be treated as the `label` accessible text content.
-	 */
-	labelAttributes: string[];
-	/**
-	 * Array of component names that should be considered the same as a `label` element.
-	 */
-	labelComponents: string[];
+	suggestedExtensions: {};
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -2307,12 +2311,6 @@ export interface NoRestrictedTypesOptions {
 }
 export interface ConsistentMemberAccessibilityOptions {
 	accessibility: Accessibility;
-}
-export interface UseImportExtensionsOptions {
-	/**
-	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
-	 */
-	suggestedExtensions: {};
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -2379,6 +2377,12 @@ export interface NamingConventionOptions {
 	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
 	 */
 	strictCase: boolean;
+}
+export interface NoConsoleOptions {
+	/**
+	 * Allowed calls on the console object.
+	 */
+	allow: string[];
 }
 /**
  * Rule's options
@@ -2663,6 +2667,7 @@ export type Category =
 	| "lint/a11y/noDistractingElements"
 	| "lint/a11y/noHeaderScope"
 	| "lint/a11y/noInteractiveElementToNoninteractiveRole"
+	| "lint/a11y/noLabelWithoutControl"
 	| "lint/a11y/noNoninteractiveElementToInteractiveRole"
 	| "lint/a11y/noNoninteractiveTabindex"
 	| "lint/a11y/noPositiveTabindex"
@@ -2674,12 +2679,15 @@ export type Category =
 	| "lint/a11y/useAriaActivedescendantWithTabindex"
 	| "lint/a11y/useAriaPropsForRole"
 	| "lint/a11y/useButtonType"
+	| "lint/a11y/useFocusableInteractive"
+	| "lint/a11y/useGenericFontNames"
 	| "lint/a11y/useHeadingContent"
 	| "lint/a11y/useHtmlLang"
 	| "lint/a11y/useIframeTitle"
 	| "lint/a11y/useKeyWithClickEvents"
 	| "lint/a11y/useKeyWithMouseEvents"
 	| "lint/a11y/useMediaCaption"
+	| "lint/a11y/useSemanticElements"
 	| "lint/a11y/useValidAnchor"
 	| "lint/a11y/useValidAriaProps"
 	| "lint/a11y/useValidAriaRole"
@@ -2701,13 +2709,16 @@ export type Category =
 	| "lint/complexity/noUselessLabel"
 	| "lint/complexity/noUselessLoneBlockStatements"
 	| "lint/complexity/noUselessRename"
+	| "lint/complexity/noUselessStringConcat"
 	| "lint/complexity/noUselessSwitchCase"
 	| "lint/complexity/noUselessTernary"
 	| "lint/complexity/noUselessThisAlias"
 	| "lint/complexity/noUselessTypeConstraint"
+	| "lint/complexity/noUselessUndefinedInitialization"
 	| "lint/complexity/noVoid"
 	| "lint/complexity/noWith"
 	| "lint/complexity/useArrowFunction"
+	| "lint/complexity/useDateNow"
 	| "lint/complexity/useFlatMap"
 	| "lint/complexity/useLiteralKeys"
 	| "lint/complexity/useOptionalChain"
@@ -2715,17 +2726,21 @@ export type Category =
 	| "lint/complexity/useSimpleNumberKeys"
 	| "lint/complexity/useSimplifiedLogicExpression"
 	| "lint/correctness/noChildrenProp"
-	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstantCondition"
 	| "lint/correctness/noConstantMathMinMaxClamp"
+	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
 	| "lint/correctness/noFlatMapIdentity"
 	| "lint/correctness/noGlobalObjectCalls"
 	| "lint/correctness/noInnerDeclarations"
+	| "lint/correctness/noInvalidBuiltinInstantiation"
 	| "lint/correctness/noInvalidConstructorSuper"
+	| "lint/correctness/noInvalidDirectionInLinearGradient"
+	| "lint/correctness/noInvalidGridAreas"
 	| "lint/correctness/noInvalidNewBuiltin"
+	| "lint/correctness/noInvalidPositionAtImportRule"
 	| "lint/correctness/noInvalidUseBeforeDeclaration"
 	| "lint/correctness/noNewSymbol"
 	| "lint/correctness/noNodejsModules"
@@ -2736,12 +2751,19 @@ export type Category =
 	| "lint/correctness/noSetterReturn"
 	| "lint/correctness/noStringCaseMismatch"
 	| "lint/correctness/noSwitchDeclarations"
+	| "lint/correctness/noUndeclaredDependencies"
 	| "lint/correctness/noUndeclaredVariables"
+	| "lint/correctness/noUnknownFunction"
+	| "lint/correctness/noUnknownMediaFeatureName"
+	| "lint/correctness/noUnknownProperty"
+	| "lint/correctness/noUnknownUnit"
+	| "lint/correctness/noUnmatchableAnbSelector"
 	| "lint/correctness/noUnnecessaryContinue"
 	| "lint/correctness/noUnreachable"
 	| "lint/correctness/noUnreachableSuper"
 	| "lint/correctness/noUnsafeFinally"
 	| "lint/correctness/noUnsafeOptionalChaining"
+	| "lint/correctness/noUnusedFunctionParameters"
 	| "lint/correctness/noUnusedImports"
 	| "lint/correctness/noUnusedLabels"
 	| "lint/correctness/noUnusedPrivateClassMembers"
@@ -2751,6 +2773,7 @@ export type Category =
 	| "lint/correctness/useArrayLiterals"
 	| "lint/correctness/useExhaustiveDependencies"
 	| "lint/correctness/useHookAtTopLevel"
+	| "lint/correctness/useImportExtensions"
 	| "lint/correctness/useIsNan"
 	| "lint/correctness/useJsxKeyInIterable"
 	| "lint/correctness/useValidForDirection"
@@ -2762,24 +2785,17 @@ export type Category =
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
-	| "lint/nursery/noDuplicateElseIf"
-	| "lint/nursery/noDuplicateFontNames"
-	| "lint/nursery/noDuplicateSelectorsKeyframeBlock"
 	| "lint/nursery/noDuplicatedFields"
+	| "lint/nursery/noDuplicateElseIf"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
-	| "lint/nursery/noEmptyBlock"
 	| "lint/nursery/noEnum"
-	| "lint/nursery/noEvolvingTypes"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
-	| "lint/nursery/noLabelWithoutControl"
-	| "lint/nursery/noMisplacedAssertion"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
-	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noSecrets"
@@ -2791,50 +2807,38 @@ export type Category =
 	| "lint/nursery/noUnknownMediaFeatureName"
 	| "lint/nursery/noUnknownProperty"
 	| "lint/nursery/noUnknownPseudoClass"
+	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownPseudoElement"
+	| "lint/nursery/noUnknownSelectorPseudoElement"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
-	| "lint/nursery/noUselessStringConcat"
-	| "lint/nursery/noUselessUndefinedInitialization"
 	| "lint/nursery/noValueAtRule"
-	| "lint/nursery/noYodaExpression"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useBiomeSuppressionComment"
-	| "lint/nursery/useConsistentBuiltinInstantiation"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
-	| "lint/nursery/useDateNow"
-	| "lint/nursery/useDefaultSwitchClause"
 	| "lint/nursery/useDeprecatedReason"
-	| "lint/nursery/useErrorMessage"
-	| "lint/nursery/useExplicitLengthCheck"
-	| "lint/nursery/useFocusableInteractive"
-	| "lint/nursery/useGenericFontNames"
-	| "lint/nursery/useImportExtensions"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useNumberToFixedDigitsArgument"
-	| "lint/nursery/useSemanticElements"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
-	| "lint/nursery/useThrowNewError"
-	| "lint/nursery/useThrowOnlyError"
-	| "lint/nursery/useTopLevelRegex"
 	| "lint/nursery/useTrimStartEnd"
 	| "lint/nursery/useValidAutocomplete"
 	| "lint/performance/noAccumulatingSpread"
 	| "lint/performance/noBarrelFile"
 	| "lint/performance/noDelete"
 	| "lint/performance/noReExportAll"
+	| "lint/performance/useTopLevelRegex"
 	| "lint/security/noDangerouslySetInnerHtml"
 	| "lint/security/noDangerouslySetInnerHtmlWithChildren"
 	| "lint/security/noGlobalEval"
 	| "lint/style/noArguments"
 	| "lint/style/noCommaOperator"
 	| "lint/style/noDefaultExport"
+	| "lint/style/noDoneCallback"
 	| "lint/style/noImplicitBoolean"
 	| "lint/style/noInferrableTypes"
 	| "lint/style/noNamespace"
@@ -2848,13 +2852,17 @@ export type Category =
 	| "lint/style/noUnusedTemplateLiteral"
 	| "lint/style/noUselessElse"
 	| "lint/style/noVar"
+	| "lint/style/noYodaExpression"
 	| "lint/style/useAsConstAssertion"
 	| "lint/style/useBlockStatements"
 	| "lint/style/useCollapsedElseIf"
 	| "lint/style/useConsistentArrayType"
+	| "lint/style/useConsistentBuiltinInstantiation"
 	| "lint/style/useConst"
 	| "lint/style/useDefaultParameterLast"
+	| "lint/style/useDefaultSwitchClause"
 	| "lint/style/useEnumInitializers"
+	| "lint/style/useExplicitLengthCheck"
 	| "lint/style/useExponentiationOperator"
 	| "lint/style/useExportType"
 	| "lint/style/useFilenamingConvention"
@@ -2874,6 +2882,8 @@ export type Category =
 	| "lint/style/useSingleCaseStatement"
 	| "lint/style/useSingleVarDeclarator"
 	| "lint/style/useTemplate"
+	| "lint/style/useThrowNewError"
+	| "lint/style/useThrowOnlyError"
 	| "lint/style/useWhile"
 	| "lint/suspicious/noApproximativeNumericConstant"
 	| "lint/suspicious/noArrayIndexKey"
@@ -2885,19 +2895,25 @@ export type Category =
 	| "lint/suspicious/noCompareNegZero"
 	| "lint/suspicious/noConfusingLabels"
 	| "lint/suspicious/noConfusingVoidType"
+	| "lint/suspicious/noConsole"
 	| "lint/suspicious/noConsoleLog"
 	| "lint/suspicious/noConstEnum"
 	| "lint/suspicious/noControlCharactersInRegex"
 	| "lint/suspicious/noDebugger"
 	| "lint/suspicious/noDoubleEquals"
+	| "lint/suspicious/noDuplicateAtImportRules"
 	| "lint/suspicious/noDuplicateCase"
 	| "lint/suspicious/noDuplicateClassMembers"
+	| "lint/suspicious/noDuplicateFontNames"
 	| "lint/suspicious/noDuplicateJsxProps"
 	| "lint/suspicious/noDuplicateObjectKeys"
 	| "lint/suspicious/noDuplicateParameters"
+	| "lint/suspicious/noDuplicateSelectorsKeyframeBlock"
 	| "lint/suspicious/noDuplicateTestHooks"
+	| "lint/suspicious/noEmptyBlock"
 	| "lint/suspicious/noEmptyBlockStatements"
 	| "lint/suspicious/noEmptyInterface"
+	| "lint/suspicious/noEvolvingTypes"
 	| "lint/suspicious/noExplicitAny"
 	| "lint/suspicious/noExportsInTest"
 	| "lint/suspicious/noExtraNonNullAssertion"
@@ -2908,16 +2924,20 @@ export type Category =
 	| "lint/suspicious/noGlobalIsFinite"
 	| "lint/suspicious/noGlobalIsNan"
 	| "lint/suspicious/noImplicitAnyLet"
+	| "lint/suspicious/noImportantInKeyframe"
 	| "lint/suspicious/noImportAssign"
 	| "lint/suspicious/noLabelVar"
 	| "lint/suspicious/noMisleadingCharacterClass"
 	| "lint/suspicious/noMisleadingInstantiator"
+	| "lint/suspicious/noMisplacedAssertion"
 	| "lint/suspicious/noMisrefactoredShorthandAssign"
 	| "lint/suspicious/noPrototypeBuiltins"
+	| "lint/suspicious/noReactSpecificProps"
 	| "lint/suspicious/noRedeclare"
 	| "lint/suspicious/noRedundantUseStrict"
 	| "lint/suspicious/noSelfCompare"
 	| "lint/suspicious/noShadowRestrictedNames"
+	| "lint/suspicious/noShorthandPropertyOverrides"
 	| "lint/suspicious/noSkippedTests"
 	| "lint/suspicious/noSparseArray"
 	| "lint/suspicious/noSuspiciousSemicolonInJsx"
@@ -2926,12 +2946,14 @@ export type Category =
 	| "lint/suspicious/noUnsafeNegation"
 	| "lint/suspicious/useAwait"
 	| "lint/suspicious/useDefaultSwitchClauseLast"
+	| "lint/suspicious/useErrorMessage"
 	| "lint/suspicious/useGetterReturn"
 	| "lint/suspicious/useIsArray"
 	| "lint/suspicious/useNamespaceKeyword"
+	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useValidTypeof"
 	| "assists/source/useSortedKeys"
-	| "syntax/nursery/noTypeOnlyImportAttributes"
+	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
 	| "syntax/correctness/noDuplicatePrivateClassMembers"

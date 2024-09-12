@@ -15,7 +15,7 @@ use std::collections::BTreeSet;
 declare_source_rule! {
     /// Sorts the keys of a JSON object in natural order
     pub UseSortedKeys {
-        version: "next",
+        version: "1.9.0",
         name: "useSortedKeys",
         language: "json",
     }

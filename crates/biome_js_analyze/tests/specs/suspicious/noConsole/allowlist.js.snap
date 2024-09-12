@@ -1,0 +1,203 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: allowlist.js
+---
+# Input
+```jsx
+console.log("invalid");
+console.debug("invalid");
+
+console.info("ok");
+console.warn("ok");
+console.error("ok");
+console.assert(true, "ok");
+
+```
+
+# Diagnostics
+```
+allowlist.options:5:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noConsole`.
+  
+    3 │         "rules": {
+    4 │             "nursery": {
+  > 5 │                 "noConsole": {
+      │                 ^^^^^^^^^^^
+    6 │                     "level": "warn",
+    7 │                     "options": {
+  
+  i Known keys:
+  
+  - recommended
+  - all
+  - noCommonJs
+  - noDuplicateCustomProperties
+  - noDuplicateElseIf
+  - noDuplicatedFields
+  - noDynamicNamespaceImportAccess
+  - noEnum
+  - noExportedImports
+  - noIrregularWhitespace
+  - noRestrictedImports
+  - noRestrictedTypes
+  - noSecrets
+  - noStaticElementInteractions
+  - noSubstr
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
+  - noUselessEscapeInRegex
+  - noValueAtRule
+  - useAdjacentOverloadSignatures
+  - useAriaPropsSupportedByRole
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
+  - useDeprecatedReason
+  - useImportRestrictions
+  - useSortedClasses
+  - useStrictMode
+  - useTrimStartEnd
+  - useValidAutocomplete
+  
+
+```
+
+```
+allowlist.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+  > 1 │ console.log("invalid");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ console.debug("invalid");
+    3 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    1 │ console.log("invalid");
+      │ -----------------------
+
+```
+
+```
+allowlist.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    1 │ console.log("invalid");
+  > 2 │ console.debug("invalid");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ console.info("ok");
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    1 1 │   console.log("invalid");
+    2   │ - console.debug("invalid");
+    3 2 │   
+    4 3 │   console.info("ok");
+  
+
+```
+
+```
+allowlist.js:4:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    2 │ console.debug("invalid");
+    3 │ 
+  > 4 │ console.info("ok");
+      │ ^^^^^^^^^^^^^^^^^^^
+    5 │ console.warn("ok");
+    6 │ console.error("ok");
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    1 1 │   console.log("invalid");
+    2 2 │   console.debug("invalid");
+    3   │ - 
+    4   │ - console.info("ok");
+    5 3 │   console.warn("ok");
+    6 4 │   console.error("ok");
+  
+
+```
+
+```
+allowlist.js:5:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    4 │ console.info("ok");
+  > 5 │ console.warn("ok");
+      │ ^^^^^^^^^^^^^^^^^^^
+    6 │ console.error("ok");
+    7 │ console.assert(true, "ok");
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    3 3 │   
+    4 4 │   console.info("ok");
+    5   │ - console.warn("ok");
+    6 5 │   console.error("ok");
+    7 6 │   console.assert(true, "ok");
+  
+
+```
+
+```
+allowlist.js:6:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    4 │ console.info("ok");
+    5 │ console.warn("ok");
+  > 6 │ console.error("ok");
+      │ ^^^^^^^^^^^^^^^^^^^^
+    7 │ console.assert(true, "ok");
+    8 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    4 4 │   console.info("ok");
+    5 5 │   console.warn("ok");
+    6   │ - console.error("ok");
+    7 6 │   console.assert(true, "ok");
+    8 7 │   
+  
+
+```
+
+```
+allowlist.js:7:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    5 │ console.warn("ok");
+    6 │ console.error("ok");
+  > 7 │ console.assert(true, "ok");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    5 5 │   console.warn("ok");
+    6 6 │   console.error("ok");
+    7   │ - console.assert(true,·"ok");
+    8 7 │   
+  
+
+```

@@ -70,57 +70,66 @@ fn find_group_by_name(root: &JsonRoot, group_name: &str) -> Option<JsonMember> {
     group
 }
 
-// used for testing purposes
 /// - Left: name of the rule in the nursery group
 /// - Right: name of the target group and name of the target rule (sometimes we change name)
-#[cfg(debug_assertions)]
+#[rustfmt::skip]
 const RULES_TO_MIGRATE: &[(&str, (&str, &str))] = &[
-    (
-        "noExcessiveNestedTestSuites",
-        ("complexity", "noExcessiveNestedTestSuites"),
-    ),
-    ("noUselessTernary", ("complexity", "noUselessTernary")),
-    (
-        "useJsxKeyInIterable",
-        ("correctness", "useJsxKeyInIterable"),
-    ),
-    ("oldName", ("suspicious", "noSuspiciousSemicolonInJsx")),
-];
-
-#[cfg(not(debug_assertions))]
-// Used in production
-const RULES_TO_MIGRATE: &[(&str, (&str, &str))] = &[
-    (
-        "noExcessiveNestedTestSuites",
-        ("complexity", "noExcessiveNestedTestSuites"),
-    ),
-    ("noUselessTernary", ("complexity", "noUselessTernary")),
-    (
-        "useJsxKeyInIterable",
-        ("correctness", "useJsxKeyInIterable"),
-    ),
+    // CSS
+    ("noDuplicateAtImportRules", ("suspicious", "noDuplicateAtImportRules")),
+    ("noDuplicateFontNames", ("suspicious", "noDuplicateFontNames")),
+    ("noDuplicateSelectorsKeyframeBlock", ("suspicious", "noDuplicateSelectorsKeyframeBlock")),
+    ("noEmptyBlock", ("suspicious", "noEmptyBlock")),
+    ("noImportantInKeyframe", ("suspicious", "noImportantInKeyframe")),
+    ("noInvalidDirectionInLinearGradient", ("correctness", "noInvalidDirectionInLinearGradient")),
+    ("noInvalidPositionAtImportRule", ("correctness", "noInvalidPositionAtImportRule")),
+    ("noShorthandPropertyOverrides", ("suspicious", "noShorthandPropertyOverrides")),
+    ("noUnknownFunction", ("correctness", "noUnknownFunction")),
+    ("noUnknownMediaFeatureName", ("correctness", "noUnknownMediaFeatureName")),
+    ("noUnknownProperty", ("correctness", "noUnknownProperty")),
+    ("noUnknownUnit", ("correctness", "noUnknownUnit")),
+    ("noUnmatchableAnbSelector", ("correctness", "noUnmatchableAnbSelector")),
+    ("useConsistentGridAreas", ("correctness", "noInvalidGridAreas")),
+    ("useGenericFontNames", ("a11y", "useGenericFontNames")),
+    // JS
     ("noBarrelFile", ("performance", "noBarrelFile")),
-    ("noReExportAll", ("performance", "noReExportAll")),
-    ("noNamespaceImport", ("style", "noNamespaceImport")),
-    ("useNodeAssertStrict", ("style", "useNodeAssertStrict")),
-    (
-        "noDuplicateTestHooks",
-        ("suspicious", "noDuplicateTestHooks"),
-    ),
+    ("noConsole", ("suspicious", "noConsole")),
+    ("noConstantMathMinMaxClamp", ("correctness", "noConstantMathMinMaxClamp")),
+    ("noDoneCallback", ("style", "noDoneCallback")),
+    ("noDuplicateTestHooks", ("suspicious", "noDuplicateTestHooks")),
+    ("noEvolvingTypes", ("suspicious", "noEvolvingTypes")),
+    ("noExcessiveNestedTestSuites", ("complexity", "noExcessiveNestedTestSuites")),
     ("noExportsInTest", ("suspicious", "noExportsInTest")),
-    ("noFocusedTests", ("suspicious", "noFocusedTests")),
-    ("noSkippedTests", ("suspicious", "noSkippedTests")),
-    (
-        "noSuspiciousSemicolonInJsx",
-        ("suspicious", "noSuspiciousSemicolonInJsx"),
-    ),
-    (
-        "noConstantMathMinMaxClamp",
-        ("correctness", "noConstantMathMinMaxClamp"),
-    ),
     ("noFlatMapIdentity", ("correctness", "noFlatMapIdentity")),
+    ("noFocusedTests", ("suspicious", "noFocusedTests")),
+    ("noLabelWithoutControl", ("a11y", "noLabelWithoutControl")),
+    ("noMisplacedAssertion", ("suspicious", "noMisplacedAssertion")),
+    ("noNamespaceImport", ("style", "noNamespaceImport")),
     ("noNodejsModules", ("correctness", "noNodejsModules")),
+    ("noReactSpecificProps", ("suspicious", "noReactSpecificProps")),
+    ("noReExportAll", ("performance", "noReExportAll")),
+    ("noSkippedTests", ("suspicious", "noSkippedTests")),
+    ("noSuspiciousSemicolonInJsx", ("suspicious", "noSuspiciousSemicolonInJsx")),
+    ("noUndeclaredDependencies", ("correctness", "noUndeclaredDependencies")),
+    ("noUnusedFunctionParameters", ("correctness", "noUnusedFunctionParameters")),
+    ("noUselessStringConcat", ("complexity", "noUselessStringConcat")),
+    ("noUselessTernary", ("complexity", "noUselessTernary")),
+    ("noUselessUndefinedInitialization", ("complexity", "noUselessUndefinedInitialization")),
+    ("noYodaExpression", ("style", "noYodaExpression")),
     ("useArrayLiterals", ("correctness", "useArrayLiterals")),
+    ("useConsistentBuiltinInstantiation", ("style", "useConsistentBuiltinInstantiation")),
+    ("useDateNow", ("complexity", "useDateNow")),
+    ("useDefaultSwitchClause", ("style", "useDefaultSwitchClause")),
+    ("useErrorMessage", ("suspicious", "useErrorMessage")),
+    ("useExplicitLengthCheck", ("style", "useExplicitLengthCheck")),
+    ("useFocusableInteractive", ("a11y", "useFocusableInteractive")),
+    ("useImportExtensions", ("correctness", "useImportExtensions")),
+    ("useJsxKeyInIterable", ("correctness", "useJsxKeyInIterable") ),
+    ("useNodeAssertStrict", ("style", "useNodeAssertStrict")),
+    ("useNumberToFixedDigitsArgument", ("suspicious", "useNumberToFixedDigitsArgument")),
+    ("useSemanticElements", ("a11y", "useSemanticElements")),
+    ("useThrowNewError", ("style", "useThrowNewError")),
+    ("useThrowOnlyError", ("style", "useThrowOnlyError")),
+    ("useTopLevelRegex", ("performance", "useTopLevelRegex")),
 ];
 
 impl Rule for NurseryRules {
@@ -222,6 +231,10 @@ impl Rule for NurseryRules {
             let target_group_value_object = target_group_value.as_json_object_value()?;
 
             let current_rules = target_group_value_object.json_member_list();
+            let mut current_rule_separators = target_group_value_object
+                .json_member_list()
+                .separators()
+                .flatten();
             let current_rules_count = current_rules.len();
 
             let mut separators = Vec::with_capacity(current_rules_count + 1);
@@ -238,7 +251,11 @@ impl Rule for NurseryRules {
                     break;
                 }
                 new_rules.push(current_rule.clone());
-                separators.push(token(T![,]));
+                if let Some(current_rule_separator) = current_rule_separators.next() {
+                    separators.push(current_rule_separator);
+                } else {
+                    separators.push(token(T![,]));
+                }
             }
 
             // We only add the rule if the rule doesn't already exist in the target group
@@ -275,12 +292,20 @@ impl Rule for NurseryRules {
 
                     let object = node.value().ok()?;
                     let object = object.as_json_object_value()?;
+                    let mut separators: Vec<_> =
+                        object.json_member_list().separators().flatten().collect();
                     let new_nursery_group: Vec<_> = object
                         .json_member_list()
                         .iter()
-                        .filter_map(|node| {
+                        .enumerate()
+                        .filter_map(|(i, node)| {
                             let node = node.ok()?;
                             if &node == nursery_rule {
+                                if i < separators.len() {
+                                    separators.remove(i);
+                                } else {
+                                    separators.pop();
+                                }
                                 None
                             } else {
                                 Some(node)
@@ -293,7 +318,7 @@ impl Rule for NurseryRules {
                         token(T![:]),
                         AnyJsonValue::JsonObjectValue(json_object_value(
                             token(T!['{']),
-                            json_member_list(new_nursery_group, vec![]),
+                            json_member_list(new_nursery_group, separators),
                             token(T!['}']),
                         )),
                     );

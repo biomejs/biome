@@ -144,9 +144,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
+        //if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+        //    return Ok(file_source.into());
+        //}
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -170,9 +170,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
-            return Ok(file_source.into());
-        }
+        //if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
+        //    return Ok(file_source.into());
+        //}
         Err(FileSourceError::UnknownLanguageId)
     }
 
@@ -311,9 +311,10 @@ impl DocumentFileSource {
                 EmbeddingKind::Svelte => SVELTE_FENCE.is_match(content),
                 EmbeddingKind::None => true,
             },
-            DocumentFileSource::Json(_) | DocumentFileSource::Css(_) => true,
-            DocumentFileSource::Graphql(_) => true,
-            DocumentFileSource::Html(_) => true,
+            DocumentFileSource::Css(_)
+            | DocumentFileSource::Graphql(_)
+            | DocumentFileSource::Json(_) => true,
+            DocumentFileSource::Html(_) => false,
             DocumentFileSource::Unknown => false,
         }
     }

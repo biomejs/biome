@@ -1,0 +1,585 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+.foo {
+	background: linear-gradient(bottom, #fff, #000);
+}
+.foo {
+	background: lInEaR-gRaDiEnT(bottom, #fff, #000);
+}
+.foo {
+	background: LINEAR-GRADIENT(bottom, #fff, #000);
+}
+.foo {
+	background: linear-gradient(bOtToM, #fff, #000);
+}
+.foo {
+	background: linear-gradient(BOTTOM, #fff, #000);
+}
+.foo {
+	background: linear-gradient(top, #fff, #000);
+}
+.foo {
+	background: linear-gradient(left, #fff, #000);
+}
+.foo {
+	background: linear-gradient(right, #fff, #000);
+}
+.foo {
+	background: linear-gradient(to top top, #fff, #000);
+}
+.foo {
+	background: linear-gradient(45, #fff, #000);
+}
+.foo {
+	background: linear-gradient(0.25, #fff, #000);
+}
+.foo {
+	background: linear-gradient(1.577, #fff, #000);
+}
+.foo {
+	background: linear-gradient(topin, #fff, #000);
+}
+.foo {
+	background: -webkit-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: -moz-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: -o-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: url(foo.png), -webkit-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: url(foo.png), -moz-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: url(foo.png), -o-linear-gradient(to bottom, #fff, #000);
+}
+.foo {
+	background: -webkit-linear-gradient(to bottom, #fff, #000), url(foo.png);
+}
+.foo {
+	background: url(foo.png), -moz-linear-gradient(to bottom, #fff, #000),
+		url(foo.png);
+}
+.foo {
+	background: -o-linear-gradient(to bottom, #fff, #000), url(foo.png);
+}
+.foo {
+	background: url(foo.png), -webkit-linear-gradient(to bottom, #fff, #000),
+		url(bar.png);
+}
+.foo {
+	background: url(foo.png), -moz-linear-gradient(to bottom, #fff, #000),
+		url(bar.png);
+}
+.foo {
+	background: url(foo.png), -o-linear-gradient(to bottom, #fff, #000),
+		url(bar.png);
+}
+.foo {
+	background: url(foo.png), -ms-linear-gradient(to bottom, #fff, #000),
+		url(bar.png);
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:2:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    1 │ .foo {
+  > 2 │ 	background: linear-gradient(bottom, #fff, #000);
+      │ 	                            ^^^^^^
+    3 │ }
+    4 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:5:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    3 │ }
+    4 │ .foo {
+  > 5 │ 	background: lInEaR-gRaDiEnT(bottom, #fff, #000);
+      │ 	                            ^^^^^^
+    6 │ }
+    7 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:8:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+     6 │ }
+     7 │ .foo {
+   > 8 │ 	background: LINEAR-GRADIENT(bottom, #fff, #000);
+       │ 	                            ^^^^^^
+     9 │ }
+    10 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:11:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+     9 │ }
+    10 │ .foo {
+  > 11 │ 	background: linear-gradient(bOtToM, #fff, #000);
+       │ 	                            ^^^^^^
+    12 │ }
+    13 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:14:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    12 │ }
+    13 │ .foo {
+  > 14 │ 	background: linear-gradient(BOTTOM, #fff, #000);
+       │ 	                            ^^^^^^
+    15 │ }
+    16 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:17:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    15 │ }
+    16 │ .foo {
+  > 17 │ 	background: linear-gradient(top, #fff, #000);
+       │ 	                            ^^^
+    18 │ }
+    19 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:20:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    18 │ }
+    19 │ .foo {
+  > 20 │ 	background: linear-gradient(left, #fff, #000);
+       │ 	                            ^^^^
+    21 │ }
+    22 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:23:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    21 │ }
+    22 │ .foo {
+  > 23 │ 	background: linear-gradient(right, #fff, #000);
+       │ 	                            ^^^^^
+    24 │ }
+    25 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:26:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    24 │ }
+    25 │ .foo {
+  > 26 │ 	background: linear-gradient(to top top, #fff, #000);
+       │ 	                            ^^^^^^^^^^
+    27 │ }
+    28 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:29:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    27 │ }
+    28 │ .foo {
+  > 29 │ 	background: linear-gradient(45, #fff, #000);
+       │ 	                            ^^
+    30 │ }
+    31 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:32:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    30 │ }
+    31 │ .foo {
+  > 32 │ 	background: linear-gradient(0.25, #fff, #000);
+       │ 	                            ^^^^
+    33 │ }
+    34 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:35:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    33 │ }
+    34 │ .foo {
+  > 35 │ 	background: linear-gradient(1.577, #fff, #000);
+       │ 	                            ^^^^^
+    36 │ }
+    37 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:38:30 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    36 │ }
+    37 │ .foo {
+  > 38 │ 	background: linear-gradient(topin, #fff, #000);
+       │ 	                            ^^^^^
+    39 │ }
+    40 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:41:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    39 │ }
+    40 │ .foo {
+  > 41 │ 	background: -webkit-linear-gradient(to bottom, #fff, #000);
+       │ 	                                    ^^^^^^^^^
+    42 │ }
+    43 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:44:35 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    42 │ }
+    43 │ .foo {
+  > 44 │ 	background: -moz-linear-gradient(to bottom, #fff, #000);
+       │ 	                                 ^^^^^^^^^
+    45 │ }
+    46 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:47:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    45 │ }
+    46 │ .foo {
+  > 47 │ 	background: -o-linear-gradient(to bottom, #fff, #000);
+       │ 	                               ^^^^^^^^^
+    48 │ }
+    49 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:50:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    48 │ }
+    49 │ .foo {
+  > 50 │ 	background: url(foo.png), -webkit-linear-gradient(to bottom, #fff, #000);
+       │ 	                                                  ^^^^^^^^^
+    51 │ }
+    52 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:53:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    51 │ }
+    52 │ .foo {
+  > 53 │ 	background: url(foo.png), -moz-linear-gradient(to bottom, #fff, #000);
+       │ 	                                               ^^^^^^^^^
+    54 │ }
+    55 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:56:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    54 │ }
+    55 │ .foo {
+  > 56 │ 	background: url(foo.png), -o-linear-gradient(to bottom, #fff, #000);
+       │ 	                                             ^^^^^^^^^
+    57 │ }
+    58 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:59:38 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    57 │ }
+    58 │ .foo {
+  > 59 │ 	background: -webkit-linear-gradient(to bottom, #fff, #000), url(foo.png);
+       │ 	                                    ^^^^^^^^^
+    60 │ }
+    61 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:62:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    60 │ }
+    61 │ .foo {
+  > 62 │ 	background: url(foo.png), -moz-linear-gradient(to bottom, #fff, #000),
+       │ 	                                               ^^^^^^^^^
+    63 │ 		url(foo.png);
+    64 │ }
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:66:33 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    64 │ }
+    65 │ .foo {
+  > 66 │ 	background: -o-linear-gradient(to bottom, #fff, #000), url(foo.png);
+       │ 	                               ^^^^^^^^^
+    67 │ }
+    68 │ .foo {
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:69:52 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    67 │ }
+    68 │ .foo {
+  > 69 │ 	background: url(foo.png), -webkit-linear-gradient(to bottom, #fff, #000),
+       │ 	                                                  ^^^^^^^^^
+    70 │ 		url(bar.png);
+    71 │ }
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:73:49 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    71 │ }
+    72 │ .foo {
+  > 73 │ 	background: url(foo.png), -moz-linear-gradient(to bottom, #fff, #000),
+       │ 	                                               ^^^^^^^^^
+    74 │ 		url(bar.png);
+    75 │ }
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:77:47 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    75 │ }
+    76 │ .foo {
+  > 77 │ 	background: url(foo.png), -o-linear-gradient(to bottom, #fff, #000),
+       │ 	                                             ^^^^^^^^^
+    78 │ 		url(bar.png);
+    79 │ }
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```
+
+```
+invalid.css:81:48 lint/correctness/noInvalidDirectionInLinearGradient ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected nonstandard direction
+  
+    79 │ }
+    80 │ .foo {
+  > 81 │ 	background: url(foo.png), -ms-linear-gradient(to bottom, #fff, #000),
+       │ 	                                              ^^^^^^^^^
+    82 │ 		url(bar.png);
+    83 │ }
+  
+  i You should fix the direction value to follow the syntax.
+  
+  i See MDN web docs for more details.
+  
+
+```

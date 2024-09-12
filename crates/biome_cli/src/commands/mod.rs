@@ -416,7 +416,7 @@ pub enum BiomeCommand {
         sub_command: Option<MigrateSubCommand>,
     },
 
-    /// [EXPERIMENTAL] Searches for Grit patterns across a project.
+    /// EXPERIMENTAL: Searches for Grit patterns across a project.
     ///
     /// Note: GritQL escapes code snippets using backticks, but most shells
     /// interpret backticks as command invocations. To avoid this, it's best to

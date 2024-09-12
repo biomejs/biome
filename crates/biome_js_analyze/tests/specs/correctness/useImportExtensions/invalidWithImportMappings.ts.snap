@@ -1,0 +1,97 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidWithImportMappings.ts
+---
+# Input
+```ts
+import "./sub/foo";
+import "./sub/Foo";
+```
+
+# Diagnostics
+```
+invalidWithImportMappings.options:7:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `useImportExtensions`.
+  
+    5 │ 		"rules": {
+    6 │ 			"nursery": {
+  > 7 │ 				"useImportExtensions": {
+      │ 				^^^^^^^^^^^^^^^^^^^^^
+    8 │ 					"level": "error",
+    9 │ 					"options": {
+  
+  i Known keys:
+  
+  - recommended
+  - all
+  - noCommonJs
+  - noDuplicateCustomProperties
+  - noDuplicateElseIf
+  - noDuplicatedFields
+  - noDynamicNamespaceImportAccess
+  - noEnum
+  - noExportedImports
+  - noIrregularWhitespace
+  - noRestrictedImports
+  - noRestrictedTypes
+  - noSecrets
+  - noStaticElementInteractions
+  - noSubstr
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
+  - noUselessEscapeInRegex
+  - noValueAtRule
+  - useAdjacentOverloadSignatures
+  - useAriaPropsSupportedByRole
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
+  - useDeprecatedReason
+  - useImportRestrictions
+  - useSortedClasses
+  - useStrictMode
+  - useTrimStartEnd
+  - useValidAutocomplete
+  
+
+```
+
+```
+invalidWithImportMappings.ts:1:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+  > 1 │ import "./sub/foo";
+      │        ^^^^^^^^^^^
+    2 │ import "./sub/Foo";
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .ts.
+  
+    1   │ - import·"./sub/foo";
+      1 │ + import·"./sub/foo.ts";
+    2 2 │   import "./sub/Foo";
+  
+
+```
+
+```
+invalidWithImportMappings.ts:2:8 lint/correctness/useImportExtensions  FIXABLE  ━━━━━━━━━━━━━━━━━━━━
+
+  ! Add a file extension for relative imports.
+  
+    1 │ import "./sub/foo";
+  > 2 │ import "./sub/Foo";
+      │        ^^^^^^^^^^^
+  
+  i Explicit import improves compatibility with browsers and makes file resolution in tooling faster.
+  
+  i Unsafe fix: Add potential import extension .tsx.
+  
+    1 1 │   import "./sub/foo";
+    2   │ - import·"./sub/Foo";
+      2 │ + import·"./sub/Foo.tsx";
+  
+
+```

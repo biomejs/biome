@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicatedFields {
-        version: "next",
+        version: "1.9.0",
         name: "noDuplicatedFields",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("no-duplicate-fields")],

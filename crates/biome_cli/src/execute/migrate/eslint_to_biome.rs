@@ -210,7 +210,7 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::NoConsole(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 if let eslint_eslint::RuleConf::Option(severity, rule_options) = conf {
-                    let group = rules.nursery.get_or_insert_with(Default::default);
+                    let group = rules.suspicious.get_or_insert_with(Default::default);
                     group.no_console = Some(biome_config::RuleFixConfiguration::WithOptions(
                         biome_config::RuleWithFixOptions {
                             level: severity.into(),

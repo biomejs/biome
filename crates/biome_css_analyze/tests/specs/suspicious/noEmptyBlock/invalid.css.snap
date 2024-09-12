@@ -1,0 +1,378 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+/* CssDeclarationOrRuleBlock */
+a {}
+a { }
+a {
+
+}
+
+.b {}
+.b { }
+.b {
+
+}
+
+/* CssRuleBlock */
+@media print {}
+@media print {
+
+}
+@media print { a {} }
+
+/* CssDeclarationBlock */
+@font-palette-values --ident {}
+@font-face {}
+
+/* CssKeyframesBlock */
+@keyframes slidein {}
+@keyframes slidein {
+    from {
+    }
+
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+/* CssFontFeatureValuesBlock */
+@font-feature-values Font One {
+  @styleset {
+
+  }
+}
+
+/* CssPageAtRuleBlock */
+@page {}
+@page :right {
+}
+
+
+/* CssDeclarationOrAtRuleBlock */
+@page :left { @left-middle {} background: red; }
+@page {
+    @top-right {
+
+    }
+}
+```
+
+# Diagnostics
+```
+invalid.css:2:3 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    1 │ /* CssDeclarationOrRuleBlock */
+  > 2 │ a {}
+      │   ^^
+    3 │ a { }
+    4 │ a {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:3:3 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    1 │ /* CssDeclarationOrRuleBlock */
+    2 │ a {}
+  > 3 │ a { }
+      │   ^^^
+    4 │ a {
+    5 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:4:3 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    2 │ a {}
+    3 │ a { }
+  > 4 │ a {
+      │   ^
+  > 5 │ 
+  > 6 │ }
+      │ ^
+    7 │ 
+    8 │ .b {}
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:8:4 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+     6 │ }
+     7 │ 
+   > 8 │ .b {}
+       │    ^^
+     9 │ .b { }
+    10 │ .b {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:9:4 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+     8 │ .b {}
+   > 9 │ .b { }
+       │    ^^^
+    10 │ .b {
+    11 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:10:4 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+     8 │ .b {}
+     9 │ .b { }
+  > 10 │ .b {
+       │    ^
+  > 11 │ 
+  > 12 │ }
+       │ ^
+    13 │ 
+    14 │ /* CssRuleBlock */
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:15:14 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    14 │ /* CssRuleBlock */
+  > 15 │ @media print {}
+       │              ^^
+    16 │ @media print {
+    17 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:16:14 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    14 │ /* CssRuleBlock */
+    15 │ @media print {}
+  > 16 │ @media print {
+       │              ^
+  > 17 │ 
+  > 18 │ }
+       │ ^
+    19 │ @media print { a {} }
+    20 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:19:18 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    18 │ }
+  > 19 │ @media print { a {} }
+       │                  ^^
+    20 │ 
+    21 │ /* CssDeclarationBlock */
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:22:30 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    21 │ /* CssDeclarationBlock */
+  > 22 │ @font-palette-values --ident {}
+       │                              ^^
+    23 │ @font-face {}
+    24 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:23:12 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    21 │ /* CssDeclarationBlock */
+    22 │ @font-palette-values --ident {}
+  > 23 │ @font-face {}
+       │            ^^
+    24 │ 
+    25 │ /* CssKeyframesBlock */
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:26:20 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    25 │ /* CssKeyframesBlock */
+  > 26 │ @keyframes slidein {}
+       │                    ^^
+    27 │ @keyframes slidein {
+    28 │     from {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:28:10 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    26 │ @keyframes slidein {}
+    27 │ @keyframes slidein {
+  > 28 │     from {
+       │          ^
+  > 29 │     }
+       │     ^
+    30 │ 
+    31 │     to {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:38:13 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    36 │ /* CssFontFeatureValuesBlock */
+    37 │ @font-feature-values Font One {
+  > 38 │   @styleset {
+       │             ^
+  > 39 │ 
+  > 40 │   }
+       │   ^
+    41 │ }
+    42 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:44:7 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    43 │ /* CssPageAtRuleBlock */
+  > 44 │ @page {}
+       │       ^^
+    45 │ @page :right {
+    46 │ }
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:45:14 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    43 │ /* CssPageAtRuleBlock */
+    44 │ @page {}
+  > 45 │ @page :right {
+       │              ^
+  > 46 │ }
+       │ ^
+    47 │ 
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:50:28 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    49 │ /* CssDeclarationOrAtRuleBlock */
+  > 50 │ @page :left { @left-middle {} background: red; }
+       │                            ^^
+    51 │ @page {
+    52 │     @top-right {
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
+
+```
+invalid.css:52:16 lint/suspicious/noEmptyBlock ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! An empty block isn't allowed.
+  
+    50 │ @page :left { @left-middle {} background: red; }
+    51 │ @page {
+  > 52 │     @top-right {
+       │                ^
+  > 53 │ 
+  > 54 │     }
+       │     ^
+    55 │ }
+  
+  i Consider removing the empty block or adding styles inside it.
+  
+
+```
