@@ -38,9 +38,9 @@
 
 **Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
 
-**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, and _JSON_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ and _GraphQL_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
 
-**Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, and _JSX_ that features **[more than 200 rules](https://biomejs.dev/linter/rules/)** from ESLint, typescript-eslint, and [other sources](https://github.com/biomejs/biome/discussions/3).
+**Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, _JSX_, _CSS_ and _GraphQL_ that features **[more than 270 rules](https://biomejs.dev/linter/rules/)** from ESLint, typescript-eslint, and [other sources](https://github.com/biomejs/biome/discussions/3).
 It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
 
 **Biome** is designed from the start to be used [interactively within an editor](https://biomejs.dev/guides/integrate-in-editor/).
@@ -58,10 +58,10 @@ npm install --save-dev --save-exact @biomejs/biome
 # format files
 npx @biomejs/biome format --write ./src
 
-# lint files
-npx @biomejs/biome lint ./src
+# lint files and apply the safe fixes
+npx @biomejs/biome lint --write ./src
 
-# run format, lint, etc. and apply the safe suggestions
+# run format, lint, etc. and apply the safe fixes
 npx @biomejs/biome check --write ./src
 
 # check all files against format, lint, etc. in CI environments
