@@ -1,0 +1,138 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+@media screen and (unknown) {
+}
+
+@media screen, (unknown: 10px) {
+}
+
+@media screen and (unknown > 10px) {
+}
+
+@media only screen and (min-width: 320px) and (max-width: 480px) and (unknown: 150dpi) {
+}
+
+@media (not(unknown < 320px)) and (max-width > 640px) {
+}
+
+@media (400px <= unknown <= 700px) {
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:1:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unknown media feature names.
+  
+  > 1 │ @media screen and (unknown) {
+      │        ^^^^^^^^^^^^^^^^^^^^
+    2 │ }
+    3 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```
+
+```
+invalid.css:4:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unknown media feature names.
+  
+    2 │ }
+    3 │ 
+  > 4 │ @media screen, (unknown: 10px) {
+      │        ^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ }
+    6 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```
+
+```
+invalid.css:7:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unknown media feature names.
+  
+    5 │ }
+    6 │ 
+  > 7 │ @media screen and (unknown > 10px) {
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```
+
+```
+invalid.css:10:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unknown media feature names.
+  
+     8 │ }
+     9 │ 
+  > 10 │ @media only screen and (min-width: 320px) and (max-width: 480px) and (unknown: 150dpi) {
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    11 │ }
+    12 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```
+
+```
+invalid.css:13:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unknown media feature names.
+  
+    11 │ }
+    12 │ 
+  > 13 │ @media (not(unknown < 320px)) and (max-width > 640px) {
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```
+
+```
+invalid.css:16:8 lint/correctness/noUnknownMediaFeatureName ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unknown media feature names.
+  
+    14 │ }
+    15 │ 
+  > 16 │ @media (400px <= unknown <= 700px) {
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ }
+    18 │ 
+  
+  i Unexpected unknown media feature name.
+  
+  i You should use media feature names defined in the CSS Specifications.
+  
+
+```

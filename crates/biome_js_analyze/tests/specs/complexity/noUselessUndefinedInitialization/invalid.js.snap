@@ -1,0 +1,228 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+let test1,
+	test2 = undefined;
+var c = undefined,
+	o = undefined;
+
+for (let i = 0; i < 100; i++) {
+	let i = undefined;
+}
+
+let x = 1, y = undefined /* comment here */, z = 40
+
+let /* comment */d = undefined;
+
+let e = undefined/**/ ;
+let f = /**/undefined/**/ ;
+let g 
+  /**/= /**/undefined/**/ ;
+```
+
+# Diagnostics
+```
+invalid.js:2:8 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not necessary to initialize test2 to undefined.
+  
+    1 │ let test1,
+  > 2 │ 	test2 = undefined;
+      │ 	      ^^^^^^^^^^^
+    3 │ var c = undefined,
+    4 │ 	o = undefined;
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+    2 │ → test2·=·undefined;
+      │         ----------- 
+
+```
+
+```
+invalid.js:3:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not necessary to initialize c to undefined.
+  
+    1 │ let test1,
+    2 │ 	test2 = undefined;
+  > 3 │ var c = undefined,
+      │       ^^^^^^^^^^^
+    4 │ 	o = undefined;
+    5 │ 
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+    3 │ var·c·=·undefined,
+      │       ----------- 
+
+```
+
+```
+invalid.js:4:4 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not necessary to initialize o to undefined.
+  
+    2 │ 	test2 = undefined;
+    3 │ var c = undefined,
+  > 4 │ 	o = undefined;
+      │ 	  ^^^^^^^^^^^
+    5 │ 
+    6 │ for (let i = 0; i < 100; i++) {
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+    4 │ → o·=·undefined;
+      │     ----------- 
+
+```
+
+```
+invalid.js:7:8 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not necessary to initialize i to undefined.
+  
+    6 │ for (let i = 0; i < 100; i++) {
+  > 7 │ 	let i = undefined;
+      │ 	      ^^^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+    7 │ → let·i·=·undefined;
+      │         ----------- 
+
+```
+
+```
+invalid.js:10:14 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not necessary to initialize y to undefined.
+  
+     8 │ }
+     9 │ 
+  > 10 │ let x = 1, y = undefined /* comment here */, z = 40
+       │              ^^^^^^^^^^^
+    11 │ 
+    12 │ let /* comment */d = undefined;
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+     8  8 │   }
+     9  9 │   
+    10    │ - let·x·=·1,·y·=·undefined·/*·comment·here·*/,·z·=·40
+       10 │ + let·x·=·1,·y·,·z·=·40/*·comment·here·*/
+    11 11 │   
+    12 12 │   let /* comment */d = undefined;
+  
+
+```
+
+```
+invalid.js:12:20 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not necessary to initialize d to undefined.
+  
+    10 │ let x = 1, y = undefined /* comment here */, z = 40
+    11 │ 
+  > 12 │ let /* comment */d = undefined;
+       │                    ^^^^^^^^^^^
+    13 │ 
+    14 │ let e = undefined/**/ ;
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+    12 │ let·/*·comment·*/d·=·undefined;
+       │                    ----------- 
+
+```
+
+```
+invalid.js:14:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not necessary to initialize e to undefined.
+  
+    12 │ let /* comment */d = undefined;
+    13 │ 
+  > 14 │ let e = undefined/**/ ;
+       │       ^^^^^^^^^^^
+    15 │ let f = /**/undefined/**/ ;
+    16 │ let g·
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+    12 12 │   let /* comment */d = undefined;
+    13 13 │   
+    14    │ - let·e·=·undefined/**/·;
+       14 │ + let·e·;/**/
+    15 15 │   let f = /**/undefined/**/ ;
+    16 16 │   let g·
+  
+
+```
+
+```
+invalid.js:15:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not necessary to initialize f to undefined.
+  
+    14 │ let e = undefined/**/ ;
+  > 15 │ let f = /**/undefined/**/ ;
+       │       ^^^^^^^^^^^^^^^
+    16 │ let g·
+    17 │   /**/= /**/undefined/**/ ;
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+    13 13 │   
+    14 14 │   let e = undefined/**/ ;
+    15    │ - let·f·=·/**/undefined/**/·;
+       15 │ + let·f·;/**//**/
+    16 16 │   let g·
+    17 17 │     /**/= /**/undefined/**/ ;
+  
+
+```
+
+```
+invalid.js:17:7 lint/complexity/noUselessUndefinedInitialization  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! It's not necessary to initialize g to undefined.
+  
+    15 │ let f = /**/undefined/**/ ;
+    16 │ let g·
+  > 17 │   /**/= /**/undefined/**/ ;
+       │       ^^^^^^^^^^^^^^^
+  
+  i A variable that is declared and not initialized to any value automatically gets the value of undefined.
+  
+  i Safe fix: Remove undefined initialization.
+  
+    14 14 │   let e = undefined/**/ ;
+    15 15 │   let f = /**/undefined/**/ ;
+    16    │ - let·g·
+    17    │ - ··/**/=·/**/undefined/**/·;
+       16 │ + let·g·;/**//**/
+  
+
+```

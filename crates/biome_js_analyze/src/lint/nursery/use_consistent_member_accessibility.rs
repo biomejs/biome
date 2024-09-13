@@ -213,7 +213,7 @@ declare_lint_rule! {
     /// Default: `noPublic`.
     ///
     pub UseConsistentMemberAccessibility {
-        version: "next",
+        version: "1.9.0",
         name: "useConsistentMemberAccessibility",
         language: "ts",
         recommended: true,

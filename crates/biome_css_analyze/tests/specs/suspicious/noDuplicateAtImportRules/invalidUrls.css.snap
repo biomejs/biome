@@ -1,0 +1,26 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidUrls.css
+---
+# Input
+```css
+@import url("c.css");
+@import url("c.css");
+
+```
+
+# Diagnostics
+```
+invalidUrls.css:2:2 lint/suspicious/noDuplicateAtImportRules ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Each @import should be unique unless differing by media queries.
+  
+    1 │ @import url("c.css");
+  > 2 │ @import url("c.css");
+      │  ^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Consider removing one of the duplicated imports.
+  
+
+```

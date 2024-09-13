@@ -10,6 +10,7 @@ pub mod no_blank_target;
 pub mod no_distracting_elements;
 pub mod no_header_scope;
 pub mod no_interactive_element_to_noninteractive_role;
+pub mod no_label_without_control;
 pub mod no_noninteractive_element_to_interactive_role;
 pub mod no_noninteractive_tabindex;
 pub mod no_positive_tabindex;
@@ -21,12 +22,14 @@ pub mod use_anchor_content;
 pub mod use_aria_activedescendant_with_tabindex;
 pub mod use_aria_props_for_role;
 pub mod use_button_type;
+pub mod use_focusable_interactive;
 pub mod use_heading_content;
 pub mod use_html_lang;
 pub mod use_iframe_title;
 pub mod use_key_with_click_events;
 pub mod use_key_with_mouse_events;
 pub mod use_media_caption;
+pub mod use_semantic_elements;
 pub mod use_valid_anchor;
 pub mod use_valid_aria_props;
 pub mod use_valid_aria_role;
@@ -45,6 +48,7 @@ declare_lint_group! {
             self :: no_distracting_elements :: NoDistractingElements ,
             self :: no_header_scope :: NoHeaderScope ,
             self :: no_interactive_element_to_noninteractive_role :: NoInteractiveElementToNoninteractiveRole ,
+            self :: no_label_without_control :: NoLabelWithoutControl ,
             self :: no_noninteractive_element_to_interactive_role :: NoNoninteractiveElementToInteractiveRole ,
             self :: no_noninteractive_tabindex :: NoNoninteractiveTabindex ,
             self :: no_positive_tabindex :: NoPositiveTabindex ,
@@ -56,12 +60,14 @@ declare_lint_group! {
             self :: use_aria_activedescendant_with_tabindex :: UseAriaActivedescendantWithTabindex ,
             self :: use_aria_props_for_role :: UseAriaPropsForRole ,
             self :: use_button_type :: UseButtonType ,
+            self :: use_focusable_interactive :: UseFocusableInteractive ,
             self :: use_heading_content :: UseHeadingContent ,
             self :: use_html_lang :: UseHtmlLang ,
             self :: use_iframe_title :: UseIframeTitle ,
             self :: use_key_with_click_events :: UseKeyWithClickEvents ,
             self :: use_key_with_mouse_events :: UseKeyWithMouseEvents ,
             self :: use_media_caption :: UseMediaCaption ,
+            self :: use_semantic_elements :: UseSemanticElements ,
             self :: use_valid_anchor :: UseValidAnchor ,
             self :: use_valid_aria_props :: UseValidAriaProps ,
             self :: use_valid_aria_role :: UseValidAriaRole ,

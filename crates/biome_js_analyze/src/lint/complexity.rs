@@ -18,13 +18,16 @@ pub mod no_useless_fragments;
 pub mod no_useless_label;
 pub mod no_useless_lone_block_statements;
 pub mod no_useless_rename;
+pub mod no_useless_string_concat;
 pub mod no_useless_switch_case;
 pub mod no_useless_ternary;
 pub mod no_useless_this_alias;
 pub mod no_useless_type_constraint;
+pub mod no_useless_undefined_initialization;
 pub mod no_void;
 pub mod no_with;
 pub mod use_arrow_function;
+pub mod use_date_now;
 pub mod use_flat_map;
 pub mod use_literal_keys;
 pub mod use_optional_chain;
@@ -52,13 +55,16 @@ declare_lint_group! {
             self :: no_useless_label :: NoUselessLabel ,
             self :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements ,
             self :: no_useless_rename :: NoUselessRename ,
+            self :: no_useless_string_concat :: NoUselessStringConcat ,
             self :: no_useless_switch_case :: NoUselessSwitchCase ,
             self :: no_useless_ternary :: NoUselessTernary ,
             self :: no_useless_this_alias :: NoUselessThisAlias ,
             self :: no_useless_type_constraint :: NoUselessTypeConstraint ,
+            self :: no_useless_undefined_initialization :: NoUselessUndefinedInitialization ,
             self :: no_void :: NoVoid ,
             self :: no_with :: NoWith ,
             self :: use_arrow_function :: UseArrowFunction ,
+            self :: use_date_now :: UseDateNow ,
             self :: use_flat_map :: UseFlatMap ,
             self :: use_literal_keys :: UseLiteralKeys ,
             self :: use_optional_chain :: UseOptionalChain ,

@@ -210,19 +210,40 @@ pub fn html_self_closing_element(
     l_angle_token: SyntaxToken,
     name: HtmlName,
     attributes: HtmlAttributeList,
-    slash_token: SyntaxToken,
     r_angle_token: SyntaxToken,
-) -> HtmlSelfClosingElement {
-    HtmlSelfClosingElement::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_SELF_CLOSING_ELEMENT,
-        [
-            Some(SyntaxElement::Token(l_angle_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(attributes.into_syntax())),
-            Some(SyntaxElement::Token(slash_token)),
-            Some(SyntaxElement::Token(r_angle_token)),
-        ],
-    ))
+) -> HtmlSelfClosingElementBuilder {
+    HtmlSelfClosingElementBuilder {
+        l_angle_token,
+        name,
+        attributes,
+        r_angle_token,
+        slash_token: None,
+    }
+}
+pub struct HtmlSelfClosingElementBuilder {
+    l_angle_token: SyntaxToken,
+    name: HtmlName,
+    attributes: HtmlAttributeList,
+    r_angle_token: SyntaxToken,
+    slash_token: Option<SyntaxToken>,
+}
+impl HtmlSelfClosingElementBuilder {
+    pub fn with_slash_token(mut self, slash_token: SyntaxToken) -> Self {
+        self.slash_token = Some(slash_token);
+        self
+    }
+    pub fn build(self) -> HtmlSelfClosingElement {
+        HtmlSelfClosingElement::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_SELF_CLOSING_ELEMENT,
+            [
+                Some(SyntaxElement::Token(self.l_angle_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Node(self.attributes.into_syntax())),
+                self.slash_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_angle_token)),
+            ],
+        ))
+    }
 }
 pub fn html_string(value_token: SyntaxToken) -> HtmlString {
     HtmlString::unwrap_cast(SyntaxNode::new_detached(

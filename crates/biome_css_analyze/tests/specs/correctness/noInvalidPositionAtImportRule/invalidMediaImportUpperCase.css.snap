@@ -1,0 +1,28 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalidMediaImportUpperCase.css
+---
+# Input
+```css
+@media print {}
+@imPort URl('foo.css');
+
+```
+
+# Diagnostics
+```
+invalidMediaImportUpperCase.css:2:2 lint/correctness/noInvalidPositionAtImportRule ━━━━━━━━━━━━━━━━━
+
+  ! This @import is in the wrong position.
+  
+    1 │ @media print {}
+  > 2 │ @imPort URl('foo.css');
+      │  ^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Any @import rules must precede all other valid at-rules and style rules in a stylesheet (ignoring @charset and @layer), or else the @import rule is invalid.
+  
+  i Consider moving import position.
+  
+
+```

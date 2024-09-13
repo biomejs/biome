@@ -1,0 +1,60 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCustomOptions.jsx
+---
+# Input
+```jsx
+<CustomLabel><span>A label<CustomInput /></span></CustomLabel>;
+<CustomLabel><span label="A label"><CustomInput /></span></CustomLabel>;
+<CustomLabel htmlFor="js_id" label="A label" />;
+<CustomLabel for="js_id" label="A label" />;
+
+```
+
+# Diagnostics
+```
+validCustomOptions.options:7:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noLabelWithoutControl`.
+  
+    5 │ 		"rules": {
+    6 │ 			"nursery": {
+  > 7 │ 				"noLabelWithoutControl": {
+      │ 				^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 					"level": "error",
+    9 │ 					"options": {
+  
+  i Known keys:
+  
+  - recommended
+  - all
+  - noCommonJs
+  - noDuplicateCustomProperties
+  - noDuplicateElseIf
+  - noDuplicatedFields
+  - noDynamicNamespaceImportAccess
+  - noEnum
+  - noExportedImports
+  - noIrregularWhitespace
+  - noRestrictedImports
+  - noRestrictedTypes
+  - noSecrets
+  - noStaticElementInteractions
+  - noSubstr
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
+  - noUselessEscapeInRegex
+  - noValueAtRule
+  - useAdjacentOverloadSignatures
+  - useAriaPropsSupportedByRole
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
+  - useDeprecatedReason
+  - useImportRestrictions
+  - useSortedClasses
+  - useStrictMode
+  - useTrimStartEnd
+  - useValidAutocomplete
+  
+
+```

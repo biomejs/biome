@@ -1,0 +1,52 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a {
+  colr: blue;
+}
+
+a {
+  my-property: 1;
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:2:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unknown property is not allowed.
+  
+    1 │ a {
+  > 2 │   colr: blue;
+      │   ^^^^
+    3 │ }
+    4 │ 
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```
+
+```
+invalid.css:6:3 lint/correctness/noUnknownProperty ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unknown property is not allowed.
+  
+    5 │ a {
+  > 6 │   my-property: 1;
+      │   ^^^^^^^^^^^
+    7 │ }
+    8 │ 
+  
+  i See CSS Specifications and browser specific properties for more details.
+  
+  i To resolve this issue, replace the unknown property with a valid CSS property.
+  
+
+```

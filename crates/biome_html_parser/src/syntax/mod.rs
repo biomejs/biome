@@ -14,6 +14,12 @@ use biome_parser::Parser;
 
 const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<], T![/]);
 
+/// These elements are effectively always self-closing. They should not have a closing tag (if they do, it should be a parsing error). They might not contain a `/` like in `<img />`.
+static VOID_ELEMENTS: &[&str] = &[
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track",
+    "wbr",
+];
+
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
 
@@ -54,6 +60,8 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
 
     p.bump(T![<]);
+    let opening_tag_name = p.cur_text().to_string();
+    let should_be_self_closing = VOID_ELEMENTS.contains(&opening_tag_name.as_str());
     parse_literal(p).or_add_diagnostic(p, expected_element_name);
 
     AttributeList.parse_list(p);
@@ -63,10 +71,28 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
         p.expect(T![>]);
         Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT))
     } else {
+        if should_be_self_closing {
+            if p.at(T![/]) {
+                p.bump(T![/]);
+            }
+            p.expect(T![>]);
+            return Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT));
+        }
         p.expect_with_context(T![>], HtmlLexContext::ElementList);
         let opening = m.complete(p, HTML_OPENING_ELEMENT);
-        ElementList.parse_list(p);
-        parse_closing_element(p).or_add_diagnostic(p, expected_closing_tag);
+        loop {
+            ElementList.parse_list(p);
+            if let Some(mut closing) =
+                parse_closing_element(p).or_add_diagnostic(p, expected_closing_tag)
+            {
+                if !closing.text(p).contains(opening_tag_name.as_str()) {
+                    p.error(expected_matching_closing_tag(p, closing.range(p)).into_diagnostic(p));
+                    closing.change_to_bogus(p);
+                    continue;
+                }
+            }
+            break;
+        }
         let previous = opening.precede(p);
 
         Present(previous.complete(p, HTML_ELEMENT))
@@ -80,6 +106,10 @@ fn parse_closing_element(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![<]);
     p.bump(T![/]);
+    let should_be_self_closing = VOID_ELEMENTS.contains(&p.cur_text());
+    if should_be_self_closing {
+        p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
+    }
     let _name = parse_literal(p);
     p.bump(T![>]);
     Present(m.complete(p, HTML_CLOSING_ELEMENT))

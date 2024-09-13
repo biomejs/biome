@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoIrregularWhitespace {
-        version: "next",
+        version: "1.9.9",
         name: "noIrregularWhitespace",
         language: "css",
         recommended: false,

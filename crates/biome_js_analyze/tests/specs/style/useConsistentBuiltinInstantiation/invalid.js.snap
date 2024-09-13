@@ -1,0 +1,309 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+Object()
+Array()
+Date()
+Error()
+Function()
+Promise()
+RegExp()
+window.Object({})
+globalThis.Object()
+function foo() {
+    return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
+}
+
+new Boolean()
+new Number()
+new String()
+new window.String(123)
+new globalThis.String()
+function foo() {
+    return /** Start */ new globalThis.String("foo") /** End */
+}
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Object() instead of Object().
+  
+  > 1 │ Object()
+      │ ^^^^^^^^
+    2 │ Array()
+    3 │ Date()
+  
+  i Unsafe fix: Add new keyword.
+  
+    1 │ new·Object()
+      │ ++++        
+
+```
+
+```
+invalid.js:2:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Array() instead of Array().
+  
+    1 │ Object()
+  > 2 │ Array()
+      │ ^^^^^^^
+    3 │ Date()
+    4 │ Error()
+  
+  i Unsafe fix: Add new keyword.
+  
+    2 │ new·Array()
+      │ ++++       
+
+```
+
+```
+invalid.js:3:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Date() instead of Date().
+  
+    1 │ Object()
+    2 │ Array()
+  > 3 │ Date()
+      │ ^^^^^^
+    4 │ Error()
+    5 │ Function()
+  
+  i Unsafe fix: Add new keyword.
+  
+    3 │ new·Date()
+      │ ++++      
+
+```
+
+```
+invalid.js:4:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Error() instead of Error().
+  
+    2 │ Array()
+    3 │ Date()
+  > 4 │ Error()
+      │ ^^^^^^^
+    5 │ Function()
+    6 │ Promise()
+  
+  i Unsafe fix: Add new keyword.
+  
+    4 │ new·Error()
+      │ ++++       
+
+```
+
+```
+invalid.js:6:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Promise() instead of Promise().
+  
+    4 │ Error()
+    5 │ Function()
+  > 6 │ Promise()
+      │ ^^^^^^^^^
+    7 │ RegExp()
+    8 │ window.Object({})
+  
+  i Unsafe fix: Add new keyword.
+  
+    6 │ new·Promise()
+      │ ++++         
+
+```
+
+```
+invalid.js:7:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new RegExp() instead of RegExp().
+  
+    5 │ Function()
+    6 │ Promise()
+  > 7 │ RegExp()
+      │ ^^^^^^^^
+    8 │ window.Object({})
+    9 │ globalThis.Object()
+  
+  i Unsafe fix: Add new keyword.
+  
+    7 │ new·RegExp()
+      │ ++++        
+
+```
+
+```
+invalid.js:8:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Object() instead of Object().
+  
+     6 │ Promise()
+     7 │ RegExp()
+   > 8 │ window.Object({})
+       │ ^^^^^^^^^^^^^^^^^
+     9 │ globalThis.Object()
+    10 │ function foo() {
+  
+  i Unsafe fix: Add new keyword.
+  
+    8 │ new·window.Object({})
+      │ ++++                 
+
+```
+
+```
+invalid.js:9:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Object() instead of Object().
+  
+     7 │ RegExp()
+     8 │ window.Object({})
+   > 9 │ globalThis.Object()
+       │ ^^^^^^^^^^^^^^^^^^^
+    10 │ function foo() {
+    11 │     return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
+  
+  i Unsafe fix: Add new keyword.
+  
+    9 │ new·globalThis.Object()
+      │ ++++                   
+
+```
+
+```
+invalid.js:11:25 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Object() instead of Object().
+  
+     9 │ globalThis.Object()
+    10 │ function foo() {
+  > 11 │     return /** Start */ globalThis.Object({ foo: 'bar' }) /** End */
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ }
+    13 │ 
+  
+  i Unsafe fix: Add new keyword.
+  
+    11 │ ····return·/**·Start·*/·new·globalThis.Object({·foo:·'bar'·})·/**·End·*/
+       │                         ++++                                            
+
+```
+
+```
+invalid.js:14:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Boolean() instead of new Boolean().
+  
+    12 │ }
+    13 │ 
+  > 14 │ new Boolean()
+       │ ^^^^^^^^^^^^^
+    15 │ new Number()
+    16 │ new String()
+  
+  i Unsafe fix: Remove new keyword.
+  
+    14 │ new·Boolean()
+       │ ----         
+
+```
+
+```
+invalid.js:15:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Number() instead of new Number().
+  
+    14 │ new Boolean()
+  > 15 │ new Number()
+       │ ^^^^^^^^^^^^
+    16 │ new String()
+    17 │ new window.String(123)
+  
+  i Unsafe fix: Remove new keyword.
+  
+    15 │ new·Number()
+       │ ----        
+
+```
+
+```
+invalid.js:16:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    14 │ new Boolean()
+    15 │ new Number()
+  > 16 │ new String()
+       │ ^^^^^^^^^^^^
+    17 │ new window.String(123)
+    18 │ new globalThis.String()
+  
+  i Unsafe fix: Remove new keyword.
+  
+    16 │ new·String()
+       │ ----        
+
+```
+
+```
+invalid.js:17:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    15 │ new Number()
+    16 │ new String()
+  > 17 │ new window.String(123)
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    18 │ new globalThis.String()
+    19 │ function foo() {
+  
+  i Unsafe fix: Remove new keyword.
+  
+    17 │ new·window.String(123)
+       │ ----                  
+
+```
+
+```
+invalid.js:18:1 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    16 │ new String()
+    17 │ new window.String(123)
+  > 18 │ new globalThis.String()
+       │ ^^^^^^^^^^^^^^^^^^^^^^^
+    19 │ function foo() {
+    20 │     return /** Start */ new globalThis.String("foo") /** End */
+  
+  i Unsafe fix: Remove new keyword.
+  
+    18 │ new·globalThis.String()
+       │ ----                   
+
+```
+
+```
+invalid.js:20:25 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use String() instead of new String().
+  
+    18 │ new globalThis.String()
+    19 │ function foo() {
+  > 20 │     return /** Start */ new globalThis.String("foo") /** End */
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    21 │ }
+  
+  i Unsafe fix: Remove new keyword.
+  
+    20 │ ····return·/**·Start·*/·new·globalThis.String("foo")·/**·End·*/
+       │                         ----                                   
+
+```

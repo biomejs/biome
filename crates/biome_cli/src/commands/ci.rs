@@ -6,9 +6,11 @@ use crate::{execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execu
 use biome_configuration::analyzer::assists::PartialAssistsConfiguration;
 use biome_configuration::{organize_imports::PartialOrganizeImports, PartialConfiguration};
 use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
+use biome_console::{markup, ConsoleExt};
 use biome_deserialize::Merge;
+use biome_diagnostics::PrintDiagnostic;
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+    load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::workspace::{RegisterProjectFolderParams, UpdateSettingsParams};
 use std::ffi::OsString;
@@ -49,11 +51,44 @@ pub(crate) fn ci(session: CliSession, payload: CiCommandPayload) -> Result<(), C
         cli_options.verbose,
     )?;
 
+    let editorconfig_search_path = loaded_configuration.directory_path.clone();
     let LoadedConfiguration {
-        configuration: mut fs_configuration,
+        configuration: biome_configuration,
         directory_path: configuration_path,
         ..
     } = loaded_configuration;
+
+    let should_use_editorconfig = configuration
+        .as_ref()
+        .and_then(|c| c.formatter.as_ref())
+        .and_then(|f| f.use_editorconfig)
+        .unwrap_or(
+            biome_configuration
+                .formatter
+                .as_ref()
+                .and_then(|f| f.use_editorconfig)
+                .unwrap_or_default(),
+        );
+    let mut fs_configuration = if should_use_editorconfig {
+        let (editorconfig, editorconfig_diagnostics) = {
+            let search_path = editorconfig_search_path.unwrap_or_else(|| {
+                let fs = &session.app.fs;
+                fs.working_directory().unwrap_or_default()
+            });
+            load_editorconfig(&session.app.fs, search_path)?
+        };
+        for diagnostic in editorconfig_diagnostics {
+            session.app.console.error(markup! {
+                {PrintDiagnostic::simple(&diagnostic)}
+            })
+        }
+        editorconfig.unwrap_or_default()
+    } else {
+        Default::default()
+    };
+    // this makes biome configuration take precedence over editorconfig configuration
+    fs_configuration.merge_with(biome_configuration);
+
     let formatter = fs_configuration
         .formatter
         .get_or_insert_with(PartialFormatterConfiguration::default);

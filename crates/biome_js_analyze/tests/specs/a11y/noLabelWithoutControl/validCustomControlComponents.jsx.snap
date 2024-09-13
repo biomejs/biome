@@ -1,0 +1,71 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validCustomControlComponents.jsx
+---
+# Input
+```jsx
+<label><span>A label<CustomInput /></span></label>;
+
+```
+
+# Diagnostics
+```
+validCustomControlComponents.options:7:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `noLabelWithoutControl`.
+  
+    5 │ 		"rules": {
+    6 │ 			"nursery": {
+  > 7 │ 				"noLabelWithoutControl": {
+      │ 				^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 					"level": "error",
+    9 │ 					"options": {
+  
+  i Known keys:
+  
+  - recommended
+  - all
+  - noCommonJs
+  - noDuplicateCustomProperties
+  - noDuplicateElseIf
+  - noDuplicatedFields
+  - noDynamicNamespaceImportAccess
+  - noEnum
+  - noExportedImports
+  - noIrregularWhitespace
+  - noRestrictedImports
+  - noRestrictedTypes
+  - noSecrets
+  - noStaticElementInteractions
+  - noSubstr
+  - noUnknownPseudoClass
+  - noUnknownPseudoElement
+  - noUselessEscapeInRegex
+  - noValueAtRule
+  - useAdjacentOverloadSignatures
+  - useAriaPropsSupportedByRole
+  - useConsistentCurlyBraces
+  - useConsistentMemberAccessibility
+  - useDeprecatedReason
+  - useImportRestrictions
+  - useSortedClasses
+  - useStrictMode
+  - useTrimStartEnd
+  - useValidAutocomplete
+  
+
+```
+
+```
+validCustomControlComponents.jsx:1:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! A form label must be associated with an input.
+  
+  > 1 │ <label><span>A label<CustomInput /></span></label>;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
+  
+
+```
