@@ -9,6 +9,28 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### Bug fixes
+
+- [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/): ignore `alert` and `alertdialog` roles ([3858](https://github.com/biomejs/biome/issues/3858)). Controbuted by @Conaclos
+
+### Parser
+
 ## v1.9.0 (2024-09-12)
 
 ### Analyzer

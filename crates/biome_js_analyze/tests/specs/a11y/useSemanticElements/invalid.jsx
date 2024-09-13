@@ -8,8 +8,6 @@
     <div role="button" ></div>
     <div role="article" ></div>
     <div role="dialog" ></div>
-    <div role="alert" ></div>
-    <div role="alertdialog" ></div>
     <div role="cell" ></div>
     <div role="columnheader" ></div>
     <div role="definition" ></div>
