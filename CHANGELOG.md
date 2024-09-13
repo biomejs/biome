@@ -29,6 +29,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### New Features
+
+- Add [nursery/noProcessEnv](https://biomejs.dev/linter/rules/no-process-env/). Contributed by @unvalley
+
 #### Bug fixes
 
 - [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/): ignore `alert` and `alertdialog` roles ([3858](https://github.com/biomejs/biome/issues/3858)). Controbuted by @Conaclos
@@ -402,8 +406,6 @@ The following JavaScript rules are promoted:
 - Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
 
 - Add [nursery/noIrregularWhitespace](https://biomejs.dev/linter/rules/no-irreguluar-whitespace/). Contributed by @DerTimonius
-
-- Add [nursery/noProcessEnv](https://biomejs.dev/linter/rules/no-process-env/). Contributed by @unvalley
 
 #### Enhancements
 
