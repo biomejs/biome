@@ -401,7 +401,7 @@ The following JavaScript rules are promoted:
 
 - Add [nursery/useTrimStartEnd](https://biomejs.dev/linter/rules/use-trim-start-end/). Contributed by @chansuke
 
-- Add [nursery/noIrreguluarWhitespace](https://biomejs.dev/linter/rules/no-irreguluar-whitespace/). Contributed by @DerTimonius
+- Add [nursery/noIrregularWhitespace](https://biomejs.dev/linter/rules/no-irreguluar-whitespace/). Contributed by @DerTimonius
 
 #### Enhancements
 
