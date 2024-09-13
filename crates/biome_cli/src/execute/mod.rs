@@ -9,6 +9,7 @@ use crate::commands::MigrateSubCommand;
 use crate::diagnostics::ReportDiagnostic;
 use crate::execute::migrate::MigratePayload;
 use crate::execute::traverse::{traverse, TraverseResult};
+use crate::reporter::files::FilesReporter;
 use crate::reporter::github::{GithubReporter, GithubReporterVisitor};
 use crate::reporter::gitlab::{GitLabReporter, GitLabReporterVisitor};
 use crate::reporter::json::{JsonReporter, JsonReporterVisitor};
@@ -213,9 +214,13 @@ impl Display for TraversalMode {
 #[derive(Copy, Clone, Debug)]
 pub enum ReportMode {
     /// Reports information straight to the console, it's the default mode
-    Terminal { with_summary: bool },
+    Terminal {
+        with_summary: bool,
+    },
     /// Reports information in JSON format
-    Json { pretty: bool },
+    Json {
+        pretty: bool,
+    },
     /// Reports information for GitHub
     GitHub,
     /// JUnit output
@@ -223,6 +228,7 @@ pub enum ReportMode {
     Junit,
     /// Reports information in the [GitLab Code Quality](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool) format.
     GitLab,
+    Files,
 }
 
 impl Default for ReportMode {
@@ -245,6 +251,7 @@ impl From<CliReporter> for ReportMode {
             CliReporter::GitHub => Self::GitHub,
             CliReporter::Junit => Self::Junit,
             CliReporter::GitLab => Self::GitLab {},
+            CliReporter::Files => Self::Files {},
         }
     }
 }
@@ -551,6 +558,25 @@ pub fn execute_mode(
                     execution: execution.clone(),
                 };
                 reporter.write(&mut JunitReporterVisitor::new(console))?;
+            }
+            ReportMode::Files => {
+                console.error(markup!{
+                    <Warn>"The "<Emphasis>"--json"</Emphasis>" option is "<Underline>"unstable/experimental"</Underline>" and its output might change between patches/minor releases."</Warn>
+                });
+                let reporter = FilesReporter {
+                    summary,
+                    diagnostics: DiagnosticsPayload {
+                        verbose: cli_options.verbose,
+                        diagnostic_level: cli_options.diagnostic_level,
+                        diagnostics,
+                    },
+                    execution: execution.clone(),
+                };
+                let mut buffer = JsonReporterVisitor::new(summary);
+                reporter.write(&mut buffer)?;
+                console.log(markup! {
+                    {buffer}
+                });
             }
         }
 
