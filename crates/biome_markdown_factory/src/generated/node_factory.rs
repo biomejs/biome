@@ -7,12 +7,6 @@ use biome_markdown_syntax::{
     MarkdownSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
-pub fn markdown_break_block(value_token: SyntaxToken) -> MarkdownBreakBlock {
-    MarkdownBreakBlock::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MARKDOWN_BREAK_BLOCK,
-        [Some(SyntaxElement::Token(value_token))],
-    ))
-}
 pub fn markdown_bullet_list_item(
     markdown_bullet_list: MarkdownBulletList,
 ) -> MarkdownBulletListItem {
@@ -24,7 +18,7 @@ pub fn markdown_bullet_list_item(
     ))
 }
 pub fn markdown_document(
-    value: AnyMarkdownBlock,
+    value: MarkdownBlockList,
     eof_token: SyntaxToken,
 ) -> MarkdownDocumentBuilder {
     MarkdownDocumentBuilder {
@@ -34,7 +28,7 @@ pub fn markdown_document(
     }
 }
 pub struct MarkdownDocumentBuilder {
-    value: AnyMarkdownBlock,
+    value: MarkdownBlockList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
 }
@@ -324,6 +318,20 @@ impl MarkdownLinkBlockBuilder {
         ))
     }
 }
+pub fn markdown_minus(minus_token: SyntaxToken) -> MarkdownMinus {
+    MarkdownMinus::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_MINUS,
+        [Some(SyntaxElement::Token(minus_token))],
+    ))
+}
+pub fn markdown_minus_thematic_break_block(
+    markdown_minus_list: MarkdownMinusList,
+) -> MarkdownMinusThematicBreakBlock {
+    MarkdownMinusThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK,
+        [Some(SyntaxElement::Node(markdown_minus_list.into_syntax()))],
+    ))
+}
 pub fn markdown_order_list_item(markdown_bullet_list: MarkdownBulletList) -> MarkdownOrderListItem {
     MarkdownOrderListItem::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_ORDER_LIST_ITEM,
@@ -366,10 +374,40 @@ pub fn markdown_soft_break(value_token: SyntaxToken) -> MarkdownSoftBreak {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
+pub fn markdown_star(star_token: SyntaxToken) -> MarkdownStar {
+    MarkdownStar::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_STAR,
+        [Some(SyntaxElement::Token(star_token))],
+    ))
+}
+pub fn markdown_star_thematic_break_block(
+    markdown_star_list: MarkdownStarList,
+) -> MarkdownStarThematicBreakBlock {
+    MarkdownStarThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_STAR_THEMATIC_BREAK_BLOCK,
+        [Some(SyntaxElement::Node(markdown_star_list.into_syntax()))],
+    ))
+}
 pub fn markdown_textual(value_token: SyntaxToken) -> MarkdownTextual {
     MarkdownTextual::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_TEXTUAL,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn markdown_underscore(__token: SyntaxToken) -> MarkdownUnderscore {
+    MarkdownUnderscore::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_UNDERSCORE,
+        [Some(SyntaxElement::Token(__token))],
+    ))
+}
+pub fn markdown_underscore_thematic_break_block(
+    markdown_underscore_list: MarkdownUnderscoreList,
+) -> MarkdownUnderscoreThematicBreakBlock {
+    MarkdownUnderscoreThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK,
+        [Some(SyntaxElement::Node(
+            markdown_underscore_list.into_syntax(),
+        ))],
     ))
 }
 pub fn markdown_block_list<I>(items: I) -> MarkdownBlockList
@@ -396,6 +434,18 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
+pub fn markdown_minus_list<I>(items: I) -> MarkdownMinusList
+where
+    I: IntoIterator<Item = MarkdownMinus>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MarkdownMinusList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_MINUS_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
 pub fn markdown_order_list<I>(items: I) -> MarkdownOrderList
 where
     I: IntoIterator<Item = AnyCodeBlock>,
@@ -415,6 +465,30 @@ where
 {
     MarkdownParagraphItemList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_PARAGRAPH_ITEM_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn markdown_star_list<I>(items: I) -> MarkdownStarList
+where
+    I: IntoIterator<Item = MarkdownStar>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MarkdownStarList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_STAR_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn markdown_underscore_list<I>(items: I) -> MarkdownUnderscoreList
+where
+    I: IntoIterator<Item = MarkdownUnderscore>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MarkdownUnderscoreList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_UNDERSCORE_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

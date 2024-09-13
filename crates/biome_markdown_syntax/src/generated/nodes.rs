@@ -24,41 +24,6 @@ use std::fmt::{Debug, Formatter};
 #[allow(dead_code)]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MarkdownBreakBlock {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MarkdownBreakBlock {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MarkdownBreakBlockFields {
-        MarkdownBreakBlockFields {
-            value_token: self.value_token(),
-        }
-    }
-    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MarkdownBreakBlock {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MarkdownBreakBlockFields {
-    pub value_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MarkdownBulletListItem {
     pub(crate) syntax: SyntaxNode,
 }
@@ -117,8 +82,8 @@ impl MarkdownDocument {
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> SyntaxResult<AnyMarkdownBlock> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn value(&self) -> MarkdownBlockList {
+        support::list(&self.syntax, 1usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -135,7 +100,7 @@ impl Serialize for MarkdownDocument {
 #[derive(Serialize)]
 pub struct MarkdownDocumentFields {
     pub bom_token: Option<SyntaxToken>,
-    pub value: SyntaxResult<AnyMarkdownBlock>,
+    pub value: MarkdownBlockList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -729,6 +694,76 @@ pub struct MarkdownLinkBlockFields {
     pub title: Option<MarkdownTextual>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownMinus {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownMinus {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownMinusFields {
+        MarkdownMinusFields {
+            minus_token: self.minus_token(),
+        }
+    }
+    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MarkdownMinus {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownMinusFields {
+    pub minus_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownMinusThematicBreakBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownMinusThematicBreakBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownMinusThematicBreakBlockFields {
+        MarkdownMinusThematicBreakBlockFields {
+            markdown_minus_list: self.markdown_minus_list(),
+        }
+    }
+    pub fn markdown_minus_list(&self) -> MarkdownMinusList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MarkdownMinusThematicBreakBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownMinusThematicBreakBlockFields {
+    pub markdown_minus_list: MarkdownMinusList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MarkdownOrderListItem {
     pub(crate) syntax: SyntaxNode,
 }
@@ -939,6 +974,76 @@ pub struct MarkdownSoftBreakFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownStar {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownStar {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownStarFields {
+        MarkdownStarFields {
+            star_token: self.star_token(),
+        }
+    }
+    pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MarkdownStar {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownStarFields {
+    pub star_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownStarThematicBreakBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownStarThematicBreakBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownStarThematicBreakBlockFields {
+        MarkdownStarThematicBreakBlockFields {
+            markdown_star_list: self.markdown_star_list(),
+        }
+    }
+    pub fn markdown_star_list(&self) -> MarkdownStarList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MarkdownStarThematicBreakBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownStarThematicBreakBlockFields {
+    pub markdown_star_list: MarkdownStarList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MarkdownTextual {
     pub(crate) syntax: SyntaxNode,
 }
@@ -972,6 +1077,76 @@ impl Serialize for MarkdownTextual {
 #[derive(Serialize)]
 pub struct MarkdownTextualFields {
     pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownUnderscore {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownUnderscore {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownUnderscoreFields {
+        MarkdownUnderscoreFields {
+            __token: self.__token(),
+        }
+    }
+    pub fn __token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MarkdownUnderscore {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownUnderscoreFields {
+    pub __token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownUnderscoreThematicBreakBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownUnderscoreThematicBreakBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownUnderscoreThematicBreakBlockFields {
+        MarkdownUnderscoreThematicBreakBlockFields {
+            markdown_underscore_list: self.markdown_underscore_list(),
+        }
+    }
+    pub fn markdown_underscore_list(&self) -> MarkdownUnderscoreList {
+        support::list(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MarkdownUnderscoreThematicBreakBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownUnderscoreThematicBreakBlockFields {
+    pub markdown_underscore_list: MarkdownUnderscoreList,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCodeBlock {
@@ -1023,7 +1198,7 @@ pub enum AnyLeafBlock {
     AnyCodeBlock(AnyCodeBlock),
     AnyMakrdownSetextHeader(AnyMakrdownSetextHeader),
     AnyMarkdownHeader(AnyMarkdownHeader),
-    MarkdownBreakBlock(MarkdownBreakBlock),
+    AnyMarkdownThematicBreakBlock(AnyMarkdownThematicBreakBlock),
     MarkdownHTMLBlock(MarkdownHTMLBlock),
     MarkdownLinkBlock(MarkdownLinkBlock),
     MarkdownParagraph(MarkdownParagraph),
@@ -1047,9 +1222,9 @@ impl AnyLeafBlock {
             _ => None,
         }
     }
-    pub fn as_markdown_break_block(&self) -> Option<&MarkdownBreakBlock> {
+    pub fn as_any_markdown_thematic_break_block(&self) -> Option<&AnyMarkdownThematicBreakBlock> {
         match &self {
-            AnyLeafBlock::MarkdownBreakBlock(item) => Some(item),
+            AnyLeafBlock::AnyMarkdownThematicBreakBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -1218,45 +1393,34 @@ impl AnyMarkdownInline {
         }
     }
 }
-impl AstNode for MarkdownBreakBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_BREAK_BLOCK as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MARKDOWN_BREAK_BLOCK
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyMarkdownThematicBreakBlock {
+    MarkdownMinusThematicBreakBlock(MarkdownMinusThematicBreakBlock),
+    MarkdownStarThematicBreakBlock(MarkdownStarThematicBreakBlock),
+    MarkdownUnderscoreThematicBreakBlock(MarkdownUnderscoreThematicBreakBlock),
+}
+impl AnyMarkdownThematicBreakBlock {
+    pub fn as_markdown_minus_thematic_break_block(
+        &self,
+    ) -> Option<&MarkdownMinusThematicBreakBlock> {
+        match &self {
+            AnyMarkdownThematicBreakBlock::MarkdownMinusThematicBreakBlock(item) => Some(item),
+            _ => None,
         }
     }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
+    pub fn as_markdown_star_thematic_break_block(&self) -> Option<&MarkdownStarThematicBreakBlock> {
+        match &self {
+            AnyMarkdownThematicBreakBlock::MarkdownStarThematicBreakBlock(item) => Some(item),
+            _ => None,
+        }
     }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MarkdownBreakBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MarkdownBreakBlock")
-            .field(
-                "value_token",
-                &support::DebugSyntaxResult(self.value_token()),
-            )
-            .finish()
-    }
-}
-impl From<MarkdownBreakBlock> for SyntaxNode {
-    fn from(n: MarkdownBreakBlock) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MarkdownBreakBlock> for SyntaxElement {
-    fn from(n: MarkdownBreakBlock) -> SyntaxElement {
-        n.syntax.into()
+    pub fn as_markdown_underscore_thematic_break_block(
+        &self,
+    ) -> Option<&MarkdownUnderscoreThematicBreakBlock> {
+        match &self {
+            AnyMarkdownThematicBreakBlock::MarkdownUnderscoreThematicBreakBlock(item) => Some(item),
+            _ => None,
+        }
     }
 }
 impl AstNode for MarkdownBulletListItem {
@@ -1325,7 +1489,7 @@ impl std::fmt::Debug for MarkdownDocument {
                 "bom_token",
                 &support::DebugOptionalElement(self.bom_token()),
             )
-            .field("value", &support::DebugSyntaxResult(self.value()))
+            .field("value", &self.value())
             .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
             .finish()
     }
@@ -1993,6 +2157,85 @@ impl From<MarkdownLinkBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for MarkdownMinus {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_MINUS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_MINUS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownMinus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownMinus")
+            .field(
+                "minus_token",
+                &support::DebugSyntaxResult(self.minus_token()),
+            )
+            .finish()
+    }
+}
+impl From<MarkdownMinus> for SyntaxNode {
+    fn from(n: MarkdownMinus) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownMinus> for SyntaxElement {
+    fn from(n: MarkdownMinus) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MarkdownMinusThematicBreakBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownMinusThematicBreakBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownMinusThematicBreakBlock")
+            .field("markdown_minus_list", &self.markdown_minus_list())
+            .finish()
+    }
+}
+impl From<MarkdownMinusThematicBreakBlock> for SyntaxNode {
+    fn from(n: MarkdownMinusThematicBreakBlock) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownMinusThematicBreakBlock> for SyntaxElement {
+    fn from(n: MarkdownMinusThematicBreakBlock) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for MarkdownOrderListItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2236,6 +2479,82 @@ impl From<MarkdownSoftBreak> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for MarkdownStar {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_STAR as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_STAR
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownStar {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownStar")
+            .field("star_token", &support::DebugSyntaxResult(self.star_token()))
+            .finish()
+    }
+}
+impl From<MarkdownStar> for SyntaxNode {
+    fn from(n: MarkdownStar) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownStar> for SyntaxElement {
+    fn from(n: MarkdownStar) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MarkdownStarThematicBreakBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_STAR_THEMATIC_BREAK_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_STAR_THEMATIC_BREAK_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownStarThematicBreakBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownStarThematicBreakBlock")
+            .field("markdown_star_list", &self.markdown_star_list())
+            .finish()
+    }
+}
+impl From<MarkdownStarThematicBreakBlock> for SyntaxNode {
+    fn from(n: MarkdownStarThematicBreakBlock) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownStarThematicBreakBlock> for SyntaxElement {
+    fn from(n: MarkdownStarThematicBreakBlock) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for MarkdownTextual {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2274,6 +2593,83 @@ impl From<MarkdownTextual> for SyntaxNode {
 }
 impl From<MarkdownTextual> for SyntaxElement {
     fn from(n: MarkdownTextual) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MarkdownUnderscore {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_UNDERSCORE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_UNDERSCORE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownUnderscore {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownUnderscore")
+            .field("__token", &support::DebugSyntaxResult(self.__token()))
+            .finish()
+    }
+}
+impl From<MarkdownUnderscore> for SyntaxNode {
+    fn from(n: MarkdownUnderscore) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownUnderscore> for SyntaxElement {
+    fn from(n: MarkdownUnderscore) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MarkdownUnderscoreThematicBreakBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = SyntaxKindSet::from_raw(RawSyntaxKind(
+        MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK as u16,
+    ));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownUnderscoreThematicBreakBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownUnderscoreThematicBreakBlock")
+            .field("markdown_underscore_list", &self.markdown_underscore_list())
+            .finish()
+    }
+}
+impl From<MarkdownUnderscoreThematicBreakBlock> for SyntaxNode {
+    fn from(n: MarkdownUnderscoreThematicBreakBlock) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownUnderscoreThematicBreakBlock> for SyntaxElement {
+    fn from(n: MarkdownUnderscoreThematicBreakBlock) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -2422,11 +2818,6 @@ impl From<AnyContainerBlock> for SyntaxElement {
         node.into()
     }
 }
-impl From<MarkdownBreakBlock> for AnyLeafBlock {
-    fn from(node: MarkdownBreakBlock) -> AnyLeafBlock {
-        AnyLeafBlock::MarkdownBreakBlock(node)
-    }
-}
 impl From<MarkdownHTMLBlock> for AnyLeafBlock {
     fn from(node: MarkdownHTMLBlock) -> AnyLeafBlock {
         AnyLeafBlock::MarkdownHTMLBlock(node)
@@ -2447,23 +2838,22 @@ impl AstNode for AnyLeafBlock {
     const KIND_SET: SyntaxKindSet<Language> = AnyCodeBlock::KIND_SET
         .union(AnyMakrdownSetextHeader::KIND_SET)
         .union(AnyMarkdownHeader::KIND_SET)
-        .union(MarkdownBreakBlock::KIND_SET)
+        .union(AnyMarkdownThematicBreakBlock::KIND_SET)
         .union(MarkdownHTMLBlock::KIND_SET)
         .union(MarkdownLinkBlock::KIND_SET)
         .union(MarkdownParagraph::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            MARKDOWN_BREAK_BLOCK | MARKDOWN_HTML_BLOCK | MARKDOWN_LINK_BLOCK
-            | MARKDOWN_PARAGRAPH => true,
+            MARKDOWN_HTML_BLOCK | MARKDOWN_LINK_BLOCK | MARKDOWN_PARAGRAPH => true,
             k if AnyCodeBlock::can_cast(k) => true,
             k if AnyMakrdownSetextHeader::can_cast(k) => true,
             k if AnyMarkdownHeader::can_cast(k) => true,
+            k if AnyMarkdownThematicBreakBlock::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            MARKDOWN_BREAK_BLOCK => AnyLeafBlock::MarkdownBreakBlock(MarkdownBreakBlock { syntax }),
             MARKDOWN_HTML_BLOCK => AnyLeafBlock::MarkdownHTMLBlock(MarkdownHTMLBlock { syntax }),
             MARKDOWN_LINK_BLOCK => AnyLeafBlock::MarkdownLinkBlock(MarkdownLinkBlock { syntax }),
             MARKDOWN_PARAGRAPH => AnyLeafBlock::MarkdownParagraph(MarkdownParagraph { syntax }),
@@ -2482,8 +2872,18 @@ impl AstNode for AnyLeafBlock {
                     }
                     Err(syntax) => syntax,
                 };
-                if let Some(any_markdown_header) = AnyMarkdownHeader::cast(syntax) {
-                    return Some(AnyLeafBlock::AnyMarkdownHeader(any_markdown_header));
+                let syntax = match AnyMarkdownHeader::try_cast(syntax) {
+                    Ok(any_markdown_header) => {
+                        return Some(AnyLeafBlock::AnyMarkdownHeader(any_markdown_header));
+                    }
+                    Err(syntax) => syntax,
+                };
+                if let Some(any_markdown_thematic_break_block) =
+                    AnyMarkdownThematicBreakBlock::cast(syntax)
+                {
+                    return Some(AnyLeafBlock::AnyMarkdownThematicBreakBlock(
+                        any_markdown_thematic_break_block,
+                    ));
                 }
                 return None;
             }
@@ -2492,24 +2892,24 @@ impl AstNode for AnyLeafBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyLeafBlock::MarkdownBreakBlock(it) => &it.syntax,
             AnyLeafBlock::MarkdownHTMLBlock(it) => &it.syntax,
             AnyLeafBlock::MarkdownLinkBlock(it) => &it.syntax,
             AnyLeafBlock::MarkdownParagraph(it) => &it.syntax,
             AnyLeafBlock::AnyCodeBlock(it) => it.syntax(),
             AnyLeafBlock::AnyMakrdownSetextHeader(it) => it.syntax(),
             AnyLeafBlock::AnyMarkdownHeader(it) => it.syntax(),
+            AnyLeafBlock::AnyMarkdownThematicBreakBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyLeafBlock::MarkdownBreakBlock(it) => it.syntax,
             AnyLeafBlock::MarkdownHTMLBlock(it) => it.syntax,
             AnyLeafBlock::MarkdownLinkBlock(it) => it.syntax,
             AnyLeafBlock::MarkdownParagraph(it) => it.syntax,
             AnyLeafBlock::AnyCodeBlock(it) => it.into_syntax(),
             AnyLeafBlock::AnyMakrdownSetextHeader(it) => it.into_syntax(),
             AnyLeafBlock::AnyMarkdownHeader(it) => it.into_syntax(),
+            AnyLeafBlock::AnyMarkdownThematicBreakBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -2519,7 +2919,7 @@ impl std::fmt::Debug for AnyLeafBlock {
             AnyLeafBlock::AnyCodeBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::AnyMakrdownSetextHeader(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::AnyMarkdownHeader(it) => std::fmt::Debug::fmt(it, f),
-            AnyLeafBlock::MarkdownBreakBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyLeafBlock::AnyMarkdownThematicBreakBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownHTMLBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownLinkBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownParagraph(it) => std::fmt::Debug::fmt(it, f),
@@ -2532,7 +2932,7 @@ impl From<AnyLeafBlock> for SyntaxNode {
             AnyLeafBlock::AnyCodeBlock(it) => it.into(),
             AnyLeafBlock::AnyMakrdownSetextHeader(it) => it.into(),
             AnyLeafBlock::AnyMarkdownHeader(it) => it.into(),
-            AnyLeafBlock::MarkdownBreakBlock(it) => it.into(),
+            AnyLeafBlock::AnyMarkdownThematicBreakBlock(it) => it.into(),
             AnyLeafBlock::MarkdownHTMLBlock(it) => it.into(),
             AnyLeafBlock::MarkdownLinkBlock(it) => it.into(),
             AnyLeafBlock::MarkdownParagraph(it) => it.into(),
@@ -2922,6 +3322,100 @@ impl From<AnyMarkdownInline> for SyntaxElement {
         node.into()
     }
 }
+impl From<MarkdownMinusThematicBreakBlock> for AnyMarkdownThematicBreakBlock {
+    fn from(node: MarkdownMinusThematicBreakBlock) -> AnyMarkdownThematicBreakBlock {
+        AnyMarkdownThematicBreakBlock::MarkdownMinusThematicBreakBlock(node)
+    }
+}
+impl From<MarkdownStarThematicBreakBlock> for AnyMarkdownThematicBreakBlock {
+    fn from(node: MarkdownStarThematicBreakBlock) -> AnyMarkdownThematicBreakBlock {
+        AnyMarkdownThematicBreakBlock::MarkdownStarThematicBreakBlock(node)
+    }
+}
+impl From<MarkdownUnderscoreThematicBreakBlock> for AnyMarkdownThematicBreakBlock {
+    fn from(node: MarkdownUnderscoreThematicBreakBlock) -> AnyMarkdownThematicBreakBlock {
+        AnyMarkdownThematicBreakBlock::MarkdownUnderscoreThematicBreakBlock(node)
+    }
+}
+impl AstNode for AnyMarkdownThematicBreakBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> = MarkdownMinusThematicBreakBlock::KIND_SET
+        .union(MarkdownStarThematicBreakBlock::KIND_SET)
+        .union(MarkdownUnderscoreThematicBreakBlock::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(
+            kind,
+            MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK
+                | MARKDOWN_STAR_THEMATIC_BREAK_BLOCK
+                | MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK
+        )
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK => {
+                AnyMarkdownThematicBreakBlock::MarkdownMinusThematicBreakBlock(
+                    MarkdownMinusThematicBreakBlock { syntax },
+                )
+            }
+            MARKDOWN_STAR_THEMATIC_BREAK_BLOCK => {
+                AnyMarkdownThematicBreakBlock::MarkdownStarThematicBreakBlock(
+                    MarkdownStarThematicBreakBlock { syntax },
+                )
+            }
+            MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK => {
+                AnyMarkdownThematicBreakBlock::MarkdownUnderscoreThematicBreakBlock(
+                    MarkdownUnderscoreThematicBreakBlock { syntax },
+                )
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyMarkdownThematicBreakBlock::MarkdownMinusThematicBreakBlock(it) => &it.syntax,
+            AnyMarkdownThematicBreakBlock::MarkdownStarThematicBreakBlock(it) => &it.syntax,
+            AnyMarkdownThematicBreakBlock::MarkdownUnderscoreThematicBreakBlock(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyMarkdownThematicBreakBlock::MarkdownMinusThematicBreakBlock(it) => it.syntax,
+            AnyMarkdownThematicBreakBlock::MarkdownStarThematicBreakBlock(it) => it.syntax,
+            AnyMarkdownThematicBreakBlock::MarkdownUnderscoreThematicBreakBlock(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyMarkdownThematicBreakBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyMarkdownThematicBreakBlock::MarkdownMinusThematicBreakBlock(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyMarkdownThematicBreakBlock::MarkdownStarThematicBreakBlock(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+            AnyMarkdownThematicBreakBlock::MarkdownUnderscoreThematicBreakBlock(it) => {
+                std::fmt::Debug::fmt(it, f)
+            }
+        }
+    }
+}
+impl From<AnyMarkdownThematicBreakBlock> for SyntaxNode {
+    fn from(n: AnyMarkdownThematicBreakBlock) -> SyntaxNode {
+        match n {
+            AnyMarkdownThematicBreakBlock::MarkdownMinusThematicBreakBlock(it) => it.into(),
+            AnyMarkdownThematicBreakBlock::MarkdownStarThematicBreakBlock(it) => it.into(),
+            AnyMarkdownThematicBreakBlock::MarkdownUnderscoreThematicBreakBlock(it) => it.into(),
+        }
+    }
+}
+impl From<AnyMarkdownThematicBreakBlock> for SyntaxElement {
+    fn from(n: AnyMarkdownThematicBreakBlock) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
 impl std::fmt::Display for AnyCodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -2957,7 +3451,7 @@ impl std::fmt::Display for AnyMarkdownInline {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MarkdownBreakBlock {
+impl std::fmt::Display for AnyMarkdownThematicBreakBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -3052,6 +3546,16 @@ impl std::fmt::Display for MarkdownLinkBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for MarkdownMinus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MarkdownMinusThematicBreakBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for MarkdownOrderListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -3082,7 +3586,27 @@ impl std::fmt::Display for MarkdownSoftBreak {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for MarkdownStar {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MarkdownStarThematicBreakBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for MarkdownTextual {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MarkdownUnderscore {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MarkdownUnderscoreThematicBreakBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -3308,6 +3832,88 @@ impl IntoIterator for MarkdownBulletList {
     }
 }
 #[derive(Clone, Eq, PartialEq, Hash)]
+pub struct MarkdownMinusList {
+    syntax_list: SyntaxList,
+}
+impl MarkdownMinusList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for MarkdownMinusList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_MINUS_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_MINUS_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<MarkdownMinusList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(MarkdownMinusList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for MarkdownMinusList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for MarkdownMinusList {
+    type Language = Language;
+    type Node = MarkdownMinus;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for MarkdownMinusList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("MarkdownMinusList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &MarkdownMinusList {
+    type Item = MarkdownMinus;
+    type IntoIter = AstNodeListIterator<Language, MarkdownMinus>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for MarkdownMinusList {
+    type Item = MarkdownMinus;
+    type IntoIter = AstNodeListIterator<Language, MarkdownMinus>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct MarkdownOrderList {
     syntax_list: SyntaxList,
 }
@@ -3467,6 +4073,170 @@ impl IntoIterator for &MarkdownParagraphItemList {
 impl IntoIterator for MarkdownParagraphItemList {
     type Item = AnyMarkdownInline;
     type IntoIter = AstNodeListIterator<Language, AnyMarkdownInline>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct MarkdownStarList {
+    syntax_list: SyntaxList,
+}
+impl MarkdownStarList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for MarkdownStarList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_STAR_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_STAR_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<MarkdownStarList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(MarkdownStarList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for MarkdownStarList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for MarkdownStarList {
+    type Language = Language;
+    type Node = MarkdownStar;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for MarkdownStarList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("MarkdownStarList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &MarkdownStarList {
+    type Item = MarkdownStar;
+    type IntoIter = AstNodeListIterator<Language, MarkdownStar>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for MarkdownStarList {
+    type Item = MarkdownStar;
+    type IntoIter = AstNodeListIterator<Language, MarkdownStar>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct MarkdownUnderscoreList {
+    syntax_list: SyntaxList,
+}
+impl MarkdownUnderscoreList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for MarkdownUnderscoreList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_UNDERSCORE_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_UNDERSCORE_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<MarkdownUnderscoreList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(MarkdownUnderscoreList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for MarkdownUnderscoreList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for MarkdownUnderscoreList {
+    type Language = Language;
+    type Node = MarkdownUnderscore;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for MarkdownUnderscoreList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("MarkdownUnderscoreList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &MarkdownUnderscoreList {
+    type Item = MarkdownUnderscore;
+    type IntoIter = AstNodeListIterator<Language, MarkdownUnderscore>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for MarkdownUnderscoreList {
+    type Item = MarkdownUnderscore;
+    type IntoIter = AstNodeListIterator<Language, MarkdownUnderscore>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

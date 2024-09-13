@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::EOF;
@@ -5,7 +7,7 @@ use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
 use biome_parser::{diagnostic::ParseDiagnostic, token_source::TokenSourceCheckpoint};
-use biome_rowan::{TextRange, TriviaPieceKind};
+use biome_rowan::{TextRange, TextSize, TriviaPieceKind};
 
 pub(crate) struct MarkdownTokenSource<'source> {
     lexer: BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>>,
@@ -27,7 +29,6 @@ impl<'source> MarkdownTokenSource<'source> {
             trivia_list: vec![],
         }
     }
-
     /// Creates a new token source for the given string
     pub fn from_str(source: &'source str) -> Self {
         let lexer = MarkdownLexer::from_str(source);
@@ -63,6 +64,31 @@ impl<'source> MarkdownTokenSource<'source> {
             }
         }
     }
+
+    pub fn before_whitespace_count(&self) -> usize {
+        let last_trivia: Vec<&Trivia> = self
+            .trivia_list
+            .iter()
+            .rev()
+            .take_while(|item| {
+                // get before whitespace and tab collect
+                return matches!(
+                    item.kind(),
+                    TriviaPieceKind::Whitespace | TriviaPieceKind::Skipped
+                );
+            })
+            .collect();
+        last_trivia.iter().fold(0, |count, b| match b.kind() {
+            TriviaPieceKind::Skipped => count + 4,
+            TriviaPieceKind::Whitespace => count + u32::from(b.len()) as usize,
+            _ => count,
+        })
+    }
+
+    pub fn before_new_line(&self) -> Option<TextSize> {
+        self.trivia_list.iter().rfind(|item| item.kind() == TriviaPieceKind::Newline).map(|item| item.offset())
+    }
+
     #[allow(dead_code)]
     pub fn re_lex(&mut self, mode: MarkdownReLexContext) -> MarkdownSyntaxKind {
         self.lexer.re_lex(mode)
@@ -141,7 +167,7 @@ impl<'source> BumpWithContext for MarkdownTokenSource<'source> {
 }
 
 impl<'source> TokenSourceWithBufferedLexer<MarkdownLexer<'source>>
-    for MarkdownTokenSource<'source>
+for MarkdownTokenSource<'source>
 {
     fn lexer(&mut self) -> &mut BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>> {
         &mut self.lexer

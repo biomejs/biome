@@ -3,14 +3,6 @@
 use crate::{generated::nodes::*, MarkdownSyntaxToken as SyntaxToken};
 use biome_rowan::AstNode;
 use std::iter::once;
-impl MarkdownBreakBlock {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
 impl MarkdownBulletListItem {
     pub fn with_markdown_bullet_list(self, element: MarkdownBulletList) -> Self {
         Self::unwrap_cast(
@@ -26,7 +18,7 @@ impl MarkdownDocument {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_value(self, element: AnyMarkdownBlock) -> Self {
+    pub fn with_value(self, element: MarkdownBlockList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -203,6 +195,22 @@ impl MarkdownLinkBlock {
         ))
     }
 }
+impl MarkdownMinus {
+    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl MarkdownMinusThematicBreakBlock {
+    pub fn with_markdown_minus_list(self, element: MarkdownMinusList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl MarkdownOrderListItem {
     pub fn with_markdown_bullet_list(self, element: MarkdownBulletList) -> Self {
         Self::unwrap_cast(
@@ -251,11 +259,43 @@ impl MarkdownSoftBreak {
         )
     }
 }
+impl MarkdownStar {
+    pub fn with_star_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl MarkdownStarThematicBreakBlock {
+    pub fn with_markdown_star_list(self, element: MarkdownStarList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl MarkdownTextual {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl MarkdownUnderscore {
+    pub fn with___token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl MarkdownUnderscoreThematicBreakBlock {
+    pub fn with_markdown_underscore_list(self, element: MarkdownUnderscoreList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

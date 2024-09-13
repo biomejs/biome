@@ -41,14 +41,14 @@ MarkdownBogus = SyntaxElement*
 
 MarkdownDocument = 
 	bom: 'UNICODE_BOM'?
-    value: AnyMarkdownBlock
+    value: MarkdownBlockList
     eof: 'EOF'
 
 MarkdownBlockList = AnyMarkdownBlock*
 
 AnyMarkdownBlock = AnyLeafBlock  | AnyContainerBlock
 
-AnyLeafBlock = MarkdownBreakBlock | AnyMarkdownHeader | AnyMakrdownSetextHeader 
+AnyLeafBlock = AnyMarkdownThematicBreakBlock | AnyMarkdownHeader | AnyMakrdownSetextHeader 
                 | AnyCodeBlock | MarkdownHTMLBlock | MarkdownLinkBlock | MarkdownParagraph
 
 AnyContainerBlock = MarkdownQuote | MarkdownBulletListItem | MarkdownOrderListItem
@@ -125,4 +125,17 @@ MarkdownIndent = value: 'markdown_indent_chunk_literal'
 // ***
 // ---
 // ___
-MarkdownBreakBlock = value: 'markdown_break_block_literal'
+AnyMarkdownThematicBreakBlock = MarkdownStarThematicBreakBlock | MarkdownMinusThematicBreakBlock | MarkdownUnderscoreThematicBreakBlock
+
+MarkdownStarThematicBreakBlock = MarkdownStarList
+MarkdownStarList = MarkdownStar*
+MarkdownStar = '*'
+
+MarkdownMinusThematicBreakBlock = MarkdownMinusList
+MarkdownMinusList = MarkdownMinus*
+MarkdownMinus = '-'
+
+MarkdownUnderscoreThematicBreakBlock = MarkdownUnderscoreList
+MarkdownUnderscoreList = MarkdownUnderscore*
+MarkdownUnderscore = '_'
+

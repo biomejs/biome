@@ -9,7 +9,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
-use biome_rowan::TextSize;
+use biome_rowan::{TextSize,SyntaxKind};
 use biome_unicode_table::{lookup_byte, Dispatch::*};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
@@ -90,7 +90,7 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
         self.diagnostics.push(diagnostic);
     }
 
-    fn next_token(&mut self, _context: Self::LexContext) -> Self::Kind {
+    fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
         self.current_start = self.text_position();
         self.current_flags = TokenFlags::empty();
 
@@ -98,7 +98,14 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
             Some(current) => self.consume_token(current),
             None => EOF,
         };
+
+        self.current_flags
+            .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
         self.current_kind = kind;
+
+        if !kind.is_trivia() {
+            self.after_newline = false;
+        }
 
         kind
     }
@@ -238,6 +245,7 @@ impl<'src> MarkdownLexer<'src> {
             }
             _ => unreachable!(),
         }
+        self.after_newline = true;
         NEWLINE
     }
 

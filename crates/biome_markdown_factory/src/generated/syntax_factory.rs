@@ -15,25 +15,6 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
     ) -> RawSyntaxNode<Self::Kind> {
         match kind {
             MARKDOWN_BOGUS => RawSyntaxNode::new(kind, children.into_iter().map(Some)),
-            MARKDOWN_BREAK_BLOCK => {
-                let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
-                let mut current_element = elements.next();
-                if let Some(element) = &current_element {
-                    if element.kind() == MARKDOWN_BREAK_BLOCK_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if current_element.is_some() {
-                    return RawSyntaxNode::new(
-                        MARKDOWN_BREAK_BLOCK.to_bogus(),
-                        children.into_iter().map(Some),
-                    );
-                }
-                slots.into_node(MARKDOWN_BREAK_BLOCK, children)
-            }
             MARKDOWN_BULLET_LIST_ITEM => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -65,7 +46,7 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyMarkdownBlock::can_cast(element.kind()) {
+                    if MarkdownBlockList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -432,6 +413,44 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MARKDOWN_LINK_BLOCK, children)
             }
+            MARKDOWN_MINUS => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [-] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MARKDOWN_MINUS.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MARKDOWN_MINUS, children)
+            }
+            MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if MarkdownMinusList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK, children)
+            }
             MARKDOWN_ORDER_LIST_ITEM => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -546,6 +565,44 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MARKDOWN_SOFT_BREAK, children)
             }
+            MARKDOWN_STAR => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [*] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MARKDOWN_STAR.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MARKDOWN_STAR, children)
+            }
+            MARKDOWN_STAR_THEMATIC_BREAK_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if MarkdownStarList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MARKDOWN_STAR_THEMATIC_BREAK_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MARKDOWN_STAR_THEMATIC_BREAK_BLOCK, children)
+            }
             MARKDOWN_TEXTUAL => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
@@ -565,17 +622,64 @@ impl SyntaxFactory for MarkdownSyntaxFactory {
                 }
                 slots.into_node(MARKDOWN_TEXTUAL, children)
             }
+            MARKDOWN_UNDERSCORE => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if element.kind() == T![_] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MARKDOWN_UNDERSCORE.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MARKDOWN_UNDERSCORE, children)
+            }
+            MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK => {
+                let mut elements = (&children).into_iter();
+                let mut slots: RawNodeSlots<1usize> = RawNodeSlots::default();
+                let mut current_element = elements.next();
+                if let Some(element) = &current_element {
+                    if MarkdownUnderscoreList::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if current_element.is_some() {
+                    return RawSyntaxNode::new(
+                        MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK.to_bogus(),
+                        children.into_iter().map(Some),
+                    );
+                }
+                slots.into_node(MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK, children)
+            }
             MARKDOWN_BLOCK_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyMarkdownBlock::can_cast)
             }
             MARKDOWN_BULLET_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCodeBlock::can_cast)
             }
+            MARKDOWN_MINUS_LIST => {
+                Self::make_node_list_syntax(kind, children, MarkdownMinus::can_cast)
+            }
             MARKDOWN_ORDER_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyCodeBlock::can_cast)
             }
             MARKDOWN_PARAGRAPH_ITEM_LIST => {
                 Self::make_node_list_syntax(kind, children, AnyMarkdownInline::can_cast)
+            }
+            MARKDOWN_STAR_LIST => {
+                Self::make_node_list_syntax(kind, children, MarkdownStar::can_cast)
+            }
+            MARKDOWN_UNDERSCORE_LIST => {
+                Self::make_node_list_syntax(kind, children, MarkdownUnderscore::can_cast)
             }
             _ => unreachable!("Is {:?} a token?", kind),
         }
