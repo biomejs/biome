@@ -2132,31 +2132,10 @@
 						{ "type": "null" }
 					]
 				},
-				"noLabelWithoutControl": {
-					"description": "Enforce that a label element or component has a text label and an associated input.",
-					"anyOf": [
-						{ "$ref": "#/definitions/NoLabelWithoutControlConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noMisplacedAssertion": {
-					"description": "Checks that the assertion function, for example expect, is placed inside an it() function call.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noProcessEnv": {
 					"description": "Disallow the use of process.env.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noReactSpecificProps": {
-					"description": "Prevents React-specific JSX properties from being used.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
