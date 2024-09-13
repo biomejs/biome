@@ -360,3 +360,95 @@ indent_style = space
         result,
     ));
 }
+
+#[test]
+fn should_use_editorconfig_ci() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+max_line_length = 300
+"#,
+    );
+
+    let test_file = Path::new("test.js");
+    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("ci"),
+                ("--use-editorconfig=true"),
+                test_file.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test_file, contents);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_use_editorconfig_ci",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn should_use_editorconfig_ci_enabled_from_biome_conf() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+max_line_length = 300
+"#,
+    );
+
+    let biomeconfig = Path::new("biome.json");
+    fs.insert(
+        biomeconfig.into(),
+        r#"{
+    "formatter": {
+        "useEditorconfig": true
+    }
+}
+"#,
+    );
+
+    let test_file = Path::new("test.js");
+    let contents = r#"console.log("really long string that should cause a break if the line width remains at the default 80 characters");
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("ci"), test_file.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test_file, contents);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_use_editorconfig_ci_enabled_from_biome_conf",
+        fs,
+        console,
+        result,
+    ));
+}

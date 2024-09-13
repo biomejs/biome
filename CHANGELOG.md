@@ -15,6 +15,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- `useEditorConfig` now loads the editorconfig when running `biome ci` [#3864](https://github.com/biomejs/biome/issues/3864). Contributed by @dyc3
+
 ### Configuration
 
 ### Editors
