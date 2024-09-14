@@ -48,8 +48,10 @@ declare_lint_rule! {
     ///     {
     ///        "include": ["test/**/*"],
     ///        "linter": {
-    ///          "style": {
-    ///            "useFilenamingConvention": "off"
+    ///          "rules": {
+    ///            "style": {
+    ///              "useFilenamingConvention": "off"
+    ///            }
     ///          }
     ///        }
     ///     }
