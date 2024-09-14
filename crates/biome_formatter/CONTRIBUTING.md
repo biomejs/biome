@@ -161,11 +161,11 @@ where
 </details>
 
 
-Then, you'll have to create three types:
+Then, you'll have to create four types:
 1. `HtmlCommentStyle`
-1. `HtmlFormatContext`
-1. `FormatHtmlSyntaxNode` 
-1. `HtmlLanguage`
+2. `HtmlFormatContext`
+3. `FormatHtmlSyntaxNode` 
+4. `HtmlLanguage`
 
 ### `HtmlCommentStyle`
 
@@ -195,12 +195,12 @@ Usually, the type context must contain `comments` and `source_map` fields:
 ```rust
 pub struct HtmlFormatContext {
     /// The comments of the nodes and tokens in the program.
-    comments: Rc<CssComments>,
-    source_map: Option<TransformSourceMap>,
+    comments: Rc<HtmlComments>,
+    source_map: Option<TransformSourceMap>, 
 }
 
 impl HtmlFormatContext {
-    pub fn new(comments: CssComments) -> Self {
+    pub fn new(comments: HtmlComments) -> Self {
         Self {
             comments: Rc::new(comments),
             source_map: None,

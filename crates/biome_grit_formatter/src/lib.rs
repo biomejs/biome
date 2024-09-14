@@ -1,4 +1,8 @@
 mod comments;
+pub mod context;
+mod cst;
+mod prelude;
+
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {
     type Format<'a>: biome_formatter::Format<Context>
