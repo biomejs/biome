@@ -33,6 +33,7 @@ validCustomLabelAttributes.options:7:5 deserialize ━━━━━━━━━�
   - noEnum
   - noExportedImports
   - noIrregularWhitespace
+  - noProcessEnv
   - noRestrictedImports
   - noRestrictedTypes
   - noSecrets

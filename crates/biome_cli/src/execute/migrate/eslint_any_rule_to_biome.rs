@@ -697,6 +697,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_positive_tabindex.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "n/no-process-env" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_process_env.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-array-constructor" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group.use_array_literals.get_or_insert(Default::default());
