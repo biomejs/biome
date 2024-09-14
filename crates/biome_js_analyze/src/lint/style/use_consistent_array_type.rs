@@ -64,8 +64,8 @@ declare_lint_rule! {
     /// ### syntax
     ///
     /// The syntax to use:
-    /// - `generic`, array declarations will be converted to `Array<T>` or `ReadonlyArray<T>`
-    /// - `shorthand`, array declarations will be converted to `T[]` or `readonly T[]`
+    /// - `generic`: array declarations will be converted to `Array<T>` or `ReadonlyArray<T>`
+    /// - `shorthand`: array declarations will be converted to `T[]` or `readonly T[]`
     ///
     /// Default: `shorthand`
     ///
