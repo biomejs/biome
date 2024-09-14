@@ -71,6 +71,7 @@ use enumflags2::{bitflags, BitFlags};
 #[cfg(feature = "schema")]
 use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
 use slotmap::{new_key_type, DenseSlotMap};
+use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
@@ -119,12 +120,13 @@ impl FileFeaturesResult {
     }
 
     /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 5] = [
+    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 6] = [
         (FeatureKind::Lint, SupportKind::FileNotSupported),
         (FeatureKind::Format, SupportKind::FileNotSupported),
         (FeatureKind::OrganizeImports, SupportKind::FileNotSupported),
         (FeatureKind::Search, SupportKind::FileNotSupported),
         (FeatureKind::Assists, SupportKind::FileNotSupported),
+        (FeatureKind::Debug, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
@@ -155,6 +157,14 @@ impl FileFeaturesResult {
         if capabilities.search.search.is_some() {
             self.features_supported
                 .insert(FeatureKind::Search, SupportKind::Supported);
+        }
+
+        if capabilities.debug.debug_syntax_tree.is_some()
+            || capabilities.debug.debug_formatter_ir.is_some()
+            || capabilities.debug.debug_control_flow.is_some()
+        {
+            self.features_supported
+                .insert(FeatureKind::Debug, SupportKind::Supported);
         }
 
         self
@@ -402,9 +412,14 @@ pub enum FeatureKind {
     OrganizeImports,
     Search,
     Assists,
+    Debug,
 }
 
 #[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
+#[serde(
+    from = "smallvec::SmallVec<[FeatureKind; 6]>",
+    into = "smallvec::SmallVec<[FeatureKind; 6]>"
+)]
 pub struct FeatureName(BitFlags<FeatureKind>);
 
 impl FeatureName {
@@ -413,6 +428,27 @@ impl FeatureName {
     }
     pub fn empty() -> Self {
         Self(BitFlags::empty())
+    }
+
+    pub fn insert(&mut self, kind: FeatureKind) {
+        self.0.insert(kind);
+    }
+}
+
+impl From<SmallVec<[FeatureKind; 6]>> for FeatureName {
+    fn from(value: SmallVec<[FeatureKind; 6]>) -> Self {
+        value
+            .into_iter()
+            .fold(FeatureName::empty(), |mut acc, kind| {
+                acc.insert(kind);
+                acc
+            })
+    }
+}
+
+impl From<FeatureName> for SmallVec<[FeatureKind; 6]> {
+    fn from(value: FeatureName) -> Self {
+        value.iter().collect()
     }
 }
 
