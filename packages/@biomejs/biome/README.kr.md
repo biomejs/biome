@@ -41,7 +41,7 @@
 
 **Biome** 은 _JavaScript_, _TypeScript_, _JSX_ 그리고 _JSON_ 을 위한 **[고속 Formatter](./benchmark#formatting)** 로, **[_Prettier_ 와의 호환성 97%](https://console.algora.io/challenges/prettier)** 을 달성하고 있습니다.
 
-**Biome** 은 _JavaScript_, _TypeScript_, _JSX_을 위한 **[고성능 Linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** 로、ESLint, typescript-eslint, [등의 리소스](https://github.com/biomejs/biome/discussions/3)에서 **[260개 이상의 룰](https://biomejs.dev/linter/rules/)** 을 제공하고 있습니다. Biome 은 **상세하며 문맥에 맞는 결과를 출력**하기 위해, 코드를 개선하고, 더 좋은 프로그래머가 되기 위한 도움을 드립니다!
+**Biome** 은 _JavaScript_, _TypeScript_, _JSX_을 위한 **[고성능 Linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** 로、ESLint, typescript-eslint, [등의 리소스](https://github.com/biomejs/biome/discussions/3)에서 **[270개 이상의 룰](https://biomejs.dev/linter/rules/)** 을 제공하고 있습니다. Biome 은 **상세하며 문맥에 맞는 결과를 출력**하기 위해, 코드를 개선하고, 더 좋은 프로그래머가 되기 위한 도움을 드립니다!
 
 **Biome** 은 처음부터 [**에디터 내에서 인터렉티브하게**](https://biomejs.dev/ja/guides/integrate-in-editor/) 사용하도록 설계되어 있습니다.
 여러분이 코드를 작성할 때, 형식이 잘못된 코드에 format, lint 를 적용합니다.
