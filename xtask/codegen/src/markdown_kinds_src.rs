@@ -18,6 +18,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         ("~", "TILDE"),
         ("   ", "WHITESPACE3"),
         ("_", "UNDERSCORE"),
+        ("#", "HASH"),
     ],
     keywords: &["false"],
     literals: &[
@@ -36,13 +37,9 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         // node
         "MARKDOWN_DOCUMENT",
         "MARKDOWN_BLOCK_LIST",
+        "MARKDOWN_HASH_LIST",
+        "MARKDOWN_HASH",
         "MARKDOWN_HEADER",
-        "MARKDOWN_H1",
-        "MARKDOWN_H2",
-        "MARKDOWN_H3",
-        "MARKDOWN_H4",
-        "MARKDOWN_H5",
-        "MARKDOWN_H6",
         "MARKDOWN_SETEXT_H1",
         "MARKDOWN_SETEXT_H2",
         "MARKDOWN_INDENT_CODE_BLOCK",

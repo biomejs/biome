@@ -26,7 +26,7 @@ impl MarkdownDocument {
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_value(self, element: AnyMarkdownBlock) -> Self {
+    pub fn with_value(self, element: MarkdownBlockList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -47,67 +47,47 @@ impl MarkdownFencedCodeBlock {
         )
     }
 }
-impl MarkdownH1 {
-    pub fn with_markdown_paragraph(self, element: Option<MarkdownParagraph>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
-}
-impl MarkdownH2 {
-    pub fn with_markdown_paragraph(self, element: Option<MarkdownParagraph>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
-}
-impl MarkdownH3 {
-    pub fn with_markdown_paragraph(self, element: Option<MarkdownParagraph>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
-}
-impl MarkdownH4 {
-    pub fn with_markdown_paragraph(self, element: Option<MarkdownParagraph>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
-}
-impl MarkdownH5 {
-    pub fn with_markdown_paragraph(self, element: Option<MarkdownParagraph>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
-}
-impl MarkdownH6 {
-    pub fn with_markdown_paragraph(self, element: Option<MarkdownParagraph>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            0usize..=0usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
-    }
-}
-impl MarkdownHTMLBlock {
-    pub fn with_markdown_textual(self, element: MarkdownTextual) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl MarkdownHardLine {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl MarkdownHash {
+    pub fn with_hash_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl MarkdownHeader {
+    pub fn with_before(self, element: MarkdownHashList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_markdown_paragraph(self, element: Option<MarkdownParagraph>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            1usize..=1usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_after(self, element: MarkdownHashList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
+impl MarkdownHtmlBlock {
+    pub fn with_markdown_textual(self, element: MarkdownTextual) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

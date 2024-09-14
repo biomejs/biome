@@ -24,7 +24,7 @@ pub fn markdown_bullet_list_item(
     ))
 }
 pub fn markdown_document(
-    value: AnyMarkdownBlock,
+    value: MarkdownBlockList,
     eof_token: SyntaxToken,
 ) -> MarkdownDocumentBuilder {
     MarkdownDocumentBuilder {
@@ -34,7 +34,7 @@ pub fn markdown_document(
     }
 }
 pub struct MarkdownDocumentBuilder {
-    value: AnyMarkdownBlock,
+    value: MarkdownBlockList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
 }
@@ -60,148 +60,51 @@ pub fn markdown_fenced_code_block(markdown_textual: MarkdownTextual) -> Markdown
         [Some(SyntaxElement::Node(markdown_textual.into_syntax()))],
     ))
 }
-pub fn markdown_h1() -> MarkdownH1Builder {
-    MarkdownH1Builder {
-        markdown_paragraph: None,
-    }
-}
-pub struct MarkdownH1Builder {
-    markdown_paragraph: Option<MarkdownParagraph>,
-}
-impl MarkdownH1Builder {
-    pub fn with_markdown_paragraph(mut self, markdown_paragraph: MarkdownParagraph) -> Self {
-        self.markdown_paragraph = Some(markdown_paragraph);
-        self
-    }
-    pub fn build(self) -> MarkdownH1 {
-        MarkdownH1::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MARKDOWN_H1,
-            [self
-                .markdown_paragraph
-                .map(|token| SyntaxElement::Node(token.into_syntax()))],
-        ))
-    }
-}
-pub fn markdown_h2() -> MarkdownH2Builder {
-    MarkdownH2Builder {
-        markdown_paragraph: None,
-    }
-}
-pub struct MarkdownH2Builder {
-    markdown_paragraph: Option<MarkdownParagraph>,
-}
-impl MarkdownH2Builder {
-    pub fn with_markdown_paragraph(mut self, markdown_paragraph: MarkdownParagraph) -> Self {
-        self.markdown_paragraph = Some(markdown_paragraph);
-        self
-    }
-    pub fn build(self) -> MarkdownH2 {
-        MarkdownH2::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MARKDOWN_H2,
-            [self
-                .markdown_paragraph
-                .map(|token| SyntaxElement::Node(token.into_syntax()))],
-        ))
-    }
-}
-pub fn markdown_h3() -> MarkdownH3Builder {
-    MarkdownH3Builder {
-        markdown_paragraph: None,
-    }
-}
-pub struct MarkdownH3Builder {
-    markdown_paragraph: Option<MarkdownParagraph>,
-}
-impl MarkdownH3Builder {
-    pub fn with_markdown_paragraph(mut self, markdown_paragraph: MarkdownParagraph) -> Self {
-        self.markdown_paragraph = Some(markdown_paragraph);
-        self
-    }
-    pub fn build(self) -> MarkdownH3 {
-        MarkdownH3::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MARKDOWN_H3,
-            [self
-                .markdown_paragraph
-                .map(|token| SyntaxElement::Node(token.into_syntax()))],
-        ))
-    }
-}
-pub fn markdown_h4() -> MarkdownH4Builder {
-    MarkdownH4Builder {
-        markdown_paragraph: None,
-    }
-}
-pub struct MarkdownH4Builder {
-    markdown_paragraph: Option<MarkdownParagraph>,
-}
-impl MarkdownH4Builder {
-    pub fn with_markdown_paragraph(mut self, markdown_paragraph: MarkdownParagraph) -> Self {
-        self.markdown_paragraph = Some(markdown_paragraph);
-        self
-    }
-    pub fn build(self) -> MarkdownH4 {
-        MarkdownH4::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MARKDOWN_H4,
-            [self
-                .markdown_paragraph
-                .map(|token| SyntaxElement::Node(token.into_syntax()))],
-        ))
-    }
-}
-pub fn markdown_h5() -> MarkdownH5Builder {
-    MarkdownH5Builder {
-        markdown_paragraph: None,
-    }
-}
-pub struct MarkdownH5Builder {
-    markdown_paragraph: Option<MarkdownParagraph>,
-}
-impl MarkdownH5Builder {
-    pub fn with_markdown_paragraph(mut self, markdown_paragraph: MarkdownParagraph) -> Self {
-        self.markdown_paragraph = Some(markdown_paragraph);
-        self
-    }
-    pub fn build(self) -> MarkdownH5 {
-        MarkdownH5::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MARKDOWN_H5,
-            [self
-                .markdown_paragraph
-                .map(|token| SyntaxElement::Node(token.into_syntax()))],
-        ))
-    }
-}
-pub fn markdown_h6() -> MarkdownH6Builder {
-    MarkdownH6Builder {
-        markdown_paragraph: None,
-    }
-}
-pub struct MarkdownH6Builder {
-    markdown_paragraph: Option<MarkdownParagraph>,
-}
-impl MarkdownH6Builder {
-    pub fn with_markdown_paragraph(mut self, markdown_paragraph: MarkdownParagraph) -> Self {
-        self.markdown_paragraph = Some(markdown_paragraph);
-        self
-    }
-    pub fn build(self) -> MarkdownH6 {
-        MarkdownH6::unwrap_cast(SyntaxNode::new_detached(
-            MarkdownSyntaxKind::MARKDOWN_H6,
-            [self
-                .markdown_paragraph
-                .map(|token| SyntaxElement::Node(token.into_syntax()))],
-        ))
-    }
-}
-pub fn markdown_html_block(markdown_textual: MarkdownTextual) -> MarkdownHTMLBlock {
-    MarkdownHTMLBlock::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MARKDOWN_HTML_BLOCK,
-        [Some(SyntaxElement::Node(markdown_textual.into_syntax()))],
-    ))
-}
 pub fn markdown_hard_line(value_token: SyntaxToken) -> MarkdownHardLine {
     MarkdownHardLine::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_HARD_LINE,
         [Some(SyntaxElement::Token(value_token))],
+    ))
+}
+pub fn markdown_hash(hash_token: SyntaxToken) -> MarkdownHash {
+    MarkdownHash::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_HASH,
+        [Some(SyntaxElement::Token(hash_token))],
+    ))
+}
+pub fn markdown_header(before: MarkdownHashList, after: MarkdownHashList) -> MarkdownHeaderBuilder {
+    MarkdownHeaderBuilder {
+        before,
+        after,
+        markdown_paragraph: None,
+    }
+}
+pub struct MarkdownHeaderBuilder {
+    before: MarkdownHashList,
+    after: MarkdownHashList,
+    markdown_paragraph: Option<MarkdownParagraph>,
+}
+impl MarkdownHeaderBuilder {
+    pub fn with_markdown_paragraph(mut self, markdown_paragraph: MarkdownParagraph) -> Self {
+        self.markdown_paragraph = Some(markdown_paragraph);
+        self
+    }
+    pub fn build(self) -> MarkdownHeader {
+        MarkdownHeader::unwrap_cast(SyntaxNode::new_detached(
+            MarkdownSyntaxKind::MARKDOWN_HEADER,
+            [
+                Some(SyntaxElement::Node(self.before.into_syntax())),
+                self.markdown_paragraph
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.after.into_syntax())),
+            ],
+        ))
+    }
+}
+pub fn markdown_html_block(markdown_textual: MarkdownTextual) -> MarkdownHtmlBlock {
+    MarkdownHtmlBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_HTML_BLOCK,
+        [Some(SyntaxElement::Node(markdown_textual.into_syntax()))],
     ))
 }
 pub fn markdown_indent(value_token: SyntaxToken) -> MarkdownIndent {
@@ -391,6 +294,18 @@ where
 {
     MarkdownBulletList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_BULLET_LIST,
+        items
+            .into_iter()
+            .map(|item| Some(item.into_syntax().into())),
+    ))
+}
+pub fn markdown_hash_list<I>(items: I) -> MarkdownHashList
+where
+    I: IntoIterator<Item = MarkdownHash>,
+    I::IntoIter: ExactSizeIterator,
+{
+    MarkdownHashList::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MARKDOWN_HASH_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),

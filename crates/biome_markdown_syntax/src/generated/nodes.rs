@@ -117,8 +117,8 @@ impl MarkdownDocument {
     pub fn bom_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn value(&self) -> SyntaxResult<AnyMarkdownBlock> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn value(&self) -> MarkdownBlockList {
+        support::list(&self.syntax, 1usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -135,7 +135,7 @@ impl Serialize for MarkdownDocument {
 #[derive(Serialize)]
 pub struct MarkdownDocumentFields {
     pub bom_token: Option<SyntaxToken>,
-    pub value: SyntaxResult<AnyMarkdownBlock>,
+    pub value: MarkdownBlockList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -174,251 +174,6 @@ pub struct MarkdownFencedCodeBlockFields {
     pub markdown_textual: SyntaxResult<MarkdownTextual>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MarkdownH1 {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MarkdownH1 {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MarkdownH1Fields {
-        MarkdownH1Fields {
-            markdown_paragraph: self.markdown_paragraph(),
-        }
-    }
-    pub fn markdown_paragraph(&self) -> Option<MarkdownParagraph> {
-        support::node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MarkdownH1 {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MarkdownH1Fields {
-    pub markdown_paragraph: Option<MarkdownParagraph>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MarkdownH2 {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MarkdownH2 {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MarkdownH2Fields {
-        MarkdownH2Fields {
-            markdown_paragraph: self.markdown_paragraph(),
-        }
-    }
-    pub fn markdown_paragraph(&self) -> Option<MarkdownParagraph> {
-        support::node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MarkdownH2 {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MarkdownH2Fields {
-    pub markdown_paragraph: Option<MarkdownParagraph>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MarkdownH3 {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MarkdownH3 {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MarkdownH3Fields {
-        MarkdownH3Fields {
-            markdown_paragraph: self.markdown_paragraph(),
-        }
-    }
-    pub fn markdown_paragraph(&self) -> Option<MarkdownParagraph> {
-        support::node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MarkdownH3 {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MarkdownH3Fields {
-    pub markdown_paragraph: Option<MarkdownParagraph>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MarkdownH4 {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MarkdownH4 {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MarkdownH4Fields {
-        MarkdownH4Fields {
-            markdown_paragraph: self.markdown_paragraph(),
-        }
-    }
-    pub fn markdown_paragraph(&self) -> Option<MarkdownParagraph> {
-        support::node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MarkdownH4 {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MarkdownH4Fields {
-    pub markdown_paragraph: Option<MarkdownParagraph>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MarkdownH5 {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MarkdownH5 {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MarkdownH5Fields {
-        MarkdownH5Fields {
-            markdown_paragraph: self.markdown_paragraph(),
-        }
-    }
-    pub fn markdown_paragraph(&self) -> Option<MarkdownParagraph> {
-        support::node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MarkdownH5 {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MarkdownH5Fields {
-    pub markdown_paragraph: Option<MarkdownParagraph>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MarkdownH6 {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MarkdownH6 {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MarkdownH6Fields {
-        MarkdownH6Fields {
-            markdown_paragraph: self.markdown_paragraph(),
-        }
-    }
-    pub fn markdown_paragraph(&self) -> Option<MarkdownParagraph> {
-        support::node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MarkdownH6 {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MarkdownH6Fields {
-    pub markdown_paragraph: Option<MarkdownParagraph>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MarkdownHTMLBlock {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MarkdownHTMLBlock {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MarkdownHTMLBlockFields {
-        MarkdownHTMLBlockFields {
-            markdown_textual: self.markdown_textual(),
-        }
-    }
-    pub fn markdown_textual(&self) -> SyntaxResult<MarkdownTextual> {
-        support::required_node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MarkdownHTMLBlock {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MarkdownHTMLBlockFields {
-    pub markdown_textual: SyntaxResult<MarkdownTextual>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MarkdownHardLine {
     pub(crate) syntax: SyntaxNode,
 }
@@ -452,6 +207,121 @@ impl Serialize for MarkdownHardLine {
 #[derive(Serialize)]
 pub struct MarkdownHardLineFields {
     pub value_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownHash {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownHash {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownHashFields {
+        MarkdownHashFields {
+            hash_token: self.hash_token(),
+        }
+    }
+    pub fn hash_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MarkdownHash {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownHashFields {
+    pub hash_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownHeader {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownHeader {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownHeaderFields {
+        MarkdownHeaderFields {
+            before: self.before(),
+            markdown_paragraph: self.markdown_paragraph(),
+            after: self.after(),
+        }
+    }
+    pub fn before(&self) -> MarkdownHashList {
+        support::list(&self.syntax, 0usize)
+    }
+    pub fn markdown_paragraph(&self) -> Option<MarkdownParagraph> {
+        support::node(&self.syntax, 1usize)
+    }
+    pub fn after(&self) -> MarkdownHashList {
+        support::list(&self.syntax, 2usize)
+    }
+}
+impl Serialize for MarkdownHeader {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownHeaderFields {
+    pub before: MarkdownHashList,
+    pub markdown_paragraph: Option<MarkdownParagraph>,
+    pub after: MarkdownHashList,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownHtmlBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownHtmlBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownHtmlBlockFields {
+        MarkdownHtmlBlockFields {
+            markdown_textual: self.markdown_textual(),
+        }
+    }
+    pub fn markdown_textual(&self) -> SyntaxResult<MarkdownTextual> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MarkdownHtmlBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownHtmlBlockFields {
+    pub markdown_textual: SyntaxResult<MarkdownTextual>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MarkdownIndent {
@@ -1021,10 +891,10 @@ impl AnyContainerBlock {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyLeafBlock {
     AnyCodeBlock(AnyCodeBlock),
-    AnyMakrdownSetextHeader(AnyMakrdownSetextHeader),
-    AnyMarkdownHeader(AnyMarkdownHeader),
+    AnyMarkdownSetextHeader(AnyMarkdownSetextHeader),
     MarkdownBreakBlock(MarkdownBreakBlock),
-    MarkdownHTMLBlock(MarkdownHTMLBlock),
+    MarkdownHeader(MarkdownHeader),
+    MarkdownHtmlBlock(MarkdownHtmlBlock),
     MarkdownLinkBlock(MarkdownLinkBlock),
     MarkdownParagraph(MarkdownParagraph),
 }
@@ -1035,15 +905,9 @@ impl AnyLeafBlock {
             _ => None,
         }
     }
-    pub fn as_any_makrdown_setext_header(&self) -> Option<&AnyMakrdownSetextHeader> {
+    pub fn as_any_markdown_setext_header(&self) -> Option<&AnyMarkdownSetextHeader> {
         match &self {
-            AnyLeafBlock::AnyMakrdownSetextHeader(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_any_markdown_header(&self) -> Option<&AnyMarkdownHeader> {
-        match &self {
-            AnyLeafBlock::AnyMarkdownHeader(item) => Some(item),
+            AnyLeafBlock::AnyMarkdownSetextHeader(item) => Some(item),
             _ => None,
         }
     }
@@ -1053,9 +917,15 @@ impl AnyLeafBlock {
             _ => None,
         }
     }
-    pub fn as_markdown_html_block(&self) -> Option<&MarkdownHTMLBlock> {
+    pub fn as_markdown_header(&self) -> Option<&MarkdownHeader> {
         match &self {
-            AnyLeafBlock::MarkdownHTMLBlock(item) => Some(item),
+            AnyLeafBlock::MarkdownHeader(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_markdown_html_block(&self) -> Option<&MarkdownHtmlBlock> {
+        match &self {
+            AnyLeafBlock::MarkdownHtmlBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -1068,25 +938,6 @@ impl AnyLeafBlock {
     pub fn as_markdown_paragraph(&self) -> Option<&MarkdownParagraph> {
         match &self {
             AnyLeafBlock::MarkdownParagraph(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyMakrdownSetextHeader {
-    MarkdownSetextH1(MarkdownSetextH1),
-    MarkdownSetextH2(MarkdownSetextH2),
-}
-impl AnyMakrdownSetextHeader {
-    pub fn as_markdown_setext_h1(&self) -> Option<&MarkdownSetextH1> {
-        match &self {
-            AnyMakrdownSetextHeader::MarkdownSetextH1(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_markdown_setext_h2(&self) -> Option<&MarkdownSetextH2> {
-        match &self {
-            AnyMakrdownSetextHeader::MarkdownSetextH2(item) => Some(item),
             _ => None,
         }
     }
@@ -1111,56 +962,9 @@ impl AnyMarkdownBlock {
     }
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyMarkdownHeader {
-    MarkdownH1(MarkdownH1),
-    MarkdownH2(MarkdownH2),
-    MarkdownH3(MarkdownH3),
-    MarkdownH4(MarkdownH4),
-    MarkdownH5(MarkdownH5),
-    MarkdownH6(MarkdownH6),
-}
-impl AnyMarkdownHeader {
-    pub fn as_markdown_h1(&self) -> Option<&MarkdownH1> {
-        match &self {
-            AnyMarkdownHeader::MarkdownH1(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_markdown_h2(&self) -> Option<&MarkdownH2> {
-        match &self {
-            AnyMarkdownHeader::MarkdownH2(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_markdown_h3(&self) -> Option<&MarkdownH3> {
-        match &self {
-            AnyMarkdownHeader::MarkdownH3(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_markdown_h4(&self) -> Option<&MarkdownH4> {
-        match &self {
-            AnyMarkdownHeader::MarkdownH4(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_markdown_h5(&self) -> Option<&MarkdownH5> {
-        match &self {
-            AnyMarkdownHeader::MarkdownH5(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_markdown_h6(&self) -> Option<&MarkdownH6> {
-        match &self {
-            AnyMarkdownHeader::MarkdownH6(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyMarkdownInline {
-    MarkdownHTMLBlock(MarkdownHTMLBlock),
     MarkdownHardLine(MarkdownHardLine),
+    MarkdownHtmlBlock(MarkdownHtmlBlock),
     MarkdownInlineCode(MarkdownInlineCode),
     MarkdownInlineEmphasis(MarkdownInlineEmphasis),
     MarkdownInlineImage(MarkdownInlineImage),
@@ -1169,15 +973,15 @@ pub enum AnyMarkdownInline {
     MarkdownTextual(MarkdownTextual),
 }
 impl AnyMarkdownInline {
-    pub fn as_markdown_html_block(&self) -> Option<&MarkdownHTMLBlock> {
-        match &self {
-            AnyMarkdownInline::MarkdownHTMLBlock(item) => Some(item),
-            _ => None,
-        }
-    }
     pub fn as_markdown_hard_line(&self) -> Option<&MarkdownHardLine> {
         match &self {
             AnyMarkdownInline::MarkdownHardLine(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_markdown_html_block(&self) -> Option<&MarkdownHtmlBlock> {
+        match &self {
+            AnyMarkdownInline::MarkdownHtmlBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -1214,6 +1018,25 @@ impl AnyMarkdownInline {
     pub fn as_markdown_textual(&self) -> Option<&MarkdownTextual> {
         match &self {
             AnyMarkdownInline::MarkdownTextual(item) => Some(item),
+            _ => None,
+        }
+    }
+}
+#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
+pub enum AnyMarkdownSetextHeader {
+    MarkdownSetextH1(MarkdownSetextH1),
+    MarkdownSetextH2(MarkdownSetextH2),
+}
+impl AnyMarkdownSetextHeader {
+    pub fn as_markdown_setext_h1(&self) -> Option<&MarkdownSetextH1> {
+        match &self {
+            AnyMarkdownSetextHeader::MarkdownSetextH1(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_markdown_setext_h2(&self) -> Option<&MarkdownSetextH2> {
+        match &self {
+            AnyMarkdownSetextHeader::MarkdownSetextH2(item) => Some(item),
             _ => None,
         }
     }
@@ -1325,7 +1148,7 @@ impl std::fmt::Debug for MarkdownDocument {
                 "bom_token",
                 &support::DebugOptionalElement(self.bom_token()),
             )
-            .field("value", &support::DebugSyntaxResult(self.value()))
+            .field("value", &self.value())
             .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
             .finish()
     }
@@ -1381,293 +1204,6 @@ impl From<MarkdownFencedCodeBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for MarkdownH1 {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_H1 as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MARKDOWN_H1
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MarkdownH1 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MarkdownH1")
-            .field(
-                "markdown_paragraph",
-                &support::DebugOptionalElement(self.markdown_paragraph()),
-            )
-            .finish()
-    }
-}
-impl From<MarkdownH1> for SyntaxNode {
-    fn from(n: MarkdownH1) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MarkdownH1> for SyntaxElement {
-    fn from(n: MarkdownH1) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for MarkdownH2 {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_H2 as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MARKDOWN_H2
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MarkdownH2 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MarkdownH2")
-            .field(
-                "markdown_paragraph",
-                &support::DebugOptionalElement(self.markdown_paragraph()),
-            )
-            .finish()
-    }
-}
-impl From<MarkdownH2> for SyntaxNode {
-    fn from(n: MarkdownH2) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MarkdownH2> for SyntaxElement {
-    fn from(n: MarkdownH2) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for MarkdownH3 {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_H3 as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MARKDOWN_H3
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MarkdownH3 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MarkdownH3")
-            .field(
-                "markdown_paragraph",
-                &support::DebugOptionalElement(self.markdown_paragraph()),
-            )
-            .finish()
-    }
-}
-impl From<MarkdownH3> for SyntaxNode {
-    fn from(n: MarkdownH3) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MarkdownH3> for SyntaxElement {
-    fn from(n: MarkdownH3) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for MarkdownH4 {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_H4 as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MARKDOWN_H4
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MarkdownH4 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MarkdownH4")
-            .field(
-                "markdown_paragraph",
-                &support::DebugOptionalElement(self.markdown_paragraph()),
-            )
-            .finish()
-    }
-}
-impl From<MarkdownH4> for SyntaxNode {
-    fn from(n: MarkdownH4) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MarkdownH4> for SyntaxElement {
-    fn from(n: MarkdownH4) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for MarkdownH5 {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_H5 as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MARKDOWN_H5
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MarkdownH5 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MarkdownH5")
-            .field(
-                "markdown_paragraph",
-                &support::DebugOptionalElement(self.markdown_paragraph()),
-            )
-            .finish()
-    }
-}
-impl From<MarkdownH5> for SyntaxNode {
-    fn from(n: MarkdownH5) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MarkdownH5> for SyntaxElement {
-    fn from(n: MarkdownH5) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for MarkdownH6 {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_H6 as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MARKDOWN_H6
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MarkdownH6 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MarkdownH6")
-            .field(
-                "markdown_paragraph",
-                &support::DebugOptionalElement(self.markdown_paragraph()),
-            )
-            .finish()
-    }
-}
-impl From<MarkdownH6> for SyntaxNode {
-    fn from(n: MarkdownH6) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MarkdownH6> for SyntaxElement {
-    fn from(n: MarkdownH6) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for MarkdownHTMLBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_HTML_BLOCK as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MARKDOWN_HTML_BLOCK
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MarkdownHTMLBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MarkdownHTMLBlock")
-            .field(
-                "markdown_textual",
-                &support::DebugSyntaxResult(self.markdown_textual()),
-            )
-            .finish()
-    }
-}
-impl From<MarkdownHTMLBlock> for SyntaxNode {
-    fn from(n: MarkdownHTMLBlock) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MarkdownHTMLBlock> for SyntaxElement {
-    fn from(n: MarkdownHTMLBlock) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for MarkdownHardLine {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1706,6 +1242,128 @@ impl From<MarkdownHardLine> for SyntaxNode {
 }
 impl From<MarkdownHardLine> for SyntaxElement {
     fn from(n: MarkdownHardLine) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MarkdownHash {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_HASH as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_HASH
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownHash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownHash")
+            .field("hash_token", &support::DebugSyntaxResult(self.hash_token()))
+            .finish()
+    }
+}
+impl From<MarkdownHash> for SyntaxNode {
+    fn from(n: MarkdownHash) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownHash> for SyntaxElement {
+    fn from(n: MarkdownHash) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MarkdownHeader {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_HEADER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_HEADER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownHeader {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownHeader")
+            .field("before", &self.before())
+            .field(
+                "markdown_paragraph",
+                &support::DebugOptionalElement(self.markdown_paragraph()),
+            )
+            .field("after", &self.after())
+            .finish()
+    }
+}
+impl From<MarkdownHeader> for SyntaxNode {
+    fn from(n: MarkdownHeader) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownHeader> for SyntaxElement {
+    fn from(n: MarkdownHeader) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for MarkdownHtmlBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_HTML_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_HTML_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownHtmlBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownHtmlBlock")
+            .field(
+                "markdown_textual",
+                &support::DebugSyntaxResult(self.markdown_textual()),
+            )
+            .finish()
+    }
+}
+impl From<MarkdownHtmlBlock> for SyntaxNode {
+    fn from(n: MarkdownHtmlBlock) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownHtmlBlock> for SyntaxElement {
+    fn from(n: MarkdownHtmlBlock) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -2427,9 +2085,14 @@ impl From<MarkdownBreakBlock> for AnyLeafBlock {
         AnyLeafBlock::MarkdownBreakBlock(node)
     }
 }
-impl From<MarkdownHTMLBlock> for AnyLeafBlock {
-    fn from(node: MarkdownHTMLBlock) -> AnyLeafBlock {
-        AnyLeafBlock::MarkdownHTMLBlock(node)
+impl From<MarkdownHeader> for AnyLeafBlock {
+    fn from(node: MarkdownHeader) -> AnyLeafBlock {
+        AnyLeafBlock::MarkdownHeader(node)
+    }
+}
+impl From<MarkdownHtmlBlock> for AnyLeafBlock {
+    fn from(node: MarkdownHtmlBlock) -> AnyLeafBlock {
+        AnyLeafBlock::MarkdownHtmlBlock(node)
     }
 }
 impl From<MarkdownLinkBlock> for AnyLeafBlock {
@@ -2445,26 +2108,26 @@ impl From<MarkdownParagraph> for AnyLeafBlock {
 impl AstNode for AnyLeafBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCodeBlock::KIND_SET
-        .union(AnyMakrdownSetextHeader::KIND_SET)
-        .union(AnyMarkdownHeader::KIND_SET)
+        .union(AnyMarkdownSetextHeader::KIND_SET)
         .union(MarkdownBreakBlock::KIND_SET)
-        .union(MarkdownHTMLBlock::KIND_SET)
+        .union(MarkdownHeader::KIND_SET)
+        .union(MarkdownHtmlBlock::KIND_SET)
         .union(MarkdownLinkBlock::KIND_SET)
         .union(MarkdownParagraph::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            MARKDOWN_BREAK_BLOCK | MARKDOWN_HTML_BLOCK | MARKDOWN_LINK_BLOCK
+            MARKDOWN_BREAK_BLOCK | MARKDOWN_HEADER | MARKDOWN_HTML_BLOCK | MARKDOWN_LINK_BLOCK
             | MARKDOWN_PARAGRAPH => true,
             k if AnyCodeBlock::can_cast(k) => true,
-            k if AnyMakrdownSetextHeader::can_cast(k) => true,
-            k if AnyMarkdownHeader::can_cast(k) => true,
+            k if AnyMarkdownSetextHeader::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             MARKDOWN_BREAK_BLOCK => AnyLeafBlock::MarkdownBreakBlock(MarkdownBreakBlock { syntax }),
-            MARKDOWN_HTML_BLOCK => AnyLeafBlock::MarkdownHTMLBlock(MarkdownHTMLBlock { syntax }),
+            MARKDOWN_HEADER => AnyLeafBlock::MarkdownHeader(MarkdownHeader { syntax }),
+            MARKDOWN_HTML_BLOCK => AnyLeafBlock::MarkdownHtmlBlock(MarkdownHtmlBlock { syntax }),
             MARKDOWN_LINK_BLOCK => AnyLeafBlock::MarkdownLinkBlock(MarkdownLinkBlock { syntax }),
             MARKDOWN_PARAGRAPH => AnyLeafBlock::MarkdownParagraph(MarkdownParagraph { syntax }),
             _ => {
@@ -2474,16 +2137,10 @@ impl AstNode for AnyLeafBlock {
                     }
                     Err(syntax) => syntax,
                 };
-                let syntax = match AnyMakrdownSetextHeader::try_cast(syntax) {
-                    Ok(any_makrdown_setext_header) => {
-                        return Some(AnyLeafBlock::AnyMakrdownSetextHeader(
-                            any_makrdown_setext_header,
-                        ));
-                    }
-                    Err(syntax) => syntax,
-                };
-                if let Some(any_markdown_header) = AnyMarkdownHeader::cast(syntax) {
-                    return Some(AnyLeafBlock::AnyMarkdownHeader(any_markdown_header));
+                if let Some(any_markdown_setext_header) = AnyMarkdownSetextHeader::cast(syntax) {
+                    return Some(AnyLeafBlock::AnyMarkdownSetextHeader(
+                        any_markdown_setext_header,
+                    ));
                 }
                 return None;
             }
@@ -2493,23 +2150,23 @@ impl AstNode for AnyLeafBlock {
     fn syntax(&self) -> &SyntaxNode {
         match self {
             AnyLeafBlock::MarkdownBreakBlock(it) => &it.syntax,
-            AnyLeafBlock::MarkdownHTMLBlock(it) => &it.syntax,
+            AnyLeafBlock::MarkdownHeader(it) => &it.syntax,
+            AnyLeafBlock::MarkdownHtmlBlock(it) => &it.syntax,
             AnyLeafBlock::MarkdownLinkBlock(it) => &it.syntax,
             AnyLeafBlock::MarkdownParagraph(it) => &it.syntax,
             AnyLeafBlock::AnyCodeBlock(it) => it.syntax(),
-            AnyLeafBlock::AnyMakrdownSetextHeader(it) => it.syntax(),
-            AnyLeafBlock::AnyMarkdownHeader(it) => it.syntax(),
+            AnyLeafBlock::AnyMarkdownSetextHeader(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
             AnyLeafBlock::MarkdownBreakBlock(it) => it.syntax,
-            AnyLeafBlock::MarkdownHTMLBlock(it) => it.syntax,
+            AnyLeafBlock::MarkdownHeader(it) => it.syntax,
+            AnyLeafBlock::MarkdownHtmlBlock(it) => it.syntax,
             AnyLeafBlock::MarkdownLinkBlock(it) => it.syntax,
             AnyLeafBlock::MarkdownParagraph(it) => it.syntax,
             AnyLeafBlock::AnyCodeBlock(it) => it.into_syntax(),
-            AnyLeafBlock::AnyMakrdownSetextHeader(it) => it.into_syntax(),
-            AnyLeafBlock::AnyMarkdownHeader(it) => it.into_syntax(),
+            AnyLeafBlock::AnyMarkdownSetextHeader(it) => it.into_syntax(),
         }
     }
 }
@@ -2517,10 +2174,10 @@ impl std::fmt::Debug for AnyLeafBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyLeafBlock::AnyCodeBlock(it) => std::fmt::Debug::fmt(it, f),
-            AnyLeafBlock::AnyMakrdownSetextHeader(it) => std::fmt::Debug::fmt(it, f),
-            AnyLeafBlock::AnyMarkdownHeader(it) => std::fmt::Debug::fmt(it, f),
+            AnyLeafBlock::AnyMarkdownSetextHeader(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownBreakBlock(it) => std::fmt::Debug::fmt(it, f),
-            AnyLeafBlock::MarkdownHTMLBlock(it) => std::fmt::Debug::fmt(it, f),
+            AnyLeafBlock::MarkdownHeader(it) => std::fmt::Debug::fmt(it, f),
+            AnyLeafBlock::MarkdownHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownLinkBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownParagraph(it) => std::fmt::Debug::fmt(it, f),
         }
@@ -2530,10 +2187,10 @@ impl From<AnyLeafBlock> for SyntaxNode {
     fn from(n: AnyLeafBlock) -> SyntaxNode {
         match n {
             AnyLeafBlock::AnyCodeBlock(it) => it.into(),
-            AnyLeafBlock::AnyMakrdownSetextHeader(it) => it.into(),
-            AnyLeafBlock::AnyMarkdownHeader(it) => it.into(),
+            AnyLeafBlock::AnyMarkdownSetextHeader(it) => it.into(),
             AnyLeafBlock::MarkdownBreakBlock(it) => it.into(),
-            AnyLeafBlock::MarkdownHTMLBlock(it) => it.into(),
+            AnyLeafBlock::MarkdownHeader(it) => it.into(),
+            AnyLeafBlock::MarkdownHtmlBlock(it) => it.into(),
             AnyLeafBlock::MarkdownLinkBlock(it) => it.into(),
             AnyLeafBlock::MarkdownParagraph(it) => it.into(),
         }
@@ -2541,70 +2198,6 @@ impl From<AnyLeafBlock> for SyntaxNode {
 }
 impl From<AnyLeafBlock> for SyntaxElement {
     fn from(n: AnyLeafBlock) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<MarkdownSetextH1> for AnyMakrdownSetextHeader {
-    fn from(node: MarkdownSetextH1) -> AnyMakrdownSetextHeader {
-        AnyMakrdownSetextHeader::MarkdownSetextH1(node)
-    }
-}
-impl From<MarkdownSetextH2> for AnyMakrdownSetextHeader {
-    fn from(node: MarkdownSetextH2) -> AnyMakrdownSetextHeader {
-        AnyMakrdownSetextHeader::MarkdownSetextH2(node)
-    }
-}
-impl AstNode for AnyMakrdownSetextHeader {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        MarkdownSetextH1::KIND_SET.union(MarkdownSetextH2::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, MARKDOWN_SETEXT_H1 | MARKDOWN_SETEXT_H2)
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            MARKDOWN_SETEXT_H1 => {
-                AnyMakrdownSetextHeader::MarkdownSetextH1(MarkdownSetextH1 { syntax })
-            }
-            MARKDOWN_SETEXT_H2 => {
-                AnyMakrdownSetextHeader::MarkdownSetextH2(MarkdownSetextH2 { syntax })
-            }
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnyMakrdownSetextHeader::MarkdownSetextH1(it) => &it.syntax,
-            AnyMakrdownSetextHeader::MarkdownSetextH2(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnyMakrdownSetextHeader::MarkdownSetextH1(it) => it.syntax,
-            AnyMakrdownSetextHeader::MarkdownSetextH2(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyMakrdownSetextHeader {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnyMakrdownSetextHeader::MarkdownSetextH1(it) => std::fmt::Debug::fmt(it, f),
-            AnyMakrdownSetextHeader::MarkdownSetextH2(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyMakrdownSetextHeader> for SyntaxNode {
-    fn from(n: AnyMakrdownSetextHeader) -> SyntaxNode {
-        match n {
-            AnyMakrdownSetextHeader::MarkdownSetextH1(it) => it.into(),
-            AnyMakrdownSetextHeader::MarkdownSetextH2(it) => it.into(),
-        }
-    }
-}
-impl From<AnyMakrdownSetextHeader> for SyntaxElement {
-    fn from(n: AnyMakrdownSetextHeader) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -2667,121 +2260,14 @@ impl From<AnyMarkdownBlock> for SyntaxElement {
         node.into()
     }
 }
-impl From<MarkdownH1> for AnyMarkdownHeader {
-    fn from(node: MarkdownH1) -> AnyMarkdownHeader {
-        AnyMarkdownHeader::MarkdownH1(node)
-    }
-}
-impl From<MarkdownH2> for AnyMarkdownHeader {
-    fn from(node: MarkdownH2) -> AnyMarkdownHeader {
-        AnyMarkdownHeader::MarkdownH2(node)
-    }
-}
-impl From<MarkdownH3> for AnyMarkdownHeader {
-    fn from(node: MarkdownH3) -> AnyMarkdownHeader {
-        AnyMarkdownHeader::MarkdownH3(node)
-    }
-}
-impl From<MarkdownH4> for AnyMarkdownHeader {
-    fn from(node: MarkdownH4) -> AnyMarkdownHeader {
-        AnyMarkdownHeader::MarkdownH4(node)
-    }
-}
-impl From<MarkdownH5> for AnyMarkdownHeader {
-    fn from(node: MarkdownH5) -> AnyMarkdownHeader {
-        AnyMarkdownHeader::MarkdownH5(node)
-    }
-}
-impl From<MarkdownH6> for AnyMarkdownHeader {
-    fn from(node: MarkdownH6) -> AnyMarkdownHeader {
-        AnyMarkdownHeader::MarkdownH6(node)
-    }
-}
-impl AstNode for AnyMarkdownHeader {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = MarkdownH1::KIND_SET
-        .union(MarkdownH2::KIND_SET)
-        .union(MarkdownH3::KIND_SET)
-        .union(MarkdownH4::KIND_SET)
-        .union(MarkdownH5::KIND_SET)
-        .union(MarkdownH6::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            MARKDOWN_H1 | MARKDOWN_H2 | MARKDOWN_H3 | MARKDOWN_H4 | MARKDOWN_H5 | MARKDOWN_H6
-        )
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            MARKDOWN_H1 => AnyMarkdownHeader::MarkdownH1(MarkdownH1 { syntax }),
-            MARKDOWN_H2 => AnyMarkdownHeader::MarkdownH2(MarkdownH2 { syntax }),
-            MARKDOWN_H3 => AnyMarkdownHeader::MarkdownH3(MarkdownH3 { syntax }),
-            MARKDOWN_H4 => AnyMarkdownHeader::MarkdownH4(MarkdownH4 { syntax }),
-            MARKDOWN_H5 => AnyMarkdownHeader::MarkdownH5(MarkdownH5 { syntax }),
-            MARKDOWN_H6 => AnyMarkdownHeader::MarkdownH6(MarkdownH6 { syntax }),
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnyMarkdownHeader::MarkdownH1(it) => &it.syntax,
-            AnyMarkdownHeader::MarkdownH2(it) => &it.syntax,
-            AnyMarkdownHeader::MarkdownH3(it) => &it.syntax,
-            AnyMarkdownHeader::MarkdownH4(it) => &it.syntax,
-            AnyMarkdownHeader::MarkdownH5(it) => &it.syntax,
-            AnyMarkdownHeader::MarkdownH6(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnyMarkdownHeader::MarkdownH1(it) => it.syntax,
-            AnyMarkdownHeader::MarkdownH2(it) => it.syntax,
-            AnyMarkdownHeader::MarkdownH3(it) => it.syntax,
-            AnyMarkdownHeader::MarkdownH4(it) => it.syntax,
-            AnyMarkdownHeader::MarkdownH5(it) => it.syntax,
-            AnyMarkdownHeader::MarkdownH6(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyMarkdownHeader {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnyMarkdownHeader::MarkdownH1(it) => std::fmt::Debug::fmt(it, f),
-            AnyMarkdownHeader::MarkdownH2(it) => std::fmt::Debug::fmt(it, f),
-            AnyMarkdownHeader::MarkdownH3(it) => std::fmt::Debug::fmt(it, f),
-            AnyMarkdownHeader::MarkdownH4(it) => std::fmt::Debug::fmt(it, f),
-            AnyMarkdownHeader::MarkdownH5(it) => std::fmt::Debug::fmt(it, f),
-            AnyMarkdownHeader::MarkdownH6(it) => std::fmt::Debug::fmt(it, f),
-        }
-    }
-}
-impl From<AnyMarkdownHeader> for SyntaxNode {
-    fn from(n: AnyMarkdownHeader) -> SyntaxNode {
-        match n {
-            AnyMarkdownHeader::MarkdownH1(it) => it.into(),
-            AnyMarkdownHeader::MarkdownH2(it) => it.into(),
-            AnyMarkdownHeader::MarkdownH3(it) => it.into(),
-            AnyMarkdownHeader::MarkdownH4(it) => it.into(),
-            AnyMarkdownHeader::MarkdownH5(it) => it.into(),
-            AnyMarkdownHeader::MarkdownH6(it) => it.into(),
-        }
-    }
-}
-impl From<AnyMarkdownHeader> for SyntaxElement {
-    fn from(n: AnyMarkdownHeader) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
-impl From<MarkdownHTMLBlock> for AnyMarkdownInline {
-    fn from(node: MarkdownHTMLBlock) -> AnyMarkdownInline {
-        AnyMarkdownInline::MarkdownHTMLBlock(node)
-    }
-}
 impl From<MarkdownHardLine> for AnyMarkdownInline {
     fn from(node: MarkdownHardLine) -> AnyMarkdownInline {
         AnyMarkdownInline::MarkdownHardLine(node)
+    }
+}
+impl From<MarkdownHtmlBlock> for AnyMarkdownInline {
+    fn from(node: MarkdownHtmlBlock) -> AnyMarkdownInline {
+        AnyMarkdownInline::MarkdownHtmlBlock(node)
     }
 }
 impl From<MarkdownInlineCode> for AnyMarkdownInline {
@@ -2816,8 +2302,8 @@ impl From<MarkdownTextual> for AnyMarkdownInline {
 }
 impl AstNode for AnyMarkdownInline {
     type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = MarkdownHTMLBlock::KIND_SET
-        .union(MarkdownHardLine::KIND_SET)
+    const KIND_SET: SyntaxKindSet<Language> = MarkdownHardLine::KIND_SET
+        .union(MarkdownHtmlBlock::KIND_SET)
         .union(MarkdownInlineCode::KIND_SET)
         .union(MarkdownInlineEmphasis::KIND_SET)
         .union(MarkdownInlineImage::KIND_SET)
@@ -2827,8 +2313,8 @@ impl AstNode for AnyMarkdownInline {
     fn can_cast(kind: SyntaxKind) -> bool {
         matches!(
             kind,
-            MARKDOWN_HTML_BLOCK
-                | MARKDOWN_HARD_LINE
+            MARKDOWN_HARD_LINE
+                | MARKDOWN_HTML_BLOCK
                 | MARKDOWN_INLINE_CODE
                 | MARKDOWN_INLINE_EMPHASIS
                 | MARKDOWN_INLINE_IMAGE
@@ -2839,10 +2325,10 @@ impl AstNode for AnyMarkdownInline {
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            MARKDOWN_HTML_BLOCK => {
-                AnyMarkdownInline::MarkdownHTMLBlock(MarkdownHTMLBlock { syntax })
-            }
             MARKDOWN_HARD_LINE => AnyMarkdownInline::MarkdownHardLine(MarkdownHardLine { syntax }),
+            MARKDOWN_HTML_BLOCK => {
+                AnyMarkdownInline::MarkdownHtmlBlock(MarkdownHtmlBlock { syntax })
+            }
             MARKDOWN_INLINE_CODE => {
                 AnyMarkdownInline::MarkdownInlineCode(MarkdownInlineCode { syntax })
             }
@@ -2865,8 +2351,8 @@ impl AstNode for AnyMarkdownInline {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyMarkdownInline::MarkdownHTMLBlock(it) => &it.syntax,
             AnyMarkdownInline::MarkdownHardLine(it) => &it.syntax,
+            AnyMarkdownInline::MarkdownHtmlBlock(it) => &it.syntax,
             AnyMarkdownInline::MarkdownInlineCode(it) => &it.syntax,
             AnyMarkdownInline::MarkdownInlineEmphasis(it) => &it.syntax,
             AnyMarkdownInline::MarkdownInlineImage(it) => &it.syntax,
@@ -2877,8 +2363,8 @@ impl AstNode for AnyMarkdownInline {
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyMarkdownInline::MarkdownHTMLBlock(it) => it.syntax,
             AnyMarkdownInline::MarkdownHardLine(it) => it.syntax,
+            AnyMarkdownInline::MarkdownHtmlBlock(it) => it.syntax,
             AnyMarkdownInline::MarkdownInlineCode(it) => it.syntax,
             AnyMarkdownInline::MarkdownInlineEmphasis(it) => it.syntax,
             AnyMarkdownInline::MarkdownInlineImage(it) => it.syntax,
@@ -2891,8 +2377,8 @@ impl AstNode for AnyMarkdownInline {
 impl std::fmt::Debug for AnyMarkdownInline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AnyMarkdownInline::MarkdownHTMLBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyMarkdownInline::MarkdownHardLine(it) => std::fmt::Debug::fmt(it, f),
+            AnyMarkdownInline::MarkdownHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyMarkdownInline::MarkdownInlineCode(it) => std::fmt::Debug::fmt(it, f),
             AnyMarkdownInline::MarkdownInlineEmphasis(it) => std::fmt::Debug::fmt(it, f),
             AnyMarkdownInline::MarkdownInlineImage(it) => std::fmt::Debug::fmt(it, f),
@@ -2905,8 +2391,8 @@ impl std::fmt::Debug for AnyMarkdownInline {
 impl From<AnyMarkdownInline> for SyntaxNode {
     fn from(n: AnyMarkdownInline) -> SyntaxNode {
         match n {
-            AnyMarkdownInline::MarkdownHTMLBlock(it) => it.into(),
             AnyMarkdownInline::MarkdownHardLine(it) => it.into(),
+            AnyMarkdownInline::MarkdownHtmlBlock(it) => it.into(),
             AnyMarkdownInline::MarkdownInlineCode(it) => it.into(),
             AnyMarkdownInline::MarkdownInlineEmphasis(it) => it.into(),
             AnyMarkdownInline::MarkdownInlineImage(it) => it.into(),
@@ -2918,6 +2404,70 @@ impl From<AnyMarkdownInline> for SyntaxNode {
 }
 impl From<AnyMarkdownInline> for SyntaxElement {
     fn from(n: AnyMarkdownInline) -> SyntaxElement {
+        let node: SyntaxNode = n.into();
+        node.into()
+    }
+}
+impl From<MarkdownSetextH1> for AnyMarkdownSetextHeader {
+    fn from(node: MarkdownSetextH1) -> AnyMarkdownSetextHeader {
+        AnyMarkdownSetextHeader::MarkdownSetextH1(node)
+    }
+}
+impl From<MarkdownSetextH2> for AnyMarkdownSetextHeader {
+    fn from(node: MarkdownSetextH2) -> AnyMarkdownSetextHeader {
+        AnyMarkdownSetextHeader::MarkdownSetextH2(node)
+    }
+}
+impl AstNode for AnyMarkdownSetextHeader {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        MarkdownSetextH1::KIND_SET.union(MarkdownSetextH2::KIND_SET);
+    fn can_cast(kind: SyntaxKind) -> bool {
+        matches!(kind, MARKDOWN_SETEXT_H1 | MARKDOWN_SETEXT_H2)
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        let res = match syntax.kind() {
+            MARKDOWN_SETEXT_H1 => {
+                AnyMarkdownSetextHeader::MarkdownSetextH1(MarkdownSetextH1 { syntax })
+            }
+            MARKDOWN_SETEXT_H2 => {
+                AnyMarkdownSetextHeader::MarkdownSetextH2(MarkdownSetextH2 { syntax })
+            }
+            _ => return None,
+        };
+        Some(res)
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        match self {
+            AnyMarkdownSetextHeader::MarkdownSetextH1(it) => &it.syntax,
+            AnyMarkdownSetextHeader::MarkdownSetextH2(it) => &it.syntax,
+        }
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        match self {
+            AnyMarkdownSetextHeader::MarkdownSetextH1(it) => it.syntax,
+            AnyMarkdownSetextHeader::MarkdownSetextH2(it) => it.syntax,
+        }
+    }
+}
+impl std::fmt::Debug for AnyMarkdownSetextHeader {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AnyMarkdownSetextHeader::MarkdownSetextH1(it) => std::fmt::Debug::fmt(it, f),
+            AnyMarkdownSetextHeader::MarkdownSetextH2(it) => std::fmt::Debug::fmt(it, f),
+        }
+    }
+}
+impl From<AnyMarkdownSetextHeader> for SyntaxNode {
+    fn from(n: AnyMarkdownSetextHeader) -> SyntaxNode {
+        match n {
+            AnyMarkdownSetextHeader::MarkdownSetextH1(it) => it.into(),
+            AnyMarkdownSetextHeader::MarkdownSetextH2(it) => it.into(),
+        }
+    }
+}
+impl From<AnyMarkdownSetextHeader> for SyntaxElement {
+    fn from(n: AnyMarkdownSetextHeader) -> SyntaxElement {
         let node: SyntaxNode = n.into();
         node.into()
     }
@@ -2937,22 +2487,17 @@ impl std::fmt::Display for AnyLeafBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyMakrdownSetextHeader {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for AnyMarkdownBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyMarkdownHeader {
+impl std::fmt::Display for AnyMarkdownInline {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyMarkdownInline {
+impl std::fmt::Display for AnyMarkdownSetextHeader {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -2977,42 +2522,22 @@ impl std::fmt::Display for MarkdownFencedCodeBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MarkdownH1 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MarkdownH2 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MarkdownH3 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MarkdownH4 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MarkdownH5 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MarkdownH6 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MarkdownHTMLBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for MarkdownHardLine {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MarkdownHash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MarkdownHeader {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MarkdownHtmlBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -3303,6 +2828,88 @@ impl IntoIterator for &MarkdownBulletList {
 impl IntoIterator for MarkdownBulletList {
     type Item = AnyCodeBlock;
     type IntoIter = AstNodeListIterator<Language, AnyCodeBlock>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub struct MarkdownHashList {
+    syntax_list: SyntaxList,
+}
+impl MarkdownHashList {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self {
+            syntax_list: syntax.into_list(),
+        }
+    }
+}
+impl AstNode for MarkdownHashList {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_HASH_LIST as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_HASH_LIST
+    }
+    fn cast(syntax: SyntaxNode) -> Option<MarkdownHashList> {
+        if Self::can_cast(syntax.kind()) {
+            Some(MarkdownHashList {
+                syntax_list: syntax.into_list(),
+            })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        self.syntax_list.node()
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax_list.into_node()
+    }
+}
+impl Serialize for MarkdownHashList {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(self.len()))?;
+        for e in self.iter() {
+            seq.serialize_element(&e)?;
+        }
+        seq.end()
+    }
+}
+impl AstNodeList for MarkdownHashList {
+    type Language = Language;
+    type Node = MarkdownHash;
+    fn syntax_list(&self) -> &SyntaxList {
+        &self.syntax_list
+    }
+    fn into_syntax_list(self) -> SyntaxList {
+        self.syntax_list
+    }
+}
+impl Debug for MarkdownHashList {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("MarkdownHashList ")?;
+        f.debug_list().entries(self.iter()).finish()
+    }
+}
+impl IntoIterator for &MarkdownHashList {
+    type Item = MarkdownHash;
+    type IntoIter = AstNodeListIterator<Language, MarkdownHash>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+impl IntoIterator for MarkdownHashList {
+    type Item = MarkdownHash;
+    type IntoIter = AstNodeListIterator<Language, MarkdownHash>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }
