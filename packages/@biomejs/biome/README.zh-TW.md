@@ -36,15 +36,15 @@
 
 </div>
 
-**Biome** 是一個高效的網絡項目工具鏈，旨在提供開發工具以維持這些項目的健康。
+**Biome** 是一個高效能的網絡項目工具鏈，旨在提供開發工具以維持這些項目的健康。
 
 **Biome 是一個 [快速格式化工具](./benchmark#formatting)**，支持 _JavaScript_、_TypeScript_、_JSX_、_JSON_、_CSS_ 和 _GraphQL_，其 **與 _Prettier_ 的相容性達到 [97%](https://console.algora.io/challenges/prettier)**。
 
-**Biome 是一個 [高效的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支持 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **超過 270 條規則**。
-它 **輸出詳細且具上下文的診斷資訊**，幫助你改進代碼並成為更好的程式設計師！
+**Biome 是一個 [高效能的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支持 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **超過 270 條規則**。
+它 **輸出詳細且具上下文的診斷資訊**，幫助你改進程式碼並成為更好的程式設計師！
 
 **Biome** 從一開始就設計為可在 [編輯器中互動使用](https://biomejs.dev/guides/integrate-in-editor/)。
-它可以在你編寫代碼時格式化和檢查錯誤的代碼。
+它可以在你編寫程式碼時格式化和檢查錯誤的程式碼。
 
 ### 安裝
 
@@ -79,13 +79,13 @@ npx @biomejs/biome ci ./src
 
 **Biome** 擁有合理的預設設定，無需配置。
 
-**Biome** 旨在支持現代網絡開發的 [所有主要語言][language-support]。
+**Biome** 旨在支持現代網絡開發的 [所有主要開發語言][language-support]。
 
 **Biome** [不需要 Node.js](https://biomejs.dev/guides/manual-installation/) 即可運行。
 
-**Biome** 擁有一流的 LSP 支持，配備了能完整保留源代碼文本的先進解析器和頂級的錯誤恢復能力。
+**Biome** 擁有一流的 LSP 支持，配備了能完整保留原文的先進解析器和頂級的錯誤修復能力。
 
-**Biome** 統一了以前分離的工具功能。基於共享基礎構建，讓我們能夠為代碼處理、錯誤顯示、並行工作、緩存和配置提供一致的體驗。
+**Biome** 整合了以前分離的工具功能。基於共享基礎構建，讓我們能夠為程式碼處理、錯誤顯示、並行工作、快取記憶體和配置提供一致的體驗。
 
 閱讀更多關於我們的[項目理念][biome-philosophy]。
 
