@@ -1,9 +1,9 @@
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::{AnyJsExpression, JsStaticMemberExpression, JsSyntaxKind};
+use biome_js_syntax::{global_identifier, AnyJsExpression, JsStaticMemberExpression, JsSyntaxKind};
 use biome_rowan::AstNode;
+
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Disallow the use of `process.env`.
@@ -45,18 +45,25 @@ declare_lint_rule! {
 }
 
 impl Rule for NoProcessEnv {
-    type Query = Ast<JsStaticMemberExpression>;
+    type Query = Semantic<JsStaticMemberExpression>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let static_member_expr = ctx.query();
-        if is_process_env(static_member_expr)? {
-            Some(())
-        } else {
-            None
+        let model = ctx.model();
+        let object = static_member_expr.object().ok()?;
+        let member_expr = static_member_expr.member().ok()?;
+        if member_expr.as_js_name()?.text() != "env" {
+            return None;
         }
+
+        let (reference, name) = global_identifier(&object)?;
+        if name.text() != "process" {
+            return None;
+        }
+        model.binding(&reference).is_none().then_some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -73,18 +80,5 @@ impl Rule for NoProcessEnv {
                 "Use a centralized configuration file instead for better maintainability and deployment consistency."
             }),
         )
-    }
-}
-
-fn is_process_env(expr: &JsStaticMemberExpression) -> Option<bool> {
-    let object = expr.object().ok()?;
-    match object {
-        AnyJsExpression::JsIdentifierExpression(ident) => {
-            let is_process = ident.name().ok()?.text() == "process";
-            let is_dot = expr.operator_token().ok()?.kind() == JsSyntaxKind::DOT;
-            let is_env = expr.member().ok()?.as_js_name()?.text() == "env";
-            Some(is_process && is_dot && is_env)
-        }
-        _ => None,
     }
 }
