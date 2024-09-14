@@ -35,7 +35,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/): ignore `alert` and `alertdialog` roles ([3858](https://github.com/biomejs/biome/issues/3858)). Controbuted by @Conaclos
+- [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
+
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now ignores `@/` imports and recognizes type imports from Definitely Typed and `bun` imports. Contributed by @Conaclos
 
 ### Parser
 
