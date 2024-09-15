@@ -112,16 +112,6 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
 
 ### Gold Sponsors
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 ### Silver Sponsors
 
 <table>

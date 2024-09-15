@@ -94,16 +94,6 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
 
 ### ゴールドスポンサー
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 ### ブロンズスポンサー
 
 <table>

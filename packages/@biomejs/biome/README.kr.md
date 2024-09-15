@@ -110,16 +110,6 @@ Biome 은 간단하게 다양한 개발자들 사이에서의 인지도를 얻�
 
 ### 골드 스폰서
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 ### 실버 스폰서
 
 <table>
