@@ -15,7 +15,6 @@ on:
 env:
   RUST_LOG: info
   RUST_BACKTRACE: 1
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   coverage:
@@ -44,6 +43,8 @@ jobs:
         with:
           cache-target: release
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compile
         run: cargo build --release --locked -p xtask_coverage

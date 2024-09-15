@@ -22,7 +22,6 @@ env:
   RUST_LOG: info
   RUST_BACKTRACE: 1
   RUSTUP_WINDOWS_PATH_ADD_BIN: 1
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   format:
@@ -39,6 +38,8 @@ jobs:
           components: rustfmt
           bins: taplo-cli
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run format
         run: |
           cargo fmt --all --check
@@ -57,6 +58,8 @@ jobs:
         with:
           components: clippy
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run clippy
         run: |
           cargo lint
@@ -94,6 +97,8 @@ jobs:
         uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests
         run: cargo test --workspace
 
@@ -110,6 +115,8 @@ jobs:
         with:
           cache-target: release
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build main binary
         run: cargo build -p biome_cli --release
       - name: Install Node.js
@@ -153,6 +160,8 @@ jobs:
         uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run doc command
         run: cargo documentation
 
@@ -168,6 +177,8 @@ jobs:
         uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run the grammar codegen
         run: cargo codegen grammar
       - name: Run the analyzer codegen
