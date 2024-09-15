@@ -92,16 +92,6 @@ npx @biomejs/biome ci ./src
 
 ### 金牌赞助商
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 ### 铜牌赞助商
 
 <table>
