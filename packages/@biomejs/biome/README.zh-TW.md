@@ -93,11 +93,11 @@ npx @biomejs/biome ci ./src
 
 ## 資金支持
 
-你可以通過不同的方式支持這個項目
+你可以通過不同的方式支持這個專案
 
-### 項目贊助和資金支持
+### 專案贊助和資金支持
 
-你可以通過 [Open Collective](https://opencollective.com/biome) 或 [GitHub Sponsors](https://github.com/sponsors/biomejs) 贊助或資助這個項目。
+你可以通過 [Open Collective](https://opencollective.com/biome) 或 [GitHub Sponsors](https://github.com/sponsors/biomejs) 贊助或資助這個專案。
 
 Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中獲得可見性和認可。
 
