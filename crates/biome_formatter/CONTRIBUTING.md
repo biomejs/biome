@@ -163,9 +163,9 @@ where
 
 Then, you'll have to create four types:
 1. `HtmlCommentStyle`
-2. `HtmlFormatContext`
-3. `FormatHtmlSyntaxNode` 
-4. `HtmlLanguage`
+1. `HtmlFormatContext`
+1. `FormatHtmlSyntaxNode` 
+1. `HtmlLanguage`
 
 ### `HtmlCommentStyle`
 
