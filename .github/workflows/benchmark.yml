@@ -22,6 +22,7 @@ on:
 
 env:
   RUST_LOG: info
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   bench:

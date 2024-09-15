@@ -5,6 +5,9 @@ on:
     types: [ closed ]
     branches: [ main ]
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   retrieve-version:
     if: github.head_ref == 'release/automated-ci' && github.event.pull_request.merged == true
