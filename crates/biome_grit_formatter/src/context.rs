@@ -42,7 +42,7 @@ impl CstFormatContext for GritFormatContext {
 
     type Style = GritCommentStyle;
 
-    type CommentRule;
+    type CommentRule = FormatGritLeadingComment;
 
     fn comments(&self) -> &biome_formatter::comments::Comments<Self::Language> {
         todo!()
