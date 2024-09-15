@@ -1,4 +1,4 @@
-use crate::comments::{GritCommentStyle, GritComments};
+use crate::comments::{FormatGritLeadingComment, GritCommentStyle, GritComments};
 use biome_formatter::{
     CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
     LineWidth, QuoteStyle, TransformSourceMap,
