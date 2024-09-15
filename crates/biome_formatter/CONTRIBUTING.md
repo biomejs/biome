@@ -380,7 +380,7 @@ Updated the `Cargo.toml` file to import some testing utility:
 ```toml
 [dev-dependencies]
 biome_formatter_test = { path = "../biome_formatter_test" }
-biome_html_factory     = { path = "../biome_html_parser" }
+biome_html_factory     = { path = "../biome_html_factory" }
 biome_html_parser      = { path = "../biome_html_parser" }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }

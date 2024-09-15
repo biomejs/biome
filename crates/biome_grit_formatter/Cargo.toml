@@ -19,7 +19,7 @@ biome_rowan       = { workspace = true }
 
 [dev-dependencies]
 biome_formatter_test = { path = "../biome_formatter_test" }
-biome_grit_factory   = { path = "../biome_grit_parser" }
+biome_grit_factory   = { path = "../biome_grit_factory" }
 biome_grit_parser    = { path = "../biome_grit_parser" }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }
