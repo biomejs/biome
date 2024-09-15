@@ -6,7 +6,7 @@ use biome_formatter::{
 use biome_grit_syntax::GritLanguage;
 use std::rc::Rc;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GritFormatContext {
     comments: Rc<GritComments>,
     source_map: Option<TransformSourceMap>,

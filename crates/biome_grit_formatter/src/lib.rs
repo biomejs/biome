@@ -8,7 +8,7 @@ mod prelude;
 use biome_formatter::{
     prelude::{format_bogus_node, format_suppressed_node, Formatter},
     trivia::{format_dangling_comments, format_leading_comments, format_trailing_comments},
-    write, CstFormatContext, Format, FormatLanguage, FormatResult, Formatted,
+    write, Buffer, CstFormatContext, Format, FormatLanguage, FormatResult, Formatted,
 };
 use biome_grit_syntax::{GritLanguage, GritSyntaxNode};
 
@@ -119,7 +119,7 @@ impl FormatLanguage for GritFormatLanguage {
     }
 
     fn options(&self) -> &<Self::Context as biome_formatter::FormatContext>::Options {
-        &self.options
+        todo!()
     }
 
     fn create_context(
