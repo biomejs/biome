@@ -36,7 +36,7 @@
 
 </div>
 
-**Biome** 是一個高效能的 Web 項目工具鏈，旨在提供開發工具以維持這些項目的健康。
+**Biome** 是一個高效能的 Web 專案工具鏈，旨在提供開發工具以維持這些專案的健康。
 
 **Biome 是一個 [快速格式化工具](./benchmark#formatting)**，支持 _JavaScript_、_TypeScript_、_JSX_、_JSON_、_CSS_ 和 _GraphQL_，其 **與 _Prettier_ 的相容性達到 [97%](https://console.algora.io/challenges/prettier)**。
 
