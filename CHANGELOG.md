@@ -11,6 +11,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+## v1.9.1 (2024-09-15)
+
 ### Analyzer
 
 ### CLI
@@ -18,6 +20,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - `useEditorConfig` now loads the editorconfig when running `biome ci` [#3864](https://github.com/biomejs/biome/issues/3864). Contributed by @dyc3
+
+- Revert [#3731](https://github.com/biomejs/biome/pull/3731) to fix broken quick fixes and code actions. Contributed by @nhedger
 
 ### Configuration
 
