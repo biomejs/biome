@@ -5,6 +5,7 @@ on:
     types: [ closed ]
     branches: [ main ]
 
+
 jobs:
   retrieve-version:
     if: github.head_ref == 'release/automated-ci' && github.event.pull_request.merged == true
@@ -81,6 +82,8 @@ jobs:
           channel: stable
           cache-target: release
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install arm64 toolchain
         if: matrix.code-target == 'linux-arm64' || matrix.code-target == 'linux-arm64-musl'
@@ -245,6 +248,8 @@ jobs:
           channel: stable
           cache-target: release
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: katyo/publish-crates@v2
         with:
           registry-token: ${{ secrets.CARGO_TOKEN }}
