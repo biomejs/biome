@@ -150,6 +150,8 @@ define_categories! {
     "lint/nursery/noInvalidPositionAtImportRule": "https://biomejs.dev/linter/rules/no-invalid-position-at-import-rule",
     "lint/nursery/noIrregularWhitespace": "https://biomejs.dev/linter/rules/no-irregular-whitespace",
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
+    "lint/nursery/noProcessEnv": "https://biomejs.dev/linter/rules/no-process-env",
+    "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",
     "lint/nursery/noRestrictedTypes": "https://biomejs.dev/linter/rules/no-restricted-types",
     "lint/nursery/noSecrets": "https://biomejs.dev/linter/rules/no-secrets",

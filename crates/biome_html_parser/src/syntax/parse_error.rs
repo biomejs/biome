@@ -30,6 +30,10 @@ pub(crate) fn expected_closing_tag(p: &HtmlParser, range: TextRange) -> ParseDia
     expected_node("closing tag", range, p).into_diagnostic(p)
 }
 
+pub(crate) fn expected_matching_closing_tag(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("matching closing tag", range, p).into_diagnostic(p)
+}
+
 /// The parser was encountered a tag that does not have a name.
 ///
 /// ```html
@@ -38,4 +42,17 @@ pub(crate) fn expected_closing_tag(p: &HtmlParser, range: TextRange) -> ParseDia
 /// ```
 pub(crate) fn expected_element_name(p: &HtmlParser, range: TextRange) -> ParseDiagnostic {
     expected_node("element name", range, p).into_diagnostic(p)
+}
+
+/// Void elements should not have a closing tag.
+///
+/// ```html
+/// <img></img>
+///      ^^^^^^ should not have a closing tag
+/// ```
+pub(crate) fn void_element_should_not_have_closing_tag(
+    _p: &HtmlParser,
+    range: TextRange,
+) -> ParseDiagnostic {
+    ParseDiagnostic::new("Void elements should not have a closing tag.", range)
 }

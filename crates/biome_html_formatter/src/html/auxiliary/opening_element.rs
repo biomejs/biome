@@ -12,15 +12,11 @@ impl FormatNodeRule<HtmlOpeningElement> for FormatHtmlOpeningElement {
             r_angle_token,
         } = node.as_fields();
 
-        write!(
-            f,
-            [
-                l_angle_token.format(),
-                name.format(),
-                attributes.format(),
-                r_angle_token.format(),
-            ]
-        )?;
+        write!(f, [l_angle_token.format(), name.format(),])?;
+        if attributes.len() > 0 {
+            write!(f, [space(), attributes.format()])?
+        }
+        write!(f, [r_angle_token.format()])?;
 
         Ok(())
     }

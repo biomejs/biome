@@ -160,6 +160,8 @@ pub type NoPositiveTabindex =
     <lint::a11y::no_positive_tabindex::NoPositiveTabindex as biome_analyze::Rule>::Options;
 pub type NoPrecisionLoss =
     <lint::correctness::no_precision_loss::NoPrecisionLoss as biome_analyze::Rule>::Options;
+pub type NoProcessEnv =
+    <lint::nursery::no_process_env::NoProcessEnv as biome_analyze::Rule>::Options;
 pub type NoPrototypeBuiltins =
     <lint::suspicious::no_prototype_builtins::NoPrototypeBuiltins as biome_analyze::Rule>::Options;
 pub type NoReExportAll =

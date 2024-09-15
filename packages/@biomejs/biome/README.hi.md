@@ -119,16 +119,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 
 ### स्वर्ण प्रायोजक[^42]
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 ### रजत प्रायोजक[^43]
 
 <table>

@@ -18,8 +18,9 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
             [
                 l_angle_token.format(),
                 name.format(),
+                space(),
                 attributes.format(),
-                soft_line_break_or_space(),
+                space(),
                 slash_token.format(),
                 r_angle_token.format()
             ]

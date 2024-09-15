@@ -9,7 +9,8 @@
 		"tailwindcss": "3.4.1"
 	},
 	"devDependencies": {
-		"@testing-library/react": "1.0.0"
+		"@testing-library/react": "1.0.0",
+		"@types/lodash": "1.0.0"
 	},
 	"peerDependencies": {
 		"peer-dep": "1.0.0"

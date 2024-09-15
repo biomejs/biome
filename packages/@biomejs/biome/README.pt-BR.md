@@ -97,16 +97,6 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
 
 ### Patrocinadores Ouro
 
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
 ### Patrocinadores Bronze
 
 <table>

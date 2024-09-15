@@ -44,6 +44,8 @@ jobs:
           cache-target: release
           bins: cargo-codspeed
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compile
         run: cargo codspeed build --features codspeed -p xtask_bench
