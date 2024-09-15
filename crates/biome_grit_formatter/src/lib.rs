@@ -6,19 +6,29 @@ mod grit;
 mod prelude;
 
 use biome_formatter::{
-    prelude::{format_suppressed_node, Formatter},
+    prelude::{format_bogus_node, format_suppressed_node, Formatter},
     trivia::{format_dangling_comments, format_leading_comments, format_trailing_comments},
-    write, FormatLanguage, FormatResult,
+    write, CstFormatContext, Format, FormatLanguage, FormatResult, Formatted,
 };
-use biome_grit_syntax::GritLanguage;
+use biome_grit_syntax::{GritLanguage, GritSyntaxNode};
+
+pub(crate) use crate::context::GritFormatContext;
 
 use biome_rowan::AstNode;
 use context::GritFormatOptions;
 use cst::FormatGritSyntaxNode;
 
-pub(crate) use crate::context::GritFormatContext;
-
 pub(crate) type GritFormatter<'buf> = Formatter<'buf, GritFormatContext>;
+
+/// Formats a GritQL file based on its features.
+///
+/// It returns a [Formatted] result, which the user can use to override a file.
+pub fn format_node(
+    options: GritFormatOptions,
+    root: &GritSyntaxNode,
+) -> FormatResult<Formatted<GritFormatContext>> {
+    biome_formatter::format_node(root, GritFormatLanguage::new(options))
+}
 
 pub(crate) trait FormatNodeRule<N>
 where
@@ -73,7 +83,7 @@ where
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct GritFormatLanguage {
     options: GritFormatOptions,
 }
@@ -257,4 +267,14 @@ where
     Iter: Iterator<Item = Item> + std::iter::ExactSizeIterator,
     Item: IntoFormat<Context>,
 {
+}
+
+/// Rule for formatting an bogus nodes.
+pub(crate) trait FormatBogusNodeRule<N>
+where
+    N: AstNode<Language = GritLanguage>,
+{
+    fn fmt(&self, node: &N, f: &mut GritFormatter) -> FormatResult<()> {
+        format_bogus_node(node.syntax()).fmt(f)
+    }
 }

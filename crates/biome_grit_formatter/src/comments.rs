@@ -1,11 +1,11 @@
+use crate::GritFormatContext;
 use biome_formatter::{
     comments::{is_doc_comment, CommentStyle, Comments, SourceComment},
     prelude::{align, dynamic_text, format_once, hard_line_break, Formatter},
     write, FormatResult, FormatRule,
 };
 use biome_grit_syntax::GritLanguage;
-
-use crate::GritFormatContext;
+use biome_rowan::TextLen;
 
 pub type GritComments = Comments<GritLanguage>;
 

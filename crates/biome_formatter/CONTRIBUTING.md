@@ -349,9 +349,10 @@ Now that everything is wired, you just needs to expose a public method that does
 
 ```rust
 pub fn format_node(
+    options: HtmlFormatOptions,
     root: &HtmlSyntaxNode,
 ) -> FormatResult<Formatted<HtmlFormatContext>> {
-    biome_formatter::format_node(root, HtmlFormatLanguage {})
+    biome_formatter::format_node(root, HtmlFormatLanguage::new(options))
 }
 ```
 

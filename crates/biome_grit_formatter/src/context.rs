@@ -49,6 +49,8 @@ impl CstFormatContext for GritFormatContext {
     }
 }
 
+#[derive(Debug, Default, Clone, PartialEq)]
+
 pub struct GritFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
