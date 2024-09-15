@@ -18,18 +18,9 @@ biome_grit_syntax = { workspace = true }
 biome_rowan       = { workspace = true }
 
 [dev-dependencies]
-biome_formatter_test = { path = "../biome_formatter_test" }
-biome_grit_factory   = { path = "../biome_grit_factory" }
-biome_grit_parser    = { path = "../biome_grit_parser" }
-biome_parser         = { path = "../biome_parser" }
-biome_service        = { path = "../biome_service" }
-countme              = { workspace = true, features = ["enable"] }
-iai                  = "0.1.1"
-quickcheck           = { workspace = true }
-quickcheck_macros    = { workspace = true }
-serde                = { workspace = true, features = ["derive"] }
-serde_json           = { workspace = true }
-tests_macros         = { path = "../tests_macros" }
+serde      = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+
 # cargo-workspaces metadata
 [package.metadata.workspaces]
 independent = true

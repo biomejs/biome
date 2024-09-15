@@ -22,7 +22,7 @@ impl CommentStyle for GritCommentStyle {
     }
 
     fn get_comment_kind(
-        comment: &biome_rowan::SyntaxTriviaPieceComments<Self::Language>,
+        _comment: &biome_rowan::SyntaxTriviaPieceComments<Self::Language>,
     ) -> biome_formatter::comments::CommentKind {
         todo!()
     }
