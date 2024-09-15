@@ -244,7 +244,7 @@ impl FormatRule<HtmlSyntaxNode> for FormatHtmlSyntaxNode {
     }
 }
 
-impl AsFormat<HtmlFormatContext> for FormatHtmlSyntaxNode {
+impl AsFormat<HtmlFormatContext> for HtmlSyntaxNode {
     type Format<'a> = FormatRefWithRule<'a, HtmlSyntaxNode, FormatHtmlSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
@@ -252,7 +252,7 @@ impl AsFormat<HtmlFormatContext> for FormatHtmlSyntaxNode {
     }
 }
 
-impl IntoFormat<HtmlFormatContext> for FormatHtmlSyntaxNode {
+impl IntoFormat<HtmlFormatContext> for HtmlSyntaxNode {
     type Format = FormatOwnedWithRule<HtmlSyntaxNode, FormatHtmlSyntaxNode>;
 
     fn into_format(self) -> Self::Format {
