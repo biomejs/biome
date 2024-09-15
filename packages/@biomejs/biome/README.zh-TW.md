@@ -87,7 +87,7 @@ npx @biomejs/biome ci ./src
 
 **Biome** 整合了以前分離的工具功能。基於共享基礎構建，讓我們能夠為程式碼處理、錯誤顯示、並行工作、快取記憶體和配置提供一致的體驗。
 
-閱讀更多關於我們的[項目理念][biome-philosophy]。
+閱讀更多關於我們的[專案理念][biome-philosophy]。
 
 **Biome** 採用 [MIT 授權](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) 或 [Apache 2.0 授權](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE)，並根據 [貢獻者公約行為準則](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md) 進行管理。
 
