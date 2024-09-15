@@ -1,9 +1,3 @@
----
-source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid.js
----
-# Input
-```jsx
 import "./valid";
 import "react";
 import "@testing-library/react";
@@ -26,4 +20,11 @@ import "peer-dep";
 import "optional-dep";
 
 import "my-package"
-```
+
+import "@/internal";
+import "#internal";
+
+// import from `@types/jest`
+import type * as jest from "lodash";
+
+import "bun";
