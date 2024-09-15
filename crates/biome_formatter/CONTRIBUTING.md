@@ -294,7 +294,7 @@ where
     N: AstNode<Language = HtmlLanguage>,
 {
     // this is the method that actually start the formatting
-    fn fmt(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()> {
+    fn fmt(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         if self.is_suppressed(node, f) {
             return write!(f, [format_suppressed_node(node.syntax())]);
         }
@@ -305,10 +305,10 @@ where
         self.fmt_trailing_comments(node, f)
     }
 
-    fn fmt_fields(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()>;
+    fn fmt_fields(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()>;
 
     /// Returns `true` if the node has a suppression comment and should use the same formatting as in the source document.
-    fn is_suppressed(&self, node: &N, f: &JsonFormatter) -> bool {
+    fn is_suppressed(&self, node: &N, f: &HtmlFormatter) -> bool {
         f.context().comments().is_suppressed(node.syntax())
     }
 
@@ -316,7 +316,7 @@ where
     ///
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the leading comments.
-    fn fmt_leading_comments(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()> {
+    fn fmt_leading_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         format_leading_comments(node.syntax()).fmt(f)
     }
 
@@ -327,7 +327,7 @@ where
     /// no comments are dropped.
     ///
     /// A node can have dangling comments if all its children are tokens or if all node childrens are optional.
-    fn fmt_dangling_comments(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()> {
+    fn fmt_dangling_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         format_dangling_comments(node.syntax())
             .with_soft_block_indent()
             .fmt(f)
@@ -337,7 +337,7 @@ where
     ///
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
-    fn fmt_trailing_comments(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()> {
+    fn fmt_trailing_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         format_trailing_comments(node.syntax()).fmt(f)
     }
 }

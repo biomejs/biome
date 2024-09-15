@@ -5,13 +5,73 @@ mod generated;
 mod grit;
 mod prelude;
 
-use biome_formatter::FormatLanguage;
+use biome_formatter::{
+    prelude::{format_suppressed_node, Formatter},
+    trivia::{format_dangling_comments, format_leading_comments, format_trailing_comments},
+    write, FormatLanguage, FormatResult,
+};
 use biome_grit_syntax::GritLanguage;
 
+use biome_rowan::AstNode;
 use context::GritFormatOptions;
 use cst::FormatGritSyntaxNode;
 
 pub(crate) use crate::context::GritFormatContext;
+
+pub(crate) type GritFormatter<'buf> = Formatter<'buf, GritFormatContext>;
+
+pub(crate) trait FormatNodeRule<N>
+where
+    N: AstNode<Language = GritLanguage>,
+{
+    // this is the method that actually start the formatting
+    fn fmt(&self, node: &N, f: &mut GritFormatter) -> FormatResult<()> {
+        if self.is_suppressed(node, f) {
+            return write!(f, [format_suppressed_node(node.syntax())]);
+        }
+
+        self.fmt_leading_comments(node, f)?;
+        self.fmt_fields(node, f)?;
+        self.fmt_dangling_comments(node, f)?;
+        self.fmt_trailing_comments(node, f)
+    }
+
+    fn fmt_fields(&self, node: &N, f: &mut GritFormatter) -> FormatResult<()>;
+
+    /// Returns `true` if the node has a suppression comment and should use the same formatting as in the source document.
+    fn is_suppressed(&self, node: &N, f: &GritFormatter) -> bool {
+        f.context().comments().is_suppressed(node.syntax())
+    }
+
+    /// Formats the [leading comments](biome_formatter::comments#leading-comments) of the node.
+    ///
+    /// You may want to override this method if you want to manually handle the formatting of comments
+    /// inside of the `fmt_fields` method or customize the formatting of the leading comments.
+    fn fmt_leading_comments(&self, node: &N, f: &mut GritFormatter) -> FormatResult<()> {
+        format_leading_comments(node.syntax()).fmt(f)
+    }
+
+    /// Formats the [dangling comments](biome_formatter::comments#dangling-comments) of the node.
+    ///
+    /// You should override this method if the node handled by this rule can have dangling comments because the
+    /// default implementation formats the dangling comments at the end of the node, which isn't ideal but ensures that
+    /// no comments are dropped.
+    ///
+    /// A node can have dangling comments if all its children are tokens or if all node childrens are optional.
+    fn fmt_dangling_comments(&self, node: &N, f: &mut GritFormatter) -> FormatResult<()> {
+        format_dangling_comments(node.syntax())
+            .with_soft_block_indent()
+            .fmt(f)
+    }
+
+    /// Formats the [trailing comments](biome_formatter::comments#trailing-comments) of the node.
+    ///
+    /// You may want to override this method if you want to manually handle the formatting of comments
+    /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
+    fn fmt_trailing_comments(&self, node: &N, f: &mut GritFormatter) -> FormatResult<()> {
+        format_trailing_comments(node.syntax()).fmt(f)
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct GritFormatLanguage {

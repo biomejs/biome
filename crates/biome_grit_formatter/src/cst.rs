@@ -1,4 +1,4 @@
-use crate::{context::GritFormatContext, prelude::*};
+use crate::{context::GritFormatContext, prelude::*, GritFormatter};
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
 use biome_grit_syntax::{map_syntax_node, GritSyntaxNode};
 
