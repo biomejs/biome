@@ -119,7 +119,7 @@ impl FormatLanguage for GritFormatLanguage {
     }
 
     fn options(&self) -> &<Self::Context as biome_formatter::FormatContext>::Options {
-        todo!()
+        &self.options
     }
 
     fn create_context(
