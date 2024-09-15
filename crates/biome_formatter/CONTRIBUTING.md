@@ -268,7 +268,7 @@ impl IntoFormat<HtmlFormatContext> for FormatHtmlSyntaxNode {
 This is small type that you need to instruct the formatter infra about a certain language. This type needs to implement the trait `biome_formatter::FormatLanguage`
 
 ```rust
-impl FormatLanguage for HtmlLanguage {
+impl FormatLanguage for HtmlFormatLanguage {
     type SyntaxLanguage = HtmlLanguage;
     type Context = HtmlFormatContext;
     type FormatRule = FormatHtmlSyntaxNode;

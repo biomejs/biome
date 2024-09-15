@@ -6,6 +6,49 @@ use biome_formatter::{
 use biome_grit_syntax::GritLanguage;
 use std::rc::Rc;
 
+#[derive(Debug)]
+pub struct GritFormatContext {
+    comments: Rc<GritComments>,
+    source_map: Option<TransformSourceMap>,
+}
+
+impl GritFormatContext {
+    pub fn new(comments: GritComments) -> Self {
+        Self {
+            comments: Rc::new(comments),
+            source_map: None,
+        }
+    }
+
+    pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
+        self.source_map = source_map;
+        self
+    }
+}
+
+impl FormatContext for GritFormatContext {
+    type Options = GritFormatOptions;
+
+    fn options(&self) -> &Self::Options {
+        todo!()
+    }
+
+    fn source_map(&self) -> Option<&TransformSourceMap> {
+        todo!()
+    }
+}
+impl CstFormatContext for GritFormatContext {
+    type Language = GritLanguage;
+
+    type Style = GritCommentStyle;
+
+    type CommentRule;
+
+    fn comments(&self) -> &biome_formatter::comments::Comments<Self::Language> {
+        todo!()
+    }
+}
+
 pub struct GritFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
@@ -100,48 +143,6 @@ impl FormatOptions for GritFormatOptions {
     }
 
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {
-        todo!()
-    }
-}
-
-pub struct GritFormatContext {
-    comments: Rc<GritComments>,
-    source_map: Option<TransformSourceMap>,
-}
-
-impl GritFormatContext {
-    pub fn new(comments: GritComments) -> Self {
-        Self {
-            comments: Rc::new(comments),
-            source_map: None,
-        }
-    }
-
-    pub fn with_source_map(mut self, source_map: Option<TransformSourceMap>) -> Self {
-        self.source_map = source_map;
-        self
-    }
-}
-
-impl FormatContext for GritFormatContext {
-    type Options = GritFormatOptions;
-
-    fn options(&self) -> &Self::Options {
-        todo!()
-    }
-
-    fn source_map(&self) -> Option<&TransformSourceMap> {
-        todo!()
-    }
-}
-impl CstFormatContext for GritFormatContext {
-    type Language = GritLanguage;
-
-    type Style = GritCommentStyle;
-
-    type CommentRule;
-
-    fn comments(&self) -> &biome_formatter::comments::Comments<Self::Language> {
         todo!()
     }
 }

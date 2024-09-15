@@ -1,7 +1,65 @@
 mod comments;
 pub mod context;
 mod cst;
+mod generated;
+mod grit;
 mod prelude;
+
+use biome_formatter::FormatLanguage;
+use biome_grit_syntax::GritLanguage;
+
+use context::GritFormatOptions;
+use cst::FormatGritSyntaxNode;
+
+pub(crate) use crate::context::GritFormatContext;
+
+#[derive(Debug, Clone)]
+pub struct GritFormatLanguage {
+    options: GritFormatOptions,
+}
+
+impl GritFormatLanguage {
+    pub fn new(options: GritFormatOptions) -> Self {
+        Self { options }
+    }
+}
+
+impl FormatLanguage for GritFormatLanguage {
+    type SyntaxLanguage = GritLanguage;
+
+    type Context = GritFormatContext;
+
+    type FormatRule = FormatGritSyntaxNode;
+
+    fn transform(
+        &self,
+        _root: &biome_rowan::SyntaxNode<Self::SyntaxLanguage>,
+    ) -> Option<(
+        biome_rowan::SyntaxNode<Self::SyntaxLanguage>,
+        biome_formatter::TransformSourceMap,
+    )> {
+        None
+    }
+
+    fn is_range_formatting_node(
+        &self,
+        _node: &biome_rowan::SyntaxNode<Self::SyntaxLanguage>,
+    ) -> bool {
+        true
+    }
+
+    fn options(&self) -> &<Self::Context as biome_formatter::FormatContext>::Options {
+        todo!()
+    }
+
+    fn create_context(
+        self,
+        root: &biome_rowan::SyntaxNode<Self::SyntaxLanguage>,
+        source_map: Option<biome_formatter::TransformSourceMap>,
+    ) -> Self::Context {
+        todo!()
+    }
+}
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {

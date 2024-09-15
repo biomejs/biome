@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{context::GritFormatContext, prelude::*};
 use biome_formatter::{FormatOwnedWithRule, FormatRefWithRule, FormatResult};
 use biome_grit_syntax::{map_syntax_node, GritSyntaxNode};
 
@@ -14,17 +14,17 @@ impl FormatRule<GritSyntaxNode> for FormatGritSyntaxNode {
 }
 
 impl AsFormat<GritFormatContext> for FormatGritSyntaxNode {
-    type Format<'a> = FormatRefWithRule<'a, HtmlSyntaxNode, FormatHtmlSyntaxNode>;
+    type Format<'a> = FormatRefWithRule<'a, GritSyntaxNode, FormatGritSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
-        FormatRefWithRule::new(self, FormatHtmlSyntaxNode)
+        FormatRefWithRule::new(self, FormatGritSyntaxNode)
     }
 }
 
-impl IntoFormat<HtmlFormatContext> for FormatHtmlSyntaxNode {
-    type Format = FormatOwnedWithRule<HtmlSyntaxNode, FormatHtmlSyntaxNode>;
+impl IntoFormat<GritFormatContext> for FormatGritSyntaxNode {
+    type Format = FormatOwnedWithRule<GritSyntaxNode, FormatGritSyntaxNode>;
 
     fn into_format(self) -> Self::Format {
-        FormatOwnedWithRule::new(self, FormatHtmlSyntaxNode)
+        FormatOwnedWithRule::new(self, FormatGritSyntaxNode)
     }
 }
