@@ -18,7 +18,7 @@ biome_text_size      = { workspace = true }
 schemars             = { workspace = true, optional = true }
 serde                = { workspace = true, optional = true, features = ["derive"] }
 termcolor            = { workspace = true }
-unicode-segmentation = "1.11.0"
+unicode-segmentation = "1.12.0"
 unicode-width        = { workspace = true }
 
 [dev-dependencies]
