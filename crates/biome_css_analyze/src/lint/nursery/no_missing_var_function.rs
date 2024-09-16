@@ -235,11 +235,11 @@ fn get_property_name(node: &CssDashedIdentifier) -> Option<String> {
     while let Some(parent) = current_node {
         if let Some(node) = CssDeclaration::cast(parent.clone()) {
             let prop = node.property().ok()?;
-            match prop {
-                AnyCssProperty::CssBogusProperty(_) => return None,
-                AnyCssProperty::CssComposesProperty(prop) => return Some(prop.name().ok()?.text()),
-                AnyCssProperty::CssGenericProperty(prop) => return Some(prop.name().ok()?.text()),
-            }
+            return match prop {
+                AnyCssProperty::CssBogusProperty(_) => None,
+                AnyCssProperty::CssComposesProperty(prop) => Some(prop.name().ok()?.text()),
+                AnyCssProperty::CssGenericProperty(prop) => Some(prop.name().ok()?.text()),
+            };
         }
         current_node = parent.parent();
     }

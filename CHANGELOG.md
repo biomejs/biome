@@ -11,6 +11,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+### Linter 
+
+#### New Features
+
+- Add [nursery/noMissingVarFunction](https://biomejs.dev/linter/rules/no-missing-var-function). Contributed by @michellocana
+
 ## v1.9.1 (2024-09-15)
 
 ### Analyzer
