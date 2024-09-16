@@ -16,12 +16,13 @@ pub(crate) struct HtmlTokenSource<'source> {
 
 #[derive(Copy, Clone, Debug, Default)]
 pub(crate) enum HtmlLexContext {
-    /// The default state
+    /// The default state. This state is used for a majority of the lexing, which is inside html tags.
     #[default]
     Regular,
-    #[allow(unused)]
-    /// When the lexer is inside a element list, newlines, spaces and quotes are part of the text
-    ElementList,
+    /// When the lexer is outside of a tag, special characters are lexed as text.
+    ///
+    /// The exeptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceeded with a `<`.
+    OutsideTag,
 }
 
 impl LexContext for HtmlLexContext {

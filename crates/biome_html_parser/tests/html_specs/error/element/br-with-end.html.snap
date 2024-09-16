@@ -40,19 +40,7 @@ HtmlRoot {
                     r_angle_token: R_ANGLE@12..13 ">" [] [],
                 },
                 HtmlContent {
-                    value_token: HTML_LITERAL@13..18 "This" [] [Whitespace(" ")],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@18..23 "text" [] [Whitespace(" ")],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@23..26 "is" [] [Whitespace(" ")],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@26..33 "inside" [] [Whitespace(" ")],
-                },
-                HtmlContent {
-                    value_token: HTML_LITERAL@33..36 "br." [] [],
+                    value_token: HTML_LITERAL@13..36 "This text is inside br." [] [],
                 },
             ],
             HtmlBogusElement {
@@ -107,16 +95,8 @@ HtmlRoot {
         2: HTML_ATTRIBUTE_LIST@12..12
         3: (empty)
         4: R_ANGLE@12..13 ">" [] []
-      2: HTML_CONTENT@13..18
-        0: HTML_LITERAL@13..18 "This" [] [Whitespace(" ")]
-      3: HTML_CONTENT@18..23
-        0: HTML_LITERAL@18..23 "text" [] [Whitespace(" ")]
-      4: HTML_CONTENT@23..26
-        0: HTML_LITERAL@23..26 "is" [] [Whitespace(" ")]
-      5: HTML_CONTENT@26..33
-        0: HTML_LITERAL@26..33 "inside" [] [Whitespace(" ")]
-      6: HTML_CONTENT@33..36
-        0: HTML_LITERAL@33..36 "br." [] []
+      2: HTML_CONTENT@13..36
+        0: HTML_LITERAL@13..36 "This text is inside br." [] []
     2: HTML_BOGUS_ELEMENT@36..41
       0: L_ANGLE@36..37 "<" [] []
       1: SLASH@37..38 "/" [] []

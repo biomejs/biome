@@ -44,12 +44,9 @@ HtmlRoot {
             r_angle_token: R_ANGLE@21..22 ">" [] [],
         },
         children: HtmlElementList [
-            HtmlContent {
-                value_token: HTML_LITERAL@22..24 "\n\t" [] [],
-            },
             HtmlElement {
                 opening_element: HtmlOpeningElement {
-                    l_angle_token: L_ANGLE@24..25 "<" [] [],
+                    l_angle_token: L_ANGLE@22..25 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlName {
                         value_token: HTML_LITERAL@25..29 "head" [] [],
                     },
@@ -57,12 +54,9 @@ HtmlRoot {
                     r_angle_token: R_ANGLE@29..30 ">" [] [],
                 },
                 children: HtmlElementList [
-                    HtmlContent {
-                        value_token: HTML_LITERAL@30..33 "\n\t\t" [] [],
-                    },
                     HtmlElement {
                         opening_element: HtmlOpeningElement {
-                            l_angle_token: L_ANGLE@33..34 "<" [] [],
+                            l_angle_token: L_ANGLE@30..34 "<" [Newline("\n"), Whitespace("\t\t")] [],
                             name: HtmlName {
                                 value_token: HTML_LITERAL@34..39 "title" [] [],
                             },
@@ -103,12 +97,9 @@ HtmlRoot {
                     r_angle_token: R_ANGLE@77..78 ">" [] [],
                 },
                 children: HtmlElementList [
-                    HtmlContent {
-                        value_token: HTML_LITERAL@78..81 "\n\t\t" [] [],
-                    },
                     HtmlElement {
                         opening_element: HtmlOpeningElement {
-                            l_angle_token: L_ANGLE@81..82 "<" [] [],
+                            l_angle_token: L_ANGLE@78..82 "<" [Newline("\n"), Whitespace("\t\t")] [],
                             name: HtmlName {
                                 value_token: HTML_LITERAL@82..84 "h1" [] [],
                             },
@@ -198,21 +189,17 @@ HtmlRoot {
       2: HTML_ATTRIBUTE_LIST@21..21
       3: R_ANGLE@21..22 ">" [] []
     1: HTML_ELEMENT_LIST@22..147
-      0: HTML_CONTENT@22..24
-        0: HTML_LITERAL@22..24 "\n\t" [] []
-      1: HTML_ELEMENT@24..70
-        0: HTML_OPENING_ELEMENT@24..30
-          0: L_ANGLE@24..25 "<" [] []
+      0: HTML_ELEMENT@22..70
+        0: HTML_OPENING_ELEMENT@22..30
+          0: L_ANGLE@22..25 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_NAME@25..29
             0: HTML_LITERAL@25..29 "head" [] []
           2: HTML_ATTRIBUTE_LIST@29..29
           3: R_ANGLE@29..30 ">" [] []
         1: HTML_ELEMENT_LIST@30..61
-          0: HTML_CONTENT@30..33
-            0: HTML_LITERAL@30..33 "\n\t\t" [] []
-          1: HTML_ELEMENT@33..61
-            0: HTML_OPENING_ELEMENT@33..40
-              0: L_ANGLE@33..34 "<" [] []
+          0: HTML_ELEMENT@30..61
+            0: HTML_OPENING_ELEMENT@30..40
+              0: L_ANGLE@30..34 "<" [Newline("\n"), Whitespace("\t\t")] []
               1: HTML_NAME@34..39
                 0: HTML_LITERAL@34..39 "title" [] []
               2: HTML_ATTRIBUTE_LIST@39..39
@@ -232,7 +219,7 @@ HtmlRoot {
           2: HTML_NAME@65..69
             0: HTML_LITERAL@65..69 "head" [] []
           3: R_ANGLE@69..70 ">" [] []
-      2: HTML_ELEMENT@70..147
+      1: HTML_ELEMENT@70..147
         0: HTML_OPENING_ELEMENT@70..78
           0: L_ANGLE@70..73 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_NAME@73..77
@@ -240,11 +227,9 @@ HtmlRoot {
           2: HTML_ATTRIBUTE_LIST@77..77
           3: R_ANGLE@77..78 ">" [] []
         1: HTML_ELEMENT_LIST@78..138
-          0: HTML_CONTENT@78..81
-            0: HTML_LITERAL@78..81 "\n\t\t" [] []
-          1: HTML_ELEMENT@81..103
-            0: HTML_OPENING_ELEMENT@81..85
-              0: L_ANGLE@81..82 "<" [] []
+          0: HTML_ELEMENT@78..103
+            0: HTML_OPENING_ELEMENT@78..85
+              0: L_ANGLE@78..82 "<" [Newline("\n"), Whitespace("\t\t")] []
               1: HTML_NAME@82..84
                 0: HTML_LITERAL@82..84 "h1" [] []
               2: HTML_ATTRIBUTE_LIST@84..84
@@ -258,7 +243,7 @@ HtmlRoot {
               2: HTML_NAME@100..102
                 0: HTML_LITERAL@100..102 "h1" [] []
               3: R_ANGLE@102..103 ">" [] []
-          2: HTML_ELEMENT@103..138
+          1: HTML_ELEMENT@103..138
             0: HTML_OPENING_ELEMENT@103..109
               0: L_ANGLE@103..107 "<" [Newline("\n"), Whitespace("\t\t")] []
               1: HTML_NAME@107..108

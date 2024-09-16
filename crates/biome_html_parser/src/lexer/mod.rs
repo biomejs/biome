@@ -61,8 +61,8 @@ impl<'src> HtmlLexer<'src> {
                 self.consume_byte(T![>])
             }
             b'/' => self.consume_byte(T![/]),
-            b'!' => self.consume_byte(T![!]),
             b'=' => self.consume_byte(T![=]),
+            b'!' => self.consume_byte(T![!]),
             b'\'' | b'"' => self.consume_string_literal(current),
             // TODO: differentiate between attribute names and identifiers
             _ if is_identifier_byte(current) || is_attribute_name_byte(current) => {
@@ -80,31 +80,13 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    fn consume_element_list_token(&mut self, current: u8) -> HtmlSyntaxKind {
-        debug_assert!(!self.is_eof());
+    fn consume_token_outside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
-            b'<' => self.consume_byte(T![<]),
-            _ => {
-                while let Some(chr) = self.current_byte() {
-                    match chr {
-                        b'<' => break,
-                        chr => {
-                            if chr.is_ascii() {
-                                self.advance(1);
-                            } else {
-                                self.advance_char_unchecked();
-                            }
-                        }
-                    }
-                }
-
-                HTML_LITERAL
-            }
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' => self.consume_l_angle(),
+            _ => self.consume_html_text(),
         }
     }
-
-    #[allow(unused)]
-    fn consume_element_token(&mut self, current: u8) {}
 
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
@@ -337,6 +319,40 @@ impl<'src> HtmlLexer<'src> {
 
         Ok(())
     }
+
+    /// Consume HTML text literals outside of tags.
+    ///
+    /// This includes text and single spaces between words. If newline or a second
+    /// consecutive space is found, this will stop consuming and to allow the lexer to
+    /// switch to `consume_whitespace`.
+    ///
+    /// See: https://html.spec.whatwg.org/#space-separated-tokens
+    /// See: https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
+    fn consume_html_text(&mut self) -> HtmlSyntaxKind {
+        let mut saw_space = false;
+        while let Some(current) = self.current_byte() {
+            match current {
+                b'<' => break,
+                b'\n' | b'\r' => {
+                    self.after_newline = true;
+                    break;
+                }
+                b' ' => {
+                    if saw_space {
+                        break;
+                    }
+                    self.advance(1);
+                    saw_space = true;
+                }
+                _ => {
+                    self.advance(1);
+                    saw_space = false;
+                }
+            }
+        }
+
+        HTML_LITERAL
+    }
 }
 
 impl<'src> Lexer<'src> for HtmlLexer<'src> {
@@ -368,7 +384,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
             match self.current_byte() {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
-                    HtmlLexContext::ElementList => self.consume_element_list_token(current),
+                    HtmlLexContext::OutsideTag => self.consume_token_outside_tag(current),
                 },
                 None => EOF,
             }
