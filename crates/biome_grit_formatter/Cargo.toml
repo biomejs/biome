@@ -13,13 +13,13 @@ version              = "0.0.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#biome_formatter   = { workspace = true }
-#biome_grit_syntax = { workspace = true }
-#biome_rowan       = { workspace = true }
+biome_formatter   = { workspace = true }
+biome_grit_syntax = { workspace = true }
+biome_rowan       = { workspace = true }
 
 [dev-dependencies]
-#serde      = { workspace = true, features = ["derive"] }
-#serde_json = { workspace = true }
+serde      = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 
 # cargo-workspaces metadata
 [package.metadata.workspaces]
