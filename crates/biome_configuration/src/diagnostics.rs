@@ -246,7 +246,7 @@ pub enum EditorConfigDiagnostic {
     /// Failed to parse the .editorconfig file.
     ParseFailed(ParseFailedDiagnostic),
     /// An option is completely incompatible with biome.
-    Incompatible(InconpatibleDiagnostic),
+    Incompatible(IncompatibleDiagnostic),
     /// A glob pattern that biome doesn't support.
     UnknownGlobPattern(UnknownGlobPatternDiagnostic),
     /// A glob pattern that contains invalid syntax.
@@ -255,7 +255,7 @@ pub enum EditorConfigDiagnostic {
 
 impl EditorConfigDiagnostic {
     pub fn incompatible(key: impl Into<String>, message: impl Into<String>) -> Self {
-        Self::Incompatible(InconpatibleDiagnostic {
+        Self::Incompatible(IncompatibleDiagnostic {
             message: MessageAndDescription::from(
                 markup! { "Key '"{key.into()}"' is incompatible with biome: "{message.into()}}
                     .to_owned(),
@@ -299,7 +299,7 @@ pub struct ParseFailedDiagnostic {
     category = "configuration",
     severity = Error,
 )]
-pub struct InconpatibleDiagnostic {
+pub struct IncompatibleDiagnostic {
     #[message]
     #[description]
     pub message: MessageAndDescription,
