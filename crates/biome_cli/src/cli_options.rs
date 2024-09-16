@@ -133,8 +133,6 @@ pub enum CliReporter {
     Summary,
     /// Reports linter diagnostics using the [GitLab Code Quality report](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool).
     GitLab,
-    /// Reports linter diagnostics as a list of files
-    Files,
 }
 
 impl CliReporter {
@@ -154,7 +152,6 @@ impl FromStr for CliReporter {
             "github" => Ok(Self::GitHub),
             "junit" => Ok(Self::Junit),
             "gitlab" => Ok(Self::GitLab),
-            "files" => Ok(Self::Files),
             _ => Err(format!(
                 "value {s:?} is not valid for the --reporter argument"
             )),
@@ -172,7 +169,6 @@ impl Display for CliReporter {
             CliReporter::GitHub => f.write_str("github"),
             CliReporter::Junit => f.write_str("junit"),
             CliReporter::GitLab => f.write_str("gitlab"),
-            CliReporter::Files => f.write_str("files"),
         }
     }
 }
