@@ -23,6 +23,10 @@ pub(crate) enum HtmlLexContext {
     ///
     /// The exeptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceeded with a `<`.
     OutsideTag,
+    /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
+    ///
+    /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
+    AttributeValue,
 }
 
 impl LexContext for HtmlLexContext {

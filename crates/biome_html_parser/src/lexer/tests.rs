@@ -250,3 +250,38 @@ fn html_text_spaces_with_lines() {
         HTML_LITERAL: 18,
     }
 }
+
+#[test]
+fn unquoted_attribute_value_1() {
+    assert_lex! {
+        HtmlLexContext::AttributeValue,
+        "value",
+        HTML_STRING_LITERAL: 5,
+    }
+}
+
+#[test]
+fn unquoted_attribute_value_2() {
+    assert_lex! {
+        HtmlLexContext::AttributeValue,
+        "value value\tvalue\n",
+        HTML_STRING_LITERAL: 5,
+        WHITESPACE: 1,
+        HTML_STRING_LITERAL: 5,
+        WHITESPACE: 1,
+        HTML_STRING_LITERAL: 5,
+        NEWLINE: 1,
+    }
+}
+
+#[test]
+fn unquoted_attribute_value_invalid_chars() {
+    assert_lex! {
+        HtmlLexContext::AttributeValue,
+        "?<='\"`",
+        ERROR_TOKEN: 1,
+        L_ANGLE: 1,
+        ERROR_TOKEN: 1,
+        ERROR_TOKEN: 3,
+    }
+}

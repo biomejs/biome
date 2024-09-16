@@ -88,6 +88,16 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    fn consume_token_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' => self.consume_byte(T![<]),
+            b'>' => self.consume_byte(T![>]),
+            b'\'' | b'"' => self.consume_string_literal(current),
+            _ => self.consume_unquoted_string_literal(),
+        }
+    }
+
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
     fn consume_byte(&mut self, tok: HtmlSyntaxKind) -> HtmlSyntaxKind {
@@ -230,6 +240,41 @@ impl<'src> HtmlLexer<'src> {
                 ERROR_TOKEN
             }
             LexStringState::InvalidEscapeSequence => ERROR_TOKEN,
+        }
+    }
+
+    /// Consume an attribute value that is not quoted.
+    ///
+    /// See: https://html.spec.whatwg.org/#attributes-2 under "Unquoted attribute value syntax"
+    fn consume_unquoted_string_literal(&mut self) -> HtmlSyntaxKind {
+        let mut content_started = false;
+        let mut encountered_invalid = false;
+        while let Some(current) = self.current_byte() {
+            match current {
+                // these characters safely terminate an unquoted attribute value
+                b'\n' | b'\r' | b'\t' | b' ' | b'>' => break,
+                // these characters are absolutely invalid in an unquoted attribute value
+                b'?' | b'\'' | b'"' | b'=' | b'<' | b'`' => {
+                    encountered_invalid = true;
+                    break;
+                }
+                _ if current.is_ascii() => {
+                    self.advance(1);
+                    content_started = true;
+                }
+                _ => break,
+            }
+        }
+
+        if content_started && !encountered_invalid {
+            HTML_STRING_LITERAL
+        } else {
+            let char = self.current_char_unchecked();
+            self.push_diagnostic(ParseDiagnostic::new(
+                "Unexpected character in unquoted attribute value",
+                self.text_position()..self.text_position() + char.text_len(),
+            ));
+            self.consume_unexpected_character()
         }
     }
 
@@ -385,6 +430,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
                     HtmlLexContext::OutsideTag => self.consume_token_outside_tag(current),
+                    HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
                 },
                 None => EOF,
             }
