@@ -117,15 +117,15 @@ pub(crate) fn format_with_guard<'ctx>(
             if output != input {
                 if should_write {
                     workspace_file.update_file(output)?;
+                    Ok(FileStatus::Changed)
                 } else {
-                    return Ok(FileStatus::Message(Message::Diff {
+                    Ok(FileStatus::Message(Message::Diff {
                         file_name: workspace_file.path.display().to_string(),
                         old: input,
                         new: output,
                         diff_kind: DiffKind::Format,
-                    }));
+                    }))
                 }
-                Ok(FileStatus::Changed)
             } else {
                 Ok(FileStatus::Unchanged)
             }
