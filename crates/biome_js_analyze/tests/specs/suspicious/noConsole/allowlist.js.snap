@@ -39,7 +39,7 @@ allowlist.options:5:17 deserialize ━━━━━━━━━━━━━━━
   - noEnum
   - noExportedImports
   - noIrregularWhitespace
-  - noMissingVarFunction
+  - noProcessEnv
   - noRestrictedImports
   - noRestrictedTypes
   - noSecrets

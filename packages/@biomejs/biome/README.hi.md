@@ -32,7 +32,7 @@
      https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
 <div align="center">
 
-हिन्दी | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) |  [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md) | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
+हिन्दी | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) |  [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md) | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
 
 </div>
 
@@ -41,7 +41,7 @@
 
 **Biome** *JavaScript*, *TypeScript*, *JSX* और *JSON* के लिए **एक [तेज़ स्वरूपक](./benchmark#formatting)[^5]** है जो **[*Prettier* के साथ ९७% अनुकूलता](https://console.algora.io/challenges/prettier)[^6]** स्कोर[^7] करता है।
 
-**Biome *JavaScript*, *TypeScript* और *JSX* के लिए एक [प्रदर्शनकारी लिंटर](https://github.com/biomejs/biome/tree/main/benchmark#linting)[^8]** है जिसमें ESLint, typescript-eslint और [अन्य स्रोतों](https://github.com/biomejs/biome/discussions/3) से **[२०० से अधिक नियम](https://biomejs.dev/linter/rules/)** शामिल हैं। यह **विस्तृत[^9] और संदर्भिकृत[^10] निदान[^11]** आउटपुट[^12] करता है जो आपको अपना कोड[^13] बेहतर बनाने और एक बेहतर प्रोग्रामर[^14] बनने में मदद करता है!
+**Biome *JavaScript*, *TypeScript* और *JSX* के लिए एक [प्रदर्शनकारी लिंटर](https://github.com/biomejs/biome/tree/main/benchmark#linting)[^8]** है जिसमें ESLint, typescript-eslint और [अन्य स्रोतों](https://github.com/biomejs/biome/discussions/3) से **[२७० से अधिक नियम](https://biomejs.dev/linter/rules/)** शामिल हैं। यह **विस्तृत[^9] और संदर्भिकृत[^10] निदान[^11]** आउटपुट[^12] करता है जो आपको अपना कोड[^13] बेहतर बनाने और एक बेहतर प्रोग्रामर[^14] बनने में मदद करता है!
 
 **Biome** को शुरू से ही [संपादक](https://biomejs.dev/guides/integrate-in-editor/)[^15] [के भीतर अंतरक्रियात्मक](https://biomejs.dev/guides/integrate-in-editor/)[^16] [रूप से](https://biomejs.dev/guides/integrate-in-editor/) उपयोग करने के लिए डिज़ाइन[^17] किया गया है। यह आपके द्वारा लिखे जा रहे विकृत[^18] कोड[^13] को स्वरूप[^5] और लिंट[^8] कर सकता है।
 
@@ -118,16 +118,6 @@ Biome एक सरल प्रायोजन[^37] कार्यक्रम
 ## प्रायोजक[^37]
 
 ### स्वर्ण प्रायोजक[^42]
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
 
 ### रजत प्रायोजक[^43]
 

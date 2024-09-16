@@ -43,6 +43,8 @@ jobs:
         with:
           cache-target: release
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compile
         run: cargo build --release --locked -p xtask_coverage

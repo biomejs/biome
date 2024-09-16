@@ -32,7 +32,7 @@
      https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
 <div align="center">
 
-[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | Português do Brasil | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
+[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | Português do Brasil | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
 
 </div>
 
@@ -40,7 +40,7 @@
 
 **Biome é um [formatador rápido](./benchmark#formatting)** para _JavaScript_, _TypeScript_, _JSX_, e _JSON_ que atinge **[97% de compatibilidade com o _Prettier_](https://console.algora.io/challenges/prettier)**.
 
-**Biome é um [linter eficiente](https://github.com/biomejs/biome/tree/main/benchmark#linting)** para _JavaScript_, _TypeScript_, e _JSX_ que possui **[mais de 190 regras](https://biomejs.dev/linter/rules/)** do ESLint, typescript-eslint, e de [outras fontes](https://github.com/biomejs/biome/discussions/3).
+**Biome é um [linter eficiente](https://github.com/biomejs/biome/tree/main/benchmark#linting)** para _JavaScript_, _TypeScript_, e _JSX_ que possui **[mais de 270 regras](https://biomejs.dev/linter/rules/)** do ESLint, typescript-eslint, e de [outras fontes](https://github.com/biomejs/biome/discussions/3).
 Ele **fornece diagnósticos detalhados e contextualizados** que ajudam você a melhorar seu código e se tornar um programador melhor!
 
 **Biome** é projetado desde o início para ser usado [interativamente dentro de um editor](https://biomejs.dev/guides/integrate-in-editor/).
@@ -96,16 +96,6 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
 ## Patrocinadores
 
 ### Patrocinadores Ouro
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
 
 ### Patrocinadores Bronze
 

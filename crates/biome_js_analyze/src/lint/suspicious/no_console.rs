@@ -25,6 +25,19 @@ declare_lint_rule! {
     /// console.error('hello world')
     /// ```
     ///
+    /// ## Options
+    ///
+    /// Use the options to specify the allowed `console` methods.
+    ///
+    /// ```json
+    /// {
+    ///   "//": "...",
+    ///   "options": {
+    ///     "allow": ["assert", "error", "info", "warn"]
+    ///   }
+    /// }
+    /// ```
+    ///
     pub NoConsole {
         version: "1.6.0",
         name: "noConsole",

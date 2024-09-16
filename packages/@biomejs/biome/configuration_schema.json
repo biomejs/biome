@@ -2132,8 +2132,8 @@
 						{ "type": "null" }
 					]
 				},
-				"noMissingVarFunction": {
-					"description": "Disallow missing var function for css variables.",
+				"noProcessEnv": {
+					"description": "Disallow the use of process.env.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

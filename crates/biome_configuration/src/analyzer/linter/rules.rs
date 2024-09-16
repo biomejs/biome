@@ -3301,10 +3301,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_irregular_whitespace:
         Option<RuleConfiguration<biome_css_analyze::options::NoIrregularWhitespace>>,
-    #[doc = "Disallow missing var function for css variables."]
+    #[doc = "Disallow the use of process.env."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_missing_var_function:
-        Option<RuleConfiguration<biome_css_analyze::options::NoMissingVarFunction>>,
+    pub no_process_env: Option<RuleConfiguration<biome_js_analyze::options::NoProcessEnv>>,
     #[doc = "Disallow specified modules when loaded by import or require."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_restricted_imports:
@@ -3403,7 +3402,7 @@ impl Nursery {
         "noEnum",
         "noExportedImports",
         "noIrregularWhitespace",
-        "noMissingVarFunction",
+        "noProcessEnv",
         "noRestrictedImports",
         "noRestrictedTypes",
         "noSecrets",
@@ -3428,7 +3427,6 @@ impl Nursery {
         "noDuplicateCustomProperties",
         "noDuplicateElseIf",
         "noDuplicatedFields",
-        "noMissingVarFunction",
         "noUnknownPseudoClass",
         "noUnknownPseudoElement",
         "noUselessEscapeInRegex",
@@ -3441,7 +3439,6 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[14]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
@@ -3535,7 +3532,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_missing_var_function.as_ref() {
+        if let Some(rule) = self.no_process_env.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
@@ -3679,7 +3676,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_missing_var_function.as_ref() {
+        if let Some(rule) = self.no_process_env.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
@@ -3847,8 +3844,8 @@ impl Nursery {
                 .no_irregular_whitespace
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "noMissingVarFunction" => self
-                .no_missing_var_function
+            "noProcessEnv" => self
+                .no_process_env
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noRestrictedImports" => self

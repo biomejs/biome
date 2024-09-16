@@ -1,16 +1,18 @@
 use crate::services::manifest::Manifest;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::AnyJsImportLike;
+use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
     /// Disallow the use of dependencies that aren't specified in the `package.json`.
     ///
-    /// Indirect dependencies will trigger the rule because they aren't declared in the `package.json`. This means that if package `@org/foo` has a dependency on `lodash`, and then you use
+    /// Indirect dependencies will trigger the rule because they aren't declared in the `package.json`.
+    /// This means that if the package `@org/foo` has a dependency on `lodash`, and then you use
     /// `import "lodash"` somewhere in your project, the rule will trigger a diagnostic for this import.
     ///
-    /// The rule ignores imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
+    /// The rule ignores imports that are not valid package names.
+    /// This includes internal imports that start with `#` and `@/` and imports with a protocol such as `node:`, `bun:`, `jsr:`, `https:`.
     ///
     /// To ensure that Visual Studio Code uses relative imports when it automatically imports a variable,
     /// you may set [`javascript.preferences.importModuleSpecifier` and `typescript.preferences.importModuleSpecifier`](https://code.visualstudio.com/docs/getstarted/settings) to `relative`.
@@ -53,36 +55,34 @@ impl Rule for NoUndeclaredDependencies {
         }
 
         let token_text = node.inner_string_text()?;
-        let text = token_text.text();
-
-        // Ignore relative path imports
-        // Ignore imports using a protocol such as `node:`, `bun:`, `jsr:`, `https:`, and so on.
-        if text.starts_with('.') || text.contains(':') {
-            return None;
-        }
-
-        let mut parts = text.split('/');
-        let mut pointer = 0;
-        if let Some(maybe_scope) = parts.next() {
-            pointer += maybe_scope.len();
-            if maybe_scope.starts_with('@') {
-                // scoped package: @mui/material/Button
-                // the package name is @mui/material, not @mui
-                pointer += parts.next().map_or(0, |s| s.len() + 1)
-            }
-        }
-        let package_name = &text[..pointer];
-
+        let package_name = parse_package_name(token_text.text())?;
         if ctx.is_dependency(package_name)
             || ctx.is_dev_dependency(package_name)
             || ctx.is_peer_dependency(package_name)
             || ctx.is_optional_dependency(package_name)
             // Self package imports
-            // TODO: we should also check that an `.` exportse exists.
+            // TODO: we should also check that an `.` exports exists.
             // See https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name
             || ctx.name() == Some(package_name)
+            // Ignore `bun` import
+            || package_name == "bun"
         {
             return None;
+        } else if !package_name.starts_with('@') {
+            // Handle DefinitelyTyped imports https://github.com/DefinitelyTyped/DefinitelyTyped
+            // e.g. `lodash` can import typ[es from `@types/lodash`.
+            if let Some(import_clause) = node.parent::<AnyJsImportClause>() {
+                if import_clause.type_token().is_some() {
+                    let package_name = format!("@types/{package_name}");
+                    if ctx.is_dependency(&package_name)
+                        || ctx.is_dev_dependency(&package_name)
+                        || ctx.is_peer_dependency(&package_name)
+                        || ctx.is_optional_dependency(&package_name)
+                    {
+                        return None;
+                    }
+                }
+            }
         }
 
         Some(())
@@ -105,4 +105,73 @@ impl Rule for NoUndeclaredDependencies {
             }),
         )
     }
+}
+
+fn parse_package_name(path: &str) -> Option<&str> {
+    let mut in_scope = false;
+    for (i, c) in path.bytes().enumerate() {
+        match c {
+            b'@' if i == 0 => {
+                in_scope = true;
+            }
+            // uppercase characters are not allowed in package name
+            // and a package name cannot start with an underscore.
+            // Here we are more tolerant and accept them.
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' => {}
+            b'/' => {
+                if in_scope {
+                    if i == 1 {
+                        // Invalid empty scope
+                        // `@/`
+                        return None;
+                    } else {
+                        // We consumed the scope.
+                        // `@scope/`
+                        in_scope = false;
+                    }
+                } else if i == 0 {
+                    // absolute path
+                    return None;
+                } else {
+                    // We consumed the package name
+                    return Some(&path[..i]);
+                }
+            }
+            _ => {
+                return None;
+            }
+        }
+    }
+    // Handle cases where only the scope is given. e.g. `@scope/`
+    (!path.ends_with('/')).then_some(path)
+}
+
+#[test]
+fn test() {
+    assert_eq!(
+        parse_package_name("@scope/package-name"),
+        Some("@scope/package-name")
+    );
+    assert_eq!(
+        parse_package_name("@scope/package-name/path"),
+        Some("@scope/package-name")
+    );
+    assert_eq!(parse_package_name("package_"), Some("package_"));
+    assert_eq!(parse_package_name("package/path"), Some("package"));
+    assert_eq!(parse_package_name("0"), Some("0"));
+    assert_eq!(parse_package_name("0/path"), Some("0"));
+    assert_eq!(parse_package_name("-"), Some("-"));
+    assert_eq!(parse_package_name("-/path"), Some("-"));
+
+    // Invalid package names that we accept
+    assert_eq!(parse_package_name("PACKAGE"), Some("PACKAGE"));
+    assert_eq!(parse_package_name("_"), Some("_"));
+
+    // Invalid package names that we reject
+    assert_eq!(parse_package_name("@/path"), None);
+    assert_eq!(parse_package_name("."), None);
+    assert_eq!(parse_package_name("./path"), None);
+    assert_eq!(parse_package_name("#path"), None);
+    assert_eq!(parse_package_name("/path"), None);
+    assert_eq!(parse_package_name("p@ckage/name"), None);
 }

@@ -33,7 +33,7 @@ validCustomControlComponents.options:7:5 deserialize ━━━━━━━━━
   - noEnum
   - noExportedImports
   - noIrregularWhitespace
-  - noMissingVarFunction
+  - noProcessEnv
   - noRestrictedImports
   - noRestrictedTypes
   - noSecrets
