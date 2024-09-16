@@ -1437,6 +1437,39 @@ fn print_verbose() {
 }
 
 #[test]
+fn print_verbose_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), LINT_ERROR.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("check"),
+                ("--verbose"),
+                "--write",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "print_verbose_write",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
 fn unsupported_file() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
