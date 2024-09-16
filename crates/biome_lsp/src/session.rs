@@ -8,10 +8,11 @@ use anyhow::Result;
 use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
+use biome_deserialize::Merge;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
 use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+    load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
@@ -499,13 +500,43 @@ impl Session {
                     ConfigurationStatus::Error
                 } else {
                     let LoadedConfiguration {
-                        configuration,
+                        configuration: fs_configuration,
                         directory_path: configuration_path,
                         ..
                     } = loaded_configuration;
                     info!("Configuration loaded successfully from disk.");
                     info!("Update workspace settings.");
+
                     let fs = &self.fs;
+                    let should_use_editorconfig =
+                        fs_configuration.use_editorconfig().unwrap_or_default();
+                    let mut configuration = if should_use_editorconfig {
+                        let (editorconfig, editorconfig_diagnostics) = {
+                            let search_path = configuration_path
+                                .clone()
+                                .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
+                            match load_editorconfig(fs, search_path) {
+                                Ok(result) => result,
+                                Err(error) => {
+                                    error!(
+                                        "Failed load the `.editorconfig` file. Reason: {}",
+                                        error
+                                    );
+                                    self.client.log_message(MessageType::ERROR, &error).await;
+                                    return ConfigurationStatus::Error;
+                                }
+                            }
+                        };
+                        for diagnostic in editorconfig_diagnostics {
+                            let message = PrintDescription(&diagnostic).to_string();
+                            self.client.log_message(MessageType::ERROR, message).await;
+                        }
+                        editorconfig.unwrap_or_default()
+                    } else {
+                        Default::default()
+                    };
+
+                    configuration.merge_with(fs_configuration);
 
                     let result =
                         configuration.retrieve_gitignore_matches(fs, configuration_path.as_deref());

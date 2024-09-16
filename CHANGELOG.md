@@ -23,6 +23,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+#### Bug fixes
+
+- Fix [#3923](https://github.com/biomejs/biome/issues/3923). Now the `.editorconfig` is correctly parsed by the LSP, and the options are correctly applied to files when formatting is triggered.
+  Plus, the Biome LSP now watches for any change to the `.editorconfig`, and updates the formatting settings.
+
 ### Formatter
 
 ### JavaScript APIs
