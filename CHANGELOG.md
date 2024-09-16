@@ -31,6 +31,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### Bug fixes
+
+- The CSS parser now accepts the characters U+FFDCF and U+FFFD in identifiers. Contributed by @Conaclos
+
 ## v1.9.1 (2024-09-15)
 
 ### CLI
