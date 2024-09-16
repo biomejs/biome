@@ -2243,6 +2243,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExplicitFunctionReturnType": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
 					"anyOf": [
