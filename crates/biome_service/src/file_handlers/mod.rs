@@ -48,6 +48,7 @@ use tracing::instrument;
 mod astro;
 mod css;
 mod graphql;
+mod grit;
 mod html;
 mod javascript;
 mod json;
