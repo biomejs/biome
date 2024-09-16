@@ -11,23 +11,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
-### Linter 
-
-#### New Features
-
-- Add [nursery/noMissingVarFunction](https://biomejs.dev/linter/rules/no-missing-var-function). Contributed by @michellocana
-
-## v1.9.1 (2024-09-15)
-
 ### Analyzer
 
 ### CLI
 
 #### Bug fixes
 
-- `useEditorConfig` now loads the editorconfig when running `biome ci` [#3864](https://github.com/biomejs/biome/issues/3864). Contributed by @dyc3
-
-- Revert [#3731](https://github.com/biomejs/biome/pull/3731) to fix broken quick fixes and code actions. Contributed by @nhedger
+- Fix [#3917](https://github.com/biomejs/biome/issues/3917), where the fixed files were incorrectly computed. Contributed by @ematipico
 
 ### Configuration
 
@@ -36,6 +26,28 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Formatter
 
 ### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add [nursery/noMissingVarFunction](https://biomejs.dev/linter/rules/no-missing-var-function). Contributed by @michellocana
+
+### Parser
+
+## v1.9.1 (2024-09-15)
+
+### CLI
+
+#### Bug fixes
+
+- `useEditorConfig` now loads the editorconfig when running `biome ci` [#3864](https://github.com/biomejs/biome/issues/3864). Contributed by @dyc3
+
+### Editors
+
+#### Bug fixes
+
+- Revert [#3731](https://github.com/biomejs/biome/pull/3731) to fix broken quick fixes and code actions. Contributed by @nhedger
 
 ### Linter
 
@@ -48,8 +60,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
 
 - [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now ignores `@/` imports and recognizes type imports from Definitely Typed and `bun` imports. Contributed by @Conaclos
-
-### Parser
 
 ## v1.9.0 (2024-09-12)
 

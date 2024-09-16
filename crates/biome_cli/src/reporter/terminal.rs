@@ -37,7 +37,7 @@ impl Reporter for ConsoleReporter {
 )]
 struct EvaluatedPathsDiagnostic {
     #[advice]
-    list: ListAdvice<String>,
+    advice: ListAdvice<String>,
 }
 
 #[derive(Debug, Diagnostic)]
@@ -48,7 +48,7 @@ struct EvaluatedPathsDiagnostic {
 )]
 struct FixedPathsDiagnostic {
     #[advice]
-    list: ListAdvice<String>,
+    advice: ListAdvice<String>,
 }
 
 pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
@@ -82,7 +82,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
 
     fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
-            list: ListAdvice {
+            advice: ListAdvice {
                 list: evaluated_paths
                     .iter()
                     .map(|p| p.display().to_string())
@@ -91,7 +91,7 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
         };
 
         let fixed_paths_diagnostic = FixedPathsDiagnostic {
-            list: ListAdvice {
+            advice: ListAdvice {
                 list: evaluated_paths
                     .iter()
                     .filter(|p| p.was_written())

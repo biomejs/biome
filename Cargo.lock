@@ -175,7 +175,7 @@ dependencies = [
  "biome_text_edit",
  "bpaf",
  "crossbeam",
- "dashmap 6.0.1",
+ "dashmap 6.1.0",
  "hdrhistogram",
  "indexmap 2.5.0",
  "insta",
@@ -1065,7 +1065,7 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "bpaf",
- "dashmap 6.0.1",
+ "dashmap 6.1.0",
  "enumflags2",
  "getrandom 0.2.15",
  "ignore",
@@ -1606,9 +1606,9 @@ dependencies = [
 
 [[package]]
 name = "dashmap"
-version = "6.0.1"
+version = "6.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "804c8821570c3f8b70230c2ba75ffa5c0f9a4189b9a432b6656c536712acae28"
+checksum = "5041cc499144891f3790297212f32a74fb938e5136a14943f338ef9e0ae276cf"
 dependencies = [
  "cfg-if",
  "crossbeam-utils",
@@ -2184,9 +2184,9 @@ dependencies = [
 
 [[package]]
 name = "insta"
-version = "1.39.0"
+version = "1.40.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "810ae6042d48e2c9e9215043563a58a80b877bc863228a74cf10c49d4620a6f5"
+checksum = "6593a41c7a73841868772495db7dc1e8ecab43bb5c0b6da2059246c4b506ab60"
 dependencies = [
  "console",
  "globset",
@@ -2589,7 +2589,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e7fe4d07afdfcf6b1d7fb952e6691d82692a54b71964a377cf49f3e47dac283d"
 dependencies = [
  "cfg-if",
- "dashmap 6.0.1",
+ "dashmap 6.1.0",
  "dunce",
  "indexmap 2.5.0",
  "json-strip-comments",
