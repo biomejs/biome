@@ -32,87 +32,96 @@
      https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
 <div align="center">
 
-[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | English | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
+[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | 繁體中文 | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-BR.md) | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
 
 </div>
 
-**Biome** is a performant toolchain for web projects, it aims to provide developer tools to maintain the health of said projects.
+**Biome** 是一個高效能的 Web 專案工具鏈，旨在提供開發工具以維持這些專案的健康。
 
-**Biome is a [fast formatter](./benchmark#formatting)** for _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ and _GraphQL_ that scores **[97% compatibility with _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome 是一個 [快速格式化工具](./benchmark#formatting)**，支持 _JavaScript_、_TypeScript_、_JSX_、_JSON_、_CSS_ 和 _GraphQL_，其 **與 _Prettier_ 的相容性達到 [97%](https://console.algora.io/challenges/prettier)**。
 
-**Biome is a [performant linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)** for _JavaScript_, _TypeScript_, _JSX_, _CSS_ and _GraphQL_ that features **[more than 270 rules](https://biomejs.dev/linter/rules/)** from ESLint, typescript-eslint, and [other sources](https://github.com/biomejs/biome/discussions/3).
-It **outputs detailed and contextualized diagnostics** that help you to improve your code and become a better programmer!
+**Biome 是一個 [高效能的語法檢查工具](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，支持 _JavaScript_、_TypeScript_、_JSX_、_CSS_ 和 _GraphQL_，擁有來自 ESLint、typescript-eslint 和 [其他來源](https://github.com/biomejs/biome/discussions/3)的 **超過 270 條規則**。
+它 **輸出詳細且具上下文的診斷資訊**，幫助你改進程式碼並成為更好的程式設計師！
 
-**Biome** is designed from the start to be used [interactively within an editor](https://biomejs.dev/guides/integrate-in-editor/).
-It can format and lint malformed code as you are writing it.
+**Biome** 從一開始就設計為可在 [編輯器中互動使用](https://biomejs.dev/guides/integrate-in-editor/)。
+它可以在你編寫程式碼時格式化和檢查錯誤的程式碼。
 
-### Installation
+### 安裝
 
 ```shell
 npm install --save-dev --save-exact @biomejs/biome
 ```
 
-### Usage
+### 使用
 
 ```shell
-# format files
+# 格式化文件
 npx @biomejs/biome format --write ./src
 
-# lint files and apply the safe fixes
+# 檢查文件並應用安全的修正
 npx @biomejs/biome lint --write ./src
 
-# run format, lint, etc. and apply the safe fixes
+# 執行格式化、檢查等並應用安全的修正
 npx @biomejs/biome check --write ./src
 
-# check all files against format, lint, etc. in CI environments
+# 在 CI 環境中檢查所有文件的格式、檢查等
 npx @biomejs/biome ci ./src
 ```
 
-If you want to give Biome a run without installing it, use the [online playground](https://biomejs.dev/playground/), compiled to WebAssembly.
+如果你想在不安裝 Biome 的情況下運行它，請使用 [線上 Playground](https://biomejs.dev/playground/)，他被編譯為 WebAssembly。
 
-## Documentation
+## 文件
 
-Check out our [homepage][biomejs] to learn more about Biome,
-or directly head to the [Getting Started guide][getting-started] to start using Biome.
+訪問我們的[首頁][biomejs]以了解更多關於 Biome 的資訊，
+或直接前往[入門指南][getting-started]開始使用 Biome。
 
-## More about Biome
+## 關於 Biome 的更多資訊
 
-**Biome** has sane defaults and it doesn't require configuration.
+**Biome** 擁有合理的預設設定，無需配置。
 
-**Biome** aims to support [all main languages][language-support] of modern web development.
+**Biome** 旨在支持現代 Web 開發的 [所有主要開發語言][language-support]。
 
-**Biome** [doesn't require Node.js](https://biomejs.dev/guides/manual-installation/) to function.
+**Biome** [不需要 Node.js](https://biomejs.dev/guides/manual-installation/) 即可運行。
 
-**Biome** has first-class LSP support, with a sophisticated parser that represents the source text in full fidelity and top-notch error recovery.
+**Biome** 擁有一流的 LSP 支持，配備了能完整保留原文的先進解析器和頂級的錯誤修復能力。
 
-**Biome** unifies functionality that has previously been separate tools. Building upon a shared base allows us to provide a cohesive experience for processing code, displaying errors, parallelize work, caching, and configuration.
+**Biome** 整合了以前分離的工具功能。基於共享基礎構建，讓我們能夠為程式碼處理、錯誤顯示、並行工作、快取記憶體和配置提供一致的體驗。
 
-Read more about our [project philosophy][biome-philosophy].
+閱讀更多關於我們的[專案理念][biome-philosophy]。
 
-**Biome** is [MIT licensed](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) or [Apache 2.0 licensed](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE) and moderated under the [Contributor Covenant Code of Conduct](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md).
+**Biome** 採用 [MIT 授權](https://github.com/biomejs/biome/tree/main/LICENSE-MIT) 或 [Apache 2.0 授權](https://github.com/biomejs/biome/tree/main/LICENSE-APACHE)，並根據 [貢獻者公約行為準則](https://github.com/biomejs/biome/tree/main/CODE_OF_CONDUCT.md) 進行管理。
 
-## Funding
+## 資金支持
 
-You can fund the project in different ways
+你可以通過不同的方式支持這個專案
 
-### Project sponsorship and funding
+### 專案贊助和資金支持
 
-You can sponsor or fund the project via [Open collective](https://opencollective.com/biome) or [GitHub sponsors](https://github.com/sponsors/biomejs)
+你可以通過 [Open Collective](https://opencollective.com/biome) 或 [GitHub Sponsors](https://github.com/sponsors/biomejs) 贊助或資助這個專案。
 
-Biome offers a simple sponsorship program that allows companies to get visibility and recognition among various developers.
+Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中獲得可見性和認可。
 
-### Issue funding
+### 問題資金支持
 
-We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific features that you would like to see and implement. Check our backlog and help us:
+我們使用 [Polar.sh](https://polar.sh/biomejs) 來提升和推廣你希望看到和實現的特定功能。查看我們的待辦事項並幫助我們：
 
 <a href="https://polar.sh/biomejs"><img src="https://polar.sh/embed/fund-our-backlog.svg?org=biomejs" /></a>
 
+## 贊助商
 
-## Sponsors
+### 金牌贊助商
 
-### Gold Sponsors
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-### Silver Sponsors
+### 銀牌贊助商
 
 <table>
   <tbody>
@@ -127,7 +136,7 @@ We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific feat
   </tbody>
 </table>
 
-### Bronze Sponsors
+### 銅牌贊助商
 
 <table>
   <tbody>
