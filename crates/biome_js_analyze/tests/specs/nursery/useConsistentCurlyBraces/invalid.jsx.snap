@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
 expression: invalid.jsx
 ---
 # Input
@@ -16,6 +17,8 @@ expression: invalid.jsx
 }</Foo>
 
 <Foo>{/*comment*/'Hello world'/*comment*/}</Foo>
+
+<Foo>{x}{'y'}{z}</Foo>
 </>
 
 ```
@@ -123,8 +126,8 @@ invalid.jsx:12:6 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━
     11 │ 
   > 12 │ <Foo>{/*comment*/'Hello world'/*comment*/}</Foo>
        │      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    13 │ </>
-    14 │ 
+    13 │ 
+    14 │ <Foo>{x}{'y'}{z}</Foo>
   
   i JSX child does not need to be wrapped in curly braces.
   
@@ -134,8 +137,29 @@ invalid.jsx:12:6 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━
     11 11 │   
     12    │ - <Foo>{/*comment*/'Hello·world'/*comment*/}</Foo>
        12 │ + <Foo>{/*comment*/}Hello·world{/*comment*/}</Foo>
-    13 13 │   </>
-    14 14 │   
+    13 13 │   
+    14 14 │   <Foo>{x}{'y'}{z}</Foo>
   
+
+```
+
+```
+invalid.jsx:14:9 lint/nursery/useConsistentCurlyBraces  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Should not have curly braces around expression.
+  
+    12 │ <Foo>{/*comment*/'Hello world'/*comment*/}</Foo>
+    13 │ 
+  > 14 │ <Foo>{x}{'y'}{z}</Foo>
+       │         ^^^^^
+    15 │ </>
+    16 │ 
+  
+  i JSX child does not need to be wrapped in curly braces.
+  
+  i Unsafe fix: Remove curly braces around the expression.
+  
+    14 │ <Foo>{x}{'y'}{z}</Foo>
+       │         -- --         
 
 ```
