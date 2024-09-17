@@ -70,7 +70,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) no longer suggests names with a disallowed case. Contributed by @Conaclos
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) no longer suggests names with a disallowed case ([#3952](https://github.com/biomejs/biome/issues/3952)). Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now recognizes file names starting with ASCII digits as lowercase ([#3952](https://github.com/biomejs/biome/issues/3952)).
+
+  Thus, `2024-09-17-filename`, `2024_09_17_filename` and `20240917FileName` are in `kebab-case`, `snake_case`, and `camelCase` respectively.
+
+  Contributed by @Conaclos
 
 - [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
 
