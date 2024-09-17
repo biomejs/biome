@@ -1,9 +1,10 @@
 use crate::comments::{FormatGritLeadingComment, GritCommentStyle, GritComments};
 use biome_formatter::{
-    CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, QuoteStyle, TransformSourceMap,
+    AttributePosition, CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth,
+    LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
 };
 use biome_grit_syntax::GritLanguage;
+use std::fmt::Display;
 use std::rc::Rc;
 
 #[allow(dead_code)]
@@ -50,14 +51,14 @@ impl CstFormatContext for GritFormatContext {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
-
+#[derive(Debug, Default, Clone)]
 pub struct GritFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
     quote_style: QuoteStyle,
+    attribute_position: AttributePosition,
 }
 
 impl GritFormatOptions {
@@ -68,6 +69,7 @@ impl GritFormatOptions {
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
+            attribute_position: AttributePosition::default(),
         }
     }
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
@@ -117,6 +119,20 @@ impl GritFormatOptions {
 
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
+    }
+
+    pub fn attribute_position(&self) -> AttributePosition {
+        self.attribute_position
+    }
+}
+
+impl Display for GritFormatOptions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Indent style: {}", self.indent_style)?;
+        writeln!(f, "Indent width: {}", self.indent_width.value())?;
+        writeln!(f, "Line ending: {}", self.line_ending)?;
+        writeln!(f, "Line width: {}", self.line_width.value())?;
+        writeln!(f, "Attribute Position: {}", self.attribute_position)
     }
 }
 

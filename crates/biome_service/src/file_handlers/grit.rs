@@ -1,4 +1,5 @@
 use crate::settings::ServiceLanguage;
+use biome_grit_formatter::context::GritFormatOptions;
 use biome_grit_syntax::GritLanguage;
 
 impl ServiceLanguage for GritLanguage {
