@@ -277,19 +277,31 @@ impl Rule for UseFilenamingConvention {
                 }
                 let suggested_filenames = allowed_cases
                     .into_iter()
-                    .map(|case| file_name.replacen(trimmed_name, &case.convert(trimmed_name), 1))
+                    .filter_map(|case| {
+                        let new_trimmed_name = case.convert(trimmed_name);
+                        // Filter out names that have not an allowed case
+                        if allowed_cases.contains(Case::identify(&new_trimmed_name, options.strict_case)) {
+                            Some(file_name.replacen(trimmed_name, &new_trimmed_name, 1))
+                        } else {
+                            None
+                        }
+                    })
                     // Deduplicate suggestions
                     .collect::<FxHashSet<_>>()
                     .into_iter()
                     .collect::<SmallVec<[_; 3]>>()
                     .join("\n");
-                Some(RuleDiagnostic::new(
+                let diagnostic = RuleDiagnostic::new(
                     rule_category!(),
                     None as Option<TextRange>,
                     markup! {
                         "The filename"{trimmed_info}" should be in "<Emphasis>{allowed_case_names}</Emphasis>"."
                     },
-                ).note(markup! {
+                );
+                if suggested_filenames.is_empty() {
+                    return Some(diagnostic);
+                }
+                Some(diagnostic.note(markup! {
                     "The filename could be renamed to one of the following names:\n"{suggested_filenames}
                 }))
             },

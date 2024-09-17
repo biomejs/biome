@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: 0_start_with_digit.ts
+---
+# Input
+```ts
+
+```
+
+# Diagnostics
+```
+0_start_with_digit.ts lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The filename should be in camelCase or kebab-case or snake_case or equal to the name of an export.
+  
+
+```
