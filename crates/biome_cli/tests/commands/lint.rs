@@ -3266,7 +3266,7 @@ fn no_unused_dependencies() {
     "enabled": true,
     "rules": {
       "all": false,
-      "nursery": {
+      "correctness": {
         "noUndeclaredDependencies": "error"
       }
     }
