@@ -250,10 +250,7 @@ fn generate_enums(len: usize, array: std::slice::Iter<&str>, enum_name: &str) ->
     let mut from_enum_metadata = Vec::with_capacity(len);
     let mut from_string_metadata = Vec::with_capacity(len);
     for property in array {
-        let name = Ident::new(
-            &Case::Pascal.convert(&property.replace('-', "_")),
-            Span::call_site(),
-        );
+        let name = Ident::new(&Case::Pascal.convert(property), Span::call_site());
         let property = Literal::string(property);
         from_enum_metadata.push(quote! {
             #enum_name::#name => #property
