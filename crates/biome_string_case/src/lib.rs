@@ -13,40 +13,42 @@ use std::borrow::Cow;
 /// The arrow means "is subset of".
 ///
 /// ```svgbob
-///                    ┌──► Pascal ────────────┐
-/// NumberableCapital ─┤                       │
-///                    └──► Upper ─► Constant ─┤
-///                                            ├──► Unknown
-///                    ┌──► Camel ─────────────┤
-///             Lower ─┤                       │
-///                    └──► Kebab ─────────────┤
-///                    │                       │
-///                    └──► Snake ─────────────┤
-///                                            │
-///               Uni ─────────────────────────┘
+///                     ┌──► Pascal ────────────┐
+/// NumberableCapital ──┤                       │
+///                     └──► Upper ─► Constant ─┤
+///                                             ├──► Unknown
+///                     ┌──► Camel ─────────────┤
+///         ┌──► Lower ─┤                       │
+///         │           └──► Kebab ─────────────┤
+/// Number ─┤           │                       │
+///         │           └──► Snake ─────────────┤
+///         │                                   │
+///         └──► Uni ───────────────────────────┘
 /// ```
 ///
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord)]
 #[repr(u16)]
 pub enum Case {
+    /// ASCII numbers
+    Number = 1 << 0,
     /// Alphanumeric Characters that cannot be in lowercase or uppercase (numbers and syllabary)
-    Uni = 1 << 0,
+    Uni = Case::Number as u16 | 1 << 1,
     /// A, B1, C42
-    NumberableCapital = 1 << 1,
+    NumberableCapital = 1 << 2,
     /// UPPERCASE
-    Upper = Case::NumberableCapital as u16 | 1 << 2,
+    Upper = Case::NumberableCapital as u16 | 1 << 3,
     // CONSTANT_CASE
-    Constant = Case::Upper as u16 | 1 << 3,
+    Constant = Case::Upper as u16 | 1 << 4,
     /// PascalCase
-    Pascal = Case::NumberableCapital as u16 | 1 << 4,
+    Pascal = Case::NumberableCapital as u16 | 1 << 5,
     /// lowercase
-    Lower = 1 << 5,
+    Lower = Case::Number as u16 | 1 << 6,
     /// snake_case
-    Snake = Case::Lower as u16 | 1 << 6,
+    Snake = Case::Lower as u16 | 1 << 7,
     /// kebab-case
-    Kebab = Case::Lower as u16 | 1 << 7,
+    Kebab = Case::Lower as u16 | 1 << 8,
     // camelCase
-    Camel = Case::Lower as u16 | 1 << 8,
+    Camel = Case::Lower as u16 | 1 << 9,
     /// Unknown case
     #[default]
     Unknown = Case::Camel as u16
@@ -55,7 +57,7 @@ pub enum Case {
         | Case::Pascal as u16
         | Case::Constant as u16
         | Case::Uni as u16
-        | 1 << 9,
+        | 1 << 10,
 }
 
 impl Case {
@@ -95,7 +97,7 @@ impl Case {
     ///
     /// assert_eq!(Case::identify("HTTPSERVER", /* no effect */ true), Case::Upper);
     ///
-    /// assert_eq!(Case::identify("100", /* no effect */ true), Case::Uni);
+    /// assert_eq!(Case::identify("100", /* no effect */ true), Case::Number);
     /// assert_eq!(Case::identify("안녕하세요", /* no effect */ true), Case::Uni);
     ///
     /// assert_eq!(Case::identify("", /* no effect */ true), Case::Unknown);
@@ -107,10 +109,12 @@ impl Case {
         let Some(first_char) = chars.next() else {
             return Case::Unknown;
         };
-        let mut result = if first_char.is_uppercase() {
-            Case::NumberableCapital
-        } else if first_char.is_lowercase() {
+        let mut result = if first_char.is_lowercase() {
             Case::Lower
+        } else if first_char.is_uppercase() {
+            Case::NumberableCapital
+        } else if first_char.is_ascii_digit() {
+            Case::Number
         } else if first_char.is_alphanumeric() {
             Case::Uni
         } else {
@@ -121,13 +125,13 @@ impl Case {
         for current_char in chars {
             result = match current_char {
                 '-' => match result {
-                    Case::Kebab | Case::Lower if previous_char != '-' => Case::Kebab,
+                    Case::Kebab | Case::Lower | Case::Number if previous_char != '-' => Case::Kebab,
                     _ => return Case::Unknown,
                 },
                 '_' => match result {
                     Case::Constant | Case::Snake if previous_char != '_' => result,
                     Case::NumberableCapital | Case::Upper => Case::Constant,
-                    Case::Lower => Case::Snake,
+                    Case::Lower | Case::Number => Case::Snake,
                     _ => return Case::Unknown,
                 },
                 _ if current_char.is_uppercase() => {
@@ -137,20 +141,21 @@ impl Case {
                             return Case::Unknown
                         }
                         Case::Camel | Case::Constant | Case::Pascal => result,
-                        Case::Lower => Case::Camel,
+                        Case::Lower | Case::Number => Case::Camel,
                         Case::NumberableCapital | Case::Upper => Case::Upper,
                         _ => return Case::Unknown,
                     }
                 }
                 _ if current_char.is_lowercase() => match result {
+                    Case::Number => Case::Lower,
                     Case::Camel | Case::Kebab | Case::Lower | Case::Snake => result,
                     Case::Pascal | Case::NumberableCapital => Case::Pascal,
                     Case::Upper if !strict || !has_consecutive_uppercase => Case::Pascal,
                     _ => return Case::Unknown,
                 },
-                _ if current_char.is_numeric() => result,
-                _ if current_char.is_alphabetic() => match result {
-                    Case::Uni => Case::Uni,
+                '0'..='9' => result,
+                _ if current_char.is_alphanumeric() => match result {
+                    Case::Number | Case::Uni => Case::Uni,
                     _ => return Case::Unknown,
                 },
                 _ => return Case::Unknown,
@@ -189,7 +194,7 @@ impl Case {
     /// assert_eq!(Case::Upper.convert("Http_SERVER"), "HTTPSERVER");
     /// ```
     pub fn convert(self, value: &str) -> String {
-        if value.is_empty() || matches!(self, Case::Unknown) {
+        if value.is_empty() || matches!(self, Case::Unknown | Case::Number) {
             return value.to_string();
         }
         let mut word_separator = matches!(self, Case::Pascal);
@@ -213,6 +218,7 @@ impl Case {
                 match self {
                     Case::Camel
                     | Case::Lower
+                    | Case::Number
                     | Case::NumberableCapital
                     | Case::Pascal
                     | Case::Unknown
@@ -242,7 +248,7 @@ impl Case {
                 }
                 Case::Kebab | Case::Snake | Case::Lower => output.extend(current.to_lowercase()),
                 Case::Uni => output.extend(Some(current)),
-                Case::Unknown => (),
+                Case::Number | Case::Unknown => (),
             }
             word_separator = false;
             if let Some(next) = next {
@@ -258,15 +264,16 @@ impl Case {
 impl std::fmt::Display for Case {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
-            Case::Unknown => "unknown case",
             Case::Camel => "camelCase",
             Case::Constant => "CONSTANT_CASE",
             Case::Kebab => "kebab-case",
             Case::Lower => "lowercase",
+            Case::Number => "number case",
             Case::NumberableCapital => "numberable capital case",
             Case::Pascal => "PascalCase",
             Case::Snake => "snake_case",
             Case::Uni => "unicase",
+            Case::Unknown => "unknown case",
             Case::Upper => "UPPERCASE",
         };
         write!(f, "{repr}")
@@ -394,7 +401,8 @@ impl Iterator for CasesIterator {
 }
 impl std::iter::FusedIterator for CasesIterator {}
 
-const LEADING_BIT_INDEX_TO_CASE: [Case; 10] = [
+const LEADING_BIT_INDEX_TO_CASE: [Case; 11] = [
+    Case::Number,
     Case::Uni,
     Case::NumberableCapital,
     Case::Upper,
@@ -460,15 +468,20 @@ mod tests {
     fn test_case_identify() {
         let no_effect = true;
 
+        assert_eq!(Case::identify("100", no_effect), Case::Number);
+
         assert_eq!(Case::identify("aHttpServer", no_effect), Case::Camel);
         assert_eq!(Case::identify("aHTTPServer", true), Case::Unknown);
         assert_eq!(Case::identify("aHTTPServer", false), Case::Camel);
         assert_eq!(Case::identify("v8Engine", no_effect), Case::Camel);
+        assert_eq!(Case::identify("2024Edition", no_effect), Case::Camel);
 
         assert_eq!(Case::identify("HTTP_SERVER", no_effect), Case::Constant);
         assert_eq!(Case::identify("V8_ENGINE", no_effect), Case::Constant);
+        assert_eq!(Case::identify("2024_EDITION", no_effect), Case::Unknown);
 
         assert_eq!(Case::identify("http-server", no_effect), Case::Kebab);
+        assert_eq!(Case::identify("2024-edition", no_effect), Case::Kebab);
 
         assert_eq!(Case::identify("httpserver", no_effect), Case::Lower);
 
@@ -481,19 +494,21 @@ mod tests {
         assert_eq!(Case::identify("V8Engine", true), Case::Pascal);
 
         assert_eq!(Case::identify("http_server", no_effect), Case::Snake);
+        assert_eq!(Case::identify("2024_edition", no_effect), Case::Snake);
 
         assert_eq!(Case::identify("HTTPSERVER", no_effect), Case::Upper);
+        assert_eq!(Case::identify("2024EDITION", no_effect), Case::Unknown);
 
-        assert_eq!(Case::identify("100", no_effect), Case::Uni);
+        assert_eq!(Case::identify("100안녕하세요", no_effect), Case::Uni);
         assert_eq!(Case::identify("안녕하세요", no_effect), Case::Uni);
 
-        // don't allow identifier that starts/ends with a delimiter
+        // don't allow identifiers that starts/ends with a delimiter
         assert_eq!(Case::identify("-a", no_effect), Case::Unknown);
         assert_eq!(Case::identify("_a", no_effect), Case::Unknown);
         assert_eq!(Case::identify("a-", no_effect), Case::Unknown);
         assert_eq!(Case::identify("a_", no_effect), Case::Unknown);
 
-        // don't allow identifier that use consecutive delimiters
+        // don't allow identifiers that use consecutive delimiters
         assert_eq!(Case::identify("a--a", no_effect), Case::Unknown);
         assert_eq!(Case::identify("a__a", no_effect), Case::Unknown);
 
@@ -718,6 +733,7 @@ mod tests {
         assert_eq!(vec(Case::Constant).as_slice(), &[Case::Constant]);
         assert_eq!(vec(Case::Upper).as_slice(), &[Case::Upper]);
         assert_eq!(vec(Case::Uni).as_slice(), &[Case::Uni]);
+        assert_eq!(vec(Case::Number).as_slice(), &[Case::Number]);
         assert_eq!(
             vec(Case::NumberableCapital).as_slice(),
             &[Case::NumberableCapital]
@@ -764,6 +780,11 @@ mod tests {
         assert_eq!(vec(Case::Camel | Case::Lower).as_slice(), &[Case::Camel]);
         assert_eq!(vec(Case::Kebab | Case::Lower).as_slice(), &[Case::Kebab]);
         assert_eq!(vec(Case::Snake | Case::Lower).as_slice(), &[Case::Snake]);
+
+        assert_eq!(vec(Case::Lower | Case::Number).as_slice(), &[Case::Lower]);
+        assert_eq!(vec(Case::Camel | Case::Number).as_slice(), &[Case::Camel]);
+        assert_eq!(vec(Case::Kebab | Case::Number).as_slice(), &[Case::Kebab]);
+        assert_eq!(vec(Case::Snake | Case::Number).as_slice(), &[Case::Snake]);
 
         assert_eq!(
             vec(Case::Constant | Case::Upper).as_slice(),

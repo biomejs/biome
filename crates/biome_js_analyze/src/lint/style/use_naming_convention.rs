@@ -1903,6 +1903,7 @@ impl TryFrom<Case> for Format {
             Case::Snake => Ok(Format::Snake),
             Case::Kebab
             | Case::Lower
+            | Case::Number
             | Case::NumberableCapital
             | Case::Uni
             | Case::Upper

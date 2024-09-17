@@ -164,7 +164,7 @@ impl Rule for UseFilenamingConvention {
             if !name.ends_with(ends)
                 || !name[..name.len() - count]
                     .chars()
-                    .all(|c| c.is_alphanumeric())
+                    .all(|c| c.is_alphanumeric() || matches!(c, '-' | '_'))
             {
                 return Some(FileNamingConventionState::Filename);
             }
