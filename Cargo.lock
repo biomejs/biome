@@ -1056,6 +1056,7 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_grit_formatter",
+ "biome_grit_parser",
  "biome_grit_patterns",
  "biome_grit_syntax",
  "biome_html_formatter",

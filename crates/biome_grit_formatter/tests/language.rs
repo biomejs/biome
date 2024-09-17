@@ -8,7 +8,6 @@ pub struct GritTestFormatLanguage;
 
 impl TestFormatLanguage for GritTestFormatLanguage {
     type ServiceLanguage = GritLanguage;
-
     type Context = GritFormatContext;
 
     type FormatLanguage = GritFormatLanguage;
