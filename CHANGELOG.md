@@ -23,6 +23,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+#### Bug fixes
+
+- Fix [#3923](https://github.com/biomejs/biome/issues/3923). Now the `.editorconfig` is correctly parsed by the LSP, and the options are correctly applied to files when formatting is triggered.
+  Plus, the Biome LSP now watches for any change to the `.editorconfig`, and updates the formatting settings.
+
 ### Formatter
 
 ### JavaScript APIs
@@ -34,6 +39,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/noMissingVarFunction](https://biomejs.dev/linter/rules/no-missing-var-function). Contributed by @michellocana
 
 ### Parser
+
+#### Bug fixes
+
+- [useStrictMode](https://biomejs.dev/linter/rules/use-strict-mode/) now reports Script files with dome diretcives, but without the `use strict` directive. Contributed by @Conaclos
+
+- The CSS parser now accepts the characters U+FFDCF and U+FFFD in identifiers. Contributed by @Conaclos
 
 ## v1.9.1 (2024-09-15)
 

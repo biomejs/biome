@@ -270,6 +270,8 @@ impl Rule for UseConsistentCurlyBraces {
 
                     let child_list = node.parent::<JsxChildList>()?;
                     let mut children = vec![];
+                    let mut iter = (&child_list).into_iter();
+                    children.extend(iter.by_ref().take_while(|c| c != node));
                     if let Some(leading_comments_expr) = leading_comments_expr {
                         children.push(leading_comments_expr);
                     }
@@ -277,6 +279,7 @@ impl Rule for UseConsistentCurlyBraces {
                     if let Some(trailing_comments_expr) = trailing_comments_expr {
                         children.push(trailing_comments_expr);
                     }
+                    children.extend(iter);
                     let new_child_list = make::jsx_child_list(children);
 
                     mutation.replace_element_discard_trivia(

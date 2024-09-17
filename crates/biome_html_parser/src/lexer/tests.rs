@@ -48,7 +48,7 @@ fn losslessness(string: String) -> bool {
 // Assert the result of lexing a piece of source code,
 // and make sure the tokens yielded are fully lossless and the source can be reconstructed from only the tokens
 macro_rules! assert_lex {
-    ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
+    ($context:expr, $src:expr, $($kind:ident:$len:expr $(,)?)*) => {{
         let mut lexer = HtmlLexer::from_str($src);
         let mut idx = 0;
         let mut tok_idx = TextSize::default();
@@ -56,7 +56,7 @@ macro_rules! assert_lex {
         let mut new_str = String::with_capacity($src.len());
         let mut tokens = vec![];
 
-        while lexer.next_token(HtmlLexContext::default()) != EOF {
+        while lexer.next_token($context) != EOF {
             tokens.push((lexer.current(), lexer.current_range()));
         }
 
@@ -97,6 +97,9 @@ macro_rules! assert_lex {
 
         assert_eq!($src, new_str, "Failed to reconstruct input");
     }};
+    ($src:expr, $($kind:ident:$len:expr $(,)?)*) => {
+        assert_lex!(HtmlLexContext::default(), $src, $($kind:$len,)*);
+    };
 }
 
 #[test]
@@ -150,17 +153,11 @@ fn element() {
 }
 
 #[test]
-fn element_with_text() {
+fn html_text() {
     assert_lex! {
-        "<div>abcdefghijklmnopqrstuvwxyz!@_-:;</div>",
-        L_ANGLE: 1,
-        HTML_LITERAL: 3,
-        R_ANGLE: 1,
+        HtmlLexContext::OutsideTag,
+        "abcdefghijklmnopqrstuvwxyz!@_-:;",
         HTML_LITERAL: 32,
-        L_ANGLE: 1,
-        SLASH: 1,
-        HTML_LITERAL: 3,
-        R_ANGLE: 1,
     }
 }
 
@@ -229,5 +226,27 @@ fn html_element() {
         SLASH: 1,
         HTML_LITERAL: 4,
         R_ANGLE: 1,
+    }
+}
+
+#[test]
+fn html_text_spaces() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "Lorem ipsum dolor sit amet, consectetur.",
+        HTML_LITERAL: 40,
+    }
+}
+
+#[test]
+fn html_text_spaces_with_lines() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "Lorem ipsum dolor sit
+        amet, consectetur.",
+        HTML_LITERAL: 21,
+        NEWLINE: 1,
+        WHITESPACE: 8,
+        HTML_LITERAL: 18,
     }
 }

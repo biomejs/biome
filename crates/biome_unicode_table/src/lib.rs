@@ -13,6 +13,7 @@ pub fn is_html_id_start(c: char) -> bool {
 }
 
 /// Is `c` a CSS non-ascii character.
+/// See https://drafts.csswg.org/css-syntax-3/#ident-token-diagram
 #[inline]
 pub fn is_css_non_ascii(c: char) -> bool {
     matches!(
@@ -29,8 +30,8 @@ pub fn is_css_non_ascii(c: char) -> bool {
         | 0x2070..=0x218F
         | 0x2C00..=0x2FEF
         | 0x3001..=0xD7FF
-        | 0xF900..0xFDCF
-        | 0xFDF0..0xFFFD
+        | 0xF900..=0xFDCF
+        | 0xFDF0..=0xFFFD
         | 0x10000..
     )
 }
