@@ -1,6 +1,6 @@
 mod tests;
 
-use crate::token_source::HtmlLexContext;
+use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
     COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
     TOMBSTONE, UNICODE_BOM, WHITESPACE,
@@ -108,6 +108,32 @@ impl<'src> HtmlLexer<'src> {
                 self.consume_identifier(current, true)
             }
             _ => self.consume_unexpected_character(),
+        }
+    }
+
+    /// Consume an embedded language in its entirety. Stops immediately before the closing tag.
+    fn consume_token_embedded_language(
+        &mut self,
+        _current: u8,
+        lang: HtmlEmbededLanguage,
+    ) -> HtmlSyntaxKind {
+        let start = self.text_position();
+        let end_tag = lang.end_tag();
+        while self.current_byte().is_some() {
+            if self.source[self.position..(self.position + end_tag.len())]
+                .eq_ignore_ascii_case(end_tag)
+            {
+                break;
+            }
+            self.advance(1);
+        }
+
+        if self.text_position() != start {
+            HTML_LITERAL
+        } else {
+            // if the element is empty, we will immediately hit the closing tag.
+            // we HAVE to consume something, so we start consuming the closing tag.
+            self.consume_byte(T![<])
         }
     }
 
@@ -442,6 +468,9 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::OutsideTag => self.consume_token_outside_tag(current),
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
                     HtmlLexContext::Doctype => self.consume_token_doctype(current),
+                    HtmlLexContext::EmbeddedLanguage(lang) => {
+                        self.consume_token_embedded_language(current, lang)
+                    }
                 },
                 None => EOF,
             }

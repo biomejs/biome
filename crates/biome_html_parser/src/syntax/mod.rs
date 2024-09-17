@@ -2,7 +2,7 @@ mod parse_error;
 
 use crate::parser::HtmlParser;
 use crate::syntax::parse_error::*;
-use crate::token_source::HtmlLexContext;
+use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -19,6 +19,9 @@ static VOID_ELEMENTS: &[&str] = &[
     "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track",
     "wbr",
 ];
+
+/// For these elements, the content is treated as raw text and no parsing is done inside them. This is so that the contents of these tags can be parsed by a different parser.
+pub(crate) static EMBEDDED_LANGUAGE_ELEMENTS: &[&str] = &["script", "style"];
 
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
@@ -76,6 +79,9 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
     let should_be_self_closing = VOID_ELEMENTS
         .iter()
         .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
+    let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
+        .iter()
+        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
     parse_literal(p).or_add_diagnostic(p, expected_element_name);
 
     AttributeList.parse_list(p);
@@ -92,7 +98,18 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
             p.expect_with_context(T![>], HtmlLexContext::OutsideTag);
             return Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT));
         }
-        p.expect_with_context(T![>], HtmlLexContext::OutsideTag);
+        p.expect_with_context(
+            T![>],
+            if is_embedded_language_tag {
+                HtmlLexContext::EmbeddedLanguage(match opening_tag_name.as_str() {
+                    tag if tag.eq_ignore_ascii_case("script") => HtmlEmbededLanguage::Script,
+                    tag if tag.eq_ignore_ascii_case("style") => HtmlEmbededLanguage::Style,
+                    _ => unreachable!(),
+                })
+            } else {
+                HtmlLexContext::OutsideTag
+            },
+        );
         let opening = m.complete(p, HTML_OPENING_ELEMENT);
         loop {
             ElementList.parse_list(p);
