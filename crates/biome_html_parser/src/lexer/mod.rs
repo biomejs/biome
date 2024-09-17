@@ -33,8 +33,6 @@ pub(crate) struct HtmlLexer<'src> {
     after_newline: bool,
 
     unicode_bom_length: usize,
-
-    after_doctype: bool,
 }
 
 impl<'src> HtmlLexer<'src> {
@@ -49,24 +47,22 @@ impl<'src> HtmlLexer<'src> {
             after_newline: false,
             current_flags: TokenFlags::empty(),
             unicode_bom_length: 0,
-            after_doctype: false,
         }
     }
+
+    /// Consume a token in the [HtmlLexContext::Regular] context.
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'<' => self.consume_l_angle(),
-            b'>' => {
-                self.after_doctype = false;
-                self.consume_byte(T![>])
-            }
+            b'>' => self.consume_byte(T![>]),
             b'/' => self.consume_byte(T![/]),
             b'=' => self.consume_byte(T![=]),
             b'!' => self.consume_byte(T![!]),
             b'\'' | b'"' => self.consume_string_literal(current),
             // TODO: differentiate between attribute names and identifiers
             _ if is_identifier_byte(current) || is_attribute_name_byte(current) => {
-                self.consume_identifier(current)
+                self.consume_identifier(current, false)
             }
             _ => {
                 if self.position == 0 {
@@ -80,6 +76,7 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consume a token in the [HtmlLexContext::OutsideTag] context.
     fn consume_token_outside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
@@ -88,6 +85,7 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consume a token in the [HtmlLexContext::AttributeValue] context.
     fn consume_token_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
@@ -95,6 +93,21 @@ impl<'src> HtmlLexer<'src> {
             b'>' => self.consume_byte(T![>]),
             b'\'' | b'"' => self.consume_string_literal(current),
             _ => self.consume_unquoted_string_literal(),
+        }
+    }
+
+    /// Consume a token in the [HtmlLexContext::Doctype] context.
+    fn consume_token_doctype(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' => self.consume_byte(T![<]),
+            b'>' => self.consume_byte(T![>]),
+            b'!' => self.consume_byte(T![!]),
+            b'\'' | b'"' => self.consume_string_literal(current),
+            _ if is_identifier_byte(current) || is_attribute_name_byte(current) => {
+                self.consume_identifier(current, true)
+            }
+            _ => self.consume_unexpected_character(),
         }
     }
 
@@ -125,7 +138,7 @@ impl<'src> HtmlLexer<'src> {
         debug_assert!(self.source.is_char_boundary(self.position));
     }
 
-    fn consume_identifier(&mut self, first: u8) -> HtmlSyntaxKind {
+    fn consume_identifier(&mut self, first: u8, doctype_context: bool) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
 
         const BUFFER_SIZE: usize = 14;
@@ -149,11 +162,8 @@ impl<'src> HtmlLexer<'src> {
         }
 
         match &buffer[..len] {
-            b"doctype" | b"DOCTYPE" => {
-                self.after_doctype = true;
-                DOCTYPE_KW
-            }
-            b"html" | b"HTML" if self.after_doctype => HTML_KW,
+            b"doctype" | b"DOCTYPE" => DOCTYPE_KW,
+            b"html" | b"HTML" if doctype_context => HTML_KW,
             _ => HTML_LITERAL,
         }
     }
@@ -431,6 +441,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::Regular => self.consume_token(current),
                     HtmlLexContext::OutsideTag => self.consume_token_outside_tag(current),
                     HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
+                    HtmlLexContext::Doctype => self.consume_token_doctype(current),
                 },
                 None => EOF,
             }
