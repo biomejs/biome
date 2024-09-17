@@ -40,11 +40,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [nursery/noMissingVarFunction](https://biomejs.dev/linter/rules/no-missing-var-function). Contributed by @michellocana
 
+#### Bug fixes
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) no longer suggests names with a disallowed case ([#3952](https://github.com/biomejs/biome/issues/3952)). Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now recognizes file names starting with ASCII digits as lowercase ([#3952](https://github.com/biomejs/biome/issues/3952)).
+
+  Thus, `2024-09-17-filename`, `2024_09_17_filename` and `20240917FileName` are in `kebab-case`, `snake_case`, and `camelCase` respectively.
+
+  Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now applies the configured formats to the file extensions ([#3650](https://github.com/biomejs/biome/discussions/3650)). Contributed by @Conaclos
+
 ### Parser
 
 #### Bug fixes
 
-- [useStrictMode](https://biomejs.dev/linter/rules/use-strict-mode/) now reports Script files with dome diretcives, but without the `use strict` directive. Contributed by @Conaclos
+- [useStrictMode](https://biomejs.dev/linter/rules/use-strict-mode/) now reports Script files with some directives, but without the `use strict` directive. Contributed by @Conaclos
 
 - The CSS parser now accepts the characters U+FFDCF and U+FFFD in identifiers. Contributed by @Conaclos
 
@@ -69,14 +81,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/noProcessEnv](https://biomejs.dev/linter/rules/no-process-env/). Contributed by @unvalley
 
 #### Bug fixes
-
-- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) no longer suggests names with a disallowed case ([#3952](https://github.com/biomejs/biome/issues/3952)). Contributed by @Conaclos
-
-- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now recognizes file names starting with ASCII digits as lowercase ([#3952](https://github.com/biomejs/biome/issues/3952)).
-
-  Thus, `2024-09-17-filename`, `2024_09_17_filename` and `20240917FileName` are in `kebab-case`, `snake_case`, and `camelCase` respectively.
-
-  Contributed by @Conaclos
 
 - [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
 
