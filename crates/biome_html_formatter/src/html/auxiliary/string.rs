@@ -12,22 +12,32 @@ impl FormatNodeRule<HtmlString> for FormatHtmlString {
             let value_text = value.text().trim();
 
             if !(value_text.starts_with('"') && value_text.ends_with('"')) {
-                let range = if value_text.starts_with('\'') && value_text.ends_with('\'') {
+                let contains_double_quote = value_text.contains('"');
+
+                let range = if value_text.starts_with('\'')
+                    && value_text.ends_with('\'')
+                    && !contains_double_quote
+                {
                     value.text_range().add_start(1.into()).sub_end(1.into())
                 } else {
                     value.text_range()
                 };
-                write!(
-                    f,
-                    [format_replaced(
-                        value,
-                        &group(&format_args![
-                            text("\""),
-                            located_token_text(value, range),
-                            text("\""),
-                        ])
-                    )]
-                )?;
+
+                if !contains_double_quote {
+                    write!(
+                        f,
+                        [format_replaced(
+                            value,
+                            &group(&format_args![
+                                text("\""),
+                                located_token_text(value, range),
+                                text("\""),
+                            ])
+                        )]
+                    )?;
+                } else {
+                    value.format().fmt(f)?;
+                }
                 return Ok(());
             }
         }
