@@ -161,5 +161,5 @@ fn is_whitespace(c: char) -> bool {
     matches!(c, ' ' | '\t' | '\n')
 }
 fn is_ident_char(c: char) -> bool {
-    matches!(c, 'a'..='z' | 'A'..='Z' | '_' | '0'..='9')
+    matches!(c, 'a'..='z' | 'A'..='Z' | '_' )
 }
