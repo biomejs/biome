@@ -214,7 +214,7 @@ fn parse_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_NAME))
 }
 
-fn parse_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(HTML_STRING_LITERAL) {
         return Absent;
     }
@@ -230,7 +230,7 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    p.bump(T![=]);
-    parse_string_literal(p).or_add_diagnostic(p, expected_initializer);
+    p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
+    parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
 }
