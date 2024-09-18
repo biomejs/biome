@@ -16,10 +16,6 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::MarkdownSyntaxNode::kind(&node) {
-                $crate::MarkdownSyntaxKind::ANY_MARKDOWN_SETEXT_HEADER => {
-                    let $pattern = unsafe { $crate::AnyMarkdownSetextHeader::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MARKDOWN_BREAK_BLOCK => {
                     let $pattern = unsafe { $crate::MarkdownBreakBlock::new_unchecked(node) };
                     $body
@@ -90,6 +86,10 @@ macro_rules! map_syntax_node {
                 }
                 $crate::MarkdownSyntaxKind::MARKDOWN_QUOTE => {
                     let $pattern = unsafe { $crate::MarkdownQuote::new_unchecked(node) };
+                    $body
+                }
+                $crate::MarkdownSyntaxKind::MARKDOWN_SETEXT_HEADER => {
+                    let $pattern = unsafe { $crate::MarkdownSetextHeader::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MARKDOWN_SOFT_BREAK => {

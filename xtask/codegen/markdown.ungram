@@ -48,7 +48,7 @@ MarkdownBlockList = AnyMarkdownBlock*
 
 AnyMarkdownBlock = AnyLeafBlock  | AnyContainerBlock
 
-AnyLeafBlock = MarkdownBreakBlock | MarkdownHeader | AnyMarkdownSetextHeader 
+AnyLeafBlock = MarkdownBreakBlock | MarkdownHeader | MarkdownSetextHeader
                 | AnyCodeBlock | MarkdownHtmlBlock | MarkdownLinkBlock | MarkdownParagraph
 
 AnyContainerBlock = MarkdownQuote | MarkdownBulletListItem | MarkdownOrderListItem
@@ -68,7 +68,7 @@ MarkdownHash = '#'
 // ===
 // bar
 // ---
-AnyMarkdownSetextHeader  = MarkdownParagraph
+MarkdownSetextHeader  = MarkdownParagraph
 
 // indented code blocks & fenced code blocks
 AnyCodeBlock = MarkdownIndentCodeBlock | MarkdownFencedCodeBlock

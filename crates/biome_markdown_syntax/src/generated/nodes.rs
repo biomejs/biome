@@ -24,41 +24,6 @@ use std::fmt::{Debug, Formatter};
 #[allow(dead_code)]
 pub(crate) const SLOT_MAP_EMPTY_VALUE: u8 = u8::MAX;
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct AnyMarkdownSetextHeader {
-    pub(crate) syntax: SyntaxNode,
-}
-impl AnyMarkdownSetextHeader {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> AnyMarkdownSetextHeaderFields {
-        AnyMarkdownSetextHeaderFields {
-            markdown_paragraph: self.markdown_paragraph(),
-        }
-    }
-    pub fn markdown_paragraph(&self) -> SyntaxResult<MarkdownParagraph> {
-        support::required_node(&self.syntax, 0usize)
-    }
-}
-impl Serialize for AnyMarkdownSetextHeader {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct AnyMarkdownSetextHeaderFields {
-    pub markdown_paragraph: SyntaxResult<MarkdownParagraph>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MarkdownBreakBlock {
     pub(crate) syntax: SyntaxNode,
 }
@@ -739,6 +704,41 @@ pub struct MarkdownQuoteFields {
     pub any_markdown_block: SyntaxResult<AnyMarkdownBlock>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct MarkdownSetextHeader {
+    pub(crate) syntax: SyntaxNode,
+}
+impl MarkdownSetextHeader {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> MarkdownSetextHeaderFields {
+        MarkdownSetextHeaderFields {
+            markdown_paragraph: self.markdown_paragraph(),
+        }
+    }
+    pub fn markdown_paragraph(&self) -> SyntaxResult<MarkdownParagraph> {
+        support::required_node(&self.syntax, 0usize)
+    }
+}
+impl Serialize for MarkdownSetextHeader {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct MarkdownSetextHeaderFields {
+    pub markdown_paragraph: SyntaxResult<MarkdownParagraph>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MarkdownSoftBreak {
     pub(crate) syntax: SyntaxNode,
 }
@@ -856,23 +856,17 @@ impl AnyContainerBlock {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyLeafBlock {
     AnyCodeBlock(AnyCodeBlock),
-    AnyMarkdownSetextHeader(AnyMarkdownSetextHeader),
     MarkdownBreakBlock(MarkdownBreakBlock),
     MarkdownHeader(MarkdownHeader),
     MarkdownHtmlBlock(MarkdownHtmlBlock),
     MarkdownLinkBlock(MarkdownLinkBlock),
     MarkdownParagraph(MarkdownParagraph),
+    MarkdownSetextHeader(MarkdownSetextHeader),
 }
 impl AnyLeafBlock {
     pub fn as_any_code_block(&self) -> Option<&AnyCodeBlock> {
         match &self {
             AnyLeafBlock::AnyCodeBlock(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_any_markdown_setext_header(&self) -> Option<&AnyMarkdownSetextHeader> {
-        match &self {
-            AnyLeafBlock::AnyMarkdownSetextHeader(item) => Some(item),
             _ => None,
         }
     }
@@ -903,6 +897,12 @@ impl AnyLeafBlock {
     pub fn as_markdown_paragraph(&self) -> Option<&MarkdownParagraph> {
         match &self {
             AnyLeafBlock::MarkdownParagraph(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_markdown_setext_header(&self) -> Option<&MarkdownSetextHeader> {
+        match &self {
+            AnyLeafBlock::MarkdownSetextHeader(item) => Some(item),
             _ => None,
         }
     }
@@ -985,47 +985,6 @@ impl AnyMarkdownInline {
             AnyMarkdownInline::MarkdownTextual(item) => Some(item),
             _ => None,
         }
-    }
-}
-impl AstNode for AnyMarkdownSetextHeader {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(ANY_MARKDOWN_SETEXT_HEADER as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == ANY_MARKDOWN_SETEXT_HEADER
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for AnyMarkdownSetextHeader {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("AnyMarkdownSetextHeader")
-            .field(
-                "markdown_paragraph",
-                &support::DebugSyntaxResult(self.markdown_paragraph()),
-            )
-            .finish()
-    }
-}
-impl From<AnyMarkdownSetextHeader> for SyntaxNode {
-    fn from(n: AnyMarkdownSetextHeader) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<AnyMarkdownSetextHeader> for SyntaxElement {
-    fn from(n: AnyMarkdownSetextHeader) -> SyntaxElement {
-        n.syntax.into()
     }
 }
 impl AstNode for MarkdownBreakBlock {
@@ -1758,6 +1717,47 @@ impl From<MarkdownQuote> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for MarkdownSetextHeader {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(MARKDOWN_SETEXT_HEADER as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == MARKDOWN_SETEXT_HEADER
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for MarkdownSetextHeader {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("MarkdownSetextHeader")
+            .field(
+                "markdown_paragraph",
+                &support::DebugSyntaxResult(self.markdown_paragraph()),
+            )
+            .finish()
+    }
+}
+impl From<MarkdownSetextHeader> for SyntaxNode {
+    fn from(n: MarkdownSetextHeader) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<MarkdownSetextHeader> for SyntaxElement {
+    fn from(n: MarkdownSetextHeader) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for MarkdownSoftBreak {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -1985,11 +1985,6 @@ impl From<AnyContainerBlock> for SyntaxElement {
         node.into()
     }
 }
-impl From<AnyMarkdownSetextHeader> for AnyLeafBlock {
-    fn from(node: AnyMarkdownSetextHeader) -> AnyLeafBlock {
-        AnyLeafBlock::AnyMarkdownSetextHeader(node)
-    }
-}
 impl From<MarkdownBreakBlock> for AnyLeafBlock {
     fn from(node: MarkdownBreakBlock) -> AnyLeafBlock {
         AnyLeafBlock::MarkdownBreakBlock(node)
@@ -2015,37 +2010,42 @@ impl From<MarkdownParagraph> for AnyLeafBlock {
         AnyLeafBlock::MarkdownParagraph(node)
     }
 }
+impl From<MarkdownSetextHeader> for AnyLeafBlock {
+    fn from(node: MarkdownSetextHeader) -> AnyLeafBlock {
+        AnyLeafBlock::MarkdownSetextHeader(node)
+    }
+}
 impl AstNode for AnyLeafBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCodeBlock::KIND_SET
-        .union(AnyMarkdownSetextHeader::KIND_SET)
         .union(MarkdownBreakBlock::KIND_SET)
         .union(MarkdownHeader::KIND_SET)
         .union(MarkdownHtmlBlock::KIND_SET)
         .union(MarkdownLinkBlock::KIND_SET)
-        .union(MarkdownParagraph::KIND_SET);
+        .union(MarkdownParagraph::KIND_SET)
+        .union(MarkdownSetextHeader::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            ANY_MARKDOWN_SETEXT_HEADER
-            | MARKDOWN_BREAK_BLOCK
+            MARKDOWN_BREAK_BLOCK
             | MARKDOWN_HEADER
             | MARKDOWN_HTML_BLOCK
             | MARKDOWN_LINK_BLOCK
-            | MARKDOWN_PARAGRAPH => true,
+            | MARKDOWN_PARAGRAPH
+            | MARKDOWN_SETEXT_HEADER => true,
             k if AnyCodeBlock::can_cast(k) => true,
             _ => false,
         }
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
-            ANY_MARKDOWN_SETEXT_HEADER => {
-                AnyLeafBlock::AnyMarkdownSetextHeader(AnyMarkdownSetextHeader { syntax })
-            }
             MARKDOWN_BREAK_BLOCK => AnyLeafBlock::MarkdownBreakBlock(MarkdownBreakBlock { syntax }),
             MARKDOWN_HEADER => AnyLeafBlock::MarkdownHeader(MarkdownHeader { syntax }),
             MARKDOWN_HTML_BLOCK => AnyLeafBlock::MarkdownHtmlBlock(MarkdownHtmlBlock { syntax }),
             MARKDOWN_LINK_BLOCK => AnyLeafBlock::MarkdownLinkBlock(MarkdownLinkBlock { syntax }),
             MARKDOWN_PARAGRAPH => AnyLeafBlock::MarkdownParagraph(MarkdownParagraph { syntax }),
+            MARKDOWN_SETEXT_HEADER => {
+                AnyLeafBlock::MarkdownSetextHeader(MarkdownSetextHeader { syntax })
+            }
             _ => {
                 if let Some(any_code_block) = AnyCodeBlock::cast(syntax) {
                     return Some(AnyLeafBlock::AnyCodeBlock(any_code_block));
@@ -2057,23 +2057,23 @@ impl AstNode for AnyLeafBlock {
     }
     fn syntax(&self) -> &SyntaxNode {
         match self {
-            AnyLeafBlock::AnyMarkdownSetextHeader(it) => &it.syntax,
             AnyLeafBlock::MarkdownBreakBlock(it) => &it.syntax,
             AnyLeafBlock::MarkdownHeader(it) => &it.syntax,
             AnyLeafBlock::MarkdownHtmlBlock(it) => &it.syntax,
             AnyLeafBlock::MarkdownLinkBlock(it) => &it.syntax,
             AnyLeafBlock::MarkdownParagraph(it) => &it.syntax,
+            AnyLeafBlock::MarkdownSetextHeader(it) => &it.syntax,
             AnyLeafBlock::AnyCodeBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
         match self {
-            AnyLeafBlock::AnyMarkdownSetextHeader(it) => it.syntax,
             AnyLeafBlock::MarkdownBreakBlock(it) => it.syntax,
             AnyLeafBlock::MarkdownHeader(it) => it.syntax,
             AnyLeafBlock::MarkdownHtmlBlock(it) => it.syntax,
             AnyLeafBlock::MarkdownLinkBlock(it) => it.syntax,
             AnyLeafBlock::MarkdownParagraph(it) => it.syntax,
+            AnyLeafBlock::MarkdownSetextHeader(it) => it.syntax,
             AnyLeafBlock::AnyCodeBlock(it) => it.into_syntax(),
         }
     }
@@ -2082,12 +2082,12 @@ impl std::fmt::Debug for AnyLeafBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyLeafBlock::AnyCodeBlock(it) => std::fmt::Debug::fmt(it, f),
-            AnyLeafBlock::AnyMarkdownSetextHeader(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownBreakBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownHeader(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownLinkBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MarkdownParagraph(it) => std::fmt::Debug::fmt(it, f),
+            AnyLeafBlock::MarkdownSetextHeader(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -2095,12 +2095,12 @@ impl From<AnyLeafBlock> for SyntaxNode {
     fn from(n: AnyLeafBlock) -> SyntaxNode {
         match n {
             AnyLeafBlock::AnyCodeBlock(it) => it.into(),
-            AnyLeafBlock::AnyMarkdownSetextHeader(it) => it.into(),
             AnyLeafBlock::MarkdownBreakBlock(it) => it.into(),
             AnyLeafBlock::MarkdownHeader(it) => it.into(),
             AnyLeafBlock::MarkdownHtmlBlock(it) => it.into(),
             AnyLeafBlock::MarkdownLinkBlock(it) => it.into(),
             AnyLeafBlock::MarkdownParagraph(it) => it.into(),
+            AnyLeafBlock::MarkdownSetextHeader(it) => it.into(),
         }
     }
 }
@@ -2341,11 +2341,6 @@ impl std::fmt::Display for AnyMarkdownInline {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for AnyMarkdownSetextHeader {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for MarkdownBreakBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -2432,6 +2427,11 @@ impl std::fmt::Display for MarkdownParagraph {
     }
 }
 impl std::fmt::Display for MarkdownQuote {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for MarkdownSetextHeader {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
