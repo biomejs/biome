@@ -1,0 +1,124 @@
+// Markdown Un-Grammar.
+//
+// This grammar specifies the structure of Rust's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+// Tokens are processed -- contextual keywords are recognised, compound operators glued.
+//
+// Legend:
+//
+//   //          				-- comment
+//   Name =      				-- non-terminal definition
+//   'ident'     				-- token (terminal)
+//   A B         				-- sequence
+//   A | B       				-- alternation
+//   A*          				-- zero or more repetition
+//   (A (',' A)* ','?)	        -- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)	            -- repetition of node A separated by ',' without a trailing comma
+//   A?          				-- zero or one repetition
+//   (A)         				-- same as A
+//   label:A     				-- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+
+
+///////////////
+// BOGUS NODES
+///////////////
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+
+SyntaxElement = SyntaxElement
+
+MarkdownBogus = SyntaxElement*
+
+MarkdownDocument = 
+	bom: 'UNICODE_BOM'?
+    value: MarkdownBlockList
+    eof: 'EOF'
+
+MarkdownBlockList = AnyMarkdownBlock*
+
+AnyMarkdownBlock = AnyLeafBlock  | AnyContainerBlock
+
+AnyLeafBlock = MarkdownBreakBlock | MarkdownHeader | MarkdownSetextHeader
+                | AnyCodeBlock | MarkdownHtmlBlock | MarkdownLinkBlock | MarkdownParagraph
+
+AnyContainerBlock = MarkdownQuote | MarkdownBulletListItem | MarkdownOrderListItem
+
+
+
+// h1..h6
+MarkdownHeader = before:MarkdownHashList MarkdownParagraph? after:MarkdownHashList
+
+MarkdownHashList = MarkdownHash*
+
+MarkdownHash = '#'
+
+
+// setext title
+// foo
+// ===
+// bar
+// ---
+MarkdownSetextHeader  = MarkdownParagraph
+
+// indented code blocks & fenced code blocks
+AnyCodeBlock = MarkdownIndentCodeBlock | MarkdownFencedCodeBlock
+
+// [    ] xxx
+MarkdownIndentCodeBlock = MarkdownTextual
+// ~~~ 
+// xxx
+// ~~~
+MarkdownFencedCodeBlock = MarkdownTextual
+
+// html block
+MarkdownHtmlBlock = MarkdownTextual 
+
+MarkdownLinkBlock = label: MarkdownTextual
+                url: MarkdownTextual
+                title: MarkdownTextual?
+
+MarkdownQuote = AnyMarkdownBlock
+
+MarkdownBulletListItem = MarkdownBulletList
+MarkdownOrderListItem = MarkdownBulletList
+
+
+MarkdownBulletList = AnyCodeBlock*
+MarkdownOrderList = AnyCodeBlock*
+
+
+MarkdownParagraph = MarkdownParagraphItemList
+
+MarkdownParagraphItemList = AnyMarkdownInline*
+
+AnyMarkdownInline = MarkdownInlineCode | MarkdownInlineEmphasis | MarkdownInlineLink | MarkdownInlineImage
+               |  MarkdownHtmlBlock | MarkdownHardLine | MarkdownSoftBreak
+                | MarkdownTextual
+MarkdownInlineCode = MarkdownTextual
+MarkdownInlineEmphasis = MarkdownTextual
+MarkdownInlineLink = label: MarkdownTextual
+                    url: MarkdownTextual
+                    title: MarkdownTextual?
+
+MarkdownInlineImage = alt: MarkdownTextual
+                    src: MarkdownTextual
+                    title: MarkdownTextual?
+
+MarkdownHardLine = value: 'markdown_hard_line_literal'
+MarkdownSoftBreak = value: 'markdown_soft_break_literal'
+MarkdownTextual = value: 'markdown_textual_literal'
+MarkdownIndent = value: 'markdown_indent_chunk_literal'
+// ***
+// ---
+// ___
+MarkdownBreakBlock = value: 'markdown_break_block_literal'
