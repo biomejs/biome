@@ -41,36 +41,34 @@ MarkdownBogus = SyntaxElement*
 
 MarkdownDocument = 
 	bom: 'UNICODE_BOM'?
-    value: AnyMarkdownBlock
+    value: MarkdownBlockList
     eof: 'EOF'
 
 MarkdownBlockList = AnyMarkdownBlock*
 
 AnyMarkdownBlock = AnyLeafBlock  | AnyContainerBlock
 
-AnyLeafBlock = MarkdownBreakBlock | AnyMarkdownHeader | AnyMakrdownSetextHeader 
-                | AnyCodeBlock | MarkdownHTMLBlock | MarkdownLinkBlock | MarkdownParagraph
+AnyLeafBlock = MarkdownBreakBlock | MarkdownHeader | AnyMarkdownSetextHeader 
+                | AnyCodeBlock | MarkdownHtmlBlock | MarkdownLinkBlock | MarkdownParagraph
 
 AnyContainerBlock = MarkdownQuote | MarkdownBulletListItem | MarkdownOrderListItem
 
 
 
 // h1..h6
-AnyMarkdownHeader = MarkdownH1 | MarkdownH2 | MarkdownH3| MarkdownH4| MarkdownH5| MarkdownH6
+MarkdownHeader = before:MarkdownHashList MarkdownParagraph? after:MarkdownHashList
 
-MarkdownH1 = MarkdownParagraph?
-MarkdownH2 =  MarkdownParagraph?
-MarkdownH3 =  MarkdownParagraph?
-MarkdownH4 =  MarkdownParagraph?
-MarkdownH5 =  MarkdownParagraph?
-MarkdownH6 =  MarkdownParagraph?
+MarkdownHashList = MarkdownHash*
+
+MarkdownHash = '#'
+
 
 // setext title
 // foo
 // ===
 // bar
 // ---
-AnyMakrdownSetextHeader = MarkdownSetextH1 | MarkdownSetextH2
+AnyMarkdownSetextHeader  = MarkdownSetextH1 | MarkdownSetextH2
 MarkdownSetextH1 = MarkdownParagraph
 MarkdownSetextH2 = MarkdownParagraph
 
@@ -85,7 +83,7 @@ MarkdownIndentCodeBlock = MarkdownTextual
 MarkdownFencedCodeBlock = MarkdownTextual
 
 // html block
-MarkdownHTMLBlock = MarkdownTextual 
+MarkdownHtmlBlock = MarkdownTextual 
 
 MarkdownLinkBlock = label: MarkdownTextual
                 url: MarkdownTextual
@@ -106,7 +104,7 @@ MarkdownParagraph = MarkdownParagraphItemList
 MarkdownParagraphItemList = AnyMarkdownInline*
 
 AnyMarkdownInline = MarkdownInlineCode | MarkdownInlineEmphasis | MarkdownInlineLink | MarkdownInlineImage
-               |  MarkdownHTMLBlock | MarkdownHardLine | MarkdownSoftBreak
+               |  MarkdownHtmlBlock | MarkdownHardLine | MarkdownSoftBreak
                 | MarkdownTextual
 MarkdownInlineCode = MarkdownTextual
 MarkdownInlineEmphasis = MarkdownTextual
