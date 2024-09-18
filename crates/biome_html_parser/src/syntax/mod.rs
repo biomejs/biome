@@ -41,11 +41,23 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
     p.bump(T![!]);
 
     if p.at(T![doctype]) {
-        p.eat(T![doctype]);
+        p.eat_with_context(T![doctype], HtmlLexContext::Doctype);
     }
 
     if p.at(T![html]) {
-        p.eat(T![html]);
+        p.eat_with_context(T![html], HtmlLexContext::Doctype);
+    }
+
+    if p.at(HTML_LITERAL) {
+        p.eat_with_context(HTML_LITERAL, HtmlLexContext::Doctype);
+    }
+
+    if p.at(HTML_STRING_LITERAL) {
+        p.eat_with_context(HTML_STRING_LITERAL, HtmlLexContext::Doctype);
+    }
+
+    if p.at(HTML_STRING_LITERAL) {
+        p.eat_with_context(HTML_STRING_LITERAL, HtmlLexContext::Doctype);
     }
 
     p.eat(T![>]);

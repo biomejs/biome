@@ -27,6 +27,10 @@ pub(crate) enum HtmlLexContext {
     ///
     /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
     AttributeValue,
+    /// Enables the `html` keyword token.
+    ///
+    /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
+    Doctype,
 }
 
 impl LexContext for HtmlLexContext {
