@@ -304,6 +304,13 @@ impl DocumentFileSource {
         }
     }
 
+    pub fn to_html_file_source(&self) -> Option<HtmlFileSource> {
+        match self {
+            DocumentFileSource::Html(html) => Some(*html),
+            _ => None,
+        }
+    }
+
     pub fn can_parse(path: &Path, content: &str) -> bool {
         let file_source = DocumentFileSource::from(path);
         match file_source {
