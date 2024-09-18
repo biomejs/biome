@@ -83,10 +83,6 @@ impl TypeContext {
     pub const TYPE_OR_INTERFACE_DECLARATION: Self =
         Self(make_bitflags!(ContextFlag::{TypeOrInterfaceDeclaration}));
 
-    pub const fn empty() -> Self {
-        Self(BitFlags::EMPTY)
-    }
-
     pub fn contains(&self, other: impl Into<TypeContext>) -> bool {
         self.0.contains(other.into().0)
     }

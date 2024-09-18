@@ -8,10 +8,7 @@ use std::path::Path;
 type RuleQueryResult<R> = <<R as Rule>::Query as Queryable>::Output;
 type RuleServiceBag<R> = <<R as Rule>::Query as Queryable>::Services;
 
-pub struct RuleContext<'a, R>
-where
-    R: ?Sized + Rule,
-{
+pub struct RuleContext<'a, R: Rule> {
     query_result: &'a RuleQueryResult<R>,
     root: &'a RuleRoot<R>,
     bag: &'a ServiceBag,

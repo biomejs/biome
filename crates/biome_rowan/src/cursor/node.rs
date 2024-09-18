@@ -476,9 +476,8 @@ impl SyntaxNodeChildren {
 impl Iterator for SyntaxNodeChildren {
     type Item = SyntaxNode;
     fn next(&mut self) -> Option<SyntaxNode> {
-        self.next.take().map(|next| {
+        self.next.take().inspect(|next| {
             self.next = next.next_sibling();
-            next
         })
     }
 }
@@ -501,9 +500,8 @@ impl SyntaxElementChildren {
 impl Iterator for SyntaxElementChildren {
     type Item = SyntaxElement;
     fn next(&mut self) -> Option<SyntaxElement> {
-        self.next.take().map(|next| {
+        self.next.take().inspect(|next| {
             self.next = next.next_sibling_or_token();
-            next
         })
     }
 }
