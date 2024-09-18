@@ -3,6 +3,14 @@
 use crate::{generated::nodes::*, MarkdownSyntaxToken as SyntaxToken};
 use biome_rowan::AstNode;
 use std::iter::once;
+impl AnyMarkdownSetextHeader {
+    pub fn with_markdown_paragraph(self, element: MarkdownParagraph) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+}
 impl MarkdownBreakBlock {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -201,22 +209,6 @@ impl MarkdownParagraph {
 }
 impl MarkdownQuote {
     pub fn with_any_markdown_block(self, element: AnyMarkdownBlock) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl MarkdownSetextH1 {
-    pub fn with_markdown_paragraph(self, element: MarkdownParagraph) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
-impl MarkdownSetextH2 {
-    pub fn with_markdown_paragraph(self, element: MarkdownParagraph) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),

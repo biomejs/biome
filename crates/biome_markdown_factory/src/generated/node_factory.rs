@@ -7,6 +7,14 @@ use biome_markdown_syntax::{
     MarkdownSyntaxToken as SyntaxToken, *,
 };
 use biome_rowan::AstNode;
+pub fn any_markdown_setext_header(
+    markdown_paragraph: MarkdownParagraph,
+) -> AnyMarkdownSetextHeader {
+    AnyMarkdownSetextHeader::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::ANY_MARKDOWN_SETEXT_HEADER,
+        [Some(SyntaxElement::Node(markdown_paragraph.into_syntax()))],
+    ))
+}
 pub fn markdown_break_block(value_token: SyntaxToken) -> MarkdownBreakBlock {
     MarkdownBreakBlock::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_BREAK_BLOCK,
@@ -249,18 +257,6 @@ pub fn markdown_quote(any_markdown_block: AnyMarkdownBlock) -> MarkdownQuote {
     MarkdownQuote::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MARKDOWN_QUOTE,
         [Some(SyntaxElement::Node(any_markdown_block.into_syntax()))],
-    ))
-}
-pub fn markdown_setext_h1(markdown_paragraph: MarkdownParagraph) -> MarkdownSetextH1 {
-    MarkdownSetextH1::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MARKDOWN_SETEXT_H1,
-        [Some(SyntaxElement::Node(markdown_paragraph.into_syntax()))],
-    ))
-}
-pub fn markdown_setext_h2(markdown_paragraph: MarkdownParagraph) -> MarkdownSetextH2 {
-    MarkdownSetextH2::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MARKDOWN_SETEXT_H2,
-        [Some(SyntaxElement::Node(markdown_paragraph.into_syntax()))],
     ))
 }
 pub fn markdown_soft_break(value_token: SyntaxToken) -> MarkdownSoftBreak {
