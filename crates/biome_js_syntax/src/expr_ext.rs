@@ -85,8 +85,7 @@ impl JsReferenceIdentifier {
     /// ```
     pub fn has_name(&self, name: &str) -> bool {
         self.value_token()
-            .map(|token| token.text_trimmed() == name)
-            .unwrap_or_default()
+            .is_ok_and(|token| token.text_trimmed() == name)
     }
 
     pub fn name(&self) -> SyntaxResult<TokenText> {

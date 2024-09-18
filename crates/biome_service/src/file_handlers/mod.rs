@@ -1006,8 +1006,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
 
         let organize_imports_enabled = self
             .settings
-            .map(|settings| settings.organize_imports.enabled)
-            .unwrap_or_default();
+            .is_some_and(|settings| settings.organize_imports.enabled);
         if organize_imports_enabled && self.import_sorting.match_rule::<R>() {
             self.enabled_rules.push(self.import_sorting);
             return;

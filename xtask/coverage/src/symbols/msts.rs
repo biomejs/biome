@@ -242,12 +242,16 @@ struct SymbolsFile {
 }
 
 /// This function parses lines like:
+///
+/// ```ignore
 /// >Cell : Symbol(Cell, Decl(2dArrays.ts, 0, 0))
 ///   |              |     |     |         \--+---> line and column ofthe first char of the leading trivia where the declaration
 ///   |              |     |     \--> File where the declaration of this symbol is
 ///   |              |     \--> States that this Symbol is a declaration
 ///   |              \--> Complete Path of the Symbol
 ///   \--> text of the symbol
+/// ```
+///
 /// To understand how the Typescript codebase generate this line
 /// see xtask\coverage\Typescript\src\harness\typeWriter.ts
 fn parse_symbol(input: &str) -> Option<Symbol> {
