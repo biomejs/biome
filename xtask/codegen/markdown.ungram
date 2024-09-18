@@ -68,9 +68,7 @@ MarkdownHash = '#'
 // ===
 // bar
 // ---
-AnyMarkdownSetextHeader  = MarkdownSetextH1 | MarkdownSetextH2
-MarkdownSetextH1 = MarkdownParagraph
-MarkdownSetextH2 = MarkdownParagraph
+AnyMarkdownSetextHeader  = MarkdownParagraph
 
 // indented code blocks & fenced code blocks
 AnyCodeBlock = MarkdownIndentCodeBlock | MarkdownFencedCodeBlock
