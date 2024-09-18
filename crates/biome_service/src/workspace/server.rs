@@ -311,24 +311,19 @@ impl WorkspaceServer {
             || settings.files.included_files.matches_path(path);
         !is_included
             || settings.files.ignored_files.matches_path(path)
-            || settings
-                .files
-                .git_ignore
-                .as_ref()
-                .map(|ignore| {
-                    // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
-                    // This checks excludes absolute paths that are not a prefix of the base root.
-                    if !path.has_root() || path.starts_with(ignore.path()) {
-                        // Because Biome passes a list of paths,
-                        // we use `matched_path_or_any_parents` instead of `matched`.
-                        ignore
-                            .matched_path_or_any_parents(path, path.is_dir())
-                            .is_ignore()
-                    } else {
-                        false
-                    }
-                })
-                .unwrap_or_default()
+            || settings.files.git_ignore.as_ref().is_some_and(|ignore| {
+                // `matched_path_or_any_parents` panics if `source` is not under the gitignore root.
+                // This checks excludes absolute paths that are not a prefix of the base root.
+                if !path.has_root() || path.starts_with(ignore.path()) {
+                    // Because Biome passes a list of paths,
+                    // we use `matched_path_or_any_parents` instead of `matched`.
+                    ignore
+                        .matched_path_or_any_parents(path, path.is_dir())
+                        .is_ignore()
+                } else {
+                    false
+                }
+            })
     }
 
     /// Check whether a file is ignored in the feature `ignore`/`include`

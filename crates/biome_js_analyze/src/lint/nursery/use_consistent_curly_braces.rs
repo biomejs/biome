@@ -386,20 +386,17 @@ fn has_curly_braces(node: &AnyJsxCurlyQuery) -> bool {
 }
 
 fn contains_string_literal(node: &JsxExpressionAttributeValue) -> bool {
-    node.expression()
-        .map(|expr| {
-            matches!(
-                expr,
-                AnyJsExpression::AnyJsLiteralExpression(
-                    AnyJsLiteralExpression::JsStringLiteralExpression(_)
-                )
+    node.expression().is_ok_and(|expr| {
+        matches!(
+            expr,
+            AnyJsExpression::AnyJsLiteralExpression(
+                AnyJsLiteralExpression::JsStringLiteralExpression(_)
             )
-        })
-        .unwrap_or_default()
+        )
+    })
 }
 
 fn contains_jsx_tag(node: &JsxExpressionAttributeValue) -> bool {
     node.expression()
-        .map(|expr| matches!(expr, AnyJsExpression::JsxTagExpression(_)))
-        .unwrap_or_default()
+        .is_ok_and(|expr| matches!(expr, AnyJsExpression::JsxTagExpression(_)))
 }

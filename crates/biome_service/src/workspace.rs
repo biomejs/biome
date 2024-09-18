@@ -255,8 +255,7 @@ impl FileFeaturesResult {
     fn supports_for(&self, feature: &FeatureKind) -> bool {
         self.features_supported
             .get(feature)
-            .map(|support_kind| matches!(support_kind, SupportKind::Supported))
-            .unwrap_or_default()
+            .is_some_and(|support_kind| matches!(support_kind, SupportKind::Supported))
     }
 
     pub fn supports_lint(&self) -> bool {
