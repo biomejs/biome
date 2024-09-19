@@ -31,7 +31,9 @@ pub enum SemanticEvent {
     /// Indicates the start of an `@property` rule
     AtProperty {
         property: CssProperty,
-        value: CssValue,
+        initial_value: Option<CssValue>,
+        syntax: Option<String>,
+        inherits: Option<bool>,
         range: TextRange,
     },
 }
@@ -40,7 +42,7 @@ pub enum SemanticEvent {
 pub struct SemanticEventExtractor {
     stash: VecDeque<SemanticEvent>,
     current_rule_stack: Vec<TextRange>,
-    in_root_selector: bool,
+    is_in_root_selector: bool,
 }
 
 impl SemanticEventExtractor {
@@ -85,7 +87,7 @@ impl SemanticEventExtractor {
                                 range: property_name.text_range(),
                             },
                             value: CssValue {
-                                value: value.text_trimmed().to_string(),
+                                text: value.text_trimmed().to_string(),
                                 range: value.text_range(),
                             },
                             range: node.text_range(),
@@ -113,7 +115,7 @@ impl SemanticEventExtractor {
             AnyCssSelector::CssCompoundSelector(selector) => {
                 if selector.text() == ":root" {
                     self.stash.push_back(SemanticEvent::RootSelectorStart);
-                    self.in_root_selector = true;
+                    self.is_in_root_selector = true;
                 }
                 self.add_selector_event(selector.text().to_string(), selector.range())
             }
@@ -121,6 +123,17 @@ impl SemanticEventExtractor {
         }
     }
 
+    /// Handles the `@property` rule, which defines custom CSS properties.
+    ///
+    /// ```css
+    /// @property --my-property {
+    ///   syntax: "<length>";
+    ///   inherits: true;
+    ///   initial-value: 0;
+    /// }
+    ///
+    /// @property --my-other-property {}
+    /// ```
     fn process_at_property(&mut self, node: &biome_css_syntax::CssSyntaxNode) {
         let property_name = match node.first_child() {
             Some(name) => name,
@@ -137,29 +150,48 @@ impl SemanticEventExtractor {
             None => return,
         };
 
-        for d in decls.declarations() {
-            if let Ok(declaration) = d.declaration() {
-                if let Ok(biome_css_syntax::AnyCssProperty::CssGenericProperty(p)) =
-                    declaration.property()
-                {
-                    if let Ok(name) = p.name() {
-                        if name.text() == "initial-value" {
-                            self.stash.push_back(SemanticEvent::AtProperty {
-                                property: CssProperty {
-                                    name: property_name.text_trimmed().to_string(),
-                                    range: property_name.text_range(),
-                                },
-                                value: CssValue {
-                                    value: p.value().text().to_string(),
-                                    range: p.value().range(),
-                                },
-                                range: node.text_range(),
+        let mut initial_value = None;
+        let mut syntax = None;
+        let mut inherits = None;
+
+        for declaration in decls
+            .declarations()
+            .into_iter()
+            .filter_map(|d| d.declaration().ok())
+        {
+            if let Ok(biome_css_syntax::AnyCssProperty::CssGenericProperty(prop)) =
+                declaration.property()
+            {
+                if let Ok(prop_name) = prop.name() {
+                    match prop_name.text().as_str() {
+                        "initial-value" => {
+                            initial_value = Some(CssValue {
+                                text: prop.value().text().to_string(),
+                                range: prop.value().range(),
                             });
                         }
+                        "syntax" => {
+                            syntax = Some(prop.value().text().to_string());
+                        }
+                        "inherits" => {
+                            inherits = Some(prop.value().text() == "true");
+                        }
+                        _ => {}
                     }
                 }
             }
         }
+
+        self.stash.push_back(SemanticEvent::AtProperty {
+            property: CssProperty {
+                name: property_name.text_trimmed().to_string(),
+                range: property_name.text_range(),
+            },
+            initial_value,
+            syntax,
+            inherits,
+            range: node.text_range(),
+        });
     }
 
     fn add_selector_event(&mut self, name: String, range: TextRange) {
@@ -177,9 +209,9 @@ impl SemanticEventExtractor {
         ) {
             self.current_rule_stack.pop();
             self.stash.push_back(SemanticEvent::RuleEnd);
-            if self.in_root_selector {
+            if self.is_in_root_selector {
                 self.stash.push_back(SemanticEvent::RootSelectorEnd);
-                self.in_root_selector = false;
+                self.is_in_root_selector = false;
             }
         }
     }

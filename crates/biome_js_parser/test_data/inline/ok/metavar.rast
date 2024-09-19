@@ -75,10 +75,10 @@ JsModule {
                 l_curly_token: L_CURLY@126..127 "{" [] [],
                 directives: JsDirectiveList [],
                 statements: JsStatementList [
-                    JsExpressionStatement {
-                        expression: JsMetavariable {
-                            value_token: GRIT_METAVARIABLE@127..143 "µstatement" [Newline("\n"), Whitespace("    ")] [],
-                        },
+                    JsMetavariable {
+                        value_token: GRIT_METAVARIABLE@127..143 "µstatement" [Newline("\n"), Whitespace("    ")] [],
+                    },
+                    JsEmptyStatement {
                         semicolon_token: SEMICOLON@143..144 ";" [] [],
                     },
                     JsVariableStatement {
@@ -269,11 +269,11 @@ JsModule {
         0: L_CURLY@126..127 "{" [] []
         1: JS_DIRECTIVE_LIST@127..127
         2: JS_STATEMENT_LIST@127..174
-          0: JS_EXPRESSION_STATEMENT@127..144
-            0: JS_METAVARIABLE@127..143
-              0: GRIT_METAVARIABLE@127..143 "µstatement" [Newline("\n"), Whitespace("    ")] []
-            1: SEMICOLON@143..144 ";" [] []
-          1: JS_VARIABLE_STATEMENT@144..174
+          0: JS_METAVARIABLE@127..143
+            0: GRIT_METAVARIABLE@127..143 "µstatement" [Newline("\n"), Whitespace("    ")] []
+          1: JS_EMPTY_STATEMENT@143..144
+            0: SEMICOLON@143..144 ";" [] []
+          2: JS_VARIABLE_STATEMENT@144..174
             0: JS_VARIABLE_DECLARATION@144..173
               0: (empty)
               1: CONST_KW@144..155 "const" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]

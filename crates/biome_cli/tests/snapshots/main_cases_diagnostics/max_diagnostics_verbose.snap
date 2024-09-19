@@ -22,6 +22,42 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
+src/folder_1/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The file src/folder_1/package-lock.json is protected because is handled by another tool. Biome won't process it.
+  
+  Verbose advice
+  
+    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
+    
+
+```
+
+```block
+src/folder_5/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The file src/folder_5/package-lock.json is protected because is handled by another tool. Biome won't process it.
+  
+  Verbose advice
+  
+    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
+    
+
+```
+
+```block
+src/folder_0/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  i The file src/folder_0/package-lock.json is protected because is handled by another tool. Biome won't process it.
+  
+  Verbose advice
+  
+    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
+    
+
+```
+
+```block
 src/folder_3/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_3/package-lock.json is protected because is handled by another tool. Biome won't process it.
@@ -73,42 +109,6 @@ src/folder_6/package-lock.json project  VERBOSE  ━━━━━━━━━━�
 src/folder_7/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   i The file src/folder_7/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
-  Verbose advice
-  
-    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
-
-```
-
-```block
-src/folder_1/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The file src/folder_1/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
-  Verbose advice
-  
-    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
-
-```
-
-```block
-src/folder_5/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The file src/folder_5/package-lock.json is protected because is handled by another tool. Biome won't process it.
-  
-  Verbose advice
-  
-    i You can hide this diagnostic by using --diagnostic-level=warn to increase the diagnostic level shown by CLI.
-    
-
-```
-
-```block
-src/folder_0/package-lock.json project  VERBOSE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  i The file src/folder_0/package-lock.json is protected because is handled by another tool. Biome won't process it.
   
   Verbose advice
   

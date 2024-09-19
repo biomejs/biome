@@ -1,0 +1,177 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
+a { font-family: Arial; }
+a { font-family: 'Arial', "Lucida Grande", Arial; }
+a { fOnT-fAmIlY: '  Lucida Grande '; }
+a { font-family: Times; }
+a { FONT: italic 300 16px/30px Arial, " Arial"; }
+a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+a { font: 1em Lucida Grande, Arial, "sans-serif" }
+```
+
+# Diagnostics
+```
+invalid.css:1:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Generic font family missing.
+  
+  > 1 │ a { font-family: Arial; }
+      │                  ^^^^^
+    2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
+    3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
+
+```
+invalid.css:2:44 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Generic font family missing.
+  
+    1 │ a { font-family: Arial; }
+  > 2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
+      │                                            ^^^^^
+    3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+    4 │ a { font-family: Times; }
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
+
+```
+invalid.css:3:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Generic font family missing.
+  
+    1 │ a { font-family: Arial; }
+    2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
+  > 3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+      │                  ^^^^^^^^^^^^^^^^^^
+    4 │ a { font-family: Times; }
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
+
+```
+invalid.css:4:18 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Generic font family missing.
+  
+    2 │ a { font-family: 'Arial', "Lucida Grande", Arial; }
+    3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+  > 4 │ a { font-family: Times; }
+      │                  ^^^^^
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+    6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
+
+```
+invalid.css:5:39 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Generic font family missing.
+  
+    3 │ a { fOnT-fAmIlY: '  Lucida Grande '; }
+    4 │ a { font-family: Times; }
+  > 5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+      │                                       ^^^^^^^^
+    6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+    7 │ a { font: 1em Lucida Grande, Arial, "sans-serif" }
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
+
+```
+invalid.css:6:43 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Generic font family missing.
+  
+    4 │ a { font-family: Times; }
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+  > 6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+      │                                           ^^^^^^^^^^^^^^^^^^
+    7 │ a { font: 1em Lucida Grande, Arial, "sans-serif" }
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```
+
+```
+invalid.css:7:37 lint/a11y/useGenericFontNames ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Generic font family missing.
+  
+    5 │ a { FONT: italic 300 16px/30px Arial, " Arial"; }
+    6 │ a { font: normal 14px/32px -apple-system, BlinkMacSystemFont; }
+  > 7 │ a { font: 1em Lucida Grande, Arial, "sans-serif" }
+      │                                     ^^^^^^^^^^^^
+  
+  i Consider adding a generic font family as a fallback.
+  
+  i For examples and more information, see the MDN Web Docs
+  
+  - serif
+  - sans-serif
+  - monospace
+  - etc.
+  
+
+```

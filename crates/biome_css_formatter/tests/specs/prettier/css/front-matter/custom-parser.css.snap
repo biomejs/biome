@@ -21,85 +21,28 @@ description: Description
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,9 @@
-----mycustomparser
-+-
-+--mycustomparser
- title: Title
- description: Description
+@@ -1,8 +1,6 @@
+ ---mycustomparser
+-title: Title
+-description: Description
 ----
 -
-+--
-+-
- /* comment */
- .something {
+-/* comment */
+-.something {
++  title:Title
++  description:Description
++  --- /* comment */
++  .something {
  }
 ```
 
 # Output
 
 ```css
--
---mycustomparser
-title: Title
-description: Description
---
--
-/* comment */
-.something {
+---mycustomparser
+  title:Title
+  description:Description
+  --- /* comment */
+  .something {
 }
-```
-
-# Errors
-```
-custom-parser.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '-'.
-  
-  > 1 │ ---mycustomparser
-      │ ^
-    2 │ title: Title
-    3 │ description: Description
-  
-  i Expected a qualified rule, or an at rule here.
-  
-  > 1 │ ---mycustomparser
-      │ ^
-    2 │ title: Title
-    3 │ description: Description
-  
-custom-parser.css:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a compound selector but instead found '-'.
-  
-    2 │ title: Title
-    3 │ description: Description
-  > 4 │ ---
-      │ ^
-    5 │ /* comment */
-    6 │ .something·
-  
-  i Expected a compound selector here.
-  
-    2 │ title: Title
-    3 │ description: Description
-  > 4 │ ---
-      │ ^
-    5 │ /* comment */
-    6 │ .something·
-  
-custom-parser.css:4:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × expected `,` but instead found `-`
-  
-    2 │ title: Title
-    3 │ description: Description
-  > 4 │ ---
-      │   ^
-    5 │ /* comment */
-    6 │ .something·
-  
-  i Remove -
-  
-
 ```

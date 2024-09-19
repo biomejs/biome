@@ -2,10 +2,11 @@ use std::{
     convert::Infallible,
     fmt::{Debug, Display},
     io,
+    ops::{BitOr, BitOrAssign},
     str::FromStr,
 };
 
-use bitflags::bitflags;
+use enumflags2::{bitflags, make_bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 
 use biome_console::fmt;
@@ -163,38 +164,68 @@ impl Display for Severity {
 
 /// Internal enum used to automatically generate bit offsets for [DiagnosticTags]
 /// and help with the implementation of `serde` and `schemars` for tags.
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase")]
+#[bitflags]
+#[repr(u8)]
 pub(super) enum DiagnosticTag {
-    Fixable,
-    Internal,
-    UnnecessaryCode,
-    DeprecatedCode,
-    Verbose,
+    Fixable = 1 << 0,
+    Internal = 1 << 1,
+    UnnecessaryCode = 1 << 2,
+    DeprecatedCode = 1 << 3,
+    Verbose = 1 << 4,
 }
 
-bitflags! {
-    #[derive(Default, Debug, Copy, Clone, Eq, PartialEq)]
-    pub struct DiagnosticTags: u8 {
-        /// This diagnostic has a fix suggestion.
-        const FIXABLE = 1 << DiagnosticTag::Fixable as u8;
-        /// This diagnostic results from an internal error.
-        const INTERNAL = 1 << DiagnosticTag::Internal as u8;
-        /// This diagnostic tags unused or unnecessary code, this may change
-        /// how the diagnostic is render in editors.
-        const UNNECESSARY_CODE = 1 << DiagnosticTag::UnnecessaryCode as u8;
-        /// This diagnostic tags deprecated or obsolete code, this may change
-        /// how the diagnostic is render in editors.
-        const DEPRECATED_CODE = 1 << DiagnosticTag::DeprecatedCode as u8;
-        /// This diagnostic is verbose and should be printed only if the `--verbose` option is provided
-        const VERBOSE = 1 << DiagnosticTag::Verbose as u8;
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct DiagnosticTags(BitFlags<DiagnosticTag>);
+impl DiagnosticTags {
+    /// This diagnostic has a fix suggestion.
+    pub const FIXABLE: Self = Self(make_bitflags!(DiagnosticTag::{Fixable}));
+    /// This diagnostic results from an internal error.
+    pub const INTERNAL: Self = Self(make_bitflags!(DiagnosticTag::{Internal}));
+    /// This diagnostic tags unused or unnecessary code, this may change
+    /// how the diagnostic is render in editors.
+    pub const UNNECESSARY_CODE: Self = Self(make_bitflags!(DiagnosticTag::{UnnecessaryCode}));
+    /// This diagnostic tags deprecated or obsolete code, this may change
+    /// how the diagnostic is render in editors.
+    pub const DEPRECATED_CODE: Self = Self(make_bitflags!(DiagnosticTag::{DeprecatedCode}));
+    /// This diagnostic is verbose and should be printed only if the `--verbose` option is provided
+    pub const VERBOSE: Self = Self(make_bitflags!(DiagnosticTag::{Verbose}));
+    pub const fn all() -> Self {
+        Self(BitFlags::ALL)
+    }
+    pub const fn empty() -> Self {
+        Self(BitFlags::EMPTY)
+    }
+    pub fn insert(&mut self, other: DiagnosticTags) {
+        self.0 |= other.0;
+    }
+    pub fn contains(self, other: impl Into<DiagnosticTags>) -> bool {
+        self.0.contains(other.into().0)
+    }
+    pub const fn union(self, other: Self) -> Self {
+        Self(self.0.union_c(other.0))
+    }
+    pub fn is_empty(self) -> bool {
+        self.0.is_empty()
+    }
+    pub fn is_verbose(&self) -> bool {
+        self.contains(DiagnosticTag::Verbose)
     }
 }
 
-impl DiagnosticTags {
-    pub const fn is_verbose(&self) -> bool {
-        self.contains(Self::VERBOSE)
+impl BitOr for DiagnosticTags {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        DiagnosticTags(self.0 | rhs.0)
+    }
+}
+
+impl BitOrAssign for DiagnosticTags {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
     }
 }
 

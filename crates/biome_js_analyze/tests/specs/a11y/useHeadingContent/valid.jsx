@@ -34,6 +34,7 @@
 		<div aria-hidden />
 		visible content
 	</h1>
+  <h1 aria-label="Screen reader content"><div aria-hidden="true">invisible content</div></h1>
 	<h1 dangerouslySetInnerHTML={{ __html: "heading" }}></h1>
 	<h1 children={children} />
 	<h1 children={"heading"} />

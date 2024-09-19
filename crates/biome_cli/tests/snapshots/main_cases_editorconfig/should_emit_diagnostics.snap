@@ -1,0 +1,33 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+---
+## `.editorconfig`
+
+```editorconfig
+
+[*]
+insert_final_newline = false
+
+```
+
+## `test.js`
+
+```js
+console.log("foo");
+
+```
+
+# Emitted Messages
+
+```block
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Key 'insert_final_newline' is incompatible with biome: Biome always inserts a final newline. Set this option to true.
+  
+
+```
+
+```block
+Formatted 1 file in <TIME>. No fixes applied.
+```

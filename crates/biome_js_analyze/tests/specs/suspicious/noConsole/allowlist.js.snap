@@ -1,0 +1,58 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: allowlist.js
+---
+# Input
+```jsx
+console.log("invalid");
+console.debug("invalid");
+
+console.info("ok");
+console.warn("ok");
+console.error("ok");
+console.assert(true, "ok");
+
+```
+
+# Diagnostics
+```
+allowlist.js:1:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+  > 1 │ console.log("invalid");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ console.debug("invalid");
+    3 │ 
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    1 │ console.log("invalid");
+      │ -----------------------
+
+```
+
+```
+allowlist.js:2:1 lint/suspicious/noConsole  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use console.
+  
+    1 │ console.log("invalid");
+  > 2 │ console.debug("invalid");
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+    4 │ console.info("ok");
+  
+  i The use of console is often reserved for debugging.
+  
+  i Unsafe fix: Remove console.
+  
+    1 1 │   console.log("invalid");
+    2   │ - console.debug("invalid");
+    3 2 │   
+    4 3 │   console.info("ok");
+  
+
+```

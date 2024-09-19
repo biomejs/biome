@@ -10,19 +10,21 @@ use crate::reporter::TraversalSummary;
 use crate::{CliDiagnostic, CliSession};
 use biome_diagnostics::DiagnosticTags;
 use biome_diagnostics::{category, DiagnosticExt, Error, Resource, Severity};
-use biome_fs::{BiomePath, EvaluatedPath, FileSystem, PathInterner};
+use biome_fs::{BiomePath, FileSystem, PathInterner};
 use biome_fs::{TraversalContext, TraversalScope};
+use biome_service::dome::Dome;
 use biome_service::workspace::{DropPatternParams, IsPathIgnoredParams};
 use biome_service::{extension_error, workspace::SupportsFeatureParams, Workspace, WorkspaceError};
 use crossbeam::channel::{unbounded, Receiver, Sender};
 use rustc_hash::FxHashSet;
+use std::collections::BTreeSet;
 use std::sync::atomic::AtomicU32;
 use std::sync::RwLock;
 use std::{
     env::current_dir,
     ffi::OsString,
     panic::catch_unwind,
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::{
         atomic::{AtomicUsize, Ordering},
         Once,
@@ -33,7 +35,7 @@ use std::{
 
 pub(crate) struct TraverseResult {
     pub(crate) summary: TraversalSummary,
-    pub(crate) evaluated_paths: FxHashSet<EvaluatedPath>,
+    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
     pub(crate) diagnostics: Vec<Error>,
 }
 
@@ -76,6 +78,7 @@ pub(crate) fn traverse(
 
     let changed = AtomicUsize::new(0);
     let unchanged = AtomicUsize::new(0);
+    let matches = AtomicUsize::new(0);
     let skipped = AtomicUsize::new(0);
 
     let fs = &*session.app.fs;
@@ -105,6 +108,7 @@ pub(crate) fn traverse(
                 workspace,
                 execution,
                 interner,
+                matches: &matches,
                 changed: &changed,
                 unchanged: &unchanged,
                 skipped: &skipped,
@@ -130,6 +134,7 @@ pub(crate) fn traverse(
     let warnings = printer.warnings();
     let changed = changed.load(Ordering::Relaxed);
     let unchanged = unchanged.load(Ordering::Relaxed);
+    let matches = matches.load(Ordering::Relaxed);
     let skipped = skipped.load(Ordering::Relaxed);
     let suggested_fixes_skipped = printer.skipped_fixes();
     let diagnostics_not_printed = printer.not_printed_diagnostics();
@@ -139,6 +144,7 @@ pub(crate) fn traverse(
             unchanged,
             duration,
             errors,
+            matches,
             warnings,
             skipped,
             suggested_fixes_skipped,
@@ -163,12 +169,12 @@ fn init_thread_pool() {
 }
 
 /// Initiate the filesystem traversal tasks with the provided input paths and
-/// run it to completion, returning the duration of the process
+/// run it to completion, returning the duration of the process and the evaluated paths
 fn traverse_inputs(
     fs: &dyn FileSystem,
     inputs: Vec<OsString>,
     ctx: &TraversalOptions,
-) -> (Duration, FxHashSet<EvaluatedPath>) {
+) -> (Duration, BTreeSet<BiomePath>) {
     let start = Instant::now();
     fs.traversal(Box::new(move |scope: &dyn TraversalScope| {
         for input in inputs {
@@ -177,14 +183,23 @@ fn traverse_inputs(
     }));
 
     let paths = ctx.evaluated_paths();
-
+    let dome = Dome::new(paths);
+    let mut iter = dome.iter();
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
-        for path in paths.clone() {
+        while let Some(path) = iter.next_config() {
+            scope.handle(ctx, path.to_path_buf());
+        }
+
+        while let Some(path) = iter.next_manifest() {
+            scope.handle(ctx, path.to_path_buf());
+        }
+
+        for path in iter {
             scope.handle(ctx, path.to_path_buf());
         }
     }));
 
-    (start.elapsed(), paths)
+    (start.elapsed(), ctx.evaluated_paths())
 }
 
 // struct DiagnosticsReporter<'ctx> {}
@@ -536,6 +551,8 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     changed: &'ctx AtomicUsize,
     /// Shared atomic counter storing the number of unchanged files
     unchanged: &'ctx AtomicUsize,
+    /// Shared atomic counter storing the number of unchanged files
+    matches: &'ctx AtomicUsize,
     /// Shared atomic counter storing the number of skipped files
     skipped: &'ctx AtomicUsize,
     /// Channel sending messages to the display thread
@@ -545,17 +562,23 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
     pub(crate) remaining_diagnostics: &'ctx AtomicU32,
 
     /// List of paths that should be processed
-    pub(crate) evaluated_paths: RwLock<FxHashSet<EvaluatedPath>>,
+    pub(crate) evaluated_paths: RwLock<BTreeSet<BiomePath>>,
 }
 
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
-    pub(crate) fn increment_changed(&self, path: &Path) {
+    pub(crate) fn increment_changed(&self, path: &BiomePath) {
         self.changed.fetch_add(1, Ordering::Relaxed);
-        let mut evaluated_paths = self.evaluated_paths.write().unwrap();
-        evaluated_paths.replace(EvaluatedPath::new_evaluated(path));
+        self.evaluated_paths
+            .write()
+            .unwrap()
+            .replace(path.to_written());
     }
     pub(crate) fn increment_unchanged(&self) {
         self.unchanged.fetch_add(1, Ordering::Relaxed);
+    }
+
+    pub(crate) fn increment_matches(&self, num_matches: usize) {
+        self.matches.fetch_add(num_matches, Ordering::Relaxed);
     }
 
     /// Send a message to the display thread
@@ -583,7 +606,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         &self.interner
     }
 
-    fn evaluated_paths(&self) -> FxHashSet<EvaluatedPath> {
+    fn evaluated_paths(&self) -> BTreeSet<BiomePath> {
         self.evaluated_paths.read().unwrap().clone()
     }
 
@@ -657,25 +680,33 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
         }
     }
 
-    fn handle_path(&self, path: &Path) {
-        handle_file(self, path)
+    fn handle_path(&self, path: BiomePath) {
+        handle_file(self, &path)
     }
 
-    fn store_path(&self, path: &Path) {
-        self.evaluated_paths.write().unwrap().insert(path.into());
+    fn store_path(&self, path: BiomePath) {
+        self.evaluated_paths
+            .write()
+            .unwrap()
+            .insert(BiomePath::new(path.as_path()));
     }
 }
 
 /// This function wraps the [process_file] function implementing the traversal
 /// in a [catch_unwind] block and emit diagnostics in case of error (either the
 /// traversal function returns Err or panics)
-fn handle_file(ctx: &TraversalOptions, path: &Path) {
+fn handle_file(ctx: &TraversalOptions, path: &BiomePath) {
     match catch_unwind(move || process_file(ctx, path)) {
         Ok(Ok(FileStatus::Changed)) => {
             ctx.increment_changed(path);
         }
         Ok(Ok(FileStatus::Unchanged)) => {
             ctx.increment_unchanged();
+        }
+        Ok(Ok(FileStatus::SearchResult(num_matches, msg))) => {
+            ctx.increment_unchanged();
+            ctx.increment_matches(num_matches);
+            ctx.push_message(msg);
         }
         Ok(Ok(FileStatus::Message(msg))) => {
             ctx.increment_unchanged();

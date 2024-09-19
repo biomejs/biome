@@ -384,3 +384,18 @@ impl TryFrom<&Path> for JsFileSource {
         Self::try_from_extension(extension)
     }
 }
+
+impl From<Language> for JsFileSource {
+    fn from(value: Language) -> Self {
+        match value {
+            Language::JavaScript => JsFileSource::js_module(),
+            Language::TypeScript { definition_file } => {
+                if definition_file {
+                    JsFileSource::d_ts()
+                } else {
+                    JsFileSource::ts()
+                }
+            }
+        }
+    }
+}

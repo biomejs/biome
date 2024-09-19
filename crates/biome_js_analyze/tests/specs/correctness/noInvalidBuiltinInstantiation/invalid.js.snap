@@ -1,0 +1,588 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+ArrayBuffer()
+BigInt64Array()
+BigUint64Array()
+DataView()
+Float32Array()
+Float64Array()
+Int16Array()
+Int32Array()
+Int8Array()
+Map()
+Proxy()
+Set()
+SharedArrayBuffer()
+Uint16Array()
+Uint32Array()
+Uint8Array()
+Uint8ClampedArray()
+WeakMap()
+WeakSet()
+WeakRef()
+FinalizationRegistry()
+window.Map()
+globalThis.Map()
+function foo() {
+    return /** Start */ globalThis.Map([]) /** End */
+}
+
+new BigInt(123)
+new Symbol()
+new window.BigInt(123)
+new globalThis.BigInt(123)
+function foo() {
+    return /** Start */ new globalThis.BigInt(123) /** End */
+}
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new ArrayBuffer() instead of ArrayBuffer().
+  
+  > 1 │ ArrayBuffer()
+      │ ^^^^^^^^^^^^^
+    2 │ BigInt64Array()
+    3 │ BigUint64Array()
+  
+  i Unsafe fix: Add new keyword.
+  
+    1 │ new·ArrayBuffer()
+      │ ++++             
+
+```
+
+```
+invalid.js:2:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new BigInt64Array() instead of BigInt64Array().
+  
+    1 │ ArrayBuffer()
+  > 2 │ BigInt64Array()
+      │ ^^^^^^^^^^^^^^^
+    3 │ BigUint64Array()
+    4 │ DataView()
+  
+  i Unsafe fix: Add new keyword.
+  
+    2 │ new·BigInt64Array()
+      │ ++++               
+
+```
+
+```
+invalid.js:3:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new BigUint64Array() instead of BigUint64Array().
+  
+    1 │ ArrayBuffer()
+    2 │ BigInt64Array()
+  > 3 │ BigUint64Array()
+      │ ^^^^^^^^^^^^^^^^
+    4 │ DataView()
+    5 │ Float32Array()
+  
+  i Unsafe fix: Add new keyword.
+  
+    3 │ new·BigUint64Array()
+      │ ++++                
+
+```
+
+```
+invalid.js:4:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new DataView() instead of DataView().
+  
+    2 │ BigInt64Array()
+    3 │ BigUint64Array()
+  > 4 │ DataView()
+      │ ^^^^^^^^^^
+    5 │ Float32Array()
+    6 │ Float64Array()
+  
+  i Unsafe fix: Add new keyword.
+  
+    4 │ new·DataView()
+      │ ++++          
+
+```
+
+```
+invalid.js:5:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Float32Array() instead of Float32Array().
+  
+    3 │ BigUint64Array()
+    4 │ DataView()
+  > 5 │ Float32Array()
+      │ ^^^^^^^^^^^^^^
+    6 │ Float64Array()
+    7 │ Int16Array()
+  
+  i Unsafe fix: Add new keyword.
+  
+    5 │ new·Float32Array()
+      │ ++++              
+
+```
+
+```
+invalid.js:6:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Float64Array() instead of Float64Array().
+  
+    4 │ DataView()
+    5 │ Float32Array()
+  > 6 │ Float64Array()
+      │ ^^^^^^^^^^^^^^
+    7 │ Int16Array()
+    8 │ Int32Array()
+  
+  i Unsafe fix: Add new keyword.
+  
+    6 │ new·Float64Array()
+      │ ++++              
+
+```
+
+```
+invalid.js:7:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Int16Array() instead of Int16Array().
+  
+    5 │ Float32Array()
+    6 │ Float64Array()
+  > 7 │ Int16Array()
+      │ ^^^^^^^^^^^^
+    8 │ Int32Array()
+    9 │ Int8Array()
+  
+  i Unsafe fix: Add new keyword.
+  
+    7 │ new·Int16Array()
+      │ ++++            
+
+```
+
+```
+invalid.js:8:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Int32Array() instead of Int32Array().
+  
+     6 │ Float64Array()
+     7 │ Int16Array()
+   > 8 │ Int32Array()
+       │ ^^^^^^^^^^^^
+     9 │ Int8Array()
+    10 │ Map()
+  
+  i Unsafe fix: Add new keyword.
+  
+    8 │ new·Int32Array()
+      │ ++++            
+
+```
+
+```
+invalid.js:9:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Int8Array() instead of Int8Array().
+  
+     7 │ Int16Array()
+     8 │ Int32Array()
+   > 9 │ Int8Array()
+       │ ^^^^^^^^^^^
+    10 │ Map()
+    11 │ Proxy()
+  
+  i Unsafe fix: Add new keyword.
+  
+    9 │ new·Int8Array()
+      │ ++++           
+
+```
+
+```
+invalid.js:10:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Map() instead of Map().
+  
+     8 │ Int32Array()
+     9 │ Int8Array()
+  > 10 │ Map()
+       │ ^^^^^
+    11 │ Proxy()
+    12 │ Set()
+  
+  i Unsafe fix: Add new keyword.
+  
+    10 │ new·Map()
+       │ ++++     
+
+```
+
+```
+invalid.js:11:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Proxy() instead of Proxy().
+  
+     9 │ Int8Array()
+    10 │ Map()
+  > 11 │ Proxy()
+       │ ^^^^^^^
+    12 │ Set()
+    13 │ SharedArrayBuffer()
+  
+  i Unsafe fix: Add new keyword.
+  
+    11 │ new·Proxy()
+       │ ++++       
+
+```
+
+```
+invalid.js:12:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Set() instead of Set().
+  
+    10 │ Map()
+    11 │ Proxy()
+  > 12 │ Set()
+       │ ^^^^^
+    13 │ SharedArrayBuffer()
+    14 │ Uint16Array()
+  
+  i Unsafe fix: Add new keyword.
+  
+    12 │ new·Set()
+       │ ++++     
+
+```
+
+```
+invalid.js:13:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new SharedArrayBuffer() instead of SharedArrayBuffer().
+  
+    11 │ Proxy()
+    12 │ Set()
+  > 13 │ SharedArrayBuffer()
+       │ ^^^^^^^^^^^^^^^^^^^
+    14 │ Uint16Array()
+    15 │ Uint32Array()
+  
+  i Unsafe fix: Add new keyword.
+  
+    13 │ new·SharedArrayBuffer()
+       │ ++++                   
+
+```
+
+```
+invalid.js:14:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Uint16Array() instead of Uint16Array().
+  
+    12 │ Set()
+    13 │ SharedArrayBuffer()
+  > 14 │ Uint16Array()
+       │ ^^^^^^^^^^^^^
+    15 │ Uint32Array()
+    16 │ Uint8Array()
+  
+  i Unsafe fix: Add new keyword.
+  
+    14 │ new·Uint16Array()
+       │ ++++             
+
+```
+
+```
+invalid.js:15:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Uint32Array() instead of Uint32Array().
+  
+    13 │ SharedArrayBuffer()
+    14 │ Uint16Array()
+  > 15 │ Uint32Array()
+       │ ^^^^^^^^^^^^^
+    16 │ Uint8Array()
+    17 │ Uint8ClampedArray()
+  
+  i Unsafe fix: Add new keyword.
+  
+    15 │ new·Uint32Array()
+       │ ++++             
+
+```
+
+```
+invalid.js:16:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Uint8Array() instead of Uint8Array().
+  
+    14 │ Uint16Array()
+    15 │ Uint32Array()
+  > 16 │ Uint8Array()
+       │ ^^^^^^^^^^^^
+    17 │ Uint8ClampedArray()
+    18 │ WeakMap()
+  
+  i Unsafe fix: Add new keyword.
+  
+    16 │ new·Uint8Array()
+       │ ++++            
+
+```
+
+```
+invalid.js:17:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Uint8ClampedArray() instead of Uint8ClampedArray().
+  
+    15 │ Uint32Array()
+    16 │ Uint8Array()
+  > 17 │ Uint8ClampedArray()
+       │ ^^^^^^^^^^^^^^^^^^^
+    18 │ WeakMap()
+    19 │ WeakSet()
+  
+  i Unsafe fix: Add new keyword.
+  
+    17 │ new·Uint8ClampedArray()
+       │ ++++                   
+
+```
+
+```
+invalid.js:18:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new WeakMap() instead of WeakMap().
+  
+    16 │ Uint8Array()
+    17 │ Uint8ClampedArray()
+  > 18 │ WeakMap()
+       │ ^^^^^^^^^
+    19 │ WeakSet()
+    20 │ WeakRef()
+  
+  i Unsafe fix: Add new keyword.
+  
+    18 │ new·WeakMap()
+       │ ++++         
+
+```
+
+```
+invalid.js:19:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new WeakSet() instead of WeakSet().
+  
+    17 │ Uint8ClampedArray()
+    18 │ WeakMap()
+  > 19 │ WeakSet()
+       │ ^^^^^^^^^
+    20 │ WeakRef()
+    21 │ FinalizationRegistry()
+  
+  i Unsafe fix: Add new keyword.
+  
+    19 │ new·WeakSet()
+       │ ++++         
+
+```
+
+```
+invalid.js:20:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new WeakRef() instead of WeakRef().
+  
+    18 │ WeakMap()
+    19 │ WeakSet()
+  > 20 │ WeakRef()
+       │ ^^^^^^^^^
+    21 │ FinalizationRegistry()
+    22 │ window.Map()
+  
+  i Unsafe fix: Add new keyword.
+  
+    20 │ new·WeakRef()
+       │ ++++         
+
+```
+
+```
+invalid.js:21:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new FinalizationRegistry() instead of FinalizationRegistry().
+  
+    19 │ WeakSet()
+    20 │ WeakRef()
+  > 21 │ FinalizationRegistry()
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    22 │ window.Map()
+    23 │ globalThis.Map()
+  
+  i Unsafe fix: Add new keyword.
+  
+    21 │ new·FinalizationRegistry()
+       │ ++++                      
+
+```
+
+```
+invalid.js:22:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Map() instead of Map().
+  
+    20 │ WeakRef()
+    21 │ FinalizationRegistry()
+  > 22 │ window.Map()
+       │ ^^^^^^^^^^^^
+    23 │ globalThis.Map()
+    24 │ function foo() {
+  
+  i Unsafe fix: Add new keyword.
+  
+    22 │ new·window.Map()
+       │ ++++            
+
+```
+
+```
+invalid.js:23:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Map() instead of Map().
+  
+    21 │ FinalizationRegistry()
+    22 │ window.Map()
+  > 23 │ globalThis.Map()
+       │ ^^^^^^^^^^^^^^^^
+    24 │ function foo() {
+    25 │     return /** Start */ globalThis.Map([]) /** End */
+  
+  i Unsafe fix: Add new keyword.
+  
+    23 │ new·globalThis.Map()
+       │ ++++                
+
+```
+
+```
+invalid.js:25:25 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use new Map() instead of Map().
+  
+    23 │ globalThis.Map()
+    24 │ function foo() {
+  > 25 │     return /** Start */ globalThis.Map([]) /** End */
+       │                         ^^^^^^^^^^^^^^^^^^
+    26 │ }
+    27 │ 
+  
+  i Unsafe fix: Add new keyword.
+  
+    25 │ ····return·/**·Start·*/·new·globalThis.Map([])·/**·End·*/
+       │                         ++++                             
+
+```
+
+```
+invalid.js:28:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use BigInt() instead of new BigInt().
+  
+    26 │ }
+    27 │ 
+  > 28 │ new BigInt(123)
+       │ ^^^^^^^^^^^^^^^
+    29 │ new Symbol()
+    30 │ new window.BigInt(123)
+  
+  i Unsafe fix: Remove new keyword.
+  
+    28 │ new·BigInt(123)
+       │ ----           
+
+```
+
+```
+invalid.js:29:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use Symbol() instead of new Symbol().
+  
+    28 │ new BigInt(123)
+  > 29 │ new Symbol()
+       │ ^^^^^^^^^^^^
+    30 │ new window.BigInt(123)
+    31 │ new globalThis.BigInt(123)
+  
+  i Unsafe fix: Remove new keyword.
+  
+    29 │ new·Symbol()
+       │ ----        
+
+```
+
+```
+invalid.js:30:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use BigInt() instead of new BigInt().
+  
+    28 │ new BigInt(123)
+    29 │ new Symbol()
+  > 30 │ new window.BigInt(123)
+       │ ^^^^^^^^^^^^^^^^^^^^^^
+    31 │ new globalThis.BigInt(123)
+    32 │ function foo() {
+  
+  i Unsafe fix: Remove new keyword.
+  
+    30 │ new·window.BigInt(123)
+       │ ----                  
+
+```
+
+```
+invalid.js:31:1 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use BigInt() instead of new BigInt().
+  
+    29 │ new Symbol()
+    30 │ new window.BigInt(123)
+  > 31 │ new globalThis.BigInt(123)
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ function foo() {
+    33 │     return /** Start */ new globalThis.BigInt(123) /** End */
+  
+  i Unsafe fix: Remove new keyword.
+  
+    31 │ new·globalThis.BigInt(123)
+       │ ----                      
+
+```
+
+```
+invalid.js:33:25 lint/correctness/noInvalidBuiltinInstantiation  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use BigInt() instead of new BigInt().
+  
+    31 │ new globalThis.BigInt(123)
+    32 │ function foo() {
+  > 33 │     return /** Start */ new globalThis.BigInt(123) /** End */
+       │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    34 │ }
+  
+  i Unsafe fix: Remove new keyword.
+  
+    33 │ ····return·/**·Start·*/·new·globalThis.BigInt(123)·/**·End·*/
+       │                         ----                                 
+
+```

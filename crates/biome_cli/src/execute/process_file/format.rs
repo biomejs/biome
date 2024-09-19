@@ -7,6 +7,7 @@ use crate::execute::TraversalMode;
 use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt, Error, Severity};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use std::ffi::OsStr;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 use tracing::debug;
@@ -90,21 +91,21 @@ pub(crate) fn format_with_guard<'ctx>(
                 return Ok(FileStatus::Ignored);
             }
 
-            match workspace_file.as_extension() {
-                Some("astro") => {
+            match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
+                Some(b"astro") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
                     }
                     output = AstroFileHandler::output(input.as_str(), output.as_str());
                 }
-                Some("vue") => {
+                Some(b"vue") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
                     }
                     output = VueFileHandler::output(input.as_str(), output.as_str());
                 }
 
-                Some("svelte") => {
+                Some(b"svelte") => {
                     if output.is_empty() {
                         return Ok(FileStatus::Unchanged);
                     }
@@ -116,15 +117,15 @@ pub(crate) fn format_with_guard<'ctx>(
             if output != input {
                 if should_write {
                     workspace_file.update_file(output)?;
+                    Ok(FileStatus::Changed)
                 } else {
-                    return Ok(FileStatus::Message(Message::Diff {
+                    Ok(FileStatus::Message(Message::Diff {
                         file_name: workspace_file.path.display().to_string(),
                         old: input,
                         new: output,
                         diff_kind: DiffKind::Format,
-                    }));
+                    }))
                 }
-                Ok(FileStatus::Changed)
             } else {
                 Ok(FileStatus::Unchanged)
             }

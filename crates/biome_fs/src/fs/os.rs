@@ -8,7 +8,6 @@ use crate::{
 use biome_diagnostics::{adapters::IoError, DiagnosticExt, Error, Severity};
 use oxc_resolver::{Resolution, ResolveError, ResolveOptions, Resolver};
 use rayon::{scope, Scope};
-use std::ffi::OsStr;
 use std::fs::{DirEntry, FileType};
 use std::panic::AssertUnwindSafe;
 use std::process::Command;
@@ -212,7 +211,7 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 
     fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf) {
         self.scope.spawn(move |_| {
-            context.handle_path(&path);
+            context.handle_path(BiomePath::new(path));
         });
     }
 }
@@ -220,7 +219,7 @@ impl<'scope> TraversalScope<'scope> for OsTraversalScope<'scope> {
 // TODO: remove in Biome 2.0, and directly use `.gitignore`
 /// Default list of ignored directories, in the future will be supplanted by
 /// detecting and parsing .ignore files
-const DEFAULT_IGNORE: &[&str; 5] = &[".git", ".svn", ".hg", ".yarn", "node_modules"];
+const DEFAULT_IGNORE: &[&[u8]] = &[b".git", b".svn", b".hg", b".yarn", b"node_modules"];
 
 /// Traverse a single directory
 fn handle_dir<'scope>(
@@ -230,8 +229,8 @@ fn handle_dir<'scope>(
     // The unresolved origin path in case the directory is behind a symbolic link
     origin_path: Option<PathBuf>,
 ) {
-    if let Some(file_name) = path.file_name().and_then(OsStr::to_str) {
-        if DEFAULT_IGNORE.contains(&file_name) {
+    if let Some(file_name) = path.file_name() {
+        if DEFAULT_IGNORE.contains(&file_name.as_encoded_bytes()) {
             return;
         }
     }
@@ -352,7 +351,7 @@ fn handle_any_file<'scope>(
 
     if file_type.is_file() {
         scope.spawn(move |_| {
-            ctx.store_path(&path);
+            ctx.store_path(BiomePath::new(path));
         });
         return;
     }

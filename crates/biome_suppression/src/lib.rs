@@ -32,6 +32,8 @@ pub fn parse_suppression_comment(
 ) -> impl Iterator<Item = Result<Suppression, SuppressionDiagnostic>> {
     let (head, mut comment) = if base.starts_with('#') {
         base.split_at(1)
+    } else if base.starts_with("<!--") {
+        base.split_at(4)
     } else {
         base.split_at(2)
     };
@@ -46,6 +48,10 @@ pub fn parse_suppression_comment(
             true
         }
         "#" => false,
+        "<!--" => {
+            comment = comment.strip_suffix("-->").unwrap_or(comment);
+            true
+        }
         token => panic!("comment with unknown opening token {token:?}, from {comment}"),
     };
 

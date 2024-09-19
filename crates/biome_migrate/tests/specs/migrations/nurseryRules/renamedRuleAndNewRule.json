@@ -3,7 +3,7 @@
     "rules": {
       "nursery": {
         "noExcessiveNestedTestSuites": "error",
-        "oldName": "error"
+        "useConsistentGridAreas": "error"
       }
     }
   }

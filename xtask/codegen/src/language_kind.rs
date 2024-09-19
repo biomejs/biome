@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use crate::css_kinds_src::CSS_KINDS_SRC;
 use crate::graphql_kind_src::GRAPHQL_KINDS_SRC;
 use crate::grit_kinds_src::GRIT_KINDS_SRC;
@@ -5,13 +7,22 @@ use crate::html_kinds_src::HTML_KINDS_SRC;
 use crate::js_kinds_src::JS_KINDS_SRC;
 use crate::json_kinds_src::JSON_KINDS_SRC;
 use crate::kind_src::KindsSrc;
+use crate::markdown_kinds_src::MARKDOWN_KINDS_SRC;
 use crate::yaml_kinds_src::YAML_KINDS_SRC;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote};
-use std::str::FromStr;
 
-pub const LANGUAGE_PREFIXES: [&str; 9] = [
-    "js_", "ts_", "jsx_", "tsx_", "css_", "json_", "grit_", "html_", "yaml_",
+pub const LANGUAGE_PREFIXES: [&str; 10] = [
+    "js_",
+    "ts_",
+    "jsx_",
+    "tsx_",
+    "css_",
+    "json_",
+    "grit_",
+    "html_",
+    "yaml_",
+    "markdown_",
 ];
 
 #[derive(Debug, Eq, Copy, Clone, PartialEq)]
@@ -23,6 +34,7 @@ pub enum LanguageKind {
     Grit,
     Html,
     Yaml,
+    Markdown,
 }
 
 impl std::fmt::Display for LanguageKind {
@@ -35,11 +47,12 @@ impl std::fmt::Display for LanguageKind {
             LanguageKind::Grit => write!(f, "grit"),
             LanguageKind::Html => write!(f, "html"),
             LanguageKind::Yaml => write!(f, "yaml"),
+            LanguageKind::Markdown => write!(f, "markdown"),
         }
     }
 }
 
-pub const ALL_LANGUAGE_KIND: [LanguageKind; 7] = [
+pub const ALL_LANGUAGE_KIND: [LanguageKind; 8] = [
     LanguageKind::Js,
     LanguageKind::Css,
     LanguageKind::Json,
@@ -47,6 +60,7 @@ pub const ALL_LANGUAGE_KIND: [LanguageKind; 7] = [
     LanguageKind::Grit,
     LanguageKind::Html,
     LanguageKind::Yaml,
+    LanguageKind::Markdown,
 ];
 
 impl FromStr for LanguageKind {
@@ -61,8 +75,9 @@ impl FromStr for LanguageKind {
             "grit" => Ok(LanguageKind::Grit),
             "html" => Ok(LanguageKind::Html),
             "yaml" => Ok(LanguageKind::Yaml),
+            "markdown" => Ok(LanguageKind::Markdown),
             _ => Err(format!(
-                "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html` or `yaml`"
+                "Language {kind} not supported, please use: `js`, `css`, `json`, `grit`, `graphql`, `html`, `yaml` or `markdown`"
             )),
         }
     }
@@ -98,7 +113,7 @@ macro_rules! define_language_kind_functions {
 }
 
 impl LanguageKind {
-    define_language_kind_functions!([Js, Css, Json, Graphql, Grit, Html, Yaml]);
+    define_language_kind_functions!([Js, Css, Json, Graphql, Grit, Html, Yaml, Markdown]);
 
     pub(crate) fn syntax_crate_ident(&self) -> Ident {
         Ident::new(self.syntax_crate_name().as_str(), Span::call_site())
@@ -125,6 +140,7 @@ impl LanguageKind {
             LanguageKind::Grit => GRIT_KINDS_SRC,
             LanguageKind::Html => HTML_KINDS_SRC,
             LanguageKind::Yaml => YAML_KINDS_SRC,
+            LanguageKind::Markdown => MARKDOWN_KINDS_SRC,
         }
     }
 
@@ -137,6 +153,7 @@ impl LanguageKind {
             LanguageKind::Grit => include_str!("../gritql.ungram"),
             LanguageKind::Html => include_str!("../html.ungram"),
             LanguageKind::Yaml => include_str!("../yaml.ungram"),
+            LanguageKind::Markdown => include_str!("../markdown.ungram"),
         }
     }
 }

@@ -1,0 +1,11 @@
+class Foo {
+  constructor(
+    @decorator1
+    readonly // comment1
+    baz1: string,
+
+    @decorator2
+    private // comment2
+    baz2: string,
+  ) {}
+}

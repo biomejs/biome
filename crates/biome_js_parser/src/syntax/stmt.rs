@@ -5,7 +5,7 @@
 use super::binding::*;
 use super::class::is_at_ts_abstract_class_declaration;
 use super::expr::parse_expression;
-use super::metavariable::{is_at_metavariable, is_nth_at_metavariable};
+use super::metavariable::{is_at_metavariable, is_nth_at_metavariable, parse_metavariable};
 use super::module::parse_export;
 use super::typescript::*;
 use crate::parser::RecoveryResult;
@@ -909,6 +909,10 @@ pub(crate) fn parse_statements(p: &mut JsParser, stop_on_r_curly: bool, statemen
             break;
         }
 
+        if parse_metavariable(p).is_present() {
+            continue;
+        }
+
         if parse_statement(p, StatementContext::StatementList)
             .or_recover_with_token_set(
                 p,
@@ -1228,8 +1232,6 @@ fn eat_variable_declaration(
         declarator_context: context,
         remaining_declarator_range: None,
     };
-
-    debug_assert!(p.state().name_map.is_empty());
     let list = variable_declarator_list.parse_list(p);
 
     p.state_mut().name_map.clear();

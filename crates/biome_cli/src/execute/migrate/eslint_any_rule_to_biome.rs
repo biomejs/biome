@@ -73,6 +73,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_literal_keys.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@typescript-eslint/explicit-member-accessibility" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_consistent_member_accessibility
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@typescript-eslint/naming-convention" => {
             if !options.include_inspired {
                 results.has_inspired_rules = true;
@@ -165,6 +175,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_redeclare.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@typescript-eslint/no-require-imports" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_common_js.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@typescript-eslint/no-restricted-imports" => {
             if !options.include_nursery {
                 return false;
@@ -173,6 +191,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .no_restricted_imports
                 .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@typescript-eslint/no-restricted-types" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_restricted_types.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@typescript-eslint/no-this-alias" => {
@@ -231,10 +257,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 results.has_inspired_rules = true;
                 return false;
             }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_throw_only_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -331,10 +354,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "default-case" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
                 .use_default_switch_clause
                 .get_or_insert(Default::default());
@@ -390,6 +410,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "import/no-commonjs" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_common_js.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "import/no-default-export" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_default_export.get_or_insert(Default::default());
@@ -417,10 +445,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "jest/no-done-callback" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_done_callback.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -458,10 +483,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 results.has_inspired_rules = true;
                 return false;
             }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .no_misplaced_assertion
                 .get_or_insert(Default::default());
@@ -551,20 +573,14 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "jsx-a11y/interactive-supports-focus" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group
                 .use_focusable_interactive
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "jsx-a11y/label-has-associated-control" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group
                 .no_label_without_control
                 .get_or_insert(Default::default());
@@ -648,10 +664,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "jsx-a11y/prefer-tag-over-role" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group
                 .use_semantic_elements
                 .get_or_insert(Default::default());
@@ -682,6 +695,14 @@ pub(crate) fn migrate_eslint_any_rule(
         "jsx-a11y/tabindex-no-positive" => {
             let group = rules.a11y.get_or_insert_with(Default::default);
             let rule = group.no_positive_tabindex.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "n/no-process-env" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_process_env.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "no-array-constructor" => {
@@ -725,12 +746,8 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "no-console" => {
-            if !options.include_inspired {
-                results.has_inspired_rules = true;
-                return false;
-            }
             let group = rules.suspicious.get_or_insert_with(Default::default);
-            let rule = group.no_console_log.get_or_insert(Default::default());
+            let rule = group.no_console.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "no-const-assign" => {
@@ -949,7 +966,7 @@ pub(crate) fn migrate_eslint_any_rule(
         "no-new-native-nonconstructor" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
-                .no_invalid_new_builtin
+                .no_invalid_builtin_instantiation
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -959,10 +976,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "no-new-wrappers" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
                 .use_consistent_builtin_instantiation
                 .get_or_insert(Default::default());
@@ -1023,6 +1037,18 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-secrets/no-secrets" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_secrets.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-self-assign" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group.no_self_assign.get_or_insert(Default::default());
@@ -1065,10 +1091,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 results.has_inspired_rules = true;
                 return false;
             }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_throw_only_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -1080,14 +1103,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "no-undef-init" => {
-            if !options.include_inspired {
-                results.has_inspired_rules = true;
-                return false;
-            }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
                 .no_useless_undefined_initialization
                 .get_or_insert(Default::default());
@@ -1150,10 +1166,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "no-useless-concat" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group
                 .no_useless_string_concat
                 .get_or_insert(Default::default());
@@ -1381,10 +1394,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "solidjs/no-react-specific-props" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .no_react_specific_props
                 .get_or_insert(Default::default());
@@ -1403,22 +1413,12 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "unicorn/error-message" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.use_error_message.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "unicorn/explicit-length-check" => {
-            if !options.include_inspired {
-                results.has_inspired_rules = true;
-                return false;
-            }
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
                 .use_explicit_length_check
                 .get_or_insert(Default::default());
@@ -1436,12 +1436,9 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "unicorn/new-for-builtins" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
-                .use_consistent_builtin_instantiation
+                .no_invalid_builtin_instantiation
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -1483,10 +1480,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "unicorn/prefer-date-now" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_date_now.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -1519,20 +1513,14 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "unicorn/require-number-to-fixed-digits-argument" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
                 .use_number_to_fixed_digits_argument
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "unicorn/throw-new-error" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_throw_new_error.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
@@ -1557,10 +1545,7 @@ pub(crate) fn migrate_eslint_any_rule(
             rule.set_level(rule_severity.into());
         }
         "yoda" => {
-            if !options.include_nursery {
-                return false;
-            }
-            let group = rules.nursery.get_or_insert_with(Default::default);
+            let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_yoda_expression.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }

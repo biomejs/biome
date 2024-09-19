@@ -1,0 +1,4 @@
+`console.log($message)` where {
+    $name = "Lucy",
+    $message <: r`"([a-zA-Z]*), Lucy"`($greeting) => `$name, $greeting`
+}

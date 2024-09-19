@@ -20,15 +20,17 @@ div {
 +++ Biome
 @@ -1,11 +1,6 @@
  div {
-   border-left: 1px solid
-     mix($warningBackgroundColors, $warningBorderColors, 50%);
+-  border-left: 1px solid
+-    mix($warningBackgroundColors, $warningBorderColors, 50%);
 -  $fontFamily:
 -    "Lato",
 -    -apple-system,
 -    "Helvetica Neue",
 -    Helvetica,
 -    Arial,
-+  $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial,
++  border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
++  $
++  fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial,
      sans-serif;
  }
 ```
@@ -37,9 +39,74 @@ div {
 
 ```css
 div {
-  border-left: 1px solid
-    mix($warningBackgroundColors, $warningBorderColors, 50%);
-  $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial,
+  border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
+  $
+  fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial,
     sans-serif;
 }
+```
+
+# Errors
+```
+fill.css:2:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    1 │ div {
+  > 2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
+      │                              ^
+    3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    4 │ }
+  
+fill.css:2:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `warningBackgroundColors`
+  
+    1 │ div {
+  > 2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
+      │                               ^^^^^^^^^^^^^^^^^^^^^^^
+    3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    4 │ }
+  
+  i Remove warningBackgroundColors
+  
+fill.css:2:56 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    1 │ div {
+  > 2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
+      │                                                        ^
+    3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    4 │ }
+  
+fill.css:2:57 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `warningBorderColors`
+  
+    1 │ div {
+  > 2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
+      │                                                         ^^^^^^^^^^^^^^^^^^^
+    3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    4 │ }
+  
+  i Remove warningBorderColors
+  
+fill.css:3:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unexpected character `$`
+  
+    1 │ div {
+    2 │   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
+  > 3 │   $fontFamily: "Lato", -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+      │   ^
+    4 │ }
+    5 │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    2:   border-left: 1px solid mix($warningBackgroundColors, $warningBorderColors, 50%);
 ```

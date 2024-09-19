@@ -29,7 +29,7 @@ pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
 /// bitfield here being twice as large as it needs to cover all nodes as well
 /// as all token kinds
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct SyntaxKindSet<L: ?Sized + Language>([u128; 4], PhantomData<L>);
+pub struct SyntaxKindSet<L: Language>([u128; 4], PhantomData<L>);
 
 impl<L> SyntaxKindSet<L>
 where

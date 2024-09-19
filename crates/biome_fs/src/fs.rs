@@ -4,10 +4,9 @@ use biome_diagnostics::{Error, Severity};
 pub use memory::{ErrorEntry, MemoryFileSystem};
 pub use os::OsFileSystem;
 use oxc_resolver::{Resolution, ResolveError};
-use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeSet;
 use std::fmt::{Debug, Display, Formatter};
-use std::hash::{Hash, Hasher};
 use std::panic::RefUnwindSafe;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -294,7 +293,7 @@ pub trait FileSystemExt: FileSystem {
     }
 }
 
-impl<T: ?Sized> FileSystemExt for T where T: FileSystem {}
+impl<T: FileSystem + ?Sized> FileSystemExt for T {}
 
 type BoxedTraversal<'fs, 'scope> = Box<dyn FnOnce(&dyn TraversalScope<'scope>) + Send + 'fs>;
 
@@ -332,68 +331,14 @@ pub trait TraversalContext: Sync {
 
     /// This method will be called by the traversal for each file it finds
     /// where [TraversalContext::can_handle] returned true
-    fn handle_path(&self, path: &Path);
+    fn handle_path(&self, path: BiomePath);
 
     /// This method will be called by the traversal for each file it finds
     /// where [TraversalContext::store_path] returned true
-    fn store_path(&self, path: &Path);
+    fn store_path(&self, path: BiomePath);
 
     /// Returns the paths that should be handled
-    fn evaluated_paths(&self) -> FxHashSet<EvaluatedPath>;
-}
-
-#[derive(Debug, Eq, Clone)]
-pub struct EvaluatedPath {
-    path: PathBuf,
-    is_fixed: bool,
-}
-
-impl PartialEq for EvaluatedPath {
-    fn eq(&self, other: &Self) -> bool {
-        self.path.eq(&other.path)
-    }
-}
-
-impl Hash for EvaluatedPath {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.path.hash(state)
-    }
-}
-
-impl EvaluatedPath {
-    pub fn new_evaluated(path: impl Into<PathBuf>) -> Self {
-        Self {
-            path: path.into(),
-            is_fixed: true,
-        }
-    }
-
-    pub fn is_fixed(&self) -> bool {
-        self.is_fixed
-    }
-
-    pub fn as_path(&self) -> &Path {
-        self.path.as_path()
-    }
-
-    pub fn to_path_buf(&self) -> PathBuf {
-        self.path.clone()
-    }
-}
-
-impl AsRef<Path> for EvaluatedPath {
-    fn as_ref(&self) -> &Path {
-        self.as_path()
-    }
-}
-
-impl<T: Into<PathBuf>> From<T> for EvaluatedPath {
-    fn from(value: T) -> Self {
-        Self {
-            path: value.into(),
-            is_fixed: false,
-        }
-    }
+    fn evaluated_paths(&self) -> BTreeSet<BiomePath>;
 }
 
 impl<T> FileSystem for Arc<T>

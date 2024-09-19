@@ -20,7 +20,10 @@ let    x
 ```diff
 --- Prettier
 +++ Biome
-@@ -4,4 +4,4 @@
+@@ -1,5 +1,7 @@
++
++
+ class a {
    b() {}
  }
  

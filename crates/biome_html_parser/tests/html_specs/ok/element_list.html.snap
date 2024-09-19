@@ -4,7 +4,7 @@ expression: snapshot
 ---
 ## Input
 
-```css
+```html
 <div>
 	<div>
 		some text
@@ -48,12 +48,9 @@ HtmlRoot {
             r_angle_token: R_ANGLE@4..5 ">" [] [],
         },
         children: HtmlElementList [
-            HtmlContent {
-                value_token: HTML_LITERAL@5..7 "\n\t" [] [],
-            },
             HtmlElement {
                 opening_element: HtmlOpeningElement {
-                    l_angle_token: L_ANGLE@7..8 "<" [] [],
+                    l_angle_token: L_ANGLE@5..8 "<" [Newline("\n"), Whitespace("\t")] [],
                     name: HtmlName {
                         value_token: HTML_LITERAL@8..11 "div" [] [],
                     },
@@ -62,11 +59,11 @@ HtmlRoot {
                 },
                 children: HtmlElementList [
                     HtmlContent {
-                        value_token: HTML_LITERAL@12..27 "\n\t\tsome text\n\t\t" [] [],
+                        value_token: HTML_LITERAL@12..24 "some text" [Newline("\n"), Whitespace("\t\t")] [],
                     },
                     HtmlElement {
                         opening_element: HtmlOpeningElement {
-                            l_angle_token: L_ANGLE@27..28 "<" [] [],
+                            l_angle_token: L_ANGLE@24..28 "<" [Newline("\n"), Whitespace("\t\t")] [],
                             name: HtmlName {
                                 value_token: HTML_LITERAL@28..31 "div" [] [],
                             },
@@ -157,10 +154,10 @@ HtmlRoot {
                         },
                         children: HtmlElementList [
                             HtmlContent {
-                                value_token: HTML_LITERAL@100..117 "\n\t\t\tsome text\n\t\t\t" [] [],
+                                value_token: HTML_LITERAL@100..113 "some text" [Newline("\n"), Whitespace("\t\t\t")] [],
                             },
                             HtmlSelfClosingElement {
-                                l_angle_token: L_ANGLE@117..118 "<" [] [],
+                                l_angle_token: L_ANGLE@113..118 "<" [Newline("\n"), Whitespace("\t\t\t")] [],
                                 name: HtmlName {
                                     value_token: HTML_LITERAL@118..122 "img" [] [Whitespace(" ")],
                                 },
@@ -253,11 +250,8 @@ HtmlRoot {
                                     r_angle_token: R_ANGLE@253..254 ">" [] [],
                                 },
                                 children: HtmlElementList [
-                                    HtmlContent {
-                                        value_token: HTML_LITERAL@254..259 "\n\t\t\t\t" [] [],
-                                    },
                                     HtmlSelfClosingElement {
-                                        l_angle_token: L_ANGLE@259..260 "<" [] [],
+                                        l_angle_token: L_ANGLE@254..260 "<" [Newline("\n"), Whitespace("\t\t\t\t")] [],
                                         name: HtmlName {
                                             value_token: HTML_LITERAL@260..264 "img" [] [Whitespace(" ")],
                                         },
@@ -398,21 +392,19 @@ HtmlRoot {
       2: HTML_ATTRIBUTE_LIST@4..4
       3: R_ANGLE@4..5 ">" [] []
     1: HTML_ELEMENT_LIST@5..417
-      0: HTML_CONTENT@5..7
-        0: HTML_LITERAL@5..7 "\n\t" [] []
-      1: HTML_ELEMENT@7..417
-        0: HTML_OPENING_ELEMENT@7..12
-          0: L_ANGLE@7..8 "<" [] []
+      0: HTML_ELEMENT@5..417
+        0: HTML_OPENING_ELEMENT@5..12
+          0: L_ANGLE@5..8 "<" [Newline("\n"), Whitespace("\t")] []
           1: HTML_NAME@8..11
             0: HTML_LITERAL@8..11 "div" [] []
           2: HTML_ATTRIBUTE_LIST@11..11
           3: R_ANGLE@11..12 ">" [] []
         1: HTML_ELEMENT_LIST@12..409
-          0: HTML_CONTENT@12..27
-            0: HTML_LITERAL@12..27 "\n\t\tsome text\n\t\t" [] []
-          1: HTML_ELEMENT@27..38
-            0: HTML_OPENING_ELEMENT@27..32
-              0: L_ANGLE@27..28 "<" [] []
+          0: HTML_CONTENT@12..24
+            0: HTML_LITERAL@12..24 "some text" [Newline("\n"), Whitespace("\t\t")] []
+          1: HTML_ELEMENT@24..38
+            0: HTML_OPENING_ELEMENT@24..32
+              0: L_ANGLE@24..28 "<" [Newline("\n"), Whitespace("\t\t")] []
               1: HTML_NAME@28..31
                 0: HTML_LITERAL@28..31 "div" [] []
               2: HTML_ATTRIBUTE_LIST@31..31
@@ -478,10 +470,10 @@ HtmlRoot {
               2: HTML_ATTRIBUTE_LIST@99..99
               3: R_ANGLE@99..100 ">" [] []
             1: HTML_ELEMENT_LIST@100..400
-              0: HTML_CONTENT@100..117
-                0: HTML_LITERAL@100..117 "\n\t\t\tsome text\n\t\t\t" [] []
-              1: HTML_SELF_CLOSING_ELEMENT@117..146
-                0: L_ANGLE@117..118 "<" [] []
+              0: HTML_CONTENT@100..113
+                0: HTML_LITERAL@100..113 "some text" [Newline("\n"), Whitespace("\t\t\t")] []
+              1: HTML_SELF_CLOSING_ELEMENT@113..146
+                0: L_ANGLE@113..118 "<" [Newline("\n"), Whitespace("\t\t\t")] []
                 1: HTML_NAME@118..122
                   0: HTML_LITERAL@118..122 "img" [] [Whitespace(" ")]
                 2: HTML_ATTRIBUTE_LIST@122..144
@@ -544,10 +536,8 @@ HtmlRoot {
                   2: HTML_ATTRIBUTE_LIST@253..253
                   3: R_ANGLE@253..254 ">" [] []
                 1: HTML_ELEMENT_LIST@254..390
-                  0: HTML_CONTENT@254..259
-                    0: HTML_LITERAL@254..259 "\n\t\t\t\t" [] []
-                  1: HTML_SELF_CLOSING_ELEMENT@259..288
-                    0: L_ANGLE@259..260 "<" [] []
+                  0: HTML_SELF_CLOSING_ELEMENT@254..288
+                    0: L_ANGLE@254..260 "<" [Newline("\n"), Whitespace("\t\t\t\t")] []
                     1: HTML_NAME@260..264
                       0: HTML_LITERAL@260..264 "img" [] [Whitespace(" ")]
                     2: HTML_ATTRIBUTE_LIST@264..286
@@ -560,7 +550,7 @@ HtmlRoot {
                             0: HTML_STRING_LITERAL@268..286 "\"attributes.html \"" [] []
                     3: SLASH@286..287 "/" [] []
                     4: R_ANGLE@287..288 ">" [] []
-                  2: HTML_SELF_CLOSING_ELEMENT@288..322
+                  1: HTML_SELF_CLOSING_ELEMENT@288..322
                     0: L_ANGLE@288..294 "<" [Newline("\n"), Whitespace("\t\t\t\t")] []
                     1: HTML_NAME@294..298
                       0: HTML_LITERAL@294..298 "img" [] [Whitespace(" ")]
@@ -574,7 +564,7 @@ HtmlRoot {
                             0: HTML_STRING_LITERAL@302..320 "\"attributes.html \"" [] []
                     3: SLASH@320..321 "/" [] []
                     4: R_ANGLE@321..322 ">" [] []
-                  3: HTML_SELF_CLOSING_ELEMENT@322..356
+                  2: HTML_SELF_CLOSING_ELEMENT@322..356
                     0: L_ANGLE@322..328 "<" [Newline("\n"), Whitespace("\t\t\t\t")] []
                     1: HTML_NAME@328..332
                       0: HTML_LITERAL@328..332 "img" [] [Whitespace(" ")]
@@ -588,7 +578,7 @@ HtmlRoot {
                             0: HTML_STRING_LITERAL@336..354 "\"attributes.html \"" [] []
                     3: SLASH@354..355 "/" [] []
                     4: R_ANGLE@355..356 ">" [] []
-                  4: HTML_SELF_CLOSING_ELEMENT@356..390
+                  3: HTML_SELF_CLOSING_ELEMENT@356..390
                     0: L_ANGLE@356..362 "<" [Newline("\n"), Whitespace("\t\t\t\t")] []
                     1: HTML_NAME@362..366
                       0: HTML_LITERAL@362..366 "img" [] [Whitespace(" ")]

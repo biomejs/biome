@@ -76,7 +76,7 @@ HtmlSelfClosingElement =
 	'<'
 	name: HtmlName
 	attributes: HtmlAttributeList
-	'/'
+	'/'?
 	'>'
 
 HtmlElement =
@@ -116,7 +116,7 @@ HtmlAttribute =
 
 
 // <a href="">
-//       ^^^^
+//        ^^^
 HtmlAttributeInitializerClause =
 	'='
 	value: HtmlString

@@ -150,6 +150,13 @@ impl LSPServer {
                             )),
                             kind: Some(WatchKind::all()),
                         },
+                        FileSystemWatcher {
+                            glob_pattern: GlobPattern::String(format!(
+                                "{}/.editorconfig",
+                                base_path.display()
+                            )),
+                            kind: Some(WatchKind::all()),
+                        },
                         // TODO: Biome 2.0 remove it
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
@@ -325,10 +332,11 @@ impl LanguageServer for LSPServer {
                     let base_path = self.session.base_path();
                     if let Some(base_path) = base_path {
                         let possible_rome_json = file_path.strip_prefix(&base_path);
-                        if let Ok(possible_rome_json) = possible_rome_json {
-                            if possible_rome_json.display().to_string() == ROME_JSON
+                        if let Ok(watched_file) = possible_rome_json {
+                            if watched_file.display().to_string() == ROME_JSON
                                 || ConfigName::file_names()
-                                    .contains(&&*possible_rome_json.display().to_string())
+                                    .contains(&&*watched_file.display().to_string())
+                                || watched_file.ends_with(".editorconfig")
                             {
                                 self.session.load_workspace_settings().await;
                                 self.session.load_manifest().await;
@@ -617,8 +625,7 @@ impl ServerFactory {
         workspace_method!(builder, register_project_folder);
         workspace_method!(builder, unregister_project_folder);
         workspace_method!(builder, open_file);
-        workspace_method!(builder, open_project);
-        workspace_method!(builder, update_current_manifest);
+        workspace_method!(builder, set_manifest_for_project);
         workspace_method!(builder, get_syntax_tree);
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);

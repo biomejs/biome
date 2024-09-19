@@ -56,6 +56,7 @@ mod or_compiler;
 mod predicate_call_compiler;
 mod predicate_compiler;
 mod predicate_return_compiler;
+mod regex_compiler;
 mod rewrite_compiler;
 mod sequential_compiler;
 mod snippet_compiler;
@@ -88,6 +89,7 @@ use biome_grit_syntax::{AnyGritMaybeCurlyPattern, AnyGritPattern, GritSyntaxKind
 use biome_rowan::AstNode as _;
 use grit_pattern_matcher::pattern::{DynamicPattern, DynamicSnippet, DynamicSnippetPart, Pattern};
 use node_like_compiler::NodeLikeCompiler;
+use regex_compiler::RegexCompiler;
 
 pub(crate) use self::auto_wrap::auto_wrap_pattern;
 
@@ -211,7 +213,9 @@ impl PatternCompiler {
             AnyGritPattern::GritPatternWhere(node) => Ok(Pattern::Where(Box::new(
                 WhereCompiler::from_node(node, context)?,
             ))),
-            AnyGritPattern::GritRegexPattern(_) => todo!(),
+            AnyGritPattern::GritRegexPattern(node) => Ok(Pattern::Regex(Box::new(
+                RegexCompiler::from_node(node, context, is_rhs)?,
+            ))),
             AnyGritPattern::GritRewrite(node) => Ok(Pattern::Rewrite(Box::new(
                 RewriteCompiler::from_node(node, context)?,
             ))),

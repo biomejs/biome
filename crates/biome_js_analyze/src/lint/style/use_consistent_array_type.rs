@@ -49,9 +49,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ## Options
-    /// The rule provides two options that help to specify what type of array declarations to use.
     ///
-    /// Default: "shorthand"
+    /// Use the options to specify the syntax of array declarations to use.
     ///
     /// ```json
     /// {
@@ -61,10 +60,14 @@ declare_lint_rule! {
     ///     }
     /// }
     /// ```
-    /// ### Syntax
     ///
-    /// By default, all array declarations will be converted to `T[]` or `readonly T[]`, which it means `shorthand`,
-    /// or if the options is set to the "generic", that all will converted to `Array<T>` or `ReadonlyArray<T>`.
+    /// ### syntax
+    ///
+    /// The syntax to use:
+    /// - `generic`: array declarations will be converted to `Array<T>` or `ReadonlyArray<T>`
+    /// - `shorthand`: array declarations will be converted to `T[]` or `readonly T[]`
+    ///
+    /// Default: `shorthand`
     ///
     pub UseConsistentArrayType {
         version: "1.5.0",

@@ -1,0 +1,26 @@
+{
+	"$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"nursery": {
+				"noRestrictedTypes": {
+					"level": "error",
+					"options": {
+						"types": {
+							"CustomType": {
+								"message": "Only CustomType2 is allowed",
+								"use": "CustomType2"
+							},
+							"Bar": "Replace Bar with Foo",
+							"InvalidUse": {
+								"message": "Do not use this type",
+								"use": "@"
+							}
+						}
+                    }
+				}
+			}
+		}
+	}
+}

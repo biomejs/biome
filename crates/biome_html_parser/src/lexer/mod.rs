@@ -1,9 +1,9 @@
 mod tests;
 
-use crate::token_source::HtmlLexContext;
+use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
-    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
-    UNICODE_BOM, WHITESPACE,
+    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
+    TOMBSTONE, UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -49,16 +49,21 @@ impl<'src> HtmlLexer<'src> {
             unicode_bom_length: 0,
         }
     }
+
+    /// Consume a token in the [HtmlLexContext::Regular] context.
     fn consume_token(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
             b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
             b'<' => self.consume_l_angle(),
             b'>' => self.consume_byte(T![>]),
             b'/' => self.consume_byte(T![/]),
-            b'!' => self.consume_byte(T![!]),
             b'=' => self.consume_byte(T![=]),
+            b'!' => self.consume_byte(T![!]),
             b'\'' | b'"' => self.consume_string_literal(current),
-            _ if is_identifier_byte(current) => self.consume_identifier(current),
+            // TODO: differentiate between attribute names and identifiers
+            _ if is_identifier_byte(current) || is_attribute_name_byte(current) => {
+                self.consume_identifier(current, false)
+            }
             _ => {
                 if self.position == 0 {
                     if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
@@ -71,31 +76,66 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
-    fn consume_element_list_token(&mut self, current: u8) -> HtmlSyntaxKind {
-        debug_assert!(!self.is_eof());
+    /// Consume a token in the [HtmlLexContext::OutsideTag] context.
+    fn consume_token_outside_tag(&mut self, current: u8) -> HtmlSyntaxKind {
         match current {
-            b'<' => self.consume_byte(T![<]),
-            _ => {
-                while let Some(chr) = self.current_byte() {
-                    match chr {
-                        b'<' => break,
-                        chr => {
-                            if chr.is_ascii() {
-                                self.advance(1);
-                            } else {
-                                self.advance_char_unchecked();
-                            }
-                        }
-                    }
-                }
-
-                HTML_LITERAL
-            }
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' => self.consume_l_angle(),
+            _ => self.consume_html_text(),
         }
     }
 
-    #[allow(unused)]
-    fn consume_element_token(&mut self, current: u8) {}
+    /// Consume a token in the [HtmlLexContext::AttributeValue] context.
+    fn consume_token_attribute_value(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' => self.consume_byte(T![<]),
+            b'>' => self.consume_byte(T![>]),
+            b'\'' | b'"' => self.consume_string_literal(current),
+            _ => self.consume_unquoted_string_literal(),
+        }
+    }
+
+    /// Consume a token in the [HtmlLexContext::Doctype] context.
+    fn consume_token_doctype(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'\n' | b'\r' | b'\t' | b' ' => self.consume_newline_or_whitespaces(),
+            b'<' => self.consume_byte(T![<]),
+            b'>' => self.consume_byte(T![>]),
+            b'!' => self.consume_byte(T![!]),
+            b'\'' | b'"' => self.consume_string_literal(current),
+            _ if is_identifier_byte(current) || is_attribute_name_byte(current) => {
+                self.consume_identifier(current, true)
+            }
+            _ => self.consume_unexpected_character(),
+        }
+    }
+
+    /// Consume an embedded language in its entirety. Stops immediately before the closing tag.
+    fn consume_token_embedded_language(
+        &mut self,
+        _current: u8,
+        lang: HtmlEmbededLanguage,
+    ) -> HtmlSyntaxKind {
+        let start = self.text_position();
+        let end_tag = lang.end_tag();
+        while self.current_byte().is_some() {
+            if self.source[self.position..(self.position + end_tag.len())]
+                .eq_ignore_ascii_case(end_tag)
+            {
+                break;
+            }
+            self.advance(1);
+        }
+
+        if self.text_position() != start {
+            HTML_LITERAL
+        } else {
+            // if the element is empty, we will immediately hit the closing tag.
+            // we HAVE to consume something, so we start consuming the closing tag.
+            self.consume_byte(T![<])
+        }
+    }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind.
     #[inline]
@@ -124,7 +164,7 @@ impl<'src> HtmlLexer<'src> {
         debug_assert!(self.source.is_char_boundary(self.position));
     }
 
-    fn consume_identifier(&mut self, first: u8) -> HtmlSyntaxKind {
+    fn consume_identifier(&mut self, first: u8, doctype_context: bool) -> HtmlSyntaxKind {
         self.assert_current_char_boundary();
 
         const BUFFER_SIZE: usize = 14;
@@ -135,7 +175,7 @@ impl<'src> HtmlLexer<'src> {
         self.advance_byte_or_char(first);
 
         while let Some(byte) = self.current_byte() {
-            if is_identifier_byte(byte) {
+            if is_identifier_byte(byte) || is_attribute_name_byte(byte) {
                 if len < BUFFER_SIZE {
                     buffer[len] = byte;
                     len += 1;
@@ -149,6 +189,7 @@ impl<'src> HtmlLexer<'src> {
 
         match &buffer[..len] {
             b"doctype" | b"DOCTYPE" => DOCTYPE_KW,
+            b"html" | b"HTML" if doctype_context => HTML_KW,
             _ => HTML_LITERAL,
         }
     }
@@ -238,13 +279,48 @@ impl<'src> HtmlLexer<'src> {
         }
     }
 
+    /// Consume an attribute value that is not quoted.
+    ///
+    /// See: https://html.spec.whatwg.org/#attributes-2 under "Unquoted attribute value syntax"
+    fn consume_unquoted_string_literal(&mut self) -> HtmlSyntaxKind {
+        let mut content_started = false;
+        let mut encountered_invalid = false;
+        while let Some(current) = self.current_byte() {
+            match current {
+                // these characters safely terminate an unquoted attribute value
+                b'\n' | b'\r' | b'\t' | b' ' | b'>' => break,
+                // these characters are absolutely invalid in an unquoted attribute value
+                b'?' | b'\'' | b'"' | b'=' | b'<' | b'`' => {
+                    encountered_invalid = true;
+                    break;
+                }
+                _ if current.is_ascii() => {
+                    self.advance(1);
+                    content_started = true;
+                }
+                _ => break,
+            }
+        }
+
+        if content_started && !encountered_invalid {
+            HTML_STRING_LITERAL
+        } else {
+            let char = self.current_char_unchecked();
+            self.push_diagnostic(ParseDiagnostic::new(
+                "Unexpected character in unquoted attribute value",
+                self.text_position()..self.text_position() + char.text_len(),
+            ));
+            self.consume_unexpected_character()
+        }
+    }
+
     fn consume_l_angle(&mut self) -> HtmlSyntaxKind {
         self.assert_byte(b'<');
 
-        if !self.at_start_comment() {
-            self.consume_byte(T![<])
-        } else {
+        if self.at_start_comment() {
             self.consume_comment()
+        } else {
+            self.consume_byte(T![<])
         }
     }
 
@@ -324,6 +400,40 @@ impl<'src> HtmlLexer<'src> {
 
         Ok(())
     }
+
+    /// Consume HTML text literals outside of tags.
+    ///
+    /// This includes text and single spaces between words. If newline or a second
+    /// consecutive space is found, this will stop consuming and to allow the lexer to
+    /// switch to `consume_whitespace`.
+    ///
+    /// See: https://html.spec.whatwg.org/#space-separated-tokens
+    /// See: https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
+    fn consume_html_text(&mut self) -> HtmlSyntaxKind {
+        let mut saw_space = false;
+        while let Some(current) = self.current_byte() {
+            match current {
+                b'<' => break,
+                b'\n' | b'\r' => {
+                    self.after_newline = true;
+                    break;
+                }
+                b' ' => {
+                    if saw_space {
+                        break;
+                    }
+                    self.advance(1);
+                    saw_space = true;
+                }
+                _ => {
+                    self.advance(1);
+                    saw_space = false;
+                }
+            }
+        }
+
+        HTML_LITERAL
+    }
 }
 
 impl<'src> Lexer<'src> for HtmlLexer<'src> {
@@ -355,7 +465,12 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
             match self.current_byte() {
                 Some(current) => match context {
                     HtmlLexContext::Regular => self.consume_token(current),
-                    HtmlLexContext::ElementList => self.consume_element_list_token(current),
+                    HtmlLexContext::OutsideTag => self.consume_token_outside_tag(current),
+                    HtmlLexContext::AttributeValue => self.consume_token_attribute_value(current),
+                    HtmlLexContext::Doctype => self.consume_token_doctype(current),
+                    HtmlLexContext::EmbeddedLanguage(lang) => {
+                        self.consume_token_embedded_language(current, lang)
+                    }
                 },
                 None => EOF,
             }
@@ -424,7 +539,18 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
 }
 
 fn is_identifier_byte(byte: u8) -> bool {
+    // https://html.spec.whatwg.org/#elements-2
     byte.is_ascii_alphanumeric()
+}
+
+fn is_attribute_name_byte(byte: u8) -> bool {
+    // https://html.spec.whatwg.org/#attributes-2
+    byte.is_ascii()
+        && !byte.is_ascii_control()
+        && !matches!(
+            byte,
+            b' ' | b'\t' | b'\n' | b'"' | b'\'' | b'>' | b'<' | b'/' | b'='
+        )
 }
 
 #[derive(Copy, Clone, Debug)]

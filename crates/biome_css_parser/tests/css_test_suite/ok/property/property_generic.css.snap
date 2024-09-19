@@ -7,6 +7,7 @@ expression: snapshot
 ```css
 div {
     /* Unknown property, always generic */
+    unknown-property: u;
     unknown-property: a value;
     unknown-property: one-value;
     unknown-property: multiple values;
@@ -15,6 +16,7 @@ div {
     unknown-property: mixed, delimiters / can be, used;
 
     /* Custom property, always generic */
+    --custom-property: u;
     --custom-property: a value;
     --custom-property: one-value;
     --custom-property: multiple values;
@@ -65,243 +67,248 @@ CssRoot {
                                 colon_token: COLON@69..71 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@71..73 "a" [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@73..78 "value" [] [],
+                                        value_token: IDENT@71..72 "u" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@78..79 ";" [] [],
+                        semicolon_token: SEMICOLON@72..73 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@79..100 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@73..94 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@100..102 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@94..96 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@102..111 "one-value" [] [],
+                                        value_token: IDENT@96..98 "a" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@98..103 "value" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@111..112 ";" [] [],
+                        semicolon_token: SEMICOLON@103..104 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@112..133 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@104..125 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@133..135 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@125..127 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@135..144 "multiple" [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@144..150 "values" [] [],
+                                        value_token: IDENT@127..136 "one-value" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@150..151 ";" [] [],
+                        semicolon_token: SEMICOLON@136..137 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@151..172 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@137..158 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@172..174 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@158..160 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@174..183 "delimited" [] [],
-                                    },
-                                    CssGenericDelimiter {
-                                        value: COMMA@183..185 "," [] [Whitespace(" ")],
+                                        value_token: IDENT@160..169 "multiple" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@185..191 "values" [] [],
+                                        value_token: IDENT@169..175 "values" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@191..192 ";" [] [],
+                        semicolon_token: SEMICOLON@175..176 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@192..213 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@176..197 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@213..215 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@197..199 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@215..225 "delimited" [] [Whitespace(" ")],
+                                        value_token: IDENT@199..208 "delimited" [] [],
                                     },
                                     CssGenericDelimiter {
-                                        value: SLASH@225..227 "/" [] [Whitespace(" ")],
+                                        value: COMMA@208..210 "," [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@227..233 "slash" [] [Whitespace(" ")],
-                                    },
-                                    CssGenericDelimiter {
-                                        value: SLASH@233..235 "/" [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@235..241 "values" [] [],
+                                        value_token: IDENT@210..216 "values" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@241..242 ";" [] [],
+                        semicolon_token: SEMICOLON@216..217 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@242..263 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@217..238 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@263..265 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@238..240 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@265..270 "mixed" [] [],
+                                        value_token: IDENT@240..250 "delimited" [] [Whitespace(" ")],
                                     },
                                     CssGenericDelimiter {
-                                        value: COMMA@270..272 "," [] [Whitespace(" ")],
+                                        value: SLASH@250..252 "/" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@272..283 "delimiters" [] [Whitespace(" ")],
+                                        value_token: IDENT@252..258 "slash" [] [Whitespace(" ")],
                                     },
                                     CssGenericDelimiter {
-                                        value: SLASH@283..285 "/" [] [Whitespace(" ")],
+                                        value: SLASH@258..260 "/" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@285..289 "can" [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@289..291 "be" [] [],
-                                    },
-                                    CssGenericDelimiter {
-                                        value: COMMA@291..293 "," [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@293..297 "used" [] [],
+                                        value_token: IDENT@260..266 "values" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@297..298 ";" [] [],
+                        semicolon_token: SEMICOLON@266..267 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
-                                name: CssDashedIdentifier {
-                                    value_token: IDENT@298..363 "--custom-property" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Custom property, a ..."), Newline("\n"), Whitespace("    ")] [],
+                                name: CssIdentifier {
+                                    value_token: IDENT@267..288 "unknown-property" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@363..365 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@288..290 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@365..367 "a" [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@367..372 "value" [] [],
-                                    },
-                                ],
-                            },
-                            important: missing (optional),
-                        },
-                        semicolon_token: SEMICOLON@372..373 ";" [] [],
-                    },
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssDashedIdentifier {
-                                    value_token: IDENT@373..395 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
-                                },
-                                colon_token: COLON@395..397 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@397..406 "one-value" [] [],
-                                    },
-                                ],
-                            },
-                            important: missing (optional),
-                        },
-                        semicolon_token: SEMICOLON@406..407 ";" [] [],
-                    },
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssDashedIdentifier {
-                                    value_token: IDENT@407..429 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
-                                },
-                                colon_token: COLON@429..431 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@431..440 "multiple" [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@440..446 "values" [] [],
-                                    },
-                                ],
-                            },
-                            important: missing (optional),
-                        },
-                        semicolon_token: SEMICOLON@446..447 ";" [] [],
-                    },
-                    CssDeclarationWithSemicolon {
-                        declaration: CssDeclaration {
-                            property: CssGenericProperty {
-                                name: CssDashedIdentifier {
-                                    value_token: IDENT@447..469 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
-                                },
-                                colon_token: COLON@469..471 ":" [] [Whitespace(" ")],
-                                value: CssGenericComponentValueList [
-                                    CssIdentifier {
-                                        value_token: IDENT@471..480 "delimited" [] [],
+                                        value_token: IDENT@290..295 "mixed" [] [],
                                     },
                                     CssGenericDelimiter {
-                                        value: COMMA@480..482 "," [] [Whitespace(" ")],
+                                        value: COMMA@295..297 "," [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@482..488 "values" [] [],
+                                        value_token: IDENT@297..308 "delimiters" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@308..310 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@310..314 "can" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@314..316 "be" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@316..318 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@318..322 "used" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@488..489 ";" [] [],
+                        semicolon_token: SEMICOLON@322..323 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssDashedIdentifier {
-                                    value_token: IDENT@489..511 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@323..388 "--custom-property" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Custom property, a ..."), Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@511..513 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@388..390 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@513..523 "delimited" [] [Whitespace(" ")],
+                                        value_token: IDENT@390..391 "u" [] [],
                                     },
-                                    CssGenericDelimiter {
-                                        value: SLASH@523..525 "/" [] [Whitespace(" ")],
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@391..392 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@392..414 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                colon_token: COLON@414..416 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@416..418 "a" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@525..531 "slash" [] [Whitespace(" ")],
+                                        value_token: IDENT@418..423 "value" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@423..424 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@424..446 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                colon_token: COLON@446..448 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@448..457 "one-value" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@457..458 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@458..480 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                colon_token: COLON@480..482 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@482..491 "multiple" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@491..497 "values" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@497..498 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@498..520 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                colon_token: COLON@520..522 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@522..531 "delimited" [] [],
                                     },
                                     CssGenericDelimiter {
-                                        value: SLASH@531..533 "/" [] [Whitespace(" ")],
+                                        value: COMMA@531..533 "," [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
                                         value_token: IDENT@533..539 "values" [] [],
@@ -321,196 +328,225 @@ CssRoot {
                                 colon_token: COLON@562..564 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@564..569 "mixed" [] [],
+                                        value_token: IDENT@564..574 "delimited" [] [Whitespace(" ")],
                                     },
                                     CssGenericDelimiter {
-                                        value: COMMA@569..571 "," [] [Whitespace(" ")],
+                                        value: SLASH@574..576 "/" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@571..582 "delimiters" [] [Whitespace(" ")],
+                                        value_token: IDENT@576..582 "slash" [] [Whitespace(" ")],
                                     },
                                     CssGenericDelimiter {
                                         value: SLASH@582..584 "/" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@584..588 "can" [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@588..590 "be" [] [],
-                                    },
-                                    CssGenericDelimiter {
-                                        value: COMMA@590..592 "," [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@592..596 "used" [] [],
+                                        value_token: IDENT@584..590 "values" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@596..597 ";" [] [],
+                        semicolon_token: SEMICOLON@590..591 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssDashedIdentifier {
+                                    value_token: IDENT@591..613 "--custom-property" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                colon_token: COLON@613..615 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssIdentifier {
+                                        value_token: IDENT@615..620 "mixed" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@620..622 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@622..633 "delimiters" [] [Whitespace(" ")],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: SLASH@633..635 "/" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@635..639 "can" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@639..641 "be" [] [],
+                                    },
+                                    CssGenericDelimiter {
+                                        value: COMMA@641..643 "," [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@643..647 "used" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@647..648 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@597..665 "all" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Known property, in ..."), Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@648..716 "all" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Known property, in ..."), Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@665..667 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@716..718 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssRegularDimension {
-                                        value_token: CSS_NUMBER_LITERAL@667..669 "10" [] [],
-                                        unit_token: IDENT@669..670 "s" [] [],
+                                        value_token: CSS_NUMBER_LITERAL@718..720 "10" [] [],
+                                        unit_token: IDENT@720..721 "s" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@670..671 ";" [] [],
+                        semicolon_token: SEMICOLON@721..722 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@671..679 "all" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@722..730 "all" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@679..681 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@730..732 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@681..690 "one-value" [] [],
+                                        value_token: IDENT@732..741 "one-value" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@690..691 ";" [] [],
+                        semicolon_token: SEMICOLON@741..742 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@691..699 "all" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@742..750 "all" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@699..701 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@750..752 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@701..710 "multiple" [] [Whitespace(" ")],
+                                        value_token: IDENT@752..761 "multiple" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@710..716 "values" [] [],
+                                        value_token: IDENT@761..767 "values" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@716..717 ";" [] [],
+                        semicolon_token: SEMICOLON@767..768 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@717..725 "all" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@768..776 "all" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@725..727 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@776..778 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@727..736 "delimited" [] [],
+                                        value_token: IDENT@778..787 "delimited" [] [],
                                     },
                                     CssGenericDelimiter {
-                                        value: COMMA@736..738 "," [] [Whitespace(" ")],
+                                        value: COMMA@787..789 "," [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@738..744 "values" [] [],
+                                        value_token: IDENT@789..795 "values" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@744..745 ";" [] [],
+                        semicolon_token: SEMICOLON@795..796 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@745..753 "all" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@796..804 "all" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@753..755 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@804..806 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@755..765 "delimited" [] [Whitespace(" ")],
+                                        value_token: IDENT@806..816 "delimited" [] [Whitespace(" ")],
                                     },
                                     CssGenericDelimiter {
-                                        value: SLASH@765..767 "/" [] [Whitespace(" ")],
+                                        value: SLASH@816..818 "/" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@767..773 "slash" [] [Whitespace(" ")],
+                                        value_token: IDENT@818..824 "slash" [] [Whitespace(" ")],
                                     },
                                     CssGenericDelimiter {
-                                        value: SLASH@773..775 "/" [] [Whitespace(" ")],
+                                        value: SLASH@824..826 "/" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@775..781 "values" [] [],
+                                        value_token: IDENT@826..832 "values" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@781..782 ";" [] [],
+                        semicolon_token: SEMICOLON@832..833 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@782..790 "all" [Newline("\n"), Whitespace("    ")] [],
+                                    value_token: IDENT@833..841 "all" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@790..792 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@841..843 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@792..797 "mixed" [] [],
+                                        value_token: IDENT@843..848 "mixed" [] [],
                                     },
                                     CssGenericDelimiter {
-                                        value: COMMA@797..799 "," [] [Whitespace(" ")],
+                                        value: COMMA@848..850 "," [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@799..810 "delimiters" [] [Whitespace(" ")],
+                                        value_token: IDENT@850..861 "delimiters" [] [Whitespace(" ")],
                                     },
                                     CssGenericDelimiter {
-                                        value: SLASH@810..812 "/" [] [Whitespace(" ")],
+                                        value: SLASH@861..863 "/" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@812..816 "can" [] [Whitespace(" ")],
+                                        value_token: IDENT@863..867 "can" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@816..818 "be" [] [],
+                                        value_token: IDENT@867..869 "be" [] [],
                                     },
                                     CssGenericDelimiter {
-                                        value: COMMA@818..820 "," [] [Whitespace(" ")],
+                                        value: COMMA@869..871 "," [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@820..824 "used" [] [],
+                                        value_token: IDENT@871..875 "used" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@824..825 ";" [] [],
+                        semicolon_token: SEMICOLON@875..876 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@825..827 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@876..878 "}" [Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@827..827 "" [] [],
+    eof_token: EOF@878..878 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..827
+0: CSS_ROOT@0..878
   0: (empty)
-  1: CSS_RULE_LIST@0..827
-    0: CSS_QUALIFIED_RULE@0..827
+  1: CSS_RULE_LIST@0..878
+    0: CSS_QUALIFIED_RULE@0..878
       0: CSS_SELECTOR_LIST@0..4
         0: CSS_COMPOUND_SELECTOR@0..4
           0: CSS_NESTED_SELECTOR_LIST@0..0
@@ -519,297 +555,319 @@ CssRoot {
             1: CSS_IDENTIFIER@0..4
               0: IDENT@0..4 "div" [] [Whitespace(" ")]
           2: CSS_SUB_SELECTOR_LIST@4..4
-      1: CSS_DECLARATION_OR_RULE_BLOCK@4..827
+      1: CSS_DECLARATION_OR_RULE_BLOCK@4..878
         0: L_CURLY@4..5 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@5..825
-          0: CSS_DECLARATION_WITH_SEMICOLON@5..79
-            0: CSS_DECLARATION@5..78
-              0: CSS_GENERIC_PROPERTY@5..78
+        1: CSS_DECLARATION_OR_RULE_LIST@5..876
+          0: CSS_DECLARATION_WITH_SEMICOLON@5..73
+            0: CSS_DECLARATION@5..72
+              0: CSS_GENERIC_PROPERTY@5..72
                 0: CSS_IDENTIFIER@5..69
                   0: IDENT@5..69 "unknown-property" [Newline("\n"), Whitespace("    "), Comments("/* Unknown property,  ..."), Newline("\n"), Whitespace("    ")] []
                 1: COLON@69..71 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@71..78
-                  0: CSS_IDENTIFIER@71..73
-                    0: IDENT@71..73 "a" [] [Whitespace(" ")]
-                  1: CSS_IDENTIFIER@73..78
-                    0: IDENT@73..78 "value" [] []
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@71..72
+                  0: CSS_IDENTIFIER@71..72
+                    0: IDENT@71..72 "u" [] []
               1: (empty)
-            1: SEMICOLON@78..79 ";" [] []
-          1: CSS_DECLARATION_WITH_SEMICOLON@79..112
-            0: CSS_DECLARATION@79..111
-              0: CSS_GENERIC_PROPERTY@79..111
-                0: CSS_IDENTIFIER@79..100
-                  0: IDENT@79..100 "unknown-property" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@100..102 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@102..111
-                  0: CSS_IDENTIFIER@102..111
-                    0: IDENT@102..111 "one-value" [] []
+            1: SEMICOLON@72..73 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@73..104
+            0: CSS_DECLARATION@73..103
+              0: CSS_GENERIC_PROPERTY@73..103
+                0: CSS_IDENTIFIER@73..94
+                  0: IDENT@73..94 "unknown-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@94..96 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@96..103
+                  0: CSS_IDENTIFIER@96..98
+                    0: IDENT@96..98 "a" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@98..103
+                    0: IDENT@98..103 "value" [] []
               1: (empty)
-            1: SEMICOLON@111..112 ";" [] []
-          2: CSS_DECLARATION_WITH_SEMICOLON@112..151
-            0: CSS_DECLARATION@112..150
-              0: CSS_GENERIC_PROPERTY@112..150
-                0: CSS_IDENTIFIER@112..133
-                  0: IDENT@112..133 "unknown-property" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@133..135 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@135..150
-                  0: CSS_IDENTIFIER@135..144
-                    0: IDENT@135..144 "multiple" [] [Whitespace(" ")]
-                  1: CSS_IDENTIFIER@144..150
-                    0: IDENT@144..150 "values" [] []
+            1: SEMICOLON@103..104 ";" [] []
+          2: CSS_DECLARATION_WITH_SEMICOLON@104..137
+            0: CSS_DECLARATION@104..136
+              0: CSS_GENERIC_PROPERTY@104..136
+                0: CSS_IDENTIFIER@104..125
+                  0: IDENT@104..125 "unknown-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@125..127 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@127..136
+                  0: CSS_IDENTIFIER@127..136
+                    0: IDENT@127..136 "one-value" [] []
               1: (empty)
-            1: SEMICOLON@150..151 ";" [] []
-          3: CSS_DECLARATION_WITH_SEMICOLON@151..192
-            0: CSS_DECLARATION@151..191
-              0: CSS_GENERIC_PROPERTY@151..191
-                0: CSS_IDENTIFIER@151..172
-                  0: IDENT@151..172 "unknown-property" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@172..174 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@174..191
-                  0: CSS_IDENTIFIER@174..183
-                    0: IDENT@174..183 "delimited" [] []
-                  1: CSS_GENERIC_DELIMITER@183..185
-                    0: COMMA@183..185 "," [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@185..191
-                    0: IDENT@185..191 "values" [] []
+            1: SEMICOLON@136..137 ";" [] []
+          3: CSS_DECLARATION_WITH_SEMICOLON@137..176
+            0: CSS_DECLARATION@137..175
+              0: CSS_GENERIC_PROPERTY@137..175
+                0: CSS_IDENTIFIER@137..158
+                  0: IDENT@137..158 "unknown-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@158..160 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@160..175
+                  0: CSS_IDENTIFIER@160..169
+                    0: IDENT@160..169 "multiple" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@169..175
+                    0: IDENT@169..175 "values" [] []
               1: (empty)
-            1: SEMICOLON@191..192 ";" [] []
-          4: CSS_DECLARATION_WITH_SEMICOLON@192..242
-            0: CSS_DECLARATION@192..241
-              0: CSS_GENERIC_PROPERTY@192..241
-                0: CSS_IDENTIFIER@192..213
-                  0: IDENT@192..213 "unknown-property" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@213..215 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@215..241
-                  0: CSS_IDENTIFIER@215..225
-                    0: IDENT@215..225 "delimited" [] [Whitespace(" ")]
-                  1: CSS_GENERIC_DELIMITER@225..227
-                    0: SLASH@225..227 "/" [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@227..233
-                    0: IDENT@227..233 "slash" [] [Whitespace(" ")]
-                  3: CSS_GENERIC_DELIMITER@233..235
-                    0: SLASH@233..235 "/" [] [Whitespace(" ")]
-                  4: CSS_IDENTIFIER@235..241
-                    0: IDENT@235..241 "values" [] []
+            1: SEMICOLON@175..176 ";" [] []
+          4: CSS_DECLARATION_WITH_SEMICOLON@176..217
+            0: CSS_DECLARATION@176..216
+              0: CSS_GENERIC_PROPERTY@176..216
+                0: CSS_IDENTIFIER@176..197
+                  0: IDENT@176..197 "unknown-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@197..199 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@199..216
+                  0: CSS_IDENTIFIER@199..208
+                    0: IDENT@199..208 "delimited" [] []
+                  1: CSS_GENERIC_DELIMITER@208..210
+                    0: COMMA@208..210 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@210..216
+                    0: IDENT@210..216 "values" [] []
               1: (empty)
-            1: SEMICOLON@241..242 ";" [] []
-          5: CSS_DECLARATION_WITH_SEMICOLON@242..298
-            0: CSS_DECLARATION@242..297
-              0: CSS_GENERIC_PROPERTY@242..297
-                0: CSS_IDENTIFIER@242..263
-                  0: IDENT@242..263 "unknown-property" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@263..265 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@265..297
-                  0: CSS_IDENTIFIER@265..270
-                    0: IDENT@265..270 "mixed" [] []
-                  1: CSS_GENERIC_DELIMITER@270..272
-                    0: COMMA@270..272 "," [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@272..283
-                    0: IDENT@272..283 "delimiters" [] [Whitespace(" ")]
-                  3: CSS_GENERIC_DELIMITER@283..285
-                    0: SLASH@283..285 "/" [] [Whitespace(" ")]
-                  4: CSS_IDENTIFIER@285..289
-                    0: IDENT@285..289 "can" [] [Whitespace(" ")]
-                  5: CSS_IDENTIFIER@289..291
-                    0: IDENT@289..291 "be" [] []
-                  6: CSS_GENERIC_DELIMITER@291..293
-                    0: COMMA@291..293 "," [] [Whitespace(" ")]
-                  7: CSS_IDENTIFIER@293..297
-                    0: IDENT@293..297 "used" [] []
+            1: SEMICOLON@216..217 ";" [] []
+          5: CSS_DECLARATION_WITH_SEMICOLON@217..267
+            0: CSS_DECLARATION@217..266
+              0: CSS_GENERIC_PROPERTY@217..266
+                0: CSS_IDENTIFIER@217..238
+                  0: IDENT@217..238 "unknown-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@238..240 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@240..266
+                  0: CSS_IDENTIFIER@240..250
+                    0: IDENT@240..250 "delimited" [] [Whitespace(" ")]
+                  1: CSS_GENERIC_DELIMITER@250..252
+                    0: SLASH@250..252 "/" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@252..258
+                    0: IDENT@252..258 "slash" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@258..260
+                    0: SLASH@258..260 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@260..266
+                    0: IDENT@260..266 "values" [] []
               1: (empty)
-            1: SEMICOLON@297..298 ";" [] []
-          6: CSS_DECLARATION_WITH_SEMICOLON@298..373
-            0: CSS_DECLARATION@298..372
-              0: CSS_GENERIC_PROPERTY@298..372
-                0: CSS_DASHED_IDENTIFIER@298..363
-                  0: IDENT@298..363 "--custom-property" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Custom property, a ..."), Newline("\n"), Whitespace("    ")] []
-                1: COLON@363..365 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@365..372
-                  0: CSS_IDENTIFIER@365..367
-                    0: IDENT@365..367 "a" [] [Whitespace(" ")]
-                  1: CSS_IDENTIFIER@367..372
-                    0: IDENT@367..372 "value" [] []
+            1: SEMICOLON@266..267 ";" [] []
+          6: CSS_DECLARATION_WITH_SEMICOLON@267..323
+            0: CSS_DECLARATION@267..322
+              0: CSS_GENERIC_PROPERTY@267..322
+                0: CSS_IDENTIFIER@267..288
+                  0: IDENT@267..288 "unknown-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@288..290 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@290..322
+                  0: CSS_IDENTIFIER@290..295
+                    0: IDENT@290..295 "mixed" [] []
+                  1: CSS_GENERIC_DELIMITER@295..297
+                    0: COMMA@295..297 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@297..308
+                    0: IDENT@297..308 "delimiters" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@308..310
+                    0: SLASH@308..310 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@310..314
+                    0: IDENT@310..314 "can" [] [Whitespace(" ")]
+                  5: CSS_IDENTIFIER@314..316
+                    0: IDENT@314..316 "be" [] []
+                  6: CSS_GENERIC_DELIMITER@316..318
+                    0: COMMA@316..318 "," [] [Whitespace(" ")]
+                  7: CSS_IDENTIFIER@318..322
+                    0: IDENT@318..322 "used" [] []
               1: (empty)
-            1: SEMICOLON@372..373 ";" [] []
-          7: CSS_DECLARATION_WITH_SEMICOLON@373..407
-            0: CSS_DECLARATION@373..406
-              0: CSS_GENERIC_PROPERTY@373..406
-                0: CSS_DASHED_IDENTIFIER@373..395
-                  0: IDENT@373..395 "--custom-property" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@395..397 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@397..406
-                  0: CSS_IDENTIFIER@397..406
-                    0: IDENT@397..406 "one-value" [] []
+            1: SEMICOLON@322..323 ";" [] []
+          7: CSS_DECLARATION_WITH_SEMICOLON@323..392
+            0: CSS_DECLARATION@323..391
+              0: CSS_GENERIC_PROPERTY@323..391
+                0: CSS_DASHED_IDENTIFIER@323..388
+                  0: IDENT@323..388 "--custom-property" [Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Custom property, a ..."), Newline("\n"), Whitespace("    ")] []
+                1: COLON@388..390 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@390..391
+                  0: CSS_IDENTIFIER@390..391
+                    0: IDENT@390..391 "u" [] []
               1: (empty)
-            1: SEMICOLON@406..407 ";" [] []
-          8: CSS_DECLARATION_WITH_SEMICOLON@407..447
-            0: CSS_DECLARATION@407..446
-              0: CSS_GENERIC_PROPERTY@407..446
-                0: CSS_DASHED_IDENTIFIER@407..429
-                  0: IDENT@407..429 "--custom-property" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@429..431 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@431..446
-                  0: CSS_IDENTIFIER@431..440
-                    0: IDENT@431..440 "multiple" [] [Whitespace(" ")]
-                  1: CSS_IDENTIFIER@440..446
-                    0: IDENT@440..446 "values" [] []
+            1: SEMICOLON@391..392 ";" [] []
+          8: CSS_DECLARATION_WITH_SEMICOLON@392..424
+            0: CSS_DECLARATION@392..423
+              0: CSS_GENERIC_PROPERTY@392..423
+                0: CSS_DASHED_IDENTIFIER@392..414
+                  0: IDENT@392..414 "--custom-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@414..416 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@416..423
+                  0: CSS_IDENTIFIER@416..418
+                    0: IDENT@416..418 "a" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@418..423
+                    0: IDENT@418..423 "value" [] []
               1: (empty)
-            1: SEMICOLON@446..447 ";" [] []
-          9: CSS_DECLARATION_WITH_SEMICOLON@447..489
-            0: CSS_DECLARATION@447..488
-              0: CSS_GENERIC_PROPERTY@447..488
-                0: CSS_DASHED_IDENTIFIER@447..469
-                  0: IDENT@447..469 "--custom-property" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@469..471 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@471..488
-                  0: CSS_IDENTIFIER@471..480
-                    0: IDENT@471..480 "delimited" [] []
-                  1: CSS_GENERIC_DELIMITER@480..482
-                    0: COMMA@480..482 "," [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@482..488
-                    0: IDENT@482..488 "values" [] []
+            1: SEMICOLON@423..424 ";" [] []
+          9: CSS_DECLARATION_WITH_SEMICOLON@424..458
+            0: CSS_DECLARATION@424..457
+              0: CSS_GENERIC_PROPERTY@424..457
+                0: CSS_DASHED_IDENTIFIER@424..446
+                  0: IDENT@424..446 "--custom-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@446..448 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@448..457
+                  0: CSS_IDENTIFIER@448..457
+                    0: IDENT@448..457 "one-value" [] []
               1: (empty)
-            1: SEMICOLON@488..489 ";" [] []
-          10: CSS_DECLARATION_WITH_SEMICOLON@489..540
-            0: CSS_DECLARATION@489..539
-              0: CSS_GENERIC_PROPERTY@489..539
-                0: CSS_DASHED_IDENTIFIER@489..511
-                  0: IDENT@489..511 "--custom-property" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@511..513 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@513..539
-                  0: CSS_IDENTIFIER@513..523
-                    0: IDENT@513..523 "delimited" [] [Whitespace(" ")]
-                  1: CSS_GENERIC_DELIMITER@523..525
-                    0: SLASH@523..525 "/" [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@525..531
-                    0: IDENT@525..531 "slash" [] [Whitespace(" ")]
-                  3: CSS_GENERIC_DELIMITER@531..533
-                    0: SLASH@531..533 "/" [] [Whitespace(" ")]
-                  4: CSS_IDENTIFIER@533..539
+            1: SEMICOLON@457..458 ";" [] []
+          10: CSS_DECLARATION_WITH_SEMICOLON@458..498
+            0: CSS_DECLARATION@458..497
+              0: CSS_GENERIC_PROPERTY@458..497
+                0: CSS_DASHED_IDENTIFIER@458..480
+                  0: IDENT@458..480 "--custom-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@480..482 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@482..497
+                  0: CSS_IDENTIFIER@482..491
+                    0: IDENT@482..491 "multiple" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@491..497
+                    0: IDENT@491..497 "values" [] []
+              1: (empty)
+            1: SEMICOLON@497..498 ";" [] []
+          11: CSS_DECLARATION_WITH_SEMICOLON@498..540
+            0: CSS_DECLARATION@498..539
+              0: CSS_GENERIC_PROPERTY@498..539
+                0: CSS_DASHED_IDENTIFIER@498..520
+                  0: IDENT@498..520 "--custom-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@520..522 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@522..539
+                  0: CSS_IDENTIFIER@522..531
+                    0: IDENT@522..531 "delimited" [] []
+                  1: CSS_GENERIC_DELIMITER@531..533
+                    0: COMMA@531..533 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@533..539
                     0: IDENT@533..539 "values" [] []
               1: (empty)
             1: SEMICOLON@539..540 ";" [] []
-          11: CSS_DECLARATION_WITH_SEMICOLON@540..597
-            0: CSS_DECLARATION@540..596
-              0: CSS_GENERIC_PROPERTY@540..596
+          12: CSS_DECLARATION_WITH_SEMICOLON@540..591
+            0: CSS_DECLARATION@540..590
+              0: CSS_GENERIC_PROPERTY@540..590
                 0: CSS_DASHED_IDENTIFIER@540..562
                   0: IDENT@540..562 "--custom-property" [Newline("\n"), Whitespace("    ")] []
                 1: COLON@562..564 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@564..596
-                  0: CSS_IDENTIFIER@564..569
-                    0: IDENT@564..569 "mixed" [] []
-                  1: CSS_GENERIC_DELIMITER@569..571
-                    0: COMMA@569..571 "," [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@571..582
-                    0: IDENT@571..582 "delimiters" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@564..590
+                  0: CSS_IDENTIFIER@564..574
+                    0: IDENT@564..574 "delimited" [] [Whitespace(" ")]
+                  1: CSS_GENERIC_DELIMITER@574..576
+                    0: SLASH@574..576 "/" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@576..582
+                    0: IDENT@576..582 "slash" [] [Whitespace(" ")]
                   3: CSS_GENERIC_DELIMITER@582..584
                     0: SLASH@582..584 "/" [] [Whitespace(" ")]
-                  4: CSS_IDENTIFIER@584..588
-                    0: IDENT@584..588 "can" [] [Whitespace(" ")]
-                  5: CSS_IDENTIFIER@588..590
-                    0: IDENT@588..590 "be" [] []
-                  6: CSS_GENERIC_DELIMITER@590..592
-                    0: COMMA@590..592 "," [] [Whitespace(" ")]
-                  7: CSS_IDENTIFIER@592..596
-                    0: IDENT@592..596 "used" [] []
+                  4: CSS_IDENTIFIER@584..590
+                    0: IDENT@584..590 "values" [] []
               1: (empty)
-            1: SEMICOLON@596..597 ";" [] []
-          12: CSS_DECLARATION_WITH_SEMICOLON@597..671
-            0: CSS_DECLARATION@597..670
-              0: CSS_GENERIC_PROPERTY@597..670
-                0: CSS_IDENTIFIER@597..665
-                  0: IDENT@597..665 "all" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Known property, in ..."), Newline("\n"), Whitespace("    ")] []
-                1: COLON@665..667 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@667..670
-                  0: CSS_REGULAR_DIMENSION@667..670
-                    0: CSS_NUMBER_LITERAL@667..669 "10" [] []
-                    1: IDENT@669..670 "s" [] []
+            1: SEMICOLON@590..591 ";" [] []
+          13: CSS_DECLARATION_WITH_SEMICOLON@591..648
+            0: CSS_DECLARATION@591..647
+              0: CSS_GENERIC_PROPERTY@591..647
+                0: CSS_DASHED_IDENTIFIER@591..613
+                  0: IDENT@591..613 "--custom-property" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@613..615 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@615..647
+                  0: CSS_IDENTIFIER@615..620
+                    0: IDENT@615..620 "mixed" [] []
+                  1: CSS_GENERIC_DELIMITER@620..622
+                    0: COMMA@620..622 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@622..633
+                    0: IDENT@622..633 "delimiters" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@633..635
+                    0: SLASH@633..635 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@635..639
+                    0: IDENT@635..639 "can" [] [Whitespace(" ")]
+                  5: CSS_IDENTIFIER@639..641
+                    0: IDENT@639..641 "be" [] []
+                  6: CSS_GENERIC_DELIMITER@641..643
+                    0: COMMA@641..643 "," [] [Whitespace(" ")]
+                  7: CSS_IDENTIFIER@643..647
+                    0: IDENT@643..647 "used" [] []
               1: (empty)
-            1: SEMICOLON@670..671 ";" [] []
-          13: CSS_DECLARATION_WITH_SEMICOLON@671..691
-            0: CSS_DECLARATION@671..690
-              0: CSS_GENERIC_PROPERTY@671..690
-                0: CSS_IDENTIFIER@671..679
-                  0: IDENT@671..679 "all" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@679..681 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@681..690
-                  0: CSS_IDENTIFIER@681..690
-                    0: IDENT@681..690 "one-value" [] []
+            1: SEMICOLON@647..648 ";" [] []
+          14: CSS_DECLARATION_WITH_SEMICOLON@648..722
+            0: CSS_DECLARATION@648..721
+              0: CSS_GENERIC_PROPERTY@648..721
+                0: CSS_IDENTIFIER@648..716
+                  0: IDENT@648..716 "all" [Newline("\n"), Newline("\n"), Newline("\n"), Whitespace("    "), Comments("/* Known property, in ..."), Newline("\n"), Whitespace("    ")] []
+                1: COLON@716..718 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@718..721
+                  0: CSS_REGULAR_DIMENSION@718..721
+                    0: CSS_NUMBER_LITERAL@718..720 "10" [] []
+                    1: IDENT@720..721 "s" [] []
               1: (empty)
-            1: SEMICOLON@690..691 ";" [] []
-          14: CSS_DECLARATION_WITH_SEMICOLON@691..717
-            0: CSS_DECLARATION@691..716
-              0: CSS_GENERIC_PROPERTY@691..716
-                0: CSS_IDENTIFIER@691..699
-                  0: IDENT@691..699 "all" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@699..701 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@701..716
-                  0: CSS_IDENTIFIER@701..710
-                    0: IDENT@701..710 "multiple" [] [Whitespace(" ")]
-                  1: CSS_IDENTIFIER@710..716
-                    0: IDENT@710..716 "values" [] []
+            1: SEMICOLON@721..722 ";" [] []
+          15: CSS_DECLARATION_WITH_SEMICOLON@722..742
+            0: CSS_DECLARATION@722..741
+              0: CSS_GENERIC_PROPERTY@722..741
+                0: CSS_IDENTIFIER@722..730
+                  0: IDENT@722..730 "all" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@730..732 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@732..741
+                  0: CSS_IDENTIFIER@732..741
+                    0: IDENT@732..741 "one-value" [] []
               1: (empty)
-            1: SEMICOLON@716..717 ";" [] []
-          15: CSS_DECLARATION_WITH_SEMICOLON@717..745
-            0: CSS_DECLARATION@717..744
-              0: CSS_GENERIC_PROPERTY@717..744
-                0: CSS_IDENTIFIER@717..725
-                  0: IDENT@717..725 "all" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@725..727 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@727..744
-                  0: CSS_IDENTIFIER@727..736
-                    0: IDENT@727..736 "delimited" [] []
-                  1: CSS_GENERIC_DELIMITER@736..738
-                    0: COMMA@736..738 "," [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@738..744
-                    0: IDENT@738..744 "values" [] []
+            1: SEMICOLON@741..742 ";" [] []
+          16: CSS_DECLARATION_WITH_SEMICOLON@742..768
+            0: CSS_DECLARATION@742..767
+              0: CSS_GENERIC_PROPERTY@742..767
+                0: CSS_IDENTIFIER@742..750
+                  0: IDENT@742..750 "all" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@750..752 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@752..767
+                  0: CSS_IDENTIFIER@752..761
+                    0: IDENT@752..761 "multiple" [] [Whitespace(" ")]
+                  1: CSS_IDENTIFIER@761..767
+                    0: IDENT@761..767 "values" [] []
               1: (empty)
-            1: SEMICOLON@744..745 ";" [] []
-          16: CSS_DECLARATION_WITH_SEMICOLON@745..782
-            0: CSS_DECLARATION@745..781
-              0: CSS_GENERIC_PROPERTY@745..781
-                0: CSS_IDENTIFIER@745..753
-                  0: IDENT@745..753 "all" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@753..755 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@755..781
-                  0: CSS_IDENTIFIER@755..765
-                    0: IDENT@755..765 "delimited" [] [Whitespace(" ")]
-                  1: CSS_GENERIC_DELIMITER@765..767
-                    0: SLASH@765..767 "/" [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@767..773
-                    0: IDENT@767..773 "slash" [] [Whitespace(" ")]
-                  3: CSS_GENERIC_DELIMITER@773..775
-                    0: SLASH@773..775 "/" [] [Whitespace(" ")]
-                  4: CSS_IDENTIFIER@775..781
-                    0: IDENT@775..781 "values" [] []
+            1: SEMICOLON@767..768 ";" [] []
+          17: CSS_DECLARATION_WITH_SEMICOLON@768..796
+            0: CSS_DECLARATION@768..795
+              0: CSS_GENERIC_PROPERTY@768..795
+                0: CSS_IDENTIFIER@768..776
+                  0: IDENT@768..776 "all" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@776..778 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@778..795
+                  0: CSS_IDENTIFIER@778..787
+                    0: IDENT@778..787 "delimited" [] []
+                  1: CSS_GENERIC_DELIMITER@787..789
+                    0: COMMA@787..789 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@789..795
+                    0: IDENT@789..795 "values" [] []
               1: (empty)
-            1: SEMICOLON@781..782 ";" [] []
-          17: CSS_DECLARATION_WITH_SEMICOLON@782..825
-            0: CSS_DECLARATION@782..824
-              0: CSS_GENERIC_PROPERTY@782..824
-                0: CSS_IDENTIFIER@782..790
-                  0: IDENT@782..790 "all" [Newline("\n"), Whitespace("    ")] []
-                1: COLON@790..792 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@792..824
-                  0: CSS_IDENTIFIER@792..797
-                    0: IDENT@792..797 "mixed" [] []
-                  1: CSS_GENERIC_DELIMITER@797..799
-                    0: COMMA@797..799 "," [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@799..810
-                    0: IDENT@799..810 "delimiters" [] [Whitespace(" ")]
-                  3: CSS_GENERIC_DELIMITER@810..812
-                    0: SLASH@810..812 "/" [] [Whitespace(" ")]
-                  4: CSS_IDENTIFIER@812..816
-                    0: IDENT@812..816 "can" [] [Whitespace(" ")]
-                  5: CSS_IDENTIFIER@816..818
-                    0: IDENT@816..818 "be" [] []
-                  6: CSS_GENERIC_DELIMITER@818..820
-                    0: COMMA@818..820 "," [] [Whitespace(" ")]
-                  7: CSS_IDENTIFIER@820..824
-                    0: IDENT@820..824 "used" [] []
+            1: SEMICOLON@795..796 ";" [] []
+          18: CSS_DECLARATION_WITH_SEMICOLON@796..833
+            0: CSS_DECLARATION@796..832
+              0: CSS_GENERIC_PROPERTY@796..832
+                0: CSS_IDENTIFIER@796..804
+                  0: IDENT@796..804 "all" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@804..806 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@806..832
+                  0: CSS_IDENTIFIER@806..816
+                    0: IDENT@806..816 "delimited" [] [Whitespace(" ")]
+                  1: CSS_GENERIC_DELIMITER@816..818
+                    0: SLASH@816..818 "/" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@818..824
+                    0: IDENT@818..824 "slash" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@824..826
+                    0: SLASH@824..826 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@826..832
+                    0: IDENT@826..832 "values" [] []
               1: (empty)
-            1: SEMICOLON@824..825 ";" [] []
-        2: R_CURLY@825..827 "}" [Newline("\n")] []
-  2: EOF@827..827 "" [] []
+            1: SEMICOLON@832..833 ";" [] []
+          19: CSS_DECLARATION_WITH_SEMICOLON@833..876
+            0: CSS_DECLARATION@833..875
+              0: CSS_GENERIC_PROPERTY@833..875
+                0: CSS_IDENTIFIER@833..841
+                  0: IDENT@833..841 "all" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@841..843 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@843..875
+                  0: CSS_IDENTIFIER@843..848
+                    0: IDENT@843..848 "mixed" [] []
+                  1: CSS_GENERIC_DELIMITER@848..850
+                    0: COMMA@848..850 "," [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@850..861
+                    0: IDENT@850..861 "delimiters" [] [Whitespace(" ")]
+                  3: CSS_GENERIC_DELIMITER@861..863
+                    0: SLASH@861..863 "/" [] [Whitespace(" ")]
+                  4: CSS_IDENTIFIER@863..867
+                    0: IDENT@863..867 "can" [] [Whitespace(" ")]
+                  5: CSS_IDENTIFIER@867..869
+                    0: IDENT@867..869 "be" [] []
+                  6: CSS_GENERIC_DELIMITER@869..871
+                    0: COMMA@869..871 "," [] [Whitespace(" ")]
+                  7: CSS_IDENTIFIER@871..875
+                    0: IDENT@871..875 "used" [] []
+              1: (empty)
+            1: SEMICOLON@875..876 ";" [] []
+        2: R_CURLY@876..878 "}" [Newline("\n")] []
+  2: EOF@878..878 "" [] []
 
 ```

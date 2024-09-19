@@ -128,7 +128,7 @@ impl AnyJsBinaryLikeExpression {
     ///
     /// There are some cases where the indentation is done by the parent, so if the parent is already doing
     /// the indentation, then there's no need to do a second indentation.
-    /// [Prettier applies]: https://github.com/prettier/prettier/blob/b0201e01ef99db799eb3716f15b7dfedb0a2e62b/src/language-js/print/binaryish.js#L122-L125
+    /// [Prettier applies]: <https://github.com/prettier/prettier/blob/b0201e01ef99db799eb3716f15b7dfedb0a2e62b/src/language-js/print/binaryish.js#L122-L125>
     pub fn should_not_indent_if_parent_indents(
         self: &AnyJsBinaryLikeExpression,
         parent: Option<JsSyntaxNode>,

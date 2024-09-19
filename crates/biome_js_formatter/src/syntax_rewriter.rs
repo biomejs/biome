@@ -140,6 +140,12 @@ impl JsFormatSyntaxRewriter {
                 let prev_token = l_paren.prev_token();
                 // Keep parentheses around unknown expressions. Biome can't know the precedence.
                 if inner.kind().is_bogus()
+                    // Don't remove parentheses if the expression in js template element
+                    || inner.grand_parent().is_some_and(|parent|
+                        parent.grand_parent().is_some_and(|node|
+                            node.kind() == JsSyntaxKind::JS_TEMPLATE_ELEMENT
+                        )
+                    )
                     // Don't remove parentheses if the expression is a decorator
                     || inner.grand_parent().is_some_and(|node| node.kind() == JsSyntaxKind::JS_DECORATOR && decorator_expression_needs_parens(&inner))
                     // Don't remove parentheses if they have skipped trivia. We don't know for certain what the intended syntax is.

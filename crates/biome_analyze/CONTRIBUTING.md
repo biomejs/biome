@@ -611,6 +611,21 @@ impl Rule for UseYield {
 }
 ```
 
+#### Common Logic Mistakes
+
+There are some common mistakes that can lead to bugs or false positives in lint rules. These tips should help you avoid them and write more robust rules.
+
+##### Not checking if a variable is global
+
+Some rules aim to ban certain functions or variables (eg. `noConsoleLog` bans `console.log`). A common mistake make this check without considering if the variable is global or not. This can lead to false positives if the variable is declared in a local scope.
+
+```js
+console.log(); // <-- This should be reported because `console` is a global variable
+const console = { log() {} };
+console.log(); // <-- This should not be reported because `console` is redeclared as a local variable
+```
+
+To avoid this, you should consult the semantic model to check if the variable is global or not.
 
 ### Test the rule
 

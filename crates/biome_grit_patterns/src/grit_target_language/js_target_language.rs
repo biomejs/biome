@@ -99,6 +99,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
         &[
             ("", ""),
             ("import ", " from 'GRIT_PACKAGE';"),
+            ("GRIT_OBJECT.", ""),
             ("GRIT_VALUE ", " GRIT_VALUE"),
             ("class GRIT_CLASS ", " {}"),
             ("class GRIT_CLASS { ", " GRIT_PROP = 'GRIT_VALUE'; }"),

@@ -1,12 +1,11 @@
+use crate::utils::apply_document_changes;
+use crate::{documents::Document, session::Session};
 use anyhow::Result;
 use biome_service::workspace::{
     ChangeFileParams, CloseFileParams, DocumentFileSource, GetFileContentParams, OpenFileParams,
 };
 use tower_lsp::lsp_types;
 use tracing::{error, field};
-
-use crate::utils::apply_document_changes;
-use crate::{documents::Document, session::Session};
 
 /// Handler for `textDocument/didOpen` LSP notification
 #[tracing::instrument(

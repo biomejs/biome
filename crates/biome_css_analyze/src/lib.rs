@@ -177,7 +177,7 @@ mod tests {
         let parsed = parse_css(SOURCE, CssParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
-        let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClassSelector");
+        let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClass");
         let options = AnalyzerOptions::default();
         analyze(
             &parsed.tree(),

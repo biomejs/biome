@@ -8,15 +8,16 @@ use anyhow::Result;
 use biome_analyze::RuleCategoriesBuilder;
 use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
+use biome_deserialize::Merge;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
 use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+    load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeaturesBuilder, GetFileContentParams, OpenProjectParams, PullDiagnosticsParams,
-    RegisterProjectFolderParams, SupportsFeatureParams, UpdateProjectParams,
+    FeaturesBuilder, GetFileContentParams, PullDiagnosticsParams, RegisterProjectFolderParams,
+    SetManifestForProjectParams, SupportsFeatureParams,
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
@@ -25,6 +26,7 @@ use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
+use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::{AtomicBool, AtomicU8};
@@ -317,6 +319,16 @@ impl Session {
             path: biome_path.clone(),
         })?;
 
+        if !file_features.supports_lint()
+            && !file_features.supports_organize_imports()
+            && !file_features.supports_assists()
+        {
+            self.client
+                .publish_diagnostics(url, vec![], Some(doc.version))
+                .await;
+            return Ok(());
+        }
+
         let diagnostics: Vec<Diagnostic> = {
             let mut categories = RuleCategoriesBuilder::default().with_syntax();
             if self.configuration_status().is_loaded() {
@@ -339,10 +351,10 @@ impl Session {
             let content = self.workspace.get_file_content(GetFileContentParams {
                 path: biome_path.clone(),
             })?;
-            let offset = match biome_path.extension().and_then(|s| s.to_str()) {
-                Some("vue") => VueFileHandler::start(content.as_str()),
-                Some("astro") => AstroFileHandler::start(content.as_str()),
-                Some("svelte") => SvelteFileHandler::start(content.as_str()),
+            let offset = match biome_path.extension().map(OsStr::as_encoded_bytes) {
+                Some(b"vue") => VueFileHandler::start(content.as_str()),
+                Some(b"astro") => AstroFileHandler::start(content.as_str()),
+                Some(b"svelte") => SvelteFileHandler::start(content.as_str()),
                 _ => None,
             };
 
@@ -488,13 +500,43 @@ impl Session {
                     ConfigurationStatus::Error
                 } else {
                     let LoadedConfiguration {
-                        configuration,
+                        configuration: fs_configuration,
                         directory_path: configuration_path,
                         ..
                     } = loaded_configuration;
                     info!("Configuration loaded successfully from disk.");
                     info!("Update workspace settings.");
+
                     let fs = &self.fs;
+                    let should_use_editorconfig =
+                        fs_configuration.use_editorconfig().unwrap_or_default();
+                    let mut configuration = if should_use_editorconfig {
+                        let (editorconfig, editorconfig_diagnostics) = {
+                            let search_path = configuration_path
+                                .clone()
+                                .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
+                            match load_editorconfig(fs, search_path) {
+                                Ok(result) => result,
+                                Err(error) => {
+                                    error!(
+                                        "Failed load the `.editorconfig` file. Reason: {}",
+                                        error
+                                    );
+                                    self.client.log_message(MessageType::ERROR, &error).await;
+                                    return ConfigurationStatus::Error;
+                                }
+                            }
+                        };
+                        for diagnostic in editorconfig_diagnostics {
+                            let message = PrintDescription(&diagnostic).to_string();
+                            self.client.log_message(MessageType::ERROR, message).await;
+                        }
+                        editorconfig.unwrap_or_default()
+                    } else {
+                        Default::default()
+                    };
+
+                    configuration.merge_with(fs_configuration);
 
                     let result =
                         configuration.retrieve_gitignore_matches(fs, configuration_path.as_deref());
@@ -570,17 +612,13 @@ impl Session {
                 Ok(result) => {
                     if let Some(result) = result {
                         let biome_path = BiomePath::new(result.file_path);
-                        let result = self.workspace.open_project(OpenProjectParams {
-                            path: biome_path.clone(),
-                            content: result.content,
-                            version: 0,
-                        });
-                        if let Err(err) = result {
-                            error!("{}", err);
-                        }
-                        let result = self
-                            .workspace
-                            .update_current_manifest(UpdateProjectParams { path: biome_path });
+                        let result =
+                            self.workspace
+                                .set_manifest_for_project(SetManifestForProjectParams {
+                                    manifest_path: biome_path.clone(),
+                                    content: result.content,
+                                    version: 0,
+                                });
                         if let Err(err) = result {
                             error!("{}", err);
                         }

@@ -32,6 +32,9 @@ biome_graphql_formatter  = { workspace = true }
 biome_graphql_parser     = { workspace = true }
 biome_graphql_syntax     = { workspace = true }
 biome_grit_patterns      = { workspace = true }
+biome_html_formatter     = { workspace = true }
+biome_html_parser        = { workspace = true }
+biome_html_syntax        = { workspace = true }
 biome_js_analyze         = { workspace = true }
 biome_js_factory         = { workspace = true, optional = true }
 biome_js_formatter       = { workspace = true, features = ["serde"] }
@@ -63,6 +66,7 @@ slotmap                  = { workspace = true, features = ["serde"] }
 tracing                  = { workspace = true, features = ["attributes", "log"] }
 
 [features]
+experimental-html = []
 schema = [
   "dep:schemars",
   "biome_js_analyze/schema",

@@ -11,6 +11,17 @@ var foo: string = "";
 <div></div>
 ```
 
+# Termination Message
+
+```block
+stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The contents aren't fixed. Use the `--fix` flag to fix them.
+  
+
+
+```
+
 # Emitted Messages
 
 ```block
@@ -18,44 +29,4 @@ var foo: string = "";
 var foo: string = "";
 </script>
 <div></div>
-```
-
-```block
-file.svelte:1:8 lint/style/noInferrableTypes  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This type annotation is trivially inferred from its initialization.
-  
-  > 1 │ var foo: string = "";
-      │        ^^^^^^^^
-    2 │ 
-  
-  i Safe fix: Remove the type annotation.
-  
-    1   │ - var·foo:·string·=·"";
-      1 │ + var·foo·=·"";
-    2 2 │   
-  
-
-```
-
-```block
-file.svelte:1:1 lint/style/noVar  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Use let or const instead of var.
-  
-  > 1 │ var foo: string = "";
-      │ ^^^^^^^^^^^^^^^^^^^^
-    2 │ 
-  
-  i A variable declared with var is accessible in the whole module. Thus, the variable can be accessed before its initialization and outside the block where it is declared.
-  
-  i See MDN web docs for more details.
-  
-  i Unsafe fix: Use 'const' instead.
-  
-    1   │ - var·foo:·string·=·"";
-      1 │ + const·foo:·string·=·"";
-    2 2 │   
-  
-
 ```

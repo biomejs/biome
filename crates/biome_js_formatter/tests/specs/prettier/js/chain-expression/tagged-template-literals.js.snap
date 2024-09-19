@@ -1,0 +1,92 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: js/chain-expression/tagged-template-literals.js
+---
+# Input
+
+```js
+// Member expressions
+//(a?.b)   ``;
+//(a.b?.c)   ``;
+//(a?.b.c)   ``;
+//(a[b?.c])   ``;
+//((a?.b).c)   ``;
+//(a[b?.()])   ``;
+//((a?.b).c)   ``;
+//((a?.()).b)   ``;
+
+// Call expressions
+//(a?.())   ``;
+//(a.b.c?.())   ``;
+//(a.b?.c())   ``;
+//(a?.b.c())   ``;
+//(a(b?.c))   ``;
+//((a?.b)())   ``;
+//((a?.())())   ``;
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,18 +1,18 @@
+ // Member expressions
+-a?.b``;
+-a.b?.c``;
+-a?.b.c``;
+-a[b?.c]``;
+-(a?.b).c``;
+-a[b?.()]``;
+-(a?.b).c``;
+-(a?.()).b``;
++//(a?.b)   ``;
++//(a.b?.c)   ``;
++//(a?.b.c)   ``;
++//(a[b?.c])   ``;
++//((a?.b).c)   ``;
++//(a[b?.()])   ``;
++//((a?.b).c)   ``;
++//((a?.()).b)   ``;
+ 
+ // Call expressions
+-a?.()``;
+-a.b.c?.()``;
+-a.b?.c()``;
+-a?.b.c()``;
+-a(b?.c)``;
+-(a?.b)()``;
+-(a?.())()``;
++//(a?.())   ``;
++//(a.b.c?.())   ``;
++//(a.b?.c())   ``;
++//(a?.b.c())   ``;
++//(a(b?.c))   ``;
++//((a?.b)())   ``;
++//((a?.())())   ``;
+```
+
+# Output
+
+```js
+// Member expressions
+//(a?.b)   ``;
+//(a.b?.c)   ``;
+//(a?.b.c)   ``;
+//(a[b?.c])   ``;
+//((a?.b).c)   ``;
+//(a[b?.()])   ``;
+//((a?.b).c)   ``;
+//((a?.()).b)   ``;
+
+// Call expressions
+//(a?.())   ``;
+//(a.b.c?.())   ``;
+//(a.b?.c())   ``;
+//(a?.b.c())   ``;
+//(a(b?.c))   ``;
+//((a?.b)())   ``;
+//((a?.())())   ``;
+```

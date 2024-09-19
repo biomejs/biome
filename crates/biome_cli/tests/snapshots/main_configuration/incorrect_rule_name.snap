@@ -59,8 +59,12 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noFlatMapIdentity
   - noGlobalObjectCalls
   - noInnerDeclarations
+  - noInvalidBuiltinInstantiation
   - noInvalidConstructorSuper
+  - noInvalidDirectionInLinearGradient
+  - noInvalidGridAreas
   - noInvalidNewBuiltin
+  - noInvalidPositionAtImportRule
   - noInvalidUseBeforeDeclaration
   - noNewSymbol
   - noNodejsModules
@@ -71,12 +75,19 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noSetterReturn
   - noStringCaseMismatch
   - noSwitchDeclarations
+  - noUndeclaredDependencies
   - noUndeclaredVariables
+  - noUnknownFunction
+  - noUnknownMediaFeatureName
+  - noUnknownProperty
+  - noUnknownUnit
+  - noUnmatchableAnbSelector
   - noUnnecessaryContinue
   - noUnreachable
   - noUnreachableSuper
   - noUnsafeFinally
   - noUnsafeOptionalChaining
+  - noUnusedFunctionParameters
   - noUnusedImports
   - noUnusedLabels
   - noUnusedPrivateClassMembers
@@ -86,6 +97,7 @@ biome.json:6:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useArrayLiterals
   - useExhaustiveDependencies
   - useHookAtTopLevel
+  - useImportExtensions
   - useIsNan
   - useJsxKeyInIterable
   - useValidForDirection
@@ -113,6 +125,7 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noArguments
   - noCommaOperator
   - noDefaultExport
+  - noDoneCallback
   - noImplicitBoolean
   - noInferrableTypes
   - noNamespace
@@ -126,13 +139,17 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - noUnusedTemplateLiteral
   - noUselessElse
   - noVar
+  - noYodaExpression
   - useAsConstAssertion
   - useBlockStatements
   - useCollapsedElseIf
   - useConsistentArrayType
+  - useConsistentBuiltinInstantiation
   - useConst
   - useDefaultParameterLast
+  - useDefaultSwitchClause
   - useEnumInitializers
+  - useExplicitLengthCheck
   - useExponentiationOperator
   - useExportType
   - useFilenamingConvention
@@ -152,6 +169,8 @@ biome.json:9:13 deserialize ━━━━━━━━━━━━━━━━━�
   - useSingleCaseStatement
   - useSingleVarDeclarator
   - useTemplate
+  - useThrowNewError
+  - useThrowOnlyError
   - useWhile
   
 

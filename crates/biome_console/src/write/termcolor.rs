@@ -165,7 +165,7 @@ where
             // Unicode is currently poorly supported on most Windows
             // terminal clients, so we always strip emojis in Windows
             if cfg!(windows) || !self.writer.supports_color() {
-                let is_ascii = grapheme_is_ascii(grapheme);
+                let is_ascii = grapheme.is_ascii();
 
                 if !is_ascii {
                     let replacement = unicode_to_ascii(grapheme.chars().nth(0).unwrap());
@@ -199,12 +199,6 @@ where
 /// which are considered whitespace characters in ASCII
 fn grapheme_is_whitespace(grapheme: &str) -> bool {
     grapheme.chars().all(|c| c.is_whitespace())
-}
-
-/// Determines if a grapheme contains code points which are out of the ASCII
-/// range and thus cannot be printed where unicode is not supported.
-fn grapheme_is_ascii(grapheme: &str) -> bool {
-    grapheme.chars().all(|c| c.is_ascii())
 }
 
 /// Replace emoji characters with similar but more widely supported ASCII

@@ -44,9 +44,9 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-::error title=format,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Formatter would have printed the following content:
+::error title=format,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Formatter would have printed the following content:
 ```
 
 ```block
-::error title=format,file=index.ts,line=1,endLine=1,col=2,endColumn=2::Formatter would have printed the following content:
+::error title=format,file=main.ts,line=1,endLine=1,col=2,endColumn=2::Formatter would have printed the following content:
 ```

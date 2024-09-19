@@ -1,0 +1,230 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: typescript/chain-expression/member-expression.ts
+---
+# Input
+
+```ts
+// Member expressions
+(a?.b)!   .foo;
+(a?.b!)   .foo;
+(a!?.b)   .foo;
+(a.b?.c)!   .foo;
+(a.b?.c!)   .foo;
+(a.b!?.c)   .foo;
+(a!.b?.c)   .foo;
+(a?.b.c)!   .foo;
+(a?.b.c!)   .foo;
+(a?.b!.c)   .foo;
+(a!?.b.c)   .foo;
+(a[b?.c])!   .foo;
+(a[b?.c]!)   .foo;
+(a[b?.c!])   .foo;
+(a[b!?.c])   .foo;
+((a?.b).c)!   .foo;
+((a?.b).c!)   .foo;
+((a?.b!).c)   .foo;
+((a!?.b).c)   .foo;
+(a[b?.()])!   .foo;
+(a[b?.()]!)   .foo;
+(a[b?.()!])   .foo;
+(a[b!?.()])   .foo;
+(a![b?.()])   .foo;
+((a?.b).c)!   .foo;
+((a?.b).c!)   .foo;
+((a?.b)!.c)   .foo;
+((a?.b!).c)   .foo;
+((a!?.b).c)   .foo;
+((a?.()).b)!   .foo;
+((a?.()).b!)   .foo;
+((a?.())!.b)   .foo;
+((a?.()!).b)   .foo;
+((a!?.()).b)   .foo;
+
+// Call expressions
+(a?.())!   .foo;
+(a?.()!)   .foo;
+(a!?.())   .foo;
+(a.b.c?.())!   .foo;
+(a.b.c?.()!)   .foo;
+(a.b.c!?.())   .foo;
+(a.b?.c())!   .foo;
+(a.b?.c()!)   .foo;
+(a.b!?.c())   .foo;
+(a?.b.c())!   .foo;
+(a?.b.c()!)   .foo;
+(a?.b!.c())   .foo;
+(a(b?.c))!   .foo;
+(a(b?.c)!)   .foo;
+(a(b?.c!))   .foo;
+((a?.b)())!   .foo;
+((a?.b)()!)   .foo;
+((a?.b)!())   .foo;
+((a?.b!)())   .foo;
+((a?.())())!   .foo;
+((a?.())()!)   .foo;
+((a?.())!())   .foo;
+((a?.()!)())   .foo;
+((a!?.())())   .foo;
+
+
+// Not `.object`
+_[a?.b!]
+
+// Computed
+(a?.b!)   [foo]
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,14 +1,14 @@
+ // Member expressions
+-(a?.b)!.foo;
+-(a?.b)!.foo;
++a?.b!.foo;
++a?.b!.foo;
+ (a!?.b).foo;
+-(a.b?.c)!.foo;
+-(a.b?.c)!.foo;
++a.b?.c!.foo;
++a.b?.c!.foo;
+ (a.b!?.c).foo;
+ (a!.b?.c).foo;
+-(a?.b.c)!.foo;
+-(a?.b.c)!.foo;
+-(a?.b!.c).foo;
++a?.b.c!.foo;
++a?.b.c!.foo;
++a?.b!.c.foo;
+ (a!?.b.c).foo;
+ a[b?.c]!.foo;
+ a[b?.c]!.foo;
+@@ -16,7 +16,7 @@
+ a[b!?.c].foo;
+ (a?.b).c!.foo;
+ (a?.b).c!.foo;
+-(a?.b)!.c.foo;
++a?.b!.c.foo;
+ (a!?.b).c.foo;
+ a[b?.()]!.foo;
+ a[b?.()]!.foo;
+@@ -25,28 +25,28 @@
+ a![b?.()].foo;
+ (a?.b).c!.foo;
+ (a?.b).c!.foo;
+-(a?.b)!.c.foo;
+-(a?.b)!.c.foo;
++a?.b!.c.foo;
++a?.b!.c.foo;
+ (a!?.b).c.foo;
+ (a?.()).b!.foo;
+ (a?.()).b!.foo;
+-(a?.())!.b.foo;
+-(a?.())!.b.foo;
++a?.()!.b.foo;
++a?.()!.b.foo;
+ (a!?.()).b.foo;
+ 
+ // Call expressions
+-(a?.())!.foo;
+-(a?.())!.foo;
++a?.()!.foo;
++a?.()!.foo;
+ (a!?.()).foo;
+-(a.b.c?.())!.foo;
+-(a.b.c?.())!.foo;
++a.b.c?.()!.foo;
++a.b.c?.()!.foo;
+ (a.b.c!?.()).foo;
+-(a.b?.c())!.foo;
+-(a.b?.c())!.foo;
++a.b?.c()!.foo;
++a.b?.c()!.foo;
+ (a.b!?.c()).foo;
+-(a?.b.c())!.foo;
+-(a?.b.c())!.foo;
+-(a?.b!.c()).foo;
++a?.b.c()!.foo;
++a?.b.c()!.foo;
++a?.b!.c().foo;
+ a(b?.c)!.foo;
+ a(b?.c)!.foo;
+ a(b?.c!).foo;
+```
+
+# Output
+
+```ts
+// Member expressions
+a?.b!.foo;
+a?.b!.foo;
+(a!?.b).foo;
+a.b?.c!.foo;
+a.b?.c!.foo;
+(a.b!?.c).foo;
+(a!.b?.c).foo;
+a?.b.c!.foo;
+a?.b.c!.foo;
+a?.b!.c.foo;
+(a!?.b.c).foo;
+a[b?.c]!.foo;
+a[b?.c]!.foo;
+a[b?.c!].foo;
+a[b!?.c].foo;
+(a?.b).c!.foo;
+(a?.b).c!.foo;
+a?.b!.c.foo;
+(a!?.b).c.foo;
+a[b?.()]!.foo;
+a[b?.()]!.foo;
+a[b?.()!].foo;
+a[b!?.()].foo;
+a![b?.()].foo;
+(a?.b).c!.foo;
+(a?.b).c!.foo;
+a?.b!.c.foo;
+a?.b!.c.foo;
+(a!?.b).c.foo;
+(a?.()).b!.foo;
+(a?.()).b!.foo;
+a?.()!.b.foo;
+a?.()!.b.foo;
+(a!?.()).b.foo;
+
+// Call expressions
+a?.()!.foo;
+a?.()!.foo;
+(a!?.()).foo;
+a.b.c?.()!.foo;
+a.b.c?.()!.foo;
+(a.b.c!?.()).foo;
+a.b?.c()!.foo;
+a.b?.c()!.foo;
+(a.b!?.c()).foo;
+a?.b.c()!.foo;
+a?.b.c()!.foo;
+a?.b!.c().foo;
+a(b?.c)!.foo;
+a(b?.c)!.foo;
+a(b?.c!).foo;
+(a?.b)()!.foo;
+(a?.b)()!.foo;
+a?.b!().foo;
+a?.b!().foo;
+(a?.())()!.foo;
+(a?.())()!.foo;
+a?.()!().foo;
+a?.()!().foo;
+(a!?.())().foo;
+
+// Not `.object`
+_[a?.b!](
+  // Computed
+  a?.b!,
+)[foo];
+```

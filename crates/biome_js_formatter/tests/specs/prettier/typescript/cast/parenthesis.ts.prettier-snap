@@ -8,5 +8,5 @@ true || <x>a;
 (<x>a) = 1;
 
 function* g() {
-  const a = <T>yield b;
+  const a = <T>(yield b);
 }

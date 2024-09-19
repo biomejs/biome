@@ -44,12 +44,14 @@ jobs:
           cache-target: release
           bins: cargo-codspeed
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Compile
         run: cargo codspeed build --features codspeed -p xtask_bench
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@ce4674c9a7e4628edd2df5a3c8e4fbacc451a21c # v2.4.4
+        uses: CodSpeedHQ/action@9481de2550a3d73cdac24ddd54ee6b9ee31f7ec2 # v2.4.5
         timeout-minutes: 30
         with:
           run: cargo codspeed run

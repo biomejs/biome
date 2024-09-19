@@ -117,6 +117,7 @@ pub(crate) fn analyze_and_snap(
     let parsed = parse(input_code, source_type, parser_options.clone());
     let root = parsed.tree();
 
+    //
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
     let (_, errors) =
@@ -234,12 +235,12 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
 
     let input_file = Path::new(input);
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
-    let source_type = match input_file.extension().and_then(OsStr::to_str).unwrap() {
-        "js" | "mjs" | "jsx" => JsFileSource::jsx(),
-        "cjs" => JsFileSource::js_script(),
-        "ts" => JsFileSource::ts(),
-        "mts" | "cts" => JsFileSource::ts_restricted(),
-        "tsx" => JsFileSource::tsx(),
+    let source_type = match input_file.extension().map(OsStr::as_encoded_bytes) {
+        Some(b"js" | b"mjs" | b"jsx") => JsFileSource::jsx(),
+        Some(b"cjs") => JsFileSource::js_script(),
+        Some(b"ts") => JsFileSource::ts(),
+        Some(b"mts" | b"cts") => JsFileSource::ts_restricted(),
+        Some(b"tsx") => JsFileSource::tsx(),
         _ => {
             panic!("Unknown file extension: {:?}", input_file.extension());
         }

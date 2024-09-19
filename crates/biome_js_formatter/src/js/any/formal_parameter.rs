@@ -10,6 +10,7 @@ impl FormatRule<AnyJsFormalParameter> for FormatAnyJsFormalParameter {
         match node {
             AnyJsFormalParameter::JsBogusParameter(node) => node.format().fmt(f),
             AnyJsFormalParameter::JsFormalParameter(node) => node.format().fmt(f),
+            AnyJsFormalParameter::JsMetavariable(node) => node.format().fmt(f),
         }
     }
 }

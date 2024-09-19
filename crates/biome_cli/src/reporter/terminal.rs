@@ -5,8 +5,8 @@ use biome_console::fmt::Formatter;
 use biome_console::{fmt, markup, Console, ConsoleExt};
 use biome_diagnostics::advice::ListAdvice;
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
-use biome_fs::EvaluatedPath;
-use rustc_hash::FxHashSet;
+use biome_fs::BiomePath;
+use std::collections::BTreeSet;
 use std::io;
 use std::time::Duration;
 
@@ -14,7 +14,7 @@ pub(crate) struct ConsoleReporter {
     pub(crate) summary: TraversalSummary,
     pub(crate) diagnostics_payload: DiagnosticsPayload,
     pub(crate) execution: Execution,
-    pub(crate) evaluated_paths: FxHashSet<EvaluatedPath>,
+    pub(crate) evaluated_paths: BTreeSet<BiomePath>,
 }
 
 impl Reporter for ConsoleReporter {
@@ -37,7 +37,7 @@ impl Reporter for ConsoleReporter {
 )]
 struct EvaluatedPathsDiagnostic {
     #[advice]
-    list: ListAdvice<String>,
+    advice: ListAdvice<String>,
 }
 
 #[derive(Debug, Diagnostic)]
@@ -48,7 +48,7 @@ struct EvaluatedPathsDiagnostic {
 )]
 struct FixedPathsDiagnostic {
     #[advice]
-    list: ListAdvice<String>,
+    advice: ListAdvice<String>,
 }
 
 pub(crate) struct ConsoleReporterVisitor<'a>(pub(crate) &'a mut dyn Console);
@@ -80,25 +80,22 @@ impl<'a> ReporterVisitor for ConsoleReporterVisitor<'a> {
         Ok(())
     }
 
-    fn report_handled_paths(
-        &mut self,
-        evaluated_paths: FxHashSet<EvaluatedPath>,
-    ) -> io::Result<()> {
+    fn report_handled_paths(&mut self, evaluated_paths: BTreeSet<BiomePath>) -> io::Result<()> {
         let evaluated_paths_diagnostic = EvaluatedPathsDiagnostic {
-            list: ListAdvice {
+            advice: ListAdvice {
                 list: evaluated_paths
                     .iter()
-                    .map(|p| p.as_ref().display().to_string())
+                    .map(|p| p.display().to_string())
                     .collect(),
             },
         };
 
         let fixed_paths_diagnostic = FixedPathsDiagnostic {
-            list: ListAdvice {
+            advice: ListAdvice {
                 list: evaluated_paths
                     .iter()
-                    .filter(|p| p.is_fixed())
-                    .map(|p| p.as_ref().display().to_string())
+                    .filter(|p| p.was_written())
+                    .map(|p| p.display().to_string())
                     .collect(),
             },
         };
@@ -237,6 +234,14 @@ impl<'a> fmt::Display for ConsoleTraversalSummary<'a> {
                 fmt.write_markup(markup!("\n"<Warn>"Found "{self.1.warnings}" warnings."</Warn>))?;
             }
         }
+
+        if let TraversalMode::Search { .. } = self.0 {
+            if self.1.matches == 1 {
+                fmt.write_markup(markup!(" "<Info>"Found "{self.1.matches}" match."</Info>))?
+            } else {
+                fmt.write_markup(markup!(" "<Info>"Found "{self.1.matches}" matches."</Info>))?
+            };
+        };
         Ok(())
     }
 }

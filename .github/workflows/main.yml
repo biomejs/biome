@@ -33,6 +33,8 @@ jobs:
           components: rustfmt
           bins: taplo-cli
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run rustfmt
         run: |
           cargo fmt --all --verbose -- --check
@@ -51,6 +53,8 @@ jobs:
         with:
           components: clippy
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run cargo check
         run: cargo check --workspace --all-targets --release
       - name: Run clippy
@@ -69,6 +73,8 @@ jobs:
         with:
           channel: nightly
           cache: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Install udeps
         run: cargo install cargo-udeps --locked
       - name: Run udeps
@@ -92,6 +98,8 @@ jobs:
         uses: moonrepo/setup-rust@e013866c4215f77c925f42f60257dec7dd18836e # v1.2.1
         with:
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run tests on ${{ matrix.os }}
         run: cargo test --workspace
 
@@ -118,6 +126,8 @@ jobs:
         with:
           cache-target: release
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Compile
         run: cargo build --release --locked -p xtask_coverage
       - name: Run Test262 suite

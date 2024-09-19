@@ -1,5 +1,5 @@
-https://raw.githubusercontent.com/angular/angular/master/packages/compiler/src/expression_parser/parser.ts
-https://raw.githubusercontent.com/angular/angular/master/packages/router/src/router.ts
-https://raw.githubusercontent.com/rome/tools/archived-js/internal/js-parser/parser/statement.ts
-https://raw.githubusercontent.com/rome/tools/archived-js/internal/diagnostics/descriptions/lint.ts
-https://raw.githubusercontent.com/rome/tools/archived-js/internal/js-parser/parser/typescript.ts
+https://cdn.jsdelivr.net/gh/angular/angular@3bafda20c30edb42e5cb3c2424edca2f7224ffde/packages/compiler/src/expression_parser/parser.ts
+https://cdn.jsdelivr.net/gh/angular/angular@3bafda20c30edb42e5cb3c2424edca2f7224ffde/packages/router/src/router.ts
+https://cdn.jsdelivr.net/gh/rome/tools@6b47011c5f3d5ed783855b821cdbc9cf1d687266/internal/js-parser/parser/statement.ts
+https://cdn.jsdelivr.net/gh/rome/tools@6b47011c5f3d5ed783855b821cdbc9cf1d687266/internal/diagnostics/descriptions/lint.ts
+https://cdn.jsdelivr.net/gh/rome/tools@6b47011c5f3d5ed783855b821cdbc9cf1d687266/internal/js-parser/parser/typescript.ts

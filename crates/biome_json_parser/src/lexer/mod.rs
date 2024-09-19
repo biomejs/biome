@@ -307,7 +307,7 @@ impl<'src> Lexer<'src> {
         match dispatched {
             WHS => self.consume_newline_or_whitespaces(),
             QOT => self.lex_string_literal(current),
-            IDT => self.lex_identifier(current),
+            IDT | DOL => self.lex_identifier(current),
             COM => self.eat_byte(T![,]),
             MIN | DIG | ZER => self.lex_number(current),
             COL => self.eat_byte(T![:]),
@@ -689,7 +689,7 @@ impl<'src> Lexer<'src> {
         while let Some(byte) = self.current_byte() {
             self.current_char_unchecked();
             match lookup_byte(byte) {
-                IDT | DIG | ZER => {
+                IDT | DOL | DIG | ZER => {
                     keyword = keyword.next_character(byte);
                     self.advance(1)
                 }

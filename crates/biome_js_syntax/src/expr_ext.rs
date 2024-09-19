@@ -85,8 +85,7 @@ impl JsReferenceIdentifier {
     /// ```
     pub fn has_name(&self, name: &str) -> bool {
         self.value_token()
-            .map(|token| token.text_trimmed() == name)
-            .unwrap_or_default()
+            .is_ok_and(|token| token.text_trimmed() == name)
     }
 
     pub fn name(&self) -> SyntaxResult<TokenText> {
@@ -1900,16 +1899,10 @@ impl JsCallExpression {
             }
 
             // it("description", ..)
-            (
-                Some(Ok(AnyJsCallArgument::AnyJsExpression(
-                    JsTemplateExpression(_)
-                    | AnyJsLiteralExpression(
-                        self::AnyJsLiteralExpression::JsStringLiteralExpression(_),
-                    ),
-                ))),
-                Some(Ok(second)),
-                third,
-            ) if arguments.args().len() <= 3 && callee.contains_a_test_pattern()? => {
+            // it(Test.name, ..)
+            (Some(Ok(AnyJsCallArgument::AnyJsExpression(_))), Some(Ok(second)), third)
+                if arguments.args().len() <= 3 && callee.contains_a_test_pattern()? =>
+            {
                 // it('name', callback, duration)
                 if !matches!(
                     third,
@@ -2151,6 +2144,29 @@ mod test {
             call_expression.callee().unwrap().contains_a_test_pattern(),
             Ok(false)
         );
+    }
+
+    #[test]
+    fn matches_test_call_expression() {
+        let call_expression = extract_call_expression("test.only(name, () => {});");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression = extract_call_expression("test.only(Test.name, () => {});");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression =
+            extract_call_expression("test.only(name = name || 'test', () => {});");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression = extract_call_expression("describe.only(name, () => {});");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression = extract_call_expression("describe.only(Test.name, () => {});");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
+
+        let call_expression =
+            extract_call_expression("describe.only(name = name || 'test', () => {});");
+        assert_eq!(call_expression.is_test_call_expression(), Ok(true));
     }
 
     #[test]

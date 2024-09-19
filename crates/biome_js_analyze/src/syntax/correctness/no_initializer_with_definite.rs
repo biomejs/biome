@@ -1,8 +1,8 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_syntax_rule, Ast, Rule, RuleDiagnostic};
 use biome_js_syntax::{JsVariableDeclarator, TextRange, TsDefiniteVariableAnnotation};
 use biome_rowan::AstNode;
 
-declare_lint_rule! {
+declare_syntax_rule! {
     /// Disallow initializing a variable with a definite assertion to prevent `SyntaxError`.
     ///
     /// ## Examples

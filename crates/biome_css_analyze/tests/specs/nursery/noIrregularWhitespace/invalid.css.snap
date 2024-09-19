@@ -139,14 +139,14 @@ invalid.css:4:2 lint/nursery/noIrregularWhitespace ━━━━━━━━━�
 ```
 
 ```
-invalid.css:6:12 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:6:2 lint/nursery/noIrregularWhitespace ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Irregular whitespace found.
   
     4 │ @layer↡module, state;
     5 │ /* \u{feff} */
   > 6 │ .firstClass�.secondClass {
-      │            ^
+      │  ^^^^^^^^^^^
     7 │ 	padding: 10px;
     8 │ }
   

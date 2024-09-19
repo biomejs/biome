@@ -4,7 +4,7 @@ use biome_console::fmt::{Display, Formatter};
 use biome_console::{markup, Console, ConsoleExt, HorizontalLine, Padding, SOFT_LINE};
 use biome_diagnostics::{Resource, Severity};
 use std::cmp::Ordering;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Debug;
 use std::io;
 
@@ -120,8 +120,8 @@ impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
 
 #[derive(Debug, Default)]
 struct FileToDiagnostics {
-    formats: Vec<String>,
-    organize_imports: Vec<String>,
+    formats: BTreeSet<String>,
+    organize_imports: BTreeSet<String>,
     lints: LintsByCategory,
 }
 
@@ -132,11 +132,11 @@ impl FileToDiagnostics {
     }
 
     fn insert_format(&mut self, location: &str) {
-        self.formats.push(location.into())
+        self.formats.insert(location.into());
     }
 
     fn insert_organize_imports(&mut self, location: &str) {
-        self.organize_imports.push(location.into())
+        self.organize_imports.insert(location.into());
     }
 }
 

@@ -1,4 +1,4 @@
-https://github.com/PanayotCankov/nativescript-big-dts/raw/master/ios.d.ts
-https://raw.githubusercontent.com/microsoft/TypeScript/2a7eb58589c62529c9045c50cae31ddcca23a6ae/src/compiler/checker.ts
-https://raw.githubusercontent.com/angular/angular/master/packages/compiler/src/expression_parser/parser.ts
-https://raw.githubusercontent.com/angular/angular/master/packages/router/src/router.ts
+https://cdn.jsdelivr.net/gh/PanayotCankov/nativescript-big-dts@eeebae4709de5394d044ec33f4d02c9a3d38417e/ios.d.ts
+https://cdn.jsdelivr.net/gh/microsoft/TypeScript@2a7eb58589c62529c9045c50cae31ddcca23a6ae/src/compiler/checker.ts
+https://cdn.jsdelivr.net/gh/angular/angular@3bafda20c30edb42e5cb3c2424edca2f7224ffde/packages/compiler/src/expression_parser/parser.ts
+https://cdn.jsdelivr.net/gh/angular/angular@3bafda20c30edb42e5cb3c2424edca2f7224ffde/packages/router/src/router.ts

@@ -186,7 +186,7 @@ pub enum TraversalMode {
     Search {
         /// The GritQL pattern to search for.
         ///
-        /// Note that the search command (currently) does not support rewrites.
+        /// Note that the search command does not support rewrites.
         pattern: PatternId,
 
         /// An optional tuple.

@@ -399,9 +399,10 @@ fn has_rest_object_or_array_parameter(parameters: &AnyJsArrowFunctionParameters)
                             | AnyJsBindingPattern::JsObjectBindingPattern(_))
                     )
                 }
-                AnyJsParameter::AnyJsFormalParameter(AnyJsFormalParameter::JsBogusParameter(_)) => {
-                    false
-                }
+                AnyJsParameter::AnyJsFormalParameter(
+                    AnyJsFormalParameter::JsBogusParameter(_)
+                    | AnyJsFormalParameter::JsMetavariable(_),
+                ) => false,
                 AnyJsParameter::TsThisParameter(_) => false,
                 AnyJsParameter::JsRestParameter(_) => true,
             }),

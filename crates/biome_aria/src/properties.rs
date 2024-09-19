@@ -111,8 +111,8 @@ define_property! {
 
 define_property! {
     AriaExpanded {
-        PROPERTY_TYPE: "boolean",
-        VALUES: [],
+        PROPERTY_TYPE: "token",
+        VALUES: ["true", "false", "undefined"],
     }
 }
 
@@ -125,8 +125,8 @@ define_property! {
 
 define_property! {
     AriaGrabbed {
-        PROPERTY_TYPE: "boolean",
-        VALUES: [],
+        PROPERTY_TYPE: "token",
+        VALUES: ["true", "false", "undefined"],
     }
 }
 
@@ -139,8 +139,8 @@ define_property! {
 
 define_property! {
     AriaHidden {
-        PROPERTY_TYPE: "boolean",
-        VALUES: [],
+        PROPERTY_TYPE: "token",
+        VALUES: ["true", "false", "undefined"],
     }
 }
 
@@ -291,8 +291,8 @@ define_property! {
 
 define_property! {
     AriaSelected {
-        PROPERTY_TYPE: "boolean",
-        VALUES: [],
+        PROPERTY_TYPE: "token",
+        VALUES: ["true", "false", "undefined"],
     }
 }
 
@@ -337,6 +337,7 @@ define_property! {
         VALUES: [],
     }
 }
+
 /// A collection of ARIA properties with their metadata, necessary to perform various operations.
 #[derive(Debug, Default)]
 pub struct AriaProperties;
@@ -427,28 +428,37 @@ pub trait AriaPropertyDefinition: Debug {
             return false;
         }
         match self.property_type() {
-            AriaPropertyTypeEnum::String | AriaPropertyTypeEnum::Id => {
-                input_value.parse::<f32>().is_err()
+            AriaPropertyTypeEnum::String => true,
+            AriaPropertyTypeEnum::Id => is_valid_html_id(input_value),
+            AriaPropertyTypeEnum::Idlist => {
+                input_value.split_ascii_whitespace().all(is_valid_html_id)
             }
-            AriaPropertyTypeEnum::Idlist => input_value
-                .split(' ')
-                .any(|piece| piece.parse::<f32>().is_err()),
             // A numerical value without a fractional component.
             AriaPropertyTypeEnum::Integer => input_value.parse::<u32>().is_ok(),
             AriaPropertyTypeEnum::Number => input_value.parse::<f32>().is_ok(),
-            AriaPropertyTypeEnum::Boolean => {
-                matches!(input_value, "false" | "true")
-            }
+            AriaPropertyTypeEnum::Boolean => matches!(input_value, "false" | "true"),
             AriaPropertyTypeEnum::Token => self
                 .values()
                 .any(|allowed_token| *allowed_token == input_value),
-            AriaPropertyTypeEnum::Tokenlist => input_value.split(' ').all(|input_token| {
-                self.values()
-                    .any(|allowed_token| allowed_token.trim() == input_token)
-            }),
-            AriaPropertyTypeEnum::Tristate => {
-                matches!(input_value, "false" | "true" | "mixed")
+            AriaPropertyTypeEnum::Tokenlist => {
+                input_value.split_ascii_whitespace().all(|input_token| {
+                    self.values()
+                        .any(|allowed_token| allowed_token.trim() == input_token)
+                })
             }
+            AriaPropertyTypeEnum::Tristate => matches!(input_value, "false" | "true" | "mixed"),
         }
     }
+}
+
+/// Is `id` a valid HTML identifier?
+///
+/// Browsers allows arbitrary sequence of characters for identifiers.
+/// However, it is commonly accepted that an identifier should not contain
+/// characters recognized as whitespaces by HTML.
+/// Whitespaces are usedd to separate two identifier in a list of identifiers.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id#syntax
+fn is_valid_html_id(id: &str) -> bool {
+    !id.is_empty() && !id.bytes().any(|b| b.is_ascii_whitespace())
 }

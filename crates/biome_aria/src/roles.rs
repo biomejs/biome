@@ -153,9 +153,9 @@ define_role! {
     /// https://www.w3.org/TR/wai-aria-1.1/#separator
     SeparatorRole {
         PROPS:  [
-            ("aria-valuemax", true),
-            ("aria-valuemin", true),
-            ("aria-valuenow", true),
+            ("aria-valuemax", false),
+            ("aria-valuemin", false),
+            ("aria-valuenow", false),
         ],
         ROLES: ["structure", "widget"],
         CONCEPTS: &[("hr", &[])],
@@ -199,7 +199,6 @@ define_role! {
     AlertRole {
         PROPS: [],
         ROLES: ["section"],
-        CONCEPTS: &[("alert", &[])],
     }
 }
 define_role! {
@@ -207,7 +206,6 @@ define_role! {
     AlertDialogRole {
         PROPS: [],
         ROLES: ["structure"],
-        CONCEPTS: &[("alert", &[])],
     }
 }
 define_role! {
@@ -853,8 +851,6 @@ impl<'a> AriaRoles {
         "button",
         "article",
         "dialog",
-        "alert",
-        "alertdialog",
         "cell",
         "columnheader",
         "definition",
@@ -1174,6 +1170,23 @@ impl<'a> AriaRoles {
             return false;
         }
 
+        // Allow SVG elements with role="img" attribute
+        // This is recommended for accessibility purposes
+        // Example:
+        // ```
+        // <svg role="img" aria-label="Description of your SVG image"></svg>;
+        // ```
+        // For more information, see:
+        // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role#svg_and_roleimg
+        if element_name == "svg"
+            && attributes
+                .as_ref()
+                .and_then(|a| a.get("role"))
+                .map_or(false, |values| values.iter().any(|x| x == "img"))
+        {
+            return false;
+        }
+
         // SVG elements, by default, do not have interactive semantics.
         // They are primarily used for graphics and visual rendering. While they can be made interactive with additional
         // attributes and JavaScript, inherently they don't provide user interaction capabilities.
@@ -1215,8 +1228,6 @@ impl<'a> AriaRoles {
                 "button" => &ButtonRole as &dyn AriaRoleDefinitionWithConcepts,
                 "article" => &ArticleRole as &dyn AriaRoleDefinitionWithConcepts,
                 "dialog" => &DialogRole as &dyn AriaRoleDefinitionWithConcepts,
-                "alert" => &AlertRole as &dyn AriaRoleDefinitionWithConcepts,
-                "alertdialog" => &AlertDialogRole as &dyn AriaRoleDefinitionWithConcepts,
                 "cell" => &CellRole as &dyn AriaRoleDefinitionWithConcepts,
                 "columnheader" => &ColumnHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
                 "definition" => &DefinitionRole as &dyn AriaRoleDefinitionWithConcepts,
@@ -1276,8 +1287,6 @@ impl<'a> AriaRoles {
             "button" => &ButtonRole as &dyn AriaRoleDefinitionWithConcepts,
             "article" => &ArticleRole as &dyn AriaRoleDefinitionWithConcepts,
             "dialog" => &DialogRole as &dyn AriaRoleDefinitionWithConcepts,
-            "alert" => &AlertRole as &dyn AriaRoleDefinitionWithConcepts,
-            "alertdialog" => &AlertDialogRole as &dyn AriaRoleDefinitionWithConcepts,
             "cell" => &CellRole as &dyn AriaRoleDefinitionWithConcepts,
             "columnheader" => &ColumnHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
             "definition" => &DefinitionRole as &dyn AriaRoleDefinitionWithConcepts,
