@@ -1,20 +1,15 @@
-pub mod themic_break_block;
+pub mod thematic_break_block;
 
-use std::{f32::consts::E, ptr};
+use biome_markdown_syntax::{kind::MarkdownSyntaxKind::*, T};
+use biome_parser::Parser;
 
-use biome_markdown_syntax::{kind::MarkdownSyntaxKind::*, MarkdownSyntaxKind, T};
-use biome_parser::{
-    prelude::ParsedSyntax::{self, *},
-    token_set, Parser,
-};
-
+use crate::syntax::thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 use crate::MarkdownParser;
-use crate::syntax::themic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
     parse_block_list(p);
-    m.complete(p, MARKDOWN_DOCUMENT);
+    m.complete(p, MD_DOCUMENT);
 }
 
 pub(crate) fn parse_block_list(p: &mut MarkdownParser) {
@@ -23,11 +18,10 @@ pub(crate) fn parse_block_list(p: &mut MarkdownParser) {
     while !p.at(T![EOF]) {
         parse_any_block(p);
     }
-    m.complete(p, MARKDOWN_BLOCK_LIST);
+    m.complete(p, MD_BLOCK_LIST);
 }
 
 pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
-    dbg!(p.cur());
     if at_indent_code_block(p) {
         parse_indent_code_block(p);
     } else if at_thematic_break_block(p) {
@@ -39,8 +33,6 @@ pub(crate) fn parse_any_block(p: &mut MarkdownParser) {
             Ok(break_block)
         });
         if break_block.is_err() {
-            dbg!(p.cur_range());
-
             parse_paragraph(p);
         }
     }
@@ -50,14 +42,11 @@ pub(crate) fn at_indent_code_block(p: &mut MarkdownParser) -> bool {
     p.before_whitespace_count() > 4
 }
 
-pub(crate) fn parse_indent_code_block(p: &mut MarkdownParser) {
+pub(crate) fn parse_indent_code_block(_p: &mut MarkdownParser) {
     todo!()
 }
 
-
-
-
-pub(crate) fn parse_paragraph(p: &mut MarkdownParser) {
+pub(crate) fn parse_paragraph(_p: &mut MarkdownParser) {
     todo!()
 }
 

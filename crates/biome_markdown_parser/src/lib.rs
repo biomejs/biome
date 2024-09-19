@@ -1,5 +1,5 @@
 use biome_markdown_factory::MarkdownSyntaxFactory;
-use biome_markdown_syntax::{MarkdownDocument, MarkdownLanguage, MarkdownSyntaxNode};
+use biome_markdown_syntax::{MarkdownLanguage, MarkdownSyntaxNode, MdDocument};
 use biome_parser::{prelude::ParseDiagnostic, tree_sink::LosslessTreeSink};
 use biome_rowan::{AstNode, NodeCache};
 use parser::MarkdownParser;
@@ -71,7 +71,7 @@ impl MarkdownParse {
     ///
     /// # Panics
     /// Panics if the node represented by this parse result mismatches.
-    pub fn tree(&self) -> MarkdownDocument {
-        MarkdownDocument::unwrap_cast(self.syntax())
+    pub fn tree(&self) -> MdDocument {
+        MdDocument::unwrap_cast(self.syntax())
     }
 }

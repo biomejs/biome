@@ -110,7 +110,7 @@ fn empty() {
 fn textual() {
     assert_lex! {
         "+",
-        MARKDOWN_TEXTUAL_LITERAL:1,
+       MD_TEXTUAL_LITERAL:1,
     }
 }
 

@@ -9,7 +9,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
-use biome_rowan::{TextSize,SyntaxKind};
+use biome_rowan::{SyntaxKind, TextSize};
 use biome_unicode_table::{lookup_byte, Dispatch::*};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
@@ -90,7 +90,7 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
         self.diagnostics.push(diagnostic);
     }
 
-    fn next_token(&mut self, context: Self::LexContext) -> Self::Kind {
+    fn next_token(&mut self, _context: Self::LexContext) -> Self::Kind {
         self.current_start = self.text_position();
         self.current_flags = TokenFlags::empty();
 
@@ -334,7 +334,7 @@ impl<'src> MarkdownLexer<'src> {
         let char = self.current_char_unchecked();
         self.advance(char.len_utf8());
 
-        MarkdownSyntaxKind::MARKDOWN_TEXTUAL_LITERAL
+        MD_TEXTUAL_LITERAL
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind

@@ -27,7 +27,7 @@ impl<'source> MarkdownParser<'source> {
         }
     }
 
-    pub fn before_whitespace_count(&self)->usize {
+    pub fn before_whitespace_count(&self) -> usize {
         self.source.before_whitespace_count()
     }
 

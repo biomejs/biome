@@ -1,17 +1,12 @@
 use crate::parser::MarkdownParser;
-use biome_markdown_syntax::{MarkdownBogus, MarkdownSyntaxKind, MarkdownSyntaxKind::*, T};
-use biome_parser::diagnostic::expected_token;
-use biome_parser::parse_lists::ParseNodeList;
-use biome_parser::parse_recovery::{ParseRecovery, ParseRecoveryTokenSet, RecoveryError};
+use biome_markdown_syntax::{MarkdownSyntaxKind, MarkdownSyntaxKind::*, T};
 use biome_parser::{
     prelude::ParsedSyntax::{self, *},
     token_set, Parser,
 };
-use biome_rowan::{TextSize, SyntaxKind};
-use crate::syntax::try_parse;
 
 pub(crate) fn at_thematic_break_block(p: &mut MarkdownParser) -> bool {
-    p.at_ts(token_set!(T![*], T![-], T![=]))
+    p.at_ts(token_set!(T![*], T![-], T![_]))
 }
 
 pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax {
@@ -21,20 +16,22 @@ pub(crate) fn parse_thematic_break_block(p: &mut MarkdownParser) -> ParsedSyntax
     let start_token = match p.cur() {
         T![*] => T![*],
         T![-] => T![-],
-        T![=] => T![=],
+        T![_] => T![_],
         _ => unreachable!(),
     };
 
-    parse_thematic_break_list(p,start_token)
+    parse_thematic_break_list(p, start_token)
 }
 
-
-pub(crate) fn parse_thematic_break_list(p: &mut MarkdownParser, start_token: MarkdownSyntaxKind) -> ParsedSyntax {
+pub(crate) fn parse_thematic_break_list(
+    p: &mut MarkdownParser,
+    start_token: MarkdownSyntaxKind,
+) -> ParsedSyntax {
     match start_token {
         T![*] => parse_star_list(p),
         T![-] => parse_minus_list(p),
         T![_] => parse_underscore_list(p),
-        _ => Absent
+        _ => Absent,
     }
 }
 
@@ -47,7 +44,7 @@ macro_rules! parse_list {
 
             let list_mark = p.start();
             // same line
-            while p.at($token) && p.source().before_new_line() == start_new_line  {
+            while p.at($token) && p.source().before_new_line() == start_new_line {
                 count += 1;
                 let star = p.start();
                 p.eat($token);
@@ -56,15 +53,32 @@ macro_rules! parse_list {
             if count < 3 {
                 list_mark.abandon(p);
                 thematic_type_mark.abandon(p);
-                return Absent
+                return Absent;
             }
             list_mark.complete(p, $list);
-            Present(thematic_type_mark.complete(p,$thematic_type))
+            Present(thematic_type_mark.complete(p, $thematic_type))
         }
     };
 }
 
-parse_list!(parse_star_list,T![*],MARKDOWN_STAR,MARKDOWN_STAR_LIST,MARKDOWN_STAR_THEMATIC_BREAK_BLOCK);
-parse_list!(parse_minus_list,T![-],MARKDOWN_MINUS,MARKDOWN_MINUS_LIST,MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK);
-parse_list!(parse_underscore_list,T![_],MARKDOWN_UNDERSCORE,MARKDOWN_UNDERSCORE_LIST,MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK);
-
+parse_list!(
+    parse_star_list,
+    T![*],
+    MD_STAR,
+    MD_STAR_LIST,
+    MD_STAR_THEMATIC_BREAK_BLOCK
+);
+parse_list!(
+    parse_minus_list,
+    T![-],
+    MD_MINUS,
+    MD_MINUS_LIST,
+    MD_MINUS_THEMATIC_BREAK_BLOCK
+);
+parse_list!(
+    parse_underscore_list,
+    T![_],
+    MD_UNDERSCORE,
+    MD_UNDERSCORE_LIST,
+    MD_UNDERSCORE_THEMATIC_BREAK_BLOCK
+);

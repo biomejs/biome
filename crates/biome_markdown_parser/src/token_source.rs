@@ -1,5 +1,3 @@
-use std::borrow::Cow;
-
 use crate::lexer::{MarkdownLexContext, MarkdownLexer, MarkdownReLexContext};
 use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::EOF;
@@ -72,10 +70,10 @@ impl<'source> MarkdownTokenSource<'source> {
             .rev()
             .take_while(|item| {
                 // get before whitespace and tab collect
-                return matches!(
+                matches!(
                     item.kind(),
                     TriviaPieceKind::Whitespace | TriviaPieceKind::Skipped
-                );
+                )
             })
             .collect();
         last_trivia.iter().fold(0, |count, b| match b.kind() {
@@ -86,7 +84,10 @@ impl<'source> MarkdownTokenSource<'source> {
     }
 
     pub fn before_new_line(&self) -> Option<TextSize> {
-        self.trivia_list.iter().rfind(|item| item.kind() == TriviaPieceKind::Newline).map(|item| item.offset())
+        self.trivia_list
+            .iter()
+            .rfind(|item| item.kind() == TriviaPieceKind::Newline)
+            .map(|item| item.offset())
     }
 
     #[allow(dead_code)]
@@ -167,7 +168,7 @@ impl<'source> BumpWithContext for MarkdownTokenSource<'source> {
 }
 
 impl<'source> TokenSourceWithBufferedLexer<MarkdownLexer<'source>>
-for MarkdownTokenSource<'source>
+    for MarkdownTokenSource<'source>
 {
     fn lexer(&mut self) -> &mut BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>> {
         &mut self.lexer
