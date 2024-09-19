@@ -2280,6 +2280,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useObjectHasOwn": {
+					"description": "Disallow use of Object.prototype.hasOwnProperty.call() and prefer use of Object.hasOwn()",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [

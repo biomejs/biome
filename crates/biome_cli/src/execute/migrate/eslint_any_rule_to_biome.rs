@@ -1265,6 +1265,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_numeric_literals.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "prefer-object-has-own" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_object_has_own.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "prefer-regex-literals" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_regex_literals.get_or_insert(Default::default());

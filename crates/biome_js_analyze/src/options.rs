@@ -354,6 +354,8 @@ pub type UseNumberNamespace =
 pub type UseNumberToFixedDigitsArgument = < lint :: suspicious :: use_number_to_fixed_digits_argument :: UseNumberToFixedDigitsArgument as biome_analyze :: Rule > :: Options ;
 pub type UseNumericLiterals =
     <lint::style::use_numeric_literals::UseNumericLiterals as biome_analyze::Rule>::Options;
+pub type UseObjectHasOwn =
+    <lint::nursery::use_object_has_own::UseObjectHasOwn as biome_analyze::Rule>::Options;
 pub type UseOptionalChain =
     <lint::complexity::use_optional_chain::UseOptionalChain as biome_analyze::Rule>::Options;
 pub type UseRegexLiterals =
