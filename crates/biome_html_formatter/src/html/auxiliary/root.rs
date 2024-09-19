@@ -10,7 +10,7 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
         if let Some(directive) = node.directive() {
             directive.format().fmt(f)?;
         }
-        
+
         node.html().format().fmt(f)?;
 
         if let Ok(eof) = node.eof_token() {
