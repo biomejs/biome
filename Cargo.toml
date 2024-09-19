@@ -18,6 +18,7 @@ empty_docs              = "allow" # there are some false positives inside biome_
 multiple_crate_versions = "allow"
 
 # pedantic
+assigning_clones             = "warn"
 checked_conversions          = "warn"
 cloned_instead_of_copied     = "warn"
 copy_iterator                = "warn"
@@ -35,10 +36,12 @@ implicit_hasher              = "warn"
 index_refutable_slice        = "warn"
 inefficient_to_string        = "warn"
 invalid_upcast_comparisons   = "warn"
+iter_filter_is_ok            = "warn"
 iter_not_returning_iterator  = "warn"
 large_stack_arrays           = "warn"
 large_types_passed_by_value  = "warn"
 macro_use_imports            = "warn"
+manual_is_variant_and        = "warn"
 manual_ok_or                 = "warn"
 manual_string_new            = "warn"
 map_flatten                  = "warn"
@@ -50,9 +53,12 @@ needless_bitwise_bool        = "warn"
 needless_continue            = "warn"
 needless_for_each            = "warn"
 no_effect_underscore_binding = "warn"
+option_as_ref_cloned         = "warn"
 ref_binding_to_reference     = "warn"
 ref_option_ref               = "warn"
+single_char_pattern          = "warn"
 stable_sort_primitive        = "warn"
+str_split_at_newline         = "warn"
 unnecessary_box_returns      = "warn"
 unnecessary_join             = "warn"
 unnested_or_patterns         = "warn"
@@ -61,15 +67,18 @@ verbose_bit_mask             = "warn"
 zero_sized_map_values        = "warn"
 
 # restriction
-empty_drop                      = "warn"
-float_cmp_const                 = "warn"
-get_unwrap                      = "warn"
-infinite_loop                   = "warn"
-lossy_float_literal             = "warn"
-rc_buffer                       = "warn"
-rc_mutex                        = "warn"
-rest_pat_in_fully_bound_structs = "warn"
-verbose_file_reads              = "warn"
+cfg_not_test                      = "warn"
+empty_drop                        = "warn"
+empty_enum_variants_with_brackets = "warn"
+float_cmp_const                   = "warn"
+get_unwrap                        = "warn"
+infinite_loop                     = "warn"
+lossy_float_literal               = "warn"
+rc_buffer                         = "warn"
+rc_mutex                          = "warn"
+rest_pat_in_fully_bound_structs   = "warn"
+string_lit_chars_any              = "warn"
+verbose_file_reads                = "warn"
 # https://github.com/rustwasm/wasm-bindgen/issues/3944
 #mem_forget                      = "warn"
 
@@ -132,6 +141,9 @@ biome_json_factory           = { version = "0.5.7", path = "./crates/biome_json_
 biome_json_formatter         = { version = "0.5.7", path = "./crates/biome_json_formatter" }
 biome_json_parser            = { version = "0.5.7", path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.5.7", path = "./crates/biome_json_syntax" }
+biome_markdown_factory       = { version = "0.0.1", path = "./crates/biome_markdown_factory" }
+biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markdown_parser" }
+biome_markdown_syntax        = { version = "0.0.1", path = "./crates/biome_markdown_syntax" }
 biome_yaml_factory           = { version = "0.0.1", path = "./crates/biome_yaml_factory" }
 biome_yaml_parser            = { version = "0.0.1", path = "./crates/biome_yaml_parser" }
 biome_yaml_syntax            = { version = "0.0.1", path = "./crates/biome_yaml_syntax" }

@@ -15,6 +15,8 @@ pub type NoInvalidGridAreas =
 pub type NoInvalidPositionAtImportRule = < lint :: correctness :: no_invalid_position_at_import_rule :: NoInvalidPositionAtImportRule as biome_analyze :: Rule > :: Options ;
 pub type NoIrregularWhitespace =
     <lint::nursery::no_irregular_whitespace::NoIrregularWhitespace as biome_analyze::Rule>::Options;
+pub type NoMissingVarFunction =
+    <lint::nursery::no_missing_var_function::NoMissingVarFunction as biome_analyze::Rule>::Options;
 pub type NoShorthandPropertyOverrides = < lint :: suspicious :: no_shorthand_property_overrides :: NoShorthandPropertyOverrides as biome_analyze :: Rule > :: Options ;
 pub type NoUnknownFunction =
     <lint::correctness::no_unknown_function::NoUnknownFunction as biome_analyze::Rule>::Options;

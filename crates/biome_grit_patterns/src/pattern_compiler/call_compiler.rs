@@ -3,9 +3,9 @@ use crate::{grit_context::GritQueryContext, CompileError, NodeLikeArgumentError}
 use biome_grit_syntax::{
     AnyGritMaybeNamedArg, AnyGritPattern, GritNamedArgList, GritNodeLike, GritSyntaxKind,
 };
-use biome_rowan::{AstNode, TextRange};
-use grit_pattern_matcher::pattern::{Call, CallFunction, FilePattern, Pattern};
-use grit_util::Language;
+use biome_rowan::AstNode;
+use grit_pattern_matcher::pattern::{Call, CallBuiltIn, CallFunction, FilePattern, Pattern};
+use grit_util::{ByteRange, Language};
 use std::collections::BTreeMap;
 
 const VALID_FILE_ARGS: &[&str] = &["$name", "$body"];
@@ -16,6 +16,7 @@ pub(super) fn call_pattern_from_node_with_name(
     node: &GritNodeLike,
     name: String,
     context: &mut NodeCompilationContext,
+    is_rhs: bool,
 ) -> Result<Pattern<GritQueryContext>, CompileError> {
     let named_args = named_args_from_node(node, &name, context)?;
     let mut args = named_args_to_map(named_args, context)?;
@@ -45,6 +46,22 @@ pub(super) fn call_pattern_from_node_with_name(
             .map_or(Pattern::Underscore, |p| p.1);
         let body = args.remove_entry("$body").map_or(Pattern::Top, |p| p.1);
         Ok(Pattern::File(Box::new(FilePattern::new(name, body))))
+    } else if let Some((index, built_in)) = context
+        .compilation
+        .built_ins
+        .get_built_ins()
+        .iter()
+        .enumerate()
+        .find(|(_, built_in)| built_in.name == name)
+    {
+        if !is_rhs {
+            return Err(CompileError::UnexpectedBuiltinCall(name));
+        }
+
+        let params = &built_in.params;
+        Ok(Pattern::CallBuiltIn(Box::new(call_built_in_from_args(
+            args, params, index, lang,
+        )?)))
     } else if let Some(info) = context.compilation.function_definition_info.get(&name) {
         let args = match_args_to_params(&name, args, &collect_params(&info.parameters), lang)?;
         Ok(Pattern::CallFunction(Box::new(CallFunction::new(
@@ -58,7 +75,23 @@ pub(super) fn call_pattern_from_node_with_name(
     }
 }
 
-pub(super) fn collect_params(parameters: &[(String, TextRange)]) -> Vec<String> {
+fn call_built_in_from_args(
+    mut args: BTreeMap<String, Pattern<GritQueryContext>>,
+    params: &[&str],
+    index: usize,
+    lang: &impl Language,
+) -> Result<CallBuiltIn<GritQueryContext>, CompileError> {
+    let mut pattern_params = Vec::with_capacity(args.len());
+    for param in params.iter() {
+        match args.remove(&(lang.metavariable_prefix().to_owned() + param)) {
+            Some(p) => pattern_params.push(Some(p)),
+            None => pattern_params.push(None),
+        }
+    }
+    Ok(CallBuiltIn::new(index, pattern_params))
+}
+
+pub(super) fn collect_params(parameters: &[(String, ByteRange)]) -> Vec<String> {
     parameters.iter().map(|p| p.0.clone()).collect()
 }
 
@@ -90,8 +123,21 @@ pub(super) fn named_args_from_node(
     name: &str,
     context: &mut NodeCompilationContext,
 ) -> Result<Vec<(String, AnyGritPattern)>, CompileError> {
-    let expected_params = if let Some(info) = context.compilation.function_definition_info.get(name)
+    let expected_params = if let Some(built_in) = context
+        .compilation
+        .built_ins
+        .get_built_ins()
+        .iter()
+        .find(|built_in| built_in.name == name)
     {
+        Some(
+            built_in
+                .params
+                .iter()
+                .map(|param| (*param).to_string())
+                .collect(),
+        )
+    } else if let Some(info) = context.compilation.function_definition_info.get(name) {
         Some(collect_params(&info.parameters))
     } else {
         context

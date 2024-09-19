@@ -452,3 +452,48 @@ max_line_length = 300
         result,
     ));
 }
+
+#[test]
+fn should_emit_diagnostics() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let editorconfig = Path::new(".editorconfig");
+    fs.insert(
+        editorconfig.into(),
+        r#"
+[*]
+insert_final_newline = false
+"#,
+    );
+
+    let test_file = Path::new("test.js");
+    let contents = r#"console.log("foo");
+"#;
+    fs.insert(test_file.into(), contents);
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("format"),
+                ("--write"),
+                ("--use-editorconfig=true"),
+                test_file.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_file_contents(&fs, test_file, contents);
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "should_emit_diagnostics",
+        fs,
+        console,
+        result,
+    ));
+}

@@ -29,12 +29,15 @@ impl FormatNodeRule<HtmlDirective> for FormatHtmlDirective {
             html.format().fmt(f)?;
         }
         if let Some(quirk) = quirk_token {
+            write!(f, [space()])?;
             quirk.format().fmt(f)?;
         }
         if let Some(public_id) = public_id_token {
+            write!(f, [space()])?;
             public_id.format().fmt(f)?;
         }
         if let Some(system_id) = system_id_token {
+            write!(f, [space()])?;
             system_id.format().fmt(f)?;
         }
         write!(f, [r_angle_token.format(), hard_line_break()])?;

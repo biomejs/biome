@@ -65,17 +65,14 @@ impl SuppressionAction for JsSuppressionAction {
             // There are some tokens that might contains newlines in their tokens, only
             // few nodes matches this criteria. If the token is inside one of those nodes,
             // then we check its content.
-            let nodes_that_might_contain_newlines = current_token
-                .parent()
-                .map(|node| {
-                    matches!(
-                        node.kind(),
-                        JsSyntaxKind::JSX_TEXT
-                            | JsSyntaxKind::JS_STRING_LITERAL
-                            | JsSyntaxKind::TEMPLATE_CHUNK
-                    )
-                })
-                .unwrap_or_default();
+            let nodes_that_might_contain_newlines = current_token.parent().is_some_and(|node| {
+                matches!(
+                    node.kind(),
+                    JsSyntaxKind::JSX_TEXT
+                        | JsSyntaxKind::JS_STRING_LITERAL
+                        | JsSyntaxKind::TEMPLATE_CHUNK
+                )
+            });
             if current_token
                 .trailing_trivia()
                 .pieces()
@@ -154,8 +151,7 @@ impl SuppressionAction for JsSuppressionAction {
             // quick check is the element is inside a list
             if current_jsx_element
                 .parent()
-                .map(|p| JsxChildList::can_cast(p.kind()))
-                .unwrap_or_default()
+                .is_some_and(|p| JsxChildList::can_cast(p.kind()))
             {
                 let jsx_comment = jsx_expression_child(
                     token(T!['{']).with_trailing_trivia([(

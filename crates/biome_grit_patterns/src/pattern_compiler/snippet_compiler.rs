@@ -489,8 +489,8 @@ fn unescape(raw_string: &str) -> String {
 mod tests {
     use super::*;
     use crate::{
-        grit_js_parser::GritJsParser, pattern_compiler::compilation_context::CompilationContext,
-        JsTargetLanguage,
+        grit_built_in_functions::BuiltIns, grit_js_parser::GritJsParser,
+        pattern_compiler::compilation_context::CompilationContext, JsTargetLanguage,
     };
     use grit_util::Parser;
     use regex::Regex;
@@ -561,8 +561,12 @@ mod tests {
 
     #[test]
     fn test_pattern_from_node() {
-        let compilation_context =
-            CompilationContext::new(None, GritTargetLanguage::JsTargetLanguage(JsTargetLanguage));
+        let built_ins = BuiltIns::default();
+        let compilation_context = CompilationContext::new(
+            None,
+            GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+            &built_ins,
+        );
         let mut vars = BTreeMap::new();
         let mut vars_array = Vec::new();
         let mut global_vars = BTreeMap::new();
@@ -798,8 +802,12 @@ mod tests {
 
     #[test]
     fn test_pattern_with_metavariables_from_node() {
-        let compilation_context =
-            CompilationContext::new(None, GritTargetLanguage::JsTargetLanguage(JsTargetLanguage));
+        let built_ins = BuiltIns::default();
+        let compilation_context = CompilationContext::new(
+            None,
+            GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+            &built_ins,
+        );
         let mut vars = BTreeMap::new();
         let mut vars_array = vec![Vec::new()];
         let mut global_vars = BTreeMap::new();

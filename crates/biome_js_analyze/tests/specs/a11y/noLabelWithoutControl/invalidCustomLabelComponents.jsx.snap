@@ -10,49 +10,15 @@ expression: invalidCustomLabelComponents.jsx
 
 # Diagnostics
 ```
-invalidCustomLabelComponents.options:7:5 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCustomLabelComponents.jsx:1:1 lint/a11y/noLabelWithoutControl ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found an unknown key `noLabelWithoutControl`.
+  ! A form label must be associated with an input.
   
-    5 │ 		"rules": {
-    6 │ 			"nursery": {
-  > 7 │ 				"noLabelWithoutControl": {
-      │ 				^^^^^^^^^^^^^^^^^^^^^^^
-    8 │ 					"level": "error",
-    9 │ 					"options": {
+  > 1 │ <CustomLabel aria-label="A label" />;
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
   
-  i Known keys:
-  
-  - recommended
-  - all
-  - noCommonJs
-  - noDuplicateCustomProperties
-  - noDuplicateElseIf
-  - noDuplicatedFields
-  - noDynamicNamespaceImportAccess
-  - noEnum
-  - noExportedImports
-  - noIrregularWhitespace
-  - noProcessEnv
-  - noRestrictedImports
-  - noRestrictedTypes
-  - noSecrets
-  - noStaticElementInteractions
-  - noSubstr
-  - noUnknownPseudoClass
-  - noUnknownPseudoElement
-  - noUselessEscapeInRegex
-  - noValueAtRule
-  - useAdjacentOverloadSignatures
-  - useAriaPropsSupportedByRole
-  - useConsistentCurlyBraces
-  - useConsistentMemberAccessibility
-  - useDeprecatedReason
-  - useImportRestrictions
-  - useSortedClasses
-  - useStrictMode
-  - useTrimStartEnd
-  - useValidAutocomplete
+  i Consider adding a `for` or `htmlFor` attribute to the label element or moving the input element to inside the label element.
   
 
 ```

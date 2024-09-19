@@ -386,7 +386,7 @@ impl<'a> Iterator for AncestorIterator<'a> {
     type Item = GritTargetNode<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let node = self.node.as_ref().cloned()?;
+        let node = self.node.clone()?;
         self.node = node.parent();
         Some(node)
     }

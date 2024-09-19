@@ -781,6 +781,7 @@ fn get_node_concept(
                 _ if name.ends_with("Value") => NodeConcept::Value,
                 _ => NodeConcept::Auxiliary,
             },
+            LanguageKind::Markdown => NodeConcept::Auxiliary,
             LanguageKind::Css => match name {
                 _ if name.ends_with("AtRule") => NodeConcept::Statement,
                 _ if name.ends_with("Selector") => NodeConcept::Selector,
@@ -890,6 +891,7 @@ impl LanguageKind {
             LanguageKind::Grit => "GritFormatter",
             LanguageKind::Html => "HtmlFormatter",
             LanguageKind::Yaml => "YamlFormatter",
+            LanguageKind::Markdown => "DemoFormatter",
         };
 
         Ident::new(name, Span::call_site())
@@ -904,6 +906,7 @@ impl LanguageKind {
             LanguageKind::Grit => "GritFormatContext",
             LanguageKind::Html => "HtmlFormatContext",
             LanguageKind::Yaml => "YamlFormatContext",
+            LanguageKind::Markdown => "DemoFormatterContext",
         };
 
         Ident::new(name, Span::call_site())

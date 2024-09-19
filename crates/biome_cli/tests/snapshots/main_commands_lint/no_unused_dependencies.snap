@@ -10,7 +10,7 @@ expression: content
     "enabled": true,
     "rules": {
       "all": false,
-      "nursery": {
+      "correctness": {
         "noUndeclaredDependencies": "error"
       }
     }
@@ -37,9 +37,9 @@ import "lodash";
 # Termination Message
 
 ```block
-configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Biome exited because the configuration resulted in errors. Please fix them.
+  × Some errors were emitted while running checks.
   
 
 
@@ -48,49 +48,23 @@ configuration ━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-biome.json:7:9 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fix.js:2:8 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Found an unknown key `noUndeclaredDependencies`.
+  × The current dependency isn't specified in your package.json.
   
-    5 │       "all": false,
-    6 │       "nursery": {
-  > 7 │         "noUndeclaredDependencies": "error"
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    8 │       }
-    9 │     }
+    1 │ import "react";
+  > 2 │ import "lodash";
+      │        ^^^^^^^^
+    3 │ 		
   
-  i Known keys:
+  i This could lead to errors.
   
-  - recommended
-  - all
-  - noCommonJs
-  - noDuplicateCustomProperties
-  - noDuplicateElseIf
-  - noDuplicatedFields
-  - noDynamicNamespaceImportAccess
-  - noEnum
-  - noExportedImports
-  - noIrregularWhitespace
-  - noProcessEnv
-  - noRestrictedImports
-  - noRestrictedTypes
-  - noSecrets
-  - noStaticElementInteractions
-  - noSubstr
-  - noUnknownPseudoClass
-  - noUnknownPseudoElement
-  - noUselessEscapeInRegex
-  - noValueAtRule
-  - useAdjacentOverloadSignatures
-  - useAriaPropsSupportedByRole
-  - useConsistentCurlyBraces
-  - useConsistentMemberAccessibility
-  - useDeprecatedReason
-  - useImportRestrictions
-  - useSortedClasses
-  - useStrictMode
-  - useTrimStartEnd
-  - useValidAutocomplete
+  i Add the dependency in your manifest.
   
 
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 error.
 ```

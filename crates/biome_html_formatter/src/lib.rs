@@ -14,6 +14,7 @@ mod cst;
 mod generated;
 mod html;
 pub(crate) mod prelude;
+pub mod utils;
 
 /// Formats a Html file based on its features.
 ///

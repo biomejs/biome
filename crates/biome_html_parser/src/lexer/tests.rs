@@ -105,6 +105,7 @@ macro_rules! assert_lex {
 #[test]
 fn doctype_key() {
     assert_lex! {
+        HtmlLexContext::Doctype,
         "doctype",
         DOCTYPE_KW: 7,
     }
@@ -113,6 +114,7 @@ fn doctype_key() {
 #[test]
 fn doctype_upper_key() {
     assert_lex! {
+            HtmlLexContext::Doctype,
         "DOCTYPE",
         DOCTYPE_KW: 7,
     }
@@ -164,6 +166,7 @@ fn html_text() {
 #[test]
 fn doctype_with_quirk() {
     assert_lex! {
+        HtmlLexContext::Doctype,
         "<!DOCTYPE HTML>",
         L_ANGLE: 1,
         BANG: 1,
@@ -177,6 +180,7 @@ fn doctype_with_quirk() {
 #[test]
 fn doctype_with_quirk_and_system() {
     assert_lex! {
+        HtmlLexContext::Doctype,
         "<!DOCTYPE HTML \"+//silmaril//dtd html pro v0r11 19970101//\">",
         L_ANGLE: 1,
         BANG: 1,
@@ -248,5 +252,40 @@ fn html_text_spaces_with_lines() {
         NEWLINE: 1,
         WHITESPACE: 8,
         HTML_LITERAL: 18,
+    }
+}
+
+#[test]
+fn unquoted_attribute_value_1() {
+    assert_lex! {
+        HtmlLexContext::AttributeValue,
+        "value",
+        HTML_STRING_LITERAL: 5,
+    }
+}
+
+#[test]
+fn unquoted_attribute_value_2() {
+    assert_lex! {
+        HtmlLexContext::AttributeValue,
+        "value value\tvalue\n",
+        HTML_STRING_LITERAL: 5,
+        WHITESPACE: 1,
+        HTML_STRING_LITERAL: 5,
+        WHITESPACE: 1,
+        HTML_STRING_LITERAL: 5,
+        NEWLINE: 1,
+    }
+}
+
+#[test]
+fn unquoted_attribute_value_invalid_chars() {
+    assert_lex! {
+        HtmlLexContext::AttributeValue,
+        "?<='\"`",
+        ERROR_TOKEN: 1,
+        L_ANGLE: 1,
+        ERROR_TOKEN: 1,
+        ERROR_TOKEN: 3,
     }
 }

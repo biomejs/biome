@@ -18,6 +18,7 @@ anyhow              = { workspace = true }
 biome_analyze       = { workspace = true }
 biome_configuration = { workspace = true }
 biome_console       = { workspace = true }
+biome_deserialize   = { workspace = true }
 biome_diagnostics   = { workspace = true }
 biome_fs            = { workspace = true }
 biome_rowan         = { workspace = true }
