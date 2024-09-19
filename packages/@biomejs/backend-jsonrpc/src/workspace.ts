@@ -2335,7 +2335,13 @@ export interface NoRestrictedTypesOptions {
 	types: {};
 }
 export interface UseComponentExportOnlyModulesOptions {
+	/**
+	 * Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)
+	 */
 	allowConstantExport?: boolean;
+	/**
+	 * A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
+	 */
 	allowExportNames: string[];
 }
 export interface ConsistentMemberAccessibilityOptions {

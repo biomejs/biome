@@ -3960,8 +3960,16 @@
 		"UseComponentExportOnlyModulesOptions": {
 			"type": "object",
 			"properties": {
-				"allowConstantExport": { "default": false, "type": "boolean" },
-				"allowExportNames": { "type": "array", "items": { "type": "string" } }
+				"allowConstantExport": {
+					"description": "Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)",
+					"default": false,
+					"type": "boolean"
+				},
+				"allowExportNames": {
+					"description": "A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)",
+					"type": "array",
+					"items": { "type": "string" }
+				}
 			},
 			"additionalProperties": false
 		},

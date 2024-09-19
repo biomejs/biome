@@ -115,12 +115,10 @@ declare_lint_rule! {
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseComponentExportOnlyModulesOptions {
-    // Allow the export of constants.
-    // (This option is for environments that support it, such as [Vite])
+    /// Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)
     #[serde(default)]
     allow_constant_export: bool,
-    // Exceptionally allowed export names.
-    // (This option is for exports that do not hinder [React Fast Refresh], such as [`meta` in Remix])
+    /// A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     allow_export_names: Vec<String>,
 }
