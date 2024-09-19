@@ -523,38 +523,6 @@ mod tests {
                     ,
                 ),
             ),
-            tree: GritTargetTree {
-                root: JsLanguage(
-                    Node(
-                        0: JS_MODULE@0..20
-                          0: (empty)
-                          1: (empty)
-                          2: JS_DIRECTIVE_LIST@0..0
-                          3: JS_MODULE_ITEM_LIST@0..20
-                            0: JS_EXPRESSION_STATEMENT@0..20
-                              0: JS_CALL_EXPRESSION@0..20
-                                0: JS_STATIC_MEMBER_EXPRESSION@0..11
-                                  0: JS_IDENTIFIER_EXPRESSION@0..7
-                                    0: JS_REFERENCE_IDENTIFIER@0..7
-                                      0: IDENT@0..7 "console" [] []
-                                  1: DOT@7..8 "." [] []
-                                  2: JS_NAME@8..11
-                                    0: IDENT@8..11 "log" [] []
-                                1: (empty)
-                                2: (empty)
-                                3: JS_CALL_ARGUMENTS@11..20
-                                  0: L_PAREN@11..12 "(" [] []
-                                  1: JS_CALL_ARGUMENT_LIST@12..19
-                                    0: JS_STRING_LITERAL_EXPRESSION@12..19
-                                      0: JS_STRING_LITERAL@12..19 "'hello'" [] []
-                                  2: R_PAREN@19..20 ")" [] []
-                              1: (empty)
-                          4: EOF@20..20 "" [] []
-                        ,
-                    ),
-                ),
-                source: "console.log('hello')",
-            },
         }
         "###);
     }
