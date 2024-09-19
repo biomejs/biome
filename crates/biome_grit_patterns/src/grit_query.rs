@@ -69,6 +69,9 @@ impl GritQuery {
             self.name.as_deref(),
             &files,
             &file_owners,
+            &self.definitions.functions,
+            &self.definitions.patterns,
+            &self.definitions.predicates,
         );
 
         let var_registry = VarRegistry::from_locations(&self.variable_locations);
