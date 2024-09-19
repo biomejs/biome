@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::{
     inner_string_text, static_value::StaticValue, AnyJsxAttribute, AnyJsxAttributeName,
-    AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName, JsSyntaxToken, JsxAttribute,
+    AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsSyntaxToken, JsxAttribute,
     JsxAttributeList, JsxElement, JsxName, JsxOpeningElement, JsxSelfClosingElement, JsxString,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, SyntaxResult, TokenText};
@@ -22,6 +22,24 @@ impl JsxString {
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
         Ok(inner_string_text(&self.value_token()?))
+    }
+}
+
+impl AnyJsxTag {
+    pub fn name(&self) -> Option<AnyJsxElementName> {
+        match self {
+            Self::JsxElement(element) => element.opening_element().ok()?.name().ok(),
+            Self::JsxFragment(_) => None,
+            Self::JsxSelfClosingElement(element) => element.name().ok(),
+        }
+    }
+
+    pub fn attributes(&self) -> Option<JsxAttributeList> {
+        match self {
+            Self::JsxElement(element) => Some(element.opening_element().ok()?.attributes()),
+            Self::JsxFragment(_) => None,
+            Self::JsxSelfClosingElement(element) => Some(element.attributes()),
+        }
     }
 }
 
@@ -328,17 +346,17 @@ declare_node_union! {
 }
 
 impl AnyJsxElement {
-    pub fn attributes(&self) -> JsxAttributeList {
-        match self {
-            AnyJsxElement::JsxOpeningElement(element) => element.attributes(),
-            AnyJsxElement::JsxSelfClosingElement(element) => element.attributes(),
-        }
-    }
-
     pub fn name(&self) -> SyntaxResult<AnyJsxElementName> {
         match self {
             AnyJsxElement::JsxOpeningElement(element) => element.name(),
             AnyJsxElement::JsxSelfClosingElement(element) => element.name(),
+        }
+    }
+
+    pub fn attributes(&self) -> JsxAttributeList {
+        match self {
+            AnyJsxElement::JsxOpeningElement(element) => element.attributes(),
+            AnyJsxElement::JsxSelfClosingElement(element) => element.attributes(),
         }
     }
 
@@ -415,6 +433,27 @@ impl JsxAttribute {
         match self.name().ok()? {
             AnyJsxAttributeName::JsxName(name) => name.value_token().ok(),
             AnyJsxAttributeName::JsxNamespaceName(name) => name.name().ok()?.value_token().ok(),
+        }
+    }
+}
+
+impl AnyJsxAttributeName {
+    pub fn name_token(&self) -> SyntaxResult<JsSyntaxToken> {
+        match self {
+            Self::JsxName(jsx_name) => jsx_name.value_token(),
+            Self::JsxNamespaceName(jsx_namespace_name) => jsx_namespace_name
+                .name()
+                .and_then(|jsx_name| jsx_name.value_token()),
+        }
+    }
+
+    pub fn namespace_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            Self::JsxName(_) => None,
+            Self::JsxNamespaceName(jsx_namespace_name) => jsx_namespace_name
+                .namespace()
+                .and_then(|namespace| namespace.value_token())
+                .ok(),
         }
     }
 }

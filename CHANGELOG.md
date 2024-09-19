@@ -49,6 +49,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- [noLabelWithoutControl](https://biomejs.dev/linter/rules/no-label-without-control/) now accept JSX expression as label value ([#3875](https://github.com/biomejs/biome/issues/3875)). Contributed by @Conaclos
+
 - [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) no longer suggests names with a disallowed case ([#3952](https://github.com/biomejs/biome/issues/3952)). Contributed by @Conaclos
 
 - [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now recognizes file names starting with ASCII digits as lowercase ([#3952](https://github.com/biomejs/biome/issues/3952)).
