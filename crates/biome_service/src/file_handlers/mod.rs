@@ -527,7 +527,7 @@ pub(crate) struct Features {
     unknown: UnknownFileHandler,
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
-    #[allow(unused)]
+    #[expect(unused)]
     grit: GritFileHandler,
 }
 
