@@ -77,7 +77,7 @@ impl Rule for NoOctalEscape {
                 "Don't use octal: " {text}
             })
             .note(markup! {
-                "Use '\\u...' instead."
+                "Use '\\u...'(unicode) instead."
             }),
         )
     }
