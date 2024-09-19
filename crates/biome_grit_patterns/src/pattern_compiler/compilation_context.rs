@@ -1,5 +1,5 @@
-use biome_rowan::TextRange;
 use grit_pattern_matcher::pattern::VariableSourceLocations;
+use grit_util::ByteRange;
 
 use crate::{diagnostics::CompilerDiagnostic, grit_target_language::GritTargetLanguage};
 use std::{collections::BTreeMap, path::Path};
@@ -17,6 +17,7 @@ pub(crate) struct CompilationContext<'a> {
 }
 
 impl<'a> CompilationContext<'a> {
+    #[cfg(test)]
     pub(crate) fn new(source_path: Option<&'a Path>, lang: GritTargetLanguage) -> Self {
         Self {
             source_path,
@@ -80,5 +81,5 @@ impl<'a> NodeCompilationContext<'a> {
 
 pub(crate) struct DefinitionInfo {
     pub(crate) index: usize,
-    pub(crate) parameters: Vec<(String, TextRange)>,
+    pub(crate) parameters: Vec<(String, ByteRange)>,
 }

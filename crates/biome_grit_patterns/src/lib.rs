@@ -4,6 +4,7 @@ mod grit_analysis_ext;
 mod grit_binding;
 mod grit_code_snippet;
 mod grit_context;
+mod grit_definitions;
 mod grit_file;
 mod grit_js_parser;
 mod grit_node;

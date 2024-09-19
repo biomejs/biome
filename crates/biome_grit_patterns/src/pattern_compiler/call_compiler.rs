@@ -3,9 +3,9 @@ use crate::{grit_context::GritQueryContext, CompileError, NodeLikeArgumentError}
 use biome_grit_syntax::{
     AnyGritMaybeNamedArg, AnyGritPattern, GritNamedArgList, GritNodeLike, GritSyntaxKind,
 };
-use biome_rowan::{AstNode, TextRange};
+use biome_rowan::AstNode;
 use grit_pattern_matcher::pattern::{Call, CallFunction, FilePattern, Pattern};
-use grit_util::Language;
+use grit_util::{ByteRange, Language};
 use std::collections::BTreeMap;
 
 const VALID_FILE_ARGS: &[&str] = &["$name", "$body"];
@@ -58,7 +58,7 @@ pub(super) fn call_pattern_from_node_with_name(
     }
 }
 
-pub(super) fn collect_params(parameters: &[(String, TextRange)]) -> Vec<String> {
+pub(super) fn collect_params(parameters: &[(String, ByteRange)]) -> Vec<String> {
     parameters.iter().map(|p| p.0.clone()).collect()
 }
 

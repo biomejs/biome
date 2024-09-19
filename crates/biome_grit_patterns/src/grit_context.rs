@@ -45,9 +45,9 @@ pub struct GritExecContext<'a> {
 
     loadable_files: &'a [GritTargetFile],
     files: &'a FileOwners<GritTargetTree>,
-    functions: Vec<GritFunctionDefinition<GritQueryContext>>,
-    patterns: Vec<PatternDefinition<GritQueryContext>>,
-    predicates: Vec<PredicateDefinition<GritQueryContext>>,
+    functions: &'a [GritFunctionDefinition<GritQueryContext>],
+    patterns: &'a [PatternDefinition<GritQueryContext>],
+    predicates: &'a [PredicateDefinition<GritQueryContext>],
 }
 
 impl<'a> GritExecContext<'a> {
@@ -56,30 +56,33 @@ impl<'a> GritExecContext<'a> {
         name: Option<&'a str>,
         loadable_files: &'a [GritTargetFile],
         files: &'a FileOwners<GritTargetTree>,
+        functions: &'a [GritFunctionDefinition<GritQueryContext>],
+        patterns: &'a [PatternDefinition<GritQueryContext>],
+        predicates: &'a [PredicateDefinition<GritQueryContext>],
     ) -> Self {
         Self {
             lang,
             name,
             loadable_files,
             files,
-            functions: Vec::new(),
-            patterns: Vec::new(),
-            predicates: Vec::new(),
+            functions,
+            patterns,
+            predicates,
         }
     }
 }
 
 impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
     fn pattern_definitions(&self) -> &[PatternDefinition<GritQueryContext>] {
-        &self.patterns
+        self.patterns
     }
 
     fn predicate_definitions(&self) -> &[PredicateDefinition<GritQueryContext>] {
-        &self.predicates
+        self.predicates
     }
 
     fn function_definitions(&self) -> &[GritFunctionDefinition<GritQueryContext>] {
-        &self.functions
+        self.functions
     }
 
     fn ignore_limit_pattern(&self) -> bool {
