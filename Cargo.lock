@@ -639,6 +639,7 @@ dependencies = [
  "im",
  "insta",
  "path-absolutize",
+ "rand 0.8.5",
  "regex",
  "rustc-hash 1.1.0",
  "serde",

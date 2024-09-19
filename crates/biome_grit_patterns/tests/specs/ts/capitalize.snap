@@ -1,0 +1,12 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: capitalize
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:1-1:29",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}
