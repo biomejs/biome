@@ -8,8 +8,8 @@ use biome_js_syntax::JsFileSource;
 #[test]
 fn test_query() {
     let parse_grit_result = parse_grit(
-        "`console.log($args)` where {
-    $args <: contains `world`
+        "`console.log($arg)` => . where {
+  log(message=\"This is a debug log\", variable=$arg),
 }
 ",
     );
@@ -28,16 +28,27 @@ fn test_query() {
         println!("Diagnostics from compiling query:\n{:?}", query.diagnostics);
     }
 
-    let body = r#"console.log("hello, world");
-console.log("hello", world);
-console.log(`hello ${world}`);
-"#;
+    let body = r#"console.log("grape");"#;
 
     let file = GritTargetFile {
         path: "test.js".into(),
         parse: parse(body, JsFileSource::tsx(), JsParserOptions::default()).into(),
     };
-    let results = query.execute(file).expect("could not execute query");
+    let (results, logs) = query.execute(file).expect("could not execute query");
 
     println!("Results: {results:#?}");
+
+    if !logs.is_empty() {
+        println!(
+            "\n## Logs\n\n{}",
+            logs.iter()
+                .map(|log| format!(
+                    "Message: {}Syntax: {}",
+                    log.message,
+                    log.syntax_tree.as_deref().unwrap_or_default()
+                ))
+                .collect::<Vec<_>>()
+                .join("\n")
+        );
+    }
 }

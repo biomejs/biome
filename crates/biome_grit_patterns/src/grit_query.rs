@@ -23,7 +23,7 @@ use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
 use grit_pattern_matcher::pattern::{
     FilePtr, FileRegistry, Matcher, Pattern, ResolvedPattern, State, VariableSourceLocations,
 };
-use grit_util::{Ast, ByteRange, InputRanges, Range, VariableMatch};
+use grit_util::{AnalysisLogs, Ast, ByteRange, InputRanges, Range, VariableMatch};
 use im::Vector;
 use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::OsStr;
@@ -64,7 +64,7 @@ pub struct GritQuery {
 }
 
 impl GritQuery {
-    pub fn execute(&self, file: GritTargetFile) -> Result<Vec<GritQueryResult>> {
+    pub fn execute(&self, file: GritTargetFile) -> Result<(Vec<GritQueryResult>, AnalysisLogs)> {
         let file_owners = FileOwners::new();
         let files = vec![file];
         let file_ptr = FilePtr::new(0, 0);
@@ -100,7 +100,7 @@ impl GritQuery {
             }
         }
 
-        Ok(results)
+        Ok((results, logs))
     }
 
     pub fn from_node(

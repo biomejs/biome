@@ -3,7 +3,7 @@ use crate::util::TextRangeGritExt;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::{NodeOrToken, SyntaxKind, SyntaxSlot, TextRange};
 use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
-use std::{borrow::Cow, ops::Deref, str::Utf8Error};
+use std::{borrow::Cow, fmt::Debug, ops::Deref, str::Utf8Error};
 
 use NodeOrToken::*;
 
@@ -187,7 +187,7 @@ generate_target_node! {
     [JsLanguage, JsSyntaxNode, JsSyntaxToken, JsSyntaxKind]
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct GritTargetNode<'a> {
     node: GritTargetLanguageNode,
     tree: &'a GritTargetTree,
@@ -260,6 +260,14 @@ impl<'a> GritTargetNode<'a> {
     pub fn text(&self) -> &'a str {
         let trimmed_range = self.text_trimmed_range();
         &self.source()[trimmed_range.start().into()..trimmed_range.end().into()]
+    }
+}
+
+impl<'a> Debug for GritTargetNode<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritTargetNode")
+            .field("node", &self.node)
+            .finish()
     }
 }
 

@@ -71,7 +71,16 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
     }
 
     fn get_sexp(&self) -> Option<String> {
-        None
+        Some(match self {
+            Self::File(path) => format!("({})", path.display()),
+            Self::Node(grit_target_node) => format!("({grit_target_node:?})"),
+            Self::Range(text_range, source) => format!(
+                "({})",
+                &source[text_range.start().into()..text_range.end().into()]
+            ),
+            Self::Empty(_, _) => "(empty)".to_owned(),
+            Self::Constant(constant) => format!("({constant})"),
+        })
     }
 
     fn position(&self, _language: &GritTargetLanguage) -> Option<Range> {
