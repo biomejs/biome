@@ -2,7 +2,8 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsBinding, JsIdentifierBinding};
+use biome_js_semantic::HasClosureAstNode;
+use biome_js_syntax::AnyJsBinding;
 use biome_js_syntax::{AnyJsFunction, JsGetterClassMember, JsMethodClassMember};
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 
@@ -99,7 +100,6 @@ impl Rule for UseExplicitFunctionReturnType {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        dbg!(node);
         match node {
             AnyJsFunctionAndMethod::AnyJsFunction(func) => {
                 if func.return_type_annotation().is_some() {
@@ -114,16 +114,26 @@ impl Rule for UseExplicitFunctionReturnType {
                     ));
                 }
 
-                return Some(func_range);
+                Some(func_range)
             }
-            AnyJsFunctionAndMethod::JsMethodClassMember(_) => {}
-            _ => {}
+            AnyJsFunctionAndMethod::JsMethodClassMember(method) => {
+                if method.return_type_annotation().is_some() {
+                    return None;
+                }
+
+                Some(method.node_text_range())
+            }
+            AnyJsFunctionAndMethod::JsGetterClassMember(getter) => {
+                if getter.return_type().is_some() {
+                    return None;
+                }
+
+                Some(getter.node_text_range())
+            }
         }
-        None
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        // dbg!(s)
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
