@@ -1,4 +1,5 @@
 use crate::diagnostics::CompilerDiagnostic;
+use crate::grit_built_in_functions::BuiltIns;
 use crate::grit_context::{GritExecContext, GritQueryContext, GritTargetFile};
 use crate::grit_definitions::{
     compile_definitions, scan_definitions, Definitions, ScannedDefinitionInfo,
@@ -27,6 +28,9 @@ use im::Vector;
 use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
+use std::sync::LazyLock;
+
+static BUILT_INS: LazyLock<BuiltIns> = LazyLock::new(BuiltIns::default);
 
 // These need to remain ordered by index.
 const GLOBAL_VARS: [(&str, usize); 4] = [
@@ -64,15 +68,16 @@ impl GritQuery {
         let file_owners = FileOwners::new();
         let files = vec![file];
         let file_ptr = FilePtr::new(0, 0);
-        let context = GritExecContext::new(
-            self.language.clone(),
-            self.name.as_deref(),
-            &files,
-            &file_owners,
-            &self.definitions.functions,
-            &self.definitions.patterns,
-            &self.definitions.predicates,
-        );
+        let context = GritExecContext {
+            lang: self.language.clone(),
+            name: self.name.as_deref(),
+            loadable_files: &files,
+            files: &file_owners,
+            built_ins: &BUILT_INS,
+            functions: &self.definitions.functions,
+            patterns: &self.definitions.patterns,
+            predicates: &self.definitions.predicates,
+        };
 
         let var_registry = VarRegistry::from_locations(&self.variable_locations);
 
@@ -112,6 +117,7 @@ impl GritQuery {
         let context = CompilationContext {
             source_path,
             lang,
+            built_ins: &BUILT_INS,
             pattern_definition_info,
             predicate_definition_info,
             function_definition_info,

@@ -2,6 +2,7 @@ mod diagnostics;
 mod errors;
 mod grit_analysis_ext;
 mod grit_binding;
+mod grit_built_in_functions;
 mod grit_code_snippet;
 mod grit_context;
 mod grit_definitions;
