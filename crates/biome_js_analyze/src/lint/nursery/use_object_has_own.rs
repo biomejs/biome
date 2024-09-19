@@ -69,7 +69,7 @@ impl Rule for UseObjectHasOwn {
         let is_call_member = member_expr.member_name()?.text() == "call";
         let is_has_own_property = obj_expr.member_name()?.text() == "hasOwnProperty";
         let is_valid_scope = variable_scope.is_none() || variable_scope?.is_global_scope();
-        let has_left_hand = has_left_hand_object(obj_expr)?;
+        let has_left_hand = has_left_hand_object(&obj_expr)?;
 
         if is_call_member && is_has_own_property && has_left_hand && is_valid_scope {
             return Some(());
@@ -134,7 +134,7 @@ impl Rule for UseObjectHasOwn {
 
 /// Checks if the given node is considered to be an access to a property of `Object.prototype`.
 /// Returns `true` if `expression.object` is `Object`, `Object.prototype`, or `{}` (empty `JsObjectExpression`).
-fn has_left_hand_object(member_expr: AnyJsMemberExpression) -> Option<bool> {
+fn has_left_hand_object(member_expr: &AnyJsMemberExpression) -> Option<bool> {
     let object = member_expr.object().ok()?.omit_parentheses();
 
     let node = match &object {
@@ -157,14 +157,11 @@ fn has_left_hand_object(member_expr: AnyJsMemberExpression) -> Option<bool> {
         _ => object,
     };
 
-    match &node {
-        AnyJsExpression::JsIdentifierExpression(id_expr) => {
-            if id_expr.name().ok()?.text() == "Object" {
-                return Some(true);
-            }
+    if let AnyJsExpression::JsIdentifierExpression(id_expr) = &node {
+        if id_expr.name().ok()?.text() == "Object" {
+            return Some(true);
         }
-        _ => (),
-    };
+    }
 
     Some(false)
 }

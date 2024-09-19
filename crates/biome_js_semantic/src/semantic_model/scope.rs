@@ -42,7 +42,7 @@ impl Eq for Scope {}
 
 impl Scope {
     pub fn is_global_scope(&self) -> bool {
-        return self.id.index() == 0;
+        self.id.index() == 0
     }
 
     /// Returns all parents of this scope. Starting with the current
