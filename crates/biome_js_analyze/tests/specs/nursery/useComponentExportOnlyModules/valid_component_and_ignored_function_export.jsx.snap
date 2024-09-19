@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_component_and_ignored_function_export.jsx
+---
+# Input
+```jsx
+export function loader() {}
+export const Bar = () => {}
+
+```

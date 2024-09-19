@@ -1,0 +1,4 @@
+pattern console_method_to_info($method) {
+  `console.$method($message)` => `console.info($message)`
+}
+console_method_to_info(method = `log`)

@@ -34,6 +34,7 @@ declare_lint_rule! {
     ///
     /// By default, the rule ensures that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`],
     /// or equal to the name of one export in the file.
+    /// By default, the rule ensures that the extensions are either in [`camelCase`], [`kebab-case`], or [`snake_case`].
     ///
     /// ## Ignoring some files
     ///
@@ -104,6 +105,9 @@ declare_lint_rule! {
     /// You can enforce a stricter convention by setting `filenameCases` option.
     /// `filenameCases` accepts an array of cases among the following cases: [`camelCase`], [`kebab-case`], [`PascalCase`], [`snake_case`], and `export`.
     ///
+    /// This option also applies to the file extensions.
+    /// Extensions in lowercase are always allowed regardless of how `filenameCases` is set.
+    ///
     /// [case]: https://en.wikipedia.org/wiki/Naming_convention_(programming)#Examples_of_multiple-word_identifier_formats
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`kebab-case`]: https://en.wikipedia.org/wiki/Letter_case#Kebab_case
@@ -164,7 +168,7 @@ impl Rule for UseFilenamingConvention {
             if !name.ends_with(ends)
                 || !name[..name.len() - count]
                     .chars()
-                    .all(|c| c.is_alphanumeric())
+                    .all(|c| c.is_alphanumeric() || matches!(c, '-' | '_'))
             {
                 return Some(FileNamingConventionState::Filename);
             }
@@ -185,15 +189,18 @@ impl Rule for UseFilenamingConvention {
             };
             (name, split)
         };
+        let allowed_cases = options.filename_cases.cases();
+        let allowed_extension_cases = allowed_cases | Case::Lower;
         // Check extension case
-        if extensions.any(|extension| Case::identify(extension, true) != Case::Lower) {
+        if extensions.any(|extension| {
+            !allowed_extension_cases.contains(Case::identify(extension, options.strict_case))
+        }) {
             return Some(FileNamingConventionState::Extension);
         }
         if name.is_empty() {
             return None;
         }
         // Check filename case
-        let allowed_cases = options.filename_cases.cases();
         if !allowed_cases.is_empty() {
             let trimmed_name = name.trim_matches('_');
             let case = Case::identify(trimmed_name, options.strict_case);
@@ -241,7 +248,7 @@ impl Rule for UseFilenamingConvention {
                         .join(" or ")
                 } else {
                     allowed_case_names
-                        .collect::<SmallVec<[_; 3]>>()
+                        .collect::<SmallVec<[_; 4]>>()
                         .join(" or ")
                 };
                 let mut split = file_name.split('.');
@@ -277,28 +284,43 @@ impl Rule for UseFilenamingConvention {
                 }
                 let suggested_filenames = allowed_cases
                     .into_iter()
-                    .map(|case| file_name.replacen(trimmed_name, &case.convert(trimmed_name), 1))
+                    .filter_map(|case| {
+                        let new_trimmed_name = case.convert(trimmed_name);
+                        // Filter out names that have not an allowed case
+                        if allowed_cases.contains(Case::identify(&new_trimmed_name, options.strict_case)) {
+                            Some(file_name.replacen(trimmed_name, &new_trimmed_name, 1))
+                        } else {
+                            None
+                        }
+                    })
                     // Deduplicate suggestions
                     .collect::<FxHashSet<_>>()
                     .into_iter()
                     .collect::<SmallVec<[_; 3]>>()
                     .join("\n");
-                Some(RuleDiagnostic::new(
+                let diagnostic = RuleDiagnostic::new(
                     rule_category!(),
                     None as Option<TextRange>,
                     markup! {
                         "The filename"{trimmed_info}" should be in "<Emphasis>{allowed_case_names}</Emphasis>"."
                     },
-                ).note(markup! {
+                );
+                if suggested_filenames.is_empty() {
+                    return Some(diagnostic);
+                }
+                Some(diagnostic.note(markup! {
                     "The filename could be renamed to one of the following names:\n"{suggested_filenames}
                 }))
             },
             FileNamingConventionState::Extension => {
+                let allowed_cases = options.filename_cases.cases() | Case::Lower;
+                let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
+                let allowed_case_names = allowed_case_names.collect::<SmallVec<[_; 4]>>().join(" or ");
                 Some(RuleDiagnostic::new(
                     rule_category!(),
                     None as Option<TextRange>,
                     markup! {
-                        "The file extension should be in lowercase without any special characters."
+                        "The file extension should be in "<Emphasis>{allowed_case_names}</Emphasis>"."
                     },
                 ))
             },

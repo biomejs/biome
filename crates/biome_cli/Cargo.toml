@@ -77,7 +77,8 @@ regex                = { workspace = true }
 tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
-docgen = ["bpaf/docgen"]
+docgen            = ["bpaf/docgen"]
+experimental-html = ["biome_service/experimental-html"]
 
 [lints]
 workspace = true

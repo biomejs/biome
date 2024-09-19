@@ -96,15 +96,8 @@ pub(crate) fn check(
 
     let should_use_editorconfig = configuration
         .as_ref()
-        .and_then(|f| f.formatter.as_ref())
-        .and_then(|f| f.use_editorconfig)
-        .unwrap_or(
-            biome_configuration
-                .formatter
-                .as_ref()
-                .and_then(|f| f.use_editorconfig)
-                .unwrap_or_default(),
-        );
+        .and_then(|c| c.use_editorconfig())
+        .unwrap_or(biome_configuration.use_editorconfig().unwrap_or_default());
     let mut fs_configuration = if should_use_editorconfig {
         let (editorconfig, editorconfig_diagnostics) = {
             let search_path = editorconfig_search_path.unwrap_or_else(|| {

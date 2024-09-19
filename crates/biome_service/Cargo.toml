@@ -69,6 +69,7 @@ slotmap                  = { workspace = true, features = ["serde"] }
 tracing                  = { workspace = true, features = ["attributes", "log"] }
 
 [features]
+experimental-html = []
 schema = [
   "dep:schemars",
   "biome_js_analyze/schema",

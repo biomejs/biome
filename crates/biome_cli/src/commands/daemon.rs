@@ -11,6 +11,7 @@ use tokio::io;
 use tokio::runtime::Runtime;
 use tracing::subscriber::Interest;
 use tracing::{debug_span, metadata::LevelFilter, Instrument, Metadata};
+use tracing_appender::rolling::Rotation;
 use tracing_subscriber::{
     layer::{Context, Filter},
     prelude::*,
@@ -206,11 +207,13 @@ pub(crate) fn read_most_recent_log_file(
 /// directory)
 fn setup_tracing_subscriber(log_path: Option<PathBuf>, log_file_name_prefix: Option<String>) {
     let biome_log_path = log_path.unwrap_or(biome_fs::ensure_cache_dir().join("biome-logs"));
-    let file_appender = tracing_appender::rolling::hourly(
-        biome_log_path,
-        // The `Option` is required because we have a command called __print-socket that spans a daemon only to retrieve its port
-        log_file_name_prefix.unwrap_or(String::from("server.log")),
-    );
+    let appender_builder = tracing_appender::rolling::RollingFileAppender::builder();
+    let file_appender = appender_builder
+        .filename_prefix(log_file_name_prefix.unwrap_or(String::from("server.log")))
+        .max_log_files(7)
+        .rotation(Rotation::HOURLY)
+        .build(biome_log_path)
+        .expect("Failed to start the logger for the daemon.");
 
     registry()
         .with(

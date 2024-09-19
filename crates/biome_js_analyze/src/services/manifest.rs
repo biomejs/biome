@@ -24,32 +24,28 @@ impl ManifestServices {
         self.manifest
             .as_ref()
             .as_ref()
-            .map(|pkg| pkg.dependencies.contains(specifier))
-            .unwrap_or_default()
+            .is_some_and(|pkg| pkg.dependencies.contains(specifier))
     }
 
     pub(crate) fn is_dev_dependency(&self, specifier: &str) -> bool {
         self.manifest
             .as_ref()
             .as_ref()
-            .map(|pkg| pkg.dev_dependencies.contains(specifier))
-            .unwrap_or_default()
+            .is_some_and(|pkg| pkg.dev_dependencies.contains(specifier))
     }
 
     pub(crate) fn is_peer_dependency(&self, specifier: &str) -> bool {
         self.manifest
             .as_ref()
             .as_ref()
-            .map(|pkg| pkg.peer_dependencies.contains(specifier))
-            .unwrap_or_default()
+            .is_some_and(|pkg| pkg.peer_dependencies.contains(specifier))
     }
 
     pub(crate) fn is_optional_dependency(&self, specifier: &str) -> bool {
         self.manifest
             .as_ref()
             .as_ref()
-            .map(|pkg| pkg.optional_dependencies.contains(specifier))
-            .unwrap_or_default()
+            .is_some_and(|pkg| pkg.optional_dependencies.contains(specifier))
     }
 }
 

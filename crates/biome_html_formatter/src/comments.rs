@@ -63,6 +63,21 @@ impl FormatRule<SourceComment<HtmlLanguage>> for FormatHtmlLeadingComment {
     }
 }
 
+#[derive(Default)]
+pub struct FormatHtmlTrailingComment;
+
+impl FormatRule<SourceComment<HtmlLanguage>> for FormatHtmlTrailingComment {
+    type Context = HtmlFormatContext;
+
+    fn fmt(
+        &self,
+        comment: &SourceComment<HtmlLanguage>,
+        f: &mut Formatter<Self::Context>,
+    ) -> FormatResult<()> {
+        write!(f, [comment.piece().as_piece()])
+    }
+}
+
 #[derive(Eq, PartialEq, Copy, Clone, Debug, Default)]
 pub struct HtmlCommentStyle;
 
@@ -82,8 +97,8 @@ impl CommentStyle for HtmlCommentStyle {
 
     fn place_comment(
         &self,
-        _comment: DecoratedComment<Self::Language>,
+        comment: DecoratedComment<Self::Language>,
     ) -> CommentPlacement<Self::Language> {
-        todo!();
+        CommentPlacement::Default(comment)
     }
 }

@@ -2132,6 +2132,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noMissingVarFunction": {
+					"description": "Disallow missing var function for css variables.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noOctalEscape": {
+					"description": "Disallow octal escape sequences in string literals",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noProcessEnv": {
 					"description": "Disallow the use of process.env.",
 					"anyOf": [
@@ -2217,6 +2231,15 @@
 					"description": "Enforce that ARIA properties are valid for the roles that are supported by the element.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useComponentExportOnlyModules": {
+					"description": "Enforce declaring components only within modules that export React Components exclusively.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseComponentExportOnlyModulesConfiguration"
+						},
 						{ "type": "null" }
 					]
 				},
@@ -2805,6 +2828,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseComponentExportOnlyModulesOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseComponentExportOnlyModulesOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -3917,6 +3957,28 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseComponentExportOnlyModulesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseComponentExportOnlyModulesOptions" }
+			]
+		},
+		"UseComponentExportOnlyModulesOptions": {
+			"type": "object",
+			"properties": {
+				"allowConstantExport": {
+					"description": "Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)",
+					"default": false,
+					"type": "boolean"
+				},
+				"allowExportNames": {
+					"description": "A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
 		},
 		"UseImportExtensionsConfiguration": {
 			"anyOf": [

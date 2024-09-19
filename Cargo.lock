@@ -647,6 +647,7 @@ dependencies = [
  "im",
  "insta",
  "path-absolutize",
+ "rand 0.8.5",
  "regex",
  "rustc-hash 1.1.0",
  "serde",
@@ -940,6 +941,7 @@ dependencies = [
  "biome_analyze",
  "biome_configuration",
  "biome_console",
+ "biome_deserialize",
  "biome_diagnostics",
  "biome_fs",
  "biome_rowan",
@@ -953,6 +955,42 @@ dependencies = [
  "tower",
  "tower-lsp",
  "tracing",
+]
+
+[[package]]
+name = "biome_markdown_factory"
+version = "0.0.1"
+dependencies = [
+ "biome_markdown_syntax",
+ "biome_rowan",
+]
+
+[[package]]
+name = "biome_markdown_parser"
+version = "0.0.1"
+dependencies = [
+ "biome_console",
+ "biome_diagnostics",
+ "biome_markdown_factory",
+ "biome_markdown_syntax",
+ "biome_parser",
+ "biome_rowan",
+ "biome_test_utils",
+ "biome_unicode_table",
+ "insta",
+ "quickcheck",
+ "quickcheck_macros",
+ "tracing",
+ "unicode-bom",
+]
+
+[[package]]
+name = "biome_markdown_syntax"
+version = "0.0.1"
+dependencies = [
+ "biome_rowan",
+ "schemars",
+ "serde",
 ]
 
 [[package]]

@@ -2162,7 +2162,7 @@ pub(super) fn parse_unary_expr(p: &mut JsParser, context: ExpressionContext) -> 
             let mut rewriter = DeleteExpressionRewriter::default();
             rewrite_events(&mut rewriter, checkpoint, p);
 
-            rewriter.result.take().map(|res| {
+            rewriter.result.take().inspect(|_| {
                 if StrictMode.is_supported(p) {
                     if let Some(range) = rewriter.exited_ident_expr {
                         kind = JS_BOGUS_EXPRESSION;
@@ -2180,8 +2180,6 @@ pub(super) fn parse_unary_expr(p: &mut JsParser, context: ExpressionContext) -> 
                         range,
                     ));
                 }
-
-                res
             })
         } else {
             parse_unary_expr(p, context).ok()

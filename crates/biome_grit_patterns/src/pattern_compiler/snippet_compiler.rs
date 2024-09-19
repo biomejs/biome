@@ -489,8 +489,8 @@ fn unescape(raw_string: &str) -> String {
 mod tests {
     use super::*;
     use crate::{
-        grit_js_parser::GritJsParser, pattern_compiler::compilation_context::CompilationContext,
-        JsTargetLanguage,
+        grit_built_in_functions::BuiltIns, grit_js_parser::GritJsParser,
+        pattern_compiler::compilation_context::CompilationContext, JsTargetLanguage,
     };
     use grit_util::Parser;
     use regex::Regex;
@@ -523,46 +523,18 @@ mod tests {
                     ,
                 ),
             ),
-            tree: GritTargetTree {
-                root: JsLanguage(
-                    Node(
-                        0: JS_MODULE@0..20
-                          0: (empty)
-                          1: (empty)
-                          2: JS_DIRECTIVE_LIST@0..0
-                          3: JS_MODULE_ITEM_LIST@0..20
-                            0: JS_EXPRESSION_STATEMENT@0..20
-                              0: JS_CALL_EXPRESSION@0..20
-                                0: JS_STATIC_MEMBER_EXPRESSION@0..11
-                                  0: JS_IDENTIFIER_EXPRESSION@0..7
-                                    0: JS_REFERENCE_IDENTIFIER@0..7
-                                      0: IDENT@0..7 "console" [] []
-                                  1: DOT@7..8 "." [] []
-                                  2: JS_NAME@8..11
-                                    0: IDENT@8..11 "log" [] []
-                                1: (empty)
-                                2: (empty)
-                                3: JS_CALL_ARGUMENTS@11..20
-                                  0: L_PAREN@11..12 "(" [] []
-                                  1: JS_CALL_ARGUMENT_LIST@12..19
-                                    0: JS_STRING_LITERAL_EXPRESSION@12..19
-                                      0: JS_STRING_LITERAL@12..19 "'hello'" [] []
-                                  2: R_PAREN@19..20 ")" [] []
-                              1: (empty)
-                          4: EOF@20..20 "" [] []
-                        ,
-                    ),
-                ),
-                source: "console.log('hello')",
-            },
         }
         "###);
     }
 
     #[test]
     fn test_pattern_from_node() {
-        let compilation_context =
-            CompilationContext::new(None, GritTargetLanguage::JsTargetLanguage(JsTargetLanguage));
+        let built_ins = BuiltIns::default();
+        let compilation_context = CompilationContext::new(
+            None,
+            GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+            &built_ins,
+        );
         let mut vars = BTreeMap::new();
         let mut vars_array = Vec::new();
         let mut global_vars = BTreeMap::new();
@@ -798,8 +770,12 @@ mod tests {
 
     #[test]
     fn test_pattern_with_metavariables_from_node() {
-        let compilation_context =
-            CompilationContext::new(None, GritTargetLanguage::JsTargetLanguage(JsTargetLanguage));
+        let built_ins = BuiltIns::default();
+        let compilation_context = CompilationContext::new(
+            None,
+            GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+            &built_ins,
+        );
         let mut vars = BTreeMap::new();
         let mut vars_array = vec![Vec::new()];
         let mut global_vars = BTreeMap::new();

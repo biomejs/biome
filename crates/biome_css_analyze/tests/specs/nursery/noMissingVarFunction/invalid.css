@@ -1,0 +1,69 @@
+/* case 1 */
+a {
+    --foo: red;
+    color: --foo;
+}
+
+/* case 2 */
+@property --bar {}
+a {
+    color: --bar;
+}
+
+/* case 3 */
+:root {
+    --baz: 0;
+}
+a {
+    --foo: --baz;
+}
+
+/* case 4 */
+:root {
+    --aaaa: 0px;
+}
+a {
+    color: calc(var(--foo) + --aaaa));
+}
+
+/* case 5 */
+:root {
+    --bbbb: pink;
+}
+a {
+    color: --bbbb, red;
+}
+
+/* case 6 */
+:root {
+    --cccc: 0;
+}
+a {
+    color: --foo(--cccc);
+}
+
+/* case 7 */
+:root {
+    --dddd: 0;
+    --eeee: 0;
+}
+a {
+    --foo: --dddd;
+    color: --eeee;
+}
+
+/* case 8 */
+@property --ffff {}
+@property --gggg {}
+a {
+    --foo: --ffff;
+    color: --gggg;
+}
+
+/* case 9 */
+.parent {
+    --foo: red;
+    .child {
+      color: --foo;
+    }
+};
