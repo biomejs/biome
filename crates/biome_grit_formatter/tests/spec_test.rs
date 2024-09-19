@@ -10,7 +10,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
 
     let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, None) else {
-        return;
+        panic!("Failed to set up snapshot test");
     };
 
     let options = GritFormatOptions::default();
