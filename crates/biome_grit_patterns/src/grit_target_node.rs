@@ -506,6 +506,9 @@ impl<'a> AstCursor for GritTargetNodeCursor<'a> {
     }
 
     fn goto_next_sibling(&mut self) -> bool {
+        if self.node == self.root {
+            return false;
+        }
         match self.node.next_sibling() {
             Some(sibling) => {
                 self.node = sibling;

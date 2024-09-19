@@ -7,7 +7,12 @@ use biome_js_syntax::JsFileSource;
 #[ignore]
 #[test]
 fn test_query() {
-    let parse_grit_result = parse_grit("`foo.$x && foo.$x()`");
+    let parse_grit_result = parse_grit(
+        "`console.log($args)` where {
+    $args <: contains `world`
+}
+",
+    );
     if !parse_grit_result.diagnostics().is_empty() {
         panic!("Cannot parse query:\n{:?}", parse_grit_result.diagnostics());
     }
@@ -23,7 +28,9 @@ fn test_query() {
         println!("Diagnostics from compiling query:\n{:?}", query.diagnostics);
     }
 
-    let body = r#"foo.bar && foo.bar();
+    let body = r#"console.log("hello, world");
+console.log("hello", world);
+console.log(`hello ${world}`);
 "#;
 
     let file = GritTargetFile {
@@ -32,5 +39,5 @@ fn test_query() {
     };
     let results = query.execute(file).expect("could not execute query");
 
-    println!("Results: {results:?}");
+    println!("Results: {results:#?}");
 }

@@ -1,0 +1,3 @@
+`console.log($args)` where {
+    $args <: contains `world`
+}
