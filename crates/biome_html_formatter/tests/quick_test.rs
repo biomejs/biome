@@ -14,10 +14,9 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-<div>
-    <p>hello
-    </p>
-</div>
+<div></div>
+<div></div>
+
 
     "#;
     let source_type = HtmlFileSource::html();
