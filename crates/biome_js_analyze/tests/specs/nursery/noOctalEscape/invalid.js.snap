@@ -82,9 +82,9 @@ invalid.js:1:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     2 │ var foo = "foo \000 bar";
     3 │ var foo = "foo \377 bar";
   
-  i Don't use octal: "foo \01 bar"
+  i Don't use octal escape sequences: "foo \01 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -100,9 +100,9 @@ invalid.js:2:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     3 │ var foo = "foo \377 bar";
     4 │ var foo = "foo \378 bar";
   
-  i Don't use octal: "foo \000 bar"
+  i Don't use octal escape sequences: "foo \000 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -119,9 +119,9 @@ invalid.js:3:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     4 │ var foo = "foo \378 bar";
     5 │ var foo = "foo \37a bar";
   
-  i Don't use octal: "foo \377 bar"
+  i Don't use octal escape sequences: "foo \377 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -138,9 +138,9 @@ invalid.js:4:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     5 │ var foo = "foo \37a bar";
     6 │ var foo = "foo \381 bar";
   
-  i Don't use octal: "foo \378 bar"
+  i Don't use octal escape sequences: "foo \378 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -157,9 +157,9 @@ invalid.js:5:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     6 │ var foo = "foo \381 bar";
     7 │ var foo = "foo \3a1 bar";
   
-  i Don't use octal: "foo \37a bar"
+  i Don't use octal escape sequences: "foo \37a bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -176,9 +176,9 @@ invalid.js:6:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     7 │ var foo = "foo \3a1 bar";
     8 │ var foo = "foo \251 bar";
   
-  i Don't use octal: "foo \381 bar"
+  i Don't use octal escape sequences: "foo \381 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -195,9 +195,9 @@ invalid.js:7:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     8 │ var foo = "foo \251 bar";
     9 │ var foo = "foo \258 bar";
   
-  i Don't use octal: "foo \3a1 bar"
+  i Don't use octal escape sequences: "foo \3a1 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -214,9 +214,9 @@ invalid.js:8:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
      9 │ var foo = "foo \258 bar";
     10 │ var foo = "foo \25a bar";
   
-  i Don't use octal: "foo \251 bar"
+  i Don't use octal escape sequences: "foo \251 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -233,9 +233,9 @@ invalid.js:9:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     10 │ var foo = "foo \25a bar";
     11 │ var foo = "\3s51";
   
-  i Don't use octal: "foo \258 bar"
+  i Don't use octal escape sequences: "foo \258 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -252,9 +252,9 @@ invalid.js:10:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     11 │ var foo = "\3s51";
     12 │ var foo = "\77";
   
-  i Don't use octal: "foo \25a bar"
+  i Don't use octal escape sequences: "foo \25a bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -271,9 +271,9 @@ invalid.js:11:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     12 │ var foo = "\77";
     13 │ var foo = "\78";
   
-  i Don't use octal: "\3s51"
+  i Don't use octal escape sequences: "\3s51"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -290,9 +290,9 @@ invalid.js:12:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     13 │ var foo = "\78";
     14 │ var foo = "\5a";
   
-  i Don't use octal: "\77"
+  i Don't use octal escape sequences: "\77"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -309,9 +309,9 @@ invalid.js:13:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     14 │ var foo = "\5a";
     15 │ var foo = "\751";
   
-  i Don't use octal: "\78"
+  i Don't use octal escape sequences: "\78"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -328,9 +328,9 @@ invalid.js:14:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     15 │ var foo = "\751";
     16 │ var foo = "foo \400 bar";
   
-  i Don't use octal: "\5a"
+  i Don't use octal escape sequences: "\5a"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -347,9 +347,9 @@ invalid.js:15:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     16 │ var foo = "foo \400 bar";
     17 │ var foo = "foo \400 bar";
   
-  i Don't use octal: "\751"
+  i Don't use octal escape sequences: "\751"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -366,9 +366,9 @@ invalid.js:16:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     17 │ var foo = "foo \400 bar";
     18 │ var foo = "\t\1";
   
-  i Don't use octal: "foo \400 bar"
+  i Don't use octal escape sequences: "foo \400 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -385,9 +385,9 @@ invalid.js:17:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     18 │ var foo = "\t\1";
     19 │ var foo = "\\\751";
   
-  i Don't use octal: "foo \400 bar"
+  i Don't use octal escape sequences: "foo \400 bar"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -404,9 +404,9 @@ invalid.js:18:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     19 │ var foo = "\\\751";
     20 │ '\0\1'
   
-  i Don't use octal: "\t\1"
+  i Don't use octal escape sequences: "\t\1"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -423,9 +423,9 @@ invalid.js:19:11 lint/nursery/noOctalEscape ━━━━━━━━━━━━
     20 │ '\0\1'
     21 │ '\0 \1'
   
-  i Don't use octal: "\\\751"
+  i Don't use octal escape sequences: "\\\751"
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -442,10 +442,10 @@ invalid.js:20:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     21 │ '\0 \1'
     22 │ '\0\01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\0\1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -462,10 +462,10 @@ invalid.js:21:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     22 │ '\0\01'
     23 │ '\0 \01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\0 \1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -482,10 +482,10 @@ invalid.js:22:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     23 │ '\0 \01'
     24 │ '\0a\1'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\0\01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -502,10 +502,10 @@ invalid.js:23:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     24 │ '\0a\1'
     25 │ '\0a\01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\0 \01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -522,10 +522,10 @@ invalid.js:24:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     25 │ '\0a\01'
     26 │ '\0\08'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\0a\1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -542,10 +542,10 @@ invalid.js:25:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     26 │ '\0\08'
     27 │ '\1'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\0a\01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -562,10 +562,10 @@ invalid.js:26:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     27 │ '\1'
     28 │ '\2'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\0\08'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -582,10 +582,10 @@ invalid.js:27:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     28 │ '\2'
     29 │ '\7'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -602,10 +602,10 @@ invalid.js:28:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     29 │ '\7'
     30 │ '\00'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\2'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -622,10 +622,10 @@ invalid.js:29:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     30 │ '\00'
     31 │ '\01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\7'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -642,10 +642,10 @@ invalid.js:30:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     31 │ '\01'
     32 │ '\02'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\00'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -662,10 +662,10 @@ invalid.js:31:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     32 │ '\02'
     33 │ '\07'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -682,10 +682,10 @@ invalid.js:32:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     33 │ '\07'
     34 │ '\08'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\02'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -702,10 +702,10 @@ invalid.js:33:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     34 │ '\08'
     35 │ '\09'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\07'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -722,10 +722,10 @@ invalid.js:34:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     35 │ '\09'
     36 │ '\10'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\08'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -742,10 +742,10 @@ invalid.js:35:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     36 │ '\10'
     37 │ '\12'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\09'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -762,10 +762,10 @@ invalid.js:36:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     37 │ '\12'
     38 │ ' \1'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\10'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -782,10 +782,10 @@ invalid.js:37:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     38 │ ' \1'
     39 │ '\1 '
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\12'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -802,10 +802,10 @@ invalid.js:38:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     39 │ '\1 '
     40 │ 'a\1'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     ' \1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -822,10 +822,10 @@ invalid.js:39:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     40 │ 'a\1'
     41 │ '\1a'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\1 '
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -842,10 +842,10 @@ invalid.js:40:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     41 │ '\1a'
     42 │ 'a\1a'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     'a\1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -862,10 +862,10 @@ invalid.js:41:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     42 │ 'a\1a'
     43 │ ' \01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\1a'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -882,10 +882,10 @@ invalid.js:42:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     43 │ ' \01'
     44 │ '\01 '
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     'a\1a'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -902,10 +902,10 @@ invalid.js:43:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     44 │ '\01 '
     45 │ 'a\01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     ' \01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -922,10 +922,10 @@ invalid.js:44:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     45 │ 'a\01'
     46 │ '\01a'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\01 '
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -942,10 +942,10 @@ invalid.js:45:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     46 │ '\01a'
     47 │ 'a\01a'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     'a\01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -962,10 +962,10 @@ invalid.js:46:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     47 │ 'a\01a'
     48 │ 'a\08a'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\01a'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -982,10 +982,10 @@ invalid.js:47:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     48 │ 'a\08a'
     49 │ '\n\1'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     'a\01a'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1002,10 +1002,10 @@ invalid.js:48:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     49 │ '\n\1'
     50 │ '\n\01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     'a\08a'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1022,10 +1022,10 @@ invalid.js:49:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     50 │ '\n\01'
     51 │ '\n\08'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\n\1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1042,10 +1042,10 @@ invalid.js:50:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     51 │ '\n\08'
     52 │ '\\\1'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\n\01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1062,10 +1062,10 @@ invalid.js:51:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     52 │ '\\\1'
     53 │ '\\\01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\n\08'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1082,10 +1082,10 @@ invalid.js:52:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     53 │ '\\\01'
     54 │ '\\\08'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\\\1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1102,10 +1102,10 @@ invalid.js:53:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     54 │ '\\\08'
     55 │ '\\n\1'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\\\01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1122,10 +1122,10 @@ invalid.js:54:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     55 │ '\\n\1'
     56 │ '\01\02'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\\\08'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1142,10 +1142,10 @@ invalid.js:55:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     56 │ '\01\02'
     57 │ '\02\01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\\n\1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1162,10 +1162,10 @@ invalid.js:56:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     57 │ '\02\01'
     58 │ '\01\2'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\01\02'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1182,10 +1182,10 @@ invalid.js:57:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     58 │ '\01\2'
     59 │ '\2\01'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\02\01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1202,10 +1202,10 @@ invalid.js:58:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     59 │ '\2\01'
     60 │ '\08\1'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\01\2'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1222,10 +1222,10 @@ invalid.js:59:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     60 │ '\08\1'
     61 │ 'foo \1 bar \2'
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\2\01'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1242,10 +1242,10 @@ invalid.js:60:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
     61 │ 'foo \1 bar \2'
     62 │ 
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     '\08\1'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```
@@ -1261,10 +1261,10 @@ invalid.js:61:1 lint/nursery/noOctalEscape ━━━━━━━━━━━━�
        │ ^^^^^^^^^^^^^^^
     62 │ 
   
-  i Don't use octal: 
+  i Don't use octal escape sequences: 
     'foo \1 bar \2'
   
-  i Use '\u...' instead.
+  i Use unicode or hexidecimal escape sequences instead.
   
 
 ```

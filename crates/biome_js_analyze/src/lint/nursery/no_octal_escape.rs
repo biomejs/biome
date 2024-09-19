@@ -74,10 +74,10 @@ impl Rule for NoOctalEscape {
                 },
             )
             .note(markup! {
-                "Don't use octal: " {text}
+                "Don't use octal escape sequences: " {text}
             })
             .note(markup! {
-                "Use '\\u...'(unicode) instead."
+                "Use unicode or hexidecimal escape sequences instead."
             }),
         )
     }
