@@ -175,6 +175,7 @@ define_categories! {
     "lint/nursery/useAdjacentOverloadSignatures": "https://biomejs.dev/linter/rules/use-adjacent-overload-signatures",
     "lint/nursery/useAriaPropsSupportedByRole": "https://biomejs.dev/linter/rules/use-aria-props-supported-by-role",
     "lint/nursery/useBiomeSuppressionComment": "https://biomejs.dev/linter/rules/use-biome-suppression-comment",
+    "lint/nursery/useComponentExportOnlyModules": "https://biomejs.dev/linter/rules/use-components-only-module",
     "lint/nursery/useConsistentCurlyBraces": "https://biomejs.dev/linter/rules/use-consistent-curly-braces",
     "lint/nursery/useConsistentMemberAccessibility": "https://biomejs.dev/linter/rules/use-consistent-member-accessibility",
     "lint/nursery/useDeprecatedReason": "https://biomejs.dev/linter/rules/use-deprecated-reason",
