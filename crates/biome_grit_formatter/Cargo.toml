@@ -25,9 +25,6 @@ biome_grit_parser    = { path = "../biome_grit_parser" }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }
 countme              = { workspace = true, features = ["enable"] }
-iai                  = "0.1.1"
-quickcheck           = { workspace = true }
-quickcheck_macros    = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }
 tests_macros         = { path = "../tests_macros" }
