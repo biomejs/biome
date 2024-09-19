@@ -38,6 +38,7 @@ use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrExtension;
+use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
 use std::borrow::Cow;
@@ -526,6 +527,8 @@ pub(crate) struct Features {
     unknown: UnknownFileHandler,
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
+    #[allow(unused)]
+    grit: GritFileHandler,
 }
 
 impl Features {
@@ -539,6 +542,7 @@ impl Features {
             svelte: SvelteFileHandler {},
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
+            grit: GritFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
