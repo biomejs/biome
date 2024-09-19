@@ -2,8 +2,9 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::JsIdentifierBinding;
-use biome_rowan::AstNode;
+use biome_js_syntax::{AnyJsBinding, JsIdentifierBinding};
+use biome_js_syntax::{AnyJsFunction, JsGetterClassMember, JsMethodClassMember};
+use biome_rowan::{declare_node_union, AstNode, TextRange};
 
 declare_lint_rule! {
     /// Require explicit return types on functions and class methods.
@@ -77,26 +78,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ## Options
-    ///
-    /// The rule provides several options that are detailed in the following subsections.
-    ///
-    /// ```json
-    /// {
-    ///     "//": "...",
-    ///     "options": {
-    ///         "allowExpressions": false,
-    ///         "allowTypedFunctionExpressions": true,
-    ///         "allowHigherOrderFunctions": true
-    ///         "allowDirectConstAssertionInArrowFunctions": true
-    ///         "allowConciseArrowFunctionExpressionsStartingWithVoid": false
-    ///         "allowFunctionsWithoutTypeParameters": false
-    ///         "allowedNames": [],
-    ///         "allowIIFEs": false
-    ///     }
-    /// }
-    /// ```
-    ///
     pub UseExplicitFunctionReturnType {
         version: "next",
         name: "useExplicitFunctionReturnType",
@@ -106,33 +87,53 @@ declare_lint_rule! {
     }
 }
 
+declare_node_union! {
+    pub AnyJsFunctionAndMethod = AnyJsFunction | JsMethodClassMember | JsGetterClassMember
+}
+
 impl Rule for UseExplicitFunctionReturnType {
-    type Query = Ast<JsIdentifierBinding>;
-    type State = ();
+    type Query = Ast<AnyJsFunctionAndMethod>;
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let _binding = ctx.query();
-        Some(())
+        let node = ctx.query();
+        dbg!(node);
+        match node {
+            AnyJsFunctionAndMethod::AnyJsFunction(func) => {
+                if func.return_type_annotation().is_some() {
+                    return None;
+                }
+
+                let func_range = func.syntax().text_range();
+                if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
+                    return Some(TextRange::new(
+                        func_range.start(),
+                        id.syntax().text_range().end(),
+                    ));
+                }
+
+                return Some(func_range);
+            }
+            AnyJsFunctionAndMethod::JsMethodClassMember(_) => {}
+            _ => {}
+        }
+        None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
-        let node = ctx.query();
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        // dbg!(s)
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                state,
                 markup! {
-                    "Variable is read here."
+                    "Missing return type on function."
                 },
             )
             .note(markup! {
-                "This note will give you more information."
+                "Require explicit return types on functions and class methods."
             }),
         )
     }
