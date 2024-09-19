@@ -18,6 +18,7 @@ biome_grit_syntax = { workspace = true }
 biome_rowan       = { workspace = true }
 
 [dev-dependencies]
+biome_configuration  = { path = "../biome_configuration" }
 biome_formatter_test = { path = "../biome_formatter_test" }
 biome_grit_factory   = { path = "../biome_grit_factory" }
 biome_grit_parser    = { path = "../biome_grit_parser" }

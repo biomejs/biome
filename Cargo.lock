@@ -591,6 +591,7 @@ dependencies = [
 name = "biome_grit_formatter"
 version = "0.0.0"
 dependencies = [
+ "biome_configuration",
  "biome_formatter",
  "biome_formatter_test",
  "biome_grit_factory",
