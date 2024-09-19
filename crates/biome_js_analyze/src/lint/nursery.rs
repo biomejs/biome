@@ -8,6 +8,7 @@ pub mod no_dynamic_namespace_import_access;
 pub mod no_enum;
 pub mod no_exported_imports;
 pub mod no_irregular_whitespace;
+pub mod no_octal_escape;
 pub mod no_process_env;
 pub mod no_restricted_imports;
 pub mod no_restricted_types;
@@ -36,6 +37,7 @@ declare_lint_group! {
             self :: no_enum :: NoEnum ,
             self :: no_exported_imports :: NoExportedImports ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
+            self :: no_octal_escape :: NoOctalEscape ,
             self :: no_process_env :: NoProcessEnv ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_restricted_types :: NoRestrictedTypes ,
