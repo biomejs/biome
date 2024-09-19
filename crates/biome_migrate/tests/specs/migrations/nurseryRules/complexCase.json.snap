@@ -1,0 +1,130 @@
+---
+source: crates/biome_migrate/tests/spec_tests.rs
+expression: complexCase.json
+---
+# Input
+```json
+{
+  "linter": {
+    "rules": {
+      "nursery": {
+        "noConsole": "off",
+        "noDoneCallback": "off",
+        "useImportRestrictions": "off",
+        "useTopLevelRegex": "off"
+      },
+      "style": {
+        "useForOf": "off"
+      }
+    }
+  }
+}
+
+```
+
+# Diagnostics
+```
+complexCase.json:5:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been promoted to suspicious/noConsole.
+  
+    3 │     "rules": {
+    4 │       "nursery": {
+  > 5 │         "noConsole": "off",
+      │         ^^^^^^^^^^^^^^^^^^
+    6 │         "noDoneCallback": "off",
+    7 │         "useImportRestrictions": "off",
+  
+  i Unsafe fix: Move the rule to the new stable group.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"nursery":·{
+     5    │ - ········"noConsole":·"off",
+     6    │ - ········"noDoneCallback":·"off",
+     7    │ - ········"useImportRestrictions":·"off",
+     8    │ - ········"useTopLevelRegex":·"off"
+        4 │ + ······"nursery":{
+        5 │ + ········"noDoneCallback":·"off",
+        6 │ + ········"useImportRestrictions":·"off",
+        7 │ + ········"useTopLevelRegex":·"off"},
+        8 │ + ······"style":·{
+        9 │ + ········"useForOf":·"off"
+     9 10 │         },
+    10    │ - ······"style":·{
+    11    │ - ········"useForOf":·"off"
+       11 │ + ······"suspicious":{
+       12 │ + ········"noConsole":·"off"
+    12 13 │         }
+    13 14 │       }
+  
+
+```
+
+```
+complexCase.json:6:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been promoted to style/noDoneCallback.
+  
+    4 │       "nursery": {
+    5 │         "noConsole": "off",
+  > 6 │         "noDoneCallback": "off",
+      │         ^^^^^^^^^^^^^^^^^^^^^^^
+    7 │         "useImportRestrictions": "off",
+    8 │         "useTopLevelRegex": "off"
+  
+  i Unsafe fix: Move the rule to the new stable group.
+  
+     3  3 │       "rules": {
+     4  4 │         "nursery": {
+     5    │ - ········"noConsole":·"off",
+     6    │ - ········"noDoneCallback":·"off",
+        5 │ + ········"noConsole":·"off",
+     7  6 │           "useImportRestrictions": "off",
+     8  7 │           "useTopLevelRegex": "off"
+     9  8 │         },
+    10  9 │         "style": {
+    11    │ - ········"useForOf":·"off"
+       10 │ + ········"useForOf":·"off",
+       11 │ + ········"noDoneCallback":·"off"
+    12 12 │         }
+    13 13 │       }
+  
+
+```
+
+```
+complexCase.json:8:9 migrate  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This rule has been promoted to performance/useTopLevelRegex.
+  
+     6 │         "noDoneCallback": "off",
+     7 │         "useImportRestrictions": "off",
+   > 8 │         "useTopLevelRegex": "off"
+       │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │       },
+    10 │       "style": {
+  
+  i Unsafe fix: Move the rule to the new stable group.
+  
+     2  2 │     "linter": {
+     3  3 │       "rules": {
+     4    │ - ······"nursery":·{
+        4 │ + ······"nursery":{
+     5  5 │           "noConsole": "off",
+     6  6 │           "noDoneCallback": "off",
+     7    │ - ········"useImportRestrictions":·"off",
+     8    │ - ········"useTopLevelRegex":·"off"
+        7 │ + ········"useImportRestrictions":·"off"},
+        8 │ + ······"style":·{
+        9 │ + ········"useForOf":·"off"
+     9 10 │         },
+    10    │ - ······"style":·{
+    11    │ - ········"useForOf":·"off"
+       11 │ + ······"performance":{
+       12 │ + ········"useTopLevelRegex":·"off"
+    12 13 │         }
+    13 14 │       }
+  
+
+```

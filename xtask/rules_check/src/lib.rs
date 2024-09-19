@@ -142,7 +142,7 @@ impl FromStr for CodeBlockTest {
         // This is based on the parsing logic for code block languages in `rustdoc`:
         // https://github.com/rust-lang/rust/blob/6ac8adad1f7d733b5b97d1df4e7f96e73a46db42/src/librustdoc/html/markdown.rs#L873
         let tokens = input
-            .split(|c| c == ',' || c == ' ' || c == '\t')
+            .split([',', ' ', '\t'])
             .map(str::trim)
             .filter(|token| !token.is_empty());
 

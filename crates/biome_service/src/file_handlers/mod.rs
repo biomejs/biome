@@ -43,6 +43,7 @@ pub use javascript::JsFormatterSettings;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::Path;
+use tracing::instrument;
 
 mod astro;
 mod css;
@@ -105,6 +106,7 @@ impl From<&Path> for DocumentFileSource {
 }
 
 impl DocumentFileSource {
+    #[instrument(level = "debug", fields(result))]
     fn try_from_well_known(path: &Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_well_known(path) {
             return Ok(file_source.into());
@@ -128,6 +130,7 @@ impl DocumentFileSource {
             .map_or(DocumentFileSource::Unknown, |file_source| file_source)
     }
 
+    #[instrument(level = "debug", fields(result))]
     fn try_from_extension(extension: &OsStr) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
@@ -141,9 +144,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
-            return Ok(file_source.into());
-        }
+        //if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+        //    return Ok(file_source.into());
+        //}
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -153,6 +156,7 @@ impl DocumentFileSource {
             .map_or(DocumentFileSource::Unknown, |file_source| file_source)
     }
 
+    #[instrument(level = "debug", fields(result))]
     fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = JsonFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
@@ -166,9 +170,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
-            return Ok(file_source.into());
-        }
+        //if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
+        //    return Ok(file_source.into());
+        //}
         Err(FileSourceError::UnknownLanguageId)
     }
 
@@ -183,6 +187,7 @@ impl DocumentFileSource {
             .map_or(DocumentFileSource::Unknown, |file_source| file_source)
     }
 
+    #[instrument(level = "debug", fields(result))]
     fn try_from_path(path: &Path) -> Result<Self, FileSourceError> {
         if let Ok(file_source) = Self::try_from_well_known(path) {
             return Ok(file_source);
@@ -306,9 +311,10 @@ impl DocumentFileSource {
                 EmbeddingKind::Svelte => SVELTE_FENCE.is_match(content),
                 EmbeddingKind::None => true,
             },
-            DocumentFileSource::Json(_) | DocumentFileSource::Css(_) => true,
-            DocumentFileSource::Graphql(_) => true,
-            DocumentFileSource::Html(_) => true,
+            DocumentFileSource::Css(_)
+            | DocumentFileSource::Graphql(_)
+            | DocumentFileSource::Json(_) => true,
+            DocumentFileSource::Html(_) => false,
             DocumentFileSource::Unknown => false,
         }
     }
@@ -1000,8 +1006,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
 
         let organize_imports_enabled = self
             .settings
-            .map(|settings| settings.organize_imports.enabled)
-            .unwrap_or_default();
+            .is_some_and(|settings| settings.organize_imports.enabled);
         if organize_imports_enabled && self.import_sorting.match_rule::<R>() {
             self.enabled_rules.push(self.import_sorting);
             return;

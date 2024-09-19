@@ -161,7 +161,7 @@ where
 </details>
 
 
-Then, you'll have to create three types:
+Then, you'll have to create four types:
 1. `HtmlCommentStyle`
 1. `HtmlFormatContext`
 1. `FormatHtmlSyntaxNode` 
@@ -195,12 +195,12 @@ Usually, the type context must contain `comments` and `source_map` fields:
 ```rust
 pub struct HtmlFormatContext {
     /// The comments of the nodes and tokens in the program.
-    comments: Rc<CssComments>,
-    source_map: Option<TransformSourceMap>,
+    comments: Rc<HtmlComments>,
+    source_map: Option<TransformSourceMap>, 
 }
 
 impl HtmlFormatContext {
-    pub fn new(comments: CssComments) -> Self {
+    pub fn new(comments: HtmlComments) -> Self {
         Self {
             comments: Rc::new(comments),
             source_map: None,
@@ -244,7 +244,7 @@ impl FormatRule<HtmlSyntaxNode> for FormatHtmlSyntaxNode {
     }
 }
 
-impl AsFormat<HtmlFormatContext> for FormatHtmlSyntaxNode {
+impl AsFormat<HtmlFormatContext> for HtmlSyntaxNode {
     type Format<'a> = FormatRefWithRule<'a, HtmlSyntaxNode, FormatHtmlSyntaxNode>;
 
     fn format(&self) -> Self::Format<'_> {
@@ -252,7 +252,7 @@ impl AsFormat<HtmlFormatContext> for FormatHtmlSyntaxNode {
     }
 }
 
-impl IntoFormat<HtmlFormatContext> for FormatHtmlSyntaxNode {
+impl IntoFormat<HtmlFormatContext> for HtmlSyntaxNode {
     type Format = FormatOwnedWithRule<HtmlSyntaxNode, FormatHtmlSyntaxNode>;
 
     fn into_format(self) -> Self::Format {
@@ -268,7 +268,7 @@ impl IntoFormat<HtmlFormatContext> for FormatHtmlSyntaxNode {
 This is small type that you need to instruct the formatter infra about a certain language. This type needs to implement the trait `biome_formatter::FormatLanguage`
 
 ```rust
-impl FormatLanguage for HtmlLanguage {
+impl FormatLanguage for HtmlFormatLanguage {
     type SyntaxLanguage = HtmlLanguage;
     type Context = HtmlFormatContext;
     type FormatRule = FormatHtmlSyntaxNode;
@@ -294,7 +294,7 @@ where
     N: AstNode<Language = HtmlLanguage>,
 {
     // this is the method that actually start the formatting
-    fn fmt(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()> {
+    fn fmt(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         if self.is_suppressed(node, f) {
             return write!(f, [format_suppressed_node(node.syntax())]);
         }
@@ -305,10 +305,10 @@ where
         self.fmt_trailing_comments(node, f)
     }
 
-    fn fmt_fields(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()>;
+    fn fmt_fields(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()>;
 
     /// Returns `true` if the node has a suppression comment and should use the same formatting as in the source document.
-    fn is_suppressed(&self, node: &N, f: &JsonFormatter) -> bool {
+    fn is_suppressed(&self, node: &N, f: &HtmlFormatter) -> bool {
         f.context().comments().is_suppressed(node.syntax())
     }
 
@@ -316,7 +316,7 @@ where
     ///
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the leading comments.
-    fn fmt_leading_comments(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()> {
+    fn fmt_leading_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         format_leading_comments(node.syntax()).fmt(f)
     }
 
@@ -327,7 +327,7 @@ where
     /// no comments are dropped.
     ///
     /// A node can have dangling comments if all its children are tokens or if all node childrens are optional.
-    fn fmt_dangling_comments(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()> {
+    fn fmt_dangling_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         format_dangling_comments(node.syntax())
             .with_soft_block_indent()
             .fmt(f)
@@ -337,7 +337,7 @@ where
     ///
     /// You may want to override this method if you want to manually handle the formatting of comments
     /// inside of the `fmt_fields` method or customize the formatting of the trailing comments.
-    fn fmt_trailing_comments(&self, node: &N, f: &mut HtmlForamtter) -> FormatResult<()> {
+    fn fmt_trailing_comments(&self, node: &N, f: &mut HtmlFormatter) -> FormatResult<()> {
         format_trailing_comments(node.syntax()).fmt(f)
     }
 }
@@ -349,9 +349,10 @@ Now that everything is wired, you just needs to expose a public method that does
 
 ```rust
 pub fn format_node(
+    options: HtmlFormatOptions,
     root: &HtmlSyntaxNode,
 ) -> FormatResult<Formatted<HtmlFormatContext>> {
-    biome_formatter::format_node(root, HtmlFormatLanguage {})
+    biome_formatter::format_node(root, HtmlFormatLanguage::new(options))
 }
 ```
 
@@ -379,7 +380,7 @@ Updated the `Cargo.toml` file to import some testing utility:
 ```toml
 [dev-dependencies]
 biome_formatter_test = { path = "../biome_formatter_test" }
-biome_html_factory     = { path = "../biome_html_parser" }
+biome_html_factory     = { path = "../biome_html_factory" }
 biome_html_parser      = { path = "../biome_html_parser" }
 biome_parser         = { path = "../biome_parser" }
 biome_service        = { path = "../biome_service" }

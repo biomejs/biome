@@ -311,6 +311,11 @@ impl PartialConfiguration {
     pub fn is_vcs_enabled(&self) -> bool {
         !self.is_vcs_disabled()
     }
+
+    /// Whether Biome should check for `.editorconfig` file
+    pub fn use_editorconfig(&self) -> Option<bool> {
+        self.formatter.as_ref().and_then(|f| f.use_editorconfig)
+    }
 }
 
 /// The configuration of the filesystem

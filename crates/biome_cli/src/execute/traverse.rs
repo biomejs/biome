@@ -199,7 +199,7 @@ fn traverse_inputs(
         }
     }));
 
-    (start.elapsed(), dome.to_paths())
+    (start.elapsed(), ctx.evaluated_paths())
 }
 
 // struct DiagnosticsReporter<'ctx> {}
@@ -568,8 +568,10 @@ pub(crate) struct TraversalOptions<'ctx, 'app> {
 impl<'ctx, 'app> TraversalOptions<'ctx, 'app> {
     pub(crate) fn increment_changed(&self, path: &BiomePath) {
         self.changed.fetch_add(1, Ordering::Relaxed);
-        let mut evaluated_paths = self.evaluated_paths.write().unwrap();
-        evaluated_paths.replace(path.to_written());
+        self.evaluated_paths
+            .write()
+            .unwrap()
+            .replace(path.to_written());
     }
     pub(crate) fn increment_unchanged(&self) {
         self.unchanged.fetch_add(1, Ordering::Relaxed);

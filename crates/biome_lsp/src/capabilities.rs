@@ -57,13 +57,17 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
         .and_then(|text_document| text_document.code_action.as_ref())
         .and_then(|code_action| code_action.code_action_literal_support.as_ref())
         .map(|_| {
-            CodeActionProviderCapability::Options(CodeActionOptions {
-                code_action_kinds: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
+            CodeActionOptions {
+                code_action_kinds: Some(vec![
+                    CodeActionKind::from("quickfix.biome"),
+                    CodeActionKind::from("source.fixAll.biome"),
+                    CodeActionKind::from("source.organizeImports.biome"),
+                ]),
                 ..Default::default()
-            })
+            }
+            .into()
         })
         .or(Some(CodeActionProviderCapability::Simple(true)));
-
     ServerCapabilities {
         position_encoding: Some(match negotiated_encoding(capabilities) {
             PositionEncoding::Utf8 => PositionEncodingKind::UTF8,

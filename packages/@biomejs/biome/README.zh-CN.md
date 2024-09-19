@@ -32,7 +32,7 @@
      https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
 <div align="center">
 
-[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | 简体中文 | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md) | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
+[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | 简体中文 | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md) | [한글](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.kr.md)
 
 </div>
 
@@ -40,7 +40,7 @@
 
 **Biome 是一个[快速的格式化工具](./benchmark#formatting)**，适用于 _JavaScript_、_TypeScript_、_JSX_、_JSON_ 等，与 _Prettier_ 的兼容性达到了 **[97%](https://console.algora.io/challenges/prettier)**。
 
-**Biome 是一个[高性能的 Linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，适用于 _JavaScript_、_TypeScript_、_JSX_ 等，包含了来自 ESLint、typescript-eslint 和[其他来源](https://github.com/biomejs/biome/discussions/3)的 **[190 余项规则](https://biomejs.dev/zh-cn/linter/rules/)**。它**输出详细且有上下文诊断信息**，能帮助你优化代码，成为一名更好的程序员！
+**Biome 是一个[高性能的 Linter](https://github.com/biomejs/biome/tree/main/benchmark#linting)**，适用于 _JavaScript_、_TypeScript_、_JSX_ 等，包含了来自 ESLint、typescript-eslint 和[其他来源](https://github.com/biomejs/biome/discussions/3)的 **[270 余项规则](https://biomejs.dev/zh-cn/linter/rules/)**。它**输出详细且有上下文诊断信息**，能帮助你优化代码，成为一名更好的程序员！
 
 **Biome** 从一开始就设计为[在编辑器中交互式使用](https://biomejs.dev/zh-cn/guides/integrate-in-editor/)。它可以在你编写代码时格式化并检查出不规范的代码。
 
@@ -91,16 +91,6 @@ npx @biomejs/biome ci ./src
 ## 赞助商
 
 ### 金牌赞助商
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://shiguredo.jp/" target="_blank"><img src="https://shiguredo.jp/official_shiguredo_logo.svg" height="120"></a>
-      </td>
-    </tr>
-  </tbody>
-</table>
 
 ### 铜牌赞助商
 

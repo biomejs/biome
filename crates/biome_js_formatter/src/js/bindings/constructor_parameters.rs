@@ -16,7 +16,7 @@ impl FormatNodeRule<JsConstructorParameters> for FormatJsConstructorParameters {
         _: &JsConstructorParameters,
         _: &mut JsFormatter,
     ) -> FormatResult<()> {
-        // Formatted inside of `FormatJsAnyParameters
+        // Formatted inside of `FormatJsAnyParameters`
         Ok(())
     }
 }

@@ -28,12 +28,6 @@ use tower::{Service, ServiceExt};
 use tower_lsp::jsonrpc;
 use tower_lsp::jsonrpc::Response;
 use tower_lsp::lsp_types as lsp;
-use tower_lsp::lsp_types::CodeActionClientCapabilities;
-use tower_lsp::lsp_types::CodeActionKind;
-use tower_lsp::lsp_types::CodeActionKindLiteralSupport;
-use tower_lsp::lsp_types::CodeActionLiteralSupport;
-use tower_lsp::lsp_types::CodeActionOptions;
-use tower_lsp::lsp_types::CodeActionProviderCapability;
 use tower_lsp::lsp_types::DidOpenTextDocumentParams;
 use tower_lsp::lsp_types::DocumentFormattingParams;
 use tower_lsp::lsp_types::FormattingOptions;
@@ -42,7 +36,6 @@ use tower_lsp::lsp_types::InitializedParams;
 use tower_lsp::lsp_types::Position;
 use tower_lsp::lsp_types::PublishDiagnosticsParams;
 use tower_lsp::lsp_types::Range;
-use tower_lsp::lsp_types::TextDocumentClientCapabilities;
 use tower_lsp::lsp_types::TextDocumentContentChangeEvent;
 use tower_lsp::lsp_types::TextDocumentIdentifier;
 use tower_lsp::lsp_types::TextDocumentItem;
@@ -190,6 +183,7 @@ impl Server {
             )
             .await?
             .context("initialize returned None")?;
+
         Ok(())
     }
 
@@ -407,104 +401,6 @@ where
 
         sink.send(res).await.ok();
     }
-
-    Ok(())
-}
-
-#[allow(deprecated)]
-#[tokio::test]
-async fn server_capabilities_fix_all_code_action_kinds() -> Result<()> {
-    let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
-    let (stream, sink) = client.split();
-    let mut server = Server::new(service);
-
-    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
-    let reader = tokio::spawn(client_handler(stream, sink, sender));
-    let expect_code_action_provider =
-        Some(CodeActionProviderCapability::Options(CodeActionOptions {
-            code_action_kinds: Some(vec![CodeActionKind::new("source.fixAll.biome")]),
-            ..Default::default()
-        }));
-    let res: InitializeResult = server
-        .request(
-            "initialize",
-            "_init",
-            InitializeParams {
-                process_id: None,
-                root_path: None,
-                root_uri: Some(url!("")),
-                initialization_options: None,
-                capabilities: ClientCapabilities {
-                    text_document: Some(TextDocumentClientCapabilities {
-                        code_action: Some(CodeActionClientCapabilities {
-                            code_action_literal_support: Some(CodeActionLiteralSupport {
-                                code_action_kind: CodeActionKindLiteralSupport {
-                                    value_set: Vec::new(),
-                                },
-                            }),
-                            ..CodeActionClientCapabilities::default()
-                        }),
-
-                        ..TextDocumentClientCapabilities::default()
-                    }),
-
-                    ..ClientCapabilities::default()
-                },
-                trace: None,
-                workspace_folders: None,
-                client_info: None,
-                locale: None,
-            },
-        )
-        .await?
-        .context("initialize returned None")?;
-
-    assert_eq!(
-        res.capabilities.code_action_provider,
-        expect_code_action_provider
-    );
-    server.shutdown().await?;
-    reader.abort();
-
-    Ok(())
-}
-
-#[allow(deprecated)]
-#[tokio::test]
-async fn server_capabilities_default_code_action_kinds() -> Result<()> {
-    let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
-    let (stream, sink) = client.split();
-    let mut server = Server::new(service);
-
-    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
-    let reader = tokio::spawn(client_handler(stream, sink, sender));
-    let expect_code_action_provider = Some(CodeActionProviderCapability::Simple(true));
-    let res: InitializeResult = server
-        .request(
-            "initialize",
-            "_init",
-            InitializeParams {
-                process_id: None,
-                root_path: None,
-                root_uri: Some(url!("")),
-                initialization_options: None,
-                capabilities: ClientCapabilities::default(),
-                trace: None,
-                workspace_folders: None,
-                client_info: None,
-                locale: None,
-            },
-        )
-        .await?
-        .context("initialize returned None")?;
-    assert_eq!(
-        res.capabilities.code_action_provider,
-        expect_code_action_provider
-    );
-    server.shutdown().await?;
-    reader.abort();
 
     Ok(())
 }
@@ -1497,7 +1393,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
             "linter": { "enabled": true }
         },
         "linter": {
-            "rules": { "nursery": { "noUnknownProperty": "error" } }
+            "rules": { "correctness": { "noUnknownProperty": "error" } }
         }
     }"#;
 
@@ -1548,7 +1444,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
                     },
                     severity: Some(lsp::DiagnosticSeverity::ERROR),
                     code: Some(lsp::NumberOrString::String(String::from(
-                        "lint/nursery/noUnknownProperty"
+                        "lint/correctness/noUnknownProperty"
                     ))),
                     code_description: Some(CodeDescription {
                         href: Url::parse("https://biomejs.dev/linter/rules/no-unknown-property")

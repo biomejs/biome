@@ -42,7 +42,7 @@ macro_rules! declare_visitor {
         impl<'a> StatementStack<'a> {
             /// Split the visitor state at the topmost function, returning the
             /// corresponding function visitor and the rest of the stack above it
-            fn new(visitor: &'a mut $name) -> Option<(&mut FunctionVisitor, Self)> {
+            fn new(visitor: &'a mut $name) -> Option<(&'a mut FunctionVisitor, Self)> {
                 let (index, builder) = visitor.function.last_mut()?;
 
                 Some((builder, Self {

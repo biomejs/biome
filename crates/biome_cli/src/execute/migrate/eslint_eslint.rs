@@ -539,9 +539,9 @@ pub struct NoConsoleOptions {
     /// Allowed calls on the console object.
     pub allow: Vec<String>,
 }
-impl From<NoConsoleOptions> for biome_js_analyze::lint::nursery::no_console::NoConsoleOptions {
+impl From<NoConsoleOptions> for biome_js_analyze::lint::suspicious::no_console::NoConsoleOptions {
     fn from(val: NoConsoleOptions) -> Self {
-        biome_js_analyze::lint::nursery::no_console::NoConsoleOptions { allow: val.allow }
+        biome_js_analyze::lint::suspicious::no_console::NoConsoleOptions { allow: val.allow }
     }
 }
 

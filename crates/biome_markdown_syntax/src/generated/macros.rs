@@ -16,6 +16,10 @@ macro_rules! map_syntax_node {
     ($ node : expr , $ pattern : pat => $ body : expr) => {
         match $node {
             node => match $crate::MarkdownSyntaxNode::kind(&node) {
+                $crate::MarkdownSyntaxKind::MARKDOWN_BREAK_BLOCK => {
+                    let $pattern = unsafe { $crate::MarkdownBreakBlock::new_unchecked(node) };
+                    $body
+                }
                 $crate::MarkdownSyntaxKind::MARKDOWN_BULLET_LIST_ITEM => {
                     let $pattern = unsafe { $crate::MarkdownBulletListItem::new_unchecked(node) };
                     $body
@@ -28,36 +32,20 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MarkdownFencedCodeBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MARKDOWN_H1 => {
-                    let $pattern = unsafe { $crate::MarkdownH1::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MARKDOWN_HARD_LINE => {
+                    let $pattern = unsafe { $crate::MarkdownHardLine::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MARKDOWN_H2 => {
-                    let $pattern = unsafe { $crate::MarkdownH2::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MARKDOWN_HASH => {
+                    let $pattern = unsafe { $crate::MarkdownHash::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MARKDOWN_H3 => {
-                    let $pattern = unsafe { $crate::MarkdownH3::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_H4 => {
-                    let $pattern = unsafe { $crate::MarkdownH4::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_H5 => {
-                    let $pattern = unsafe { $crate::MarkdownH5::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_H6 => {
-                    let $pattern = unsafe { $crate::MarkdownH6::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MARKDOWN_HEADER => {
+                    let $pattern = unsafe { $crate::MarkdownHeader::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MARKDOWN_HTML_BLOCK => {
-                    let $pattern = unsafe { $crate::MarkdownHTMLBlock::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_HARD_LINE => {
-                    let $pattern = unsafe { $crate::MarkdownHardLine::new_unchecked(node) };
+                    let $pattern = unsafe { $crate::MarkdownHtmlBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MARKDOWN_INDENT => {
@@ -88,15 +76,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MarkdownLinkBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MARKDOWN_MINUS => {
-                    let $pattern = unsafe { $crate::MarkdownMinus::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_MINUS_THEMATIC_BREAK_BLOCK => {
-                    let $pattern =
-                        unsafe { $crate::MarkdownMinusThematicBreakBlock::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MARKDOWN_ORDER_LIST_ITEM => {
                     let $pattern = unsafe { $crate::MarkdownOrderListItem::new_unchecked(node) };
                     $body
@@ -109,39 +88,16 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MarkdownQuote::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MARKDOWN_SETEXT_H1 => {
-                    let $pattern = unsafe { $crate::MarkdownSetextH1::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_SETEXT_H2 => {
-                    let $pattern = unsafe { $crate::MarkdownSetextH2::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MARKDOWN_SETEXT_HEADER => {
+                    let $pattern = unsafe { $crate::MarkdownSetextHeader::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MARKDOWN_SOFT_BREAK => {
                     let $pattern = unsafe { $crate::MarkdownSoftBreak::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MARKDOWN_STAR => {
-                    let $pattern = unsafe { $crate::MarkdownStar::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_STAR_THEMATIC_BREAK_BLOCK => {
-                    let $pattern =
-                        unsafe { $crate::MarkdownStarThematicBreakBlock::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MARKDOWN_TEXTUAL => {
                     let $pattern = unsafe { $crate::MarkdownTextual::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_UNDERSCORE => {
-                    let $pattern = unsafe { $crate::MarkdownUnderscore::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_UNDERSCORE_THEMATIC_BREAK_BLOCK => {
-                    let $pattern = unsafe {
-                        $crate::MarkdownUnderscoreThematicBreakBlock::new_unchecked(node)
-                    };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MARKDOWN_BOGUS => {
@@ -156,8 +112,8 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MarkdownBulletList::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MARKDOWN_MINUS_LIST => {
-                    let $pattern = unsafe { $crate::MarkdownMinusList::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MARKDOWN_HASH_LIST => {
+                    let $pattern = unsafe { $crate::MarkdownHashList::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MARKDOWN_ORDER_LIST => {
@@ -167,14 +123,6 @@ macro_rules! map_syntax_node {
                 $crate::MarkdownSyntaxKind::MARKDOWN_PARAGRAPH_ITEM_LIST => {
                     let $pattern =
                         unsafe { $crate::MarkdownParagraphItemList::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_STAR_LIST => {
-                    let $pattern = unsafe { $crate::MarkdownStarList::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MARKDOWN_UNDERSCORE_LIST => {
-                    let $pattern = unsafe { $crate::MarkdownUnderscoreList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

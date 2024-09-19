@@ -153,9 +153,9 @@ define_role! {
     /// https://www.w3.org/TR/wai-aria-1.1/#separator
     SeparatorRole {
         PROPS:  [
-            ("aria-valuemax", true),
-            ("aria-valuemin", true),
-            ("aria-valuenow", true),
+            ("aria-valuemax", false),
+            ("aria-valuemin", false),
+            ("aria-valuenow", false),
         ],
         ROLES: ["structure", "widget"],
         CONCEPTS: &[("hr", &[])],
@@ -199,7 +199,6 @@ define_role! {
     AlertRole {
         PROPS: [],
         ROLES: ["section"],
-        CONCEPTS: &[("alert", &[])],
     }
 }
 define_role! {
@@ -207,7 +206,6 @@ define_role! {
     AlertDialogRole {
         PROPS: [],
         ROLES: ["structure"],
-        CONCEPTS: &[("alert", &[])],
     }
 }
 define_role! {
@@ -853,8 +851,6 @@ impl<'a> AriaRoles {
         "button",
         "article",
         "dialog",
-        "alert",
-        "alertdialog",
         "cell",
         "columnheader",
         "definition",
@@ -1232,8 +1228,6 @@ impl<'a> AriaRoles {
                 "button" => &ButtonRole as &dyn AriaRoleDefinitionWithConcepts,
                 "article" => &ArticleRole as &dyn AriaRoleDefinitionWithConcepts,
                 "dialog" => &DialogRole as &dyn AriaRoleDefinitionWithConcepts,
-                "alert" => &AlertRole as &dyn AriaRoleDefinitionWithConcepts,
-                "alertdialog" => &AlertDialogRole as &dyn AriaRoleDefinitionWithConcepts,
                 "cell" => &CellRole as &dyn AriaRoleDefinitionWithConcepts,
                 "columnheader" => &ColumnHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
                 "definition" => &DefinitionRole as &dyn AriaRoleDefinitionWithConcepts,
@@ -1293,8 +1287,6 @@ impl<'a> AriaRoles {
             "button" => &ButtonRole as &dyn AriaRoleDefinitionWithConcepts,
             "article" => &ArticleRole as &dyn AriaRoleDefinitionWithConcepts,
             "dialog" => &DialogRole as &dyn AriaRoleDefinitionWithConcepts,
-            "alert" => &AlertRole as &dyn AriaRoleDefinitionWithConcepts,
-            "alertdialog" => &AlertDialogRole as &dyn AriaRoleDefinitionWithConcepts,
             "cell" => &CellRole as &dyn AriaRoleDefinitionWithConcepts,
             "columnheader" => &ColumnHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
             "definition" => &DefinitionRole as &dyn AriaRoleDefinitionWithConcepts,

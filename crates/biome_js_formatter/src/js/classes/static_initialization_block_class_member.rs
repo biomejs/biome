@@ -41,7 +41,7 @@ impl FormatNodeRule<JsStaticInitializationBlockClassMember>
         _: &JsStaticInitializationBlockClassMember,
         _: &mut JsFormatter,
     ) -> FormatResult<()> {
-        // Formatted inside of `fmt_fields
+        // Formatted inside of `fmt_fields`
         Ok(())
     }
 }

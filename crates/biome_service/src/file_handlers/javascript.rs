@@ -323,15 +323,13 @@ fn parse(
 ) -> ParseResult {
     let mut options = JsParserOptions {
         grit_metavariables: false,
-        parse_class_parameter_decorators: settings
-            .map(|settings| {
-                settings
-                    .languages
-                    .javascript
-                    .parser
-                    .parse_class_parameter_decorators
-            })
-            .unwrap_or_default(),
+        parse_class_parameter_decorators: settings.is_some_and(|settings| {
+            settings
+                .languages
+                .javascript
+                .parser
+                .parse_class_parameter_decorators
+        }),
     };
     if let Some(settings) = settings {
         options = settings

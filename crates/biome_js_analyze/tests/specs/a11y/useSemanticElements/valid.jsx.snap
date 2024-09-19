@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.jsx
+---
+# Input
+```jsx
+export const Component = () => (
+    <div>
+        hello world
+        <header>header</header>
+        <img alt="" src="image.jpg" ></img>
+    </div>
+);
+
+
+export const Component2 = () => (
+    <div aria-label="foo">
+        hello world
+    </div>
+);
+
+export const C = <svg role="img" aria-label="Description of your SVG image">
+</svg>;
+
+<>
+    <div role="alert"></div>
+    <div role="alertdialog"></div>
+</>
+```
+
+# Diagnostics
+```
+valid.jsx:20:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    19 │ <>
+  > 20 │     <div role="alert"></div>
+       │          ^^^^^^^^^^^^
+    21 │     <div role="alertdialog"></div>
+    22 │ </>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+```
+
+```
+valid.jsx:21:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The element with this role can be changed to a DOM element that already this role.
+  
+    19 │ <>
+    20 │     <div role="alert"></div>
+  > 21 │     <div role="alertdialog"></div>
+       │          ^^^^^^^^^^^^^^^^^^
+    22 │ </>
+  
+  i For examples and more information, see WAI-ARIA Roles
+  
+
+```

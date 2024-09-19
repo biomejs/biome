@@ -46,7 +46,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseTrimStartEnd {
-        version: "next",
+        version: "1.9.0",
         name: "useTrimStartEnd",
         language: "js",
         recommended: false,

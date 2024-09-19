@@ -1,0 +1,37 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.ts
+---
+# Input
+```ts
+import "./valid";
+import "react";
+import "@testing-library/react";
+import("./valid");
+import("react");
+import("@testing-library/react");
+require("./valid");
+require("react");
+require("@testing-library/react");
+
+import "node:assert";
+require("node:assert");
+
+import "bun:test";
+
+import Button from "@mui/material/Button";
+import { fontFamily } from "tailwindcss/defaultTheme";
+
+import "peer-dep";
+import "optional-dep";
+
+import "my-package"
+
+import "@/internal";
+import "#internal";
+
+// import from `@types/jest`
+import type * as jest from "lodash";
+
+import "bun";
+```

@@ -20,7 +20,7 @@ impl FormatRule<TsTypeParameterList> for FormatTsTypeParameterList {
             && !f.options().source_type().variant().is_standard()
             && node.syntax().grand_parent().kind()
                 == Some(JsSyntaxKind::JS_ARROW_FUNCTION_EXPRESSION)
-            // Ignore Type parameter with an `extends`` clause or a default type.
+            // Ignore Type parameter with an `extends` clause or a default type.
             && !node.first().and_then(|param| param.ok())
                 .is_some_and(|type_parameter| type_parameter.constraint().is_some() || type_parameter.default().is_some())
         {

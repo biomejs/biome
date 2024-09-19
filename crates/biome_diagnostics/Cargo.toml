@@ -27,7 +27,7 @@ name = "serde"
 test = true
 
 [dependencies]
-backtrace                    = "0.3.73"
+backtrace                    = "0.3.74"
 biome_console                = { workspace = true, features = ["serde_markup"] }
 biome_diagnostics_categories = { workspace = true, features = ["serde"] }
 biome_diagnostics_macros     = { workspace = true }

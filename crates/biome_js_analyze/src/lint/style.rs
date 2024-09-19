@@ -5,6 +5,7 @@ use biome_analyze::declare_lint_group;
 pub mod no_arguments;
 pub mod no_comma_operator;
 pub mod no_default_export;
+pub mod no_done_callback;
 pub mod no_implicit_boolean;
 pub mod no_inferrable_types;
 pub mod no_namespace;
@@ -18,13 +19,17 @@ pub mod no_shouty_constants;
 pub mod no_unused_template_literal;
 pub mod no_useless_else;
 pub mod no_var;
+pub mod no_yoda_expression;
 pub mod use_as_const_assertion;
 pub mod use_block_statements;
 pub mod use_collapsed_else_if;
 pub mod use_consistent_array_type;
+pub mod use_consistent_builtin_instantiation;
 pub mod use_const;
 pub mod use_default_parameter_last;
+pub mod use_default_switch_clause;
 pub mod use_enum_initializers;
+pub mod use_explicit_length_check;
 pub mod use_exponentiation_operator;
 pub mod use_export_type;
 pub mod use_filenaming_convention;
@@ -44,6 +49,8 @@ pub mod use_shorthand_function_type;
 pub mod use_single_case_statement;
 pub mod use_single_var_declarator;
 pub mod use_template;
+pub mod use_throw_new_error;
+pub mod use_throw_only_error;
 pub mod use_while;
 
 declare_lint_group! {
@@ -53,6 +60,7 @@ declare_lint_group! {
             self :: no_arguments :: NoArguments ,
             self :: no_comma_operator :: NoCommaOperator ,
             self :: no_default_export :: NoDefaultExport ,
+            self :: no_done_callback :: NoDoneCallback ,
             self :: no_implicit_boolean :: NoImplicitBoolean ,
             self :: no_inferrable_types :: NoInferrableTypes ,
             self :: no_namespace :: NoNamespace ,
@@ -66,13 +74,17 @@ declare_lint_group! {
             self :: no_unused_template_literal :: NoUnusedTemplateLiteral ,
             self :: no_useless_else :: NoUselessElse ,
             self :: no_var :: NoVar ,
+            self :: no_yoda_expression :: NoYodaExpression ,
             self :: use_as_const_assertion :: UseAsConstAssertion ,
             self :: use_block_statements :: UseBlockStatements ,
             self :: use_collapsed_else_if :: UseCollapsedElseIf ,
             self :: use_consistent_array_type :: UseConsistentArrayType ,
+            self :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation ,
             self :: use_const :: UseConst ,
             self :: use_default_parameter_last :: UseDefaultParameterLast ,
+            self :: use_default_switch_clause :: UseDefaultSwitchClause ,
             self :: use_enum_initializers :: UseEnumInitializers ,
+            self :: use_explicit_length_check :: UseExplicitLengthCheck ,
             self :: use_exponentiation_operator :: UseExponentiationOperator ,
             self :: use_export_type :: UseExportType ,
             self :: use_filenaming_convention :: UseFilenamingConvention ,
@@ -92,6 +104,8 @@ declare_lint_group! {
             self :: use_single_case_statement :: UseSingleCaseStatement ,
             self :: use_single_var_declarator :: UseSingleVarDeclarator ,
             self :: use_template :: UseTemplate ,
+            self :: use_throw_new_error :: UseThrowNewError ,
+            self :: use_throw_only_error :: UseThrowOnlyError ,
             self :: use_while :: UseWhile ,
         ]
      }

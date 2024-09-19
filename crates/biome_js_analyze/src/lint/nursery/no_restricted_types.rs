@@ -48,7 +48,7 @@ declare_lint_rule! {
     /// In the example above, the rule will emit a diagnostics if `Foo` or `OldAPI` are used.
     ///
     pub NoRestrictedTypes {
-        version: "next",
+        version: "1.9.0",
         name: "noRestrictedTypes",
         language: "ts",
         sources: &[

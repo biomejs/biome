@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-with-directive.cjs
+---
+# Input
+```cjs
+"use server";
+"use strict";
+```
