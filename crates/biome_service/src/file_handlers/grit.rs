@@ -51,7 +51,6 @@ impl ServiceLanguage for GritLanguage {
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
-
 pub(crate) struct GritFileHandler;
 
 impl ExtensionHandler for GritFileHandler {
