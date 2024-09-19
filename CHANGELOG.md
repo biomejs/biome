@@ -15,9 +15,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### New features
+
+- Added support for custom GritQL definitions, including:
+  - Pattern and predicate definitions: https://docs.grit.io/guides/patterns
+  - Function definitions: https://docs.grit.io/language/functions#function-definitions
+
+  Contributed by @arendjr
+
 #### Bug fixes
 
 - Fix [#3917](https://github.com/biomejs/biome/issues/3917), where the fixed files were incorrectly computed. Contributed by @ematipico
+- Fixed an issue that caused GritQL `contains` queries to report false positives when the matched
+  node appeared inside a sibling node. Contributed by @arendjr
 
 ### Configuration
 
@@ -68,21 +78,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - [useStrictMode](https://biomejs.dev/linter/rules/use-strict-mode/) now reports Script files with some directives, but without the `use strict` directive. Contributed by @Conaclos
 
 - The CSS parser now accepts the characters U+FFDCF and U+FFFD in identifiers. Contributed by @Conaclos
-
-### GritQL
-
-#### New features
-
-- Added support for custom definitions, including:
-  - Pattern and predicate definitions: https://docs.grit.io/guides/patterns
-  - Function definitions: https://docs.grit.io/language/functions#function-definitions
-
-  Contributed by @arendjr
-
-#### Bug fixes
-
-- Fixed an issue that caused `contains` queries to report false positives when the matched node
-  appeared inside a sibling node. Contributed by @arendjr
 
 ## v1.9.1 (2024-09-15)
 
