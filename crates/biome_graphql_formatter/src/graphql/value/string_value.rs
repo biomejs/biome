@@ -40,14 +40,18 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
 
                 let mut start = token.text_trimmed_range().start();
                 for line in trimmed_content.lines() {
+                    if line.is_empty() || is_blank(line) {
+                        // if the line is empty,
+                        // write an empty line because two hardline breaks don't work
+                        join.entry(&empty_line());
+                        continue;
+                    }
                     // Write the line with the minimum indentation level removed
                     // SAFETY: min_indent is always less than or equal to the length of the line
                     join.entry(&dynamic_text(&line[min_indent..], start));
                     start += line.text_len();
 
                     if line.is_empty() {
-                        // if the line is empty,
-                        // write an empty line because two hardline breaks don't work
                         join.entry(&empty_line());
                     } else {
                         // Write a hard line break after each line
@@ -66,4 +70,8 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
             write![f, [graphql_string_literal_token.format()]]
         }
     }
+}
+
+fn is_blank(line: &str) -> bool {
+    line.chars().all(|c| c.is_whitespace())
 }
