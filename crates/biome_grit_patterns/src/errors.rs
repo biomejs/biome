@@ -15,6 +15,9 @@ pub enum CompileError {
     /// Used for missing syntax nodes.
     MissingSyntaxNode,
 
+    /// A built-in function call was discovered in an unexpected context.
+    UnexpectedBuiltinCall(String),
+
     /// A metavariables was discovered in an unexpected context.
     UnexpectedMetavariable,
 
@@ -94,6 +97,9 @@ impl Diagnostic for CompileError {
             }
             CompileError::MissingSyntaxNode => {
                 fmt.write_markup(markup! { "A syntax node was missing" })
+            }
+            CompileError::UnexpectedBuiltinCall(name) => {
+                fmt.write_markup(markup! { "Unexpected call to built-in: "{{name}}"()" })
             }
             CompileError::UnexpectedMetavariable => {
                 fmt.write_markup(markup! { "Unexpected metavariable" })
@@ -176,6 +182,11 @@ impl Diagnostic for CompileError {
 
     fn advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> std::io::Result<()> {
         match self {
+            CompileError::UnexpectedBuiltinCall(name) => visitor.record_log(
+                LogCategory::Info,
+                &markup! { "Built-in "{{name}}" can only be used on the right-hand side of a rewrite" }
+                    .to_owned(),
+            ),
             CompileError::ReservedMetavariable(_) => visitor.record_log(
                 LogCategory::Info,
                 &markup! { "Try using a different variable name" }.to_owned(),

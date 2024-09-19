@@ -28,3 +28,5 @@
 <label>foo<output /></label>;
 <label>foo<progress /></label>;
 <label>foo<textarea /></label>;
+
+<label htmlFor="three">{label}</label>;

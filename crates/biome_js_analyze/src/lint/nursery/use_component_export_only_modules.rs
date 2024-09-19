@@ -102,7 +102,7 @@ declare_lint_rule! {
     /// [`camelCase`]: https://en.wikipedia.org/wiki/Camel_case
     /// [`PascalCase`]: https://en.wikipedia.org/wiki/Camel_case
     pub UseComponentExportOnlyModules {
-        version: "next",
+        version: "1.9.2",
         name: "useComponentExportOnlyModules",
         language: "jsx",
         sources: &[RuleSource::EslintReactRefresh("only-export-components")],

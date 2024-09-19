@@ -24,7 +24,7 @@ impl NodeLikeCompiler {
         if let Some(kind) = lang.kind_by_name(&name) {
             node_pattern_from_node_with_name_and_kind(node, name, kind, context, is_rhs)
         } else {
-            call_pattern_from_node_with_name(node, name, context)
+            call_pattern_from_node_with_name(node, name, context, is_rhs)
         }
     }
 }

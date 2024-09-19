@@ -1,6 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-info: attributes-single-quotes.html
+info: attributes/single-quotes.html
 ---
 # Input
 
@@ -25,4 +25,4 @@ Attribute Position: Auto
 -----
 
 ```html
-<img src="foo.png" alt='should keep "these" quotes' />```
+<img src="foo.png'" alt='should keep "these" quotes' />```
