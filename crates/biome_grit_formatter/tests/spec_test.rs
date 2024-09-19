@@ -14,7 +14,7 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
     };
 
     let options = GritFormatOptions::default();
-    let language = language::GritTestFormatLanguage::default();
+    let language = language::GritTestFormatLanguage;
 
     let snapshot = SpecSnapshot::new(
         test_file,
