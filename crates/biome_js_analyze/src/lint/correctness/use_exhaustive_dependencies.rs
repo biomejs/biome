@@ -22,6 +22,8 @@ use schemars::JsonSchema;
 declare_lint_rule! {
     /// Enforce all dependencies are correctly specified in a React hook.
     ///
+    /// _This rule should be used only in **React** projects._
+    ///
     /// This rule is a port of the rule [react-hooks/exhaustive-deps](https://legacy.reactjs.org/docs/hooks-rules.html#eslint-plugin), and it's meant to target projects that uses React.
     ///
     /// If your project _doesn't_ use React (or Preact), **you shouldn't use this rule**.
