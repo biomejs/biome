@@ -112,17 +112,17 @@ impl PrinterOptions {
         self.indent_width
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub(super) const fn line_ending(&self) -> LineEnding {
         self.line_ending
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub(crate) fn attribute_position(&self) -> AttributePosition {
         self.attribute_position
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub(crate) fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
     }

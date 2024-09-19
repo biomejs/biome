@@ -18,6 +18,7 @@
 
 #![forbid(unsafe_code)]
 #![warn(missing_debug_implementations, missing_docs)]
+#![deny(clippy::allow_attributes)]
 
 mod range;
 mod size;

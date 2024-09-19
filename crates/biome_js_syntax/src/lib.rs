@@ -185,7 +185,7 @@ impl TryFrom<JsSyntaxKind> for TriviaPieceKind {
 }
 
 /// See: [MDN Operator precedence](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#table)
-#[allow(dead_code)]
+#[expect(dead_code)]
 #[derive(Debug, Eq, Ord, PartialOrd, PartialEq, Copy, Clone, Hash)]
 pub enum OperatorPrecedence {
     Comma = 0,
@@ -221,7 +221,7 @@ impl OperatorPrecedence {
     }
 
     /// Returns the operator with the highest precedence
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn highest() -> Self {
         OperatorPrecedence::Primary
     }

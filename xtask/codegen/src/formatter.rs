@@ -201,7 +201,7 @@ impl ModuleIndex {
                 // Clippy complains about child modules having the same
                 // names as their parent, eg. js/name/name.rs
                 if import == stem {
-                    content.push_str("#[allow(clippy::module_inception)]\n");
+                    content.push_str("#[expect(clippy::module_inception)]\n");
                 }
 
                 content.push_str("pub(crate) mod ");

@@ -8,7 +8,7 @@ use biome_rowan::{
 pub struct JsSyntaxFactory;
 impl SyntaxFactory for JsSyntaxFactory {
     type Kind = JsSyntaxKind;
-    #[allow(unused_mut)]
+    #[expect(unused_mut)]
     fn make_syntax(
         kind: Self::Kind,
         children: ParsedChildren<Self::Kind>,

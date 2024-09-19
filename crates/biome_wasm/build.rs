@@ -76,7 +76,7 @@ fn main() -> io::Result<()> {
         let ident = format_ident!("I{name}");
         quote! {
             #[wasm_bindgen(typescript_type = #name)]
-            #[allow(non_camel_case_types)]
+            #[expect(non_camel_case_types)]
             pub type #ident;
         }
     });

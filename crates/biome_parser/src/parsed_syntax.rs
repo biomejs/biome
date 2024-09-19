@@ -104,7 +104,7 @@ impl ParsedSyntax {
     }
 
     /// Returns the contained [ParsedSyntax::Present] value or passed default
-    #[allow(unused)]
+    #[expect(unused)]
     #[inline]
     pub fn unwrap_or(self, default: CompletedMarker) -> CompletedMarker {
         match self {
@@ -115,7 +115,7 @@ impl ParsedSyntax {
 
     /// Returns the contained [ParsedSyntax::Present] value or computes it from a clojure.
     #[inline]
-    #[allow(unused)]
+    #[expect(unused)]
     pub fn unwrap_or_else<F>(self, default: F) -> CompletedMarker
     where
         F: FnOnce() -> CompletedMarker,

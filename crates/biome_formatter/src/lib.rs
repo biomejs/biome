@@ -20,6 +20,7 @@
 //! * [`write!`]: Writes a sequence of formatable objects into an output buffer.
 
 #![deny(rustdoc::broken_intra_doc_links)]
+#![deny(clippy::allow_attributes)]
 
 mod arguments;
 mod buffer;
@@ -1614,9 +1615,9 @@ pub fn format_range<Language: FormatLanguage>(
         // nodes and iterating along the two paths at once to find the first
         // divergence (the ancestors have to be collected into vectors first
         // since the ancestor iterator isn't double ended)
-        #[allow(clippy::needless_collect)]
+        #[expect(clippy::needless_collect)]
         let start_to_root: Vec<_> = result_start_node.ancestors().collect();
-        #[allow(clippy::needless_collect)]
+        #[expect(clippy::needless_collect)]
         let end_to_root: Vec<_> = result_end_node.ancestors().collect();
 
         start_to_root
@@ -1889,7 +1890,7 @@ impl<Context> FormatState<Context> {
 
     /// Tracks the given token as formatted
     #[inline]
-    pub fn track_token<L: Language>(&mut self, #[allow(unused_variables)] token: &SyntaxToken<L>) {
+    pub fn track_token<L: Language>(&mut self, #[expect(unused_variables)] token: &SyntaxToken<L>) {
         cfg_if::cfg_if! {
             if #[cfg(debug_assertions)] {
                 self.printed_tokens.track_token(token);
@@ -1925,7 +1926,7 @@ impl<Context> FormatState<Context> {
     #[inline]
     pub fn assert_formatted_all_tokens<L: Language>(
         &self,
-        #[allow(unused_variables)] root: &SyntaxNode<L>,
+        #[expect(unused_variables)] root: &SyntaxNode<L>,
     ) {
         cfg_if::cfg_if! {
             if #[cfg(debug_assertions)] {

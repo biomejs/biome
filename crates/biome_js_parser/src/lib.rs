@@ -109,7 +109,7 @@
 //! ```powershell
 //! set UPDATE_EXPECT=1 & cargo test
 //! ```
-
+#![deny(clippy::allow_attributes)]
 mod parser;
 #[macro_use]
 mod lexer;
@@ -143,7 +143,7 @@ pub(crate) use state::{JsParserState, StrictMode};
 use std::fmt::Debug;
 
 pub enum JsSyntaxFeature {
-    #[allow(unused)]
+    #[expect(unused)]
     #[doc(alias = "LooseMode")]
     SloppyMode,
     StrictMode,

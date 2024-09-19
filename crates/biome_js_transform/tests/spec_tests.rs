@@ -1,3 +1,4 @@
+#![deny(clippy::allow_attributes)]
 use biome_analyze::{AnalysisFilter, AnalyzerTransformation, ControlFlow, Never, RuleFilter};
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_formatter::format_node;
@@ -87,7 +88,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,

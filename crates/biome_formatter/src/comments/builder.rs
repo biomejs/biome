@@ -555,7 +555,7 @@ impl<'a> SourceParentheses<'a> {
             SourceParentheses::Empty => None,
             SourceParentheses::SourceMap { next, tail, .. } => {
                 while let Some(range) = next {
-                    #[allow(clippy::comparison_chain)]
+                    #[expect(clippy::comparison_chain)]
                     if range.transformed == offset {
                         // A deleted range can contain multiple tokens. See if there's any `)` in the deleted
                         // range and compute its source range.

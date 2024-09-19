@@ -34,7 +34,7 @@ pub type VariantsConfig = &'static [&'static str];
 /// The sort config, containing the utility config and the variant config.
 pub struct SortConfig {
     pub utilities: &'static [UtilityLayer],
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub variants: VariantsConfig,
     pub layer_index_map: HashMap<&'static str, usize>,
 }

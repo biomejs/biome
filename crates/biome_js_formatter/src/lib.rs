@@ -162,7 +162,7 @@
 //!     fail if there are syntax errors;
 //! - the emitted code, when formatted again, differs from the original; this usually happens when removing/adding new
 //!     elements, and the grouping is not correctly set;
-
+#![deny(clippy::allow_attributes)]
 mod cst;
 mod js;
 mod jsx;

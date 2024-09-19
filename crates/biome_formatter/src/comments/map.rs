@@ -248,7 +248,7 @@ impl<K: std::hash::Hash + Eq, V> CommentsMap<K, V> {
     }
 
     /// Returns an iterator over the parts of all keys.
-    #[allow(unused)]
+    #[expect(unused)]
     pub fn all_parts(&self) -> impl Iterator<Item = &V> {
         self.index
             .values()

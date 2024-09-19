@@ -23,7 +23,7 @@ pub(crate) struct GreenTriviaData {
 }
 
 impl GreenTriviaData {
-    #[allow(unused)]
+    #[expect(unused)]
     #[inline]
     pub fn header(&self) -> &GreenTriviaHead {
         &self.data.header

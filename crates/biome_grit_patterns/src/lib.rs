@@ -1,3 +1,4 @@
+#![deny(clippy::allow_attributes)]
 mod diagnostics;
 mod errors;
 mod grit_analysis_ext;

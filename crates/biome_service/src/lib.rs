@@ -1,3 +1,4 @@
+#![deny(clippy::allow_attributes)]
 use biome_console::Console;
 use biome_fs::{FileSystem, OsFileSystem};
 use serde::{Deserialize, Serialize};
@@ -71,7 +72,7 @@ impl<'app> Deref for WorkspaceRef<'app> {
     type Target = dyn Workspace + 'app;
 
     // False positive
-    #[allow(clippy::explicit_auto_deref)]
+    #[expect(clippy::explicit_auto_deref)]
     fn deref(&self) -> &Self::Target {
         match self {
             WorkspaceRef::Owned(inner) => &**inner,

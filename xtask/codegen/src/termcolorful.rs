@@ -1,5 +1,5 @@
 #[derive(Copy, Clone, Debug)]
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub(crate) enum Color {
     Red,
     Green,

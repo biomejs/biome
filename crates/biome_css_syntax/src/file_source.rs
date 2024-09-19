@@ -7,7 +7,7 @@ use std::{ffi::OsStr, path::Path};
 )]
 pub struct CssFileSource {
     // Unused until we potentially support postcss/less/sass
-    #[allow(unused)]
+    #[expect(unused)]
     variant: CssVariant,
 }
 

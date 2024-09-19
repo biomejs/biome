@@ -1,3 +1,4 @@
+#![deny(clippy::allow_attributes)]
 //! This module contains the configuration of `biome.json`
 //!
 //! The configuration is divided by "tool", and then it's possible to further customise it

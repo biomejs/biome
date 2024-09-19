@@ -406,7 +406,7 @@ macro_rules! declare_lint_rule {
         // This is implemented by calling the `group_category!` macro from the
         // parent module (that should be declared by a call to `declare_group!`)
         // and providing it with the name of this rule as a string literal token
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! rule_category {
             () => { super::group_category!( $name ) };
         }
@@ -458,7 +458,7 @@ macro_rules! declare_syntax_rule {
         // This is implemented by calling the `group_category!` macro from the
         // parent module (that should be declared by a call to `declare_group!`)
         // and providing it with the name of this rule as a string literal token
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! rule_category {
             () => { super::group_category!( $name ) };
         }
@@ -525,7 +525,7 @@ macro_rules! declare_source_rule {
         );
 
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! rule_action_category {
             () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(concat!($language, ".", $name) )))  };
         }
@@ -570,7 +570,7 @@ macro_rules! declare_lint_group {
         // name within this group.
         // This is implemented by calling the `category_concat!` macro with the
         // "lint" prefix, the name of this group, and the rule name argument
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! group_category {
             ( $rule_name:tt ) => { $crate::category_concat!( "lint", $name, $rule_name ) };
         }
@@ -607,7 +607,7 @@ macro_rules! declare_assists_group {
         // name within this group.
         // This is implemented by calling the `category_concat!` macro with the
         // "lint" prefix, the name of this group, and the rule name argument
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! group_category {
             ( $rule_name:tt ) => { $crate::category_concat!( "assists", $name, $rule_name ) };
         }
@@ -644,7 +644,7 @@ macro_rules! declare_syntax_group {
         // name within this group.
         // This is implemented by calling the `category_concat!` macro with the
         // "lint" prefix, the name of this group, and the rule name argument
-        #[allow(unused_macros)]
+        #[expect(unused_macros)]
         macro_rules! group_category {
             ( $rule_name:tt ) => { $crate::category_concat!( "syntax", $name, $rule_name ) };
         }

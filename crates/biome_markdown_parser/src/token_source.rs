@@ -14,7 +14,7 @@ pub(crate) struct MarkdownTokenSource<'source> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub(crate) type MarkdownTokenSourceCheckpoint = TokenSourceCheckpoint<MarkdownSyntaxKind>;
 
 impl<'source> MarkdownTokenSource<'source> {
@@ -63,13 +63,13 @@ impl<'source> MarkdownTokenSource<'source> {
             }
         }
     }
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn re_lex(&mut self, mode: MarkdownReLexContext) -> MarkdownSyntaxKind {
         self.lexer.re_lex(mode)
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn checkpoint(&self) -> MarkdownTokenSourceCheckpoint {
         MarkdownTokenSourceCheckpoint {
             trivia_len: self.trivia_list.len() as u32,
@@ -78,7 +78,7 @@ impl<'source> MarkdownTokenSource<'source> {
     }
 
     /// Restores the token source to a previous state
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn rewind(&mut self, checkpoint: MarkdownTokenSourceCheckpoint) {
         assert!(self.trivia_list.len() >= checkpoint.trivia_len as usize);
         self.trivia_list.truncate(checkpoint.trivia_len as usize);

@@ -91,7 +91,7 @@ struct InitializeParams {
     client_capabilities: lsp_types::ClientCapabilities,
     client_information: Option<ClientInformation>,
     root_uri: Option<Url>,
-    #[allow(unused)]
+    #[expect(unused)]
     workspace_folders: Option<Vec<WorkspaceFolder>>,
 }
 

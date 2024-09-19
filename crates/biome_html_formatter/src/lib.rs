@@ -1,3 +1,4 @@
+#![deny(clippy::allow_attributes)]
 use biome_formatter::comments::Comments;
 use biome_formatter::{prelude::*, CstFormatContext, FormatOwnedWithRule, FormatRefWithRule};
 use biome_formatter::{write, FormatLanguage, FormatResult, FormatToken, Formatted};

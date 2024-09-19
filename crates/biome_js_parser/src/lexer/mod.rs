@@ -1440,7 +1440,7 @@ impl<'src> JsLexer<'src> {
         )
     }
     #[inline]
-    #[allow(clippy::many_single_char_names)]
+    #[expect(clippy::many_single_char_names)]
     fn read_regex(&mut self) -> JsSyntaxKind {
         #[derive(Copy, Clone)]
         #[bitflags]

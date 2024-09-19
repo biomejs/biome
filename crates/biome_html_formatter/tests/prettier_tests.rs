@@ -9,7 +9,7 @@ mod language;
 
 tests_macros::gen_tests! {"tests/specs/prettier/**/*.html", crate::test_snapshot, ""}
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     countme::enable(true);
 

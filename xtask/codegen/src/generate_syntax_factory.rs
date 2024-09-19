@@ -158,7 +158,7 @@ pub fn generate_syntax_factory(ast: &AstSrc, language_kind: LanguageKind) -> Res
         impl SyntaxFactory for #factory_kind {
             type Kind = #syntax_kind;
 
-            #[allow(unused_mut)]
+            #[expect(unused_mut)]
             fn make_syntax(
                 kind: Self::Kind,
                 children: ParsedChildren<Self::Kind>,

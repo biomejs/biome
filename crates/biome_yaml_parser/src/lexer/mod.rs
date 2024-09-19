@@ -16,12 +16,12 @@ pub struct Token {
 }
 
 impl Token {
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn kind(&self) -> YamlSyntaxKind {
         self.kind
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn range(&self) -> TextRange {
         self.range
     }
@@ -38,7 +38,7 @@ pub(crate) struct YamlLexer<'src> {
     after_newline: bool,
 
     /// If the source starts with a Unicode BOM, this is the number of bytes for that token.
-    #[allow(unused)]
+    #[expect(unused)]
     unicode_bom_length: usize,
 
     /// Byte offset of the current token from the start of the source
@@ -59,7 +59,7 @@ pub(crate) struct YamlLexer<'src> {
 
 impl<'source> YamlLexer<'source> {
     /// Creates a new lexer from the given string
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn from_str(source: &'source str) -> Self {
         Self {
             source,

@@ -190,6 +190,6 @@ fn format_range(range: Range) -> String {
 
 #[derive(Debug, Default)]
 struct ErrorSnapshotResult {
-    #[allow(unused)]
+    #[expect(unused)]
     diagnostics: Vec<Box<dyn Diagnostic>>,
 }

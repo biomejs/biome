@@ -8,7 +8,7 @@ use biome_rowan::{
 pub struct CssSyntaxFactory;
 impl SyntaxFactory for CssSyntaxFactory {
     type Kind = CssSyntaxKind;
-    #[allow(unused_mut)]
+    #[expect(unused_mut)]
     fn make_syntax(
         kind: Self::Kind,
         children: ParsedChildren<Self::Kind>,

@@ -1,4 +1,5 @@
 #![warn(clippy::needless_pass_by_value)]
+#![deny(clippy::allow_attributes)]
 
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{

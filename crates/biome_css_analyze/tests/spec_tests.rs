@@ -1,3 +1,4 @@
+#![deny(clippy::allow_attributes)]
 use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
 use biome_css_parser::{parse_css, CssParserOptions};
 use biome_css_syntax::{CssFileSource, CssLanguage};
@@ -99,7 +100,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[expect(clippy::too_many_arguments)]
 pub(crate) fn analyze_and_snap(
     snapshot: &mut String,
     input_code: &str,

@@ -15,7 +15,7 @@ pub(crate) struct CssTokenSource<'src> {
     pub(super) trivia_list: Vec<Trivia>,
 }
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub(crate) type CssTokenSourceCheckpoint = TokenSourceCheckpoint<CssSyntaxKind>;
 
 impl<'src> CssTokenSource<'src> {
@@ -68,7 +68,7 @@ impl<'src> CssTokenSource<'src> {
     }
 
     /// Creates a checkpoint to which it can later return using [Self::rewind].
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn checkpoint(&self) -> CssTokenSourceCheckpoint {
         CssTokenSourceCheckpoint {
             trivia_len: self.trivia_list.len() as u32,

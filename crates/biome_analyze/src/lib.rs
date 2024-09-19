@@ -1,4 +1,5 @@
 #![deny(rustdoc::broken_intra_doc_links)]
+#![deny(clippy::allow_attributes)]
 
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};

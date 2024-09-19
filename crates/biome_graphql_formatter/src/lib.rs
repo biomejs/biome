@@ -1,3 +1,4 @@
+#![deny(clippy::allow_attributes)]
 mod comments;
 pub mod context;
 mod cst;

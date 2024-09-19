@@ -209,7 +209,7 @@ thread_local! {
 /// On the main thread:
 /// ```
 /// # use biome_diagnostics::set_bottom_frame;
-/// # #[allow(clippy::needless_doctest_main)]
+/// # #[expect(clippy::needless_doctest_main)]
 /// pub fn main() {
 ///     set_bottom_frame(main as usize);
 ///

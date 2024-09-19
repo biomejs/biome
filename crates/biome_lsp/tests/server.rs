@@ -163,7 +163,7 @@ impl Server {
 
     /// Basic implementation of the `initialize` request for tests
     // The `root_path` field is deprecated, but we still need to specify it
-    #[allow(deprecated)]
+    #[expect(deprecated)]
     async fn initialize(&mut self) -> Result<()> {
         let _res: InitializeResult = self
             .request(
@@ -191,7 +191,7 @@ impl Server {
     ///
     /// Hence, the two roots will be `/workspace/test_one` and `/workspace/test_two`
     // The `root_path` field is deprecated, but we still need to specify it
-    #[allow(deprecated)]
+    #[expect(deprecated)]
     async fn initialize_workspaces(&mut self) -> Result<()> {
         let _res: InitializeResult = self
             .request(

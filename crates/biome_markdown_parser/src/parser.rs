@@ -19,14 +19,14 @@ impl<'source> MarkdownParser<'source> {
             source: MarkdownTokenSource::from_str(source),
         }
     }
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn checkpoint(&self) -> MarkdownParserCheckpoint {
         MarkdownParserCheckpoint {
             context: self.context.checkpoint(),
             source: self.source.checkpoint(),
         }
     }
-    #[allow(dead_code)]
+    #[expect(dead_code)]
     pub fn rewind(&mut self, checkpoint: MarkdownParserCheckpoint) {
         let MarkdownParserCheckpoint { context, source } = checkpoint;
 
@@ -71,7 +71,7 @@ impl<'source> Parser for MarkdownParser<'source> {
     }
 }
 
-#[allow(dead_code)]
+#[expect(dead_code)]
 pub struct MarkdownParserCheckpoint {
     pub(super) context: ParserContextCheckpoint,
     pub(super) source: MarkdownTokenSourceCheckpoint,

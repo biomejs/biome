@@ -8,7 +8,7 @@ use biome_yaml_syntax::{YamlSyntaxKind, YamlSyntaxKind::*, T, *};
 pub struct YamlSyntaxFactory;
 impl SyntaxFactory for YamlSyntaxFactory {
     type Kind = YamlSyntaxKind;
-    #[allow(unused_mut)]
+    #[expect(unused_mut)]
     fn make_syntax(
         kind: Self::Kind,
         children: ParsedChildren<Self::Kind>,
