@@ -2227,6 +2227,15 @@
 						{ "type": "null" }
 					]
 				},
+				"useComponentExportOnlyModules": {
+					"description": "Enforce declaring components only within modules that export React Components exclusively.",
+					"anyOf": [
+						{
+							"$ref": "#/definitions/UseComponentExportOnlyModulesConfiguration"
+						},
+						{ "type": "null" }
+					]
+				},
 				"useConsistentCurlyBraces": {
 					"description": "This rule enforces consistent use of curly braces inside JSX attributes and JSX children.",
 					"anyOf": [
@@ -2812,6 +2821,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseComponentExportOnlyModulesOptions": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseComponentExportOnlyModulesOptions" }
+					]
 				}
 			},
 			"additionalProperties": false
@@ -3924,6 +3950,20 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseComponentExportOnlyModulesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseComponentExportOnlyModulesOptions" }
+			]
+		},
+		"UseComponentExportOnlyModulesOptions": {
+			"type": "object",
+			"properties": {
+				"allowConstantExport": { "default": false, "type": "boolean" },
+				"allowExportNames": { "type": "array", "items": { "type": "string" } }
+			},
+			"additionalProperties": false
 		},
 		"UseImportExtensionsConfiguration": {
 			"anyOf": [

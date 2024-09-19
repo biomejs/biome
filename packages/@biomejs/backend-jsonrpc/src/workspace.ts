@@ -1312,6 +1312,10 @@ export interface Nursery {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce declaring components only within modules that export React Components exclusively.
+	 */
+	useComponentExportOnlyModules?: RuleConfiguration_for_UseComponentExportOnlyModulesOptions;
+	/**
 	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
 	 */
 	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
@@ -1981,6 +1985,9 @@ export type RuleConfiguration_for_RestrictedImportsOptions =
 export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
+export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseComponentExportOnlyModulesOptions;
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
@@ -2138,6 +2145,16 @@ export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	 * Rule's options
 	 */
 	options: NoRestrictedTypesOptions;
+}
+export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseComponentExportOnlyModulesOptions;
 }
 export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	/**
@@ -2316,6 +2333,10 @@ export interface RestrictedImportsOptions {
 }
 export interface NoRestrictedTypesOptions {
 	types: {};
+}
+export interface UseComponentExportOnlyModulesOptions {
+	allowConstantExport?: boolean;
+	allowExportNames: string[];
 }
 export interface ConsistentMemberAccessibilityOptions {
 	accessibility: Accessibility;
@@ -2829,6 +2850,7 @@ export type Category =
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
