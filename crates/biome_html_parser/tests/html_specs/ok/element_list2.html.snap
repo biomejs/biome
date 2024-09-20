@@ -48,10 +48,7 @@ HtmlRoot {
             },
         },
         HtmlContent {
-            value_token: HTML_LITERAL@21..27 "some" [Newline("\n")] [Whitespace(" ")],
-        },
-        HtmlContent {
-            value_token: HTML_LITERAL@27..31 "text" [] [],
+            value_token: HTML_LITERAL@21..31 "some text" [Newline("\n")] [],
         },
         HtmlElement {
             opening_element: HtmlOpeningElement {
@@ -140,11 +137,9 @@ HtmlRoot {
         2: HTML_NAME@17..20
           0: HTML_LITERAL@17..20 "div" [] []
         3: R_ANGLE@20..21 ">" [] []
-    3: HTML_CONTENT@21..27
-      0: HTML_LITERAL@21..27 "some" [Newline("\n")] [Whitespace(" ")]
-    4: HTML_CONTENT@27..31
-      0: HTML_LITERAL@27..31 "text" [] []
-    5: HTML_ELEMENT@31..43
+    3: HTML_CONTENT@21..31
+      0: HTML_LITERAL@21..31 "some text" [Newline("\n")] []
+    4: HTML_ELEMENT@31..43
       0: HTML_OPENING_ELEMENT@31..37
         0: L_ANGLE@31..33 "<" [Newline("\n")] []
         1: HTML_NAME@33..36
@@ -158,7 +153,7 @@ HtmlRoot {
         2: HTML_NAME@39..42
           0: HTML_LITERAL@39..42 "div" [] []
         3: R_ANGLE@42..43 ">" [] []
-    6: HTML_ELEMENT@43..55
+    5: HTML_ELEMENT@43..55
       0: HTML_OPENING_ELEMENT@43..49
         0: L_ANGLE@43..45 "<" [Newline("\n")] []
         1: HTML_NAME@45..48
@@ -172,7 +167,7 @@ HtmlRoot {
         2: HTML_NAME@51..54
           0: HTML_LITERAL@51..54 "div" [] []
         3: R_ANGLE@54..55 ">" [] []
-    7: HTML_ELEMENT@55..67
+    6: HTML_ELEMENT@55..67
       0: HTML_OPENING_ELEMENT@55..61
         0: L_ANGLE@55..57 "<" [Newline("\n")] []
         1: HTML_NAME@57..60

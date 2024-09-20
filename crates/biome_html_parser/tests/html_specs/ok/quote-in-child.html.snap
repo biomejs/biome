@@ -1,0 +1,117 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<p>"<span>Foo</span>" is the title.</p>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..2 "p" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@2..3 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@3..4 "\"" [] [],
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@4..5 "<" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@5..9 "span" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@9..10 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@10..13 "Foo" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@13..14 "<" [] [],
+                        slash_token: SLASH@14..15 "/" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@15..19 "span" [] [],
+                        },
+                        r_angle_token: R_ANGLE@19..20 ">" [] [],
+                    },
+                },
+                HtmlContent {
+                    value_token: HTML_LITERAL@20..35 "\" is the title." [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@35..36 "<" [] [],
+                slash_token: SLASH@36..37 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@37..38 "p" [] [],
+                },
+                r_angle_token: R_ANGLE@38..39 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@39..40 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..40
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..39
+    0: HTML_ELEMENT@0..39
+      0: HTML_OPENING_ELEMENT@0..3
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..2
+          0: HTML_LITERAL@1..2 "p" [] []
+        2: HTML_ATTRIBUTE_LIST@2..2
+        3: R_ANGLE@2..3 ">" [] []
+      1: HTML_ELEMENT_LIST@3..35
+        0: HTML_CONTENT@3..4
+          0: HTML_LITERAL@3..4 "\"" [] []
+        1: HTML_ELEMENT@4..20
+          0: HTML_OPENING_ELEMENT@4..10
+            0: L_ANGLE@4..5 "<" [] []
+            1: HTML_NAME@5..9
+              0: HTML_LITERAL@5..9 "span" [] []
+            2: HTML_ATTRIBUTE_LIST@9..9
+            3: R_ANGLE@9..10 ">" [] []
+          1: HTML_ELEMENT_LIST@10..13
+            0: HTML_CONTENT@10..13
+              0: HTML_LITERAL@10..13 "Foo" [] []
+          2: HTML_CLOSING_ELEMENT@13..20
+            0: L_ANGLE@13..14 "<" [] []
+            1: SLASH@14..15 "/" [] []
+            2: HTML_NAME@15..19
+              0: HTML_LITERAL@15..19 "span" [] []
+            3: R_ANGLE@19..20 ">" [] []
+        2: HTML_CONTENT@20..35
+          0: HTML_LITERAL@20..35 "\" is the title." [] []
+      2: HTML_CLOSING_ELEMENT@35..39
+        0: L_ANGLE@35..36 "<" [] []
+        1: SLASH@36..37 "/" [] []
+        2: HTML_NAME@37..38
+          0: HTML_LITERAL@37..38 "p" [] []
+        3: R_ANGLE@38..39 ">" [] []
+  3: EOF@39..40 "" [Newline("\n")] []
+
+```

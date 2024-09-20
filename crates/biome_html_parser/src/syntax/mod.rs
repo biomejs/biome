@@ -144,7 +144,7 @@ fn parse_closing_element(p: &mut HtmlParser) -> ParsedSyntax {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
     let _name = parse_literal(p);
-    p.bump(T![>]);
+    p.bump_with_context(T![>], HtmlLexContext::OutsideTag);
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
 
