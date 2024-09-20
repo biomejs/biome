@@ -39,9 +39,7 @@ impl PredicateCompiler {
             AnyGritPredicate::GritPredicateAssignment(node) => Ok(Predicate::Assignment(Box::new(
                 PrAssignmentCompiler::from_node(node, context)?,
             ))),
-            AnyGritPredicate::GritPredicateCall(node) => Ok(Predicate::Call(Box::new(
-                PrCallCompiler::from_node(node, context)?,
-            ))),
+            AnyGritPredicate::GritPredicateCall(node) => PrCallCompiler::from_node(node, context),
             AnyGritPredicate::GritPredicateEqual(node) => Ok(Predicate::Equal(Box::new(
                 PrEqualCompiler::from_node(node, context)?,
             ))),

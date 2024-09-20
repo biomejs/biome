@@ -30,6 +30,8 @@ use schemars::JsonSchema;
 declare_lint_rule! {
     /// Enforce that all React hooks are being called from the Top Level component functions.
     ///
+    /// _This rule should be used only in **React** projects._
+    ///
     /// To understand why this required see https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
     ///
     /// ## Examples

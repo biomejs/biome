@@ -113,7 +113,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoMissingVarFunction {
-        version: "next",
+        version: "1.9.2",
         name: "noMissingVarFunction",
         language: "css",
         recommended: true,

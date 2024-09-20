@@ -996,6 +996,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-octal-escape" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_octal_escape.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-param-reassign" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_parameter_assign.get_or_insert(Default::default());

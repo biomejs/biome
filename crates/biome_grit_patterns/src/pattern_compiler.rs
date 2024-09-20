@@ -45,6 +45,7 @@ mod limit_compiler;
 mod list_compiler;
 mod list_index_compiler;
 mod literal_compiler;
+mod log_compiler;
 mod map_accessor_compiler;
 mod map_compiler;
 mod match_compiler;

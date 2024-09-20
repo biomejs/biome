@@ -1260,6 +1260,10 @@ export interface Nursery {
 	 */
 	noMissingVarFunction?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow octal escape sequences in string literals
+	 */
+	noOctalEscape?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of process.env.
 	 */
 	noProcessEnv?: RuleConfiguration_for_Null;
@@ -2835,9 +2839,10 @@ export type Category =
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noMissingVarFunction"
+	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
-	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noRestrictedImports"
 	| "lint/nursery/noRestrictedTypes"
 	| "lint/nursery/noSecrets"

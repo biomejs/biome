@@ -647,7 +647,7 @@ pub(crate) fn search(
     query: &GritQuery,
     _settings: WorkspaceSettingsHandle,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
-    let query_result = query
+    let (query_result, _logs) = query
         .execute(GritTargetFile {
             path: path.to_path_buf(),
             parse,
