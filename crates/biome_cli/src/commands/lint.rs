@@ -45,6 +45,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) json_linter: Option<PartialJsonLinter>,
     pub(crate) css_linter: Option<PartialCssLinter>,
     pub(crate) graphql_linter: Option<PartialGraphqlLinter>,
+    pub(crate) write_suppressions: Option<String>,
 }
 
 /// Handler for the "lint" command of the Biome CLI
@@ -70,6 +71,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         css_linter,
         json_linter,
         graphql_linter,
+        write_suppressions,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
@@ -181,6 +183,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
             only,
             skip,
             vcs_targeted: VcsTargeted { staged, changed },
+            write_suppressions,
         })
         .set_report(&cli_options),
         session,

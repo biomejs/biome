@@ -220,6 +220,11 @@ pub enum BiomeCommand {
         #[bpaf(external(partial_graphql_linter), optional, hide_usage, hide)]
         graphql_linter: Option<PartialGraphqlLinter>,
 
+        // TODO: The flag requires a value here. Am I able to let them pass `--write-suppressions`,
+        // without a value? Option<Option<String>> wasn't it.
+        #[bpaf(long("write-suppressions"))]
+        write_suppressions: Option<String>,
+
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
 

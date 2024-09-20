@@ -73,6 +73,10 @@ pub(crate) fn lint_with_guard<'ctx>(
                 }
             }
 
+            // if let Some(write_suppressions_mode) = ctx.as_write_suppressions_mode() {
+            //     println!("write_suppressions_mode: {write_suppressions_mode}");
+            // }
+
             let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
             let pull_diagnostics_result = workspace_file
                 .guard()

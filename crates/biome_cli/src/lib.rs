@@ -145,6 +145,7 @@ impl<'app> CliSession<'app> {
                 javascript_linter,
                 json_linter,
                 graphql_linter,
+                write_suppressions,
             } => commands::lint::lint(
                 self,
                 LintCommandPayload {
@@ -168,6 +169,7 @@ impl<'app> CliSession<'app> {
                     javascript_linter,
                     json_linter,
                     graphql_linter,
+                    write_suppressions,
                 },
             ),
             BiomeCommand::Ci {

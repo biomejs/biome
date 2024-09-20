@@ -144,6 +144,10 @@ pub(crate) fn run<'a>(
                 }
             }
 
+            if let Some(write_suppressions_mode) = mode.as_write_suppressions_mode() {
+                println!("write_suppressions_mode: {write_suppressions_mode}");
+            }
+
             if file_features.supports_organize_imports() && mode.is_check() {
                 let result = workspace.organize_imports(OrganizeImportsParams {
                     path: biome_path.clone(),

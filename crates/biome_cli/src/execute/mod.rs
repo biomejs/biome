@@ -151,6 +151,7 @@ pub enum TraversalMode {
         skip: Vec<RuleSelector>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
+        write_suppressions: Option<String>,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
@@ -298,6 +299,19 @@ impl Execution {
             TraversalMode::Check { fix_file_mode, .. }
             | TraversalMode::Lint { fix_file_mode, .. } => fix_file_mode.as_ref(),
             TraversalMode::Format { .. }
+            | TraversalMode::CI { .. }
+            | TraversalMode::Migrate { .. }
+            | TraversalMode::Search { .. } => None,
+        }
+    }
+
+    pub(crate) fn as_write_suppressions_mode(&self) -> Option<bool> {
+        match &self.traversal_mode {
+            TraversalMode::Lint {
+                write_suppressions, ..
+            } => Some(write_suppressions.as_ref().is_some()),
+            TraversalMode::Check { .. }
+            | TraversalMode::Format { .. }
             | TraversalMode::CI { .. }
             | TraversalMode::Migrate { .. }
             | TraversalMode::Search { .. } => None,

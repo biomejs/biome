@@ -128,6 +128,7 @@ impl<'ctx, 'app> Deref for SharedTraversalOptions<'ctx, 'app> {
 /// content of the file and emit a diff or write the new content to the disk if
 /// write mode is enabled
 pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> FileResult {
+    ctx.execution.as_write_suppressions_mode();
     tracing::trace_span!("process_file", path = ?biome_path).in_scope(move || {
         let file_features = ctx
             .workspace
