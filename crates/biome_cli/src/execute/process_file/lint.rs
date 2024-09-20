@@ -2,7 +2,7 @@ use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use crate::TraversalMode;
-use biome_analyze::RuleCategoriesBuilder;
+use biome_analyze::{Rule, RuleCategoriesBuilder};
 use biome_diagnostics::{category, Error};
 use biome_rowan::TextSize;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
@@ -73,10 +73,6 @@ pub(crate) fn lint_with_guard<'ctx>(
                 }
             }
 
-            // if let Some(write_suppressions_mode) = ctx.as_write_suppressions_mode() {
-            //     println!("write_suppressions_mode: {write_suppressions_mode}");
-            // }
-
             let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
             let pull_diagnostics_result = workspace_file
                 .guard()
@@ -98,30 +94,34 @@ pub(crate) fn lint_with_guard<'ctx>(
                 && pull_diagnostics_result.skipped_diagnostics == 0;
 
             if !no_diagnostics {
-                let offset = match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
-                    Some(b"vue") => VueFileHandler::start(input.as_str()),
-                    Some(b"astro") => AstroFileHandler::start(input.as_str()),
-                    Some(b"svelte") => SvelteFileHandler::start(input.as_str()),
-                    _ => None,
-                };
+                if let Some(write_suppressions_mode) = ctx.execution.as_write_suppressions_mode() {
+                    println!("Rule::suppress() here");
+                } else {
+                    let offset = match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
+                        Some(b"vue") => VueFileHandler::start(input.as_str()),
+                        Some(b"astro") => AstroFileHandler::start(input.as_str()),
+                        Some(b"svelte") => SvelteFileHandler::start(input.as_str()),
+                        _ => None,
+                    };
 
-                ctx.push_message(Message::Diagnostics {
-                    name: workspace_file.path.display().to_string(),
-                    content: input,
-                    diagnostics: pull_diagnostics_result
-                        .diagnostics
-                        .into_iter()
-                        .map(|d| {
-                            if let Some(offset) = offset {
-                                d.with_offset(TextSize::from(offset))
-                            } else {
-                                d
-                            }
-                        })
-                        .map(Error::from)
-                        .collect(),
-                    skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics as u32,
-                });
+                    ctx.push_message(Message::Diagnostics {
+                        name: workspace_file.path.display().to_string(),
+                        content: input,
+                        diagnostics: pull_diagnostics_result
+                            .diagnostics
+                            .into_iter()
+                            .map(|d| {
+                                if let Some(offset) = offset {
+                                    d.with_offset(TextSize::from(offset))
+                                } else {
+                                    d
+                                }
+                            })
+                            .map(Error::from)
+                            .collect(),
+                        skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics as u32,
+                    });
+                }
             }
 
             if changed {
