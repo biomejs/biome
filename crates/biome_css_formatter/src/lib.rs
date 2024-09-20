@@ -274,7 +274,7 @@ impl FormatLanguage for CssFormatLanguage {
         root: &CssSyntaxNode,
         source_map: Option<TransformSourceMap>,
     ) -> Self::Context {
-        let comments = Comments::from_node(root, &CssCommentStyle, source_map.as_ref());
+        let comments: Comments<CssLanguage> = Comments::from_node(root, &CssCommentStyle, source_map.as_ref());
         CssFormatContext::new(self.options, comments).with_source_map(source_map)
     }
 }

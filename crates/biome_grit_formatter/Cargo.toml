@@ -23,7 +23,7 @@ biome_formatter_test = { path = "../biome_formatter_test" }
 biome_grit_factory   = { path = "../biome_grit_factory" }
 biome_grit_parser    = { path = "../biome_grit_parser" }
 biome_parser         = { path = "../biome_parser" }
-biome_service        = { path = "../biome_service" }
+biome_service        = { path = "../biome_service", features = ["experimental-grit"] }
 countme              = { workspace = true, features = ["enable"] }
 serde                = { workspace = true, features = ["derive"] }
 serde_json           = { workspace = true }

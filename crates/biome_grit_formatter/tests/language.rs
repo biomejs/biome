@@ -1,5 +1,6 @@
 use biome_formatter_test::TestFormatLanguage;
 use biome_grit_formatter::{context::GritFormatContext, GritFormatLanguage};
+use biome_grit_parser::parse_grit;
 use biome_grit_syntax::GritLanguage;
 
 #[derive(Default)]
@@ -10,8 +11,8 @@ impl TestFormatLanguage for GritTestFormatLanguage {
     type Context = GritFormatContext;
     type FormatLanguage = GritFormatLanguage;
 
-    fn parse(&self, _text: &str) -> biome_parser::AnyParse {
-        todo!()
+    fn parse(&self, text: &str) -> biome_parser::AnyParse {
+        parse_grit(text).into()
     }
 
     fn to_format_language(

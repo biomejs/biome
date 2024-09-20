@@ -104,6 +104,12 @@ impl From<HtmlFileSource> for DocumentFileSource {
     }
 }
 
+impl From<GritFileSource> for DocumentFileSource {
+    fn from(value: GritFileSource) -> Self {
+        Self::Grit(value)
+    }
+}
+
 impl From<&Path> for DocumentFileSource {
     fn from(path: &Path) -> Self {
         Self::from_path(path)

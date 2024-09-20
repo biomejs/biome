@@ -37,6 +37,13 @@ impl GritFileSource {
             _ => Err(FileSourceError::UnknownExtension),
         }
     }
+
+    pub fn try_from_language_id(language_id: &str) -> Result<Self, FileSourceError> {
+        match language_id {
+            "grit" => Ok(Self::grit()),
+            _ => Err(FileSourceError::UnknownLanguageId),
+        }
+    }
 }
 
 impl TryFrom<&Path> for GritFileSource {
