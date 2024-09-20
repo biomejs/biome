@@ -1116,6 +1116,7 @@ dependencies = [
  "serde",
  "serde_json",
  "slotmap",
+ "smallvec",
  "tests_macros",
  "tracing",
 ]
