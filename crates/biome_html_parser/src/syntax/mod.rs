@@ -29,7 +29,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     p.eat(UNICODE_BOM);
 
     parse_doc_type(p).ok();
-    parse_element(p).ok();
+    ElementList.parse_list(p);
 
     m.complete(p, HTML_ROOT);
 }
