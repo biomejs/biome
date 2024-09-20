@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use biome_formatter::write;
 use biome_html_syntax::HtmlRoot;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlRoot;
@@ -16,6 +17,7 @@ impl FormatNodeRule<HtmlRoot> for FormatHtmlRoot {
         if let Ok(eof) = node.eof_token() {
             eof.format().fmt(f)?;
         }
+        write!(f, [hard_line_break()])?;
 
         Ok(())
     }
