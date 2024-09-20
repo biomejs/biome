@@ -364,7 +364,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
             DocumentFileSource::Css(_) => fmt.write_markup(markup! { "CSS" }),
             DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
             DocumentFileSource::Html(_) => fmt.write_markup(markup! { "HTML" }),
-            DocumentFileSource::Grit(_) => fmt.write_markup(markup! { "GRIT" }),
+            DocumentFileSource::Grit(_) => fmt.write_markup(markup! { "Grit" }),
             DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -543,7 +543,6 @@ pub(crate) struct Features {
     unknown: UnknownFileHandler,
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
-    #[expect(unused)]
     grit: GritFileHandler,
 }
 

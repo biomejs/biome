@@ -449,6 +449,8 @@ fn assert_lint(
             }
         }
         DocumentFileSource::Html(..) => todo!("HTML analysis is not yet supported"),
+        DocumentFileSource::Grit(..) => todo!("Grit analysis is not yet supported"),
+
         // Unknown code blocks should be ignored by tests
         DocumentFileSource::Unknown => {}
     }
