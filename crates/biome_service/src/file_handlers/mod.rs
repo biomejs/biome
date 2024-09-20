@@ -28,6 +28,7 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
+use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::HtmlFileSource;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{
@@ -38,6 +39,7 @@ use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
 use biome_string_case::StrExtension;
+
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
@@ -67,6 +69,7 @@ pub enum DocumentFileSource {
     Css(CssFileSource),
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
+    Grit(GritFileSource),
     #[default]
     Unknown,
 }
@@ -151,8 +154,10 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
 
-        // #[cfg(feature = "experimental-grit")]
-        // if let Ok(file_source) = GritFileSource::;
+        #[cfg(feature = "experimental-grit")]
+        if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -178,6 +183,10 @@ impl DocumentFileSource {
         }
         #[cfg(feature = "experimental-html")]
         if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+        #[cfg(feature = "experimental-grit")]
+        if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -322,6 +331,7 @@ impl DocumentFileSource {
             | DocumentFileSource::Graphql(_)
             | DocumentFileSource::Json(_) => true,
             DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
+            DocumentFileSource::Grit(_) => cfg!(feature = "experimental-grit"),
             DocumentFileSource::Unknown => false,
         }
     }
@@ -354,6 +364,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
             DocumentFileSource::Css(_) => fmt.write_markup(markup! { "CSS" }),
             DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
             DocumentFileSource::Html(_) => fmt.write_markup(markup! { "HTML" }),
+            DocumentFileSource::Grit(_) => fmt.write_markup(markup! { "GRIT" }),
             DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -569,6 +580,7 @@ impl Features {
             DocumentFileSource::Css(_) => self.css.capabilities(),
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
+            DocumentFileSource::Grit(_) => self.grit.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
     }

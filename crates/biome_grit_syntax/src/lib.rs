@@ -4,7 +4,7 @@
 
 #[macro_use]
 mod generated;
-mod file_source;
+pub mod file_source;
 mod syntax_ext;
 mod syntax_node;
 

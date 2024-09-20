@@ -2,6 +2,7 @@ use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     WorkspaceError,
 };
+use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};
@@ -23,9 +24,9 @@ impl ServiceLanguage for GritLanguage {
     type ParserSettings = ();
     type EnvironmentSettings = ();
     fn lookup_settings(
-        _languages: &crate::settings::LanguageListSettings,
+        languages: &crate::settings::LanguageListSettings,
     ) -> &crate::settings::LanguageSettings<Self> {
-        todo!()
+        &languages.grit
     }
 
     fn resolve_format_options(
@@ -43,10 +44,13 @@ impl ServiceLanguage for GritLanguage {
         _linter: Option<&crate::settings::LinterSettings>,
         _overrides: Option<&crate::settings::OverrideSettings>,
         _language: Option<&Self::LinterSettings>,
-        _path: &biome_fs::BiomePath,
+        path: &biome_fs::BiomePath,
         _file_source: &super::DocumentFileSource,
     ) -> biome_analyze::AnalyzerOptions {
-        todo!()
+        AnalyzerOptions {
+            configuration: AnalyzerConfiguration::default(),
+            file_path: path.to_path_buf(),
+        }
     }
 }
 
