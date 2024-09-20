@@ -1,3 +1,5 @@
+use std::{collections::HashMap, sync::LazyLock};
+
 pub const BASIC_KEYWORDS: [&str; 5] = ["initial", "inherit", "revert", "revert-layer", "unset"];
 
 // https://drafts.csswg.org/css-fonts/#system-family-name-value
@@ -5408,6 +5410,25 @@ pub const LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES: [&[&str]; 57] = [
     ],
 ];
 
+// longhand => shorthand map
+pub(crate) static LONGHAND_SUB_PROPERTIES_MAP: LazyLock<HashMap<String, String>> =
+    LazyLock::new(|| {
+        let cap: usize = LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES
+            .map(|list| list.len())
+            .iter()
+            .sum();
+        let mut map: HashMap<String, String> = HashMap::with_capacity(cap);
+        for (shorthand, longhand_list) in SHORTHAND_PROPERTIES
+            .iter()
+            .zip(LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES)
+        {
+            for longhand in longhand_list {
+                map.insert((*longhand).to_string(), (*shorthand).to_string());
+            }
+        }
+        map
+    });
+
 pub const RESET_TO_INITIAL_PROPERTIES_BY_BORDER: [&str; 6] = [
     "border-image",
     "border-image-outset",
@@ -5432,6 +5453,20 @@ pub const RESET_TO_INITIAL_PROPERTIES_BY_FONT: [&str; 13] = [
     "font-variant-position",
     "font-variation-settings",
 ];
+
+pub(crate) static RESET_TO_INITIAL_PROPERTIES_MAP: LazyLock<HashMap<String, String>> =
+    LazyLock::new(|| {
+        let cap = RESET_TO_INITIAL_PROPERTIES_BY_BORDER.len()
+            + RESET_TO_INITIAL_PROPERTIES_BY_BORDER.len();
+        let mut map: HashMap<String, String> = HashMap::with_capacity(cap);
+        for longhand in RESET_TO_INITIAL_PROPERTIES_BY_BORDER {
+            map.insert(longhand.to_string(), "border".to_string());
+        }
+        for longhand in RESET_TO_INITIAL_PROPERTIES_BY_BORDER {
+            map.insert(longhand.to_string(), "font".to_string());
+        }
+        map
+    });
 
 #[cfg(test)]
 mod tests {

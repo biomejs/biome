@@ -1,0 +1,69 @@
+.not-sorted-basic {
+  color: red;
+  display: block;
+}
+
+.progressive-fixes-1 {
+  margin: 1px;
+  transition:cubic-bezier(1, 0, 0, 1);
+  color: red;
+  display: block;
+}
+
+.progressive-fixes-2 {
+  margin: 1px;
+  color: red;
+  transition:cubic-bezier(1, 0, 0, 1);
+  display: block;
+}
+
+.comments {
+  /* leading for z-index */
+  z-index: 1; /* trailing for z-index */
+  /* leading for margin */
+  margin: 1px; /* trailing for margin*/
+}
+
+.oneline { color: red; display: block; }
+
+.nested-rules {
+  display: block;
+  .nested {}
+  color: red;
+  .nested {}
+  margin: 1px;
+}
+
+.at-rules {
+  display: block;
+  @media (min-width: 100px) {}
+  color: red;
+  @media (min-width: 100px) {}
+  margin: 1px;
+}
+
+.mixed-rules {
+  display: block;
+  @media (min-width: 100px) {}
+  color: red;
+  .nested {}
+  margin: 1px;
+}
+
+.vendor-prefixes {
+  margin: 1px;
+  -moz-margin: 1px;
+  -webkit-margin: 1px;
+}
+
+.case-insensitive {
+  color: red;
+  DISPLAY: block;
+}
+
+.nested-with-content {
+  .nested {
+    color: red;
+    display: block;
+  }
+}

@@ -1,0 +1,391 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+assertion_line: 94
+expression: invalid.css
+---
+# Input
+```css
+.not-sorted-basic {
+  color: red;
+  display: block;
+}
+
+.progressive-fixes-1 {
+  margin: 1px;
+  transition:cubic-bezier(1, 0, 0, 1);
+  color: red;
+  display: block;
+}
+
+.progressive-fixes-2 {
+  margin: 1px;
+  color: red;
+  transition:cubic-bezier(1, 0, 0, 1);
+  display: block;
+}
+
+.comments {
+  /* leading for z-index */
+  z-index: 1; /* trailing for z-index */
+  /* leading for margin */
+  margin: 1px; /* trailing for margin*/
+}
+
+.oneline { color: red; display: block; }
+
+.nested-rules {
+  display: block;
+  .nested {}
+  color: red;
+  .nested {}
+  margin: 1px;
+}
+
+.at-rules {
+  display: block;
+  @media (min-width: 100px) {}
+  color: red;
+  @media (min-width: 100px) {}
+  margin: 1px;
+}
+
+.mixed-rules {
+  display: block;
+  @media (min-width: 100px) {}
+  color: red;
+  .nested {}
+  margin: 1px;
+}
+
+.vendor-prefixes {
+  margin: 1px;
+  -moz-margin: 1px;
+  -webkit-margin: 1px;
+}
+
+.case-insensitive {
+  color: red;
+  DISPLAY: block;
+}
+
+.nested-with-content {
+  .nested {
+    color: red;
+    display: block;
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalid.css:1:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: display should be before color.
+  
+  > 1 │ .not-sorted-basic {
+      │                   ^
+  > 2 │   color: red;
+  > 3 │   display: block;
+  > 4 │ }
+      │ ^
+    5 │ 
+    6 │ .progressive-fixes-1 {
+  
+  i Safe fix: Sort these properties
+  
+     1  1 │   .not-sorted-basic {
+     2    │ - ··color:·red;
+     3    │ - ··display:·block;
+        2 │ + ··display:·block;
+        3 │ + ··color:·red;
+     4  4 │   }
+     5  5 │   
+  
+
+```
+
+```
+invalid.css:6:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: color should be before transition.
+  
+     4 │ }
+     5 │ 
+   > 6 │ .progressive-fixes-1 {
+       │                      ^
+   > 7 │   margin: 1px;
+   > 8 │   transition:cubic-bezier(1, 0, 0, 1);
+   > 9 │   color: red;
+  > 10 │   display: block;
+  > 11 │ }
+       │ ^
+    12 │ 
+    13 │ .progressive-fixes-2 {
+  
+  i Safe fix: Sort these properties
+  
+     5  5 │   
+     6  6 │   .progressive-fixes-1 {
+     7    │ - ··margin:·1px;
+     8    │ - ··transition:cubic-bezier(1,·0,·0,·1);
+        7 │ + ··display:·block;
+        8 │ + ··margin:·1px;
+     9  9 │     color: red;
+    10    │ - ··display:·block;
+       10 │ + ··transition:cubic-bezier(1,·0,·0,·1);
+    11 11 │   }
+    12 12 │   
+  
+
+```
+
+```
+invalid.css:13:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: display should be before margin.
+  
+    11 │ }
+    12 │ 
+  > 13 │ .progressive-fixes-2 {
+       │                      ^
+  > 14 │   margin: 1px;
+  > 15 │   color: red;
+  > 16 │   transition:cubic-bezier(1, 0, 0, 1);
+  > 17 │   display: block;
+  > 18 │ }
+       │ ^
+    19 │ 
+    20 │ .comments {
+  
+  i Safe fix: Sort these properties
+  
+    12 12 │   
+    13 13 │   .progressive-fixes-2 {
+    14    │ - ··margin:·1px;
+    15    │ - ··color:·red;
+    16    │ - ··transition:cubic-bezier(1,·0,·0,·1);
+    17    │ - ··display:·block;
+       14 │ + ··display:·block;
+       15 │ + ··margin:·1px;
+       16 │ + ··color:·red;
+       17 │ + ··transition:cubic-bezier(1,·0,·0,·1);
+    18 18 │   }
+    19 19 │   
+  
+
+```
+
+```
+invalid.css:27:10 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: display should be before color.
+  
+    25 │ }
+    26 │ 
+  > 27 │ .oneline { color: red; display: block; }
+       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    28 │ 
+    29 │ .nested-rules {
+  
+  i Safe fix: Sort these properties
+  
+    25 25 │   }
+    26 26 │   
+    27    │ - .oneline·{·color:·red;·display:·block;·}
+       27 │ + .oneline·{·display:·block;·color:·red;·}
+    28 28 │   
+    29 29 │   .nested-rules {
+  
+
+```
+
+```
+invalid.css:29:15 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: color should be before the nested rule at position 2.
+  
+    27 │ .oneline { color: red; display: block; }
+    28 │ 
+  > 29 │ .nested-rules {
+       │               ^
+  > 30 │   display: block;
+        ...
+  > 34 │   margin: 1px;
+  > 35 │ }
+       │ ^
+    36 │ 
+    37 │ .at-rules {
+  
+  i Safe fix: Sort these properties
+  
+    29 29 │   .nested-rules {
+    30 30 │     display: block;
+    31    │ - ··.nested·{}
+       31 │ + ··margin:·1px;
+    32 32 │     color: red;
+    33 33 │     .nested {}
+    34    │ - ··margin:·1px;
+       34 │ + ··.nested·{}
+    35 35 │   }
+    36 36 │   
+  
+
+```
+
+```
+invalid.css:37:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: color should be before the at-rule at position 2.
+  
+    35 │ }
+    36 │ 
+  > 37 │ .at-rules {
+       │           ^
+  > 38 │   display: block;
+        ...
+  > 42 │   margin: 1px;
+  > 43 │ }
+       │ ^
+    44 │ 
+    45 │ .mixed-rules {
+  
+  i Safe fix: Sort these properties
+  
+    37 37 │   .at-rules {
+    38 38 │     display: block;
+    39    │ - ··@media·(min-width:·100px)·{}
+       39 │ + ··margin:·1px;
+    40 40 │     color: red;
+    41 41 │     @media (min-width: 100px) {}
+    42    │ - ··margin:·1px;
+       42 │ + ··@media·(min-width:·100px)·{}
+    43 43 │   }
+    44 44 │   
+  
+
+```
+
+```
+invalid.css:45:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: color should be before the at-rule at position 2.
+  
+    43 │ }
+    44 │ 
+  > 45 │ .mixed-rules {
+       │              ^
+  > 46 │   display: block;
+        ...
+  > 50 │   margin: 1px;
+  > 51 │ }
+       │ ^
+    52 │ 
+    53 │ .vendor-prefixes {
+  
+  i Safe fix: Sort these properties
+  
+    45 45 │   .mixed-rules {
+    46 46 │     display: block;
+    47    │ - ··@media·(min-width:·100px)·{}
+       47 │ + ··margin:·1px;
+    48 48 │     color: red;
+    49 49 │     .nested {}
+    50    │ - ··margin:·1px;
+       50 │ + ··@media·(min-width:·100px)·{}
+    51 51 │   }
+    52 52 │   
+  
+
+```
+
+```
+invalid.css:53:18 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: -moz-margin should be before margin.
+  
+    51 │ }
+    52 │ 
+  > 53 │ .vendor-prefixes {
+       │                  ^
+  > 54 │   margin: 1px;
+  > 55 │   -moz-margin: 1px;
+  > 56 │   -webkit-margin: 1px;
+  > 57 │ }
+       │ ^
+    58 │ 
+    59 │ .case-insensitive {
+  
+  i Safe fix: Sort these properties
+  
+    52 52 │   
+    53 53 │   .vendor-prefixes {
+    54    │ - ··margin:·1px;
+       54 │ + ··-webkit-margin:·1px;
+    55 55 │     -moz-margin: 1px;
+    56    │ - ··-webkit-margin:·1px;
+       56 │ + ··margin:·1px;
+    57 57 │   }
+    58 58 │   
+  
+
+```
+
+```
+invalid.css:59:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: DISPLAY should be before color.
+  
+    57 │ }
+    58 │ 
+  > 59 │ .case-insensitive {
+       │                   ^
+  > 60 │   color: red;
+  > 61 │   DISPLAY: block;
+  > 62 │ }
+       │ ^
+    63 │ 
+    64 │ .nested-with-content {
+  
+  i Safe fix: Sort these properties
+  
+    58 58 │   
+    59 59 │   .case-insensitive {
+    60    │ - ··color:·red;
+    61    │ - ··DISPLAY:·block;
+       60 │ + ··DISPLAY:·block;
+       61 │ + ··color:·red;
+    62 62 │   }
+    63 63 │   
+  
+
+```
+
+```
+invalid.css:65:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Properties should be sorted: display should be before color.
+  
+    64 │ .nested-with-content {
+  > 65 │   .nested {
+       │           ^
+  > 66 │     color: red;
+  > 67 │     display: block;
+  > 68 │   }
+       │   ^
+    69 │ }
+    70 │ 
+  
+  i Safe fix: Sort these properties
+  
+    64 64 │   .nested-with-content {
+    65 65 │     .nested {
+    66    │ - ····color:·red;
+    67    │ - ····display:·block;
+       66 │ + ····display:·block;
+       67 │ + ····color:·red;
+    68 68 │     }
+    69 69 │   }
+  
+
+```

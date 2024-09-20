@@ -2257,6 +2257,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useSortedProperties": {
+					"description": "Enforce ordering of CSS properties.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useStrictMode": {
 					"description": "Enforce the use of the directive \"use strict\" in script files.",
 					"anyOf": [

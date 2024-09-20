@@ -180,6 +180,7 @@ define_categories! {
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",
     "lint/nursery/useSortedClasses": "https://biomejs.dev/linter/rules/use-sorted-classes",
+    "lint/nursery/useSortedProperties": "https://biomejs.dev/linter/rules/use-sorted-properties",
     "lint/nursery/useStrictMode": "https://biomejs.dev/linter/rules/use-strict-mode",
     "lint/nursery/useTrimStartEnd": "https://biomejs.dev/linter/rules/use-trim-start-end",
     "lint/nursery/useValidAutocomplete": "https://biomejs.dev/linter/rules/use-valid-autocomplete",
