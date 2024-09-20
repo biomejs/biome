@@ -1,6 +1,6 @@
 use std::{
     fmt::Write,
-    panic::{set_hook, PanicInfo},
+    panic::{set_hook, PanicHookInfo},
     thread,
 };
 
@@ -10,7 +10,7 @@ pub fn setup_panic_handler() {
     set_hook(Box::new(panic_handler))
 }
 
-fn panic_handler(info: &PanicInfo) {
+fn panic_handler(info: &PanicHookInfo) {
     // Buffer the error message to a string before printing it at once
     // to prevent it from getting mixed with other errors if multiple threads
     // panic at the same time
