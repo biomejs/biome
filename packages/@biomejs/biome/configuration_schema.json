@@ -2266,6 +2266,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExplicitFunctionReturnType": {
+					"description": "Require explicit return types on functions and class methods.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
 					"anyOf": [

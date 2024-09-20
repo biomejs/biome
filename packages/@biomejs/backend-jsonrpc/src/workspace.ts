@@ -1327,6 +1327,10 @@ export interface Nursery {
 	 */
 	useDeprecatedReason?: RuleConfiguration_for_Null;
 	/**
+	 * Require explicit return types on functions and class methods.
+	 */
+	useExplicitFunctionReturnType?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
@@ -2860,6 +2864,7 @@ export type Category =
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
+	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useSortedClasses"
