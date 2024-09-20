@@ -2267,7 +2267,7 @@
 					]
 				},
 				"useExplicitFunctionReturnType": {
-					"description": "Succinct description of the rule.",
+					"description": "Require explicit return types on functions and class methods.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

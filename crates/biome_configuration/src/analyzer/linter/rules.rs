@@ -3368,7 +3368,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_deprecated_reason:
         Option<RuleConfiguration<biome_graphql_analyze::options::UseDeprecatedReason>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Require explicit return types on functions and class methods."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_explicit_function_return_type:
         Option<RuleConfiguration<biome_js_analyze::options::UseExplicitFunctionReturnType>>,
