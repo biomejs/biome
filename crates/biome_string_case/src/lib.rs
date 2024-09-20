@@ -426,6 +426,7 @@ impl StrExtension for str {
     fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
         let has_ascii_uppercase = self.bytes().any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
+            #[allow(clippy::disallowed_methods)]
             Cow::Owned(self.to_ascii_lowercase())
         } else {
             Cow::Borrowed(self)
@@ -440,6 +441,7 @@ impl StrExtension for std::ffi::OsStr {
             .iter()
             .any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
+            #[allow(clippy::disallowed_methods)]
             Cow::Owned(self.to_ascii_lowercase())
         } else {
             Cow::Borrowed(self)
