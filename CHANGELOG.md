@@ -9,17 +9,23 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
-
-### Analyzer
+## v1.9.2 (2024-09-19)
 
 ### CLI
+
+#### New features
+
+- Added support for custom GritQL definitions, including:
+  - Pattern and predicate definitions: https://docs.grit.io/guides/patterns
+  - Function definitions: https://docs.grit.io/language/functions#function-definitions
+
+  Contributed by @arendjr
 
 #### Bug fixes
 
 - Fix [#3917](https://github.com/biomejs/biome/issues/3917), where the fixed files were incorrectly computed. Contributed by @ematipico
-
-### Configuration
+- Fixed an issue that caused GritQL `contains` queries to report false positives when the matched
+  node appeared inside a sibling node. Contributed by @arendjr
 
 ### Editors
 
@@ -36,17 +42,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @ematipico
 
-### Formatter
-
-### JavaScript APIs
-
 ### Linter
 
 #### New features
 
 - Add [nursery/noMissingVarFunction](https://biomejs.dev/linter/rules/no-missing-var-function). Contributed by @michellocana
+- Add [nursery/useComponentExportOnlyModules]((https://biomejs.dev/linter/rules/use-component-export-only-modules). Use this rule in React projects to enforce a code styling that fits React Refresh. Contributed by @GunseiKPaseri
 
 #### Bug fixes
+
+- [noLabelWithoutControl](https://biomejs.dev/linter/rules/no-label-without-control/) now accept JSX expression as label value ([#3875](https://github.com/biomejs/biome/issues/3875)). Contributed by @Conaclos
 
 - [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) no longer suggests names with a disallowed case ([#3952](https://github.com/biomejs/biome/issues/3952)). Contributed by @Conaclos
 

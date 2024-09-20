@@ -21,7 +21,7 @@ biome_formatter_test = { workspace = true }
 biome_fs             = { workspace = true }
 biome_html_parser    = { workspace = true }
 biome_parser         = { workspace = true }
-biome_service        = { workspace = true }
+biome_service        = { workspace = true, features = ["experimental-html"] }
 countme              = { workspace = true, features = ["enable"] }
 tests_macros         = { workspace = true }
 

@@ -1,4 +1,5 @@
 use crate::grit_binding::GritBinding;
+use crate::grit_built_in_functions::BuiltIns;
 use crate::grit_code_snippet::GritCodeSnippet;
 use crate::grit_file::GritFile;
 use crate::grit_node_patterns::{GritLeafNodePattern, GritNodePattern};
@@ -38,48 +39,30 @@ impl QueryContext for GritQueryContext {
 
 pub struct GritExecContext<'a> {
     /// The language to which the snippet should apply.
-    lang: GritTargetLanguage,
+    pub lang: GritTargetLanguage,
 
     /// The name of the snippet being executed.
-    name: Option<&'a str>,
+    pub name: Option<&'a str>,
 
-    loadable_files: &'a [GritTargetFile],
-    files: &'a FileOwners<GritTargetTree>,
-    functions: Vec<GritFunctionDefinition<GritQueryContext>>,
-    patterns: Vec<PatternDefinition<GritQueryContext>>,
-    predicates: Vec<PredicateDefinition<GritQueryContext>>,
-}
-
-impl<'a> GritExecContext<'a> {
-    pub fn new(
-        lang: GritTargetLanguage,
-        name: Option<&'a str>,
-        loadable_files: &'a [GritTargetFile],
-        files: &'a FileOwners<GritTargetTree>,
-    ) -> Self {
-        Self {
-            lang,
-            name,
-            loadable_files,
-            files,
-            functions: Vec::new(),
-            patterns: Vec::new(),
-            predicates: Vec::new(),
-        }
-    }
+    pub loadable_files: &'a [GritTargetFile],
+    pub files: &'a FileOwners<GritTargetTree>,
+    pub built_ins: &'a BuiltIns,
+    pub functions: &'a [GritFunctionDefinition<GritQueryContext>],
+    pub patterns: &'a [PatternDefinition<GritQueryContext>],
+    pub predicates: &'a [PredicateDefinition<GritQueryContext>],
 }
 
 impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
     fn pattern_definitions(&self) -> &[PatternDefinition<GritQueryContext>] {
-        &self.patterns
+        self.patterns
     }
 
     fn predicate_definitions(&self) -> &[PredicateDefinition<GritQueryContext>] {
-        &self.predicates
+        self.predicates
     }
 
     fn function_definitions(&self) -> &[GritFunctionDefinition<GritQueryContext>] {
-        &self.functions
+        self.functions
     }
 
     fn ignore_limit_pattern(&self) -> bool {
@@ -88,12 +71,12 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
 
     fn call_built_in(
         &self,
-        _call: &'a CallBuiltIn<GritQueryContext>,
-        _context: &'a Self,
-        _state: &mut State<'a, GritQueryContext>,
-        _logs: &mut AnalysisLogs,
+        call: &'a CallBuiltIn<GritQueryContext>,
+        context: &'a Self,
+        state: &mut State<'a, GritQueryContext>,
+        logs: &mut AnalysisLogs,
     ) -> Result<GritResolvedPattern<'a>> {
-        unimplemented!("built-in functions are still TODO")
+        self.built_ins.call(call, context, state, logs)
     }
 
     fn files(&self) -> &FileOwners<GritTargetTree> {

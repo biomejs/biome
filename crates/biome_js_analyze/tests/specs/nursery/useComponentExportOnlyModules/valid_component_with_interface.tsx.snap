@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 84
+expression: valid_component_with_interface.tsx
+---
+# Input
+```tsx
+export const SampleComponent = () => <></>
+export interface SampleInterfafce {
+  hoge: number
+}
+
+```

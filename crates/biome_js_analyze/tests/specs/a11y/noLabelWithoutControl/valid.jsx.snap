@@ -35,4 +35,6 @@ expression: valid.jsx
 <label>foo<progress /></label>;
 <label>foo<textarea /></label>;
 
+<label htmlFor="three">{label}</label>;
+
 ```
