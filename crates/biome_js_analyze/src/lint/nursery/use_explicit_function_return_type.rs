@@ -50,6 +50,13 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// // Should indicate that no value is returned (void)
+    /// function test(a: number) {
+    ///   a += 1;
+    /// }
+    /// ```
+    ///
     /// ### Valid
     /// ```ts
     /// // No return value should be expected (void)
