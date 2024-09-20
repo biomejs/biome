@@ -95,6 +95,7 @@ pub(crate) fn lint_with_guard<'ctx>(
 
             if !no_diagnostics {
                 if let Some(write_suppressions_mode) = ctx.execution.as_write_suppressions_mode() {
+                    // Rule::suppress()
                     println!("Rule::suppress() here");
                 } else {
                     let offset = match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
