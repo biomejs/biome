@@ -5,8 +5,10 @@ info: self-closing.html
 # Input
 
 ```html
-<br />
-
+<div>
+<br>
+<img>
+</div>
 ```
 
 
@@ -25,4 +27,7 @@ Attribute Position: Auto
 -----
 
 ```html
-<br />```
+<div>
+	<br />
+	<img />
+</div>```

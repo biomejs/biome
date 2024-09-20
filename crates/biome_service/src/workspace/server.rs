@@ -355,6 +355,7 @@ impl WorkspaceServer {
             }
             // TODO: enable once the configuration is available
             FeatureKind::Search => return false, // There is no search-specific config.
+            FeatureKind::Debug => return false,
         };
         let is_feature_included = feature_included_files.is_empty()
             || is_dir(path)

@@ -12,7 +12,7 @@ use crate::{
 };
 use biome_formatter::{best_fitting, prelude::*, CstFormatContext};
 use biome_formatter::{format_args, write, VecBuffer};
-use biome_html_syntax::{AnyHtmlElement, HtmlElementList};
+use biome_html_syntax::{AnyHtmlElement, HtmlElementList, HtmlRoot};
 use tag::GroupMode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
@@ -24,7 +24,6 @@ impl FormatRule<HtmlElementList> for FormatHtmlElementList {
         if node.is_empty() {
             return Ok(());
         }
-
         let result = self.fmt_children(node, f)?;
         match result {
             FormatChildrenResult::ForceMultiline(format_multiline) => {
@@ -80,8 +79,13 @@ impl FormatHtmlElementList {
             MultilineLayout::NoFill
         };
 
+        let is_root_parent = list
+            .syntax()
+            .parent()
+            .is_some_and(|parent| HtmlRoot::can_cast(parent.kind()));
+
         let mut flat = FlatBuilder::new();
-        let mut multiline = MultilineBuilder::new(multiline_layout);
+        let mut multiline = MultilineBuilder::new(multiline_layout, is_root_parent);
 
         let mut force_multiline = layout.is_multiline();
 
@@ -539,13 +543,15 @@ enum MultilineLayout {
 #[derive(Debug, Clone)]
 struct MultilineBuilder {
     layout: MultilineLayout,
+    is_root: bool,
     result: FormatResult<Vec<FormatElement>>,
 }
 
 impl MultilineBuilder {
-    fn new(layout: MultilineLayout) -> Self {
+    fn new(layout: MultilineLayout, is_root: bool) -> Self {
         Self {
             layout,
+            is_root,
             result: Ok(Vec::new()),
         }
     }
@@ -616,6 +622,7 @@ impl MultilineBuilder {
     fn finish(self) -> FormatResult<FormatMultilineChildren> {
         Ok(FormatMultilineChildren {
             layout: self.layout,
+            is_root: self.is_root,
             elements: RefCell::new(self.result?),
         })
     }
@@ -624,6 +631,7 @@ impl MultilineBuilder {
 #[derive(Debug)]
 pub(crate) struct FormatMultilineChildren {
     layout: MultilineLayout,
+    is_root: bool,
     elements: RefCell<Vec<FormatElement>>,
 }
 
@@ -649,6 +657,10 @@ impl Format<HtmlFormatContext> for FormatMultilineChildren {
 
             Ok(())
         });
+        // We do not need the block ident when the list node is at the html root node
+        if self.is_root {
+            return write!(f, [format_inner]);
+        }
 
         // This indent is wrapped with a group to ensure that the print mode is
         // set to `Expanded` when the group prints and will guarantee that the
