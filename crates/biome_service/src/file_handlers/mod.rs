@@ -150,6 +150,9 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+
+        // #[cfg(feature = "experimental-grit")]
+        // if let Ok(file_source) = GritFileSource::;
         Err(FileSourceError::UnknownExtension)
     }
 
