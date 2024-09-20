@@ -415,8 +415,8 @@ impl HtmlRoot {
     pub fn directive(&self) -> Option<HtmlDirective> {
         support::node(&self.syntax, 1usize)
     }
-    pub fn html(&self) -> Option<AnyHtmlElement> {
-        support::node(&self.syntax, 2usize)
+    pub fn html(&self) -> HtmlElementList {
+        support::list(&self.syntax, 2usize)
     }
     pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
@@ -434,7 +434,7 @@ impl Serialize for HtmlRoot {
 pub struct HtmlRootFields {
     pub bom_token: Option<SyntaxToken>,
     pub directive: Option<HtmlDirective>,
-    pub html: Option<AnyHtmlElement>,
+    pub html: HtmlElementList,
     pub eof_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -983,7 +983,7 @@ impl std::fmt::Debug for HtmlRoot {
                 "directive",
                 &support::DebugOptionalElement(self.directive()),
             )
-            .field("html", &support::DebugOptionalElement(self.html()))
+            .field("html", &self.html())
             .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
             .finish()
     }

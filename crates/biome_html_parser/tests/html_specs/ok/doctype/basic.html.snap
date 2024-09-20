@@ -25,7 +25,7 @@ HtmlRoot {
         system_id_token: missing (optional),
         r_angle_token: R_ANGLE@14..15 ">" [] [],
     },
-    html: missing (optional),
+    html: HtmlElementList [],
     eof_token: EOF@15..16 "" [Newline("\n")] [],
 }
 ```
@@ -44,7 +44,7 @@ HtmlRoot {
     5: (empty)
     6: (empty)
     7: R_ANGLE@14..15 ">" [] []
-  2: (empty)
+  2: HTML_ELEMENT_LIST@15..15
   3: EOF@15..16 "" [Newline("\n")] []
 
 ```

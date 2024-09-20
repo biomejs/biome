@@ -25,4 +25,5 @@ Attribute Position: Auto
 -----
 
 ```html
-<div foo="bar" id="foo"></div>```
+<div foo="bar" id="foo"></div>
+```

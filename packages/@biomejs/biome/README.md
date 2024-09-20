@@ -8,22 +8,25 @@
 
 <div align="center">
 
-[![Discord chat][discord-badge]][discord-url]
 [![CI on main][ci-badge]][ci-url]
+[![Discord chat][discord-badge]][discord-url]
 [![npm version][npm-badge]][npm-url]
 [![VSCode version][vscode-badge]][vscode-url]
 [![Open VSX version][open-vsx-badge]][open-vsx-url]
+[![Polar bounties][polar-badge]][polar-url]
 
-[discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=green
-[discord-url]: https://discord.gg/BypW39g6Yc
 [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
 [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
-[npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=green&label=%40biomejs%2Fbiome
+[discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
+[discord-url]: https://discord.gg/BypW39g6Yc
+[npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
 [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
-[vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=green
+[vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=60a5fa
 [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
-[open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=green
+[open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=60a5fa
 [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
+[polar-badge]: https://polar.sh/embed/seeks-funding-shield.svg?org=biomejs
+[polar-url]: https://polar.sh/biomejs
 
 </div>
 
@@ -105,12 +108,8 @@ Biome offers a simple sponsorship program that allows companies to get visibilit
 
 We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific features that you would like to see and implement. Check our backlog and help us:
 
-<a href="https://polar.sh/biomejs"><img src="https://polar.sh/embed/fund-our-backlog.svg?org=biomejs" /></a>
-
 
 ## Sponsors
-
-### Gold Sponsors
 
 ### Silver Sponsors
 

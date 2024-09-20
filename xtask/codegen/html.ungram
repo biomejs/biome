@@ -43,7 +43,7 @@ HtmlBogusAttribute = SyntaxElement*
 HtmlRoot =
 	bom: 'UNICODE_BOM'?
 	directive: HtmlDirective?
-	html: AnyHtmlElement?
+	html: HtmlElementList
 	eof: 'EOF'
 
 // <!DOCTYPE html>
