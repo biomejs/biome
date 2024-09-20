@@ -564,76 +564,6 @@ pub struct MdLinkBlockFields {
     pub title: Option<MdTextual>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdMinus {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdMinus {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdMinusFields {
-        MdMinusFields {
-            minus_token: self.minus_token(),
-        }
-    }
-    pub fn minus_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MdMinus {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdMinusFields {
-    pub minus_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdMinusThematicBreakBlock {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdMinusThematicBreakBlock {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdMinusThematicBreakBlockFields {
-        MdMinusThematicBreakBlockFields {
-            md_minus_list: self.md_minus_list(),
-        }
-    }
-    pub fn md_minus_list(&self) -> MdMinusList {
-        support::list(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MdMinusThematicBreakBlock {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdMinusThematicBreakBlockFields {
-    pub md_minus_list: MdMinusList,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdOrderListItem {
     pub(crate) syntax: SyntaxNode,
 }
@@ -809,76 +739,6 @@ pub struct MdSoftBreakFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdStar {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdStar {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdStarFields {
-        MdStarFields {
-            star_token: self.star_token(),
-        }
-    }
-    pub fn star_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MdStar {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdStarFields {
-    pub star_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdStarThematicBreakBlock {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdStarThematicBreakBlock {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdStarThematicBreakBlockFields {
-        MdStarThematicBreakBlockFields {
-            md_star_list: self.md_star_list(),
-        }
-    }
-    pub fn md_star_list(&self) -> MdStarList {
-        support::list(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MdStarThematicBreakBlock {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdStarThematicBreakBlockFields {
-    pub md_star_list: MdStarList,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct MdTextual {
     pub(crate) syntax: SyntaxNode,
 }
@@ -914,10 +774,10 @@ pub struct MdTextualFields {
     pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdUnderscore {
+pub struct MdThematicBreakBlock {
     pub(crate) syntax: SyntaxNode,
 }
-impl MdUnderscore {
+impl MdThematicBreakBlock {
     #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
     #[doc = r""]
     #[doc = r" # Safety"]
@@ -927,16 +787,16 @@ impl MdUnderscore {
     pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
         Self { syntax }
     }
-    pub fn as_fields(&self) -> MdUnderscoreFields {
-        MdUnderscoreFields {
-            __token: self.__token(),
+    pub fn as_fields(&self) -> MdThematicBreakBlockFields {
+        MdThematicBreakBlockFields {
+            value_token: self.value_token(),
         }
     }
-    pub fn __token(&self) -> SyntaxResult<SyntaxToken> {
+    pub fn value_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
 }
-impl Serialize for MdUnderscore {
+impl Serialize for MdThematicBreakBlock {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -945,43 +805,8 @@ impl Serialize for MdUnderscore {
     }
 }
 #[derive(Serialize)]
-pub struct MdUnderscoreFields {
-    pub __token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct MdUnderscoreThematicBreakBlock {
-    pub(crate) syntax: SyntaxNode,
-}
-impl MdUnderscoreThematicBreakBlock {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> MdUnderscoreThematicBreakBlockFields {
-        MdUnderscoreThematicBreakBlockFields {
-            md_underscore_list: self.md_underscore_list(),
-        }
-    }
-    pub fn md_underscore_list(&self) -> MdUnderscoreList {
-        support::list(&self.syntax, 0usize)
-    }
-}
-impl Serialize for MdUnderscoreThematicBreakBlock {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct MdUnderscoreThematicBreakBlockFields {
-    pub md_underscore_list: MdUnderscoreList,
+pub struct MdThematicBreakBlockFields {
+    pub value_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyCodeBlock {
@@ -1031,23 +856,17 @@ impl AnyContainerBlock {
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyLeafBlock {
     AnyCodeBlock(AnyCodeBlock),
-    AnyMdThematicBreakBlock(AnyMdThematicBreakBlock),
     MdHeader(MdHeader),
     MdHtmlBlock(MdHtmlBlock),
     MdLinkBlock(MdLinkBlock),
     MdParagraph(MdParagraph),
     MdSetextHeader(MdSetextHeader),
+    MdThematicBreakBlock(MdThematicBreakBlock),
 }
 impl AnyLeafBlock {
     pub fn as_any_code_block(&self) -> Option<&AnyCodeBlock> {
         match &self {
             AnyLeafBlock::AnyCodeBlock(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_any_md_thematic_break_block(&self) -> Option<&AnyMdThematicBreakBlock> {
-        match &self {
-            AnyLeafBlock::AnyMdThematicBreakBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -1078,6 +897,12 @@ impl AnyLeafBlock {
     pub fn as_md_setext_header(&self) -> Option<&MdSetextHeader> {
         match &self {
             AnyLeafBlock::MdSetextHeader(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_md_thematic_break_block(&self) -> Option<&MdThematicBreakBlock> {
+        match &self {
+            AnyLeafBlock::MdThematicBreakBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -1158,32 +983,6 @@ impl AnyMdInline {
     pub fn as_md_textual(&self) -> Option<&MdTextual> {
         match &self {
             AnyMdInline::MdTextual(item) => Some(item),
-            _ => None,
-        }
-    }
-}
-#[derive(Clone, PartialEq, Eq, Hash, Serialize)]
-pub enum AnyMdThematicBreakBlock {
-    MdMinusThematicBreakBlock(MdMinusThematicBreakBlock),
-    MdStarThematicBreakBlock(MdStarThematicBreakBlock),
-    MdUnderscoreThematicBreakBlock(MdUnderscoreThematicBreakBlock),
-}
-impl AnyMdThematicBreakBlock {
-    pub fn as_md_minus_thematic_break_block(&self) -> Option<&MdMinusThematicBreakBlock> {
-        match &self {
-            AnyMdThematicBreakBlock::MdMinusThematicBreakBlock(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_md_star_thematic_break_block(&self) -> Option<&MdStarThematicBreakBlock> {
-        match &self {
-            AnyMdThematicBreakBlock::MdStarThematicBreakBlock(item) => Some(item),
-            _ => None,
-        }
-    }
-    pub fn as_md_underscore_thematic_break_block(&self) -> Option<&MdUnderscoreThematicBreakBlock> {
-        match &self {
-            AnyMdThematicBreakBlock::MdUnderscoreThematicBreakBlock(item) => Some(item),
             _ => None,
         }
     }
@@ -1742,85 +1541,6 @@ impl From<MdLinkBlock> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for MdMinus {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_MINUS as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_MINUS
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdMinus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdMinus")
-            .field(
-                "minus_token",
-                &support::DebugSyntaxResult(self.minus_token()),
-            )
-            .finish()
-    }
-}
-impl From<MdMinus> for SyntaxNode {
-    fn from(n: MdMinus) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MdMinus> for SyntaxElement {
-    fn from(n: MdMinus) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for MdMinusThematicBreakBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_MINUS_THEMATIC_BREAK_BLOCK as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_MINUS_THEMATIC_BREAK_BLOCK
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdMinusThematicBreakBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdMinusThematicBreakBlock")
-            .field("md_minus_list", &self.md_minus_list())
-            .finish()
-    }
-}
-impl From<MdMinusThematicBreakBlock> for SyntaxNode {
-    fn from(n: MdMinusThematicBreakBlock) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MdMinusThematicBreakBlock> for SyntaxElement {
-    fn from(n: MdMinusThematicBreakBlock) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for MdOrderListItem {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2020,82 +1740,6 @@ impl From<MdSoftBreak> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for MdStar {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_STAR as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_STAR
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdStar {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdStar")
-            .field("star_token", &support::DebugSyntaxResult(self.star_token()))
-            .finish()
-    }
-}
-impl From<MdStar> for SyntaxNode {
-    fn from(n: MdStar) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MdStar> for SyntaxElement {
-    fn from(n: MdStar) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for MdStarThematicBreakBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_STAR_THEMATIC_BREAK_BLOCK as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_STAR_THEMATIC_BREAK_BLOCK
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdStarThematicBreakBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdStarThematicBreakBlock")
-            .field("md_star_list", &self.md_star_list())
-            .finish()
-    }
-}
-impl From<MdStarThematicBreakBlock> for SyntaxNode {
-    fn from(n: MdStarThematicBreakBlock) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MdStarThematicBreakBlock> for SyntaxElement {
-    fn from(n: MdStarThematicBreakBlock) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for MdTextual {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -2137,12 +1781,12 @@ impl From<MdTextual> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for MdUnderscore {
+impl AstNode for MdThematicBreakBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_UNDERSCORE as u16));
+        SyntaxKindSet::from_raw(RawSyntaxKind(MD_THEMATIC_BREAK_BLOCK as u16));
     fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_UNDERSCORE
+        kind == MD_THEMATIC_BREAK_BLOCK
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         if Self::can_cast(syntax.kind()) {
@@ -2158,58 +1802,23 @@ impl AstNode for MdUnderscore {
         self.syntax
     }
 }
-impl std::fmt::Debug for MdUnderscore {
+impl std::fmt::Debug for MdThematicBreakBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdUnderscore")
-            .field("__token", &support::DebugSyntaxResult(self.__token()))
+        f.debug_struct("MdThematicBreakBlock")
+            .field(
+                "value_token",
+                &support::DebugSyntaxResult(self.value_token()),
+            )
             .finish()
     }
 }
-impl From<MdUnderscore> for SyntaxNode {
-    fn from(n: MdUnderscore) -> SyntaxNode {
+impl From<MdThematicBreakBlock> for SyntaxNode {
+    fn from(n: MdThematicBreakBlock) -> SyntaxNode {
         n.syntax
     }
 }
-impl From<MdUnderscore> for SyntaxElement {
-    fn from(n: MdUnderscore) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
-impl AstNode for MdUnderscoreThematicBreakBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_UNDERSCORE_THEMATIC_BREAK_BLOCK as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_UNDERSCORE_THEMATIC_BREAK_BLOCK
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for MdUnderscoreThematicBreakBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("MdUnderscoreThematicBreakBlock")
-            .field("md_underscore_list", &self.md_underscore_list())
-            .finish()
-    }
-}
-impl From<MdUnderscoreThematicBreakBlock> for SyntaxNode {
-    fn from(n: MdUnderscoreThematicBreakBlock) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<MdUnderscoreThematicBreakBlock> for SyntaxElement {
-    fn from(n: MdUnderscoreThematicBreakBlock) -> SyntaxElement {
+impl From<MdThematicBreakBlock> for SyntaxElement {
+    fn from(n: MdThematicBreakBlock) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -2369,20 +1978,29 @@ impl From<MdSetextHeader> for AnyLeafBlock {
         AnyLeafBlock::MdSetextHeader(node)
     }
 }
+impl From<MdThematicBreakBlock> for AnyLeafBlock {
+    fn from(node: MdThematicBreakBlock) -> AnyLeafBlock {
+        AnyLeafBlock::MdThematicBreakBlock(node)
+    }
+}
 impl AstNode for AnyLeafBlock {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = AnyCodeBlock::KIND_SET
-        .union(AnyMdThematicBreakBlock::KIND_SET)
         .union(MdHeader::KIND_SET)
         .union(MdHtmlBlock::KIND_SET)
         .union(MdLinkBlock::KIND_SET)
         .union(MdParagraph::KIND_SET)
-        .union(MdSetextHeader::KIND_SET);
+        .union(MdSetextHeader::KIND_SET)
+        .union(MdThematicBreakBlock::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
         match kind {
-            MD_HEADER | MD_HTML_BLOCK | MD_LINK_BLOCK | MD_PARAGRAPH | MD_SETEXT_HEADER => true,
+            MD_HEADER
+            | MD_HTML_BLOCK
+            | MD_LINK_BLOCK
+            | MD_PARAGRAPH
+            | MD_SETEXT_HEADER
+            | MD_THEMATIC_BREAK_BLOCK => true,
             k if AnyCodeBlock::can_cast(k) => true,
-            k if AnyMdThematicBreakBlock::can_cast(k) => true,
             _ => false,
         }
     }
@@ -2393,17 +2011,12 @@ impl AstNode for AnyLeafBlock {
             MD_LINK_BLOCK => AnyLeafBlock::MdLinkBlock(MdLinkBlock { syntax }),
             MD_PARAGRAPH => AnyLeafBlock::MdParagraph(MdParagraph { syntax }),
             MD_SETEXT_HEADER => AnyLeafBlock::MdSetextHeader(MdSetextHeader { syntax }),
+            MD_THEMATIC_BREAK_BLOCK => {
+                AnyLeafBlock::MdThematicBreakBlock(MdThematicBreakBlock { syntax })
+            }
             _ => {
-                let syntax = match AnyCodeBlock::try_cast(syntax) {
-                    Ok(any_code_block) => {
-                        return Some(AnyLeafBlock::AnyCodeBlock(any_code_block));
-                    }
-                    Err(syntax) => syntax,
-                };
-                if let Some(any_md_thematic_break_block) = AnyMdThematicBreakBlock::cast(syntax) {
-                    return Some(AnyLeafBlock::AnyMdThematicBreakBlock(
-                        any_md_thematic_break_block,
-                    ));
+                if let Some(any_code_block) = AnyCodeBlock::cast(syntax) {
+                    return Some(AnyLeafBlock::AnyCodeBlock(any_code_block));
                 }
                 return None;
             }
@@ -2417,8 +2030,8 @@ impl AstNode for AnyLeafBlock {
             AnyLeafBlock::MdLinkBlock(it) => &it.syntax,
             AnyLeafBlock::MdParagraph(it) => &it.syntax,
             AnyLeafBlock::MdSetextHeader(it) => &it.syntax,
+            AnyLeafBlock::MdThematicBreakBlock(it) => &it.syntax,
             AnyLeafBlock::AnyCodeBlock(it) => it.syntax(),
-            AnyLeafBlock::AnyMdThematicBreakBlock(it) => it.syntax(),
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -2428,8 +2041,8 @@ impl AstNode for AnyLeafBlock {
             AnyLeafBlock::MdLinkBlock(it) => it.syntax,
             AnyLeafBlock::MdParagraph(it) => it.syntax,
             AnyLeafBlock::MdSetextHeader(it) => it.syntax,
+            AnyLeafBlock::MdThematicBreakBlock(it) => it.syntax,
             AnyLeafBlock::AnyCodeBlock(it) => it.into_syntax(),
-            AnyLeafBlock::AnyMdThematicBreakBlock(it) => it.into_syntax(),
         }
     }
 }
@@ -2437,12 +2050,12 @@ impl std::fmt::Debug for AnyLeafBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AnyLeafBlock::AnyCodeBlock(it) => std::fmt::Debug::fmt(it, f),
-            AnyLeafBlock::AnyMdThematicBreakBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MdHeader(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MdHtmlBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MdLinkBlock(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MdParagraph(it) => std::fmt::Debug::fmt(it, f),
             AnyLeafBlock::MdSetextHeader(it) => std::fmt::Debug::fmt(it, f),
+            AnyLeafBlock::MdThematicBreakBlock(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -2450,12 +2063,12 @@ impl From<AnyLeafBlock> for SyntaxNode {
     fn from(n: AnyLeafBlock) -> SyntaxNode {
         match n {
             AnyLeafBlock::AnyCodeBlock(it) => it.into(),
-            AnyLeafBlock::AnyMdThematicBreakBlock(it) => it.into(),
             AnyLeafBlock::MdHeader(it) => it.into(),
             AnyLeafBlock::MdHtmlBlock(it) => it.into(),
             AnyLeafBlock::MdLinkBlock(it) => it.into(),
             AnyLeafBlock::MdParagraph(it) => it.into(),
             AnyLeafBlock::MdSetextHeader(it) => it.into(),
+            AnyLeafBlock::MdThematicBreakBlock(it) => it.into(),
         }
     }
 }
@@ -2659,96 +2272,6 @@ impl From<AnyMdInline> for SyntaxElement {
         node.into()
     }
 }
-impl From<MdMinusThematicBreakBlock> for AnyMdThematicBreakBlock {
-    fn from(node: MdMinusThematicBreakBlock) -> AnyMdThematicBreakBlock {
-        AnyMdThematicBreakBlock::MdMinusThematicBreakBlock(node)
-    }
-}
-impl From<MdStarThematicBreakBlock> for AnyMdThematicBreakBlock {
-    fn from(node: MdStarThematicBreakBlock) -> AnyMdThematicBreakBlock {
-        AnyMdThematicBreakBlock::MdStarThematicBreakBlock(node)
-    }
-}
-impl From<MdUnderscoreThematicBreakBlock> for AnyMdThematicBreakBlock {
-    fn from(node: MdUnderscoreThematicBreakBlock) -> AnyMdThematicBreakBlock {
-        AnyMdThematicBreakBlock::MdUnderscoreThematicBreakBlock(node)
-    }
-}
-impl AstNode for AnyMdThematicBreakBlock {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> = MdMinusThematicBreakBlock::KIND_SET
-        .union(MdStarThematicBreakBlock::KIND_SET)
-        .union(MdUnderscoreThematicBreakBlock::KIND_SET);
-    fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(
-            kind,
-            MD_MINUS_THEMATIC_BREAK_BLOCK
-                | MD_STAR_THEMATIC_BREAK_BLOCK
-                | MD_UNDERSCORE_THEMATIC_BREAK_BLOCK
-        )
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        let res = match syntax.kind() {
-            MD_MINUS_THEMATIC_BREAK_BLOCK => {
-                AnyMdThematicBreakBlock::MdMinusThematicBreakBlock(MdMinusThematicBreakBlock {
-                    syntax,
-                })
-            }
-            MD_STAR_THEMATIC_BREAK_BLOCK => {
-                AnyMdThematicBreakBlock::MdStarThematicBreakBlock(MdStarThematicBreakBlock {
-                    syntax,
-                })
-            }
-            MD_UNDERSCORE_THEMATIC_BREAK_BLOCK => {
-                AnyMdThematicBreakBlock::MdUnderscoreThematicBreakBlock(
-                    MdUnderscoreThematicBreakBlock { syntax },
-                )
-            }
-            _ => return None,
-        };
-        Some(res)
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        match self {
-            AnyMdThematicBreakBlock::MdMinusThematicBreakBlock(it) => &it.syntax,
-            AnyMdThematicBreakBlock::MdStarThematicBreakBlock(it) => &it.syntax,
-            AnyMdThematicBreakBlock::MdUnderscoreThematicBreakBlock(it) => &it.syntax,
-        }
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        match self {
-            AnyMdThematicBreakBlock::MdMinusThematicBreakBlock(it) => it.syntax,
-            AnyMdThematicBreakBlock::MdStarThematicBreakBlock(it) => it.syntax,
-            AnyMdThematicBreakBlock::MdUnderscoreThematicBreakBlock(it) => it.syntax,
-        }
-    }
-}
-impl std::fmt::Debug for AnyMdThematicBreakBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            AnyMdThematicBreakBlock::MdMinusThematicBreakBlock(it) => std::fmt::Debug::fmt(it, f),
-            AnyMdThematicBreakBlock::MdStarThematicBreakBlock(it) => std::fmt::Debug::fmt(it, f),
-            AnyMdThematicBreakBlock::MdUnderscoreThematicBreakBlock(it) => {
-                std::fmt::Debug::fmt(it, f)
-            }
-        }
-    }
-}
-impl From<AnyMdThematicBreakBlock> for SyntaxNode {
-    fn from(n: AnyMdThematicBreakBlock) -> SyntaxNode {
-        match n {
-            AnyMdThematicBreakBlock::MdMinusThematicBreakBlock(it) => it.into(),
-            AnyMdThematicBreakBlock::MdStarThematicBreakBlock(it) => it.into(),
-            AnyMdThematicBreakBlock::MdUnderscoreThematicBreakBlock(it) => it.into(),
-        }
-    }
-}
-impl From<AnyMdThematicBreakBlock> for SyntaxElement {
-    fn from(n: AnyMdThematicBreakBlock) -> SyntaxElement {
-        let node: SyntaxNode = n.into();
-        node.into()
-    }
-}
 impl std::fmt::Display for AnyCodeBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -2770,11 +2293,6 @@ impl std::fmt::Display for AnyMdBlock {
     }
 }
 impl std::fmt::Display for AnyMdInline {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for AnyMdThematicBreakBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -2849,16 +2367,6 @@ impl std::fmt::Display for MdLinkBlock {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MdMinus {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MdMinusThematicBreakBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for MdOrderListItem {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -2884,27 +2392,12 @@ impl std::fmt::Display for MdSoftBreak {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MdStar {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MdStarThematicBreakBlock {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for MdTextual {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for MdUnderscore {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for MdUnderscoreThematicBreakBlock {
+impl std::fmt::Display for MdThematicBreakBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
@@ -3212,88 +2705,6 @@ impl IntoIterator for MdHashList {
     }
 }
 #[derive(Clone, Eq, PartialEq, Hash)]
-pub struct MdMinusList {
-    syntax_list: SyntaxList,
-}
-impl MdMinusList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for MdMinusList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_MINUS_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_MINUS_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<MdMinusList> {
-        if Self::can_cast(syntax.kind()) {
-            Some(MdMinusList {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-impl Serialize for MdMinusList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstNodeList for MdMinusList {
-    type Language = Language;
-    type Node = MdMinus;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for MdMinusList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("MdMinusList ")?;
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-impl IntoIterator for &MdMinusList {
-    type Item = MdMinus;
-    type IntoIter = AstNodeListIterator<Language, MdMinus>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for MdMinusList {
-    type Item = MdMinus;
-    type IntoIter = AstNodeListIterator<Language, MdMinus>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct MdOrderList {
     syntax_list: SyntaxList,
 }
@@ -3453,170 +2864,6 @@ impl IntoIterator for &MdParagraphItemList {
 impl IntoIterator for MdParagraphItemList {
     type Item = AnyMdInline;
     type IntoIter = AstNodeListIterator<Language, AnyMdInline>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct MdStarList {
-    syntax_list: SyntaxList,
-}
-impl MdStarList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for MdStarList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_STAR_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_STAR_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<MdStarList> {
-        if Self::can_cast(syntax.kind()) {
-            Some(MdStarList {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-impl Serialize for MdStarList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstNodeList for MdStarList {
-    type Language = Language;
-    type Node = MdStar;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for MdStarList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("MdStarList ")?;
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-impl IntoIterator for &MdStarList {
-    type Item = MdStar;
-    type IntoIter = AstNodeListIterator<Language, MdStar>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for MdStarList {
-    type Item = MdStar;
-    type IntoIter = AstNodeListIterator<Language, MdStar>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-#[derive(Clone, Eq, PartialEq, Hash)]
-pub struct MdUnderscoreList {
-    syntax_list: SyntaxList,
-}
-impl MdUnderscoreList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self {
-            syntax_list: syntax.into_list(),
-        }
-    }
-}
-impl AstNode for MdUnderscoreList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(MD_UNDERSCORE_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == MD_UNDERSCORE_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<MdUnderscoreList> {
-        if Self::can_cast(syntax.kind()) {
-            Some(MdUnderscoreList {
-                syntax_list: syntax.into_list(),
-            })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        self.syntax_list.node()
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax_list.into_node()
-    }
-}
-impl Serialize for MdUnderscoreList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.len()))?;
-        for e in self.iter() {
-            seq.serialize_element(&e)?;
-        }
-        seq.end()
-    }
-}
-impl AstNodeList for MdUnderscoreList {
-    type Language = Language;
-    type Node = MdUnderscore;
-    fn syntax_list(&self) -> &SyntaxList {
-        &self.syntax_list
-    }
-    fn into_syntax_list(self) -> SyntaxList {
-        self.syntax_list
-    }
-}
-impl Debug for MdUnderscoreList {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        f.write_str("MdUnderscoreList ")?;
-        f.debug_list().entries(self.iter()).finish()
-    }
-}
-impl IntoIterator for &MdUnderscoreList {
-    type Item = MdUnderscore;
-    type IntoIter = AstNodeListIterator<Language, MdUnderscore>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
-}
-impl IntoIterator for MdUnderscoreList {
-    type Item = MdUnderscore;
-    type IntoIter = AstNodeListIterator<Language, MdUnderscore>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

@@ -180,9 +180,7 @@ impl<'src> MarkdownLexer<'src> {
         let dispatched = lookup_byte(current);
         match dispatched {
             WHS => self.consume_newline_or_whitespace(),
-            MUL => self.consume_byte(T![*]),
-            MIN => self.consume_byte(T![-]),
-            IDT => self.consume_byte(T![_]),
+            MUL | MIN | IDT => self.consume_thematic_break_literal(),
             _ => self.consume_textual(),
         }
     }
@@ -269,6 +267,36 @@ impl<'src> MarkdownLexer<'src> {
             self.advance(1)
         }
         TAB
+    }
+
+    fn consume_thematic_break_literal(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        let start_char = match self.current_byte() {
+            Some(b'-') => b'-',
+            Some(b'*') => b'*',
+            Some(b'_') => b'_',
+            _ => unreachable!(),
+        };
+
+        loop {
+            self.skip_whitespace();
+            if  matches!(self.current_byte(), Some(start_char)) {
+                self.advance(1);
+            }
+        }
+        // newline
+        if matches!(self.current_byte(), Some(b'\n' | b'\r')) {
+            MD_THEMATIC_BREAK_LITERAL
+        }
+        // FIXME: should return a error token,resume to the position
+        MD_THEMATIC_BREAK_LITERAL
+    }
+
+    fn skip_whitespace(&mut self) {
+        while matches!(self.current_byte(), Some(b'\t' | b' ')) {
+            self.advance(1);
+        }
     }
 
     /// Get the UTF8 char which starts at the current byte

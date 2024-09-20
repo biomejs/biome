@@ -175,22 +175,6 @@ impl MdLinkBlock {
         ))
     }
 }
-impl MdMinus {
-    pub fn with_minus_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
-impl MdMinusThematicBreakBlock {
-    pub fn with_md_minus_list(self, element: MdMinusList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl MdOrderListItem {
     pub fn with_md_bullet_list(self, element: MdBulletList) -> Self {
         Self::unwrap_cast(
@@ -231,22 +215,6 @@ impl MdSoftBreak {
         )
     }
 }
-impl MdStar {
-    pub fn with_star_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
-impl MdStarThematicBreakBlock {
-    pub fn with_md_star_list(self, element: MdStarList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl MdTextual {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -255,19 +223,11 @@ impl MdTextual {
         )
     }
 }
-impl MdUnderscore {
-    pub fn with___token(self, element: SyntaxToken) -> Self {
+impl MdThematicBreakBlock {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
-impl MdUnderscoreThematicBreakBlock {
-    pub fn with_md_underscore_list(self, element: MdUnderscoreList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }

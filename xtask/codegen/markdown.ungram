@@ -1,4 +1,4 @@
-// Md Un-Grammar.
+// Markdown Un-Grammar.
 //
 // This grammar specifies the structure of Rust's concrete syntax tree.
 // It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
@@ -48,7 +48,7 @@ MdBlockList = AnyMdBlock*
 
 AnyMdBlock = AnyLeafBlock  | AnyContainerBlock
 
-AnyLeafBlock = AnyMdThematicBreakBlock | MdHeader | MdSetextHeader
+AnyLeafBlock = MdThematicBreakBlock | MdHeader | MdSetextHeader
                 | AnyCodeBlock | MdHtmlBlock | MdLinkBlock | MdParagraph
 
 AnyContainerBlock = MdQuote | MdBulletListItem | MdOrderListItem
@@ -114,24 +114,14 @@ MdInlineImage = alt: MdTextual
                     src: MdTextual
                     title: MdTextual?
 
-MdHardLine = value: 'Md_hard_line_literal'
-MdSoftBreak = value: 'Md_soft_break_literal'
-MdTextual = value: 'Md_textual_literal'
-MdIndent = value: 'Md_indent_chunk_literal'
+MdHardLine = value: 'md_hard_line_literal'
+MdSoftBreak = value: 'md_soft_break_literal'
+MdTextual = value: 'md_textual_literal'
+MdIndent = value: 'md_indent_chunk_literal'
+
 // ***
 // ---
 // ___
-AnyMdThematicBreakBlock = MdStarThematicBreakBlock | MdMinusThematicBreakBlock | MdUnderscoreThematicBreakBlock
-
-MdStarThematicBreakBlock = MdStarList
-MdStarList = MdStar*
-MdStar = '*'
-
-MdMinusThematicBreakBlock = MdMinusList
-MdMinusList = MdMinus*
-MdMinus = '-'
-
-MdUnderscoreThematicBreakBlock = MdUnderscoreList
-MdUnderscoreList = MdUnderscore*
-MdUnderscore = '_'
+// https://spec.commonmark.org/0.31.2/#container-blocks-and-leaf-blocks
+MdThematicBreakBlock = value: 'md_thematic_break_literal'
 

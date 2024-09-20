@@ -35,7 +35,7 @@ pub enum MarkdownSyntaxKind {
     MD_TEXTUAL_LITERAL,
     MD_STRING_LITERAL,
     MD_INDENT_CHUNK_LITERAL,
-    MD_BREAK_BLOCK_LITERAL,
+    MD_THEMATIC_BREAK_LITERAL,
     NEWLINE,
     WHITESPACE,
     TAB,
@@ -67,15 +67,7 @@ pub enum MarkdownSyntaxKind {
     MD_SETEXT_HEADER,
     MD_STRING,
     MD_INDENT,
-    MD_MINUS_THEMATIC_BREAK_BLOCK,
-    MD_MINUS_LIST,
-    MD_MINUS,
-    MD_UNDERSCORE_THEMATIC_BREAK_BLOCK,
-    MD_UNDERSCORE_LIST,
-    MD_UNDERSCORE,
-    MD_STAR_THEMATIC_BREAK_BLOCK,
-    MD_STAR_LIST,
-    MD_STAR,
+    MD_THEMATIC_BREAK_BLOCK,
     #[doc(hidden)]
     __LAST,
 }
@@ -95,7 +87,7 @@ impl MarkdownSyntaxKind {
             | MD_TEXTUAL_LITERAL
             | MD_STRING_LITERAL
             | MD_INDENT_CHUNK_LITERAL
-            | MD_BREAK_BLOCK_LITERAL => true,
+            | MD_THEMATIC_BREAK_LITERAL => true,
             _ => false,
         }
     }
@@ -105,10 +97,7 @@ impl MarkdownSyntaxKind {
             | MD_HASH_LIST
             | MD_BULLET_LIST
             | MD_ORDER_LIST
-            | MD_PARAGRAPH_ITEM_LIST
-            | MD_MINUS_LIST
-            | MD_UNDERSCORE_LIST
-            | MD_STAR_LIST => true,
+            | MD_PARAGRAPH_ITEM_LIST => true,
             _ => false,
         }
     }

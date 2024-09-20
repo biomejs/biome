@@ -72,15 +72,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdLinkBlock::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_MINUS => {
-                    let $pattern = unsafe { $crate::MdMinus::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MD_MINUS_THEMATIC_BREAK_BLOCK => {
-                    let $pattern =
-                        unsafe { $crate::MdMinusThematicBreakBlock::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MD_ORDER_LIST_ITEM => {
                     let $pattern = unsafe { $crate::MdOrderListItem::new_unchecked(node) };
                     $body
@@ -101,25 +92,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdSoftBreak::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_STAR => {
-                    let $pattern = unsafe { $crate::MdStar::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MD_STAR_THEMATIC_BREAK_BLOCK => {
-                    let $pattern = unsafe { $crate::MdStarThematicBreakBlock::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MD_TEXTUAL => {
                     let $pattern = unsafe { $crate::MdTextual::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_UNDERSCORE => {
-                    let $pattern = unsafe { $crate::MdUnderscore::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MD_UNDERSCORE_THEMATIC_BREAK_BLOCK => {
-                    let $pattern =
-                        unsafe { $crate::MdUnderscoreThematicBreakBlock::new_unchecked(node) };
+                $crate::MarkdownSyntaxKind::MD_THEMATIC_BREAK_BLOCK => {
+                    let $pattern = unsafe { $crate::MdThematicBreakBlock::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_BOGUS => {
@@ -138,24 +116,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::MdHashList::new_unchecked(node) };
                     $body
                 }
-                $crate::MarkdownSyntaxKind::MD_MINUS_LIST => {
-                    let $pattern = unsafe { $crate::MdMinusList::new_unchecked(node) };
-                    $body
-                }
                 $crate::MarkdownSyntaxKind::MD_ORDER_LIST => {
                     let $pattern = unsafe { $crate::MdOrderList::new_unchecked(node) };
                     $body
                 }
                 $crate::MarkdownSyntaxKind::MD_PARAGRAPH_ITEM_LIST => {
                     let $pattern = unsafe { $crate::MdParagraphItemList::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MD_STAR_LIST => {
-                    let $pattern = unsafe { $crate::MdStarList::new_unchecked(node) };
-                    $body
-                }
-                $crate::MarkdownSyntaxKind::MD_UNDERSCORE_LIST => {
-                    let $pattern = unsafe { $crate::MdUnderscoreList::new_unchecked(node) };
                     $body
                 }
                 _ => unreachable!(),

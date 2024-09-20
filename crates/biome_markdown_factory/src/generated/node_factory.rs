@@ -205,18 +205,6 @@ impl MdLinkBlockBuilder {
         ))
     }
 }
-pub fn md_minus(minus_token: SyntaxToken) -> MdMinus {
-    MdMinus::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_MINUS,
-        [Some(SyntaxElement::Token(minus_token))],
-    ))
-}
-pub fn md_minus_thematic_break_block(md_minus_list: MdMinusList) -> MdMinusThematicBreakBlock {
-    MdMinusThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_MINUS_THEMATIC_BREAK_BLOCK,
-        [Some(SyntaxElement::Node(md_minus_list.into_syntax()))],
-    ))
-}
 pub fn md_order_list_item(md_bullet_list: MdBulletList) -> MdOrderListItem {
     MdOrderListItem::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_ORDER_LIST_ITEM,
@@ -249,36 +237,16 @@ pub fn md_soft_break(value_token: SyntaxToken) -> MdSoftBreak {
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn md_star(star_token: SyntaxToken) -> MdStar {
-    MdStar::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_STAR,
-        [Some(SyntaxElement::Token(star_token))],
-    ))
-}
-pub fn md_star_thematic_break_block(md_star_list: MdStarList) -> MdStarThematicBreakBlock {
-    MdStarThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_STAR_THEMATIC_BREAK_BLOCK,
-        [Some(SyntaxElement::Node(md_star_list.into_syntax()))],
-    ))
-}
 pub fn md_textual(value_token: SyntaxToken) -> MdTextual {
     MdTextual::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_TEXTUAL,
         [Some(SyntaxElement::Token(value_token))],
     ))
 }
-pub fn md_underscore(__token: SyntaxToken) -> MdUnderscore {
-    MdUnderscore::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_UNDERSCORE,
-        [Some(SyntaxElement::Token(__token))],
-    ))
-}
-pub fn md_underscore_thematic_break_block(
-    md_underscore_list: MdUnderscoreList,
-) -> MdUnderscoreThematicBreakBlock {
-    MdUnderscoreThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_UNDERSCORE_THEMATIC_BREAK_BLOCK,
-        [Some(SyntaxElement::Node(md_underscore_list.into_syntax()))],
+pub fn md_thematic_break_block(value_token: SyntaxToken) -> MdThematicBreakBlock {
+    MdThematicBreakBlock::unwrap_cast(SyntaxNode::new_detached(
+        MarkdownSyntaxKind::MD_THEMATIC_BREAK_BLOCK,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn md_block_list<I>(items: I) -> MdBlockList
@@ -317,18 +285,6 @@ where
             .map(|item| Some(item.into_syntax().into())),
     ))
 }
-pub fn md_minus_list<I>(items: I) -> MdMinusList
-where
-    I: IntoIterator<Item = MdMinus>,
-    I::IntoIter: ExactSizeIterator,
-{
-    MdMinusList::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_MINUS_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
-    ))
-}
 pub fn md_order_list<I>(items: I) -> MdOrderList
 where
     I: IntoIterator<Item = AnyCodeBlock>,
@@ -348,30 +304,6 @@ where
 {
     MdParagraphItemList::unwrap_cast(SyntaxNode::new_detached(
         MarkdownSyntaxKind::MD_PARAGRAPH_ITEM_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
-    ))
-}
-pub fn md_star_list<I>(items: I) -> MdStarList
-where
-    I: IntoIterator<Item = MdStar>,
-    I::IntoIter: ExactSizeIterator,
-{
-    MdStarList::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_STAR_LIST,
-        items
-            .into_iter()
-            .map(|item| Some(item.into_syntax().into())),
-    ))
-}
-pub fn md_underscore_list<I>(items: I) -> MdUnderscoreList
-where
-    I: IntoIterator<Item = MdUnderscore>,
-    I::IntoIter: ExactSizeIterator,
-{
-    MdUnderscoreList::unwrap_cast(SyntaxNode::new_detached(
-        MarkdownSyntaxKind::MD_UNDERSCORE_LIST,
         items
             .into_iter()
             .map(|item| Some(item.into_syntax().into())),
