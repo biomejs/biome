@@ -1,7 +1,10 @@
-use biome_rowan::TextRange;
 use grit_pattern_matcher::pattern::VariableSourceLocations;
+use grit_util::ByteRange;
 
-use crate::{diagnostics::CompilerDiagnostic, grit_target_language::GritTargetLanguage};
+use crate::{
+    diagnostics::CompilerDiagnostic, grit_built_in_functions::BuiltIns,
+    grit_target_language::GritTargetLanguage,
+};
 use std::{collections::BTreeMap, path::Path};
 
 pub(crate) struct CompilationContext<'a> {
@@ -11,16 +14,23 @@ pub(crate) struct CompilationContext<'a> {
     /// The target language being matched on.
     pub lang: GritTargetLanguage,
 
+    pub built_ins: &'a BuiltIns,
     pub pattern_definition_info: BTreeMap<String, DefinitionInfo>,
     pub predicate_definition_info: BTreeMap<String, DefinitionInfo>,
     pub function_definition_info: BTreeMap<String, DefinitionInfo>,
 }
 
 impl<'a> CompilationContext<'a> {
-    pub(crate) fn new(source_path: Option<&'a Path>, lang: GritTargetLanguage) -> Self {
+    #[cfg(test)]
+    pub(crate) fn new(
+        source_path: Option<&'a Path>,
+        lang: GritTargetLanguage,
+        built_ins: &'a BuiltIns,
+    ) -> Self {
         Self {
             source_path,
             lang,
+            built_ins,
             pattern_definition_info: Default::default(),
             predicate_definition_info: Default::default(),
             function_definition_info: Default::default(),
@@ -80,5 +90,5 @@ impl<'a> NodeCompilationContext<'a> {
 
 pub(crate) struct DefinitionInfo {
     pub(crate) index: usize,
-    pub(crate) parameters: Vec<(String, TextRange)>,
+    pub(crate) parameters: Vec<(String, ByteRange)>,
 }

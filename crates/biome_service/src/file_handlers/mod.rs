@@ -144,9 +144,10 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-        //if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
-        //    return Ok(file_source.into());
-        //}
+        #[cfg(feature = "experimental-html")]
+        if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -170,9 +171,10 @@ impl DocumentFileSource {
         if let Ok(file_source) = GraphqlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        //if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
-        //    return Ok(file_source.into());
-        //}
+        #[cfg(feature = "experimental-html")]
+        if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
         Err(FileSourceError::UnknownLanguageId)
     }
 
@@ -314,7 +316,7 @@ impl DocumentFileSource {
             DocumentFileSource::Css(_)
             | DocumentFileSource::Graphql(_)
             | DocumentFileSource::Json(_) => true,
-            DocumentFileSource::Html(_) => false,
+            DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
             DocumentFileSource::Unknown => false,
         }
     }
@@ -645,7 +647,7 @@ pub(crate) fn search(
     query: &GritQuery,
     _settings: WorkspaceSettingsHandle,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
-    let query_result = query
+    let (query_result, _logs) = query
         .execute(GritTargetFile {
             path: path.to_path_buf(),
             parse,

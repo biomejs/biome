@@ -7,7 +7,12 @@ use biome_js_syntax::JsFileSource;
 #[ignore]
 #[test]
 fn test_query() {
-    let parse_grit_result = parse_grit("`foo.$x && foo.$x()`");
+    let parse_grit_result = parse_grit(
+        "`console.log($arg)` => . where {
+  log(message=\"This is a debug log\", variable=$arg),
+}
+",
+    );
     if !parse_grit_result.diagnostics().is_empty() {
         panic!("Cannot parse query:\n{:?}", parse_grit_result.diagnostics());
     }
@@ -23,14 +28,27 @@ fn test_query() {
         println!("Diagnostics from compiling query:\n{:?}", query.diagnostics);
     }
 
-    let body = r#"foo.bar && foo.bar();
-"#;
+    let body = r#"console.log("grape");"#;
 
     let file = GritTargetFile {
         path: "test.js".into(),
         parse: parse(body, JsFileSource::tsx(), JsParserOptions::default()).into(),
     };
-    let results = query.execute(file).expect("could not execute query");
+    let (results, logs) = query.execute(file).expect("could not execute query");
 
-    println!("Results: {results:?}");
+    println!("Results: {results:#?}");
+
+    if !logs.is_empty() {
+        println!(
+            "\n## Logs\n\n{}",
+            logs.iter()
+                .map(|log| format!(
+                    "Message: {}Syntax: {}",
+                    log.message,
+                    log.syntax_tree.as_deref().unwrap_or_default()
+                ))
+                .collect::<Vec<_>>()
+                .join("\n")
+        );
+    }
 }

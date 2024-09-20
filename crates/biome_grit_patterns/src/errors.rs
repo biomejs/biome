@@ -15,11 +15,23 @@ pub enum CompileError {
     /// Used for missing syntax nodes.
     MissingSyntaxNode,
 
+    /// A built-in function call was discovered in an unexpected context.
+    UnexpectedBuiltinCall(String),
+
     /// A metavariables was discovered in an unexpected context.
     UnexpectedMetavariable,
 
+    /// If a function with the same name is defined multiple times.
+    DuplicateFunctionDefinition(String),
+
     /// If a function or bubble pattern has multiple parameters with the same name.
     DuplicateParameters,
+
+    /// If a function with the same name is defined multiple times.
+    DuplicatePatternDefinition(String),
+
+    /// If a function with the same name is defined multiple times.
+    DuplicatePredicateDefinition(String),
 
     /// A metavariable was expected at the given range.
     InvalidMetavariableRange(ByteRange),
@@ -86,11 +98,23 @@ impl Diagnostic for CompileError {
             CompileError::MissingSyntaxNode => {
                 fmt.write_markup(markup! { "A syntax node was missing" })
             }
+            CompileError::UnexpectedBuiltinCall(name) => {
+                fmt.write_markup(markup! { "Unexpected call to built-in: "{{name}}"()" })
+            }
             CompileError::UnexpectedMetavariable => {
                 fmt.write_markup(markup! { "Unexpected metavariable" })
             }
+            CompileError::DuplicateFunctionDefinition(name) => {
+                fmt.write_markup(markup! { "Duplicate function definition: "{{name}} })
+            }
             CompileError::DuplicateParameters => {
                 fmt.write_markup(markup! { "Duplicate parameters" })
+            }
+            CompileError::DuplicatePatternDefinition(name) => {
+                fmt.write_markup(markup! { "Duplicate pattern definition: "{{name}} })
+            }
+            CompileError::DuplicatePredicateDefinition(name) => {
+                fmt.write_markup(markup! { "Duplicate predicate definition: "{{name}} })
             }
             CompileError::InvalidMetavariableRange(_) => {
                 fmt.write_markup(markup! { "Invalid range for metavariable" })
@@ -158,6 +182,11 @@ impl Diagnostic for CompileError {
 
     fn advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> std::io::Result<()> {
         match self {
+            CompileError::UnexpectedBuiltinCall(name) => visitor.record_log(
+                LogCategory::Info,
+                &markup! { "Built-in "{{name}}" can only be used on the right-hand side of a rewrite" }
+                    .to_owned(),
+            ),
             CompileError::ReservedMetavariable(_) => visitor.record_log(
                 LogCategory::Info,
                 &markup! { "Try using a different variable name" }.to_owned(),
