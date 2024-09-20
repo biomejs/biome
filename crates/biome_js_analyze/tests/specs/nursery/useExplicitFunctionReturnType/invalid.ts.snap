@@ -58,7 +58,9 @@ invalid.ts:1:1 lint/nursery/useExplicitFunctionReturnType ━━━━━━━�
     2 │ 	return;
     3 │ }
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```
@@ -78,7 +80,9 @@ invalid.ts:3:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━�
     6 │ 	return;
     7 │ }
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```
@@ -98,7 +102,9 @@ invalid.ts:9:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
     12 │ 
     13 │ var arrowFn = () => "test";
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```
@@ -115,7 +121,9 @@ invalid.ts:13:15 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
     14 │ 
     15 │ class Test {
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```
@@ -135,7 +143,9 @@ invalid.ts:17:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
     20 │ 	set prop() {}
     21 │ 	method() {
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```
@@ -155,7 +165,9 @@ invalid.ts:21:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
     24 │ 	arrow = () => "arrow";
     25 │ 	private method() {
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```
@@ -172,7 +184,9 @@ invalid.ts:24:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
     25 │ 	private method() {
     26 │ 		return;
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```
@@ -192,7 +206,9 @@ invalid.ts:25:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
     28 │ }
     29 │ 
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```
@@ -211,7 +227,9 @@ invalid.ts:31:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
     34 │ }
     35 │ 
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```
@@ -230,7 +248,9 @@ invalid.ts:37:3 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
     40 │ };
     41 │ 
   
-  i Require explicit return types on functions and class methods.
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
   
 
 ```

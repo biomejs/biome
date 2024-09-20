@@ -168,7 +168,10 @@ impl Rule for UseExplicitFunctionReturnType {
                 },
             )
             .note(markup! {
-                "Require explicit return types on functions and class methods."
+                "Declaring the return type makes the code self-documenting and can speed up TypeScript type checking."
+            })
+            .note(markup! {
+                "Add a return type annotation."
             }),
         )
     }
