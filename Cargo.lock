@@ -1232,7 +1232,6 @@ name = "biome_yaml_syntax"
 version = "0.0.1"
 dependencies = [
  "biome_rowan",
- "biome_string_case",
  "schemars",
  "serde",
 ]
