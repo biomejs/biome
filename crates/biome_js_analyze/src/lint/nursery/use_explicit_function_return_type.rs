@@ -15,6 +15,7 @@ declare_lint_rule! {
     ///
     /// However, explicit return types do make it visually more clear what type is returned by a function.
     /// They can also speed up TypeScript type checking performance in large codebases with many large functions.
+    /// Explicit return types also reduce the chance of bugs by asserting the return type, and they avoid surprising "action at a distance," where changing the body of one function may cause failures inside another function.
     ///
     /// This rule enforces that functions do have an explicit return type annotation.
     ///
