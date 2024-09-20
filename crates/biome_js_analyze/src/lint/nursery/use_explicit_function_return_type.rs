@@ -4,7 +4,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::AnyJsBinding;
-use biome_js_syntax::{AnyJsFunction, JsGetterClassMember, JsMethodClassMember};
+use biome_js_syntax::{
+    AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
+    JsMethodObjectMember,
+};
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 
 declare_lint_rule! {
@@ -97,11 +100,11 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub AnyJsFunctionAndMethod = AnyJsFunction | JsMethodClassMember | JsGetterClassMember
+    pub AnyJsFunctionWithReturnType = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember | JsGetterClassMember | JsGetterObjectMember
 }
 
 impl Rule for UseExplicitFunctionReturnType {
-    type Query = Ast<AnyJsFunctionAndMethod>;
+    type Query = Ast<AnyJsFunctionWithReturnType>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -109,7 +112,7 @@ impl Rule for UseExplicitFunctionReturnType {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         match node {
-            AnyJsFunctionAndMethod::AnyJsFunction(func) => {
+            AnyJsFunctionWithReturnType::AnyJsFunction(func) => {
                 if func.return_type_annotation().is_some() {
                     return None;
                 }
@@ -124,14 +127,28 @@ impl Rule for UseExplicitFunctionReturnType {
 
                 Some(func_range)
             }
-            AnyJsFunctionAndMethod::JsMethodClassMember(method) => {
+            AnyJsFunctionWithReturnType::JsMethodClassMember(method) => {
                 if method.return_type_annotation().is_some() {
                     return None;
                 }
 
                 Some(method.node_text_range())
             }
-            AnyJsFunctionAndMethod::JsGetterClassMember(getter) => {
+            AnyJsFunctionWithReturnType::JsGetterClassMember(getter) => {
+                if getter.return_type().is_some() {
+                    return None;
+                }
+
+                Some(getter.node_text_range())
+            }
+            AnyJsFunctionWithReturnType::JsMethodObjectMember(method) => {
+                if method.return_type_annotation().is_some() {
+                    return None;
+                }
+
+                Some(method.node_text_range())
+            }
+            AnyJsFunctionWithReturnType::JsGetterObjectMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }

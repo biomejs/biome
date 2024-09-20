@@ -33,6 +33,18 @@ class Test {
 	}
 }
 
+const obj = {
+	method() {
+		return "test"
+	}
+}
+
+const obj = {
+  get method() {
+    return "test"
+  },
+};
+
 ```
 
 # Diagnostics
@@ -179,6 +191,44 @@ invalid.ts:25:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
        │ 	^
     28 │ }
     29 │ 
+  
+  i Require explicit return types on functions and class methods.
+  
+
+```
+
+```
+invalid.ts:31:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    30 │ const obj = {
+  > 31 │ 	method() {
+       │ 	^^^^^^^^^^
+  > 32 │ 		return "test"
+  > 33 │ 	}
+       │ 	^
+    34 │ }
+    35 │ 
+  
+  i Require explicit return types on functions and class methods.
+  
+
+```
+
+```
+invalid.ts:37:3 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    36 │ const obj = {
+  > 37 │   get method() {
+       │   ^^^^^^^^^^^^^^
+  > 38 │     return "test"
+  > 39 │   },
+       │   ^
+    40 │ };
+    41 │ 
   
   i Require explicit return types on functions and class methods.
   

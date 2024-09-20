@@ -20,3 +20,15 @@ class Test {
   }
   arrow = (): string => 'arrow';
 }
+
+const obj = {
+	method(): string {
+		return "test"
+	}
+}
+
+const obj = {
+  get method(): string {
+    return "test"
+  },
+};

@@ -26,3 +26,15 @@ class Test {
 		return;
 	}
 }
+
+const obj = {
+	method() {
+		return "test"
+	}
+}
+
+const obj = {
+  get method() {
+    return "test"
+  },
+};
