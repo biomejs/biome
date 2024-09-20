@@ -82,8 +82,7 @@ impl FormatHtmlElementList {
         let is_root_parent = list
             .syntax()
             .parent()
-            .map(|parent| HtmlRoot::can_cast(parent.kind()))
-            .unwrap_or(false);
+            .is_some_and(|parent| HtmlRoot::can_cast(parent.kind()));
 
         let mut flat = FlatBuilder::new();
         let mut multiline = MultilineBuilder::new(multiline_layout, is_root_parent);
@@ -660,7 +659,7 @@ impl Format<HtmlFormatContext> for FormatMultilineChildren {
         });
         // We do not need the block ident when the list node is at the html root node
         if self.is_root {
-           return write!(f, [format_inner]); 
+            return write!(f, [format_inner]);
         }
 
         // This indent is wrapped with a group to ensure that the print mode is
