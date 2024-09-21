@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
-use biome_js_syntax::AnyJsBinding;
+use biome_js_syntax::{AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyTsType};
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
     JsMethodObjectMember,
@@ -61,6 +61,11 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// // Should use const assertions
+    /// const func = (value: number) => ({ type: 'X', value }) as any;
+    /// ```
+    ///
     /// ### Valid
     /// ```ts
     /// // No return value should be expected (void)
@@ -90,6 +95,10 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```ts
+    /// const func = (value: number) => ({ foo: 'bar', value }) as const;
+    /// ```
+    ///
     pub UseExplicitFunctionReturnType {
         version: "next",
         name: "useExplicitFunctionReturnType",
@@ -114,6 +123,10 @@ impl Rule for UseExplicitFunctionReturnType {
         match node {
             AnyJsFunctionWithReturnType::AnyJsFunction(func) => {
                 if func.return_type_annotation().is_some() {
+                    return None;
+                }
+
+                if is_direct_const_assertion_in_arrow_functions(func) {
                     return None;
                 }
 
@@ -175,4 +188,29 @@ impl Rule for UseExplicitFunctionReturnType {
             }),
         )
     }
+}
+
+/**
+ * Checks if an arrow function immediately returns a `as const` value.
+ * const func = (value: number) => ({ foo: 'bar', value }) as const;
+ * const func = () => x as const;
+ */
+fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
+    let AnyJsFunction::JsArrowFunctionExpression(arrow_func) = func else {
+        return false;
+    };
+
+    let Ok(AnyJsFunctionBody::AnyJsExpression(expr)) = arrow_func.body() else {
+        return false;
+    };
+
+    let AnyJsExpression::TsAsExpression(ts_expr) = expr else {
+        return false;
+    };
+
+    let Ok(AnyTsType::TsReferenceType(ts_ref)) = ts_expr.ty() else {
+        return false;
+    };
+
+    ts_ref.text() == "const"
 }

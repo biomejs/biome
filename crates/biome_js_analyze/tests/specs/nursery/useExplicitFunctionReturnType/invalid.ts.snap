@@ -45,6 +45,8 @@ const obj = {
   },
 };
 
+const func = (value: number) => ({ type: 'X', value }) as any;
+const func = (value: number) => ({ type: 'X', value }) as Action;
 ```
 
 # Diagnostics
@@ -247,6 +249,40 @@ invalid.ts:37:3 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
        │   ^
     40 │ };
     41 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:42:14 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    40 │ };
+    41 │ 
+  > 42 │ const func = (value: number) => ({ type: 'X', value }) as any;
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ const func = (value: number) => ({ type: 'X', value }) as Action;
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:43:14 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    42 │ const func = (value: number) => ({ type: 'X', value }) as any;
+  > 43 │ const func = (value: number) => ({ type: 'X', value }) as Action;
+       │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   

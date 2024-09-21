@@ -32,3 +32,6 @@ const obj = {
     return "test"
   },
 };
+
+const func = (value: number) => ({ foo: 'bar', value }) as const;
+const func = () => x as const;
