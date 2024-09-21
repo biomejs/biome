@@ -23,7 +23,7 @@ function sumOfPrimes(max) {
 ```
 sumOfPrimes.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity detected.
+  ! Excessive complexity of 7 detected (max: 6).
   
   > 1 │ function sumOfPrimes(max) {
       │          ^^^^^^^^^^^
