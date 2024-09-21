@@ -69,20 +69,16 @@ impl Rule for NoDuplicateProperties {
     }
 
     fn diagnostic(_: &RuleContext<Self>, span: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected empty block is not allowed"
+                    "Duplicate properties are not allowed."
                 },
             )
             .note(markup! {
-                    "This note will give you more information."
+                    "Consider removing the duplicate property."
             }),
         )
     }
