@@ -1291,6 +1291,10 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
+	 * Validates that all enum values are capitalized.
+	 */
+	noLowerCaseEnum?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow missing var function for css variables.
 	 */
 	noMissingVarFunction?: RuleConfiguration_for_Null;
@@ -3070,6 +3074,7 @@ export type Category =
 	| "lint/nursery/noInvalidGridAreas"
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
+	| "lint/nursery/noLowerCaseEnum"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"

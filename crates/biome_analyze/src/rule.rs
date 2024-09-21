@@ -97,6 +97,8 @@ pub enum RuleSource {
     Eslint(&'static str),
     /// Rules from [GraphQL-ESLint](https://github.com/dimaMachina/graphql-eslint)
     EslintGraphql(&'static str),
+    /// Rules from [graphql-schema-linter](https://github.com/cjoudrey/graphql-schema-linter)
+    EslintGraphqlSchemaLinter(&'static str),
     /// Rules from [Eslint Plugin Import](https://github.com/import-js/eslint-plugin-import)
     EslintImport(&'static str),
     /// Rules from [Eslint Plugin Import Access](https://github.com/uhyo/eslint-plugin-import-access)
@@ -149,6 +151,7 @@ impl std::fmt::Display for RuleSource {
             Self::Clippy(_) => write!(f, "Clippy"),
             Self::Eslint(_) => write!(f, "ESLint"),
             Self::EslintGraphql(_) => write!(f, "GraphQL-ESLint"),
+            Self::EslintGraphqlSchemaLinter(_) => write!(f, "graphql-schema-linter"),
             Self::EslintImport(_) => write!(f, "eslint-plugin-import"),
             Self::EslintImportAccess(_) => write!(f, "eslint-plugin-import-access"),
             Self::EslintJest(_) => write!(f, "eslint-plugin-jest"),
@@ -200,6 +203,7 @@ impl RuleSource {
             Self::Clippy(rule_name)
             | Self::Eslint(rule_name)
             | Self::EslintGraphql(rule_name)
+            | Self::EslintGraphqlSchemaLinter(rule_name)
             | Self::EslintImport(rule_name)
             | Self::EslintImportAccess(rule_name)
             | Self::EslintJest(rule_name)
@@ -226,6 +230,7 @@ impl RuleSource {
         match self {
             Self::Clippy(rule_name) | Self::Eslint(rule_name) => (*rule_name).to_string(),
             Self::EslintGraphql(rule_name) => format!("graphql/{rule_name}"),
+            Self::EslintGraphqlSchemaLinter(rule_name) => format!("graphql/{rule_name}"),
             Self::EslintImport(rule_name) => format!("import/{rule_name}"),
             Self::EslintImportAccess(rule_name) => format!("import-access/{rule_name}"),
             Self::EslintJest(rule_name) => format!("jest/{rule_name}"),
@@ -253,6 +258,7 @@ impl RuleSource {
             Self::Clippy(rule_name) => format!("https://rust-lang.github.io/rust-clippy/master/#/{rule_name}"),
             Self::Eslint(rule_name) => format!("https://eslint.org/docs/latest/rules/{rule_name}"),
             Self::EslintGraphql(rule_name) => format!("https://the-guild.dev/graphql/eslint/rules/{rule_name}"),
+            Self::EslintGraphqlSchemaLinter(rule_name) => format!("https://github.com/cjoudrey/graphql-schema-linter?tab=readme-ov-file#{rule_name}"),
             Self::EslintImport(rule_name) => format!("https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintImportAccess(_) => "https://github.com/uhyo/eslint-plugin-import-access".to_string(),
             Self::EslintJest(rule_name) => format!("https://github.com/jest-community/eslint-plugin-jest/blob/main/docs/rules/{rule_name}.md"),
