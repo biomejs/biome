@@ -9,6 +9,7 @@ use biome_js_syntax::{
     JsBinaryOperator, JsUnaryOperator, TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
+use biome_string_case::StrExtension;
 
 use crate::JsRuleAction;
 
@@ -179,7 +180,7 @@ impl Rule for UseValidTypeof {
                 let suggestion = ident.name().ok().and_then(|name| {
                     let value = name.value_token().ok()?;
 
-                    let to_lower = value.text_trimmed().to_lowercase();
+                    let to_lower = value.text_trimmed().to_lowercase_cow();
                     let as_type = JsTypeName::from_str(&to_lower)?;
 
                     Some((id.clone(), as_type))

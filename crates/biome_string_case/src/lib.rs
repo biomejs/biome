@@ -420,6 +420,10 @@ pub trait StrExtension: ToOwned {
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
     fn to_ascii_lowercase_cow(&self) -> std::borrow::Cow<Self>;
+    /// Returns the same value as String::to_lowercase. The only difference
+    /// is that this functions returns ```Cow``` and does not allocate
+    /// if the string is already in lowercase.
+    fn to_lowercase_cow(&self) -> std::borrow::Cow<Self>;
 }
 
 impl StrExtension for str {
@@ -428,6 +432,16 @@ impl StrExtension for str {
         if has_ascii_uppercase {
             #[allow(clippy::disallowed_methods)]
             Cow::Owned(self.to_ascii_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+
+    fn to_lowercase_cow(&self) -> Cow<Self> {
+        let has_uppercase = self.chars().any(char::is_uppercase);
+        if has_uppercase {
+            #[allow(clippy::disallowed_methods)]
+            Cow::Owned(self.to_lowercase())
         } else {
             Cow::Borrowed(self)
         }
@@ -447,6 +461,10 @@ impl StrExtension for std::ffi::OsStr {
             Cow::Borrowed(self)
         }
     }
+
+    fn to_lowercase_cow(&self) -> Cow<Self> {
+        panic!("OsStr is not supported")
+    }
 }
 
 impl StrExtension for [u8] {
@@ -457,6 +475,11 @@ impl StrExtension for [u8] {
         } else {
             Cow::Borrowed(self)
         }
+    }
+
+    fn to_lowercase_cow(&self) -> Cow<Self> {
+        // u8 is always ASCII
+        Self::to_ascii_lowercase_cow(self)
     }
 }
 
@@ -877,5 +900,24 @@ mod tests {
             OsStr::new("test").to_ascii_lowercase_cow(),
             Cow::Borrowed(_)
         ));
+    }
+
+    #[test]
+    fn to_lowercase_cow() {
+        assert_eq!("test", "Test".to_lowercase_cow());
+        assert_eq!(b"test", b"Test".to_lowercase_cow().as_ref());
+
+        assert_eq!("test", "teSt".to_lowercase_cow());
+        assert_eq!("te😀st", "te😀St".to_lowercase_cow());
+        assert_eq!(b"test", b"teSt".to_lowercase_cow().as_ref());
+
+        assert!(matches!("test".to_lowercase_cow(), Cow::Borrowed(_)));
+
+        assert_eq!("ėest", "Ėest".to_lowercase_cow());
+
+        assert_eq!("tešt", "teŠt".to_lowercase_cow());
+        assert_eq!("te😀st", "te😀St".to_lowercase_cow());
+
+        assert!(matches!("tešt".to_lowercase_cow(), Cow::Borrowed(_)));
     }
 }
