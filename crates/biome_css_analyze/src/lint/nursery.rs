@@ -3,6 +3,7 @@
 use biome_analyze::declare_lint_group;
 
 pub mod no_duplicate_custom_properties;
+pub mod no_duplicate_properties;
 pub mod no_irregular_whitespace;
 pub mod no_missing_var_function;
 pub mod no_unknown_pseudo_class;
@@ -14,6 +15,7 @@ declare_lint_group! {
         name : "nursery" ,
         rules : [
             self :: no_duplicate_custom_properties :: NoDuplicateCustomProperties ,
+            self :: no_duplicate_properties :: NoDuplicateProperties ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
             self :: no_missing_var_function :: NoMissingVarFunction ,
             self :: no_unknown_pseudo_class :: NoUnknownPseudoClass ,
