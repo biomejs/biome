@@ -29,6 +29,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### New features
+
+- Add [nursery/noLowerCaseEnum](https://biomejs.dev/linter/rules/no-lower-case-enum). Contributed by @eMerzh
+
 ### Parser
 
 ## v1.9.2 (2024-09-19)
