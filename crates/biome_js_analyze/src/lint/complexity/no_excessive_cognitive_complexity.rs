@@ -121,7 +121,7 @@ impl Rule for NoExcessiveCognitiveComplexity {
                     format!(
                         "Excessive complexity of {calculated_score} detected \
                     (max: {max_allowed_complexity})."
-                    ) 
+                    )
                 }),
             )
             .note(if calculated_score == &MAX_SCORE {
