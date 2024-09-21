@@ -192,10 +192,8 @@ impl Rule for UseExplicitFunctionReturnType {
 
 /**
  * Checks if an arrow function immediately returns a `as const` value.
- * ```
  * const func = (value: number) => ({ foo: 'bar', value }) as const;
  * const func = () => x as const;
- * ```
  */
 fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
     let AnyJsFunction::JsArrowFunctionExpression(arrow_func) = func else {
