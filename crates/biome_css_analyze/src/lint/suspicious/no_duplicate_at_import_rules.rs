@@ -86,7 +86,9 @@ impl Rule for NoDuplicateAtImportRules {
                             for media in import_rule.media() {
                                 match media {
                                     Ok(media) => {
-                                        if !media_query_set.insert(media.text().to_lowercase()) {
+                                        if !media_query_set
+                                            .insert(media.text().to_lowercase_cow().into())
+                                        {
                                             return Some(import_rule);
                                         }
                                     }
@@ -98,7 +100,7 @@ impl Rule for NoDuplicateAtImportRules {
                             for media in import_rule.media() {
                                 match media {
                                     Ok(media) => {
-                                        media_set.insert(media.text().to_lowercase());
+                                        media_set.insert(media.text().to_lowercase_cow().into());
                                     }
                                     _ => return None,
                                 }

@@ -129,16 +129,16 @@ impl Rule for UseValidTypeof {
                         .text_trimmed()
                         .trim_start_matches(['"', '\''])
                         .trim_end_matches(['"', '\''])
-                        .to_lowercase();
+                        .to_lowercase_cow();
 
                     if JsTypeName::from_str(&literal).is_some() {
                         return None;
                     }
 
                     // Try to fix the casing of the literal eg. "String" -> "string"
-                    let suggestion = literal.to_lowercase();
+                    let suggestion = literal.to_lowercase_cow();
                     return Some((
-                        TypeofError::InvalidLiteral(range, literal),
+                        TypeofError::InvalidLiteral(range, literal.to_string()),
                         JsTypeName::from_str(&suggestion).map(|type_name| (lit.clone(), type_name)),
                     ));
                 }

@@ -4543,6 +4543,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_string_case",
  "colored",
  "indicatif",
  "once_cell",

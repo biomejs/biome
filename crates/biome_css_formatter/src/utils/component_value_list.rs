@@ -2,6 +2,7 @@ use crate::comments::CssComments;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_formatter::{write, CstFormatContext};
 use biome_formatter::{FormatOptions, FormatResult};
+use biome_string_case::StrExtension;
 
 use crate::prelude::*;
 use crate::CssFormatter;
@@ -177,9 +178,11 @@ where
         .and_then(|parent| parent.name().ok())
         .and_then(|name| {
             name.as_css_identifier()
-                .map(|name| name.text().to_lowercase())
+                .and_then(|identifier| identifier.value_token().ok())
         })
-        .map_or(false, |name| {
+        .map_or(false, |token| {
+            let name = token.text().to_lowercase_cow();
+
             name.starts_with("grid-template") || name == "grid"
         });
 
