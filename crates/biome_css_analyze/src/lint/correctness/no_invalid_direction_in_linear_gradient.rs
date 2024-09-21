@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{CssFunction, CssParameter};
 use biome_rowan::AstNode;
 use biome_rowan::AstSeparatedList;
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 use regex::Regex;
 use std::sync::LazyLock;
 

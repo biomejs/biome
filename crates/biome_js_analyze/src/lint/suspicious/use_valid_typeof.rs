@@ -9,7 +9,7 @@ use biome_js_syntax::{
     JsBinaryOperator, JsUnaryOperator, TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 use crate::JsRuleAction;
 

@@ -1,5 +1,5 @@
 use biome_rowan::{Language, SyntaxToken};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 use std::borrow::Cow;
 use std::num::NonZeroUsize;
 

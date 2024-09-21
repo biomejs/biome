@@ -4,7 +4,7 @@ use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiag
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute, JsxChildList, JsxElement};
 use biome_rowan::{AstNode, AstNodeList};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.

@@ -5,7 +5,7 @@ use crate::runner::{
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, ModuleKind};
 use biome_rowan::{AstNode, SyntaxKind};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 use regex::Regex;
 use std::borrow::Cow;
 use std::convert::TryFrom;

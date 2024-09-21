@@ -6,7 +6,7 @@ use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, AnyJsxAttributeValue,
 };
 use biome_rowan::AstNode;
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Enforce `img` alt prop does not contain the word "image", "picture", or "photo".

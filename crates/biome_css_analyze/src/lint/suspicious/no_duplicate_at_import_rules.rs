@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssAtRule, AnyCssRule, CssImportAtRule, CssRuleList};
 use biome_rowan::AstNode;
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Disallow duplicate `@import` rules.

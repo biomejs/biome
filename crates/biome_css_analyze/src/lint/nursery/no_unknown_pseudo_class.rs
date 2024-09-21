@@ -14,7 +14,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Disallow unknown pseudo-class selectors.

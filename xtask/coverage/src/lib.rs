@@ -17,7 +17,7 @@ use crate::reporters::{
 };
 use crate::runner::{run_test_suite, TestRunContext, TestSuite};
 use biome_parser::diagnostic::ParseDiagnostic;
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 use jsx::jsx_babel::BabelJsxTestSuite;
 use serde::{Deserialize, Serialize};
 use std::any::Any;

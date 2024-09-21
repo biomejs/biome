@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxElementName};
 use biome_rowan::AstNode;
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Enforce onClick is accompanied by at least one of the following: `onKeyUp`, `onKeyDown`, `onKeyPress`.

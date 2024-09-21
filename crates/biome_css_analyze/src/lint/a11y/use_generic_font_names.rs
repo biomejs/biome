@@ -7,7 +7,7 @@ use biome_css_syntax::{
     CssGenericComponentValueList, CssGenericProperty, CssSyntaxKind,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 use crate::utils::{
     find_font_family, is_css_variable, is_font_family_keyword, is_system_family_name_keyword,

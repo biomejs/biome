@@ -4,7 +4,7 @@ use crate::prelude::*;
 
 use biome_formatter::write;
 use biome_js_syntax::{TsBigintLiteralType, TsBigintLiteralTypeFields};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsBigintLiteralType;

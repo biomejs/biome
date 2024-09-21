@@ -9,7 +9,7 @@ use biome_graphql_syntax::{
     GraphqlVariableDefinitions,
 };
 use biome_rowan::{AstNode, TextRange};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// No duplicated fields in GraphQL operations.

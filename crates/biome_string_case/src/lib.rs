@@ -415,18 +415,25 @@ const LEADING_BIT_INDEX_TO_CASE: [Case; 11] = [
     Case::Unknown,
 ];
 
-pub trait StrExtension: ToOwned {
+pub trait StrLikeExtension: ToOwned {
     /// Returns the same value as String::to_lowercase. The only difference
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
     fn to_ascii_lowercase_cow(&self) -> std::borrow::Cow<Self>;
+}
+
+pub trait StrOnlyExtension: ToOwned {
     /// Returns the same value as String::to_lowercase. The only difference
     /// is that this functions returns ```Cow``` and does not allocate
     /// if the string is already in lowercase.
     fn to_lowercase_cow(&self) -> std::borrow::Cow<Self>;
+    /// Returns the same value as String::to_lowercase. The only difference
+    /// is that this functions returns ```Cow``` and does not allocate
+    /// if the string is already in lowercase.
+    fn to_ascii_lowercase_cow(&self) -> std::borrow::Cow<Self>;
 }
 
-impl StrExtension for str {
+impl StrOnlyExtension for str {
     fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
         let has_ascii_uppercase = self.bytes().any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
@@ -448,7 +455,7 @@ impl StrExtension for str {
     }
 }
 
-impl StrExtension for std::ffi::OsStr {
+impl StrLikeExtension for std::ffi::OsStr {
     fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
         let has_ascii_uppercase = self
             .as_encoded_bytes()
@@ -461,13 +468,9 @@ impl StrExtension for std::ffi::OsStr {
             Cow::Borrowed(self)
         }
     }
-
-    fn to_lowercase_cow(&self) -> Cow<Self> {
-        panic!("OsStr is not supported")
-    }
 }
 
-impl StrExtension for [u8] {
+impl StrLikeExtension for [u8] {
     fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
         let has_ascii_uppercase = self.iter().any(|b| b.is_ascii_uppercase());
         if has_ascii_uppercase {
@@ -476,12 +479,12 @@ impl StrExtension for [u8] {
             Cow::Borrowed(self)
         }
     }
-
-    fn to_lowercase_cow(&self) -> Cow<Self> {
-        // u8 is always ASCII
-        Self::to_ascii_lowercase_cow(self)
-    }
 }
+
+// TODO. Once trait-alias are stabilized it would be enough to `use` this trait instead of individual ones.
+// https://doc.rust-lang.org/stable/unstable-book/language-features/trait-alias.html
+pub trait StrExtension: StrOnlyExtension + StrLikeExtension {}
+impl<T: StrOnlyExtension + StrLikeExtension> StrExtension for T {}
 
 #[cfg(test)]
 mod tests {
@@ -905,11 +908,9 @@ mod tests {
     #[test]
     fn to_lowercase_cow() {
         assert_eq!("test", "Test".to_lowercase_cow());
-        assert_eq!(b"test", b"Test".to_lowercase_cow().as_ref());
 
         assert_eq!("test", "teSt".to_lowercase_cow());
         assert_eq!("te😀st", "te😀St".to_lowercase_cow());
-        assert_eq!(b"test", b"teSt".to_lowercase_cow().as_ref());
 
         assert!(matches!("test".to_lowercase_cow(), Cow::Borrowed(_)));
 

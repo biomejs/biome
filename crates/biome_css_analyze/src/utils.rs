@@ -15,7 +15,7 @@ use crate::keywords::{
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 pub fn is_font_family_keyword(value: &str) -> bool {
     BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)

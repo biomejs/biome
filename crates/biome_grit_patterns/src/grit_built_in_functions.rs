@@ -3,7 +3,7 @@ use crate::{
     grit_resolved_pattern::GritResolvedPattern,
 };
 use anyhow::{anyhow, bail, Result};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 use grit_pattern_matcher::{
     binding::Binding,
     constant::Constant,

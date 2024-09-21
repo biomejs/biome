@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssPseudoElement, CssPseudoElementSelector};
 use biome_rowan::AstNode;
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 use crate::utils::{is_pseudo_elements, vender_prefix};
 

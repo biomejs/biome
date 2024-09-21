@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::CssGenericProperty;
 use biome_rowan::{AstNode, TextRange};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 use crate::utils::{is_known_properties, vendor_prefixed};
 

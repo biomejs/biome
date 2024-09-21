@@ -6,7 +6,7 @@ use biome_css_syntax::{
     AnyCssDimension, CssFunction, CssGenericProperty, CssQueryFeaturePlain, CssSyntaxKind,
 };
 use biome_rowan::{SyntaxNodeCast, TextRange};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 const RESOLUTION_MEDIA_FEATURE_NAMES: [&str; 3] =
     ["resolution", "min-resolution", "max-resolution"];

@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericProperty};
 use biome_rowan::{AstNode, TextRange};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 use crate::utils::{find_font_family, is_font_family_keyword};
 

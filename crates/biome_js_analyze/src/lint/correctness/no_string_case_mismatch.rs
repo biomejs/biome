@@ -8,7 +8,7 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::*;
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 use crate::JsRuleAction;
 
