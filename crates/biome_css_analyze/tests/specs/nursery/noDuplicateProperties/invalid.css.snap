@@ -11,27 +11,308 @@ a {
 
 a {
     color: pink;
-    color: orange;
+    color: pink;
+    color: pink;
 }
 
 a {
+    color: pink;
     color: pink;
     color: orange;
 }
 
 a {
     color: pink;
+    background: orange;
     color: orange;
 }
 
 a {
     color: pink;
-    color: orange;
+    background: orange;
+    background: pink;
 }
 
-a {
-    color: pink;
-    color: orange;
-}
+a { color: pink; { &:hover { color: orange; color: black; } } }
+
+a { color: pink; @media { color: orange; color: black; } }
+
+@media { color: orange; .foo { color: black; color: white; } }
+
+a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+
+a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+
+a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+
+a { color: red !important; color: blue; }
+
+a { color: red !important; color: blue !important; }
+
+```
+
+# Diagnostics
+```
+invalid.css:2:17 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    1 │ a {
+  > 2 │     color: pink;
+      │                 
+  > 3 │     color: orange;
+      │     ^^^^^
+    4 │ }
+    5 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:7:17 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+     6 │ a {
+   > 7 │     color: pink;
+       │                 
+   > 8 │     color: pink;
+       │     ^^^^^
+     9 │     color: pink;
+    10 │ }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:8:17 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+     6 │ a {
+     7 │     color: pink;
+   > 8 │     color: pink;
+       │                 
+   > 9 │     color: pink;
+       │     ^^^^^
+    10 │ }
+    11 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:13:17 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    12 │ a {
+  > 13 │     color: pink;
+       │                 
+  > 14 │     color: pink;
+       │     ^^^^^
+    15 │     color: orange;
+    16 │ }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:14:17 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    12 │ a {
+    13 │     color: pink;
+  > 14 │     color: pink;
+       │                 
+  > 15 │     color: orange;
+       │     ^^^^^
+    16 │ }
+    17 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:20:24 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    18 │ a {
+    19 │     color: pink;
+  > 20 │     background: orange;
+       │                        
+  > 21 │     color: orange;
+       │     ^^^^^
+    22 │ }
+    23 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:26:24 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    24 │ a {
+    25 │     color: pink;
+  > 26 │     background: orange;
+       │                        
+  > 27 │     background: pink;
+       │     ^^^^^^^^^^
+    28 │ }
+    29 │ 
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:30:45 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    28 │ }
+    29 │ 
+  > 30 │ a { color: pink; { &:hover { color: orange; color: black; } } }
+       │                                             ^^^^^
+    31 │ 
+    32 │ a { color: pink; @media { color: orange; color: black; } }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:32:42 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    30 │ a { color: pink; { &:hover { color: orange; color: black; } } }
+    31 │ 
+  > 32 │ a { color: pink; @media { color: orange; color: black; } }
+       │                                          ^^^^^
+    33 │ 
+    34 │ @media { color: orange; .foo { color: black; color: white; } }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:34:46 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    32 │ a { color: pink; @media { color: orange; color: black; } }
+    33 │ 
+  > 34 │ @media { color: orange; .foo { color: black; color: white; } }
+       │                                              ^^^^^
+    35 │ 
+    36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:36:68 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    34 │ @media { color: orange; .foo { color: black; color: white; } }
+    35 │ 
+  > 36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+       │                                                                    ^^^^^
+    37 │ 
+    38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:38:63 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+    37 │ 
+  > 38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+       │                                                               ^^^^^
+    39 │ 
+    40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:40:34 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+    39 │ 
+  > 40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+       │                                  ^^^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ a { color: red !important; color: blue; }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:42:28 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+    41 │ 
+  > 42 │ a { color: red !important; color: blue; }
+       │                            ^^^^^
+    43 │ 
+    44 │ a { color: red !important; color: blue !important; }
+  
+  i This note will give you more information.
+  
+
+```
+
+```
+invalid.css:44:28 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected empty block is not allowed
+  
+    42 │ a { color: red !important; color: blue; }
+    43 │ 
+  > 44 │ a { color: red !important; color: blue !important; }
+       │                            ^^^^^
+    45 │ 
+  
+  i This note will give you more information.
+  
 
 ```

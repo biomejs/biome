@@ -1,7 +1,10 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleBlock;
-use biome_rowan::AstNode;
+use biome_css_syntax::CssDeclarationOrRuleList;
+use biome_rowan::{AstNode, TextRange};
+use rustc_hash::FxHashSet;
+
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Succinct description of the rule.
@@ -38,25 +41,38 @@ declare_lint_rule! {
 }
 
 impl Rule for NoDuplicateProperties {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
-    type State = CssDeclarationOrRuleBlock;
-    type Signals = Option<Self::State>;
+    type Query = Semantic<CssDeclarationOrRuleList>;
+    type State = TextRange;
+    type Signals = Vec<Self::State>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
         let node = ctx.query();
-        if node.items().into_iter().next().is_none() {
-            return Some(node.clone());
+        let model = ctx.model();
+
+        let rule = model.get_rule_by_range(node.range()).unwrap();
+
+        let mut duplicates = Vec::new();
+        let mut seen = FxHashSet::default();
+
+        for declaration in rule.declarations.iter() {
+            let property = &declaration.property;
+            let prop_name = property.name.to_lowercase();
+            let is_custom_propety = prop_name.starts_with("--");
+
+            if !seen.insert(prop_name) && !is_custom_propety {
+                duplicates.push(property.range);
+            }
         }
-        None
+
+        duplicates
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_: &RuleContext<Self>, span: &Self::State) -> Option<RuleDiagnostic> {
         //
         // Read our guidelines to write great diagnostics:
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
-        let span = node.range();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
