@@ -3,12 +3,13 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_html_formatter::{format_node, HtmlFormatOptions};
 use biome_html_parser::parse_html_with_cache;
-use biome_html_syntax::HtmlLanguage;
+use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
 
 use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
+    workspace::GetSyntaxTreeResult,
     WorkspaceError,
 };
 
@@ -65,9 +66,9 @@ impl ExtensionHandler for HtmlFileHandler {
         Capabilities {
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
-                debug_syntax_tree: None,
+                debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
-                debug_formatter_ir: None,
+                debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
                 lint: None,
@@ -99,6 +100,30 @@ fn parse(
         any_parse: parse.into(),
         language: Some(file_source),
     }
+}
+
+fn debug_syntax_tree(_biome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+    let syntax: HtmlSyntaxNode = parse.syntax();
+    let tree: HtmlRoot = parse.tree();
+    GetSyntaxTreeResult {
+        cst: format!("{syntax:#?}"),
+        ast: format!("{tree:#?}"),
+    }
+}
+
+fn debug_formatter_ir(
+    path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+) -> Result<String, WorkspaceError> {
+    let options = settings.format_options::<HtmlLanguage>(path, document_file_source);
+
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+
+    let root_element = formatted.into_document();
+    Ok(root_element.to_string())
 }
 
 #[tracing::instrument(level = "debug", skip(parse, settings))]
