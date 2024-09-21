@@ -1231,7 +1231,7 @@ export interface Nursery {
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow duplicate properties within declaration blocks.
 	 */
 	noDuplicateProperties?: RuleConfiguration_for_Null;
 	/**
