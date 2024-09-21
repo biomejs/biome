@@ -1,3 +1,9 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: invalid.css
+---
+# Input
+```css
 a {
     color: pink;
     color: orange;
@@ -27,3 +33,5 @@ a {
     color: pink;
     color: orange;
 }
+
+```
