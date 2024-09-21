@@ -2128,7 +2128,7 @@
 					]
 				},
 				"noDuplicateProperties": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow duplicate properties within declaration blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

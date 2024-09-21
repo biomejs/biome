@@ -3293,7 +3293,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_else_if:
         Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateElseIf>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow duplicate properties within declaration blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_properties:
         Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateProperties>>,
@@ -3499,6 +3499,7 @@ impl Nursery {
         "noDescendingSpecificity",
         "noDuplicateCustomProperties",
         "noDuplicateElseIf",
+        "noDuplicateProperties",
         "noDuplicatedFields",
         "noMissingVarFunction",
         "noUnknownPseudoClass",
@@ -3514,6 +3515,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[5]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
