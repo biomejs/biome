@@ -3282,7 +3282,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_else_if:
         Option<RuleConfiguration<biome_js_analyze::options::NoDuplicateElseIf>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow duplicate properties within declaration blocks."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_duplicate_properties:
         Option<RuleConfiguration<biome_css_analyze::options::NoDuplicateProperties>>,
@@ -3450,6 +3450,7 @@ impl Nursery {
     const RECOMMENDED_RULES: &'static [&'static str] = &[
         "noDuplicateCustomProperties",
         "noDuplicateElseIf",
+        "noDuplicateProperties",
         "noDuplicatedFields",
         "noMissingVarFunction",
         "noUnknownPseudoClass",
@@ -3463,6 +3464,7 @@ impl Nursery {
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[17]),

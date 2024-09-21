@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
 use biome_rowan::{AstNode, TextRange};
@@ -7,28 +7,27 @@ use rustc_hash::FxHashSet;
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow duplicate properties within declaration blocks.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
+    /// This rule checks the declaration blocks for duplicate properties. It ignores custom properties.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// p {}
+    /// a {
+    ///   color: pink;
+    ///   color: orange;
+    /// }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```css
-    /// p {
-    ///   color: red;
+    /// a {
+    ///   color: pink;
+    ///   background: orange;
     /// }
     /// ```
     ///
@@ -36,7 +35,8 @@ declare_lint_rule! {
         version: "next",
         name: "noDuplicateProperties",
         language: "css",
-        recommended: false,
+        recommended: true,
+        sources: &[RuleSource::Stylelint("declaration-block-no-duplicate-properties")],
     }
 }
 
