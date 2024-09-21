@@ -61,6 +61,11 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ```ts,expect_diagnostic
+    /// // Should use const assertions
+    /// const func = (value: number) => ({ type: 'X', value }) as any;
+    /// ```
+    ///
     /// ### Valid
     /// ```ts
     /// // No return value should be expected (void)
@@ -88,6 +93,10 @@ declare_lint_rule! {
     ///     return;
     ///   }
     /// }
+    /// ```
+    ///
+    /// ```ts
+    /// const func = (value: number) => ({ foo: 'bar', value }) as const;
     /// ```
     ///
     pub UseExplicitFunctionReturnType {
