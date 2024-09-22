@@ -139,7 +139,7 @@ impl Rule for UseExplicitFunctionReturnType {
                     return None;
                 }
 
-                if is_allow_expressions(func) {
+                if is_function_used_in_argument_or_expression_list(func) {
                     return None;
                 }
 
@@ -203,11 +203,14 @@ impl Rule for UseExplicitFunctionReturnType {
     }
 }
 
-/**
- * Checks if an arrow function immediately returns a `as const` value.
- * const func = (value: number) => ({ foo: 'bar', value }) as const;
- * const func = () => x as const;
- */
+/// Checks if an arrow function immediately returns an `as const` value.
+///
+/// # Examples
+///
+/// ```typescript
+/// const func = (value: number) => ({ foo: 'bar', value }) as const;
+/// const func = () => x as const;
+/// ```
 fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
     let AnyJsFunction::JsArrowFunctionExpression(arrow_func) = func else {
         return false;
@@ -228,21 +231,23 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
     ts_ref.text() == "const"
 }
 
-/**
- * Checks if a function is not part of a declaration
- * JS_CALL_ARGUMENT_LIST
- * - window.addEventListener('click', () => {});
- * - const foo = arr.map(i => i * i);
- * - setTimeout(function() { console.log("Hello!"); }, 1000);
- *
- * JS_ARRAY_ELEMENT_LIST
- * - [function () {}, () => {}];
- *
- * JS_PARENTHESIZED_EXPRESSION
- * - (function () {});
- * - (() => {})();
- */
-fn is_allow_expressions(func: &AnyJsFunction) -> bool {
+/// Checks if a function is allowed within specific expression contexts.
+/// These include function calls, array elements, and parenthesized expressions.
+///
+/// # Examples
+///
+/// JS_CALL_ARGUMENT_LIST:
+/// - `window.addEventListener('click', () => {});`
+/// - `const foo = arr.map(i => i * i);`
+/// - `setTimeout(function() { console.log("Hello!"); }, 1000);`
+///
+/// JS_ARRAY_ELEMENT_LIST:
+/// - `[function () {}, () => {}];`
+///
+/// JS_PARENTHESIZED_EXPRESSION:
+/// - `(function () {});`
+/// - `(() => {})();`
+fn is_function_used_in_argument_or_expression_list(func: &AnyJsFunction) -> bool {
     matches!(
         func.syntax().parent().kind(),
         Some(
