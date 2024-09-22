@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{collections::BTreeMap, rc::Rc};
 
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
 use biome_rowan::TextRange;
@@ -44,12 +44,13 @@ impl SemanticModel {
 
     /// Returns the rule that contains the given range.
     pub fn get_rule_by_range(&self, target_range: TextRange) -> Option<&Rule> {
-        self.data
+        let (_, rule) = self
+            .data
             .range_to_rule
-            .iter()
-            .filter(|(rule_range, _)| rule_range.contains_range(target_range))
-            .min_by_key(|(rule_range, _)| rule_range.len())
-            .map(|(_, rule)| rule)
+            .range(..=target_range)
+            .rev()
+            .find(|(&range, _)| range.contains_range(target_range))?;
+        Some(rule)
     }
 }
 
@@ -69,7 +70,7 @@ pub(crate) struct SemanticModelData {
     /// Map of all the rules by their id
     pub(crate) rules_by_id: FxHashMap<RuleId, Rule>,
     /// Map of the range of each rule to the rule itself
-    pub(crate) range_to_rule: FxHashMap<TextRange, Rule>,
+    pub(crate) range_to_rule: BTreeMap<TextRange, Rule>,
 }
 
 /// Represents a CSS rule set, including its selectors, declarations, and nested rules.

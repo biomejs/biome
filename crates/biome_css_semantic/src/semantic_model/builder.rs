@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
@@ -18,7 +20,7 @@ pub struct SemanticModelBuilder {
     current_rule_stack: Vec<RuleId>,
     next_rule_id: RuleId,
     /// Map to get the rule containing the given range of CST nodes
-    range_to_rule: FxHashMap<TextRange, Rule>,
+    range_to_rule: BTreeMap<TextRange, Rule>,
     rules_by_id: FxHashMap<RuleId, Rule>,
     /// Indicates if the current node is within a `:root` selector
     is_in_root_selector: bool,
@@ -32,7 +34,7 @@ impl SemanticModelBuilder {
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
-            range_to_rule: FxHashMap::default(),
+            range_to_rule: BTreeMap::default(),
             is_in_root_selector: false,
             next_rule_id: RuleId::default(),
             rules_by_id: FxHashMap::default(),
