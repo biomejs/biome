@@ -13,7 +13,7 @@ use {
 /// A range in text, represented as a pair of [`TextSize`][struct@TextSize].
 ///
 /// It is a logic error for `start` to be greater than `end`.
-#[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
+#[derive(Default, Copy, Clone, Eq, PartialEq, Hash)]
 pub struct TextRange {
     // Invariant: start <= end
     start: TextSize,
@@ -23,6 +23,24 @@ pub struct TextRange {
 impl fmt::Debug for TextRange {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}..{}", self.start().raw, self.end().raw)
+    }
+}
+
+impl PartialOrd for TextRange {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for TextRange {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.end <= other.start {
+            Ordering::Less
+        } else if self.start >= other.end {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
     }
 }
 
