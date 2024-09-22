@@ -627,6 +627,7 @@ pub enum FixFileMode {
     SafeFixes,
     /// Applies [safe](biome_diagnostics::Applicability::Always) and [unsafe](biome_diagnostics::Applicability::MaybeIncorrect) fixes
     SafeAndUnsafeFixes,
+    ApplySuppressions,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

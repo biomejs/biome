@@ -659,6 +659,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
 
                 for action in signal.actions() {
+                    // TODO: This can get removed now if I'm understanding correctly?
                     // suppression actions should not be part of the fixes (safe or suggested)
                     if action.is_suppression() {
                         continue;
@@ -682,6 +683,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                                 errors = errors.saturating_sub(1);
                                 return ControlFlow::Break(action);
                             }
+                        }
+                        FixFileMode::ApplySuppressions => {
+                            println!("Made it to da block.")
                         }
                     }
                 }

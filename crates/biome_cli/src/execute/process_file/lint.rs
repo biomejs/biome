@@ -94,35 +94,30 @@ pub(crate) fn lint_with_guard<'ctx>(
                 && pull_diagnostics_result.skipped_diagnostics == 0;
 
             if !no_diagnostics {
-                if let Some(write_suppressions_mode) = ctx.execution.as_write_suppressions_mode() {
-                    // Rule::suppress()
-                    println!("Rule::suppress() here");
-                } else {
-                    let offset = match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
-                        Some(b"vue") => VueFileHandler::start(input.as_str()),
-                        Some(b"astro") => AstroFileHandler::start(input.as_str()),
-                        Some(b"svelte") => SvelteFileHandler::start(input.as_str()),
-                        _ => None,
-                    };
+                let offset = match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
+                    Some(b"vue") => VueFileHandler::start(input.as_str()),
+                    Some(b"astro") => AstroFileHandler::start(input.as_str()),
+                    Some(b"svelte") => SvelteFileHandler::start(input.as_str()),
+                    _ => None,
+                };
 
-                    ctx.push_message(Message::Diagnostics {
-                        name: workspace_file.path.display().to_string(),
-                        content: input,
-                        diagnostics: pull_diagnostics_result
-                            .diagnostics
-                            .into_iter()
-                            .map(|d| {
-                                if let Some(offset) = offset {
-                                    d.with_offset(TextSize::from(offset))
-                                } else {
-                                    d
-                                }
-                            })
-                            .map(Error::from)
-                            .collect(),
-                        skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics as u32,
-                    });
-                }
+                ctx.push_message(Message::Diagnostics {
+                    name: workspace_file.path.display().to_string(),
+                    content: input,
+                    diagnostics: pull_diagnostics_result
+                        .diagnostics
+                        .into_iter()
+                        .map(|d| {
+                            if let Some(offset) = offset {
+                                d.with_offset(TextSize::from(offset))
+                            } else {
+                                d
+                            }
+                        })
+                        .map(Error::from)
+                        .collect(),
+                    skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics as u32,
+                });
             }
 
             if changed {

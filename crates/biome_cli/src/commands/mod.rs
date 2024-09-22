@@ -729,6 +729,7 @@ pub(crate) struct FixFileModeOptions {
     apply: bool,
     apply_unsafe: bool,
     write: bool,
+    write_suppressions: bool,
     fix: bool,
     unsafe_: bool,
 }
@@ -745,6 +746,7 @@ pub(crate) fn determine_fix_file_mode(
         apply_unsafe,
         write,
         fix,
+        write_suppressions,
         unsafe_,
     } = options;
 
@@ -769,6 +771,8 @@ pub(crate) fn determine_fix_file_mode(
         Ok(Some(FixFileMode::SafeAndUnsafeFixes))
     } else if safe_fixes {
         Ok(Some(FixFileMode::SafeFixes))
+    } else if write_suppressions {
+        Ok(Some(FixFileMode::ApplySuppressions))
     } else {
         Ok(None)
     }
@@ -780,6 +784,7 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         apply,
         apply_unsafe,
         write,
+        write_suppressions,
         fix,
         unsafe_,
     } = options;
@@ -805,6 +810,16 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ));
     } else if write && fix {
         return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
+    } else if write_suppressions && write {
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--write-suppressions",
+            "--write",
+        ));
+    } else if write_suppressions && fix {
+        return Err(CliDiagnostic::incompatible_arguments(
+            "--write-suppressions",
+            "--fix",
+        ));
     }
     Ok(())
 }
@@ -830,6 +845,7 @@ mod tests {
                 apply,
                 apply_unsafe,
                 write,
+                write_suppressions,
                 fix,
                 unsafe_
             })
@@ -852,6 +868,7 @@ mod tests {
                         apply,
                         apply_unsafe,
                         write,
+                        write_suppressions,
                         fix,
                         unsafe_
                     },
@@ -867,7 +884,7 @@ mod tests {
     fn safe_and_unsafe_fixes() {
         let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, fix, unsafe_) in [
+        for (apply, apply_unsafe, write, fix, write_suppressions, unsafe_) in [
             (false, true, false, false, false), // --apply-unsafe
             (false, false, true, false, true),  // --write --unsafe
             (false, false, false, true, true),  // --fix --unsafe
@@ -878,6 +895,7 @@ mod tests {
                         apply,
                         apply_unsafe,
                         write,
+                        write_suppressions,
                         fix,
                         unsafe_
                     },
@@ -893,13 +911,15 @@ mod tests {
     fn no_fix() {
         let mut console = BufferConsole::default();
 
-        let (apply, apply_unsafe, write, fix, unsafe_) = (false, false, false, false, false);
+        let (apply, apply_unsafe, write, fix, write_suppressions, unsafe_) =
+            (false, false, false, false, false, false);
         assert_eq!(
             determine_fix_file_mode(
                 FixFileModeOptions {
                     apply,
                     apply_unsafe,
                     write,
+                    write_suppressions,
                     fix,
                     unsafe_
                 },

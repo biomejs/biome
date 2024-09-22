@@ -529,6 +529,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             return ControlFlow::Break(action);
                         }
                     }
+                    FixFileMode::ApplySuppressions => {
+                        println!("No-op'ing in JSON.")
+                    }
                 }
             }
 
