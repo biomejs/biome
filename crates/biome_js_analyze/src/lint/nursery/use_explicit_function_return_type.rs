@@ -3,12 +3,12 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
-use biome_js_syntax::{AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyTsType};
+use biome_js_syntax::{AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyTsType, JsSyntaxKind};
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
     JsMethodObjectMember,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, TextRange};
 
 declare_lint_rule! {
     /// Require explicit return types on functions and class methods.
@@ -99,6 +99,15 @@ declare_lint_rule! {
     /// const func = (value: number) => ({ foo: 'bar', value }) as const;
     /// ```
     ///
+    /// ```ts
+    /// // Callbacks without return types
+    /// setTimeout(function() { console.log("Hello!"); }, 1000);
+    /// ```
+    /// ```ts
+    /// // IIFE
+    /// (() => {})();
+    /// ```
+    ///
     pub UseExplicitFunctionReturnType {
         version: "next",
         name: "useExplicitFunctionReturnType",
@@ -127,6 +136,10 @@ impl Rule for UseExplicitFunctionReturnType {
                 }
 
                 if is_direct_const_assertion_in_arrow_functions(func) {
+                    return None;
+                }
+
+                if is_allow_expressions(func) {
                     return None;
                 }
 
@@ -213,4 +226,29 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
     };
 
     ts_ref.text() == "const"
+}
+
+/**
+ * Checks if a function are not part of a declaration
+ * JS_CALL_ARGUMENT_LIST
+ * - window.addEventListener('click', () => {});
+ * - const foo = arr.map(i => i * i);
+ * - setTimeout(function() { console.log("Hello!"); }, 1000);
+ *
+ * JS_ARRAY_ELEMENT_LIST
+ * - [function () {}, () => {}];
+ *
+ * JS_PARENTHESIZED_EXPRESSION
+ * - (function () {});
+ * - (() => {})();
+ */
+fn is_allow_expressions(func: &AnyJsFunction) -> bool {
+    matches!(
+        func.syntax().parent().kind(),
+        Some(
+            JsSyntaxKind::JS_CALL_ARGUMENT_LIST
+                | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST
+                | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+        )
+    )
 }
