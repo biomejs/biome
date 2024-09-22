@@ -229,7 +229,7 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
 }
 
 /**
- * Checks if a function are not part of a declaration
+ * Checks if a function is not part of a declaration
  * JS_CALL_ARGUMENT_LIST
  * - window.addEventListener('click', () => {});
  * - const foo = arr.map(i => i * i);
