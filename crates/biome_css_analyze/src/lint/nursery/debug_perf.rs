@@ -1,7 +1,9 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_css_syntax::CssDeclarationOrRuleBlock;
+use biome_css_syntax::{CssDeclarationOrRuleBlock, CssRuleList};
 use biome_rowan::AstNode;
+
+use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
     /// Succinct description of the rule.
@@ -38,16 +40,12 @@ declare_lint_rule! {
 }
 
 impl Rule for DebugPerf {
-    type Query = Ast<CssDeclarationOrRuleBlock>;
+    type Query = Semantic<CssRuleList>;
     type State = CssDeclarationOrRuleBlock;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        let node = ctx.query();
-        if node.items().into_iter().next().is_none() {
-            return Some(node.clone());
-        }
         None
     }
 
