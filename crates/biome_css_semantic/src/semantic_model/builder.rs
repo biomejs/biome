@@ -1,6 +1,6 @@
 use std::collections::BTreeMap;
 
-use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
+use biome_css_syntax::CssRoot;
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
@@ -12,7 +12,6 @@ use crate::events::SemanticEvent;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
-    node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     /// List of all top-level rules in the CSS file
     rules: Vec<Rule>,
     global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
@@ -30,7 +29,6 @@ impl SemanticModelBuilder {
     pub fn new(root: CssRoot) -> Self {
         Self {
             root,
-            node_by_range: FxHashMap::default(),
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
@@ -44,24 +42,12 @@ impl SemanticModelBuilder {
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
             root: self.root,
-            node_by_range: self.node_by_range,
             rules: self.rules,
             global_custom_variables: self.global_custom_variables,
             range_to_rule: self.range_to_rule,
             rules_by_id: self.rules_by_id,
         };
         SemanticModel::new(data)
-    }
-
-    #[inline]
-    pub fn push_node(&mut self, node: &CssSyntaxNode) {
-        use CssSyntaxKind::*;
-        if matches!(
-            node.kind(),
-            CSS_SELECTOR_LIST | CSS_DECLARATION | CSS_DECLARATION_OR_RULE_LIST | CSS_QUALIFIED_RULE
-        ) {
-            self.node_by_range.insert(node.text_range(), node.clone());
-        }
     }
 
     #[inline]

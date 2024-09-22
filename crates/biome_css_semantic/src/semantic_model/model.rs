@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, rc::Rc};
 
-use biome_css_syntax::{CssRoot, CssSyntaxNode};
+use biome_css_syntax::CssRoot;
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
@@ -22,11 +22,6 @@ impl SemanticModel {
 
     pub fn root(&self) -> &CssRoot {
         &self.data.root
-    }
-
-    /// Retrieves a node by its text range.
-    pub fn node_by_range(&self, range: TextRange) -> Option<&CssSyntaxNode> {
-        self.data.node_by_range.get(&range)
     }
 
     /// Returns a slice of all rules in the CSS document.
@@ -61,8 +56,6 @@ impl SemanticModel {
 #[derive(Debug)]
 pub(crate) struct SemanticModelData {
     pub(crate) root: CssRoot,
-    /// Map to each by its range
-    pub(crate) node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     /// List of all top-level rules in the CSS document
     pub(crate) rules: Vec<Rule>,
     /// Map of CSS variables declared in the `:root` selector or using the @property rule.
