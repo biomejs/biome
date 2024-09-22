@@ -2,6 +2,7 @@ use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
 use biome_rowan::{AstNode, TextRange};
+use biome_string_case::StrExtension;
 use rustc_hash::FxHashSet;
 
 use crate::services::semantic::Semantic;
@@ -57,10 +58,10 @@ impl Rule for NoDuplicateProperties {
 
         for declaration in rule.declarations.iter() {
             let property = &declaration.property;
-            let prop_name = property.name.to_lowercase();
+            let prop_name = property.name.to_ascii_lowercase_cow();
             let is_custom_propety = prop_name.starts_with("--");
 
-            if !seen.insert(prop_name) && !is_custom_propety {
+            if !is_custom_propety && !seen.insert(prop_name) {
                 duplicates.push(property.range);
             }
         }
