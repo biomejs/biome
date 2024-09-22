@@ -8,6 +8,8 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         ("=", "EQ"),
         ("!", "BANG"),
         ("-", "MINUS"),
+        ("<!--", "COMMENT_START"),
+        ("-->", "COMMENT_END"),
     ],
     keywords: &["null", "true", "false", "doctype", "html"],
     literals: &["HTML_STRING_LITERAL", "HTML_LITERAL"],
@@ -16,7 +18,6 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "NEWLINE",
         "WHITESPACE",
         "IDENT",
-        "COMMENT",
         "HTML_IDENT",
     ],
     nodes: &[
@@ -34,6 +35,7 @@ pub const HTML_KINDS_SRC: KindsSrc = KindsSrc {
         "HTML_ELEMENT_LIST",
         "HTML_ATTRIBUTE_LIST",
         "HTML_CONTENT",
+        "HTML_COMMENT",
         // Bogus nodes
         "HTML_BOGUS",
         "HTML_BOGUS_ELEMENT",
