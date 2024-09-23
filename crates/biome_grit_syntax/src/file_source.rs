@@ -59,6 +59,7 @@ impl TryFrom<&Path> for GritFileSource {
         };
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
+        #[allow(clippy::disallowed_methods)]
         Self::try_from_extension(&extension.to_ascii_lowercase())
     }
 }
