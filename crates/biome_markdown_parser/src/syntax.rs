@@ -1,25 +1,28 @@
 pub mod thematic_break_block;
 
 use biome_markdown_syntax::{kind::MarkdownSyntaxKind::*, T};
-use biome_parser::Parser;
+use biome_parser::{
+    parse_lists::ParseNodeList,
+    prelude::ParsedSyntax::{self, *},
+    Parser,
+};
 use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
-// use crate::syntax::thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 use crate::MarkdownParser;
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {
     let m = p.start();
-    parse_block_list(p);
+    let _ = parse_block_list(p);
     m.complete(p, MD_DOCUMENT);
 }
 
-pub(crate) fn parse_block_list(p: &mut MarkdownParser) {
+pub(crate) fn parse_block_list(p: &mut MarkdownParser) -> ParsedSyntax {
     let m = p.start();
 
     while !p.at(T![EOF]) {
         parse_any_block(p);
     }
-    m.complete(p, MD_BLOCK_LIST);
+    Present(m.complete(p, MD_BLOCK_LIST))
 }
 
 pub(crate) fn parse_any_block(p: &mut MarkdownParser) {

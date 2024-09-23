@@ -63,6 +63,9 @@ impl<'source> MarkdownTokenSource<'source> {
         }
     }
 
+    /// Returns the number of whitespace characters before the current token until the first new line.
+    /// tab will be counted as 4 spaces
+    /// whitespace will be counted as 1 space
     pub fn before_whitespace_count(&self) -> usize {
         let last_trivia: Vec<&Trivia> = self
             .trivia_list
@@ -81,14 +84,6 @@ impl<'source> MarkdownTokenSource<'source> {
             TriviaPieceKind::Whitespace => count + u32::from(b.len()) as usize,
             _ => count,
         })
-    }
-
-    #[allow(dead_code)]
-    pub fn before_new_line(&self) -> Option<TextSize> {
-        self.trivia_list
-            .iter()
-            .rfind(|item| item.kind() == TriviaPieceKind::Newline)
-            .map(|item| item.offset())
     }
 
     #[allow(dead_code)]

@@ -281,7 +281,7 @@ impl<'src> MarkdownLexer<'src> {
 
         let mut count = 0;
         loop {
-            self.skip_whitespace();
+            self.consume_whitespace();
             if matches!(self.current_byte(), Some(ch) if ch == start_char) {
                 self.advance(1);
                 count += 1;
@@ -294,12 +294,6 @@ impl<'src> MarkdownLexer<'src> {
             return MD_THEMATIC_BREAK_LITERAL;
         }
         ERROR_TOKEN
-    }
-
-    fn skip_whitespace(&mut self) {
-        while matches!(self.current_byte(), Some(b'\t' | b' ')) {
-            self.advance(1);
-        }
     }
 
     /// Get the UTF8 char which starts at the current byte

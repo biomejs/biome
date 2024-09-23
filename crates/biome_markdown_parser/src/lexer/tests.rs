@@ -1,10 +1,10 @@
 #![cfg(test)]
 #![allow(unused_mut, unused_variables, unused_assignments)]
 
-use biome_parser::lexer::Lexer;
-use biome_markdown_syntax::MarkdownSyntaxKind::*;
-use crate::lexer::MarkdownLexContext;
 use super::{MarkdownLexer, TextSize};
+use crate::lexer::MarkdownLexContext;
+use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use biome_parser::lexer::Lexer;
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -24,7 +24,7 @@ macro_rules! assert_lex {
         while lexer.next_token(MarkdownLexContext::default()) != EOF {
             tokens.push((lexer.current(), lexer.current_range()));
         }
-        
+
         $(
             assert_eq!(
                 tokens[idx].0,
@@ -111,6 +111,32 @@ fn textual() {
     assert_lex! {
         "+",
        MD_TEXTUAL_LITERAL:1,
+    }
+}
+
+#[test]
+fn new_line() {
+    assert_lex! {
+        "\n\r\n\r",
+        NEWLINE:1,
+        NEWLINE:2,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn tab() {
+    assert_lex! {
+        "\t",
+        TAB:1,
+    }
+}
+
+#[test]
+fn whitespace() {
+    assert_lex! {
+        " ",
+        WHITESPACE:1,
     }
 }
 
