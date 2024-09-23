@@ -15,6 +15,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### New features
+
+- When Biome detects that it's running in Github Actions, it will automatically default the reporter to `github` if no reporter is specified. Contributed by @dyc3.
+
 ### Configuration
 
 #### Bug fixes

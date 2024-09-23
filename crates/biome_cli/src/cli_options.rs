@@ -51,10 +51,9 @@ pub struct CliOptions {
     /// Allows to change how diagnostics and summary are reported.
     #[bpaf(
         long("reporter"),
-        argument("json|json-pretty|github|junit|summary|gitlab"),
-        fallback(CliReporter::default())
+        argument("json|json-pretty|github|junit|summary|gitlab")
     )]
-    pub reporter: CliReporter,
+    pub reporter: Option<CliReporter>,
 
     #[bpaf(
         long("log-level"),
@@ -116,7 +115,7 @@ impl FromStr for ColorsArg {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Copy)]
 pub enum CliReporter {
     /// The default reporter
     #[default]
@@ -133,12 +132,6 @@ pub enum CliReporter {
     Summary,
     /// Reports linter diagnostics using the [GitLab Code Quality report](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool).
     GitLab,
-}
-
-impl CliReporter {
-    pub(crate) const fn is_default(&self) -> bool {
-        matches!(self, Self::Default)
-    }
 }
 
 impl FromStr for CliReporter {

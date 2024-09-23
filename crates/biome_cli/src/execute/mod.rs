@@ -280,7 +280,22 @@ impl Execution {
 
     /// It sets the reporting mode by reading the [CliOptions]
     pub(crate) fn set_report(mut self, cli_options: &CliOptions) -> Self {
-        self.report_mode = cli_options.reporter.clone().into();
+        self.report_mode = cli_options
+            .reporter
+            .unwrap_or_else(|| {
+                if matches!(
+                    self.traversal_mode,
+                    TraversalMode::CI {
+                        environment: Some(ExecutionEnvironment::GitHub),
+                        ..
+                    }
+                ) {
+                    CliReporter::GitHub
+                } else {
+                    CliReporter::default()
+                }
+            })
+            .into();
         self
     }
 
@@ -415,10 +430,10 @@ pub fn execute_mode(
     paths: Vec<OsString>,
 ) -> Result<(), CliDiagnostic> {
     // If a custom reporter was provided, let's lift the limit so users can see all of them
-    execution.max_diagnostics = if cli_options.reporter.is_default() {
+    execution.max_diagnostics = if matches!(execution.report_mode, ReportMode::Terminal { .. }) {
         cli_options.max_diagnostics.into()
     } else {
-        info!("Removing the limit of --max-diagnostics, because of a reporter different from the default one: {}", cli_options.reporter);
+        info!("Removing the limit of --max-diagnostics, because of a reporter different from the default one: {}", cli_options.reporter.unwrap_or_default());
         u32::MAX
     };
 
