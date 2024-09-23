@@ -424,9 +424,15 @@ pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _f
         return;
     };
 
+    let options = HtmlFormatOptions::default();
     let language = language::HtmlTestFormatLanguage::default();
 
-    let snapshot = SpecSnapshot::new(test_file, test_directory, language, ());
+    let snapshot = SpecSnapshot::new(
+        test_file, 
+        test_directory, 
+        language, 
+        HtmlFormatLanguage::new(options),
+    );
 
     snapshot.test()
 }

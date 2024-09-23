@@ -5,8 +5,8 @@ mod token_source;
 
 use biome_grit_factory::GritSyntaxFactory;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
-use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::tree_sink::LosslessTreeSink;
+use biome_parser::{diagnostic::ParseDiagnostic, AnyParse};
 use biome_rowan::{AstNode, NodeCache};
 use parser::{parse_root, GritParser};
 
@@ -98,5 +98,13 @@ impl GritParse {
     /// Panics if the node represented by this parse result mismatches.
     pub fn tree(&self) -> GritRoot {
         GritRoot::unwrap_cast(self.syntax())
+    }
+}
+
+impl From<GritParse> for AnyParse {
+    fn from(parse: GritParse) -> Self {
+        let root = parse.syntax();
+        let diagnostics = parse.into_diagnostics();
+        Self::new(root.as_send().unwrap(), diagnostics)
     }
 }

@@ -23,6 +23,7 @@ use biome_formatter::{
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_grit_syntax::GritLanguage;
 use biome_html_formatter::HtmlFormatOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
@@ -563,6 +564,7 @@ pub struct LanguageListSettings {
     pub css: LanguageSettings<CssLanguage>,
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
+    pub grit: LanguageSettings<GritLanguage>,
 }
 
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {

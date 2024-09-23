@@ -1,21 +1,25 @@
 use crate::comments::{FormatGritLeadingComment, GritCommentStyle, GritComments};
+use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
-    CstFormatContext, FormatContext, FormatOptions, IndentStyle, IndentWidth, LineEnding,
-    LineWidth, QuoteStyle, TransformSourceMap,
+    AttributePosition, BracketSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle,
+    IndentWidth, LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
 };
 use biome_grit_syntax::GritLanguage;
+use std::fmt::Display;
 use std::rc::Rc;
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct GritFormatContext {
+    options: GritFormatOptions,
     comments: Rc<GritComments>,
     source_map: Option<TransformSourceMap>,
 }
 
 impl GritFormatContext {
-    pub fn new(comments: GritComments) -> Self {
+    pub fn new(options: GritFormatOptions, comments: GritComments) -> Self {
         Self {
+            options,
             comments: Rc::new(comments),
             source_map: None,
         }
@@ -31,11 +35,11 @@ impl FormatContext for GritFormatContext {
     type Options = GritFormatOptions;
 
     fn options(&self) -> &Self::Options {
-        todo!()
+        &self.options
     }
 
     fn source_map(&self) -> Option<&TransformSourceMap> {
-        todo!()
+        self.source_map.as_ref()
     }
 }
 impl CstFormatContext for GritFormatContext {
@@ -46,18 +50,18 @@ impl CstFormatContext for GritFormatContext {
     type CommentRule = FormatGritLeadingComment;
 
     fn comments(&self) -> &biome_formatter::comments::Comments<Self::Language> {
-        todo!()
+        &self.comments
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
-
+#[derive(Debug, Default, Clone)]
 pub struct GritFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
     quote_style: QuoteStyle,
+    attribute_position: AttributePosition,
 }
 
 impl GritFormatOptions {
@@ -68,6 +72,7 @@ impl GritFormatOptions {
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
+            attribute_position: AttributePosition::default(),
         }
     }
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
@@ -118,34 +123,48 @@ impl GritFormatOptions {
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
     }
+
+    pub fn attribute_position(&self) -> AttributePosition {
+        self.attribute_position
+    }
+}
+
+impl Display for GritFormatOptions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "Indent style: {}", self.indent_style)?;
+        writeln!(f, "Indent width: {}", self.indent_width.value())?;
+        writeln!(f, "Line ending: {}", self.line_ending)?;
+        writeln!(f, "Line width: {}", self.line_width.value())?;
+        writeln!(f, "Attribute Position: {}", self.attribute_position)
+    }
 }
 
 impl FormatOptions for GritFormatOptions {
     fn indent_style(&self) -> IndentStyle {
-        todo!()
+        self.indent_style
     }
 
     fn indent_width(&self) -> IndentWidth {
-        todo!()
+        self.indent_width
     }
 
     fn line_width(&self) -> LineWidth {
-        todo!()
+        self.line_width
     }
 
     fn line_ending(&self) -> LineEnding {
-        todo!()
+        self.line_ending
     }
 
     fn attribute_position(&self) -> biome_formatter::AttributePosition {
-        todo!()
+        self.attribute_position
     }
 
     fn bracket_spacing(&self) -> biome_formatter::BracketSpacing {
-        todo!()
+        BracketSpacing::default()
     }
 
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {
-        todo!()
+        PrinterOptions::from(self)
     }
 }

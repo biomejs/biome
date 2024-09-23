@@ -593,11 +593,19 @@ dependencies = [
 name = "biome_grit_formatter"
 version = "0.0.0"
 dependencies = [
+ "biome_configuration",
  "biome_formatter",
+ "biome_formatter_test",
+ "biome_grit_factory",
+ "biome_grit_parser",
  "biome_grit_syntax",
+ "biome_parser",
  "biome_rowan",
+ "biome_service",
+ "countme",
  "serde",
  "serde_json",
+ "tests_macros",
 ]
 
 [[package]]
@@ -1088,7 +1096,10 @@ dependencies = [
  "biome_graphql_formatter",
  "biome_graphql_parser",
  "biome_graphql_syntax",
+ "biome_grit_formatter",
+ "biome_grit_parser",
  "biome_grit_patterns",
+ "biome_grit_syntax",
  "biome_html_formatter",
  "biome_html_parser",
  "biome_html_syntax",
