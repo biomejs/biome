@@ -1,7 +1,7 @@
 use std::{collections::BTreeMap, rc::Rc};
 
 use biome_css_syntax::CssRoot;
-use biome_rowan::TextRange;
+use biome_rowan::{TextRange, TextSize};
 use rustc_hash::FxHashMap;
 
 /// The façade for all semantic information of a CSS document.
@@ -39,13 +39,21 @@ impl SemanticModel {
 
     /// Returns the rule that contains the given range.
     pub fn get_rule_by_range(&self, target_range: TextRange) -> Option<&Rule> {
-        let (_, rule) = self
-            .data
-            .range_to_rule
-            .range(..=target_range)
-            .rev()
-            .find(|(&range, _)| range.contains_range(target_range))?;
-        Some(rule)
+        if target_range.start() == TextSize::from(0) {
+            self.data
+                .range_to_rule
+                .iter()
+                .rev()
+                .find(|(&range, _)| range.contains_range(target_range))
+                .map(|(_, rule)| rule)
+        } else {
+            self.data
+                .range_to_rule
+                .range(..=target_range)
+                .rev()
+                .find(|(&range, _)| range.contains_range(target_range))
+                .map(|(_, rule)| rule)
+        }
     }
 }
 
