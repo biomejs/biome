@@ -1,5 +1,5 @@
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
-use biome_formatter::Printed;
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
 use biome_html_formatter::{format_node, HtmlFormatOptions};
 use biome_html_parser::parse_html_with_cache;
@@ -18,8 +18,30 @@ use super::{
     FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
 };
 
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct HtmlFormatterSettings {
+    pub line_ending: Option<LineEnding>,
+    pub line_width: Option<LineWidth>,
+    pub indent_width: Option<IndentWidth>,
+    pub indent_style: Option<IndentStyle>,
+    pub enabled: Option<bool>,
+}
+
+impl Default for HtmlFormatterSettings {
+    fn default() -> Self {
+        Self {
+            enabled: Some(false),
+            indent_style: Default::default(),
+            indent_width: Default::default(),
+            line_ending: Default::default(),
+            line_width: Default::default(),
+        }
+    }
+}
+
 impl ServiceLanguage for HtmlLanguage {
-    type FormatterSettings = ();
+    type FormatterSettings = HtmlFormatterSettings;
     type LinterSettings = ();
     type OrganizeImportsSettings = ();
     type FormatOptions = HtmlFormatOptions;
@@ -33,14 +55,40 @@ impl ServiceLanguage for HtmlLanguage {
     }
 
     fn resolve_format_options(
-        _global: Option<&crate::settings::FormatSettings>,
-        _overrides: Option<&crate::settings::OverrideSettings>,
-        _language: Option<&Self::FormatterSettings>,
-        _path: &biome_fs::BiomePath,
-        _file_source: &super::DocumentFileSource,
+        global: Option<&crate::settings::FormatSettings>,
+        overrides: Option<&crate::settings::OverrideSettings>,
+        language: Option<&Self::FormatterSettings>,
+        path: &biome_fs::BiomePath,
+        file_source: &super::DocumentFileSource,
     ) -> Self::FormatOptions {
-        // TODO: actually resolve options
-        HtmlFormatOptions::default()
+        let indent_style = language
+            .and_then(|l| l.indent_style)
+            .or(global.and_then(|g| g.indent_style))
+            .unwrap_or_default();
+        let line_width = language
+            .and_then(|l| l.line_width)
+            .or(global.and_then(|g| g.line_width))
+            .unwrap_or_default();
+        let indent_width = language
+            .and_then(|l| l.indent_width)
+            .or(global.and_then(|g| g.indent_width))
+            .unwrap_or_default();
+
+        let line_ending = language
+            .and_then(|l| l.line_ending)
+            .or(global.and_then(|g| g.line_ending))
+            .unwrap_or_default();
+
+        let options = HtmlFormatOptions::new(file_source.to_html_file_source().unwrap_or_default())
+            .with_indent_style(indent_style)
+            .with_indent_width(indent_width)
+            .with_line_width(line_width)
+            .with_line_ending(line_ending);
+        if let Some(overrides) = overrides {
+            overrides.to_override_html_format_options(path, options)
+        } else {
+            options
+        }
     }
 
     fn resolve_analyzer_options(
