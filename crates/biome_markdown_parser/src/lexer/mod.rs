@@ -276,9 +276,9 @@ impl<'src> MarkdownLexer<'src> {
             Some(b'-') => b'-',
             Some(b'*') => b'*',
             Some(b'_') => b'_',
-            _ => unreachable!(),
+            _ => return self.consume_textual(),
         };
-
+        
         let mut count = 0;
         loop {
             self.skip_whitespace();
