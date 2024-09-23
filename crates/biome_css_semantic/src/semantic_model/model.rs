@@ -39,6 +39,11 @@ impl SemanticModel {
 
     /// Returns the rule that contains the given range.
     pub fn get_rule_by_range(&self, target_range: TextRange) -> Option<&Rule> {
+        // Generally, this function narrows down the search before finding the most specific rule for better performance.
+        // But when the target range starts from 0, the BTreeMap's range method may not work as expected due to
+        // the comparison semantics of TextRange.
+
+        // Handle the edge case where the target range starts from 0.
         if target_range.start() == TextSize::from(0) {
             self.data
                 .range_to_rule
