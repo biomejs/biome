@@ -683,7 +683,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             }
                         }
                         FixFileMode::ApplySuppressions => {
-                            // TODO: Now what goes in these parentheses...?
+                            // TODO: Now where do I get ctx, text_range, and suppression_action
+                            // from...?
                             Rule::suppress();
                         }
                     }
