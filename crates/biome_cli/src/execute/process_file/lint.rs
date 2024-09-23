@@ -2,7 +2,7 @@ use crate::execute::diagnostics::ResultExt;
 use crate::execute::process_file::workspace_file::WorkspaceFile;
 use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraversalOptions};
 use crate::TraversalMode;
-use biome_analyze::{Rule, RuleCategoriesBuilder};
+use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{category, Error};
 use biome_rowan::TextSize;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};

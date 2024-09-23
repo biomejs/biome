@@ -28,6 +28,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) apply: bool,
     pub(crate) apply_unsafe: bool,
     pub(crate) write: bool,
+    pub(crate) write_suppressions: bool,
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
     pub(crate) cli_options: CliOptions,
@@ -45,7 +46,6 @@ pub(crate) struct LintCommandPayload {
     pub(crate) json_linter: Option<PartialJsonLinter>,
     pub(crate) css_linter: Option<PartialCssLinter>,
     pub(crate) graphql_linter: Option<PartialGraphqlLinter>,
-    pub(crate) write_suppressions: Option<String>,
 }
 
 /// Handler for the "lint" command of the Biome CLI
@@ -80,6 +80,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
             apply,
             apply_unsafe,
             write,
+            write_suppressions,
             fix,
             unsafe_,
         },

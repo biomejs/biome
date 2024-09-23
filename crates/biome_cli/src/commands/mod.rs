@@ -105,6 +105,10 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
+        /// Writes inline biome-ignore comments to ignore existing diagnostics
+        #[bpaf(long("write"), switch)]
+        write_suppressions: bool,
+
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
@@ -220,10 +224,8 @@ pub enum BiomeCommand {
         #[bpaf(external(partial_graphql_linter), optional, hide_usage, hide)]
         graphql_linter: Option<PartialGraphqlLinter>,
 
-        // TODO: The flag requires a value here. Am I able to let them pass `--write-suppressions`,
-        // without a value? Option<Option<String>> wasn't it.
         #[bpaf(long("write-suppressions"))]
-        write_suppressions: Option<String>,
+        write_suppressions: bool,
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
@@ -303,6 +305,7 @@ pub enum BiomeCommand {
         /// Writes formatted files to file system.
         #[bpaf(long("write"), switch)]
         write: bool,
+        write_suppressions: bool,
 
         /// Alias of `--write`, writes formatted files to file system.
         #[bpaf(long("fix"), switch, hide_usage)]
@@ -412,6 +415,10 @@ pub enum BiomeCommand {
         /// Writes the new configuration file to disk
         #[bpaf(long("write"), switch)]
         write: bool,
+
+        /// Writes inline biome-ignore comments to ignore existing diagnostics
+        #[bpaf(long("write"), switch)]
+        write_suppressions: bool,
 
         /// Alias of `--write`, writes the new configuration file to disk
         #[bpaf(long("fix"), switch, hide_usage)]
@@ -884,7 +891,7 @@ mod tests {
     fn safe_and_unsafe_fixes() {
         let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, fix, write_suppressions, unsafe_) in [
+        for (apply, apply_unsafe, write, fix, unsafe_) in [
             (false, true, false, false, false), // --apply-unsafe
             (false, false, true, false, true),  // --write --unsafe
             (false, false, false, true, true),  // --fix --unsafe
@@ -911,8 +918,7 @@ mod tests {
     fn no_fix() {
         let mut console = BufferConsole::default();
 
-        let (apply, apply_unsafe, write, fix, write_suppressions, unsafe_) =
-            (false, false, false, false, false, false);
+        let (apply, apply_unsafe, write, fix, unsafe_) = (false, false, false, false, false);
         assert_eq!(
             determine_fix_file_mode(
                 FixFileModeOptions {
