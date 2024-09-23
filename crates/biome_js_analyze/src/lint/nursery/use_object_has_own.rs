@@ -5,6 +5,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_factory::make;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{AnyJsExpression, AnyJsMemberExpression, JsCallExpression, JsSyntaxKind, T};
 use biome_rowan::{AstNode, BatchMutationExt};
 
@@ -56,7 +57,6 @@ impl Rule for UseObjectHasOwn {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let expression = ctx.query();
-        let model = ctx.model();
 
         let callee = expression.callee().ok()?.omit_parentheses();
         let member_expr = AnyJsMemberExpression::cast(callee.into_syntax())?;
@@ -64,14 +64,11 @@ impl Rule for UseObjectHasOwn {
         let object = member_expr.object().ok()?.omit_parentheses();
         let obj_expr = AnyJsMemberExpression::cast(object.into_syntax())?;
 
-        let variable_scope = model.scopes().find(|s| s.get_binding("Object").is_some());
-
-        let is_call_member = member_expr.member_name()?.text() == "call";
-        let is_has_own_property = obj_expr.member_name()?.text() == "hasOwnProperty";
-        let is_valid_scope = variable_scope.is_none() || variable_scope?.is_global_scope();
-        let has_left_hand = has_left_hand_object(&obj_expr)?;
-
-        if is_call_member && is_has_own_property && has_left_hand && is_valid_scope {
+        if member_expr.member_name()?.text() == "call"
+            && obj_expr.member_name()?.text() == "hasOwnProperty"
+            && has_left_hand_object(&obj_expr)?
+            && is_global_object(ctx.model())
+        {
             return Some(());
         }
 
@@ -130,6 +127,13 @@ impl Rule for UseObjectHasOwn {
             mutation,
         ))
     }
+}
+
+fn is_global_object(semantic: &SemanticModel) -> bool {
+    semantic
+        .scopes()
+        .find(|s| s.get_binding("Object").is_some())
+        .map_or(true, |s| s.is_global_scope())
 }
 
 /// Checks if the given node is considered to be an access to a property of `Object.prototype`.
