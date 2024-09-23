@@ -16,7 +16,6 @@ pub fn semantic_model(root: &CssRoot) -> SemanticModel {
     for node in root.preorder() {
         match node {
             biome_css_syntax::WalkEvent::Enter(node) => {
-                builder.push_node(&node);
                 extractor.enter(&node);
             }
             biome_css_syntax::WalkEvent::Leave(node) => extractor.leave(&node),
