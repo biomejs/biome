@@ -21,7 +21,7 @@ use crate::{
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch, Rule,
     RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
 };
 use biome_configuration::javascript::JsxRuntime;
@@ -659,8 +659,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
 
                 for action in signal.actions() {
-                    // TODO: This can get removed now if I'm understanding correctly?
-                    // suppression actions should not be part of the fixes (safe or suggested)
                     if action.is_suppression() {
                         continue;
                     }
@@ -685,7 +683,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             }
                         }
                         FixFileMode::ApplySuppressions => {
-                            println!("Made it to da block.")
+                            // TODO: Now what goes in these parentheses...?
+                            Rule::suppress();
                         }
                     }
                 }
