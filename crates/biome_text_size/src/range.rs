@@ -34,9 +34,9 @@ impl PartialOrd for TextRange {
 
 impl Ord for TextRange {
     fn cmp(&self, other: &Self) -> Ordering {
-        if self.end <= other.start {
+        if self.end < other.start {
             Ordering::Less
-        } else if self.start >= other.end {
+        } else if self.start > other.end {
             Ordering::Greater
         } else {
             Ordering::Equal
