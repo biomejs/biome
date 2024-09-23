@@ -114,3 +114,25 @@ fn textual() {
     }
 }
 
+#[test]
+fn thematic_break_literal() {
+    assert_lex! {
+        r#"---
+***
+___
+* * *
+* * * *
+_ _ _ _  _ "#,
+        MD_THEMATIC_BREAK_LITERAL:3,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:3,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:3,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:5,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:7,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:11,
+    }
+}

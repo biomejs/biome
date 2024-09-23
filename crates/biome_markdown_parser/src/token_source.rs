@@ -83,6 +83,7 @@ impl<'source> MarkdownTokenSource<'source> {
         })
     }
 
+    #[allow(dead_code)]
     pub fn before_new_line(&self) -> Option<TextSize> {
         self.trivia_list
             .iter()

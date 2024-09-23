@@ -2,8 +2,9 @@ pub mod thematic_break_block;
 
 use biome_markdown_syntax::{kind::MarkdownSyntaxKind::*, T};
 use biome_parser::Parser;
+use thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 
-use crate::syntax::thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
+// use crate::syntax::thematic_break_block::{at_thematic_break_block, parse_thematic_break_block};
 use crate::MarkdownParser;
 
 pub(crate) fn parse_document(p: &mut MarkdownParser) {

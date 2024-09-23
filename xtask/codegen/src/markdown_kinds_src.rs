@@ -30,7 +30,7 @@ pub const MARKDOWN_KINDS_SRC: KindsSrc = KindsSrc {
         "MD_THEMATIC_BREAK_LITERAL",
         "MD_ERROR_LITERAL",
     ],
-    tokens: &["NEWLINE", "WHITESPACE", "TAB"],
+    tokens: &["ERROR_TOKEN", "NEWLINE", "WHITESPACE", "TAB"],
     nodes: &[
         // Bogus nodes
         "BOGUS",

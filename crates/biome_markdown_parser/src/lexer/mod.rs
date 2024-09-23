@@ -3,8 +3,8 @@
 #[rustfmt::skip]
 mod tests;
 
+use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
-use biome_markdown_syntax::{MarkdownSyntaxKind, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
@@ -279,18 +279,21 @@ impl<'src> MarkdownLexer<'src> {
             _ => unreachable!(),
         };
 
+        let mut count = 0;
         loop {
             self.skip_whitespace();
-            if  matches!(self.current_byte(), Some(start_char)) {
+            if matches!(self.current_byte(), Some(ch) if ch == start_char) {
                 self.advance(1);
+                count += 1;
+            } else {
+                break;
             }
         }
-        // newline
-        if matches!(self.current_byte(), Some(b'\n' | b'\r')) {
-            MD_THEMATIC_BREAK_LITERAL
+        // until next newline or eof
+        if matches!(self.current_byte(), Some(b'\n' | b'\r') | None) && count >= 3 {
+            return MD_THEMATIC_BREAK_LITERAL;
         }
-        // FIXME: should return a error token,resume to the position
-        MD_THEMATIC_BREAK_LITERAL
+        ERROR_TOKEN
     }
 
     fn skip_whitespace(&mut self) {
@@ -366,6 +369,7 @@ impl<'src> MarkdownLexer<'src> {
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
+    #[allow(dead_code)]
     fn consume_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
         tok
