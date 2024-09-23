@@ -21,7 +21,7 @@ fn test_snapshot(input: &'static str, _: &str, _: &str, _: &str) {
     let test_file = PrettierTestFile::new(input, root_path);
     let source_type = HtmlFileSource::html();
 
-    let options = HtmlFormatOptions::new()
+    let options = HtmlFormatOptions::new(HtmlFileSource::html())
         .with_indent_style(IndentStyle::Space)
         .with_indent_width(IndentWidth::default());
 

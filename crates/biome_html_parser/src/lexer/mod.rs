@@ -10,7 +10,7 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{Lexer, LexerCheckpoint, LexerWithCheckpoint, TokenFlags};
 use biome_rowan::SyntaxKind;
 use biome_unicode_table::lookup_byte;
-use biome_unicode_table::Dispatch::{BSL, QOT, UNI, WHS};
+use biome_unicode_table::Dispatch::{BSL, QOT, UNI};
 use std::ops::Add;
 
 pub(crate) struct HtmlLexer<'src> {
@@ -245,15 +245,6 @@ impl<'src> HtmlLexer<'src> {
 
                         None => {}
                     }
-                }
-                WHS if matches!(chr, b'\n' | b'\r') => {
-                    let unterminated =
-                        ParseDiagnostic::new("Missing closing quote", start..self.text_position())
-                            .with_hint("The closing quote must be on the same line.");
-
-                    self.diagnostics.push(unterminated);
-
-                    return ERROR_TOKEN;
                 }
                 // we don't need to handle IDT because it's always len 1.
                 UNI => self.advance_char_unchecked(),

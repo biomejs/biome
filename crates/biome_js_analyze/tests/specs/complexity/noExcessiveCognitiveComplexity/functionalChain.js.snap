@@ -25,7 +25,7 @@ function functionalChain(array) {
 ```
 functionalChain.js:4:24 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity detected.
+  ! Excessive complexity of 3 detected (max: 2).
   
     2 │     return array
     3 │         .filter(Boolean)

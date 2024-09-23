@@ -9,6 +9,28 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [#3924](https://github.com/biomejs/biome/issues/3924) where GraphQL formatter panics in block comments with empty line. Contributed by @vohoanglong0107
+
+### JavaScript API
+
+### Linter
+
+### Parser
+
 ## v1.9.2 (2024-09-19)
 
 ### CLI

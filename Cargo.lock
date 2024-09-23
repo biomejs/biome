@@ -345,6 +345,7 @@ name = "biome_css_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
+ "biome_string_case",
  "schemars",
  "serde",
 ]
@@ -575,6 +576,7 @@ name = "biome_graphql_syntax"
 version = "0.1.0"
 dependencies = [
  "biome_rowan",
+ "biome_string_case",
  "schemars",
  "serde",
 ]
@@ -713,6 +715,7 @@ name = "biome_html_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
+ "biome_string_case",
  "schemars",
  "serde",
 ]
@@ -835,6 +838,7 @@ dependencies = [
  "biome_js_factory",
  "biome_js_parser",
  "biome_rowan",
+ "biome_string_case",
  "enumflags2",
  "schemars",
  "serde",
@@ -929,6 +933,7 @@ name = "biome_json_syntax"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
+ "biome_string_case",
  "schemars",
  "serde",
 ]
@@ -1277,9 +1282,9 @@ dependencies = [
 
 [[package]]
 name = "bpaf"
-version = "0.9.13"
+version = "0.9.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0eb12bae07c4142b840ff2a892d3abd94124f30672293f5b466f38624077aadb"
+checksum = "8d4e5ca9929037866947af4b8b7418124f2ec7c411a8b9ee24e46ad2b8470497"
 dependencies = [
  "bpaf_derive",
  "owo-colors",

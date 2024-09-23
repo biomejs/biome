@@ -25,7 +25,7 @@ grit-pattern-matcher = { version = "0.3" }
 grit-util            = { version = "0.3" }
 im                   = { version = "15.1.0" }
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
-rand                 = { version = "0.8" }
+rand                 = { version = "0.8.5" }
 regex                = { workspace = true }
 rustc-hash           = { workspace = true }
 serde                = { workspace = true, features = ["derive"] }
