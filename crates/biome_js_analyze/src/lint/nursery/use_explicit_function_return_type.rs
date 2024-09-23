@@ -253,6 +253,8 @@ fn is_function_used_in_argument_or_expression_list(func: &AnyJsFunction) -> bool
         Some(
             JsSyntaxKind::JS_CALL_ARGUMENT_LIST
                 | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST
+                // We include JS_PARENTHESIZED_EXPRESSION for IIFE (Immediately Invoked Function Expressions).
+                // We also assume that the parent of the parent is a call expression.
                 | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
         )
     )
