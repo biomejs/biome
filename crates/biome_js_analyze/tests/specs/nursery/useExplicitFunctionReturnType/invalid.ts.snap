@@ -47,6 +47,9 @@ const obj = {
 
 const func = (value: number) => ({ type: 'X', value }) as any;
 const func = (value: number) => ({ type: 'X', value }) as Action;
+
+export default () => {};
+export default function () {}
 ```
 
 # Diagnostics
@@ -267,6 +270,7 @@ invalid.ts:42:14 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
   > 42 │ const func = (value: number) => ({ type: 'X', value }) as any;
        │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     43 │ const func = (value: number) => ({ type: 'X', value }) as Action;
+    44 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -283,6 +287,42 @@ invalid.ts:43:14 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
     42 │ const func = (value: number) => ({ type: 'X', value }) as any;
   > 43 │ const func = (value: number) => ({ type: 'X', value }) as Action;
        │              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ export default () => {};
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:45:16 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    43 │ const func = (value: number) => ({ type: 'X', value }) as Action;
+    44 │ 
+  > 45 │ export default () => {};
+       │                ^^^^^^^^
+    46 │ export default function () {}
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:46:16 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    45 │ export default () => {};
+  > 46 │ export default function () {}
+       │                ^^^^^^^^^^^^^^
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
