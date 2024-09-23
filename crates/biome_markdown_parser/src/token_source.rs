@@ -5,7 +5,7 @@ use biome_parser::lexer::BufferedLexer;
 use biome_parser::prelude::{BumpWithContext, TokenSource};
 use biome_parser::token_source::{TokenSourceWithBufferedLexer, Trivia};
 use biome_parser::{diagnostic::ParseDiagnostic, token_source::TokenSourceCheckpoint};
-use biome_rowan::{TextRange, TextSize, TriviaPieceKind};
+use biome_rowan::{TextRange, TriviaPieceKind};
 
 pub(crate) struct MarkdownTokenSource<'source> {
     lexer: BufferedLexer<MarkdownSyntaxKind, MarkdownLexer<'source>>,

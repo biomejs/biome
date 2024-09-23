@@ -2,7 +2,6 @@ pub mod thematic_break_block;
 
 use biome_markdown_syntax::{kind::MarkdownSyntaxKind::*, T};
 use biome_parser::{
-    parse_lists::ParseNodeList,
     prelude::ParsedSyntax::{self, *},
     Parser,
 };
