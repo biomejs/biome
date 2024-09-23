@@ -278,7 +278,7 @@ impl<'src> MarkdownLexer<'src> {
             Some(b'_') => b'_',
             _ => return self.consume_textual(),
         };
-        
+
         let mut count = 0;
         loop {
             self.skip_whitespace();
