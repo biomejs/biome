@@ -1,11 +1,11 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
 expression: valid.js
 ---
 # Input
 ```jsx
 Object.hasOwn(foo, "bar");
-Object.prototype.hasOwnProperty.call(foo, "bar");
 Object.prototype.isPrototypeOf.call(foo, bar);
 Object.prototype.propertyIsEnumerable.call(foo, 'bar');
 Object.prototype.hasOwnProperty.apply(foo, ['bar']);
@@ -17,7 +17,6 @@ foo(hasOwnProperty);
 hasOwnProperty(foo, 'bar');
 isPrototypeOf(foo, 'bar');
 propertyIsEnumerable(foo, 'bar');
-({}.hasOwnProperty.call(foo, 'bar'));
 ({}.isPrototypeOf.call(foo, 'bar'));
 ({}.propertyIsEnumerable.call(foo, 'bar'));
 ({}.hasOwnProperty.apply(foo, ['bar']));
@@ -25,6 +24,28 @@ propertyIsEnumerable(foo, 'bar');
 ({}.propertyIsEnumerable.apply(foo, ['bar']));
 foo[hasOwnProperty]('bar');
 foo['HasOwnProperty']('bar');
+Object;
+Object(obj, prop);
+Object.hasOwnProperty;
+hasOwnProperty(obj, prop);
+Object.hasOwnProperty.call;
+foo.Object.hasOwnProperty.call(obj, prop);
+foo.hasOwnProperty.call(obj, prop);
+Object.foo.call(obj, prop);
+Object.hasOwnProperty.foo(obj, prop);
+Object.hasOwnProperty.call.foo(obj, prop);
+Object[hasOwnProperty].call(obj, prop);
+Object.hasOwnProperty[call](obj, prop);
+Object.foo.hasOwnProperty.call(obj, prop);
+({});
+({}(obj, prop));
+({}.hasOwnProperty);
+({}.hasOwnProperty.call);
+({}.foo.call(obj, prop));
+({}.hasOwnProperty.foo(obj, prop));
+({}[hasOwnProperty].call(obj, prop));
+({}.hasOwnProperty[call](obj, prop));
+({}).hasOwnProperty[call](object, property);
+({})[hasOwnProperty].call(object, property);
+({ foo }.hasOwnProperty.call(obj, prop)); // object literal should be empty
 ```
-
-
