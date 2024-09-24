@@ -1,4 +1,6 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_js_syntax::JsStringLiteralExpression;
 use biome_rowan::AstNode;
@@ -6,9 +8,9 @@ use biome_rowan::AstNode;
 declare_lint_rule! {
     /// Disallow template literal placeholder syntax in regular strings.
     ///
-    /// ECMAScript 6 allows programmers to create strings containing variable or expressions using template literals, 
-    /// instead of string concatenation, by writing expressions like ${variable} between two backtick quotes (`). 
-    /// It can be easy to use the wrong quotes when wanting to use template literals, by writing "${variable}", 
+    /// ECMAScript 6 allows programmers to create strings containing variable or expressions using template literals,
+    /// instead of string concatenation, by writing expressions like ${variable} between two backtick quotes (`).
+    /// It can be easy to use the wrong quotes when wanting to use template literals, by writing "${variable}",
     /// and end up with the literal value "${variable}" instead of a string containing the value of the injected expressions.
     ///
     /// ## Examples
@@ -76,9 +78,12 @@ impl Rule for NoTemplateCurlyInString {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Unexpected template string expression."
+                    "Unexpected template string placeholder."
                 },
-            ),
+            )
+            .note(markup! {
+                "Turn the string into a template string."
+            }),
         )
     }
 }
