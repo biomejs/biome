@@ -1,10 +1,20 @@
 use std::{collections::HashMap, sync::LazyLock};
 
-// Same order used by stylelint-config-recess-order
-// (vendor prefixes omitted)
-pub(crate) const PROPERTY_ORDER: [&str; 381] = [
+/*
+Same order used by stylelint-config-recess-order
+(vendor prefixes omitted)
+
+This differs from stylelint-config-recess-order in the following ways:
+Vendor prefixes removed
+flex-direction and flex-flow swapped
+IE filters (progid:DXImageTransform) removed
+Removed properties not known to biome:
+    font-effect, font-emphasize, font-emphasize-position, font-emphasize-style,
+    font-smooth, text-outline, text-overflow-ellipsis, text-overflow-mode,
+    scroll-behaviour, nav-index, color-profile
+*/
+pub(crate) const PROPERTY_ORDER: [&str; 369] = [
     // special
-    "composes",
     "all",
     // position
     "position",
@@ -25,8 +35,8 @@ pub(crate) const PROPERTY_ORDER: [&str; 381] = [
     "display",
     // layout - flex & grid
     "flex",
+    "flex-flow",
     "flex-basis",
-    "flex-flow", // Note - stylelint-config-recess-order places this after flex-direction, but flex-flow is a shorthand of flex-direction
     "flex-direction",
     "flex-grow",
     "flex-shrink",
@@ -132,11 +142,6 @@ pub(crate) const PROPERTY_ORDER: [&str; 381] = [
     "font-variant-position",
     "font-size-adjust",
     "font-stretch",
-    "font-effect",
-    "font-emphasize",
-    "font-emphasize-position",
-    "font-emphasize-style",
-    "font-smooth",
     "hyphens",
     "line-height",
     "color",
@@ -155,10 +160,7 @@ pub(crate) const PROPERTY_ORDER: [&str; 381] = [
     "text-underline-offset",
     "text-indent",
     "text-justify",
-    "text-outline",
     "text-overflow",
-    "text-overflow-ellipsis",
-    "text-overflow-mode",
     "line-clamp",
     "text-shadow",
     "text-transform",
@@ -203,7 +205,6 @@ pub(crate) const PROPERTY_ORDER: [&str; 381] = [
     "counter-set",
     "counter-increment",
     "resize",
-    "scroll-behaviour",
     "scroll-snap-type",
     "scroll-snap-align",
     "scroll-snap-stop",
@@ -233,7 +234,6 @@ pub(crate) const PROPERTY_ORDER: [&str; 381] = [
     "scrollbar-gutter",
     "scrollbar-width",
     "user-select",
-    "nav-index",
     "nav-up",
     "nav-right",
     "nav-down",
@@ -358,7 +358,6 @@ pub(crate) const PROPERTY_ORDER: [&str; 381] = [
     "stroke-width",
     "color-interpolation",
     "color-interpolation-filters",
-    "color-profile",
     "color-rendering",
     "flood-color",
     "flood-opacity",
@@ -410,7 +409,7 @@ pub(crate) static PROPERTY_ORDER_MAP: LazyLock<HashMap<String, u32>> = LazyLock:
 #[cfg(test)]
 mod tests {
     use crate::{
-        keywords::LONGHAND_SUB_PROPERTIES_MAP,
+        keywords::{LONGHAND_SUB_PROPERTIES_MAP, VENDOR_PREFIXES},
         order::PROPERTY_ORDER_MAP,
         utils::{is_known_properties, vendor_prefixed},
     };
@@ -458,12 +457,16 @@ mod tests {
 
     #[test]
     fn test_no_unknown_properties_in_order_list() {
-        for prop in PROPERTY_ORDER {
-            assert!(
-                is_known_properties(prop),
-                "{} is not a known property",
-                prop
-            );
+        'outer: for prop in PROPERTY_ORDER {
+            if is_known_properties(prop) {
+                continue;
+            }
+            for prefix in VENDOR_PREFIXES {
+                if is_known_properties(&(prefix.to_owned() + prop)) {
+                    continue 'outer;
+                }
+            }
+            panic!("unknown property {}", prop)
         }
     }
 

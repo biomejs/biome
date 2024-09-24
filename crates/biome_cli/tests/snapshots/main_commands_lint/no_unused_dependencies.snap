@@ -88,6 +88,7 @@ biome.json:7:9 deserialize ━━━━━━━━━━━━━━━━━�
   - useDeprecatedReason
   - useImportRestrictions
   - useSortedClasses
+  - useSortedProperties
   - useStrictMode
   - useTrimStartEnd
   - useValidAutocomplete

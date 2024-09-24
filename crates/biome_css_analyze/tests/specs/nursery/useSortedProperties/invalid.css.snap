@@ -1,6 +1,5 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
-assertion_line: 94
 expression: invalid.css
 ---
 # Input
@@ -81,7 +80,7 @@ expression: invalid.css
 ```
 invalid.css:1:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: display should be before color.
+  ! Properties should be sorted: "display" should be before "color".
   
   > 1 │ .not-sorted-basic {
       │                   ^
@@ -108,7 +107,7 @@ invalid.css:1:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:6:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: color should be before transition.
+  ! Properties should be sorted: "color" should be before "transition".
   
      4 │ }
      5 │ 
@@ -143,7 +142,7 @@ invalid.css:6:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:13:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: display should be before margin.
+  ! Properties should be sorted: "display" should be before "margin".
   
     11 │ }
     12 │ 
@@ -179,7 +178,7 @@ invalid.css:13:22 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:27:10 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: display should be before color.
+  ! Properties should be sorted: "display" should be before "color".
   
     25 │ }
     26 │ 
@@ -203,7 +202,7 @@ invalid.css:27:10 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:29:15 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: color should be before the nested rule at position 2.
+  ! Properties should be sorted: "color" should be before the nested rule at position 2.
   
     27 │ .oneline { color: red; display: block; }
     28 │ 
@@ -236,7 +235,7 @@ invalid.css:29:15 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:37:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: color should be before the at-rule at position 2.
+  ! Properties should be sorted: "color" should be before the at-rule at position 2.
   
     35 │ }
     36 │ 
@@ -269,7 +268,7 @@ invalid.css:37:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:45:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: color should be before the at-rule at position 2.
+  ! Properties should be sorted: "color" should be before the at-rule at position 2.
   
     43 │ }
     44 │ 
@@ -290,9 +289,10 @@ invalid.css:45:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
     47    │ - ··@media·(min-width:·100px)·{}
        47 │ + ··margin:·1px;
     48 48 │     color: red;
-    49 49 │     .nested {}
+    49    │ - ··.nested·{}
     50    │ - ··margin:·1px;
-       50 │ + ··@media·(min-width:·100px)·{}
+       49 │ + ··@media·(min-width:·100px)·{}
+       50 │ + ··.nested·{}
     51 51 │   }
     52 52 │   
   
@@ -302,7 +302,7 @@ invalid.css:45:14 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:53:18 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: -moz-margin should be before margin.
+  ! Properties should be sorted: "-moz-margin" should be before "margin".
   
     51 │ }
     52 │ 
@@ -334,7 +334,7 @@ invalid.css:53:18 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:59:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: DISPLAY should be before color.
+  ! Properties should be sorted: "DISPLAY" should be before "color".
   
     57 │ }
     58 │ 
@@ -364,7 +364,7 @@ invalid.css:59:19 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━�
 ```
 invalid.css:65:11 lint/nursery/useSortedProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Properties should be sorted: display should be before color.
+  ! Properties should be sorted: "display" should be before "color".
   
     64 │ .nested-with-content {
   > 65 │   .nested {

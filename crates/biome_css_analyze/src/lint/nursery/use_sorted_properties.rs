@@ -78,7 +78,8 @@ impl Rule for UseSortedProperties {
 
         Some(UseSortedPropertiesState {
             block: query_result.clone(),
-            can_be_sorted: !contains_shorthand_after_longhand(&items),
+            can_be_sorted: !contains_shorthand_after_longhand(&items)
+                && !contains_unknown_property(&items),
             first_out_of_order_pair,
         })
     }
@@ -354,6 +355,22 @@ fn contains_shorthand_after_longhand(items: &[NodeWithPosition]) -> bool {
     false
 }
 
+fn contains_unknown_property(items: &[NodeWithPosition]) -> bool {
+    for item in items.iter() {
+        let node = &item.node;
+        if let AnyCssDeclarationOrRule::CssDeclarationWithSemicolon(decl_with_semicolon) = node {
+            if let Some(sanitized_prop) = &css_declaration_to_prop_name(decl_with_semicolon) {
+                let (_, plain_prop) = sanitized_prop;
+                if !PROPERTY_ORDER_MAP.contains_key(plain_prop) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    false
+}
+
 fn node_short_description(node_with_position: &NodeWithPosition) -> String {
     let position = node_with_position.position + 1; // one-based
 
@@ -371,7 +388,7 @@ fn node_short_description(node_with_position: &NodeWithPosition) -> String {
                 .ok()
                 .and_then(|decl| decl.property().ok())
                 .and_then(|prop| match prop {
-                    AnyCssProperty::CssComposesProperty(_) => Some("composes".to_string()),
+                    AnyCssProperty::CssComposesProperty(_) => Some("\"composes\"".to_string()),
                     AnyCssProperty::CssGenericProperty(prop) => match prop.name().ok() {
                         Some(name) => match name {
                             AnyCssDeclarationName::CssIdentifier(ident) => ident.value_token().ok(),
@@ -379,7 +396,7 @@ fn node_short_description(node_with_position: &NodeWithPosition) -> String {
                                 ident.value_token().ok()
                             }
                         }
-                        .map(|tok| tok.token_text_trimmed().text().to_string()),
+                        .map(|tok| "\"".to_owned() + tok.token_text_trimmed().text() + "\""),
                         None => None,
                     },
                     _ => None,
