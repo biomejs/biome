@@ -9,9 +9,9 @@ use biome_js_factory::make::{
     jsx_tag_expression, token, JsxExpressionChildBuilder,
 };
 use biome_js_syntax::{
-    AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsParenthesizedExpression, JsSyntaxKind,
-    JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxFragment, JsxTagExpression, JsxText,
-    T,
+    AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression,
+    JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
+    JsxFragment, JsxTagExpression, JsxText, T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
@@ -123,6 +123,7 @@ impl Rule for NoUselessFragments {
         let node = ctx.query();
         let model = ctx.model();
         let mut in_jsx_attr_expr = false;
+        let mut in_js_logical_expr = false;
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
                 let parents_where_fragments_must_be_preserved = node.syntax().parent().map_or(
@@ -134,6 +135,9 @@ impl Rule for NoUselessFragments {
                             .and_then(|parent| {
                                 if JsxExpressionAttributeValue::can_cast(parent.kind()) {
                                     in_jsx_attr_expr = true;
+                                }
+                                if JsLogicalExpression::can_cast(parent.kind()) {
+                                    in_js_logical_expr = true;
                                 }
                                 match JsParenthesizedExpression::try_cast(parent) {
                                     Ok(parenthesized_expression) => {
@@ -163,12 +167,22 @@ impl Rule for NoUselessFragments {
                 if !parents_where_fragments_must_be_preserved {
                     let mut significant_children = 0;
                     let mut first_significant_child = None;
+                    let mut children_where_fragments_must_preserved = false;
 
                     for child in child_list.iter() {
                         match child.syntax().kind() {
+                            JsSyntaxKind::JSX_EXPRESSION_CHILD => {
+                                if !in_js_logical_expr {
+                                    significant_children += 1;
+                                    if first_significant_child.is_none() {
+                                        first_significant_child = Some(child);
+                                    }
+                                } else {
+                                    children_where_fragments_must_preserved = true;
+                                }
+                            }
                             JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
                             | JsSyntaxKind::JSX_ELEMENT
-                            | JsSyntaxKind::JSX_EXPRESSION_CHILD
                             | JsSyntaxKind::JSX_FRAGMENT => {
                                 significant_children += 1;
                                 if first_significant_child.is_none() {
@@ -185,9 +199,13 @@ impl Rule for NoUselessFragments {
                             }
                             _ => {}
                         }
-                        if significant_children > 1 {
+                        if significant_children > 1 || children_where_fragments_must_preserved {
                             break;
                         }
+                    }
+
+                    if children_where_fragments_must_preserved {
+                        return None;
                     }
 
                     match significant_children {
