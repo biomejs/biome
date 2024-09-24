@@ -1,0 +1,114 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+let a = 'Hello, ${name}';
+let a = "Hello, ${name}";
+let a = '${greeting}, ${name}';
+let a = 'Hello, ${index + 1}';
+let a = 'Hello, ${name + " foo"}';
+let a = 'Hello, ${name || "foo"}';
+let a = 'Hello, ${{foo: "bar"}.foo}';
+```
+
+# Diagnostics
+```
+invalid.js:1:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected template string expression.
+  
+  > 1 │ let a = 'Hello, ${name}';
+      │         ^^^^^^^^^^^^^^^^
+    2 │ let a = "Hello, ${name}";
+    3 │ let a = '${greeting}, ${name}';
+  
+
+```
+
+```
+invalid.js:2:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected template string expression.
+  
+    1 │ let a = 'Hello, ${name}';
+  > 2 │ let a = "Hello, ${name}";
+      │         ^^^^^^^^^^^^^^^^
+    3 │ let a = '${greeting}, ${name}';
+    4 │ let a = 'Hello, ${index + 1}';
+  
+
+```
+
+```
+invalid.js:3:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected template string expression.
+  
+    1 │ let a = 'Hello, ${name}';
+    2 │ let a = "Hello, ${name}";
+  > 3 │ let a = '${greeting}, ${name}';
+      │         ^^^^^^^^^^^^^^^^^^^^^^
+    4 │ let a = 'Hello, ${index + 1}';
+    5 │ let a = 'Hello, ${name + " foo"}';
+  
+
+```
+
+```
+invalid.js:4:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected template string expression.
+  
+    2 │ let a = "Hello, ${name}";
+    3 │ let a = '${greeting}, ${name}';
+  > 4 │ let a = 'Hello, ${index + 1}';
+      │         ^^^^^^^^^^^^^^^^^^^^^
+    5 │ let a = 'Hello, ${name + " foo"}';
+    6 │ let a = 'Hello, ${name || "foo"}';
+  
+
+```
+
+```
+invalid.js:5:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected template string expression.
+  
+    3 │ let a = '${greeting}, ${name}';
+    4 │ let a = 'Hello, ${index + 1}';
+  > 5 │ let a = 'Hello, ${name + " foo"}';
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ let a = 'Hello, ${name || "foo"}';
+    7 │ let a = 'Hello, ${{foo: "bar"}.foo}';
+  
+
+```
+
+```
+invalid.js:6:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected template string expression.
+  
+    4 │ let a = 'Hello, ${index + 1}';
+    5 │ let a = 'Hello, ${name + " foo"}';
+  > 6 │ let a = 'Hello, ${name || "foo"}';
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │ let a = 'Hello, ${{foo: "bar"}.foo}';
+  
+
+```
+
+```
+invalid.js:7:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Unexpected template string expression.
+  
+    5 │ let a = 'Hello, ${name + " foo"}';
+    6 │ let a = 'Hello, ${name || "foo"}';
+  > 7 │ let a = 'Hello, ${{foo: "bar"}.foo}';
+      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+
+```

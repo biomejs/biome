@@ -3332,6 +3332,10 @@ pub struct Nursery {
     #[doc = "Enforce the use of String.slice() over String.substr() and String.substring()."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_substr: Option<RuleFixConfiguration<biome_js_analyze::options::NoSubstr>>,
+    #[doc = "Disallow template literal placeholder syntax in regular strings."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_template_curly_in_string:
+        Option<RuleConfiguration<biome_js_analyze::options::NoTemplateCurlyInString>>,
     #[doc = "Disallow unknown pseudo-class selectors."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_pseudo_class:
@@ -3429,6 +3433,7 @@ impl Nursery {
         "noSecrets",
         "noStaticElementInteractions",
         "noSubstr",
+        "noTemplateCurlyInString",
         "noUnknownPseudoClass",
         "noUnknownPseudoElement",
         "noUselessEscapeInRegex",
@@ -3958,6 +3963,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noSubstr" => self
                 .no_substr
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "noTemplateCurlyInString" => self
+                .no_template_curly_in_string
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noUnknownPseudoClass" => self
