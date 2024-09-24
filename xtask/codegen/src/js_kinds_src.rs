@@ -688,6 +688,8 @@ impl Field {
                     ("~=", _) => "whitespace_like",
                     (",", _) => "comma",
                     ("---", LanguageKind::Yaml) => "dashdashdash",
+                    ("<!--", LanguageKind::Html) => "comment_start",
+                    ("-->", LanguageKind::Html) => "comment_end",
                     _ => name,
                 };
 

@@ -68,6 +68,7 @@ AnyHtmlElement =
 	HtmlSelfClosingElement
 	| HtmlElement
 	| HtmlContent
+	| HtmlComment
 	| HtmlBogusElement
 
 
@@ -99,6 +100,12 @@ HtmlClosingElement =
 	'/'
 	name: HtmlName
 	'>'
+
+// <!-- comment -->
+HtmlComment =
+	'<!--'
+	content: 'html_literal'
+	'-->'
 
 // ==================================
 // Attributes
