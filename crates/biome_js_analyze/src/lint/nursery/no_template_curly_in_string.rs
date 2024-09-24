@@ -57,7 +57,7 @@ impl Rule for NoTemplateCurlyInString {
             if byte == b'$' {
                 if let Some(&next_byte) = byte_iter.next() {
                     if next_byte == b'{' {
-                        while let Some(&inner_byte) = byte_iter.next() {
+                        for &inner_byte in byte_iter.by_ref() {
                             if inner_byte == b'}' {
                                 return Some(());
                             }
