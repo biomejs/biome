@@ -9,7 +9,9 @@ use biome_js_factory::make::{
     jsx_tag_expression, token, JsxExpressionChildBuilder,
 };
 use biome_js_syntax::{
-    AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression, JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue, JsxFragment, JsxTagExpression, JsxText, T
+    AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression,
+    JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
+    JsxFragment, JsxTagExpression, JsxText, T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
