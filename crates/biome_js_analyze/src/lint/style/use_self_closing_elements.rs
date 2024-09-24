@@ -3,9 +3,13 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxTag, JsSyntaxToken, JsxElement, JsxOpeningElementFields, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPiece};
+#[cfg(feature = "schemars")]
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 use crate::JsRuleAction;
 
@@ -53,6 +57,31 @@ declare_lint_rule! {
     /// ```js
     /// <Foo.bar>child</Foo.bar>
     ///```
+    ///
+    /// ## Options
+    ///
+    /// #### `checkHtmlElements`
+    ///
+    /// Default: true
+    ///
+    /// This option allows you to specify whether or not to check native HTML elements.
+    ///
+    /// In the following example, when the option is set to "false", it will not self close native HTML elements.
+    ///
+    /// ```json
+    /// {
+    ///     "//":"...",
+    ///     "options": {
+    ///         "checkHtmlElements": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,ignore
+    /// <div></div>
+    /// ```
+    ///
+    ///
     pub UseSelfClosingElements {
         version: "1.0.0",
         name: "useSelfClosingElements",
@@ -67,10 +96,15 @@ impl Rule for UseSelfClosingElements {
     type Query = Ast<JsxElement>;
     type State = ();
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = Box<UseSelfClosingElementsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
-        if ctx.query().children().is_empty() {
+        let node = ctx.query();
+        let is_html_element = node
+            .opening_element()
+            .is_ok_and(|node| node.name().is_ok_and(|name| name.as_jsx_name().is_some()));
+
+        if node.children().is_empty() && (ctx.options().check_html_elements || !is_html_element) {
             Some(())
         } else {
             None
@@ -146,5 +180,22 @@ impl Rule for UseSelfClosingElements {
             markup! { "Use a SelfClosingElement instead" }.to_owned(),
             mutation,
         ))
+    }
+}
+
+/// Options for the `useSelfClosingElements` rule.
+#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct UseSelfClosingElementsOptions {
+    // Whether or not to check native HTML elements. Default is true.
+    pub check_html_elements: bool,
+}
+
+impl Default for UseSelfClosingElementsOptions {
+    fn default() -> Self {
+        Self {
+            check_html_elements: true,
+        }
     }
 }
