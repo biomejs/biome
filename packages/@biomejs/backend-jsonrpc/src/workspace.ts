@@ -1335,10 +1335,6 @@ export interface Nursery {
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow use of Object.prototype.hasOwnProperty.call() and prefer use of Object.hasOwn()
-	 */
-	useObjectHasOwn?: RuleFixConfiguration_for_Null;
-	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
@@ -1821,7 +1817,7 @@ export interface Suspicious {
 	/**
 	 * Disallow direct use of Object.prototype builtins.
 	 */
-	noPrototypeBuiltins?: RuleConfiguration_for_Null;
+	noPrototypeBuiltins?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
@@ -2876,7 +2872,6 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
-	| "lint/nursery/useObjectHasOwn"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"
