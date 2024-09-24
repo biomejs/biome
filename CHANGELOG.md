@@ -69,7 +69,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add [nursery/noMissingVarFunction](https://biomejs.dev/linter/rules/no-missing-var-function). Contributed by @michellocana
-- Add [nursery/useComponentExportOnlyModules]((https://biomejs.dev/linter/rules/use-component-export-only-modules). Use this rule in React projects to enforce a code styling that fits React Refresh. Contributed by @GunseiKPaseri
+- Add [nursery/useComponentExportOnlyModules](https://biomejs.dev/linter/rules/use-component-export-only-modules). Use this rule in React projects to enforce a code styling that fits React Refresh. Contributed by @GunseiKPaseri
 
 #### Bug fixes
 
