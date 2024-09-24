@@ -2209,6 +2209,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessLengthCheck": {
+					"description": "Disallow unnecessary length checks within logical expressions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noValueAtRule": {
 					"description": "Disallow use of @value rule in css modules.",
 					"anyOf": [

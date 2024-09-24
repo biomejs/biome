@@ -1,0 +1,164 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: valid.jsonc
+---
+# Input
+```cjs
+if (array.every(Boolean));
+```
+
+# Input
+```cjs
+if (array.some(Boolean));
+```
+
+# Input
+```cjs
+const isAllTrulyOrEmpty = array.every(Boolean);
+```
+
+# Input
+```cjs
+if (array.length === 0 || anotherCheck() || array.every(Boolean));
+```
+
+# Input
+```cjs
+const isNonEmptyAllTrulyArray = array.length > 0 && array.every(Boolean);
+```
+
+# Input
+```cjs
+const isEmptyArrayOrAllTruly = array.length === 0 || array.some(Boolean);
+```
+
+# Input
+```cjs
+array.length === 0 ?? array.every(Boolean)
+```
+
+# Input
+```cjs
+array.length === 0 && array.every(Boolean)
+```
+
+# Input
+```cjs
+(array.length === 0) + (array.every(Boolean))
+```
+
+# Input
+```cjs
+array.length === 1 || array.every(Boolean)
+```
+
+# Input
+```cjs
+array.length === '0' || array.every(Boolean)
+```
+
+# Input
+```cjs
+array.length === 0. || array.every(Boolean)
+```
+
+# Input
+```cjs
+array.length === 0x0 || array.every(Boolean)
+```
+
+# Input
+```cjs
+array.length !== 0 || array.every(Boolean)
+```
+
+# Input
+```cjs
+array.length == 0 || array.every(Boolean)
+```
+
+# Input
+```cjs
+0 === array.length || array.every(Boolean)
+```
+
+# Input
+```cjs
+array?.length === 0 || array.every(Boolean)
+```
+
+# Input
+```cjs
+array.notLength === 0 || array.every(Boolean)
+```
+
+# Input
+```cjs
+array[length] === 0 || array.every(Boolean)
+```
+
+# Input
+```cjs
+array.length === 0 || array.every?.(Boolean)
+```
+
+# Input
+```cjs
+array.length === 0 || array?.every(Boolean)
+```
+
+# Input
+```cjs
+array.length === 0 || array.every
+```
+
+# Input
+```cjs
+array.length === 0 || array[every](Boolean)
+```
+
+# Input
+```cjs
+array1.length === 0 || array2.every(Boolean)
+```
+
+# Input
+```cjs
+(foo && array.length === 0) || array.every(Boolean) && foo
+```
+
+# Input
+```cjs
+array.length === 0 || (array.every(Boolean) && foo)
+```
+
+# Input
+```cjs
+(foo || array.length > 0) && array.some(Boolean)
+```
+
+# Input
+```cjs
+array.length > 0 && (array.some(Boolean) || foo)
+```
+
+# Input
+```cjs
+array.length > 0 && array.some(Boolean) && array.other(Boolean)
+```
+
+# Input
+```cjs
+array.length > 0 && array.some(Boolean) && array.every(Boolean)
+```
+
+# Input
+```cjs
+array.length === 0
+```
+
+# Input
+```cjs
+array.every(Boolean)
+```
