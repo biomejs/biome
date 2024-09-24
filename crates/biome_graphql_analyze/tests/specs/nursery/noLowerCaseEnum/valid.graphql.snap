@@ -1,0 +1,12 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: valid.graphql
+---
+# Input
+```graphql
+enum Status {
+	ACTIVE
+	INACTIVE
+}
+
+```

@@ -3,6 +3,7 @@
 use biome_analyze::declare_lint_group;
 
 pub mod no_duplicated_fields;
+pub mod no_lower_case_enum;
 pub mod use_deprecated_reason;
 
 declare_lint_group! {
@@ -10,6 +11,7 @@ declare_lint_group! {
         name : "nursery" ,
         rules : [
             self :: no_duplicated_fields :: NoDuplicatedFields ,
+            self :: no_lower_case_enum :: NoLowerCaseEnum ,
             self :: use_deprecated_reason :: UseDeprecatedReason ,
         ]
      }
