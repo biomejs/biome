@@ -73,6 +73,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_literal_keys.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@typescript-eslint/explicit-function-return-type" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_explicit_function_return_type
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@typescript-eslint/explicit-member-accessibility" => {
             if !options.include_nursery {
                 return false;
@@ -996,6 +1006,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-octal-escape" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_octal_escape.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-param-reassign" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_parameter_assign.get_or_insert(Default::default());
@@ -1273,6 +1291,20 @@ pub(crate) fn migrate_eslint_any_rule(
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
                 .use_hook_at_top_level
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "react-refresh/only-export-components" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_component_export_only_modules
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }

@@ -25,15 +25,15 @@ mod language {
 /// * `json/null` -> input: `tests/specs/json/null.json`, expected output: `tests/specs/json/null.json.snap`
 /// * `null` -> input: `tests/specs/null.json`, expected output: `tests/specs/null.json.snap`
 pub fn run(spec_input_file: &str, _expected_file: &str, test_directory: &str, _file_type: &str) {
-    let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/"));
+    let root_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tests/specs/html"));
 
     let Some(test_file) = SpecTestFile::try_from_file(spec_input_file, root_path, None) else {
-        return;
+        panic!("Failed to set up snapshot test");
     };
 
     let source_type: HtmlFileSource = test_file.input_file().as_path().try_into().unwrap();
 
-    let options = HtmlFormatOptions::new();
+    let options = HtmlFormatOptions::new(HtmlFileSource::html());
     let language = language::HtmlTestFormatLanguage::new(source_type);
 
     let snapshot = SpecSnapshot::new(

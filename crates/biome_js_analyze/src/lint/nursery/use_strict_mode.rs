@@ -1,12 +1,11 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, options::PreferredQuote, ActionCategory, Ast, FixKind,
+    Rule, RuleDiagnostic,
 };
 use biome_console::markup;
-use biome_js_factory::make::{
-    js_directive, js_directive_list, jsx_string_literal, jsx_string_literal_single_quotes,
-};
-use biome_js_syntax::{JsFileSource, JsScript};
+use biome_js_factory::make;
+use biome_js_syntax::{JsScript, JsSyntaxKind, JsSyntaxToken, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
 declare_lint_rule! {
@@ -52,9 +51,12 @@ impl Rule for UseStrictMode {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let file_source = ctx.source_type::<JsFileSource>();
-
-        if node.directives().is_empty() && file_source.is_script() {
+        if node
+            .directives()
+            .iter()
+            .filter_map(|directive| directive.inner_string_text().ok())
+            .all(|directive| directive.text() != "use strict")
+        {
             Some(())
         } else {
             None
@@ -83,12 +85,20 @@ impl Rule for UseStrictMode {
     fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query().clone();
         let mut mutation = ctx.root().begin();
-        let value = if ctx.as_preferred_quote().is_double() {
-            jsx_string_literal("use strict")
-        } else {
-            jsx_string_literal_single_quotes("use strict")
+        let value = match ctx.as_preferred_quote() {
+            PreferredQuote::Double => "\"use strict\"",
+            PreferredQuote::Single => "'use strict'",
         };
-        let directives = js_directive_list(vec![js_directive(value).build()]);
+        let value = JsSyntaxToken::new_detached(JsSyntaxKind::JSX_STRING_LITERAL, value, [], []);
+        let use_strict_diretcive = make::js_directive(value)
+            .with_semicolon_token(make::token(T![;]))
+            .build();
+        let directives = make::js_directive_list(
+            node.directives()
+                .into_iter()
+                .chain([use_strict_diretcive])
+                .collect::<Vec<_>>(),
+        );
         let new_node = node.clone().with_directives(directives);
         mutation.replace_node(node, new_node);
         Some(JsRuleAction::new(

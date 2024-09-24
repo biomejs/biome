@@ -1,0 +1,250 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<object type="application/pdf" data="/media/examples/In-CC0.pdf" width="250" height="200">
+	<param name="autoplay" value="true">
+	<param name="src" value="/media/examples/In-CC0.pdf">
+</object>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..8 "object" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@8..12 "type" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@12..13 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@13..31 "\"application/pdf\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@31..35 "data" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@35..36 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@36..65 "\"/media/examples/In-CC0.pdf\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@65..70 "width" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@70..71 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@71..77 "\"250\"" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@77..83 "height" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@83..84 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@84..89 "\"200\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@89..90 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@90..93 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlName {
+                        value_token: HTML_LITERAL@93..99 "param" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@99..103 "name" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@103..104 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@104..115 "\"autoplay\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@115..120 "value" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@120..121 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@121..127 "\"true\"" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: missing (optional),
+                    r_angle_token: R_ANGLE@127..128 ">" [] [],
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@128..131 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlName {
+                        value_token: HTML_LITERAL@131..137 "param" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@137..141 "name" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@141..142 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@142..148 "\"src\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        HtmlAttribute {
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@148..153 "value" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@153..154 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@154..182 "\"/media/examples/In-CC0.pdf\"" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: missing (optional),
+                    r_angle_token: R_ANGLE@182..183 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@183..185 "<" [Newline("\n")] [],
+                slash_token: SLASH@185..186 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@186..192 "object" [] [],
+                },
+                r_angle_token: R_ANGLE@192..193 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@193..194 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..194
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..193
+    0: HTML_ELEMENT@0..193
+      0: HTML_OPENING_ELEMENT@0..90
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..8
+          0: HTML_LITERAL@1..8 "object" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@8..89
+          0: HTML_ATTRIBUTE@8..31
+            0: HTML_NAME@8..12
+              0: HTML_LITERAL@8..12 "type" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@12..31
+              0: EQ@12..13 "=" [] []
+              1: HTML_STRING@13..31
+                0: HTML_STRING_LITERAL@13..31 "\"application/pdf\"" [] [Whitespace(" ")]
+          1: HTML_ATTRIBUTE@31..65
+            0: HTML_NAME@31..35
+              0: HTML_LITERAL@31..35 "data" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@35..65
+              0: EQ@35..36 "=" [] []
+              1: HTML_STRING@36..65
+                0: HTML_STRING_LITERAL@36..65 "\"/media/examples/In-CC0.pdf\"" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE@65..77
+            0: HTML_NAME@65..70
+              0: HTML_LITERAL@65..70 "width" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@70..77
+              0: EQ@70..71 "=" [] []
+              1: HTML_STRING@71..77
+                0: HTML_STRING_LITERAL@71..77 "\"250\"" [] [Whitespace(" ")]
+          3: HTML_ATTRIBUTE@77..89
+            0: HTML_NAME@77..83
+              0: HTML_LITERAL@77..83 "height" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@83..89
+              0: EQ@83..84 "=" [] []
+              1: HTML_STRING@84..89
+                0: HTML_STRING_LITERAL@84..89 "\"200\"" [] []
+        3: R_ANGLE@89..90 ">" [] []
+      1: HTML_ELEMENT_LIST@90..183
+        0: HTML_SELF_CLOSING_ELEMENT@90..128
+          0: L_ANGLE@90..93 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_NAME@93..99
+            0: HTML_LITERAL@93..99 "param" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@99..127
+            0: HTML_ATTRIBUTE@99..115
+              0: HTML_NAME@99..103
+                0: HTML_LITERAL@99..103 "name" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@103..115
+                0: EQ@103..104 "=" [] []
+                1: HTML_STRING@104..115
+                  0: HTML_STRING_LITERAL@104..115 "\"autoplay\"" [] [Whitespace(" ")]
+            1: HTML_ATTRIBUTE@115..127
+              0: HTML_NAME@115..120
+                0: HTML_LITERAL@115..120 "value" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@120..127
+                0: EQ@120..121 "=" [] []
+                1: HTML_STRING@121..127
+                  0: HTML_STRING_LITERAL@121..127 "\"true\"" [] []
+          3: (empty)
+          4: R_ANGLE@127..128 ">" [] []
+        1: HTML_SELF_CLOSING_ELEMENT@128..183
+          0: L_ANGLE@128..131 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_NAME@131..137
+            0: HTML_LITERAL@131..137 "param" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@137..182
+            0: HTML_ATTRIBUTE@137..148
+              0: HTML_NAME@137..141
+                0: HTML_LITERAL@137..141 "name" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@141..148
+                0: EQ@141..142 "=" [] []
+                1: HTML_STRING@142..148
+                  0: HTML_STRING_LITERAL@142..148 "\"src\"" [] [Whitespace(" ")]
+            1: HTML_ATTRIBUTE@148..182
+              0: HTML_NAME@148..153
+                0: HTML_LITERAL@148..153 "value" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@153..182
+                0: EQ@153..154 "=" [] []
+                1: HTML_STRING@154..182
+                  0: HTML_STRING_LITERAL@154..182 "\"/media/examples/In-CC0.pdf\"" [] []
+          3: (empty)
+          4: R_ANGLE@182..183 ">" [] []
+      2: HTML_CLOSING_ELEMENT@183..193
+        0: L_ANGLE@183..185 "<" [Newline("\n")] []
+        1: SLASH@185..186 "/" [] []
+        2: HTML_NAME@186..192
+          0: HTML_LITERAL@186..192 "object" [] []
+        3: R_ANGLE@192..193 ">" [] []
+  3: EOF@193..194 "" [Newline("\n")] []
+
+```

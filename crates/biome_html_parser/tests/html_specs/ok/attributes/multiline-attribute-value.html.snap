@@ -1,0 +1,93 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<div class="foo
+bar baz">foo</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@5..10 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@10..11 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@11..24 "\"foo\nbar baz\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@24..25 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@25..28 "foo" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@28..29 "<" [] [],
+                slash_token: SLASH@29..30 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@30..33 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@33..34 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@34..35 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..35
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..34
+    0: HTML_ELEMENT@0..34
+      0: HTML_OPENING_ELEMENT@0..25
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..24
+          0: HTML_ATTRIBUTE@5..24
+            0: HTML_NAME@5..10
+              0: HTML_LITERAL@5..10 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..24
+              0: EQ@10..11 "=" [] []
+              1: HTML_STRING@11..24
+                0: HTML_STRING_LITERAL@11..24 "\"foo\nbar baz\"" [] []
+        3: R_ANGLE@24..25 ">" [] []
+      1: HTML_ELEMENT_LIST@25..28
+        0: HTML_CONTENT@25..28
+          0: HTML_LITERAL@25..28 "foo" [] []
+      2: HTML_CLOSING_ELEMENT@28..34
+        0: L_ANGLE@28..29 "<" [] []
+        1: SLASH@29..30 "/" [] []
+        2: HTML_NAME@30..33
+          0: HTML_LITERAL@30..33 "div" [] []
+        3: R_ANGLE@33..34 ">" [] []
+  3: EOF@34..35 "" [Newline("\n")] []
+
+```

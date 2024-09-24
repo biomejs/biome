@@ -307,7 +307,7 @@ impl SyntaxFactory for HtmlSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if AnyHtmlElement::can_cast(element.kind()) {
+                    if HtmlElementList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }

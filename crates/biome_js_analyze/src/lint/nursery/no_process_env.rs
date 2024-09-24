@@ -36,7 +36,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoProcessEnv {
-        version: "next",
+        version: "1.9.1",
         name: "noProcessEnv",
         language: "js",
         sources: &[RuleSource::EslintN("no-process-env")],

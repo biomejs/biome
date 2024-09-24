@@ -8,6 +8,7 @@ pub mod no_dynamic_namespace_import_access;
 pub mod no_enum;
 pub mod no_exported_imports;
 pub mod no_irregular_whitespace;
+pub mod no_octal_escape;
 pub mod no_process_env;
 pub mod no_restricted_imports;
 pub mod no_restricted_types;
@@ -17,8 +18,10 @@ pub mod no_substr;
 pub mod no_useless_escape_in_regex;
 pub mod use_adjacent_overload_signatures;
 pub mod use_aria_props_supported_by_role;
+pub mod use_component_export_only_modules;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_member_accessibility;
+pub mod use_explicit_function_return_type;
 pub mod use_import_restrictions;
 pub mod use_sorted_classes;
 pub mod use_strict_mode;
@@ -35,6 +38,7 @@ declare_lint_group! {
             self :: no_enum :: NoEnum ,
             self :: no_exported_imports :: NoExportedImports ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
+            self :: no_octal_escape :: NoOctalEscape ,
             self :: no_process_env :: NoProcessEnv ,
             self :: no_restricted_imports :: NoRestrictedImports ,
             self :: no_restricted_types :: NoRestrictedTypes ,
@@ -44,8 +48,10 @@ declare_lint_group! {
             self :: no_useless_escape_in_regex :: NoUselessEscapeInRegex ,
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
             self :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRole ,
+            self :: use_component_export_only_modules :: UseComponentExportOnlyModules ,
             self :: use_consistent_curly_braces :: UseConsistentCurlyBraces ,
             self :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility ,
+            self :: use_explicit_function_return_type :: UseExplicitFunctionReturnType ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_strict_mode :: UseStrictMode ,

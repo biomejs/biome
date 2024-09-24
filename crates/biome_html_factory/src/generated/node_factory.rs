@@ -165,19 +165,19 @@ pub fn html_opening_element(
         ],
     ))
 }
-pub fn html_root(eof_token: SyntaxToken) -> HtmlRootBuilder {
+pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuilder {
     HtmlRootBuilder {
+        html,
         eof_token,
         bom_token: None,
         directive: None,
-        html: None,
     }
 }
 pub struct HtmlRootBuilder {
+    html: HtmlElementList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
     directive: Option<HtmlDirective>,
-    html: Option<AnyHtmlElement>,
 }
 impl HtmlRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
@@ -188,10 +188,6 @@ impl HtmlRootBuilder {
         self.directive = Some(directive);
         self
     }
-    pub fn with_html(mut self, html: AnyHtmlElement) -> Self {
-        self.html = Some(html);
-        self
-    }
     pub fn build(self) -> HtmlRoot {
         HtmlRoot::unwrap_cast(SyntaxNode::new_detached(
             HtmlSyntaxKind::HTML_ROOT,
@@ -199,8 +195,7 @@ impl HtmlRootBuilder {
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.directive
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.html
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.html.into_syntax())),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))

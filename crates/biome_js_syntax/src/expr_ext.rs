@@ -85,8 +85,7 @@ impl JsReferenceIdentifier {
     /// ```
     pub fn has_name(&self, name: &str) -> bool {
         self.value_token()
-            .map(|token| token.text_trimmed() == name)
-            .unwrap_or_default()
+            .is_ok_and(|token| token.text_trimmed() == name)
     }
 
     pub fn name(&self) -> SyntaxResult<TokenText> {
@@ -1159,6 +1158,92 @@ impl AnyJsExpression {
                 }
             }
             None => None,
+        }
+    }
+
+    /// Determining if an expression is literal
+    /// - Any literal: 1, true, null, etc
+    /// - Static template literals: `foo`
+    /// - Negative numeric literal: -1
+    /// - Parenthesized expression: (1)
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::{
+    ///     AnyJsExpression, AnyJsLiteralExpression, AnyJsTemplateElement, JsSyntaxToken, JsUnaryOperator, T
+    /// };
+    ///
+    /// // Any literal: 1, true, null, etc
+    /// let number_literal = AnyJsExpression::AnyJsLiteralExpression(
+    ///     AnyJsLiteralExpression::from(make::js_number_literal_expression(make::js_number_literal("1")))
+    /// );
+    /// assert_eq!(number_literal.is_literal_expression(), true);
+    ///
+    /// // Static template literals: `foo`
+    /// let template = AnyJsExpression::JsTemplateExpression(
+    ///     make::js_template_expression(
+    ///         make::token(T!['`']),
+    ///         make::js_template_element_list(
+    ///             vec![
+    ///                 AnyJsTemplateElement::from(make::js_template_chunk_element(
+    ///                     make::js_template_chunk("foo"),
+    ///                 ))
+    ///             ]
+    ///         ),
+    ///         make::token(T!['`']),
+    ///     )
+    ///     .build()
+    /// );
+    /// assert_eq!(template.is_literal_expression(), true);
+    ///
+    /// // Negative numeric literal: -1
+    /// let negative_numeric_literal = AnyJsExpression::JsUnaryExpression(
+    ///     make::js_unary_expression(make::token(T![-]), number_literal.clone())
+    /// );
+    /// assert_eq!(negative_numeric_literal.is_literal_expression(), true);
+    ///
+    /// // Parenthesized expression: (1)
+    /// let parenthesized = AnyJsExpression::JsParenthesizedExpression(
+    ///     make::js_parenthesized_expression(make::token(T!['(']), number_literal, make::token(T![')']))
+    /// );
+    /// assert_eq!(parenthesized.is_literal_expression(), true);
+    /// ```
+    pub fn is_literal_expression(&self) -> bool {
+        match self {
+            // Any literal: 1, true, null, etc
+            AnyJsExpression::AnyJsLiteralExpression(_) => true,
+
+            // Static template literals: `foo`
+            AnyJsExpression::JsTemplateExpression(template_expression) => template_expression
+                .elements()
+                .into_iter()
+                .all(|element| element.as_js_template_chunk_element().is_some()),
+
+            // Negative numeric literal: -1
+            AnyJsExpression::JsUnaryExpression(unary_expression) => {
+                let is_minus_operator =
+                    matches!(unary_expression.operator(), Ok(JsUnaryOperator::Minus));
+                let is_number_expression = matches!(
+                    unary_expression.argument(),
+                    Ok(AnyJsExpression::AnyJsLiteralExpression(
+                        AnyJsLiteralExpression::JsNumberLiteralExpression(_)
+                    ))
+                );
+
+                is_minus_operator && is_number_expression
+            }
+
+            // Parenthesized expression: (1)
+            AnyJsExpression::JsParenthesizedExpression(parenthesized_expression) => {
+                parenthesized_expression
+                    .expression()
+                    .ok()
+                    .map_or(false, |expression| expression.is_literal_expression())
+            }
+
+            _ => false,
         }
     }
 }

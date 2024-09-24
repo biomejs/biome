@@ -1,0 +1,496 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<div>
+	<div data=foo>bar</div>
+	<div data=foo >bar</div>
+	<div data = foo >bar</div>
+	<div data=	foo >bar</div>
+	<div data=	foo	>bar</div>
+	<div data=
+foo>bar</div>
+	<img data=foo/>
+	<img data=foo />
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@5..8 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@8..12 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@12..16 "data" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@16..17 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@17..20 "foo" [] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@20..21 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@21..24 "bar" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@24..25 "<" [] [],
+                        slash_token: SLASH@25..26 "/" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@26..29 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@29..30 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@30..33 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@33..37 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@37..41 "data" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@41..42 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@42..46 "foo" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@46..47 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@47..50 "bar" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@50..51 "<" [] [],
+                        slash_token: SLASH@51..52 "/" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@52..55 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@55..56 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@56..59 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@59..63 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@63..68 "data" [] [Whitespace(" ")],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@68..70 "=" [] [Whitespace(" ")],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@70..74 "foo" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@74..75 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@75..78 "bar" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@78..79 "<" [] [],
+                        slash_token: SLASH@79..80 "/" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@80..83 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@83..84 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@84..87 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@87..91 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@91..95 "data" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@95..97 "=" [] [Whitespace("\t")],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@97..101 "foo" [] [Whitespace(" ")],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@101..102 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@102..105 "bar" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@105..106 "<" [] [],
+                        slash_token: SLASH@106..107 "/" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@107..110 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@110..111 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@111..114 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@114..118 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@118..122 "data" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@122..124 "=" [] [Whitespace("\t")],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@124..128 "foo" [] [Whitespace("\t")],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@128..129 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@129..132 "bar" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@132..133 "<" [] [],
+                        slash_token: SLASH@133..134 "/" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@134..137 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@137..138 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@138..141 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@141..145 "div" [] [Whitespace(" ")],
+                        },
+                        attributes: HtmlAttributeList [
+                            HtmlAttribute {
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@145..149 "data" [] [],
+                                },
+                                initializer: HtmlAttributeInitializerClause {
+                                    eq_token: EQ@149..150 "=" [] [],
+                                    value: HtmlString {
+                                        value_token: HTML_STRING_LITERAL@150..154 "foo" [Newline("\n")] [],
+                                    },
+                                },
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@154..155 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlContent {
+                            value_token: HTML_LITERAL@155..158 "bar" [] [],
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@158..159 "<" [] [],
+                        slash_token: SLASH@159..160 "/" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@160..163 "div" [] [],
+                        },
+                        r_angle_token: R_ANGLE@163..164 ">" [] [],
+                    },
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@164..167 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlName {
+                        value_token: HTML_LITERAL@167..171 "img" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@171..175 "data" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@175..176 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@176..180 "foo/" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: missing (optional),
+                    r_angle_token: R_ANGLE@180..181 ">" [] [],
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@181..184 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlName {
+                        value_token: HTML_LITERAL@184..188 "img" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@188..192 "data" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@192..193 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@193..197 "foo" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@197..198 "/" [] [],
+                    r_angle_token: R_ANGLE@198..199 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@199..201 "<" [Newline("\n")] [],
+                slash_token: SLASH@201..202 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@202..205 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@205..206 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@206..207 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..207
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..206
+    0: HTML_ELEMENT@0..206
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..4
+          0: HTML_LITERAL@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..199
+        0: HTML_ELEMENT@5..30
+          0: HTML_OPENING_ELEMENT@5..21
+            0: L_ANGLE@5..8 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@8..12
+              0: HTML_LITERAL@8..12 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@12..20
+              0: HTML_ATTRIBUTE@12..20
+                0: HTML_NAME@12..16
+                  0: HTML_LITERAL@12..16 "data" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@16..20
+                  0: EQ@16..17 "=" [] []
+                  1: HTML_STRING@17..20
+                    0: HTML_STRING_LITERAL@17..20 "foo" [] []
+            3: R_ANGLE@20..21 ">" [] []
+          1: HTML_ELEMENT_LIST@21..24
+            0: HTML_CONTENT@21..24
+              0: HTML_LITERAL@21..24 "bar" [] []
+          2: HTML_CLOSING_ELEMENT@24..30
+            0: L_ANGLE@24..25 "<" [] []
+            1: SLASH@25..26 "/" [] []
+            2: HTML_NAME@26..29
+              0: HTML_LITERAL@26..29 "div" [] []
+            3: R_ANGLE@29..30 ">" [] []
+        1: HTML_ELEMENT@30..56
+          0: HTML_OPENING_ELEMENT@30..47
+            0: L_ANGLE@30..33 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@33..37
+              0: HTML_LITERAL@33..37 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@37..46
+              0: HTML_ATTRIBUTE@37..46
+                0: HTML_NAME@37..41
+                  0: HTML_LITERAL@37..41 "data" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@41..46
+                  0: EQ@41..42 "=" [] []
+                  1: HTML_STRING@42..46
+                    0: HTML_STRING_LITERAL@42..46 "foo" [] [Whitespace(" ")]
+            3: R_ANGLE@46..47 ">" [] []
+          1: HTML_ELEMENT_LIST@47..50
+            0: HTML_CONTENT@47..50
+              0: HTML_LITERAL@47..50 "bar" [] []
+          2: HTML_CLOSING_ELEMENT@50..56
+            0: L_ANGLE@50..51 "<" [] []
+            1: SLASH@51..52 "/" [] []
+            2: HTML_NAME@52..55
+              0: HTML_LITERAL@52..55 "div" [] []
+            3: R_ANGLE@55..56 ">" [] []
+        2: HTML_ELEMENT@56..84
+          0: HTML_OPENING_ELEMENT@56..75
+            0: L_ANGLE@56..59 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@59..63
+              0: HTML_LITERAL@59..63 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@63..74
+              0: HTML_ATTRIBUTE@63..74
+                0: HTML_NAME@63..68
+                  0: HTML_LITERAL@63..68 "data" [] [Whitespace(" ")]
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@68..74
+                  0: EQ@68..70 "=" [] [Whitespace(" ")]
+                  1: HTML_STRING@70..74
+                    0: HTML_STRING_LITERAL@70..74 "foo" [] [Whitespace(" ")]
+            3: R_ANGLE@74..75 ">" [] []
+          1: HTML_ELEMENT_LIST@75..78
+            0: HTML_CONTENT@75..78
+              0: HTML_LITERAL@75..78 "bar" [] []
+          2: HTML_CLOSING_ELEMENT@78..84
+            0: L_ANGLE@78..79 "<" [] []
+            1: SLASH@79..80 "/" [] []
+            2: HTML_NAME@80..83
+              0: HTML_LITERAL@80..83 "div" [] []
+            3: R_ANGLE@83..84 ">" [] []
+        3: HTML_ELEMENT@84..111
+          0: HTML_OPENING_ELEMENT@84..102
+            0: L_ANGLE@84..87 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@87..91
+              0: HTML_LITERAL@87..91 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@91..101
+              0: HTML_ATTRIBUTE@91..101
+                0: HTML_NAME@91..95
+                  0: HTML_LITERAL@91..95 "data" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@95..101
+                  0: EQ@95..97 "=" [] [Whitespace("\t")]
+                  1: HTML_STRING@97..101
+                    0: HTML_STRING_LITERAL@97..101 "foo" [] [Whitespace(" ")]
+            3: R_ANGLE@101..102 ">" [] []
+          1: HTML_ELEMENT_LIST@102..105
+            0: HTML_CONTENT@102..105
+              0: HTML_LITERAL@102..105 "bar" [] []
+          2: HTML_CLOSING_ELEMENT@105..111
+            0: L_ANGLE@105..106 "<" [] []
+            1: SLASH@106..107 "/" [] []
+            2: HTML_NAME@107..110
+              0: HTML_LITERAL@107..110 "div" [] []
+            3: R_ANGLE@110..111 ">" [] []
+        4: HTML_ELEMENT@111..138
+          0: HTML_OPENING_ELEMENT@111..129
+            0: L_ANGLE@111..114 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@114..118
+              0: HTML_LITERAL@114..118 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@118..128
+              0: HTML_ATTRIBUTE@118..128
+                0: HTML_NAME@118..122
+                  0: HTML_LITERAL@118..122 "data" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@122..128
+                  0: EQ@122..124 "=" [] [Whitespace("\t")]
+                  1: HTML_STRING@124..128
+                    0: HTML_STRING_LITERAL@124..128 "foo" [] [Whitespace("\t")]
+            3: R_ANGLE@128..129 ">" [] []
+          1: HTML_ELEMENT_LIST@129..132
+            0: HTML_CONTENT@129..132
+              0: HTML_LITERAL@129..132 "bar" [] []
+          2: HTML_CLOSING_ELEMENT@132..138
+            0: L_ANGLE@132..133 "<" [] []
+            1: SLASH@133..134 "/" [] []
+            2: HTML_NAME@134..137
+              0: HTML_LITERAL@134..137 "div" [] []
+            3: R_ANGLE@137..138 ">" [] []
+        5: HTML_ELEMENT@138..164
+          0: HTML_OPENING_ELEMENT@138..155
+            0: L_ANGLE@138..141 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@141..145
+              0: HTML_LITERAL@141..145 "div" [] [Whitespace(" ")]
+            2: HTML_ATTRIBUTE_LIST@145..154
+              0: HTML_ATTRIBUTE@145..154
+                0: HTML_NAME@145..149
+                  0: HTML_LITERAL@145..149 "data" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@149..154
+                  0: EQ@149..150 "=" [] []
+                  1: HTML_STRING@150..154
+                    0: HTML_STRING_LITERAL@150..154 "foo" [Newline("\n")] []
+            3: R_ANGLE@154..155 ">" [] []
+          1: HTML_ELEMENT_LIST@155..158
+            0: HTML_CONTENT@155..158
+              0: HTML_LITERAL@155..158 "bar" [] []
+          2: HTML_CLOSING_ELEMENT@158..164
+            0: L_ANGLE@158..159 "<" [] []
+            1: SLASH@159..160 "/" [] []
+            2: HTML_NAME@160..163
+              0: HTML_LITERAL@160..163 "div" [] []
+            3: R_ANGLE@163..164 ">" [] []
+        6: HTML_SELF_CLOSING_ELEMENT@164..181
+          0: L_ANGLE@164..167 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_NAME@167..171
+            0: HTML_LITERAL@167..171 "img" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@171..180
+            0: HTML_ATTRIBUTE@171..180
+              0: HTML_NAME@171..175
+                0: HTML_LITERAL@171..175 "data" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@175..180
+                0: EQ@175..176 "=" [] []
+                1: HTML_STRING@176..180
+                  0: HTML_STRING_LITERAL@176..180 "foo/" [] []
+          3: (empty)
+          4: R_ANGLE@180..181 ">" [] []
+        7: HTML_SELF_CLOSING_ELEMENT@181..199
+          0: L_ANGLE@181..184 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_NAME@184..188
+            0: HTML_LITERAL@184..188 "img" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@188..197
+            0: HTML_ATTRIBUTE@188..197
+              0: HTML_NAME@188..192
+                0: HTML_LITERAL@188..192 "data" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@192..197
+                0: EQ@192..193 "=" [] []
+                1: HTML_STRING@193..197
+                  0: HTML_STRING_LITERAL@193..197 "foo" [] [Whitespace(" ")]
+          3: SLASH@197..198 "/" [] []
+          4: R_ANGLE@198..199 ">" [] []
+      2: HTML_CLOSING_ELEMENT@199..206
+        0: L_ANGLE@199..201 "<" [Newline("\n")] []
+        1: SLASH@201..202 "/" [] []
+        2: HTML_NAME@202..205
+          0: HTML_LITERAL@202..205 "div" [] []
+        3: R_ANGLE@205..206 ">" [] []
+  3: EOF@206..207 "" [Newline("\n")] []
+
+```

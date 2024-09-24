@@ -24,7 +24,8 @@ export type FeatureKind =
 	| "Lint"
 	| "OrganizeImports"
 	| "Search"
-	| "Assists";
+	| "Assists"
+	| "Debug";
 export type FileKind = FileKind2[];
 /**
  * The priority of the file
@@ -35,15 +36,9 @@ export type FileKind2 =
 	| "Ignore"
 	| "Inspectable"
 	| "Handleable";
-export interface SupportsFeatureResult {
-	reason?: SupportKind;
+export interface FileFeaturesResult {
+	features_supported: {};
 }
-export type SupportKind =
-	| "Supported"
-	| "Ignored"
-	| "Protected"
-	| "FeatureNotEnabled"
-	| "FileNotSupported";
 export interface UpdateSettingsParams {
 	configuration: PartialConfiguration;
 	gitignore_matches: string[];
@@ -1256,6 +1251,14 @@ export interface Nursery {
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow missing var function for css variables.
+	 */
+	noMissingVarFunction?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow octal escape sequences in string literals
+	 */
+	noOctalEscape?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of process.env.
 	 */
 	noProcessEnv?: RuleConfiguration_for_Null;
@@ -1308,6 +1311,10 @@ export interface Nursery {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce declaring components only within modules that export React Components exclusively.
+	 */
+	useComponentExportOnlyModules?: RuleConfiguration_for_UseComponentExportOnlyModulesOptions;
+	/**
 	 * This rule enforces consistent use of curly braces inside JSX attributes and JSX children.
 	 */
 	useConsistentCurlyBraces?: RuleFixConfiguration_for_Null;
@@ -1319,6 +1326,10 @@ export interface Nursery {
 	 * Require specifying the reason argument when using @deprecated directive
 	 */
 	useDeprecatedReason?: RuleConfiguration_for_Null;
+	/**
+	 * Require explicit return types on functions and class methods.
+	 */
+	useExplicitFunctionReturnType?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -1981,6 +1992,9 @@ export type RuleConfiguration_for_RestrictedImportsOptions =
 export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
+export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UseComponentExportOnlyModulesOptions;
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
@@ -2138,6 +2152,16 @@ export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	 * Rule's options
 	 */
 	options: NoRestrictedTypesOptions;
+}
+export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseComponentExportOnlyModulesOptions;
 }
 export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	/**
@@ -2316,6 +2340,16 @@ export interface RestrictedImportsOptions {
 }
 export interface NoRestrictedTypesOptions {
 	types: {};
+}
+export interface UseComponentExportOnlyModulesOptions {
+	/**
+	 * Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)
+	 */
+	allowConstantExport?: boolean;
+	/**
+	 * A list of names that can be additionally exported from the module This option is for exports that do not hinder [React Fast Refresh](https://github.com/facebook/react/tree/main/packages/react-refresh), such as [`meta` in Remix](https://remix.run/docs/en/main/route/meta)
+	 */
+	allowExportNames: string[];
 }
 export interface ConsistentMemberAccessibilityOptions {
 	accessibility: Accessibility;
@@ -2549,7 +2583,8 @@ export type DocumentFileSource =
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
 	| { Graphql: GraphqlFileSource }
-	| { Html: HtmlFileSource };
+	| { Html: HtmlFileSource }
+	| { Grit: GritFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -2572,6 +2607,9 @@ export interface GraphqlFileSource {
 }
 export interface HtmlFileSource {
 	variant: HtmlVariant;
+}
+export interface GritFileSource {
+	variant: GritVariant;
 }
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
@@ -2599,6 +2637,7 @@ export type CssVariant = "Standard";
  */
 export type GraphqlVariant = "Standard";
 export type HtmlVariant = "Standard" | "Astro";
+export type GritVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
@@ -2734,9 +2773,9 @@ export type Category =
 	| "lint/complexity/useSimpleNumberKeys"
 	| "lint/complexity/useSimplifiedLogicExpression"
 	| "lint/correctness/noChildrenProp"
+	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstantCondition"
 	| "lint/correctness/noConstantMathMinMaxClamp"
-	| "lint/correctness/noConstAssign"
 	| "lint/correctness/noConstructorReturn"
 	| "lint/correctness/noEmptyCharacterClassInRegex"
 	| "lint/correctness/noEmptyPattern"
@@ -2793,8 +2832,8 @@ export type Category =
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
-	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
@@ -2804,6 +2843,8 @@ export type Category =
 	| "lint/nursery/noInvalidPositionAtImportRule"
 	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
+	| "lint/nursery/noMissingVarFunction"
+	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"
@@ -2828,9 +2869,11 @@ export type Category =
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
+	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useSortedClasses"
@@ -2935,8 +2978,8 @@ export type Category =
 	| "lint/suspicious/noGlobalIsFinite"
 	| "lint/suspicious/noGlobalIsNan"
 	| "lint/suspicious/noImplicitAnyLet"
-	| "lint/suspicious/noImportantInKeyframe"
 	| "lint/suspicious/noImportAssign"
+	| "lint/suspicious/noImportantInKeyframe"
 	| "lint/suspicious/noLabelVar"
 	| "lint/suspicious/noMisleadingCharacterClass"
 	| "lint/suspicious/noMisleadingInstantiator"
@@ -3235,7 +3278,7 @@ export interface RenameResult {
 }
 export type Configuration = PartialConfiguration;
 export interface Workspace {
-	fileFeatures(params: SupportsFeatureParams): Promise<SupportsFeatureResult>;
+	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
 	updateSettings(params: UpdateSettingsParams): Promise<void>;
 	registerProjectFolder(
 		params: RegisterProjectFolderParams,

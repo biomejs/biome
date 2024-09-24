@@ -152,7 +152,11 @@ define_role! {
 define_role! {
     /// https://www.w3.org/TR/wai-aria-1.1/#separator
     SeparatorRole {
-        PROPS:  [],
+        PROPS:  [
+            ("aria-valuemax", false),
+            ("aria-valuemin", false),
+            ("aria-valuenow", false),
+        ],
         ROLES: ["structure", "widget"],
         CONCEPTS: &[("hr", &[])],
     }

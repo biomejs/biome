@@ -21,9 +21,15 @@ impl FormatNodeRule<HtmlSelfClosingElement> for FormatHtmlSelfClosingElement {
                 space(),
                 attributes.format(),
                 space(),
-                slash_token.format(),
-                r_angle_token.format()
             ]
-        )
+        )?;
+
+        if slash_token.is_some() {
+            write!(f, [slash_token.format()])?;
+        } else {
+            write!(f, [text("/")])?;
+        }
+
+        write!(f, [r_angle_token.format()])
     }
 }

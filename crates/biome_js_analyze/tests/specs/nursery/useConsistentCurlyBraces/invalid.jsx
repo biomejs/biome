@@ -10,4 +10,6 @@
 }</Foo>
 
 <Foo>{/*comment*/'Hello world'/*comment*/}</Foo>
+
+<Foo>{x}{'y'}{z}</Foo>
 </>

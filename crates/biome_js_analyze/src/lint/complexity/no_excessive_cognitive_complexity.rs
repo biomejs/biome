@@ -117,7 +117,12 @@ impl Rule for NoExcessiveCognitiveComplexity {
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
-                markup!("Excessive complexity detected."),
+                markup!({
+                    format!(
+                        "Excessive complexity of {calculated_score} detected \
+                    (max: {max_allowed_complexity})."
+                    )
+                }),
             )
             .note(if calculated_score == &MAX_SCORE {
                 "Please refactor this function to reduce its complexity. \
@@ -198,10 +203,7 @@ impl Visitor for CognitiveComplexityVisitor {
 impl CognitiveComplexityVisitor {
     fn on_enter(&mut self, node: &JsSyntaxNode) {
         let parent = self.stack.last();
-        if parent
-            .map(|parent| parent.score == MAX_SCORE)
-            .unwrap_or_default()
-        {
+        if parent.is_some_and(|parent| parent.score == MAX_SCORE) {
             return; // No need for further processing if we're already at the max.
         }
 

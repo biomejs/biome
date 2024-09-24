@@ -1,0 +1,17 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: filename.INVALID-extension.js
+---
+# Input
+```jsx
+
+```
+
+# Diagnostics
+```
+filename.INVALID-extension.js lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The file extension should be in camelCase or kebab-case or snake_case.
+  
+
+```

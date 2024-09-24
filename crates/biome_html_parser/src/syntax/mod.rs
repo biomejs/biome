@@ -2,7 +2,7 @@ mod parse_error;
 
 use crate::parser::HtmlParser;
 use crate::syntax::parse_error::*;
-use crate::token_source::HtmlLexContext;
+use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::*;
 use biome_html_syntax::{HtmlSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
@@ -16,9 +16,12 @@ const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<]
 
 /// These elements are effectively always self-closing. They should not have a closing tag (if they do, it should be a parsing error). They might not contain a `/` like in `<img />`.
 static VOID_ELEMENTS: &[&str] = &[
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track",
-    "wbr",
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
+    "track", "wbr",
 ];
+
+/// For these elements, the content is treated as raw text and no parsing is done inside them. This is so that the contents of these tags can be parsed by a different parser.
+pub(crate) static EMBEDDED_LANGUAGE_ELEMENTS: &[&str] = &["script", "style"];
 
 pub(crate) fn parse_root(p: &mut HtmlParser) {
     let m = p.start();
@@ -26,7 +29,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     p.eat(UNICODE_BOM);
 
     parse_doc_type(p).ok();
-    parse_element(p).ok();
+    ElementList.parse_list(p);
 
     m.complete(p, HTML_ROOT);
 }
@@ -41,11 +44,23 @@ fn parse_doc_type(p: &mut HtmlParser) -> ParsedSyntax {
     p.bump(T![!]);
 
     if p.at(T![doctype]) {
-        p.eat(T![doctype]);
+        p.eat_with_context(T![doctype], HtmlLexContext::Doctype);
     }
 
     if p.at(T![html]) {
-        p.eat(T![html]);
+        p.eat_with_context(T![html], HtmlLexContext::Doctype);
+    }
+
+    if p.at(HTML_LITERAL) {
+        p.eat_with_context(HTML_LITERAL, HtmlLexContext::Doctype);
+    }
+
+    if p.at(HTML_STRING_LITERAL) {
+        p.eat_with_context(HTML_STRING_LITERAL, HtmlLexContext::Doctype);
+    }
+
+    if p.at(HTML_STRING_LITERAL) {
+        p.eat_with_context(HTML_STRING_LITERAL, HtmlLexContext::Doctype);
     }
 
     p.eat(T![>]);
@@ -61,24 +76,40 @@ fn parse_element(p: &mut HtmlParser) -> ParsedSyntax {
 
     p.bump(T![<]);
     let opening_tag_name = p.cur_text().to_string();
-    let should_be_self_closing = VOID_ELEMENTS.contains(&opening_tag_name.as_str());
+    let should_be_self_closing = VOID_ELEMENTS
+        .iter()
+        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
+    let is_embedded_language_tag = EMBEDDED_LANGUAGE_ELEMENTS
+        .iter()
+        .any(|tag| tag.eq_ignore_ascii_case(opening_tag_name.as_str()));
     parse_literal(p).or_add_diagnostic(p, expected_element_name);
 
     AttributeList.parse_list(p);
 
     if p.at(T![/]) {
         p.bump(T![/]);
-        p.expect(T![>]);
+        p.expect_with_context(T![>], HtmlLexContext::OutsideTag);
         Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT))
     } else {
         if should_be_self_closing {
             if p.at(T![/]) {
                 p.bump(T![/]);
             }
-            p.expect(T![>]);
+            p.expect_with_context(T![>], HtmlLexContext::OutsideTag);
             return Present(m.complete(p, HTML_SELF_CLOSING_ELEMENT));
         }
-        p.expect_with_context(T![>], HtmlLexContext::ElementList);
+        p.expect_with_context(
+            T![>],
+            if is_embedded_language_tag {
+                HtmlLexContext::EmbeddedLanguage(match opening_tag_name.as_str() {
+                    tag if tag.eq_ignore_ascii_case("script") => HtmlEmbededLanguage::Script,
+                    tag if tag.eq_ignore_ascii_case("style") => HtmlEmbededLanguage::Style,
+                    _ => unreachable!(),
+                })
+            } else {
+                HtmlLexContext::OutsideTag
+            },
+        );
         let opening = m.complete(p, HTML_OPENING_ELEMENT);
         loop {
             ElementList.parse_list(p);
@@ -106,12 +137,14 @@ fn parse_closing_element(p: &mut HtmlParser) -> ParsedSyntax {
     let m = p.start();
     p.bump(T![<]);
     p.bump(T![/]);
-    let should_be_self_closing = VOID_ELEMENTS.contains(&p.cur_text());
+    let should_be_self_closing = VOID_ELEMENTS
+        .iter()
+        .any(|tag| tag.eq_ignore_ascii_case(p.cur_text()));
     if should_be_self_closing {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
     let _name = parse_literal(p);
-    p.bump(T![>]);
+    p.bump_with_context(T![>], HtmlLexContext::OutsideTag);
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
 
@@ -128,7 +161,7 @@ impl ParseNodeList for ElementList {
             T![<] => parse_element(p),
             HTML_LITERAL => {
                 let m = p.start();
-                p.bump(HTML_LITERAL);
+                p.bump_with_context(HTML_LITERAL, HtmlLexContext::OutsideTag);
                 Present(m.complete(p, HTML_CONTENT))
             }
             _ => Absent,
@@ -210,7 +243,7 @@ fn parse_literal(p: &mut HtmlParser) -> ParsedSyntax {
     Present(m.complete(p, HTML_NAME))
 }
 
-fn parse_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
+fn parse_attribute_string_literal(p: &mut HtmlParser) -> ParsedSyntax {
     if !p.at(HTML_STRING_LITERAL) {
         return Absent;
     }
@@ -226,7 +259,7 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
         return Absent;
     }
     let m = p.start();
-    p.bump(T![=]);
-    parse_string_literal(p).or_add_diagnostic(p, expected_initializer);
+    p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
+    parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
 }

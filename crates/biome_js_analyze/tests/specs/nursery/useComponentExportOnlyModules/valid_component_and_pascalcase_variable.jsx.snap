@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_component_and_pascalcase_variable.jsx
+---
+# Input
+```jsx
+export function Component() {};
+export const Aa = 'a'
+
+```

@@ -27,7 +27,7 @@ insta               = { workspace = true, features = ["glob"] }
 serde               = { workspace = true, features = ["derive"] }
 serde_json          = { workspace = true }
 similar             = { workspace = true }
-similar-asserts     = "1.5.0"
+similar-asserts     = "1.6.0"
 
 [dev-dependencies]
 

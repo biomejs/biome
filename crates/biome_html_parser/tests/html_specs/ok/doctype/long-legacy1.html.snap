@@ -1,0 +1,50 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<!DOCTYPE html SYSTEM "about:legacy-compat">
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: HtmlDirective {
+        l_angle_token: L_ANGLE@0..1 "<" [] [],
+        excl_token: BANG@1..2 "!" [] [],
+        doctype_token: DOCTYPE_KW@2..10 "DOCTYPE" [] [Whitespace(" ")],
+        html_token: HTML_KW@10..15 "html" [] [Whitespace(" ")],
+        quirk_token: HTML_LITERAL@15..22 "SYSTEM" [] [Whitespace(" ")],
+        public_id_token: HTML_STRING_LITERAL@22..43 "\"about:legacy-compat\"" [] [],
+        system_id_token: missing (optional),
+        r_angle_token: R_ANGLE@43..44 ">" [] [],
+    },
+    html: HtmlElementList [],
+    eof_token: EOF@44..45 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..45
+  0: (empty)
+  1: HTML_DIRECTIVE@0..44
+    0: L_ANGLE@0..1 "<" [] []
+    1: BANG@1..2 "!" [] []
+    2: DOCTYPE_KW@2..10 "DOCTYPE" [] [Whitespace(" ")]
+    3: HTML_KW@10..15 "html" [] [Whitespace(" ")]
+    4: HTML_LITERAL@15..22 "SYSTEM" [] [Whitespace(" ")]
+    5: HTML_STRING_LITERAL@22..43 "\"about:legacy-compat\"" [] []
+    6: (empty)
+    7: R_ANGLE@43..44 ">" [] []
+  2: HTML_ELEMENT_LIST@44..44
+  3: EOF@44..45 "" [Newline("\n")] []
+
+```

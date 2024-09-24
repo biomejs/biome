@@ -4,6 +4,6 @@ mod spec_test;
 mod formatter {
 
     mod html {
-        tests_macros::gen_tests! {"tests/specs/**/*.html", crate::spec_test::run, "unknown"}
+        tests_macros::gen_tests! {"tests/specs/html/**/*.html", crate::spec_test::run, ""}
     }
 }

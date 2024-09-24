@@ -1,0 +1,141 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<head>
+	<META charset="utf-8">
+	<MeTa charset="utf-8">
+</head>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..5 "head" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@5..6 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@6..9 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlName {
+                        value_token: HTML_LITERAL@9..14 "META" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@14..21 "charset" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@21..22 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@22..29 "\"utf-8\"" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: missing (optional),
+                    r_angle_token: R_ANGLE@29..30 ">" [] [],
+                },
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@30..33 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlName {
+                        value_token: HTML_LITERAL@33..38 "MeTa" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@38..45 "charset" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@45..46 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@46..53 "\"utf-8\"" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: missing (optional),
+                    r_angle_token: R_ANGLE@53..54 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@54..56 "<" [Newline("\n")] [],
+                slash_token: SLASH@56..57 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@57..61 "head" [] [],
+                },
+                r_angle_token: R_ANGLE@61..62 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@62..63 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..63
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..62
+    0: HTML_ELEMENT@0..62
+      0: HTML_OPENING_ELEMENT@0..6
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..5
+          0: HTML_LITERAL@1..5 "head" [] []
+        2: HTML_ATTRIBUTE_LIST@5..5
+        3: R_ANGLE@5..6 ">" [] []
+      1: HTML_ELEMENT_LIST@6..54
+        0: HTML_SELF_CLOSING_ELEMENT@6..30
+          0: L_ANGLE@6..9 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_NAME@9..14
+            0: HTML_LITERAL@9..14 "META" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@14..29
+            0: HTML_ATTRIBUTE@14..29
+              0: HTML_NAME@14..21
+                0: HTML_LITERAL@14..21 "charset" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@21..29
+                0: EQ@21..22 "=" [] []
+                1: HTML_STRING@22..29
+                  0: HTML_STRING_LITERAL@22..29 "\"utf-8\"" [] []
+          3: (empty)
+          4: R_ANGLE@29..30 ">" [] []
+        1: HTML_SELF_CLOSING_ELEMENT@30..54
+          0: L_ANGLE@30..33 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_NAME@33..38
+            0: HTML_LITERAL@33..38 "MeTa" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@38..53
+            0: HTML_ATTRIBUTE@38..53
+              0: HTML_NAME@38..45
+                0: HTML_LITERAL@38..45 "charset" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@45..53
+                0: EQ@45..46 "=" [] []
+                1: HTML_STRING@46..53
+                  0: HTML_STRING_LITERAL@46..53 "\"utf-8\"" [] []
+          3: (empty)
+          4: R_ANGLE@53..54 ">" [] []
+      2: HTML_CLOSING_ELEMENT@54..62
+        0: L_ANGLE@54..56 "<" [Newline("\n")] []
+        1: SLASH@56..57 "/" [] []
+        2: HTML_NAME@57..61
+          0: HTML_LITERAL@57..61 "head" [] []
+        3: R_ANGLE@61..62 ">" [] []
+  3: EOF@62..63 "" [Newline("\n")] []
+
+```

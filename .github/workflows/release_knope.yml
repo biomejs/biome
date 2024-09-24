@@ -5,6 +5,7 @@ on:
     types: [ closed ]
     branches: [ main ]
 
+
 jobs:
   retrieve-version:
     if: github.head_ref == 'release/automated-ci' && github.event.pull_request.merged == true
@@ -71,7 +72,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Install Node.js
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
         with:
           node-version: 20
 
@@ -81,6 +82,8 @@ jobs:
           channel: stable
           cache-target: release
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install arm64 toolchain
         if: matrix.code-target == 'linux-arm64' || matrix.code-target == 'linux-arm64-musl'
@@ -219,7 +222,7 @@ jobs:
           path: packages/@biomejs
 
       - name: Install Node.js
-        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
         with:
           node-version: 20
           registry-url: 'https://registry.npmjs.org'
@@ -245,6 +248,8 @@ jobs:
           channel: stable
           cache-target: release
           cache-base: main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: katyo/publish-crates@v2
         with:
           registry-token: ${{ secrets.CARGO_TOKEN }}
