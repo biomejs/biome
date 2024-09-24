@@ -54,7 +54,8 @@
       "style": {
         "noNonNullAssertion": "off"
       }
-    }
+    },
+    "plugins": ["plugin-example.grit"]
   },
   "organizeImports": {
     "enabled": true

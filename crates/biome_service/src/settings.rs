@@ -2,6 +2,7 @@ use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
 use biome_configuration::analyzer::assists::AssistsConfiguration;
+use biome_configuration::analyzer::Plugins;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
@@ -461,6 +462,9 @@ pub struct LinterSettings {
     /// List of rules
     pub rules: Option<biome_configuration::analyzer::linter::Rules>,
 
+    /// List of plugins
+    pub plugins: Plugins,
+
     /// List of ignored paths/files to match
     pub ignored_files: Matcher,
 
@@ -473,6 +477,7 @@ impl Default for LinterSettings {
         Self {
             enabled: true,
             rules: Some(biome_configuration::analyzer::linter::Rules::default()),
+            plugins: Plugins::default(),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         }
@@ -1734,6 +1739,7 @@ pub fn to_linter_settings(
     Ok(LinterSettings {
         enabled: conf.enabled,
         rules: Some(conf.rules),
+        plugins: conf.plugins,
         ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
         included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
     })
@@ -1746,6 +1752,7 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             rules: conf.rules,
+            plugins: conf.plugins.unwrap_or_default(),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         })

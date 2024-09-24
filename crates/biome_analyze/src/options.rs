@@ -57,6 +57,9 @@ pub struct AnalyzerConfiguration {
     /// A list of rules and their options
     pub rules: AnalyzerRules,
 
+    /// A list of plugins that should be loaded.
+    pub plugins: Vec<String>,
+
     /// A collections of bindings that the analyzers should consider as "external".
     ///
     /// For example, lint rules should ignore them.

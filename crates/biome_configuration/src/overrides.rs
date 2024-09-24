@@ -1,6 +1,7 @@
 use super::javascript::PartialJavascriptConfiguration;
 use super::json::PartialJsonConfiguration;
 use super::{PartialCssConfiguration, PartialGraphqlConfiguration};
+use crate::analyzer::Plugins;
 use crate::{
     partial_css_configuration, partial_graphql_configuration, partial_javascript_configuration,
     partial_json_configuration,
@@ -160,6 +161,11 @@ pub struct OverrideLinterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(pure(crate::analyzer::linter::Rules::default()), optional, hide)]
     pub rules: Option<crate::analyzer::linter::Rules>,
+
+    /// List of plugins
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[bpaf(pure(Plugins::default()), optional, hide)]
+    pub plugins: Option<Plugins>,
 }
 
 #[derive(

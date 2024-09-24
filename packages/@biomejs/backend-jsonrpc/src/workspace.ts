@@ -3016,6 +3016,7 @@ export type Category =
 	| "assists"
 	| "migrate"
 	| "deserialize"
+	| "plugin"
 	| "project"
 	| "search"
 	| "internalError/io"

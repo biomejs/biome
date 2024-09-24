@@ -1,5 +1,5 @@
 use biome_console::fmt::{Formatter, Termcolor};
-use biome_console::{markup, MarkupBuf};
+use biome_console::{markup, Markup, MarkupBuf};
 use serde::{Deserialize, Serialize};
 use termcolor::NoColor;
 
@@ -44,6 +44,12 @@ impl From<String> for MessageAndDescription {
             message: markup! { {description} }.to_owned(),
             description,
         }
+    }
+}
+
+impl<'a> From<Markup<'a>> for MessageAndDescription {
+    fn from(message: Markup<'a>) -> Self {
+        message.to_owned().into()
     }
 }
 

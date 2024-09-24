@@ -334,6 +334,7 @@ define_categories! {
     "assists",
     "migrate",
     "deserialize",
+    "plugin",
     "project",
     "search",
     "internalError/io",

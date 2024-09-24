@@ -121,6 +121,12 @@ where
         analyzer.add_visitor(phase, visitor);
     }
 
+    for plugin in &options.configuration.plugins {
+        if let Err(error) = analyzer.load_plugin(plugin) {
+            return (None, vec![error.into()]);
+        }
+    }
+
     services.insert_service(Arc::new(AriaRoles));
     services.insert_service(Arc::new(AriaProperties));
     services.insert_service(Arc::new(manifest));

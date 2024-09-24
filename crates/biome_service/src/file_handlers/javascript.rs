@@ -271,6 +271,9 @@ impl ServiceLanguage for JsLanguage {
             rules: global
                 .map(|g| to_analyzer_rules(g, path.as_path()))
                 .unwrap_or_default(),
+            plugins: global
+                .map(|global| global.linter.plugins.0.clone())
+                .unwrap_or_default(),
             globals,
             preferred_quote,
             jsx_runtime,

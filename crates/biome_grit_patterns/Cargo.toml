@@ -21,8 +21,8 @@ biome_js_parser      = { workspace = true }
 biome_js_syntax      = { workspace = true }
 biome_parser         = { workspace = true }
 biome_rowan          = { workspace = true }
-grit-pattern-matcher = { version = "0.3" }
-grit-util            = { version = "0.3" }
+grit-pattern-matcher = { workspace = true }
+grit-util            = { workspace = true }
 im                   = { version = "15.1.0" }
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 rand                 = { version = "0.8.5" }

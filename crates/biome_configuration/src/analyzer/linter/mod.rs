@@ -1,7 +1,7 @@
 #[rustfmt::skip]
 mod rules;
 
-use biome_deserialize::StringSet;
+use biome_deserialize::{Merge, StringSet};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 pub use rules::*;
@@ -19,6 +19,10 @@ pub struct LinterConfiguration {
     /// List of rules
     #[partial(bpaf(pure(Default::default()), optional, hide))]
     pub rules: Rules,
+
+    /// List of plugins
+    #[partial(bpaf(pure(Default::default()), optional, hide))]
+    pub plugins: Plugins,
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
@@ -42,6 +46,7 @@ impl Default for LinterConfiguration {
         Self {
             enabled: true,
             rules: Default::default(),
+            plugins: Default::default(),
             ignore: Default::default(),
             include: Default::default(),
         }
@@ -55,5 +60,17 @@ impl PartialLinterConfiguration {
 
     pub fn get_rules(&self) -> Rules {
         self.rules.as_ref().unwrap_or(&Rules::default()).clone()
+    }
+}
+
+/// Configuration of plugins.
+// TODO: We probably want to extend this with plugin options too.
+#[derive(Bpaf, Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct Plugins(pub Vec<String>);
+
+impl Merge for Plugins {
+    fn merge_with(&mut self, other: Self) {
+        self.0.extend(other.0)
     }
 }
