@@ -50,6 +50,7 @@ invalidCustomLabelAttributes.options:7:5 deserialize ━━━━━━━━━
   - useDeprecatedReason
   - useImportRestrictions
   - useSortedClasses
+  - useSortedProperties
   - useStrictMode
   - useTrimStartEnd
   - useValidAutocomplete
