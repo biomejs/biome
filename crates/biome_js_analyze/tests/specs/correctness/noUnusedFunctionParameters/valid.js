@@ -13,3 +13,7 @@ new Promise((accept, _reject) => {
 });
 
 data.filter(([_k, v]) => v > 10);
+
+function withObjectSpread({ a, ...rest }) {
+    return rest;
+}
