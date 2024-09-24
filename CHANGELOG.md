@@ -29,6 +29,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Bug fixes
+
+- [noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/) no longer panics when it encounter malformed code. Contributed by @Conaclos
+
 ### Parser
 
 ## v1.9.2 (2024-09-19)

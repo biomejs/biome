@@ -471,7 +471,9 @@ fn has_combining_class_or_vs16(chars: &str) -> bool {
     chars.chars().enumerate().any(|(i, c)| {
         i != 0
             && (is_combining_character(c) || is_variation_selector_16(c))
+            // SAFETY: index `i - 1` is not equal to zero.
             && !(is_combining_character(chars.chars().nth(i - 1).unwrap())
+                // SAFETY: index `i - 1` is not equal to zero.
                 || is_variation_selector_16(chars.chars().nth(i - 1).unwrap()))
     })
 }
