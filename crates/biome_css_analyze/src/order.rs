@@ -10,10 +10,9 @@ flex-direction and flex-flow swapped
 IE filters (progid:DXImageTransform) removed
 Removed properties not known to biome:
     font-effect, font-emphasize, font-emphasize-position, font-emphasize-style,
-    font-smooth, text-outline, text-overflow-ellipsis, text-overflow-mode,
-    scroll-behaviour, nav-index, color-profile
+    font-smooth, text-outline, text-overflow-ellipsis, text-overflow-mode, nav-index, color-profile
 */
-pub(crate) const PROPERTY_ORDER: [&str; 369] = [
+pub(crate) const PROPERTY_ORDER: [&str; 370] = [
     // special
     "all",
     // position
@@ -205,6 +204,7 @@ pub(crate) const PROPERTY_ORDER: [&str; 369] = [
     "counter-set",
     "counter-increment",
     "resize",
+    "scroll-behavior",
     "scroll-snap-type",
     "scroll-snap-align",
     "scroll-snap-stop",
