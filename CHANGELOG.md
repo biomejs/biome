@@ -31,7 +31,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- [noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/) no longer panics when it encounter malformed code. Contributed by @Conaclos
+- [noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/) no longer panics when it encounters malformed code. Contributed by @Conaclos
+
+- [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) no longer reports unused parameters inside an object pattern with a rest parameter.
+
+  In the following code, the rule no longer reports `a` as unused.
+
+  ```js
+  function f({ a, ...rest }) {
+    return rest;
+  }
+  ```
+
+  This matches the behavior of [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/).
+
+  Contributed by @Conaclos
 
 ### Parser
 

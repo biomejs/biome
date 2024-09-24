@@ -30,6 +30,14 @@ new Promise((accept, reject) => {
     console.log(a);
 })
 
+function withSpread({ a: { x }, ...rest }) {
+    return rest;
+}
+
+function withArraySpread([a, ...rest]) {
+    return rest;
+}
+
 ```
 
 # Diagnostics
@@ -238,6 +246,49 @@ invalid.js:23:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━
        23 │ + (function·(a,·_b)·{
     24 24 │       console.log(a);
     25 25 │   })
+  
+
+```
+
+```
+invalid.js:27:28 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    25 │ })
+    26 │ 
+  > 27 │ function withSpread({ a: { x }, ...rest }) {
+       │                            ^
+    28 │     return rest;
+    29 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+```
+
+```
+invalid.js:31:27 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    29 │ }
+    30 │ 
+  > 31 │ function withArraySpread([a, ...rest]) {
+       │                           ^
+    32 │     return rest;
+    33 │ }
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend a with an underscore.
+  
+    29 29 │   }
+    30 30 │   
+    31    │ - function·withArraySpread([a,·...rest])·{
+       31 │ + function·withArraySpread([_a,·...rest])·{
+    32 32 │       return rest;
+    33 33 │   }
   
 
 ```
