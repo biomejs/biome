@@ -1,0 +1,618 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalid.json
+---
+# Input
+```cjs
+let a = undefined;
+```
+
+# Diagnostics
+```
+invalid.json:1:9 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ let a = undefined;
+      │         ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+let a = undefined, b = 2;
+```
+
+# Diagnostics
+```
+invalid.json:1:9 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ let a = undefined, b = 2;
+      │         ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+var a = undefined;
+```
+
+# Diagnostics
+```
+invalid.json:1:9 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ var a = undefined;
+      │         ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+var a = undefined, b = 2;
+```
+
+# Diagnostics
+```
+invalid.json:1:9 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ var a = undefined, b = 2;
+      │         ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+function foo() {return undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ function foo() {return undefined;}
+      │                        ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+const foo = () => undefined;
+```
+
+# Input
+```cjs
+const foo = () => {return undefined;};
+```
+
+# Diagnostics
+```
+invalid.json:1:27 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ const foo = () => {return undefined;};
+      │                           ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+function foo() {return undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ function foo() {return undefined;}
+      │                        ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+function foo() {return /* comment */ undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:38 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ function foo() {return /* comment */ undefined;}
+      │                                      ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+function* foo() {yield undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ function* foo() {yield undefined;}
+      │                        ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+function* foo() {yield undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ function* foo() {yield undefined;}
+      │                        ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(undefined);
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined);
+      │     ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(undefined, undefined);
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, undefined);
+      │     ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:16 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, undefined);
+      │                ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(undefined,);
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined,);
+      │     ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(undefined, undefined,);
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, undefined,);
+      │     ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:16 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, undefined,);
+      │                ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(bar, undefined);
+```
+
+# Diagnostics
+```
+invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(bar, undefined);
+      │          ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(bar, undefined, undefined);
+```
+
+# Diagnostics
+```
+invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(bar, undefined, undefined);
+      │          ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(bar, undefined, undefined);
+      │                     ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(undefined, bar, undefined);
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined);
+      │     ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined);
+      │                     ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(bar, undefined,);
+```
+
+# Diagnostics
+```
+invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(bar, undefined,);
+      │          ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(undefined, bar, undefined,);
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined,);
+      │     ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined,);
+      │                     ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(bar, undefined, undefined,);
+```
+
+# Diagnostics
+```
+invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(bar, undefined, undefined,);
+      │          ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(bar, undefined, undefined,);
+      │                     ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(undefined, bar, undefined, undefined,);
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined, undefined,);
+      │     ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined, undefined,);
+      │                     ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:32 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined, undefined,);
+      │                                ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+foo(undefined, bar, undefined, undefined, undefined, undefined,)
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
+      │     ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
+      │                     ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:32 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
+      │                                ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:43 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
+      │                                           ^^^^^^^^^
+
+  i
+
+
+```
+
+```
+invalid.json:1:54 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+
+  > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
+      │                                                      ^^^^^^^^^
+
+  i
+
+
+```
+
+# Input
+```cjs
+const {foo = undefined} = {};
+```
+
+# Input
+```cjs
+const [foo = undefined] = [];
+```
+
+# Input
+```cjs
+function foo(bar = undefined) {}
+```
+
+# Input
+```cjs
+function foo({bar = undefined}) {}
+```
+
+# Input
+```cjs
+function foo({bar = undefined} = {}) {}
+```
+
+# Input
+```cjs
+function foo([bar = undefined]) {}
+```
+
+# Input
+```cjs
+function foo([bar = undefined] = []) {}
+```
