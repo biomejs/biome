@@ -20,11 +20,11 @@ declare_lint_rule! {
     /// ```js,expect_diagnostic
     /// const a = "Hello ${name}!";
     /// ```
-    /// 
+    ///
     /// ```js,expect_diagnostic
     /// const a = 'Hello ${name}!';
     /// ```
-    /// 
+    ///
     /// ```js,expect_diagnostic
     /// const a = "Time: ${12 * 60 * 60 * 1000}";
     /// ```
