@@ -119,6 +119,7 @@ pub(crate) enum HtmlChild {
 }
 
 impl HtmlChild {
+    #[expect(dead_code)]
     pub(crate) const fn is_any_line(&self) -> bool {
         matches!(self, HtmlChild::EmptyLine | HtmlChild::Newline)
     }
@@ -170,6 +171,7 @@ where
 {
     let mut builder = HtmlSplitChildrenBuilder::new();
 
+    let mut prev_was_content = false;
     for child in children {
         match child {
             AnyHtmlElement::HtmlContent(text) => {
@@ -181,17 +183,18 @@ where
 
                 // Text starting with a whitespace
                 if let Some((_, HtmlTextChunk::Whitespace(_whitespace))) = chunks.peek() {
-                    match chunks.next() {
-                        Some((_, HtmlTextChunk::Whitespace(whitespace))) => {
-                            if whitespace.contains('\n') {
+                    // SAFETY: We just checked this above.
+                    match chunks.next().unwrap() {
+                        (_, HtmlTextChunk::Whitespace(whitespace)) => {
+                            if whitespace.contains('\n') && !prev_was_content {
                                 if chunks.peek().is_none() {
                                     // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
                                     // It can be entirely removed from the content without changing the semantics.
                                     let newlines =
                                         whitespace.chars().filter(|c| *c == '\n').count();
 
-                                    // Keep up to one blank line between tags/expressions and text.
-                                    // ```javascript
+                                    // Keep up to one blank line between tags.
+                                    // ```html
                                     // <div>
                                     //
                                     //   <MyElement />
@@ -236,9 +239,44 @@ where
                         }
                     }
                 }
+                prev_was_content = true;
             }
             child => {
+                let text = child.to_string();
+                let mut chunks = HtmlSplitChunksIterator::new(&text).peekable();
+
+                // Text starting with a whitespace
+                if let Some((_, HtmlTextChunk::Whitespace(_whitespace))) = chunks.peek() {
+                    // SAFETY: We just checked this above.
+                    match chunks.next().unwrap() {
+                        (_, HtmlTextChunk::Whitespace(whitespace)) => {
+                            if whitespace.contains('\n') {
+                                // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
+                                // It can be entirely removed from the content without changing the semantics.
+                                let newlines = whitespace.chars().filter(|c| *c == '\n').count();
+
+                                // Keep up to one blank line between tags.
+                                // ```html
+                                // <div>
+                                //
+                                //   <MyElement />
+                                // </div>
+                                // ```
+                                if newlines > 1 {
+                                    builder.entry(HtmlChild::EmptyLine);
+                                } else {
+                                    builder.entry(HtmlChild::Newline);
+                                }
+                            } else {
+                                builder.entry(HtmlChild::Whitespace)
+                            }
+                        }
+                        _ => unreachable!(),
+                    }
+                }
+
                 builder.entry(HtmlChild::NonText(child));
+                prev_was_content = false;
             }
         }
     }
