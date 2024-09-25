@@ -1,0 +1,630 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalid.jsonc
+---
+# Input
+```cjs
+if (array.length === 0 || array.every(Boolean));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ if (array.length === 0 || array.every(Boolean));
+      │     ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ if·(array.length·===·0·||·array.every(Boolean));
+      │     ----------------------                      
+
+```
+
+# Input
+```cjs
+if (array.length !== 0 && array.some(Boolean));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ if (array.length !== 0 && array.some(Boolean));
+      │     ^^^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ if·(array.length·!==·0·&&·array.some(Boolean));
+      │     ----------------------                     
+
+```
+
+# Input
+```cjs
+if (array.length > 0 && array.some(Boolean));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ if (array.length > 0 && array.some(Boolean));
+      │     ^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ if·(array.length·>·0·&&·array.some(Boolean));
+      │     --------------------                     
+
+```
+
+# Input
+```cjs
+const isAllTrulyOrEmpty = array.length === 0 || array.every(Boolean);
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:27 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ const isAllTrulyOrEmpty = array.length === 0 || array.every(Boolean);
+      │                           ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ const·isAllTrulyOrEmpty·=·array.length·===·0·||·array.every(Boolean);
+      │                           ----------------------                     
+
+```
+
+# Input
+```cjs
+array.length === 0 || array.every(Boolean)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.length === 0 || array.every(Boolean)
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.length·===·0·||·array.every(Boolean)
+      │ ----------------------                    
+
+```
+
+# Input
+```cjs
+array.length > 0 && array.some(Boolean)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.length > 0 && array.some(Boolean)
+      │ ^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.length·>·0·&&·array.some(Boolean)
+      │ --------------------                   
+
+```
+
+# Input
+```cjs
+array.length !== 0 && array.some(Boolean)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.length !== 0 && array.some(Boolean)
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.length·!==·0·&&·array.some(Boolean)
+      │ ----------------------                   
+
+```
+
+# Input
+```cjs
+if ((( array.length > 0 )) && array.some(Boolean));
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ if ((( array.length > 0 )) && array.some(Boolean));
+      │     ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ if·(((·array.length·>·0·))·&&·array.some(Boolean));
+      │     --------------------------                     
+
+```
+
+# Input
+```cjs
+(array.length === 0 || array.every(Boolean)) || foo
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ (array.length === 0 || array.every(Boolean)) || foo
+      │  ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ (array.length·===·0·||·array.every(Boolean))·||·foo
+      │ -----------------------                   -        
+
+```
+
+# Input
+```cjs
+foo || (array.length === 0 || array.every(Boolean))
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ foo || (array.length === 0 || array.every(Boolean))
+      │         ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ foo·||·(array.length·===·0·||·array.every(Boolean))
+      │        -----------------------                   - 
+
+```
+
+# Input
+```cjs
+(array.length > 0 && array.some(Boolean)) && foo
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ (array.length > 0 && array.some(Boolean)) && foo
+      │  ^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ (array.length·>·0·&&·array.some(Boolean))·&&·foo
+      │ ---------------------                  -        
+
+```
+
+# Input
+```cjs
+foo && (array.length > 0 && array.some(Boolean))
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ foo && (array.length > 0 && array.some(Boolean))
+      │         ^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ foo·&&·(array.length·>·0·&&·array.some(Boolean))
+      │        ---------------------                  - 
+
+```
+
+# Input
+```cjs
+array.every(Boolean) || array.length === 0
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:25 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.every(Boolean) || array.length === 0
+      │                         ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.every(Boolean)·||·array.length·===·0
+      │                     ----------------------
+
+```
+
+# Input
+```cjs
+array.some(Boolean) && array.length !== 0
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:24 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.some(Boolean) && array.length !== 0
+      │                        ^^^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.some(Boolean)·&&·array.length·!==·0
+      │                    ----------------------
+
+```
+
+# Input
+```cjs
+array.some(Boolean) && array.length > 0
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:24 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.some(Boolean) && array.length > 0
+      │                        ^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.some(Boolean)·&&·array.length·>·0
+      │                    --------------------
+
+```
+
+# Input
+```cjs
+foo && array.length > 0 && array.some(Boolean)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:8 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ foo && array.length > 0 && array.some(Boolean)
+      │        ^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ foo·&&·array.length·>·0·&&·array.some(Boolean)
+      │     --------------------                      
+
+```
+
+# Input
+```cjs
+foo || array.length === 0 || array.every(Boolean)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:8 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ foo || array.length === 0 || array.every(Boolean)
+      │        ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ foo·||·array.length·===·0·||·array.every(Boolean)
+      │     ----------------------                       
+
+```
+
+# Input
+```cjs
+(foo || array.length === 0) || array.every(Boolean)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ (foo || array.length === 0) || array.every(Boolean)
+      │         ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ (foo·||·array.length·===·0)·||·array.every(Boolean)
+      │ -   -----------------------                        
+
+```
+
+# Input
+```cjs
+array.length === 0 || (array.every(Boolean) || foo)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.length === 0 || (array.every(Boolean) || foo)
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.length·===·0·||·(array.every(Boolean)·||·foo)
+      │ -----------------------                           -
+
+```
+
+# Input
+```cjs
+(foo && array.length > 0) && array.some(Boolean)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ (foo && array.length > 0) && array.some(Boolean)
+      │         ^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ (foo·&&·array.length·>·0)·&&·array.some(Boolean)
+      │ -   ---------------------                       
+
+```
+
+# Input
+```cjs
+array.length > 0 && (array.some(Boolean) && foo)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.length > 0 && (array.some(Boolean) && foo)
+      │ ^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.length·>·0·&&·(array.some(Boolean)·&&·foo)
+      │ ---------------------                          -
+
+```
+
+# Input
+```cjs
+array.every(Boolean) || array.length === 0 || array.every(Boolean)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:25 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.every(Boolean) || array.length === 0 || array.every(Boolean)
+      │                         ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.every(Boolean)·||·array.length·===·0·||·array.every(Boolean)
+      │                      ----------------------                       
+
+```
+
+# Input
+```cjs
+array.length === 0 || array.every(Boolean) || array.length === 0
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.length === 0 || array.every(Boolean) || array.length === 0
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.length·===·0·||·array.every(Boolean)·||·array.length·===·0
+      │ ----------------------                                          
+
+```
+
+```
+invalid.jsonc:1:47 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ array.length === 0 || array.every(Boolean) || array.length === 0
+      │                                               ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.length·===·0·||·array.every(Boolean)·||·array.length·===·0
+      │                                           ----------------------
+
+```
+
+# Input
+```cjs
+(array1.length === 0 || array1.every(Boolean)) || (array2.length === 0 || array2.every(Boolean))
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ (array1.length === 0 || array1.every(Boolean)) || (array2.length === 0 || array2.every(Boolean))
+      │  ^^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ (array1.length·===·0·||·array1.every(Boolean))·||·(array2.length·===·0·||·array2.every(Boolean))
+      │ -       -----------------------             -                                                   
+
+```
+
+```
+invalid.jsonc:1:52 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ (array1.length === 0 || array1.every(Boolean)) || (array2.length === 0 || array2.every(Boolean))
+      │                                                    ^^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ (array1.length·===·0·||·array1.every(Boolean))·||·(array2.length·===·0·||·array2.every(Boolean))
+      │                                                   -       -----------------------             - 
+
+```
+
+# Input
+```cjs
+(array1.length === 0 || array1.every(Boolean)) && (array2.length === 0 || array2.every(Boolean))
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ (array1.length === 0 || array1.every(Boolean)) && (array2.length === 0 || array2.every(Boolean))
+      │  ^^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ (array1.length·===·0·||·array1.every(Boolean))·&&·(array2.length·===·0·||·array2.every(Boolean))
+      │ -       -----------------------             -                                                   
+
+```
+
+```
+invalid.jsonc:1:52 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This is a check for unnecessary length.
+  
+  > 1 │ (array1.length === 0 || array1.every(Boolean)) && (array2.length === 0 || array2.every(Boolean))
+      │                                                    ^^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ (array1.length·===·0·||·array1.every(Boolean))·&&·(array2.length·===·0·||·array2.every(Boolean))
+      │                                                   -       -----------------------             - 
+
+```

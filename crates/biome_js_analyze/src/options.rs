@@ -243,6 +243,8 @@ pub type NoUselessFragments =
     <lint::complexity::no_useless_fragments::NoUselessFragments as biome_analyze::Rule>::Options;
 pub type NoUselessLabel =
     <lint::complexity::no_useless_label::NoUselessLabel as biome_analyze::Rule>::Options;
+pub type NoUselessLengthCheck =
+    <lint::nursery::no_useless_length_check::NoUselessLengthCheck as biome_analyze::Rule>::Options;
 pub type NoUselessLoneBlockStatements = < lint :: complexity :: no_useless_lone_block_statements :: NoUselessLoneBlockStatements as biome_analyze :: Rule > :: Options ;
 pub type NoUselessRename =
     <lint::complexity::no_useless_rename::NoUselessRename as biome_analyze::Rule>::Options;

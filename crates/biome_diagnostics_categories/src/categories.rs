@@ -172,6 +172,7 @@ define_categories! {
     "lint/nursery/noUnmatchableAnbSelector": "https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
     "lint/nursery/noUnusedFunctionParameters": "https://biomejs.dev/linter/rules/no-unused-function-parameters",
     "lint/nursery/noUselessEscapeInRegex": "https://biomejs.dev/linter/rules/no-useless-escape-in-regex",
+    "lint/nursery/noUselessLengthCheck": "https://biomejs.dev/linter/rules/no-useless-length-check",
     "lint/nursery/noValueAtRule": "https://biomejs.dev/linter/rules/no-value-at-rule",
     "lint/nursery/useAdjacentOverloadSignatures": "https://biomejs.dev/linter/rules/use-adjacent-overload-signatures",
     "lint/nursery/useAriaPropsSupportedByRole": "https://biomejs.dev/linter/rules/use-aria-props-supported-by-role",
