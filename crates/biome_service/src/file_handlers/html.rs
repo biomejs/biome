@@ -1,20 +1,21 @@
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
+use biome_css_syntax::TextSize;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_html_formatter::{format_node, HtmlFormatOptions};
 use biome_html_parser::parse_html_with_cache;
-use biome_html_syntax::HtmlLanguage;
+use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
-
-use crate::{
-    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
-    WorkspaceError,
-};
 
 use super::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
     FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+};
+use crate::workspace::GetSyntaxTreeResult;
+use crate::{
+    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
+    WorkspaceError,
 };
 
 impl ServiceLanguage for HtmlLanguage {
@@ -65,9 +66,9 @@ impl ExtensionHandler for HtmlFileHandler {
         Capabilities {
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
-                debug_syntax_tree: None,
-                debug_control_flow: None,
-                debug_formatter_ir: None,
+                debug_syntax_tree: Some(debug_syntax_tree),
+                debug_control_flow: Some(debug_control_flow),
+                debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
                 lint: None,
@@ -119,4 +120,32 @@ fn format(
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
+}
+
+fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+    let syntax: HtmlSyntaxNode = parse.syntax();
+    let tree: HtmlRoot = parse.tree();
+    GetSyntaxTreeResult {
+        cst: format!("{syntax:#?}"),
+        ast: format!("{tree:#?}"),
+    }
+}
+
+fn debug_formatter_ir(
+    path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+) -> Result<String, WorkspaceError> {
+    let options = settings.format_options::<HtmlLanguage>(path, document_file_source);
+
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+
+    let root_element = formatted.into_document();
+    Ok(root_element.to_string())
+}
+
+fn debug_control_flow(_parse: AnyParse, _cursor: TextSize) -> String {
+    String::new()
 }
