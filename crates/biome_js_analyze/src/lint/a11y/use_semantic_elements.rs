@@ -51,26 +51,19 @@ impl Rule for UseSemanticElements {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        let role = node.find_attribute_by_name("role").ok().flatten()?;
+        let role_value = role.as_static_value()?;
+        let role_value = role_value.as_string_constant()?;
 
-        let role_attribute = node.find_attribute_by_name("role").ok().flatten();
-
-        if let Some(attr) = role_attribute {
-            // check is not interactive element
-            let element = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-            let element_name = element.text_trimmed();
-
-            let aria_roles = ctx.aria_roles();
-            let extract_attributes = ctx.extract_attributes(&node.attributes());
-            let extract_attributes = ctx.convert_all_attribute_values(extract_attributes);
-            let is_not_interactive =
-                aria_roles.is_not_interactive_element(element_name, extract_attributes);
-
-            if is_not_interactive {
-                return Some(attr);
-            }
+        // Allow `role="img"` on any element. For more information, see:
+        // <https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role>
+        if role_value == "img" {
+            return None;
         }
 
-        None
+        let aria_roles = ctx.aria_roles();
+        let mut elements = aria_roles.get_elements_by_role(role_value)?;
+        elements.next().map(|_| role)
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
