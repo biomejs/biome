@@ -1,4 +1,4 @@
-//! Generated file, do not edit by hand, see `xtask/codegen/src/generate_target_language_constants.rs`
+//! Generated file, do not edit by hand, see `xtask/codegen`
 
 use crate::grit_target_language::DisregardedSlotCondition::{self, *};
 use biome_js_syntax::JsSyntaxKind::{self, *};
@@ -30,7 +30,11 @@ pub(crate) const DISREGARDED_SNIPPET_SLOTS: &[(JsSyntaxKind, u32, DisregardedSlo
     (TS_CONSTRUCTOR_SIGNATURE_CLASS_MEMBER, 3, Always),
     (TS_DECLARE_FUNCTION_DECLARATION, 0, OnlyIf(&[""])),
     (TS_DECLARE_FUNCTION_DECLARATION, 6, Always),
-    (TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION, 0, OnlyIf(&[""])),
+    (
+        TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION,
+        0,
+        OnlyIf(&[""]),
+    ),
     (TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION, 6, Always),
     (TS_EXPORT_AS_NAMESPACE_CLAUSE, 3, Always),
     (TS_EXPORT_ASSIGNMENT_CLAUSE, 2, Always),

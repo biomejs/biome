@@ -34,9 +34,7 @@ pub fn generate_target_language_constants(
     let disregarded_slots = disregarded_slots.join("\n    ");
 
     let result = format!(
-        "//! Generated file, do not edit by hand, see `xtask/codegen/src/generate_target_language_constants.rs`
-
-use crate::grit_target_language::DisregardedSlotCondition::{{self, *}};
+        "use crate::grit_target_language::DisregardedSlotCondition::{{self, *}};
 use biome_js_syntax::JsSyntaxKind::{{self, *}};
 
 pub(crate) const DISREGARDED_SNIPPET_SLOTS: &[(JsSyntaxKind, u32, DisregardedSlotCondition)] = &[
@@ -45,5 +43,7 @@ pub(crate) const DISREGARDED_SNIPPET_SLOTS: &[(JsSyntaxKind, u32, DisregardedSlo
 "
     );
 
-    Ok(result)
+    let pretty = xtask::reformat(result)?;
+
+    Ok(pretty)
 }
