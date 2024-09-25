@@ -271,6 +271,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_rowan",
+ "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
  "insta",
