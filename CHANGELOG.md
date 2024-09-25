@@ -47,6 +47,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useButtonType](https://biomejs.dev/linter/rules/use-button-type/) no longer reports dynamically created button with a valid type ([#4072](https://github.com/biomejs/biome/issues/4072)).
+
+  The following code is no longer reported:
+
+  ```js
+  React.createElement("button", { type: "button" }, "foo")
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
 
 ## v1.9.2 (2024-09-19)
