@@ -1255,6 +1255,10 @@ export interface Nursery {
 	 */
 	noMissingVarFunction?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow nested ternary expressions.
+	 */
+	noNestedTernary?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow octal escape sequences in string literals
 	 */
 	noOctalEscape?: RuleConfiguration_for_Null;
@@ -2840,6 +2844,7 @@ export type Category =
 	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
+	| "lint/nursery/noNestedTernary"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"

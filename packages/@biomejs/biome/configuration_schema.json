@@ -2139,6 +2139,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNestedTernary": {
+					"description": "Disallow nested ternary expressions.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noOctalEscape": {
 					"description": "Disallow octal escape sequences in string literals",
 					"anyOf": [
