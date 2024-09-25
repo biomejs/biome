@@ -1,4 +1,14 @@
+use super::{
+    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
+    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+};
+use crate::workspace::GetSyntaxTreeResult;
+use crate::{
+    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
+    WorkspaceError,
+};
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
+use biome_css_syntax::TextSize;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
 use biome_html_formatter::{format_node, HtmlFormatOptions};
@@ -6,17 +16,6 @@ use biome_html_parser::parse_html_with_cache;
 use biome_html_syntax::{HtmlLanguage, HtmlRoot, HtmlSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
-
-use crate::{
-    settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
-    workspace::GetSyntaxTreeResult,
-    WorkspaceError,
-};
-
-use super::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
-    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
-};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -115,7 +114,7 @@ impl ExtensionHandler for HtmlFileHandler {
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
                 debug_syntax_tree: Some(debug_syntax_tree),
-                debug_control_flow: None,
+                debug_control_flow: Some(debug_control_flow),
                 debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
@@ -192,4 +191,8 @@ fn format(
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
     }
+}
+
+fn debug_control_flow(_parse: AnyParse, _cursor: TextSize) -> String {
+    String::new()
 }

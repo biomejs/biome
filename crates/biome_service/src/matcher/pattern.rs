@@ -5,25 +5,26 @@ use crate::matcher::pattern::MatchResult::{
 use crate::matcher::pattern::PatternToken::{
     AnyChar, AnyExcept, AnyPattern, AnyRecursiveSequence, AnySequence, AnyWithin, Char,
 };
+use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::path::Path;
 use std::str::FromStr;
 use std::{fmt, path};
 
 /// A pattern parsing error.
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 #[allow(missing_copy_implementations)]
 pub struct PatternError {
     /// The approximate character index of where the error occurred.
     pub pos: usize,
 
     /// A message describing the error.
-    pub msg: &'static str,
+    pub msg: String,
 }
 
 impl Error for PatternError {
     fn description(&self) -> &str {
-        self.msg
+        self.msg.as_str()
     }
 }
 
@@ -182,7 +183,7 @@ impl Pattern {
                         count if count > 2 => {
                             return Err(PatternError {
                                 pos: old + 2,
-                                msg: ERROR_WILDCARDS,
+                                msg: ERROR_WILDCARDS.to_string(),
                             });
                         }
                         count if count == 2 => {
@@ -202,14 +203,14 @@ impl Pattern {
                                 } else {
                                     return Err(PatternError {
                                         pos: i,
-                                        msg: ERROR_RECURSIVE_WILDCARDS,
+                                        msg: ERROR_RECURSIVE_WILDCARDS.to_string(),
                                     });
                                 }
                                 // `**` begins with non-separator
                             } else {
                                 return Err(PatternError {
                                     pos: old - 1,
-                                    msg: ERROR_RECURSIVE_WILDCARDS,
+                                    msg: ERROR_RECURSIVE_WILDCARDS.to_string(),
                                 });
                             };
 
@@ -259,7 +260,7 @@ impl Pattern {
                     // if we get here then this is not a valid range pattern
                     return Err(PatternError {
                         pos: i,
-                        msg: ERROR_INVALID_RANGE,
+                        msg: ERROR_INVALID_RANGE.to_string(),
                     });
                 }
                 '{' if is_editorconfig => {
@@ -274,7 +275,7 @@ impl Pattern {
                         if depth > 1 {
                             return Err(PatternError {
                                 pos: j,
-                                msg: "nested '{' in '{...}' is not allowed",
+                                msg: "nested '{' in '{...}' is not allowed".to_string(),
                             });
                         }
                         if depth == 0 {
@@ -286,7 +287,7 @@ impl Pattern {
                     if depth != 0 {
                         return Err(PatternError {
                             pos: i,
-                            msg: "unmatched '{'",
+                            msg: "unmatched '{'".to_string(),
                         });
                     }
 

@@ -183,6 +183,7 @@ fn traverse_inputs(
     }));
 
     let paths = ctx.evaluated_paths();
+    dbg!("paths", &paths);
     let dome = Dome::new(paths);
     let mut iter = dome.iter();
     fs.traversal(Box::new(|scope: &dyn TraversalScope| {
@@ -685,6 +686,7 @@ impl<'ctx, 'app> TraversalContext for TraversalOptions<'ctx, 'app> {
     }
 
     fn store_path(&self, path: BiomePath) {
+        dbg!("stored", &path);
         self.evaluated_paths
             .write()
             .unwrap()

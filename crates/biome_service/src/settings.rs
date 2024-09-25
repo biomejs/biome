@@ -1,3 +1,4 @@
+use crate::matcher::Pattern;
 use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
@@ -6,7 +7,7 @@ use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
+    push_to_analyzer_rules, BiomeConfigDiagnostic, FilesConfiguration, FormatterConfiguration,
     JavascriptConfiguration, LinterConfiguration, OverrideAssistsConfiguration,
     OverrideFormatterConfiguration, OverrideLinterConfiguration,
     OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
@@ -181,6 +182,13 @@ impl WorkspaceSettings {
     pub fn set_current_project(&mut self, new_key: ProjectKey) {
         self.current_project = new_key;
     }
+
+    /// Checks if the current project has members defined in the current settings.
+    pub fn is_root(&self) -> bool {
+        self.get_current_settings()
+            .map(|settings| !settings.members.is_empty())
+            .unwrap_or_default()
+    }
 }
 
 /// Global settings for the entire workspace
@@ -200,6 +208,8 @@ pub struct Settings {
     pub assists: AssistsSettings,
     /// overrides
     pub override_settings: OverrideSettings,
+    /// members for monorepo
+    pub members: Vec<Pattern>,
 }
 
 impl Settings {
@@ -273,6 +283,17 @@ impl Settings {
             self.override_settings =
                 to_override_settings(working_directory.clone(), overrides, self)?;
         }
+
+        self.members = {
+            let mut members = Vec::new();
+            if let Some(configuration_members) = configuration.members {
+                for s in configuration_members.iter() {
+                    members.push(Pattern::new(s.as_str())?);
+                }
+            }
+
+            members
+        };
 
         Ok(())
     }
@@ -1444,7 +1465,7 @@ pub fn to_matcher(
     if let Some(string_set) = string_set {
         for pattern in string_set.iter() {
             matcher.add_pattern(pattern).map_err(|err| {
-                BiomeDiagnostic::new_invalid_ignore_pattern(
+                BiomeConfigDiagnostic::new_invalid_ignore_pattern(
                     pattern.to_string(),
                     err.msg.to_string(),
                 )
@@ -1461,14 +1482,14 @@ fn to_git_ignore(path: PathBuf, matches: &[String]) -> Result<Gitignore, Workspa
         gitignore_builder
             .add_line(Some(path.clone()), the_match)
             .map_err(|err| {
-                BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
+                BiomeConfigDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
                     message: err.to_string(),
                     file_path: path.to_str().map(|s| s.to_string()),
                 })
             })?;
     }
     let gitignore = gitignore_builder.build().map_err(|err| {
-        BiomeDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
+        BiomeConfigDiagnostic::InvalidIgnorePattern(InvalidIgnorePattern {
             message: err.to_string(),
             file_path: path.to_str().map(|s| s.to_string()),
         })

@@ -14,6 +14,7 @@ mod handle_css_files;
 mod handle_svelte_files;
 mod handle_vue_files;
 mod included_files;
+mod monorepo;
 mod overrides_formatter;
 mod overrides_linter;
 mod overrides_organize_imports;

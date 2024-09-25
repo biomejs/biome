@@ -19,7 +19,7 @@ use crate::analyzer::assists::{
     partial_assists_configuration, AssistsConfiguration, PartialAssistsConfiguration,
 };
 use crate::css::CssLinter;
-pub use crate::diagnostics::BiomeDiagnostic;
+pub use crate::diagnostics::BiomeConfigDiagnostic;
 pub use crate::diagnostics::CantLoadExtendFile;
 pub use crate::generated::{push_to_analyzer_assists, push_to_analyzer_rules};
 use crate::javascript::JavascriptLinter;
@@ -31,7 +31,11 @@ pub use analyzer::{
     RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration, RuleWithFixOptions,
     RuleWithOptions, Rules,
 };
-use biome_deserialize::{Deserialized, StringSet};
+use biome_css_syntax::TextRange;
+use biome_deserialize::{
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, Deserialized, Merge, StringSet,
+};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{IndentStyle, QuoteStyle};
 use bpaf::Bpaf;
@@ -61,6 +65,7 @@ pub use overrides::{
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::num::NonZeroU64;
+use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use vcs::VcsClientKind;
 
@@ -84,6 +89,11 @@ pub struct Configuration {
     #[partial(serde(rename = "$schema"))]
     #[partial(bpaf(hide))]
     pub schema: String,
+
+    /// A list of glob patterns to lookup monorepo directories
+    #[partial(bpaf(pure(Default::default()), hide))]
+    #[partial(deserializable(passthrough_name))]
+    pub members: Members,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
     #[partial(bpaf(hide))]
@@ -135,6 +145,89 @@ pub struct Configuration {
     /// Specific configuration for assists
     #[partial(type, bpaf(external(partial_assists_configuration), optional))]
     pub assists: AssistsConfiguration,
+}
+
+#[derive(Clone, Default, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+pub struct Members(Vec<String>);
+
+impl Deref for Members {
+    type Target = Vec<String>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Members {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl Merge for Members {
+    fn merge_with(&mut self, other: Self) {
+        self.0.extend(other.0)
+    }
+}
+
+#[cfg(feature = "schema")]
+impl schemars::JsonSchema for Members {
+    fn schema_name() -> String {
+        String::from("Members")
+    }
+
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<String>>::json_schema(gen)
+    }
+}
+
+impl Deserializable for Members {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        struct Visitor;
+        impl DeserializationVisitor for Visitor {
+            type Output = Vec<String>;
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
+
+            fn visit_array(
+                self,
+                items: impl Iterator<Item = Option<impl DeserializableValue>>,
+                _range: TextRange,
+                new_name: &str,
+                diagnostics: &mut Vec<DeserializationDiagnostic>,
+            ) -> Option<Self::Output> {
+                let mut values = items.flatten();
+                let Some(first_item) = values.next() else {
+                    return None;
+                };
+                // TODO: uncomment once the deserialization via context is implemented
+                // if name != "root" {
+                //     diagnostics.push(
+                //         DeserializationDiagnostic::new(markup! {
+                //             "The current configuration file can't have members. Please remove them."
+                //         })
+                //         .with_range(range),
+                //     );
+                // }
+
+                let mut members: Vec<String> = Vec::new();
+
+                members.push(Deserializable::deserialize(&first_item, "", diagnostics)?);
+                members.extend(
+                    values
+                        .filter_map(|value| Deserializable::deserialize(&value, "", diagnostics))
+                        .collect::<Vec<String>>(),
+                );
+
+                Some(members)
+            }
+        }
+
+        Some(Members(value.deserialize(Visitor, name, diagnostics)?))
+    }
 }
 
 impl PartialConfiguration {
@@ -316,6 +409,13 @@ impl PartialConfiguration {
     pub fn use_editorconfig(&self) -> Option<bool> {
         self.formatter.as_ref().and_then(|f| f.use_editorconfig)
     }
+
+    pub fn has_members(&self) -> bool {
+        self.members
+            .as_ref()
+            .map(|members| !members.is_empty())
+            .unwrap_or_default()
+    }
 }
 
 /// The configuration of the filesystem
@@ -376,6 +476,8 @@ pub enum ConfigurationPathHint {
     /// will use **this path** as base path.
     FromWorkspace(PathBuf),
 
+    FromChildWorkspace(PathBuf),
+
     /// The configuration path provided by the LSP, not having a configuration file is not an error.
     /// The path will always be a directory path.
     FromLsp(PathBuf),
@@ -391,6 +493,12 @@ impl ConfigurationPathHint {
     }
     pub const fn is_from_lsp(&self) -> bool {
         matches!(self, Self::FromLsp(_))
+    }
+    pub const fn is_root(&self) -> bool {
+        match self {
+            Self::FromChildWorkspace(_) => false,
+            _ => true,
+        }
     }
 }
 

@@ -5,7 +5,7 @@ use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
 use biome_configuration::VERSION;
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload,
+    push_to_analyzer_rules, BiomeConfigDiagnostic, ConfigurationPathHint, ConfigurationPayload,
     PartialConfiguration,
 };
 use biome_console::markup;
@@ -53,7 +53,7 @@ impl LoadedConfiguration {
         self.file_path.as_deref()
     }
 
-    /// Whether the are errors emitted. Error are [Severity::Error] or greater.
+    /// Whether there are errors emitted. Error are [Severity::Error] or greater.
     pub fn has_errors(&self) -> bool {
         self.diagnostics
             .iter()
@@ -99,6 +99,11 @@ impl<'a> Iterator for ConfigurationDiagnosticsIter<'a> {
 impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 
 impl LoadedConfiguration {
+    /// Finalise the configuration by applying the `extends` field to the loaded configuration.
+    ///
+    /// Also, it checks whether this configuration is a "root" configuration or not.
+    /// ## Errors
+    ///
     fn try_from_payload(
         value: Option<ConfigurationPayload>,
         fs: &DynRef<'_, dyn FileSystem>,
@@ -114,20 +119,22 @@ impl LoadedConfiguration {
         } = value;
         let (partial_configuration, mut diagnostics) = deserialized.consume();
 
+        let configuration = match partial_configuration {
+            Some(mut partial_configuration) => {
+                partial_configuration.apply_extends(
+                    fs,
+                    &configuration_file_path,
+                    &external_resolution_base_path,
+                    &mut diagnostics,
+                )?;
+                partial_configuration.migrate_deprecated_fields();
+                partial_configuration
+            }
+            None => PartialConfiguration::default(),
+        };
+
         Ok(Self {
-            configuration: match partial_configuration {
-                Some(mut partial_configuration) => {
-                    partial_configuration.apply_extends(
-                        fs,
-                        &configuration_file_path,
-                        &external_resolution_base_path,
-                        &mut diagnostics,
-                    )?;
-                    partial_configuration.migrate_deprecated_fields();
-                    partial_configuration
-                }
-                None => PartialConfiguration::default(),
-            },
+            configuration,
             diagnostics: diagnostics
                 .into_iter()
                 .map(|diagnostic| {
@@ -143,9 +150,9 @@ impl LoadedConfiguration {
 /// Load the partial configuration for this session of the CLI.
 pub fn load_configuration(
     fs: &DynRef<'_, dyn FileSystem>,
-    config_path: ConfigurationPathHint,
+    path_hint: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
-    let config = load_config(fs, config_path)?;
+    let config = load_config(fs, path_hint)?;
     LoadedConfiguration::try_from_payload(config, fs)
 }
 
@@ -170,14 +177,18 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 ///     means Biome will use the default configuration.
 fn load_config(
     file_system: &DynRef<'_, dyn FileSystem>,
-    base_path: ConfigurationPathHint,
+    path_hint: ConfigurationPathHint,
 ) -> LoadConfig {
+    let name = if path_hint.is_root() { "root" } else { "" };
+
+    dbg!("laod config", name);
     // This path is used for configuration resolution from external packages.
-    let external_resolution_base_path = match base_path {
+    let external_resolution_base_path = match path_hint {
         // Path hint from LSP is always the workspace root
         // we use it as the resolution base path.
         ConfigurationPathHint::FromLsp(ref path) => path.clone(),
         ConfigurationPathHint::FromWorkspace(ref path) => path.clone(),
+        ConfigurationPathHint::FromChildWorkspace(ref path) => path.clone(),
         // Path hint from user means the command is invoked from the CLI
         // So we use the working directory (CWD) as the resolution base path
         ConfigurationPathHint::FromUser(_) | ConfigurationPathHint::None => file_system
@@ -187,7 +198,7 @@ fn load_config(
 
     // If the configuration path hint is from user and is a file path,
     // we'll load it directly
-    if let ConfigurationPathHint::FromUser(ref config_file_path) = base_path {
+    if let ConfigurationPathHint::FromUser(ref config_file_path) = path_hint {
         if file_system.path_is_file(config_file_path) {
             let content = file_system.read_file_from_path(config_file_path)?;
             let parser_options = match config_file_path.extension().map(OsStr::as_encoded_bytes) {
@@ -197,7 +208,7 @@ fn load_config(
                     .with_allow_trailing_commas(),
             };
             let deserialized =
-                deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, "");
+                deserialize_from_json_str::<PartialConfiguration>(&content, parser_options, name);
             return Ok(Some(ConfigurationPayload {
                 deserialized,
                 configuration_file_path: PathBuf::from(config_file_path),
@@ -208,11 +219,12 @@ fn load_config(
 
     // If the configuration path hint is not a file path
     // we'll auto search for the configuration file
-    let should_error = base_path.is_from_user();
-    let configuration_directory = match base_path {
+    let should_error = path_hint.is_from_user();
+    let configuration_directory = match path_hint {
         ConfigurationPathHint::FromLsp(path) => path,
         ConfigurationPathHint::FromUser(path) => path,
         ConfigurationPathHint::FromWorkspace(path) => path,
+        ConfigurationPathHint::FromChildWorkspace(path) => path,
         ConfigurationPathHint::None => file_system.working_directory().unwrap_or_default(),
     };
 
@@ -288,12 +300,14 @@ pub fn load_editorconfig(
                 if let Some(pattern_set) = &override_pattern.include {
                     for pattern in pattern_set.iter() {
                         if let Err(err) = Pattern::new(pattern) {
-                            return Err(BiomeDiagnostic::new_invalid_ignore_pattern_with_path(
-                                pattern,
-                                err.to_string(),
-                                path.to_str(),
-                            )
-                            .into());
+                            return Err(
+                                BiomeConfigDiagnostic::new_invalid_ignore_pattern_with_path(
+                                    pattern,
+                                    err.to_string(),
+                                    path.to_str(),
+                                )
+                                .into(),
+                            );
                         }
                     }
                 }
@@ -322,7 +336,7 @@ pub fn create_config(
     let jsonc_path = PathBuf::from(ConfigName::biome_jsonc());
 
     if fs.path_exists(&json_path) || fs.path_exists(&jsonc_path) {
-        return Err(BiomeDiagnostic::new_already_exists().into());
+        return Err(BiomeConfigDiagnostic::new_already_exists().into());
     }
 
     let path = if emit_jsonc { jsonc_path } else { json_path };
@@ -331,7 +345,7 @@ pub fn create_config(
 
     let mut config_file = fs.open_with_options(&path, options).map_err(|err| {
         if err.kind() == ErrorKind::AlreadyExists {
-            BiomeDiagnostic::new_already_exists().into()
+            BiomeConfigDiagnostic::new_already_exists().into()
         } else {
             WorkspaceError::cant_read_file(format!("{}", path.display()))
         }
@@ -349,7 +363,7 @@ pub fn create_config(
     }
 
     let contents = serde_json::to_string_pretty(&configuration)
-        .map_err(|_| BiomeDiagnostic::new_serialization_error())?;
+        .map_err(|_| BiomeConfigDiagnostic::new_serialization_error())?;
 
     let parsed = parse_json(&contents, JsonParserOptions::default());
     let formatted =
@@ -477,7 +491,7 @@ impl PartialConfigurationExt for PartialConfiguration {
             } else {
                 fs.resolve_configuration(extend_entry.as_str(), external_resolution_base_path)
                     .map_err(|error| {
-                        BiomeDiagnostic::cant_resolve(
+                        BiomeConfigDiagnostic::cant_resolve(
                             external_resolution_base_path.display().to_string(),
                             error,
                         )

@@ -1,7 +1,8 @@
+use crate::matcher::PatternError;
 use crate::workspace::DocumentFileSource;
 use biome_analyze::RuleError;
 use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiagnostic};
-use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
+use biome_configuration::{BiomeConfigDiagnostic, CantLoadExtendFile};
 use biome_console::fmt::Bytes;
 use biome_console::markup;
 use biome_css_parser::ParseDiagnostic;
@@ -62,6 +63,8 @@ pub enum WorkspaceError {
     ProtectedFile(ProtectedFile),
     /// Error when searching for a pattern
     SearchError(SearchError),
+    /// When a pattern isn't valid
+    PatternError(PatternError),
 }
 
 impl WorkspaceError {
@@ -153,8 +156,8 @@ impl From<FileSystemDiagnostic> for WorkspaceError {
     }
 }
 
-impl From<BiomeDiagnostic> for WorkspaceError {
-    fn from(value: BiomeDiagnostic) -> Self {
+impl From<BiomeConfigDiagnostic> for WorkspaceError {
+    fn from(value: BiomeConfigDiagnostic) -> Self {
         Self::Configuration(value.into())
     }
 }
@@ -167,7 +170,13 @@ impl From<EditorConfigDiagnostic> for WorkspaceError {
 
 impl From<CantLoadExtendFile> for WorkspaceError {
     fn from(value: CantLoadExtendFile) -> Self {
-        WorkspaceError::Configuration(BiomeDiagnostic::CantLoadExtendFile(value).into())
+        WorkspaceError::Configuration(BiomeConfigDiagnostic::CantLoadExtendFile(value).into())
+    }
+}
+
+impl From<PatternError> for WorkspaceError {
+    fn from(value: PatternError) -> Self {
+        WorkspaceError::PatternError(value)
     }
 }
 

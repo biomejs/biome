@@ -1,4 +1,5 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
+
 use crate::{
     diagnostics::DeserializableType, Deserializable, DeserializableValue,
     DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text, TextNumber,

@@ -301,9 +301,11 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                     let absolute_path = Path::new("/").join(path);
                     absolute_path.strip_prefix(&absolute_base).is_ok()
                 } else {
+                    dbg!(&path, &base);
                     path.strip_prefix(&base).is_ok()
                 };
 
+                dbg!(should_process_file);
                 if should_process_file {
                     let _ = ctx.interner().intern_path(path.into());
                     let biome_path = BiomePath::new(path);
