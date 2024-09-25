@@ -437,19 +437,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Contributed by @Conaclos
 
 - Updated format of query_feature_range_interval. [#4076]
+  ```
+  Before:
+      .class {
+      @media (1024px <= width <=1280px) {
+        color: red;
+      }
+    }
+
+  Now:
+      .class {
+      @media (1024px <= width <= 1280px) {
+        color: red;
+      }
+    }
 
   ```
-                left.format(),
-                space(),
-                left_comparison.format(),
-                space(),
-                name.format(),
-                space(),
-                right_comparison.format(),
-                space(),
-                right.format()
-  ```
-
   Contributed by @blaze-d83
 
 ### Linter
