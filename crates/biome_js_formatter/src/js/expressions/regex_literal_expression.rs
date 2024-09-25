@@ -25,7 +25,7 @@ impl FormatNodeRule<JsRegexLiteralExpression> for FormatJsRegexLiteralExpression
         let end_slash_pos = trimmed_raw_string.rfind('/').unwrap();
         let mut flag_char_vec = trimmed_raw_string[end_slash_pos + 1..]
             .chars()
-            .collect::<Vec<_>>();
+            .collect::<smallvec::SmallVec<[_; 6]>>();
         flag_char_vec.sort_unstable();
         let sorted_flag_string = flag_char_vec.iter().collect::<String>();
 

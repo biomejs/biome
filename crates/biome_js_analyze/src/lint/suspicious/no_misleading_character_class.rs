@@ -425,30 +425,41 @@ fn make_suggestion(
     })
 }
 
-fn is_emoji_modifier(code: u32) -> bool {
-    (0x1F3FB..=0x1F3FF).contains(&code)
+fn is_emoji_modifier(c: char) -> bool {
+    (0x1F3FB..=0x1F3FF).contains(&(c as u32))
 }
 
 fn has_emoji_modifier(chars: &str) -> bool {
-    let char_vec: Vec<char> = chars.chars().collect();
-
-    char_vec.iter().enumerate().any(|(i, &c)| {
-        i != 0 && is_emoji_modifier(c as u32) && !is_emoji_modifier(char_vec[i - 1] as u32)
-    })
+    let mut prev_is_emoji_modifier = true;
+    for c in chars.chars() {
+        if is_emoji_modifier(c) {
+            if !prev_is_emoji_modifier {
+                return true;
+            }
+            prev_is_emoji_modifier = true;
+        } else {
+            prev_is_emoji_modifier = false;
+        }
+    }
+    false
 }
 
-fn is_regional_indicator_symbol(code: u32) -> bool {
-    (0x1F1E6..=0x1F1FF).contains(&code)
+fn is_regional_indicator_symbol(c: char) -> bool {
+    (0x1F1E6..=0x1F1FF).contains(&(c as u32))
 }
 
 fn has_regional_indicator_symbol(chars: &str) -> bool {
-    let char_vec: Vec<char> = chars.chars().collect();
-
-    char_vec.iter().enumerate().any(|(i, &c)| {
-        i != 0
-            && is_regional_indicator_symbol(c as u32)
-            && is_regional_indicator_symbol(char_vec[i - 1] as u32)
-    })
+    let mut iter = chars.chars();
+    while let Some(c) = iter.next() {
+        if is_regional_indicator_symbol(c) {
+            if let Some(c) = iter.next() {
+                if is_regional_indicator_symbol(c) {
+                    return true;
+                }
+            }
+        }
+    }
+    false
 }
 
 fn is_combining_character(ch: char) -> bool {

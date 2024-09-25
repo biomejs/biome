@@ -92,8 +92,8 @@ impl Rule for NoInvalidDirectionInLinearGradient {
         if IN_KEYWORD.is_match(&first_css_parameter_text) {
             return None;
         }
-        if let Some(first_char) = first_css_parameter_text.chars().next() {
-            if first_char.is_ascii_digit() {
+        if let Some(first_byte) = first_css_parameter_text.bytes().next() {
+            if first_byte.is_ascii_digit() {
                 if ANGLE.is_match(&first_css_parameter_text) {
                     return None;
                 }

@@ -393,16 +393,11 @@ pub(super) fn print_invisibles(
 
     // Get the first trailing whitespace character in the string
     let trailing_whitespace_index = input
-        .char_indices()
+        .bytes()
+        .enumerate()
         .rev()
-        .find_map(|(index, char)| {
-            if !char.is_ascii_whitespace() {
-                Some(index)
-            } else {
-                None
-            }
-        })
-        .unwrap_or(input.len());
+        .find(|(_, byte)| !byte.is_ascii_whitespace())
+        .map_or(input.len(), |(index, _)| index);
 
     let mut iter = input.char_indices().peekable();
     let mut prev_char_was_whitespace = false;

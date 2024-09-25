@@ -586,11 +586,11 @@ fn has_simple_arguments(call: &JsCallExpression) -> bool {
 fn is_factory(token: &JsSyntaxToken) -> bool {
     let text = token.text_trimmed();
 
-    let mut chars = text.chars();
+    let mut bytes = text.bytes();
 
     match text.chars().next() {
         // Any sequence of '$' or '_' characters
-        Some('_' | '$') => chars.all(|c| matches!(c, '_' | '$')),
+        Some('_' | '$') => bytes.all(|b| matches!(b, b'_' | b'$')),
         Some(c) => c.is_uppercase(),
         _ => false,
     }
