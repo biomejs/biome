@@ -15,6 +15,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### New features
+
+- GritQL queries that match functions or methods will now match async functions or methods as well.
+
+  If this is not what you want, you can capture the `async` keyword (or its absence) in a metavariable and assert its emptiness:
+
+  ```grit
+  $async function foo() {} where $async <: .
+  ```
+
+  Contributed by @arendjr
+
+#### Bug fixes
+
+- Fix [#4077](https://github.com/biomejs/biome/issues/4077): Grit queries no longer need to match the statement's trailing semicolon. Contributed by @arendjr
+
 ### Configuration
 
 ### Editors
