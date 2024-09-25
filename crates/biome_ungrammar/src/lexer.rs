@@ -53,7 +53,7 @@ impl Location {
     fn advance(&mut self, text: &str) {
         match text.rfind('\n') {
             Some(idx) => {
-                self.line += text.chars().filter(|&it| it == '\n').count();
+                self.line += text.bytes().filter(|byte| *byte == b'\n').count();
                 self.column = text[idx + 1..].chars().count();
             }
             None => self.column += text.chars().count(),

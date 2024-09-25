@@ -115,6 +115,7 @@ impl Rule for NoDuplicateFontNames {
                 }
                 // A font family name. e.g "Lucida Grande", "Arial".
                 AnyCssValue::CssString(val) => {
+                    // FIXME: avoid String allocation
                     let normalized_font_name: String = val
                         .text()
                         .chars()
