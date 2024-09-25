@@ -105,14 +105,7 @@ impl ReactApiCall for ReactCreateElementCall {
                 let AnyJsObjectMember::JsPropertyObjectMember(property) = member.ok()? else {
                     return None;
                 };
-                let property_name = property.name().ok()?;
-
-                let property_name = property_name.as_js_literal_member_name()?;
-                if property_name.name().ok()? == prop_name {
-                    Some(property)
-                } else {
-                    None
-                }
+                (property.name().ok()?.name()? == prop_name).then_some(property)
             })
         })
     }
