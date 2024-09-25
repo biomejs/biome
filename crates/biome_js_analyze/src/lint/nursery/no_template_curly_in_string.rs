@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::JsStringLiteralExpression;
-use biome_rowan::AstNode;
+use biome_rowan::{TextRange, TextSize};
 
 declare_lint_rule! {
     /// Disallow template literal placeholder syntax in regular strings.
@@ -49,7 +49,7 @@ declare_lint_rule! {
 
 impl Rule for NoTemplateCurlyInString {
     type Query = Ast<JsStringLiteralExpression>;
-    type State = JsStringLiteralExpression;
+    type State = (u32, u32);
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -59,12 +59,12 @@ impl Rule for NoTemplateCurlyInString {
         let text = token.text();
 
         let mut byte_iter = text.bytes().enumerate();
-        while let Some((_i, byte)) = byte_iter.next() {
+        while let Some((i, byte)) = byte_iter.next() {
             if byte == b'$' {
                 if let Some((_, b'{')) = byte_iter.next() {
-                    for (_j, inner_byte) in byte_iter.by_ref() {
+                    for (j, inner_byte) in byte_iter.by_ref() {
                         if inner_byte == b'}' {
-                            return Some(node.clone());
+                            return Some((i as u32, (j + 1) as u32));
                         }
                     }
                 }
@@ -73,12 +73,16 @@ impl Rule for NoTemplateCurlyInString {
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        let span = node.range();
+    fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+        let value_token = ctx.query().value_token().ok()?;
+        let value_token_range = value_token.text_trimmed_range();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                span,
+                TextRange::new(
+                    value_token_range.start() + TextSize::from(range.0),
+                    value_token_range.start() + TextSize::from(range.1),
+                ),
                 markup! {
                     "Unexpected template string placeholder."
                 },

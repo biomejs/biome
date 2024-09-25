@@ -15,12 +15,12 @@ let a = 'Hello, ${{foo: "bar"}.foo}';
 
 # Diagnostics
 ```
-invalid.js:1:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:17 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected template string placeholder.
   
   > 1 │ let a = 'Hello, ${name}';
-      │         ^^^^^^^^^^^^^^^^
+      │                 ^^^^^^^
     2 │ let a = "Hello, ${name}";
     3 │ let a = '${greeting}, ${name}';
   
@@ -30,13 +30,13 @@ invalid.js:1:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━�
 ```
 
 ```
-invalid.js:2:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:17 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected template string placeholder.
   
     1 │ let a = 'Hello, ${name}';
   > 2 │ let a = "Hello, ${name}";
-      │         ^^^^^^^^^^^^^^^^
+      │                 ^^^^^^^
     3 │ let a = '${greeting}, ${name}';
     4 │ let a = 'Hello, ${index + 1}';
   
@@ -46,14 +46,14 @@ invalid.js:2:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━�
 ```
 
 ```
-invalid.js:3:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:10 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected template string placeholder.
   
     1 │ let a = 'Hello, ${name}';
     2 │ let a = "Hello, ${name}";
   > 3 │ let a = '${greeting}, ${name}';
-      │         ^^^^^^^^^^^^^^^^^^^^^^
+      │          ^^^^^^^^^^^
     4 │ let a = 'Hello, ${index + 1}';
     5 │ let a = 'Hello, ${name + " foo"}';
   
@@ -63,14 +63,14 @@ invalid.js:3:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━�
 ```
 
 ```
-invalid.js:4:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:17 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected template string placeholder.
   
     2 │ let a = "Hello, ${name}";
     3 │ let a = '${greeting}, ${name}';
   > 4 │ let a = 'Hello, ${index + 1}';
-      │         ^^^^^^^^^^^^^^^^^^^^^
+      │                 ^^^^^^^^^^^^
     5 │ let a = 'Hello, ${name + " foo"}';
     6 │ let a = 'Hello, ${name || "foo"}';
   
@@ -80,14 +80,14 @@ invalid.js:4:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━�
 ```
 
 ```
-invalid.js:5:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:17 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected template string placeholder.
   
     3 │ let a = '${greeting}, ${name}';
     4 │ let a = 'Hello, ${index + 1}';
   > 5 │ let a = 'Hello, ${name + " foo"}';
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+      │                 ^^^^^^^^^^^^^^^^
     6 │ let a = 'Hello, ${name || "foo"}';
     7 │ let a = 'Hello, ${{foo: "bar"}.foo}';
   
@@ -97,14 +97,14 @@ invalid.js:5:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━�
 ```
 
 ```
-invalid.js:6:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:17 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected template string placeholder.
   
     4 │ let a = 'Hello, ${index + 1}';
     5 │ let a = 'Hello, ${name + " foo"}';
   > 6 │ let a = 'Hello, ${name || "foo"}';
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^
+      │                 ^^^^^^^^^^^^^^^^
     7 │ let a = 'Hello, ${{foo: "bar"}.foo}';
   
   i Turn the string into a template string.
@@ -113,14 +113,14 @@ invalid.js:6:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━�
 ```
 
 ```
-invalid.js:7:9 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:7:17 lint/nursery/noTemplateCurlyInString ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Unexpected template string placeholder.
   
     5 │ let a = 'Hello, ${name + " foo"}';
     6 │ let a = 'Hello, ${name || "foo"}';
   > 7 │ let a = 'Hello, ${{foo: "bar"}.foo}';
-      │         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │                 ^^^^^^^^^^^^^^
   
   i Turn the string into a template string.
   
