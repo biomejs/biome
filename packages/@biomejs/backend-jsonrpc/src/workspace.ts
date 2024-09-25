@@ -1287,7 +1287,7 @@ export interface Nursery {
 	 */
 	noSubstr?: RuleFixConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow template literal placeholder syntax in regular strings.
 	 */
 	noTemplateCurlyInString?: RuleConfiguration_for_Null;
 	/**

@@ -2196,7 +2196,7 @@
 					]
 				},
 				"noTemplateCurlyInString": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow template literal placeholder syntax in regular strings.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
