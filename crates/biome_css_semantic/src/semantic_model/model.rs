@@ -135,6 +135,12 @@ pub struct Selector {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct Specificity(pub u32, pub u32, pub u32);
 
+impl std::fmt::Display for Specificity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}-{}-{}", self.0, self.1, self.2)
+    }
+}
+
 /// Represents a CSS declaration (property-value pair).
 /// ```css
 /// a {

@@ -2,6 +2,7 @@
 
 use biome_analyze::declare_lint_group;
 
+pub mod no_descending_specificity;
 pub mod no_duplicate_custom_properties;
 pub mod no_irregular_whitespace;
 pub mod no_missing_var_function;
@@ -13,6 +14,7 @@ declare_lint_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
+            self :: no_descending_specificity :: NoDescendingSpecificity ,
             self :: no_duplicate_custom_properties :: NoDuplicateCustomProperties ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
             self :: no_missing_var_function :: NoMissingVarFunction ,
