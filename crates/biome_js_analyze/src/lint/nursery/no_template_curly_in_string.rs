@@ -49,7 +49,7 @@ declare_lint_rule! {
 
 impl Rule for NoTemplateCurlyInString {
     type Query = Ast<JsStringLiteralExpression>;
-    type State = ();
+    type State = JsStringLiteralExpression;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -58,17 +58,13 @@ impl Rule for NoTemplateCurlyInString {
         let token = node.value_token().ok()?;
         let text = token.text();
 
-        let bytes = text.as_bytes();
-        let mut byte_iter = bytes.iter();
-
-        while let Some(&byte) = byte_iter.next() {
+        let mut byte_iter = text.bytes().enumerate();
+        while let Some((_i, byte)) = byte_iter.next() {
             if byte == b'$' {
-                if let Some(&next_byte) = byte_iter.next() {
-                    if next_byte == b'{' {
-                        for &inner_byte in byte_iter.by_ref() {
-                            if inner_byte == b'}' {
-                                return Some(());
-                            }
+                if let Some((_, b'{')) = byte_iter.next() {
+                    for (_j, inner_byte) in byte_iter.by_ref() {
+                        if inner_byte == b'}' {
+                            return Some(node.clone());
                         }
                     }
                 }
@@ -77,12 +73,12 @@ impl Rule for NoTemplateCurlyInString {
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
+        let span = node.range();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                span,
                 markup! {
                     "Unexpected template string placeholder."
                 },
