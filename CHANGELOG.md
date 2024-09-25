@@ -436,6 +436,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Updated format of query_feature_range_interval. [#4076]
+
+  ```
+                left.format(),
+                space(),
+                left_comparison.format(),
+                space(),
+                name.format(),
+                space(),
+                right_comparison.format(),
+                space(),
+                right.format()
+  ```
+
+  Contributed by @blaze-d83
+
 ### Linter
 
 #### Promoted rules
