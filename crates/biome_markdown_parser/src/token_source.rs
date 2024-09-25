@@ -64,7 +64,7 @@ impl<'source> MarkdownTokenSource<'source> {
     }
 
     /// Returns the number of whitespace characters before the current token until the first new line.
-    /// tab will be counted as 4 spaces
+    /// tab will be counted as 4 spaces https://spec.commonmark.org/0.31.2/#tabs
     /// whitespace will be counted as 1 space
     pub fn before_whitespace_count(&self) -> usize {
         let last_trivia: Vec<&Trivia> = self
