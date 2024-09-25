@@ -11,12 +11,12 @@ foo ? baz === qux ? quxx() : foobar() : bar();
 
 # Diagnostics
 ```
-invalid.js:1:13 lint/nursery/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:25 lint/nursery/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not nest ternary expressions.
   
   > 1 │ var thing = foo ? bar : baz === qux ? quxx : foobar;
-      │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
     3 │ foo ? baz === qux ? quxx() : foobar() : bar();
   
@@ -28,14 +28,14 @@ invalid.js:1:13 lint/nursery/noNestedTernary ━━━━━━━━━━━�
 ```
 
 ```
-invalid.js:3:1 lint/nursery/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:7 lint/nursery/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not nest ternary expressions.
   
     1 │ var thing = foo ? bar : baz === qux ? quxx : foobar;
     2 │ 
   > 3 │ foo ? baz === qux ? quxx() : foobar() : bar();
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Nesting ternary expressions can make code more difficult to understand.
   

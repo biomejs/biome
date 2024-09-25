@@ -3,7 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{AnyJsExpression, JsConditionalExpression};
-use biome_rowan::AstNode;
+use biome_rowan::{AstNode, TextRange};
 
 declare_lint_rule! {
     /// Disallow nested ternary expressions.
@@ -51,7 +51,7 @@ declare_lint_rule! {
 
 impl Rule for NoNestedTernary {
     type Query = Ast<JsConditionalExpression>;
-    type State = ();
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -59,21 +59,23 @@ impl Rule for NoNestedTernary {
         let node = ctx.query();
         let alternate = node.alternate().ok()?;
         let consequent = node.consequent().ok()?;
-        if matches!(alternate, AnyJsExpression::JsConditionalExpression(_))
-            || matches!(consequent, AnyJsExpression::JsConditionalExpression(_))
-        {
-            return Some(());
+
+        if let AnyJsExpression::JsConditionalExpression(expr) = consequent {
+            return Some(expr.range());
+        }
+
+        if let AnyJsExpression::JsConditionalExpression(expr) = alternate {
+            return Some(expr.range());
         }
 
         None
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.range(),
+                state,
                 markup! {
                     "Do not nest ternary expressions."
                 },
