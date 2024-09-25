@@ -18,18 +18,18 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// "Hello ${name}!";
-    /// 'Hello ${name}!';
-    /// "Time: ${12 * 60 * 60 * 1000}";
+    /// const a = "Hello ${name}!";
+    /// const a = 'Hello ${name}!';
+    /// const a = "Time: ${12 * 60 * 60 * 1000}";
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// `Hello ${name}!`;
-    /// `Time: ${12 * 60 * 60 * 1000}`;
+    /// const a = `Hello ${name}!`;
+    /// const a = `Time: ${12 * 60 * 60 * 1000}`;
     ///
-    /// templateFunction`Hello ${name}`;
+    /// const a = templateFunction`Hello ${name}`;
     /// ```
     ///
     pub NoTemplateCurlyInString {
