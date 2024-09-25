@@ -1,0 +1,68 @@
+---
+source: crates/biome_markdown_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```
+   ***
+ ***
+ - - -
+___
+
+ _ _ _
+
+* * *
+```
+
+
+## AST
+
+```
+MdDocument {
+    bom_token: missing (optional),
+    value: MdBlockList [
+        MdThematicBreakBlock {
+            value_token: MD_THEMATIC_BREAK_LITERAL@0..6 "***" [Whitespace("   ")] [],
+        },
+        MdThematicBreakBlock {
+            value_token: MD_THEMATIC_BREAK_LITERAL@6..11 "***" [Newline("\n"), Whitespace(" ")] [],
+        },
+        MdThematicBreakBlock {
+            value_token: MD_THEMATIC_BREAK_LITERAL@11..18 "- - -" [Newline("\n"), Whitespace(" ")] [],
+        },
+        MdThematicBreakBlock {
+            value_token: MD_THEMATIC_BREAK_LITERAL@18..22 "___" [Newline("\n")] [],
+        },
+        MdThematicBreakBlock {
+            value_token: MD_THEMATIC_BREAK_LITERAL@22..30 "_ _ _" [Newline("\n"), Newline("\n"), Whitespace(" ")] [],
+        },
+        MdThematicBreakBlock {
+            value_token: MD_THEMATIC_BREAK_LITERAL@30..37 "* * *" [Newline("\n"), Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@37..37 "" [] [],
+}
+```
+
+## CST
+
+```
+0: MD_DOCUMENT@0..37
+  0: (empty)
+  1: MD_BLOCK_LIST@0..37
+    0: MD_THEMATIC_BREAK_BLOCK@0..6
+      0: MD_THEMATIC_BREAK_LITERAL@0..6 "***" [Whitespace("   ")] []
+    1: MD_THEMATIC_BREAK_BLOCK@6..11
+      0: MD_THEMATIC_BREAK_LITERAL@6..11 "***" [Newline("\n"), Whitespace(" ")] []
+    2: MD_THEMATIC_BREAK_BLOCK@11..18
+      0: MD_THEMATIC_BREAK_LITERAL@11..18 "- - -" [Newline("\n"), Whitespace(" ")] []
+    3: MD_THEMATIC_BREAK_BLOCK@18..22
+      0: MD_THEMATIC_BREAK_LITERAL@18..22 "___" [Newline("\n")] []
+    4: MD_THEMATIC_BREAK_BLOCK@22..30
+      0: MD_THEMATIC_BREAK_LITERAL@22..30 "_ _ _" [Newline("\n"), Newline("\n"), Whitespace(" ")] []
+    5: MD_THEMATIC_BREAK_BLOCK@30..37
+      0: MD_THEMATIC_BREAK_LITERAL@30..37 "* * *" [Newline("\n"), Newline("\n")] []
+  2: EOF@37..37 "" [] []
+
+```
