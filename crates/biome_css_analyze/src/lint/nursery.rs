@@ -8,6 +8,7 @@ pub mod no_missing_var_function;
 pub mod no_unknown_pseudo_class;
 pub mod no_unknown_pseudo_element;
 pub mod no_value_at_rule;
+pub mod use_sorted_properties;
 
 declare_lint_group! {
     pub Nursery {
@@ -19,6 +20,7 @@ declare_lint_group! {
             self :: no_unknown_pseudo_class :: NoUnknownPseudoClass ,
             self :: no_unknown_pseudo_element :: NoUnknownPseudoElement ,
             self :: no_value_at_rule :: NoValueAtRule ,
+            self :: use_sorted_properties :: UseSortedProperties ,
         ]
      }
 }
