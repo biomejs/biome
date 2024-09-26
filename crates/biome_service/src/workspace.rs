@@ -635,6 +635,7 @@ pub enum FixFileMode {
 pub struct FixFileParams {
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
+    pub write_suppressions: bool,
     pub should_format: bool,
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
@@ -1060,6 +1061,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn fix_file(
         &self,
         fix_file_mode: FixFileMode,
+        write_suppressions: bool,
         should_format: bool,
         rule_categories: RuleCategories,
         only: Vec<RuleSelector>,
@@ -1068,6 +1070,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         self.workspace.fix_file(FixFileParams {
             path: self.path.clone(),
             fix_file_mode,
+            write_suppressions,
             should_format,
             only,
             skip,

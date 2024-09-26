@@ -777,6 +777,7 @@ impl Workspace for WorkspaceServer {
             parse,
             // rules: rules.as_ref().map(|x| x.borrow()),
             fix_file_mode: params.fix_file_mode,
+            write_suppressions: params.write_suppressions,
             // filter,
             workspace: self.workspace(),
             should_format: params.should_format,

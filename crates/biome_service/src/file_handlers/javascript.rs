@@ -659,9 +659,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
 
                 for action in signal.actions() {
-                    if action.is_suppression()
-                        && params.fix_file_mode == FixFileMode::ApplySuppressions
-                    {
+                    if action.is_suppression() && params.write_suppressions {
                         return ControlFlow::Break(action);
                     }
 
