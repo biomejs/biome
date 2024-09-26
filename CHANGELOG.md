@@ -119,6 +119,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### Bug fixes
+
+- Forbid undefined as type name for typescript parser. Contributed by @fireairforce
+
 ## v1.9.2 (2024-09-19)
 
 ### CLI
