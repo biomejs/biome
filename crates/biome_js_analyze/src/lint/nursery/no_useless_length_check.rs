@@ -85,41 +85,40 @@ pub enum ErrorType {
     UselessLengthCheckWithEvery,
 }
 
-fn is_logical_exp_child(node: &AnyJsExpression, operator: JsSyntaxKind) -> bool {
+// Whether the node is a descendant of a logical expression.
+fn is_logical_exp_descendant(node: &AnyJsExpression, operator: JsSyntaxKind) -> bool {
     let Some(parent) = node.syntax().parent() else {
         return false;
     };
-    // ( hoge )
-    if let Some(parenthesized_exp_parent) = JsParenthesizedExpression::cast(parent.clone()) {
-        return is_logical_exp_child(&AnyJsExpression::from(parenthesized_exp_parent), operator);
-    }
-    let Some(parent) = JsLogicalExpression::cast(parent) else {
-        return false;
-    };
-    let Some(ope) = parent.operator_token().ok() else {
-        return false;
-    };
-    ope.kind() == operator
+    parent
+        .ancestors()
+        .find_map(|ancestor| {
+            if let Some(logical_exp) = JsLogicalExpression::cast(ancestor.clone()) {
+                return logical_exp
+                    .operator_token()
+                    .ok()
+                    .map(|token| token.kind() == operator)
+                    .or(Some(false));
+            }
+            (!JsParenthesizedExpression::can_cast(ancestor.kind())).then_some(false)
+        })
+        .unwrap_or(false)
 }
 
-fn comparing_length_exp(
+// Extract the expressions that perform length comparisons corresponding to the errors you want to check.
+fn get_comparing_length_exp(
     binary_exp: &JsBinaryExpression,
     expect_error: &ErrorType,
 ) -> Option<AnyJsExpression> {
     let left = binary_exp.left().ok()?;
     let operator = binary_exp.operator_token().ok()?.kind();
     let right = binary_exp.right().ok()?;
+
     // Check only when the number appears on the right side according to the original rules.
     // We assume that you have already complied with useExplicitLengthCheck
-    comparing_length(&left, operator, &right, expect_error)
-}
+    let compare_exp = left;
+    let value_exp = right;
 
-fn comparing_length(
-    compare_exp: &AnyJsExpression,
-    operator: JsSyntaxKind,
-    value_exp: &AnyJsExpression,
-    expect_error: &ErrorType,
-) -> Option<AnyJsExpression> {
     let AnyJsExpression::JsStaticMemberExpression(member_exp) = compare_exp else {
         return None;
     };
@@ -181,6 +180,7 @@ fn search_logical_exp(
                 comparing_zeros,
                 array_tokens_used_api,
             )?;
+
             let right = logical_exp.right().ok()?;
             let right_replacer = (logical_exp.clone(), logical_exp.left().ok()?, right.range());
             search_logical_exp(
@@ -193,7 +193,7 @@ fn search_logical_exp(
         }
         // a === 0 ext.
         AnyJsExpression::JsBinaryExpression(binary_exp) => {
-            let comparing_zero = comparing_length_exp(binary_exp, expect_error)?;
+            let comparing_zero = get_comparing_length_exp(binary_exp, expect_error)?;
             let AnyJsExpression::JsIdentifierExpression(array_token) = comparing_zero else {
                 return None;
             };
@@ -285,7 +285,7 @@ impl Rule for NoUselessLengthCheck {
             return Vec::new();
         };
         // node must not be a child of a logical expression
-        if is_logical_exp_child(&AnyJsExpression::from(node.clone()), operator.kind()) {
+        if is_logical_exp_descendant(&AnyJsExpression::from(node.clone()), operator.kind()) {
             return Vec::new();
         }
 
