@@ -109,20 +109,14 @@ impl Rule for NoMisleadingCharacterClass {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let regex = ctx.query();
-
         match regex {
             AnyRegexExpression::JsRegexLiteralExpression(expr) => {
                 let Ok((pattern, flags)) = expr.decompose() else {
                     return None;
                 };
-
-                if flags.text().contains('v') {
-                    return None;
-                }
                 let regex_pattern = replace_escaped_unicode(pattern.text());
-                let has_u_flag = flags.text().contains('u');
-                let range = expr.syntax().text_range();
-                return diagnostic_regex_pattern(&regex_pattern, has_u_flag, range);
+                let range = expr.syntax().text_trimmed_range();
+                return diagnostic_regex_pattern(&regex_pattern, flags.text(), range);
             }
 
             AnyRegexExpression::JsNewExpression(expr) => {
@@ -143,12 +137,8 @@ impl Rule for NoMisleadingCharacterClass {
                         .map(|js_string_literal| js_string_literal.text())
                         .unwrap_or_default();
 
-                    if regexp_flags.contains('v') {
-                        return None;
-                    }
-                    let has_u_flag = regexp_flags.contains('u');
-                    let range = expr.syntax().text_range();
-                    return diagnostic_regex_pattern(&regex_pattern, has_u_flag, range);
+                    let range = expr.syntax().text_trimmed_range();
+                    return diagnostic_regex_pattern(&regex_pattern, &regexp_flags, range);
                 }
             }
             AnyRegexExpression::JsCallExpression(expr) => {
@@ -169,14 +159,8 @@ impl Rule for NoMisleadingCharacterClass {
                         .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
                         .map(|js_string_literal| js_string_literal.text())
                         .unwrap_or_default();
-
-                    if regexp_flags.contains('v') {
-                        return None;
-                    }
-
-                    let has_u_flag = regexp_flags.contains('u');
-                    let range = expr.syntax().text_range();
-                    return diagnostic_regex_pattern(&regex_pattern, has_u_flag, range);
+                    let range = expr.syntax().text_trimmed_range();
+                    return diagnostic_regex_pattern(&regex_pattern, &regexp_flags, range);
                 }
             }
         }
@@ -289,60 +273,93 @@ fn is_regex_expr(expr: AnyJsExpression) -> Option<bool> {
 
 fn diagnostic_regex_pattern(
     regex_pattern: &str,
-    has_u_flag: bool,
+    flags: &str,
     range: TextRange,
 ) -> Option<RuleState> {
-    let regex_bytes_len = regex_pattern.as_bytes().len();
-    let mut is_in_character_class = false;
-    let mut escape_next = false;
-    // We use `char_indices` to get the byte index of every character
-    for (i, ch) in regex_pattern.char_indices() {
-        if escape_next {
-            escape_next = false;
-            continue;
-        }
-        match ch {
-            '\\' => escape_next = true,
-            '[' => is_in_character_class = true,
-            ']' => is_in_character_class = false,
-            _ if is_in_character_class && i < regex_bytes_len => {
-                if !has_u_flag && has_surrogate_pair(&regex_pattern[i..]) {
-                    return Some(RuleState {
-                        range,
-                        message: Message::SurrogatePairWithoutUFlag,
-                    });
-                }
-
-                if has_combining_class_or_vs16(&regex_pattern[i..]) {
-                    return Some(RuleState {
-                        range,
-                        message: Message::CombiningClassOrVs16,
-                    });
-                }
-
-                if has_regional_indicator_symbol(&regex_pattern[i..]) {
-                    return Some(RuleState {
-                        range,
-                        message: Message::RegionalIndicatorSymbol,
-                    });
-                }
-
-                if has_emoji_modifier(&regex_pattern[i..]) {
-                    return Some(RuleState {
-                        range,
-                        message: Message::EmojiModifier,
-                    });
-                }
-
-                if zwj(&regex_pattern[i..]) {
-                    return Some(RuleState {
-                        range,
-                        message: Message::JoinedCharSequence,
-                    });
+    if flags.contains('v') {
+        return None;
+    }
+    let has_u_flag = flags.contains('u');
+    let mut bytes_iter = regex_pattern.bytes().enumerate();
+    while let Some((i, byte)) = bytes_iter.next() {
+        match byte {
+            b'\\' => {
+                bytes_iter.next();
+            }
+            b'[' => {
+                while let Some((j, byte)) = bytes_iter.next() {
+                    match byte {
+                        b'\\' => {
+                            bytes_iter.next();
+                        }
+                        b']' => {
+                            let char_class = &regex_pattern[i + 1..j];
+                            if let Some(diag) =
+                                diagnostic_regex_class(char_class, has_u_flag, range)
+                            {
+                                return Some(diag);
+                            }
+                            break;
+                        }
+                        _ => {}
+                    }
                 }
             }
             _ => {}
         }
+    }
+    None
+}
+
+fn diagnostic_regex_class(
+    char_class: &str,
+    has_u_flag: bool,
+    range: TextRange,
+) -> Option<RuleState> {
+    // FIXME: escape handling should be done in th entire class, not only at the start.
+    let char_class = if char_class.as_bytes().first() == Some(&b'\\') {
+        let start = 1 + char_class[1..].chars().next()?.len_utf8();
+        if start >= char_class.len() {
+            return None;
+        }
+        &char_class[start..]
+    } else {
+        char_class
+    };
+
+    if !has_u_flag && has_surrogate_pair(char_class) {
+        return Some(RuleState {
+            range,
+            message: Message::SurrogatePairWithoutUFlag,
+        });
+    }
+
+    if has_combining_class_or_vs16(char_class) {
+        return Some(RuleState {
+            range,
+            message: Message::CombiningClassOrVs16,
+        });
+    }
+
+    if has_regional_indicator_symbol(char_class) {
+        return Some(RuleState {
+            range,
+            message: Message::RegionalIndicatorSymbol,
+        });
+    }
+
+    if has_emoji_modifier(char_class) {
+        return Some(RuleState {
+            range,
+            message: Message::EmojiModifier,
+        });
+    }
+
+    if zwj(char_class) {
+        return Some(RuleState {
+            range,
+            message: Message::JoinedCharSequence,
+        });
     }
     None
 }
