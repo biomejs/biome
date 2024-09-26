@@ -114,7 +114,7 @@ impl Rule for NoMisleadingCharacterClass {
                 let Ok((pattern, flags)) = expr.decompose() else {
                     return None;
                 };
-                let regex_pattern = replace_escaped_unicode(pattern.text());
+                let regex_pattern = pattern.text();
                 let range = expr.syntax().text_trimmed_range();
                 return diagnostic_regex_pattern(&regex_pattern, flags.text(), range);
             }
@@ -122,14 +122,13 @@ impl Rule for NoMisleadingCharacterClass {
             AnyRegexExpression::JsNewExpression(expr) => {
                 if is_regex_expr(expr.callee().ok()?)? {
                     let mut args = expr.arguments()?.args().iter();
-                    let raw_regex_pattern = args
+                    let regex_pattern = args
                         .next()
                         .and_then(|arg| arg.ok())
                         .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
                         .and_then(|js_string_literal| js_string_literal.inner_string_text().ok())?
                         .to_string();
 
-                    let regex_pattern = replace_escaped_unicode(raw_regex_pattern.as_str());
                     let regexp_flags = args
                         .next()
                         .and_then(|arg| arg.ok())
@@ -144,14 +143,12 @@ impl Rule for NoMisleadingCharacterClass {
             AnyRegexExpression::JsCallExpression(expr) => {
                 if is_regex_expr(expr.callee().ok()?)? {
                     let mut args = expr.arguments().ok()?.args().iter();
-                    let raw_regex_pattern = args
+                    let regex_pattern = args
                         .next()
                         .and_then(|arg| arg.ok())
                         .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
                         .and_then(|js_string_literal| js_string_literal.inner_string_text().ok())?
                         .to_string();
-
-                    let regex_pattern = replace_escaped_unicode(raw_regex_pattern.as_str());
 
                     let regexp_flags = args
                         .next()
@@ -293,9 +290,10 @@ fn diagnostic_regex_pattern(
                             bytes_iter.next();
                         }
                         b']' => {
-                            let char_class = &regex_pattern[i + 1..j];
+                            let rqw_char_class = &regex_pattern[i + 1..j];
+                            let char_class = replace_escaped_unicode(rqw_char_class);
                             if let Some(diag) =
-                                diagnostic_regex_class(char_class, has_u_flag, range)
+                                diagnostic_regex_class(&char_class, has_u_flag, range)
                             {
                                 return Some(diag);
                             }
@@ -519,7 +517,12 @@ fn zwj(chars: &str) -> bool {
 }
 
 fn has_surrogate_pair(s: &str) -> bool {
-    s.chars().any(|c| c as u32 > 0xFFFF)
+    s.chars().any(is_not_bmp_char)
+}
+
+/// Codepoints that cannot be encoded on 4 bytes in UTF-16 / UCS-2
+fn is_not_bmp_char(c: char) -> bool {
+    c as u32 > 0xFFFF
 }
 
 /// Convert unicode escape sequence string to unicode character
