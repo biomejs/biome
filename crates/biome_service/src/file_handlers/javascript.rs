@@ -666,6 +666,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     }
 
                     match params.fix_file_mode {
+                        FixFileMode::ApplySuppressions => {
+                            // No-op, handled above
+                        }
                         FixFileMode::SafeFixes => {
                             if action.applicability == Applicability::MaybeIncorrect {
                                 skipped_suggested_fixes += 1;
@@ -683,12 +686,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                                 errors = errors.saturating_sub(1);
                                 return ControlFlow::Break(action);
                             }
-                        }
-                        FixFileMode::ApplySuppressions => {
-                            // println!("Action: {:#?}", action);
-                            // if action.category == ActionCategory::Other {
-                            //     return ControlFlow::Break(action);
-                            // }
                         }
                     }
                 }
