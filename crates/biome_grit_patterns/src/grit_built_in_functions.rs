@@ -3,6 +3,7 @@ use crate::{
     grit_resolved_pattern::GritResolvedPattern,
 };
 use anyhow::{anyhow, bail, Result};
+use biome_string_case::StrOnlyExtension;
 use grit_pattern_matcher::{
     binding::Binding,
     constant::Constant,
@@ -236,7 +237,9 @@ fn lowercase_fn<'a>(
     };
 
     let string = arg1.text(&state.files, context.language())?;
-    Ok(ResolvedPattern::from_string(string.to_lowercase()))
+    Ok(ResolvedPattern::from_string(
+        string.to_lowercase_cow().to_string(),
+    ))
 }
 
 fn random_fn<'a>(

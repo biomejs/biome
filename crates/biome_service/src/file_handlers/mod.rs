@@ -38,7 +38,7 @@ use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
-use biome_string_case::StrExtension;
+use biome_string_case::StrLikeExtension;
 
 use grit::GritFileHandler;
 use html::HtmlFileHandler;

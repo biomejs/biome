@@ -21,6 +21,7 @@ biome_js_parser      = { workspace = true }
 biome_js_syntax      = { workspace = true }
 biome_parser         = { workspace = true }
 biome_rowan          = { workspace = true }
+biome_string_case    = { workspace = true }
 grit-pattern-matcher = { version = "0.3" }
 grit-util            = { version = "0.3" }
 im                   = { version = "15.1.0" }

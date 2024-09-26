@@ -1,6 +1,6 @@
 use biome_rowan::FileSourceError;
 use std::{ffi::OsStr, path::Path};
-use biome_string_case::StrExtension;
+use biome_string_case::StrOnlyExtension;
 
 #[cfg_attr(feature = "schema", derive(schemars::YamlSchema))]
 #[derive(
