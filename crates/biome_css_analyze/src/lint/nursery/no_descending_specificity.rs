@@ -39,14 +39,14 @@ declare_lint_rule! {
     /// a { color: red; }
     /// b a { color: red; }
     /// ```
-    /// 
+    ///
     /// ```css
     /// b { color: red; }
     /// a {
     ///   & > b { color: red; }
     /// }
     /// ```
-    /// 
+    ///
     /// ```css
     /// a:hover { color: red; }
     /// a { color: red; }

@@ -126,7 +126,7 @@ pub struct Selector {
     pub name: String,
     /// The text range of the selector in the source document.
     pub range: TextRange,
-    pub original:AnyCssSelector,
+    pub original: AnyCssSelector,
     /// The specificity of the selector.
     pub specificity: Specificity,
 }
