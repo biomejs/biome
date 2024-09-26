@@ -71,3 +71,5 @@ var r = RegExp("[👍]", "");
 var r = window.RegExp("[👍]", "");
 var r = global.RegExp("[👍]", "");
 var r = globalThis.RegExp("[👍]", "");
+
+/[\]👍]/;
