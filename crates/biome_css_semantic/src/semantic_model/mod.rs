@@ -1,3 +1,4 @@
+pub mod specificity;
 pub mod builder;
 pub mod model;
 

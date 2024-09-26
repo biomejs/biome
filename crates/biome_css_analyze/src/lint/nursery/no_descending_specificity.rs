@@ -2,9 +2,11 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, Specificity};
-use biome_css_syntax::CssRoot;
+use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, SemanticModel, Specificity};
+use biome_css_syntax::{AnyCssSelector, CssRoot};
 use biome_rowan::TextRange;
+
+use biome_rowan::AstNode;
 
 use crate::services::semantic::Semantic;
 
@@ -48,9 +50,33 @@ pub struct DescendingSelector {
     high: (TextRange, Specificity),
     low: (TextRange, Specificity),
 }
+/// find tail selector
+/// /// ```css
+/// a b:hover {
+///   ^^^^^^^
+/// }
+/// ```
+fn find_tail_selector(selector: &AnyCssSelector) -> Option<String> {
+    match selector {
+        AnyCssSelector::CssCompoundSelector(s) => {
+            let simple = s
+                .simple_selector()
+                .map_or(String::new(), |s| s.syntax().text_trimmed().to_string());
+            let sub = s.sub_selectors().syntax().text_trimmed().to_string();
 
-fn found_descending_selector(
+            let last_selector = [simple, sub].join("");
+            Some(last_selector)
+        }
+        AnyCssSelector::CssComplexSelector(s) => {
+            s.right().as_ref().ok().and_then(find_tail_selector)
+        }
+        _ => None,
+    }
+}
+
+fn find_descending_selector(
     rule: &CssSemanticRule,
+    model: &SemanticModel,
     visited_rules: &mut BTreeSet<RuleId>,
     visited_selectors: &mut BTreeMap<String, (TextRange, Specificity)>,
     descending_selectors: &mut Vec<DescendingSelector>,
@@ -62,19 +88,39 @@ fn found_descending_selector(
     };
 
     for selector in &rule.selectors {
-        if let Some((last_textrange, last_specificity)) = visited_selectors.get(&selector.name) {
+        let tail_selector = if let Some(s) = find_tail_selector(&selector.original) {
+            s
+        } else {
+            continue;
+        };
+
+        if let Some((last_textrange, last_specificity)) = visited_selectors.get(&tail_selector) {
             if last_specificity > &selector.specificity {
                 descending_selectors.push(DescendingSelector {
                     high: (*last_textrange, last_specificity.clone()),
                     low: (selector.range, selector.specificity.clone()),
                 });
-            } else {
-                visited_selectors.insert(
-                    selector.name.clone(),
-                    (selector.range, selector.specificity.clone()),
-                );
             }
+        } else {
+            visited_selectors.insert(
+                tail_selector,
+                (selector.range, selector.specificity.clone()),
+            );
         }
+    }
+
+    for child_rule in rule
+        .child_ids
+        .iter()
+        .filter_map(|id| model.get_rule_by_id(*id))
+    {
+        find_descending_selector(
+            child_rule,
+            model,
+            visited_rules,
+            visited_selectors,
+            descending_selectors,
+        );
     }
 }
 
@@ -90,8 +136,9 @@ impl Rule for NoDescendingSpecificity {
         let mut visited_selectors = BTreeMap::new();
         let mut descending_selectors = Vec::new();
         for rule in model.rules() {
-            found_descending_selector(
+            find_descending_selector(
                 rule,
+                model,
                 &mut visited_rules,
                 &mut visited_selectors,
                 &mut descending_selectors,
