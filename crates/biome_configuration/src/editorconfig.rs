@@ -279,18 +279,18 @@ fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConf
 
     let mut all_variants = vec![];
     let mut current_variants = None;
-    for (i, c) in pattern.chars().enumerate() {
-        match c {
-            '{' => {
+    for (index, byte) in pattern.bytes().enumerate() {
+        match byte {
+            b'{' => {
                 if current_variants.is_none() {
-                    current_variants = Some(Variants::new(i));
+                    current_variants = Some(Variants::new(index));
                 } else {
                     // TODO: error, recursive brace expansion is not supported
                 }
             }
-            '}' => {
+            b'}' => {
                 if let Some(mut v) = current_variants.take() {
-                    v.end = i;
+                    v.end = index;
                     v.parse_to_variants(&pattern[v.start..=v.end])?;
                     all_variants.push(v);
                 }

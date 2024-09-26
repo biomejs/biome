@@ -41,25 +41,6 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-fix.js:1:1 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing return type on function.
-  
-  > 1 │ 
-      │ 
-  > 2 │     function f() {arguments;}
-      │     ^^^^^^^^^^
-    3 │     const FOO = "FOO";
-    4 │     var x, y;
-  
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```block
 fix.js:2:14 lint/correctness/noUnusedVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This function is unused.
@@ -170,5 +151,5 @@ fix.js format ━━━━━━━━━━━━━━━━━━━━━━
 ```block
 Checked 1 file in <TIME>. No fixes applied.
 Found 1 error.
-Found 5 warnings.
+Found 4 warnings.
 ```

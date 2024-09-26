@@ -2202,6 +2202,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noTemplateCurlyInString": {
+					"description": "Disallow template literal placeholder syntax in regular strings.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUnknownPseudoClass": {
 					"description": "Disallow unknown pseudo-class selectors.",
 					"anyOf": [
@@ -2593,7 +2600,7 @@
 		},
 		"RuleWithAllowDomainOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",
@@ -2612,7 +2619,7 @@
 		},
 		"RuleWithComplexityOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2627,7 +2634,7 @@
 		},
 		"RuleWithConsistentArrayTypeOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",
@@ -2646,7 +2653,7 @@
 		},
 		"RuleWithConsistentMemberAccessibilityOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2663,7 +2670,7 @@
 		},
 		"RuleWithDeprecatedHooksOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2678,7 +2685,7 @@
 		},
 		"RuleWithFilenamingConventionOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2708,7 +2715,7 @@
 		},
 		"RuleWithHooksOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2723,7 +2730,7 @@
 		},
 		"RuleWithNamingConventionOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",
@@ -2742,7 +2749,7 @@
 		},
 		"RuleWithNoConsoleOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",
@@ -2761,7 +2768,7 @@
 		},
 		"RuleWithNoDoubleEqualsOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",
@@ -2780,7 +2787,7 @@
 		},
 		"RuleWithNoLabelWithoutControlOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2806,7 +2813,7 @@
 		},
 		"RuleWithNoRestrictedTypesOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",
@@ -2825,7 +2832,7 @@
 		},
 		"RuleWithRestrictedGlobalsOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2840,7 +2847,7 @@
 		},
 		"RuleWithRestrictedImportsOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2855,7 +2862,7 @@
 		},
 		"RuleWithUseComponentExportOnlyModulesOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2872,7 +2879,7 @@
 		},
 		"RuleWithUseImportExtensionsOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",
@@ -2891,7 +2898,7 @@
 		},
 		"RuleWithUseValidAutocompleteOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"level": {
 					"description": "The severity of the emitted diagnostics by the rule",
@@ -2906,7 +2913,7 @@
 		},
 		"RuleWithUtilityClassSortingOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",
@@ -2925,7 +2932,7 @@
 		},
 		"RuleWithValidAriaRoleOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",

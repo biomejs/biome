@@ -252,6 +252,10 @@ fn parse_class(p: &mut JsParser, kind: ClassKind, decorator_list: ParsedSyntax) 
         Present(id) => {
             let text = p.text(id.range(p));
             if TypeScript.is_supported(p) && is_reserved_type_name(text) {
+                // test_err ts ts_class_name_reserved_as_type
+                // class undefined {}
+                // class string {}
+                // class any {}
                 let err = p
                     .err_builder(format!(
                             "`{text}` cannot be used as a class name because it is already reserved as a type"

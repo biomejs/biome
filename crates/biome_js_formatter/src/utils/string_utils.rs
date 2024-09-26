@@ -281,9 +281,9 @@ impl<'token> LiteralStringNormaliser<'token> {
         let text_to_check = self.raw_content();
 
         if text_to_check
-            .chars()
+            .bytes()
             .next()
-            .map_or(false, |c| c.is_ascii_digit())
+            .map_or(false, |b| b.is_ascii_digit())
         {
             if let Ok(parsed) = text_to_check.parse::<f64>() {
                 // In TypeScript, numbers like members have different meaning from numbers.

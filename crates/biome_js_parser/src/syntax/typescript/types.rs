@@ -154,22 +154,21 @@ impl Sub for TypeContext {
 }
 
 pub(crate) fn is_reserved_type_name(name: &str) -> bool {
-    name.len() <= 6
-        && name.len() >= 3
-        && matches!(
-            name,
-            "string"
-                | "null"
-                | "number"
-                | "object"
-                | "any"
-                | "unknown"
-                | "boolean"
-                | "bigint"
-                | "symbol"
-                | "void"
-                | "never"
-        )
+    matches!(
+        name,
+        "string"
+            | "null"
+            | "number"
+            | "object"
+            | "any"
+            | "unknown"
+            | "boolean"
+            | "bigint"
+            | "symbol"
+            | "void"
+            | "never"
+            | "undefined"
+    )
 }
 
 pub(crate) fn is_reserved_module_name(name: &str) -> bool {

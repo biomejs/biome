@@ -55,3 +55,7 @@ var r = new globalThis.globalThis.globalThis.RegExp(/[👍]/u);
 
 // Issue: https://github.com/biomejs/biome/issues/1522
 var cyrillicChars = /[\u200E\u2066-\u2069]/gu;
+
+// Unicode char outside the class
+/[a-z]👍/;
+/\[👍]/;
