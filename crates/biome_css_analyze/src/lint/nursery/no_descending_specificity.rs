@@ -13,27 +13,43 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Disallow a lower specificity selector from coming after a higher specificity selector.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
+    /// This rule prohibits placing selectors with lower specificity after selectors with higher specificity.
+    /// By maintaining the order of the source and specificity as consistently as possible, it enhances readability.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// p {}
+    /// b a { color: red; }
+    /// a { color: red; }
     /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// a {
+    ///   & > b { color: red; }
+    /// }
+    /// b { color: red; }
+    /// ```
+    ///
     ///
     /// ### Valid
     ///
     /// ```css
-    /// p {
-    ///   color: red;
+    /// a { color: red; }
+    /// b a { color: red; }
+    /// ```
+    /// 
+    /// ```css
+    /// b { color: red; }
+    /// a {
+    ///   & > b { color: red; }
     /// }
+    /// ```
+    /// 
+    /// ```css
+    /// a:hover { color: red; }
+    /// a { color: red; }
     /// ```
     ///
     pub NoDescendingSpecificity {
@@ -164,7 +180,7 @@ impl Rule for NoDescendingSpecificity {
                 "This selector specificity is "{node.high.1.to_string()}
             ))
             .note(markup! {
-                    "Consider rearranging the order of the selectors."
+                    "Descending specificity selector may not applied. Consider rearranging the order of the selectors. See "<Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity">"MDN web docs"</Hyperlink>" for more details."
             }),
         )
     }
