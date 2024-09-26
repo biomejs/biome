@@ -18,7 +18,6 @@
     <div role="grid" ></div>
     <div role="gridcell" ></div>
     <div role="group" ></div>
-    <div role="img" ></div>
     <div role="link" ></div>
     <div role="list" ></div>
     <div role="listbox" ></div>

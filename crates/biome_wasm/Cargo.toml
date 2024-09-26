@@ -17,6 +17,7 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 default           = ["console_error_panic_hook"]
+experimental-grit = ["biome_service/experimental-grit"]
 experimental-html = ["biome_service/experimental-html"]
 
 [dependencies]

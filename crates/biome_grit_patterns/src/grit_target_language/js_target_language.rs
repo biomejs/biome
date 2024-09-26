@@ -1,9 +1,16 @@
+mod constants;
+
 use super::{
-    normalize_quoted_string, GritTargetLanguageImpl, LeafEquivalenceClass, LeafNormalizer,
+    normalize_quoted_string, DisregardedSlotCondition, GritTargetLanguageImpl,
+    LeafEquivalenceClass, LeafNormalizer,
 };
-use crate::{grit_target_node::GritTargetSyntaxKind, CompileError};
+use crate::{
+    grit_target_node::{GritTargetNode, GritTargetSyntaxKind},
+    CompileError,
+};
 use biome_js_syntax::{JsLanguage, JsSyntaxKind};
 use biome_rowan::{RawSyntaxKind, SyntaxKindSet};
+use constants::DISREGARDED_SNIPPET_SLOTS;
 
 const COMMENT_KINDS: SyntaxKindSet<JsLanguage> =
     SyntaxKindSet::from_raw(RawSyntaxKind(JsSyntaxKind::COMMENT as u16)).union(
@@ -133,6 +140,30 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             kind == JsSyntaxKind::JS_TEMPLATE_ELEMENT_LIST
                 || kind == JsSyntaxKind::TS_TEMPLATE_ELEMENT_LIST
         })
+    }
+
+    fn is_disregarded_snippet_field(
+        &self,
+        kind: GritTargetSyntaxKind,
+        slot_index: u32,
+        node: Option<GritTargetNode<'_>>,
+    ) -> bool {
+        DISREGARDED_SNIPPET_SLOTS.iter().any(
+            |(disregarded_kind, disregarded_slot_index, condition)| {
+                if GritTargetSyntaxKind::from(*disregarded_kind) != kind
+                    || *disregarded_slot_index != slot_index
+                {
+                    return false;
+                }
+
+                match condition {
+                    DisregardedSlotCondition::Always => true,
+                    DisregardedSlotCondition::OnlyIf(node_texts) => node_texts.iter().any(|text| {
+                        *text == node.as_ref().map(|node| node.text()).unwrap_or_default()
+                    }),
+                }
+            },
+        )
     }
 
     fn get_equivalence_class(

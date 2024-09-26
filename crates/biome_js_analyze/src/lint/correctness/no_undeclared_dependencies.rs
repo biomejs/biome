@@ -1,4 +1,4 @@
-use crate::services::manifest::Manifest;
+use crate::{globals::is_node_builtin_module, services::manifest::Manifest};
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
@@ -64,6 +64,8 @@ impl Rule for NoUndeclaredDependencies {
             // TODO: we should also check that an `.` exports exists.
             // See https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name
             || ctx.name() == Some(package_name)
+            // ignore Node.js builtin modules
+            || is_node_builtin_module(package_name)
             // Ignore `bun` import
             || package_name == "bun"
         {

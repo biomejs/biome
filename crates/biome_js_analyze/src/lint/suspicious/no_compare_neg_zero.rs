@@ -64,7 +64,7 @@ impl Rule for NoCompareNegZero {
         if is_left_neg_zero || is_right_neg_zero {
             // SAFETY: Because we know those T![>] | T![>=] | T![<] | T![<=] | T![==] | T![===] | T![!=] | T![!==] SyntaxKind will
             // always success in to_string, you could look at our test case `noCompareNegZero.js`
-            let operator_kind = op.kind().to_string().unwrap();
+            let operator_kind = op.kind().to_string()?;
 
             Some(NoCompareNegZeroState {
                 operator_kind,

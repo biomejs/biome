@@ -3,12 +3,14 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
-use biome_js_syntax::{AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyTsType};
+use biome_js_syntax::{
+    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyTsType, JsFileSource, JsSyntaxKind,
+};
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
     JsMethodObjectMember,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, TextRange};
 
 declare_lint_rule! {
     /// Require explicit return types on functions and class methods.
@@ -99,6 +101,15 @@ declare_lint_rule! {
     /// const func = (value: number) => ({ foo: 'bar', value }) as const;
     /// ```
     ///
+    /// ```ts
+    /// // Callbacks without return types
+    /// setTimeout(function() { console.log("Hello!"); }, 1000);
+    /// ```
+    /// ```ts
+    /// // IIFE
+    /// (() => {})();
+    /// ```
+    ///
     pub UseExplicitFunctionReturnType {
         version: "next",
         name: "useExplicitFunctionReturnType",
@@ -119,6 +130,11 @@ impl Rule for UseExplicitFunctionReturnType {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let source_type = ctx.source_type::<JsFileSource>().language();
+        if !source_type.is_typescript() || source_type.is_definition_file() {
+            return None;
+        }
+
         let node = ctx.query();
         match node {
             AnyJsFunctionWithReturnType::AnyJsFunction(func) => {
@@ -127,6 +143,10 @@ impl Rule for UseExplicitFunctionReturnType {
                 }
 
                 if is_direct_const_assertion_in_arrow_functions(func) {
+                    return None;
+                }
+
+                if is_function_used_in_argument_or_expression_list(func) {
                     return None;
                 }
 
@@ -190,11 +210,14 @@ impl Rule for UseExplicitFunctionReturnType {
     }
 }
 
-/**
- * Checks if an arrow function immediately returns a `as const` value.
- * const func = (value: number) => ({ foo: 'bar', value }) as const;
- * const func = () => x as const;
- */
+/// Checks if an arrow function immediately returns an `as const` value.
+///
+/// # Examples
+///
+/// ```typescript
+/// const func = (value: number) => ({ foo: 'bar', value }) as const;
+/// const func = () => x as const;
+/// ```
 fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
     let AnyJsFunction::JsArrowFunctionExpression(arrow_func) = func else {
         return false;
@@ -213,4 +236,33 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
     };
 
     ts_ref.text() == "const"
+}
+
+/// Checks if a function is allowed within specific expression contexts.
+/// These include function calls, array elements, and parenthesized expressions.
+///
+/// # Examples
+///
+/// JS_CALL_ARGUMENT_LIST:
+/// - `window.addEventListener('click', () => {});`
+/// - `const foo = arr.map(i => i * i);`
+/// - `setTimeout(function() { console.log("Hello!"); }, 1000);`
+///
+/// JS_ARRAY_ELEMENT_LIST:
+/// - `[function () {}, () => {}];`
+///
+/// JS_PARENTHESIZED_EXPRESSION:
+/// - `(function () {});`
+/// - `(() => {})();`
+fn is_function_used_in_argument_or_expression_list(func: &AnyJsFunction) -> bool {
+    matches!(
+        func.syntax().parent().kind(),
+        Some(
+            JsSyntaxKind::JS_CALL_ARGUMENT_LIST
+                | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST
+                // We include JS_PARENTHESIZED_EXPRESSION for IIFE (Immediately Invoked Function Expressions).
+                // We also assume that the parent of the parent is a call expression.
+                | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
+        )
+    )
 }

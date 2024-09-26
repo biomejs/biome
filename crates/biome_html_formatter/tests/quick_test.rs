@@ -22,7 +22,7 @@ fn quick_test() {
     "#;
     let source_type = HtmlFileSource::html();
     let tree = parse_html(src);
-    let options = HtmlFormatOptions::new()
+    let options = HtmlFormatOptions::new(HtmlFileSource::html())
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())
         .with_attribute_position(AttributePosition::Multiline);

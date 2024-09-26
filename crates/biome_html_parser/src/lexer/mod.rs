@@ -2,8 +2,8 @@ mod tests;
 
 use crate::token_source::{HtmlEmbededLanguage, HtmlLexContext};
 use biome_html_syntax::HtmlSyntaxKind::{
-    COMMENT, DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE,
-    TOMBSTONE, UNICODE_BOM, WHITESPACE,
+    DOCTYPE_KW, EOF, ERROR_TOKEN, HTML_KW, HTML_LITERAL, HTML_STRING_LITERAL, NEWLINE, TOMBSTONE,
+    UNICODE_BOM, WHITESPACE,
 };
 use biome_html_syntax::{HtmlSyntaxKind, TextLen, TextSize, T};
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -134,6 +134,24 @@ impl<'src> HtmlLexer<'src> {
             // if the element is empty, we will immediately hit the closing tag.
             // we HAVE to consume something, so we start consuming the closing tag.
             self.consume_byte(T![<])
+        }
+    }
+
+    /// Consume a token in the [HtmlLexContext::Comment] context.
+    fn consume_inside_comment(&mut self, current: u8) -> HtmlSyntaxKind {
+        match current {
+            b'<' if self.at_start_comment() => self.consume_comment_start(),
+            b'-' if self.at_end_comment() => self.consume_comment_end(),
+            _ => {
+                while let Some(char) = self.current_byte() {
+                    if self.at_end_comment() {
+                        // eat -->
+                        break;
+                    }
+                    self.advance_byte_or_char(char);
+                }
+                HTML_LITERAL
+            }
         }
     }
 
@@ -309,26 +327,10 @@ impl<'src> HtmlLexer<'src> {
         self.assert_byte(b'<');
 
         if self.at_start_comment() {
-            self.consume_comment()
+            self.consume_comment_start()
         } else {
             self.consume_byte(T![<])
         }
-    }
-
-    fn consume_comment(&mut self) -> HtmlSyntaxKind {
-        // eat <!--
-        self.advance(4);
-
-        while let Some(char) = self.current_byte() {
-            if self.at_end_comment() {
-                // eat -->
-                self.advance(3);
-                return COMMENT;
-            }
-            self.advance_byte_or_char(char);
-        }
-
-        COMMENT
     }
 
     fn at_start_comment(&mut self) -> bool {
@@ -342,6 +344,20 @@ impl<'src> HtmlLexer<'src> {
         self.current_byte() == Some(b'-')
             && self.byte_at(1) == Some(b'-')
             && self.byte_at(2) == Some(b'>')
+    }
+
+    fn consume_comment_start(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_start_comment());
+
+        self.advance(4);
+        T![<!--]
+    }
+
+    fn consume_comment_end(&mut self) -> HtmlSyntaxKind {
+        debug_assert!(self.at_end_comment());
+
+        self.advance(3);
+        T![-->]
     }
 
     /// Lexes a `\u0000` escape sequence. Assumes that the lexer is positioned at the `u` token.
@@ -462,6 +478,7 @@ impl<'src> Lexer<'src> for HtmlLexer<'src> {
                     HtmlLexContext::EmbeddedLanguage(lang) => {
                         self.consume_token_embedded_language(current, lang)
                     }
+                    HtmlLexContext::Comment => self.consume_inside_comment(current),
                 },
                 None => EOF,
             }

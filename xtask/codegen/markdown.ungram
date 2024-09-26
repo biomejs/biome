@@ -37,30 +37,30 @@
 
 SyntaxElement = SyntaxElement
 
-MarkdownBogus = SyntaxElement*
+MdBogus = SyntaxElement*
 
-MarkdownDocument = 
+MdDocument =
 	bom: 'UNICODE_BOM'?
-    value: MarkdownBlockList
+    value: MdBlockList
     eof: 'EOF'
 
-MarkdownBlockList = AnyMarkdownBlock*
+MdBlockList = AnyMdBlock*
 
-AnyMarkdownBlock = AnyLeafBlock  | AnyContainerBlock
+AnyMdBlock = AnyLeafBlock  | AnyContainerBlock
 
-AnyLeafBlock = MarkdownBreakBlock | MarkdownHeader | MarkdownSetextHeader
-                | AnyCodeBlock | MarkdownHtmlBlock | MarkdownLinkBlock | MarkdownParagraph
+AnyLeafBlock = MdThematicBreakBlock | MdHeader | MdSetextHeader
+                | AnyCodeBlock | MdHtmlBlock | MdLinkBlock | MdParagraph
 
-AnyContainerBlock = MarkdownQuote | MarkdownBulletListItem | MarkdownOrderListItem
+AnyContainerBlock = MdQuote | MdBulletListItem | MdOrderListItem
 
 
 
 // h1..h6
-MarkdownHeader = before:MarkdownHashList MarkdownParagraph? after:MarkdownHashList
+MdHeader = before:MdHashList MdParagraph? after:MdHashList
 
-MarkdownHashList = MarkdownHash*
+MdHashList = MdHash*
 
-MarkdownHash = '#'
+MdHash = '#'
 
 
 // setext title
@@ -68,57 +68,60 @@ MarkdownHash = '#'
 // ===
 // bar
 // ---
-MarkdownSetextHeader  = MarkdownParagraph
+MdSetextHeader  = MdParagraph
 
 // indented code blocks & fenced code blocks
-AnyCodeBlock = MarkdownIndentCodeBlock | MarkdownFencedCodeBlock
+AnyCodeBlock = MdIndentCodeBlock | MdFencedCodeBlock
 
 // [    ] xxx
-MarkdownIndentCodeBlock = MarkdownTextual
-// ~~~ 
+MdIndentCodeBlock = MdTextual
+// ~~~
 // xxx
 // ~~~
-MarkdownFencedCodeBlock = MarkdownTextual
+MdFencedCodeBlock = MdTextual
 
 // html block
-MarkdownHtmlBlock = MarkdownTextual 
+MdHtmlBlock = MdTextual
 
-MarkdownLinkBlock = label: MarkdownTextual
-                url: MarkdownTextual
-                title: MarkdownTextual?
+MdLinkBlock = label: MdTextual
+                url: MdTextual
+                title: MdTextual?
 
-MarkdownQuote = AnyMarkdownBlock
+MdQuote = AnyMdBlock
 
-MarkdownBulletListItem = MarkdownBulletList
-MarkdownOrderListItem = MarkdownBulletList
-
-
-MarkdownBulletList = AnyCodeBlock*
-MarkdownOrderList = AnyCodeBlock*
+MdBulletListItem = MdBulletList
+MdOrderListItem = MdBulletList
 
 
-MarkdownParagraph = MarkdownParagraphItemList
+MdBulletList = AnyCodeBlock*
+MdOrderList = AnyCodeBlock*
 
-MarkdownParagraphItemList = AnyMarkdownInline*
 
-AnyMarkdownInline = MarkdownInlineCode | MarkdownInlineEmphasis | MarkdownInlineLink | MarkdownInlineImage
-               |  MarkdownHtmlBlock | MarkdownHardLine | MarkdownSoftBreak
-                | MarkdownTextual
-MarkdownInlineCode = MarkdownTextual
-MarkdownInlineEmphasis = MarkdownTextual
-MarkdownInlineLink = label: MarkdownTextual
-                    url: MarkdownTextual
-                    title: MarkdownTextual?
+MdParagraph = MdParagraphItemList
 
-MarkdownInlineImage = alt: MarkdownTextual
-                    src: MarkdownTextual
-                    title: MarkdownTextual?
+MdParagraphItemList = AnyMdInline*
 
-MarkdownHardLine = value: 'markdown_hard_line_literal'
-MarkdownSoftBreak = value: 'markdown_soft_break_literal'
-MarkdownTextual = value: 'markdown_textual_literal'
-MarkdownIndent = value: 'markdown_indent_chunk_literal'
+AnyMdInline = MdInlineCode | MdInlineEmphasis | MdInlineLink | MdInlineImage
+               |  MdHtmlBlock | MdHardLine | MdSoftBreak
+                | MdTextual
+MdInlineCode = MdTextual
+MdInlineEmphasis = MdTextual
+MdInlineLink = label: MdTextual
+                    url: MdTextual
+                    title: MdTextual?
+
+MdInlineImage = alt: MdTextual
+                    src: MdTextual
+                    title: MdTextual?
+
+MdHardLine = value: 'md_hard_line_literal'
+MdSoftBreak = value: 'md_soft_break_literal'
+MdTextual = value: 'md_textual_literal'
+MdIndent = value: 'md_indent_chunk_literal'
+
 // ***
 // ---
 // ___
-MarkdownBreakBlock = value: 'markdown_break_block_literal'
+// https://spec.commonmark.org/0.31.2/#container-blocks-and-leaf-blocks
+MdThematicBreakBlock = value: 'md_thematic_break_literal'
+

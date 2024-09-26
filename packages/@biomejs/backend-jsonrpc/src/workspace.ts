@@ -1255,6 +1255,10 @@ export interface Nursery {
 	 */
 	noMissingVarFunction?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow nested ternary expressions.
+	 */
+	noNestedTernary?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow octal escape sequences in string literals
 	 */
 	noOctalEscape?: RuleConfiguration_for_Null;
@@ -1282,6 +1286,10 @@ export interface Nursery {
 	 * Enforce the use of String.slice() over String.substr() and String.substring().
 	 */
 	noSubstr?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow template literal placeholder syntax in regular strings.
+	 */
+	noTemplateCurlyInString?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
@@ -2579,7 +2587,8 @@ export type DocumentFileSource =
 	| { Json: JsonFileSource }
 	| { Css: CssFileSource }
 	| { Graphql: GraphqlFileSource }
-	| { Html: HtmlFileSource };
+	| { Html: HtmlFileSource }
+	| { Grit: GritFileSource };
 export interface JsFileSource {
 	/**
 	 * Used to mark if the source is being used for an Astro, Svelte or Vue file
@@ -2602,6 +2611,9 @@ export interface GraphqlFileSource {
 }
 export interface HtmlFileSource {
 	variant: HtmlVariant;
+}
+export interface GritFileSource {
+	variant: GritVariant;
 }
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
@@ -2629,6 +2641,7 @@ export type CssVariant = "Standard";
  */
 export type GraphqlVariant = "Standard";
 export type HtmlVariant = "Standard" | "Astro";
+export type GritVariant = "Standard";
 export interface ChangeFileParams {
 	content: string;
 	path: BiomePath;
@@ -2835,6 +2848,7 @@ export type Category =
 	| "lint/nursery/noIrregularWhitespace"
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
+	| "lint/nursery/noNestedTernary"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
@@ -2844,6 +2858,7 @@ export type Category =
 	| "lint/nursery/noShorthandPropertyOverrides"
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
+	| "lint/nursery/noTemplateCurlyInString"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"

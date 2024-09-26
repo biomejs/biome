@@ -60,7 +60,7 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
 
     let text = text.to_ascii_lowercase_cow();
     let mut copied_or_ignored_chars = 0usize;
-    let mut iter = text.chars().enumerate();
+    let mut iter = text.bytes().enumerate();
     let mut curr = iter.next();
     let mut state = IntegerPart;
 
@@ -68,10 +68,10 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
     let mut cleaned_text = String::new();
 
     // Look at only the start of the text, ignore any sign, and make sure numbers always start with a digit. Add 0 if missing.
-    if let Some((_, '+' | '-')) = curr {
+    if let Some((_, b'+' | b'-')) = curr {
         curr = iter.next();
     }
-    if let Some((curr_index, '.')) = curr {
+    if let Some((curr_index, b'.')) = curr {
         cleaned_text.push_str(&text[copied_or_ignored_chars..curr_index]);
         copied_or_ignored_chars = curr_index;
         cleaned_text.push('0');
@@ -91,7 +91,7 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
                     dot_index,
                     last_non_zero_index: None,
                 }),
-                (curr_index, Some('e') | None),
+                (curr_index, Some(b'e') | None),
             ) => {
                 // The decimal part equals zero, ignore it completely.
                 // Caveat: Prettier still prints a single `.0` unless there was *only* a trailing dot.
@@ -108,7 +108,7 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
                     last_non_zero_index: Some(last_non_zero_index),
                     ..
                 }),
-                (curr_index, Some('e') | None),
+                (curr_index, Some(b'e') | None),
             ) if last_non_zero_index.get() < curr_index - 1 => {
                 // The decimal part ends with at least one zero, ignore them but copy the part from the dot until the last non-zero.
                 cleaned_text.push_str(&text[copied_or_ignored_chars..=last_non_zero_index.get()]);
@@ -151,13 +151,13 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
         // Update state after the current char
         match (&state, curr) {
             // Cases entering or remaining in decimal part
-            (_, Some((curr_index, '.'))) => {
+            (_, Some((curr_index, b'.'))) => {
                 state = DecimalPart(FormatNumberLiteralDecimalPart {
                     dot_index: curr_index,
                     last_non_zero_index: None,
                 });
             }
-            (DecimalPart(decimal_part), Some((curr_index, '1'..='9'))) => {
+            (DecimalPart(decimal_part), Some((curr_index, b'1'..=b'9'))) => {
                 state = DecimalPart(FormatNumberLiteralDecimalPart {
                     last_non_zero_index: Some(unsafe {
                         // We've already entered InDecimalPart, so curr_index must be >0
@@ -167,7 +167,7 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
                 });
             }
             // Cases entering or remaining in exponent
-            (_, Some((curr_index, 'e'))) => {
+            (_, Some((curr_index, b'e'))) => {
                 state = Exponent(FormatNumberLiteralExponent {
                     e_index: curr_index,
                     is_negative: false,
@@ -175,7 +175,7 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
                     first_non_zero_index: None,
                 });
             }
-            (Exponent(exponent), Some((_, '-'))) => {
+            (Exponent(exponent), Some((_, b'-'))) => {
                 state = Exponent(FormatNumberLiteralExponent {
                     is_negative: true,
                     ..*exponent
@@ -188,14 +188,14 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
                         ..
                     },
                 ),
-                Some((curr_index, curr_char @ '0'..='9')),
+                Some((curr_index, curr_char @ b'0'..=b'9')),
             ) => {
                 state = Exponent(FormatNumberLiteralExponent {
                     first_digit_index: Some(unsafe {
                         // We've already entered InExponent, so curr_index must be >0
                         NonZeroUsize::new_unchecked(curr_index)
                     }),
-                    first_non_zero_index: if curr_char != '0' {
+                    first_non_zero_index: if curr_char != b'0' {
                         Some(unsafe {
                             // We've already entered InExponent, so curr_index must be >0
                             NonZeroUsize::new_unchecked(curr_index)
@@ -213,7 +213,7 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
                         ..
                     },
                 ),
-                Some((curr_index, '1'..='9')),
+                Some((curr_index, b'1'..=b'9')),
             ) => {
                 state = Exponent(FormatNumberLiteralExponent {
                     first_non_zero_index: Some(unsafe { NonZeroUsize::new_unchecked(curr_index) }),
@@ -225,7 +225,7 @@ fn format_trimmed_number(text: &str) -> Cow<str> {
 
         // Repeat or exit
         match curr {
-            None | Some((_, 'x') /* hex bailout */) => break,
+            None | Some((_, b'x') /* hex bailout */) => break,
             Some(_) => curr = iter.next(),
         }
     }

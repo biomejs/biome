@@ -11,6 +11,7 @@ mod generate_nodes;
 mod generate_nodes_mut;
 mod generate_syntax_factory;
 mod generate_syntax_kinds;
+mod generate_target_language_constants;
 mod graphql_kind_src;
 mod grit_kinds_src;
 mod js_kinds_src;

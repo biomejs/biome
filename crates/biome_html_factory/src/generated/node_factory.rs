@@ -61,6 +61,20 @@ pub fn html_closing_element(
         ],
     ))
 }
+pub fn html_comment(
+    comment_start_token: SyntaxToken,
+    content_token: SyntaxToken,
+    comment_end_token: SyntaxToken,
+) -> HtmlComment {
+    HtmlComment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_COMMENT,
+        [
+            Some(SyntaxElement::Token(comment_start_token)),
+            Some(SyntaxElement::Token(content_token)),
+            Some(SyntaxElement::Token(comment_end_token)),
+        ],
+    ))
+}
 pub fn html_content(value_token: SyntaxToken) -> HtmlContent {
     HtmlContent::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_CONTENT,

@@ -143,6 +143,8 @@ pub type NoNamespaceImport =
     <lint::style::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
 pub type NoNegationElse =
     <lint::style::no_negation_else::NoNegationElse as biome_analyze::Rule>::Options;
+pub type NoNestedTernary =
+    <lint::nursery::no_nested_ternary::NoNestedTernary as biome_analyze::Rule>::Options;
 pub type NoNewSymbol =
     <lint::correctness::no_new_symbol::NoNewSymbol as biome_analyze::Rule>::Options;
 pub type NoNodejsModules =
@@ -206,6 +208,7 @@ pub type NoSuspiciousSemicolonInJsx = < lint :: suspicious :: no_suspicious_semi
 pub type NoSvgWithoutTitle =
     <lint::a11y::no_svg_without_title::NoSvgWithoutTitle as biome_analyze::Rule>::Options;
 pub type NoSwitchDeclarations = < lint :: correctness :: no_switch_declarations :: NoSwitchDeclarations as biome_analyze :: Rule > :: Options ;
+pub type NoTemplateCurlyInString = < lint :: nursery :: no_template_curly_in_string :: NoTemplateCurlyInString as biome_analyze :: Rule > :: Options ;
 pub type NoThenProperty =
     <lint::suspicious::no_then_property::NoThenProperty as biome_analyze::Rule>::Options;
 pub type NoThisInStatic =

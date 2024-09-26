@@ -23,6 +23,8 @@ use biome_formatter::{
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_syntax::GraphqlLanguage;
+use biome_grit_syntax::GritLanguage;
+use biome_html_formatter::HtmlFormatOptions;
 use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
@@ -562,6 +564,7 @@ pub struct LanguageListSettings {
     pub css: LanguageSettings<CssLanguage>,
     pub graphql: LanguageSettings<GraphqlLanguage>,
     pub html: LanguageSettings<HtmlLanguage>,
+    pub grit: LanguageSettings<GritLanguage>,
 }
 
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
@@ -1001,6 +1004,19 @@ impl OverrideSettings {
         options
     }
 
+    pub fn to_override_html_format_options(
+        &self,
+        path: &Path,
+        mut options: HtmlFormatOptions,
+    ) -> HtmlFormatOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_html_format_options(&mut options);
+            }
+        }
+        options
+    }
+
     pub fn to_override_js_parser_options(
         &self,
         path: &Path,
@@ -1152,6 +1168,7 @@ pub struct OverrideSettingPattern {
     pub(crate) cached_json_format_options: RwLock<Option<JsonFormatOptions>>,
     pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
     pub(crate) cached_graphql_format_options: RwLock<Option<GraphqlFormatOptions>>,
+    pub(crate) cached_html_format_options: RwLock<Option<HtmlFormatOptions>>,
     pub(crate) cached_js_parser_options: RwLock<Option<JsParserOptions>>,
     pub(crate) _cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
     pub(crate) cached_css_parser_options: RwLock<Option<CssParserOptions>>,
@@ -1316,6 +1333,36 @@ impl OverrideSettingPattern {
         }
 
         if let Ok(mut writeonly_cache) = self.cached_graphql_format_options.write() {
+            let options = options.clone();
+            let _ = writeonly_cache.insert(options);
+        }
+    }
+
+    fn apply_overrides_to_html_format_options(&self, options: &mut HtmlFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_html_format_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+        }
+
+        let html_formatter = &self.languages.html.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_style) = html_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = html_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_ending) = html_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = html_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+
+        if let Ok(mut writeonly_cache) = self.cached_html_format_options.write() {
             let options = options.clone();
             let _ = writeonly_cache.insert(options);
         }

@@ -293,6 +293,7 @@ fn lex_escape_sequences(input: &str) -> Vec<EscapeSequence> {
                         '9' => "\\9".to_string(),
                         _ => unreachable!(),
                     },
+                    // SAFETY: We tested `decimal_escape_start.is_some()`
                     decimal_escape_range: (decimal_escape_start.unwrap(), i + ch.len_utf8()),
                 });
                 decimal_escape_start = None;

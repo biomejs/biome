@@ -104,12 +104,12 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
     let mut last_char = CharKind::Other;
     let mut delimiter_indexes: Vec<usize> = Vec::new();
 
-    for (index, c) in class_name.char_indices() {
+    for (index, byte) in class_name.bytes().enumerate() {
         let mut next_last_char = CharKind::Other;
         let mut is_start_of_arbitrary_block = false;
 
-        match c {
-            '[' => {
+        match byte {
+            b'[' => {
                 if arbitrary_block_depth == 0 {
                     arbitrary_block_depth = 1;
                     at_arbitrary_block_start = true;
@@ -118,24 +118,24 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
                     arbitrary_block_depth += 1;
                 }
             }
-            '\'' | '"' | '`' => {
+            b'\'' | b'"' | b'`' => {
                 if at_arbitrary_block_start {
-                    quoted_arbitrary_block_type = Quote::from_char(c);
+                    quoted_arbitrary_block_type = Quote::from_char(byte as char);
                 } else if let CharKind::Backslash = last_char {
                     // Escaped, ignore.
                 } else {
-                    let quote = Quote::from_char(c)?;
+                    let quote = Quote::from_char(byte as char)?;
                     next_last_char = CharKind::Quote(quote);
                 }
             }
-            '\\' => {
+            b'\\' => {
                 if let CharKind::Backslash = last_char {
                     // Consider escaped backslashes as other characters.
                 } else {
                     next_last_char = CharKind::Backslash;
                 }
             }
-            ']' => {
+            b']' => {
                 if arbitrary_block_depth > 0 {
                     match &quoted_arbitrary_block_type {
                         // If in quoted arbitrary block...
@@ -159,7 +159,7 @@ pub fn tokenize_class(class_name: &str) -> Option<ClassStructure> {
                     return None;
                 }
             }
-            ':' => {
+            b':' => {
                 if arbitrary_block_depth == 0 {
                     delimiter_indexes.push(index);
                 }
