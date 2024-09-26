@@ -27,7 +27,6 @@ impl<'source> MarkdownTokenSource<'source> {
             trivia_list: vec![],
         }
     }
-
     /// Creates a new token source for the given string
     pub fn from_str(source: &'source str) -> Self {
         let lexer = MarkdownLexer::from_str(source);
@@ -63,6 +62,30 @@ impl<'source> MarkdownTokenSource<'source> {
             }
         }
     }
+
+    /// Returns the number of whitespace characters before the current token until the first new line.
+    /// tab will be counted as 4 spaces https://spec.commonmark.org/0.31.2/#tabs
+    /// whitespace will be counted as 1 space
+    pub fn before_whitespace_count(&self) -> usize {
+        let last_trivia: Vec<&Trivia> = self
+            .trivia_list
+            .iter()
+            .rev()
+            .take_while(|item| {
+                // get before whitespace and tab collect
+                matches!(
+                    item.kind(),
+                    TriviaPieceKind::Whitespace | TriviaPieceKind::Skipped
+                )
+            })
+            .collect();
+        last_trivia.iter().fold(0, |count, b| match b.kind() {
+            TriviaPieceKind::Skipped => count + 4,
+            TriviaPieceKind::Whitespace => count + u32::from(b.len()) as usize,
+            _ => count,
+        })
+    }
+
     #[allow(dead_code)]
     pub fn re_lex(&mut self, mode: MarkdownReLexContext) -> MarkdownSyntaxKind {
         self.lexer.re_lex(mode)

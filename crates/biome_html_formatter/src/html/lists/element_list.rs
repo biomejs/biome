@@ -6,13 +6,12 @@ use crate::{
     comments::HtmlComments,
     prelude::*,
     utils::children::{
-        html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator,
-        HtmlRawSpace, HtmlSpace,
+        html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator, HtmlSpace,
     },
 };
 use biome_formatter::{best_fitting, prelude::*, CstFormatContext};
 use biome_formatter::{format_args, write, VecBuffer};
-use biome_html_syntax::{AnyHtmlElement, HtmlElementList};
+use biome_html_syntax::{AnyHtmlElement, HtmlElementList, HtmlRoot};
 use tag::GroupMode;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatHtmlElementList {
@@ -24,7 +23,6 @@ impl FormatRule<HtmlElementList> for FormatHtmlElementList {
         if node.is_empty() {
             return Ok(());
         }
-
         let result = self.fmt_children(node, f)?;
         match result {
             FormatChildrenResult::ForceMultiline(format_multiline) => {
@@ -80,8 +78,13 @@ impl FormatHtmlElementList {
             MultilineLayout::NoFill
         };
 
+        let is_root_parent = list
+            .syntax()
+            .parent()
+            .is_some_and(|parent| HtmlRoot::can_cast(parent.kind()));
+
         let mut flat = FlatBuilder::new();
-        let mut multiline = MultilineBuilder::new(multiline_layout);
+        let mut multiline = MultilineBuilder::new(multiline_layout, is_root_parent);
 
         let mut force_multiline = layout.is_multiline();
 
@@ -102,7 +105,6 @@ impl FormatHtmlElementList {
 
         while let Some(child) = children_iter.next() {
             let mut child_breaks = false;
-
             match &child {
                 // A single word: Both `a` and `b` are a word in `a b` because they're separated by HTML Whitespace.
                 HtmlChild::Word(word) => {
@@ -144,34 +146,7 @@ impl FormatHtmlElementList {
                 // * Whitespace before an opening tag: `a <div>`
                 HtmlChild::Whitespace => {
                     flat.write(&HtmlSpace, f);
-
-                    // ```javascript
-                    // <div>a
-                    // {' '}</div>
-                    // ```
-                    let is_after_line_break =
-                        last.as_ref().map_or(false, |last| last.is_any_line());
-
-                    // `<div>aaa </div>` or `<div> </div>`
-                    let is_trailing_or_only_whitespace = children_iter.peek().is_none();
-
-                    if is_trailing_or_only_whitespace || is_after_line_break {
-                        multiline.write_separator(&HtmlRawSpace, f);
-                    }
-                    // Leading whitespace. Only possible if used together with a expression child
-                    //
-                    // ```
-                    // <div>
-                    //
-                    //   {' '}
-                    //   <b />
-                    // </div>
-                    // ```
-                    else if last.is_none() {
-                        multiline.write_with_separator(&HtmlRawSpace, &hard_line_break(), f);
-                    } else {
-                        multiline.write_separator(&HtmlSpace, f);
-                    }
+                    multiline.write_separator(&soft_line_break_or_space(), f);
                 }
 
                 // A new line between some JSX text and an element
@@ -241,30 +216,7 @@ impl FormatHtmlElementList {
                 // An empty line between some JSX text and an element
                 HtmlChild::EmptyLine => {
                     child_breaks = true;
-
-                    // Additional empty lines are not preserved when any of
-                    // the children are a meaningful text node.
-                    //
-                    // <>
-                    //   <div>First</div>
-                    //
-                    //   <div>Second</div>
-                    //
-                    //   Third
-                    // </>
-                    //
-                    // Becomes:
-                    //
-                    // <>
-                    //   <div>First</div>
-                    //   <div>Second</div>
-                    //   Third
-                    // </>
-                    if children_meta.meaningful_text {
-                        multiline.write_separator(&hard_line_break(), f);
-                    } else {
-                        multiline.write_separator(&empty_line(), f);
-                    }
+                    multiline.write_separator(&empty_line(), f);
                 }
 
                 // Any child that isn't text
@@ -539,13 +491,15 @@ enum MultilineLayout {
 #[derive(Debug, Clone)]
 struct MultilineBuilder {
     layout: MultilineLayout,
+    is_root: bool,
     result: FormatResult<Vec<FormatElement>>,
 }
 
 impl MultilineBuilder {
-    fn new(layout: MultilineLayout) -> Self {
+    fn new(layout: MultilineLayout, is_root: bool) -> Self {
         Self {
             layout,
+            is_root,
             result: Ok(Vec::new()),
         }
     }
@@ -616,6 +570,7 @@ impl MultilineBuilder {
     fn finish(self) -> FormatResult<FormatMultilineChildren> {
         Ok(FormatMultilineChildren {
             layout: self.layout,
+            is_root: self.is_root,
             elements: RefCell::new(self.result?),
         })
     }
@@ -624,6 +579,7 @@ impl MultilineBuilder {
 #[derive(Debug)]
 pub(crate) struct FormatMultilineChildren {
     layout: MultilineLayout,
+    is_root: bool,
     elements: RefCell<Vec<FormatElement>>,
 }
 
@@ -649,6 +605,10 @@ impl Format<HtmlFormatContext> for FormatMultilineChildren {
 
             Ok(())
         });
+        // We do not need the block ident when the list node is at the html root node
+        if self.is_root {
+            return write!(f, [format_inner]);
+        }
 
         // This indent is wrapped with a group to ensure that the print mode is
         // set to `Expanded` when the group prints and will guarantee that the

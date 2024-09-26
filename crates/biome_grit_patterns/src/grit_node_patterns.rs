@@ -85,10 +85,9 @@ impl Matcher<GritQueryContext> for GritNodePattern {
             let mut cur_state = running_state.clone();
 
             let res = pattern.execute(
-                &if let Some(child) = node.child_by_slot_index(*slot_index) {
-                    GritResolvedPattern::from_node_binding(child)
-                } else {
-                    GritResolvedPattern::from_empty_binding(node.clone(), *slot_index)
+                &match node.child_by_slot_index(*slot_index) {
+                    Some(child) => GritResolvedPattern::from_node_binding(child),
+                    None => GritResolvedPattern::from_empty_binding(node.clone(), *slot_index),
                 },
                 &mut cur_state,
                 context,

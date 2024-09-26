@@ -159,7 +159,7 @@ mod tests {
         let mut lin_col = LineCol { line: 0, col: 0 };
         let mut col_utf16 = 0;
         let mut col_utf32 = 0;
-        for (offset, c) in text.char_indices() {
+        for (offset, char) in text.char_indices() {
             let got_offset = line_index.offset(lin_col).unwrap();
             assert_eq!(usize::from(got_offset), offset);
 
@@ -178,14 +178,14 @@ mod tests {
                 assert_eq!(wide_lin_col.col, want_col)
             }
 
-            if c == '\n' {
+            if char == '\n' {
                 lin_col.line += 1;
                 lin_col.col = 0;
                 col_utf16 = 0;
                 col_utf32 = 0;
             } else {
-                lin_col.col += c.len_utf8() as u32;
-                col_utf16 += c.len_utf16() as u32;
+                lin_col.col += char.len_utf8() as u32;
+                col_utf16 += char.len_utf16() as u32;
                 col_utf32 += 1;
             }
         }

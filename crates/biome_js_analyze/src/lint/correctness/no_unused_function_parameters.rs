@@ -5,9 +5,9 @@ use biome_console::markup;
 use biome_js_semantic::ReferencesExtensions;
 use biome_js_syntax::{
     binding_ext::{AnyJsBindingDeclaration, AnyJsParameterParentFunction},
-    JsIdentifierBinding,
+    JsIdentifierBinding, JsSyntaxKind,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, Direction};
 
 use crate::{services::semantic::Semantic, utils::rename::RenameSymbolExtensions, JsRuleAction};
 
@@ -105,7 +105,25 @@ impl Rule for NoUnusedFunctionParameters {
         if name.starts_with('_') {
             return None;
         }
-
+        // Ignore object patterns with a rest spread.
+        // e.g. `{ a, ...rest }`
+        if let AnyJsBindingDeclaration::JsObjectBindingPatternShorthandProperty(_)
+        | AnyJsBindingDeclaration::JsObjectBindingPatternProperty(_) = &declaration
+        {
+            if declaration
+                .syntax()
+                .siblings(Direction::Next)
+                .last()
+                .is_some_and(|last_sibling| {
+                    matches!(
+                        last_sibling.kind(),
+                        JsSyntaxKind::JS_OBJECT_BINDING_PATTERN_REST
+                    )
+                })
+            {
+                return None;
+            }
+        }
         let parent_function = match declaration
             .parent_binding_pattern_declaration()
             .unwrap_or(declaration)

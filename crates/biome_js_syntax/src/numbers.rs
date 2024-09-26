@@ -16,17 +16,16 @@ pub fn split_into_radix_and_number(num: &str) -> (u8, Cow<str>) {
 }
 
 fn parse_js_number_prefix(num: &str) -> Option<(u8, &str)> {
-    let mut chars = num.chars();
-    let c = chars.next()?;
-    if c != '0' {
+    let mut bytes = num.bytes();
+    if bytes.next()? != b'0' {
         return None;
     }
-    Some(match chars.next()? {
-        'x' | 'X' => (16, chars.as_str()),
-        'o' | 'O' => (8, chars.as_str()),
-        'b' | 'B' => (2, chars.as_str()),
+    Some(match bytes.next()? {
+        b'x' | b'X' => (16, &num[2..]),
+        b'o' | b'O' => (8, &num[2..]),
+        b'b' | b'B' => (2, &num[2..]),
         // Legacy octal literals
-        '0'..='7' if !chars.as_str().contains(['8', '9']) => (8, &num[1..]),
+        b'0'..=b'7' if bytes.all(|b| !matches!(b, b'8' | b'9')) => (8, &num[1..]),
         _ => return None,
     })
 }

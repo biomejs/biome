@@ -26,6 +26,22 @@ impl fmt::Debug for TextRange {
     }
 }
 
+impl PartialOrd for TextRange {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for TextRange {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.start.cmp(&other.start) {
+            Ordering::Less => Ordering::Less,
+            Ordering::Greater => Ordering::Greater,
+            Ordering::Equal => self.end.cmp(&other.end),
+        }
+    }
+}
+
 impl TextRange {
     /// Creates a new `TextRange` with the given `start` and `end` (`start..end`).
     ///

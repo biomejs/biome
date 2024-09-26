@@ -1,10 +1,10 @@
 #![cfg(test)]
 #![allow(unused_mut, unused_variables, unused_assignments)]
 
-use biome_parser::lexer::Lexer;
-use biome_markdown_syntax::MarkdownSyntaxKind::*;
-use crate::lexer::MarkdownLexContext;
 use super::{MarkdownLexer, TextSize};
+use crate::lexer::MarkdownLexContext;
+use biome_markdown_syntax::MarkdownSyntaxKind::*;
+use biome_parser::lexer::Lexer;
 use quickcheck_macros::quickcheck;
 use std::sync::mpsc::channel;
 use std::thread;
@@ -24,7 +24,7 @@ macro_rules! assert_lex {
         while lexer.next_token(MarkdownLexContext::default()) != EOF {
             tokens.push((lexer.current(), lexer.current_range()));
         }
-        
+
         $(
             assert_eq!(
                 tokens[idx].0,
@@ -110,7 +110,55 @@ fn empty() {
 fn textual() {
     assert_lex! {
         "+",
-        MARKDOWN_TEXTUAL_LITERAL:1,
+       MD_TEXTUAL_LITERAL:1,
     }
 }
 
+#[test]
+fn new_line() {
+    assert_lex! {
+        "\n\r\n\r",
+        NEWLINE:1,
+        NEWLINE:2,
+        NEWLINE:1,
+    }
+}
+
+#[test]
+fn tab() {
+    assert_lex! {
+        "\t",
+        TAB:1,
+    }
+}
+
+#[test]
+fn whitespace() {
+    assert_lex! {
+        " ",
+        WHITESPACE:1,
+    }
+}
+
+#[test]
+fn thematic_break_literal() {
+    assert_lex! {
+        r#"---
+***
+___
+* * *
+* * * *
+_ _ _ _  _ "#,
+        MD_THEMATIC_BREAK_LITERAL:3,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:3,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:3,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:5,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:7,
+        NEWLINE:1,
+        MD_THEMATIC_BREAK_LITERAL:11,
+    }
+}

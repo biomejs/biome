@@ -1,10 +1,11 @@
 use super::call_compiler::*;
 use super::compilation_context::NodeCompilationContext;
+use super::log_compiler::LogCompiler;
 use crate::NodeLikeArgumentError;
 use crate::{grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::GritPredicateCall;
 use biome_rowan::AstNode;
-use grit_pattern_matcher::pattern::PrCall;
+use grit_pattern_matcher::pattern::{PrCall, Predicate};
 
 pub(crate) struct PrCallCompiler;
 
@@ -12,9 +13,13 @@ impl PrCallCompiler {
     pub(crate) fn from_node(
         node: &GritPredicateCall,
         context: &mut NodeCompilationContext,
-    ) -> Result<PrCall<GritQueryContext>, CompileError> {
+    ) -> Result<Predicate<GritQueryContext>, CompileError> {
         let name = node.name()?;
         let name = name.text();
+
+        if name == "log" {
+            return LogCompiler::from_named_args(node.named_args(), context).map(Predicate::Log);
+        }
 
         let info = if let Some(info) = context.compilation.predicate_definition_info.get(&name) {
             info
@@ -37,6 +42,6 @@ impl PrCallCompiler {
         }
 
         let args = match_args_to_params(&name, args, &params, &context.compilation.lang)?;
-        Ok(PrCall::new(info.index, args))
+        Ok(Predicate::Call(Box::new(PrCall::new(info.index, args))))
     }
 }

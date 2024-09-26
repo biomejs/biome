@@ -99,7 +99,6 @@ impl Visitor for SemanticModelBuilderVisitor {
     fn visit(&mut self, event: &WalkEvent<CssSyntaxNode>, _ctx: VisitorContext<CssLanguage>) {
         match event {
             WalkEvent::Enter(node) => {
-                self.builder.push_node(node);
                 self.extractor.enter(node);
             }
             WalkEvent::Leave(node) => {

@@ -74,6 +74,17 @@ macro_rules! generate_target_language {
                 }
             }
 
+            pub fn is_disregarded_snippet_field(
+                &self,
+                kind: GritTargetSyntaxKind,
+                slot_index: u32,
+                node: Option<GritTargetNode<'_>>,
+            ) -> bool {
+                match self {
+                    $(Self::$language(lang) => lang.is_disregarded_snippet_field(kind, slot_index, node)),+
+                }
+            }
+
             pub fn get_equivalence_class(
                 &self,
                 kind: GritTargetSyntaxKind,
@@ -266,6 +277,44 @@ trait GritTargetLanguageImpl {
         false
     }
 
+    /// Ordinarily, we want to match on all possible fields, including the absence of nodes within a field.
+    /// e.g., `my_function()` should not match `my_function(arg)`.
+    ///
+    /// However, some fields are trivial or not expected to be part of the snippet, and should be disregarded.
+    /// For example, in JavaScript, we want to match both `function name() {}` and `async function name() {}` with the same snippet.
+    ///
+    /// You can still match on the presence/absence of the field in the snippet by including a metavariable and checking its value.
+    /// For example, in JavaScript:
+    /// ```grit
+    /// `$async func name(args)` where $async <: .
+    /// ```
+    ///
+    /// This method allows you to specify fields that should be (conditionally) disregarded in snippets.
+    /// The actual value of the field from the snippet, if any, is passed in as the third argument.
+    ///
+    /// Note that if a field is always disregarded, you can still switch to ast_node syntax to match on these fields.
+    /// For example, in react_to_hooks we match on `arrow_function` and capture `$parenthesis` for inspection.
+    ///
+    /// ```grit
+    /// arrow_function(parameters=$props, $body, $parenthesis) where {
+    ///     $props <: contains or { `props`, `inputProps` },
+    ///     $body <: not contains `props`,
+    ///    if ($parenthesis <: .) {
+    ///         $props => `()`
+    ///     } else {
+    ///         $props => .
+    ///     }
+    /// }
+    /// ```
+    fn is_disregarded_snippet_field(
+        &self,
+        _kind: GritTargetSyntaxKind,
+        _slot_index: u32,
+        _node: Option<GritTargetNode<'_>>,
+    ) -> bool {
+        false
+    }
+
     /// Returns an optional "equivalence class" for the given syntax kind.
     ///
     /// Equivalence classes allow leaf nodes to be classified as being equal,
@@ -352,4 +401,10 @@ impl LeafNormalizer {
 fn normalize_quoted_string(string: &str) -> Option<&str> {
     // Strip the quotes, regardless of type:
     (string.len() >= 2).then(|| &string[1..string.len() - 1])
+}
+
+#[derive(Debug, Clone)]
+enum DisregardedSlotCondition {
+    Always,
+    OnlyIf(&'static [&'static str]),
 }

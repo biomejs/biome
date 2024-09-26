@@ -26,7 +26,7 @@ HtmlRoot {
         system_id_token: HTML_STRING_LITERAL@58..102 "\"http://www.w3.org/TR/html4/frameset.dtd\"" [Newline("\n"), Whitespace("  ")] [],
         r_angle_token: R_ANGLE@102..103 ">" [] [],
     },
-    html: missing (optional),
+    html: HtmlElementList [],
     eof_token: EOF@103..104 "" [Newline("\n")] [],
 }
 ```
@@ -45,7 +45,7 @@ HtmlRoot {
     5: HTML_STRING_LITERAL@22..58 "\"-//W3C//DTD HTML 4.01 Frameset//EN\"" [] []
     6: HTML_STRING_LITERAL@58..102 "\"http://www.w3.org/TR/html4/frameset.dtd\"" [Newline("\n"), Whitespace("  ")] []
     7: R_ANGLE@102..103 ">" [] []
-  2: (empty)
+  2: HTML_ELEMENT_LIST@103..103
   3: EOF@103..104 "" [Newline("\n")] []
 
 ```

@@ -126,8 +126,8 @@ fn can_convert_to_string_literal(node: &JsTemplateExpression) -> bool {
                         // if token text has any special character
                         token
                             .text()
-                            .chars()
-                            .any(|ch| matches!(ch, '\n' | '\'' | '"'))
+                            .bytes()
+                            .any(|byte| matches!(byte, b'\n' | b'\'' | b'"'))
                     }
                     Err(_) => {
                         // if we found an error, then just return `true`, which means that this template literal can't be converted to

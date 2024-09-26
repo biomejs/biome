@@ -29,6 +29,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::HtmlClosingElement::new_unchecked(node) };
                     $body
                 }
+                $crate::HtmlSyntaxKind::HTML_COMMENT => {
+                    let $pattern = unsafe { $crate::HtmlComment::new_unchecked(node) };
+                    $body
+                }
                 $crate::HtmlSyntaxKind::HTML_CONTENT => {
                     let $pattern = unsafe { $crate::HtmlContent::new_unchecked(node) };
                     $body

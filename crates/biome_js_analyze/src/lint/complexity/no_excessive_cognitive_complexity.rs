@@ -117,7 +117,12 @@ impl Rule for NoExcessiveCognitiveComplexity {
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
-                markup!("Excessive complexity detected."),
+                markup!({
+                    format!(
+                        "Excessive complexity of {calculated_score} detected \
+                    (max: {max_allowed_complexity})."
+                    )
+                }),
             )
             .note(if calculated_score == &MAX_SCORE {
                 "Please refactor this function to reduce its complexity. \

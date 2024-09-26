@@ -22,7 +22,7 @@ function nestedControlFlowStructures(num) {
 ```
 nestedControlFlowStructures.js:1:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity detected.
+  ! Excessive complexity of 9 detected (max: 8).
   
   > 1 │ function nestedControlFlowStructures(num) {
       │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -67,12 +67,27 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         }
     };
 
-    let results = query
+    let (results, logs) = query
         .execute(target_file)
         .unwrap_or_else(|err| panic!("cannot execute query from {query_path:?}: {err:?}"));
     let snapshot_result = SnapshotResult::from_query_results(results);
 
-    let snapshot = format!("{snapshot_result:#?}");
+    let snapshot = if logs.is_empty() {
+        format!("{snapshot_result:#?}")
+    } else {
+        let logs = logs
+            .iter()
+            .map(|log| {
+                format!(
+                    "Message: {}Syntax: {}",
+                    log.message,
+                    log.syntax_tree.as_deref().unwrap_or_default()
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        format!("{snapshot_result:#?}\n\n## Logs\n\n{logs}")
+    };
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,

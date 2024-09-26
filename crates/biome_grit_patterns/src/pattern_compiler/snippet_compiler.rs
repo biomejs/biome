@@ -213,7 +213,7 @@ fn pattern_from_node(
         return Ok(metavariable);
     }
 
-    if node.slots().is_none() {
+    let Some(slots) = node.slots() else {
         let content = node.text();
         let lang = &context.compilation.lang;
         let pattern = if let Some(regex_pattern) = lang
@@ -227,22 +227,19 @@ fn pattern_from_node(
         };
 
         return Ok(pattern);
-    }
+    };
 
     let kind = node.kind();
-    let args = node
-        .slots()
-        .map(|slots| {
-            // TODO: Implement filtering for disregarded snippet fields.
-            // Implementing this will make it more convenient to match
-            // CST nodes without needing to match all the trivia in the
-            // snippet (if I understand correctly).
-            slots
-                .map(|slot| pattern_arg_from_slot(slot, context_range, range_map, context, is_rhs))
-                .collect::<Result<Vec<GritNodePatternArg>, CompileError>>()
+    let args = slots
+        .filter(|slot| {
+            !context.compilation.lang.is_disregarded_snippet_field(
+                kind,
+                slot.index(),
+                node.child_by_slot_index(slot.index()),
+            )
         })
-        .transpose()?
-        .unwrap_or_default();
+        .map(|slot| pattern_arg_from_slot(slot, context_range, range_map, context, is_rhs))
+        .collect::<Result<Vec<GritNodePatternArg>, CompileError>>()?;
 
     Ok(Pattern::AstNode(Box::new(GritNodePattern { kind, args })))
 }
@@ -523,38 +520,6 @@ mod tests {
                     ,
                 ),
             ),
-            tree: GritTargetTree {
-                root: JsLanguage(
-                    Node(
-                        0: JS_MODULE@0..20
-                          0: (empty)
-                          1: (empty)
-                          2: JS_DIRECTIVE_LIST@0..0
-                          3: JS_MODULE_ITEM_LIST@0..20
-                            0: JS_EXPRESSION_STATEMENT@0..20
-                              0: JS_CALL_EXPRESSION@0..20
-                                0: JS_STATIC_MEMBER_EXPRESSION@0..11
-                                  0: JS_IDENTIFIER_EXPRESSION@0..7
-                                    0: JS_REFERENCE_IDENTIFIER@0..7
-                                      0: IDENT@0..7 "console" [] []
-                                  1: DOT@7..8 "." [] []
-                                  2: JS_NAME@8..11
-                                    0: IDENT@8..11 "log" [] []
-                                1: (empty)
-                                2: (empty)
-                                3: JS_CALL_ARGUMENTS@11..20
-                                  0: L_PAREN@11..12 "(" [] []
-                                  1: JS_CALL_ARGUMENT_LIST@12..19
-                                    0: JS_STRING_LITERAL_EXPRESSION@12..19
-                                      0: JS_STRING_LITERAL@12..19 "'hello'" [] []
-                                  2: R_PAREN@19..20 ")" [] []
-                              1: (empty)
-                          4: EOF@20..20 "" [] []
-                        ,
-                    ),
-                ),
-                source: "console.log('hello')",
-            },
         }
         "###);
     }

@@ -5,7 +5,7 @@
 //!
 //! This is a simple wrapper around the `rowan` crate which does most of the heavy lifting and is language agnostic.
 
-use crate::{MarkdownDocument, MarkdownSyntaxKind};
+use crate::{MarkdownSyntaxKind, MdDocument};
 use biome_rowan::Language;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Default)]
@@ -13,7 +13,7 @@ pub struct MarkdownLanguage;
 
 impl Language for MarkdownLanguage {
     type Kind = MarkdownSyntaxKind;
-    type Root = MarkdownDocument;
+    type Root = MdDocument;
 }
 
 pub type MarkdownSyntaxNode = biome_rowan::SyntaxNode<MarkdownLanguage>;

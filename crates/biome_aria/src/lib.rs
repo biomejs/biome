@@ -24,20 +24,6 @@ pub fn is_aria_property_valid(property: &str) -> bool {
     AriaPropertiesEnum::from_str(property).is_ok()
 }
 
-/// It checks if an ARIA property type is valid
-///
-/// ## Examples
-///
-/// ```
-/// use biome_aria::is_aria_property_type_valid;
-///
-/// assert!(is_aria_property_type_valid("string"));
-/// assert!(!is_aria_property_type_valid("bogus"));
-/// ```
-pub fn is_aria_property_type_valid(property_type: &str) -> bool {
-    AriaPropertyTypeEnum::from_str(property_type).is_ok()
-}
-
 #[cfg(test)]
 mod test {
     use crate::roles::AriaRoles;

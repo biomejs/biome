@@ -147,7 +147,7 @@ impl Rule for NoDoubleEquals {
             ctx.metadata().applicability(),
             // SAFETY: `suggestion` can only be JsSyntaxKind::EQ3 or JsSyntaxKind::NEQ2,
             // the implementation of `to_string` for these two variants always returns Some
-            markup! { "Use "<Emphasis>{suggestion.to_string().unwrap()}</Emphasis> }.to_owned(),
+            markup! { "Use "<Emphasis>{suggestion.to_string()?}</Emphasis> }.to_owned(),
             mutation,
         ))
     }

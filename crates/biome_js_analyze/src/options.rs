@@ -143,6 +143,8 @@ pub type NoNamespaceImport =
     <lint::style::no_namespace_import::NoNamespaceImport as biome_analyze::Rule>::Options;
 pub type NoNegationElse =
     <lint::style::no_negation_else::NoNegationElse as biome_analyze::Rule>::Options;
+pub type NoNestedTernary =
+    <lint::nursery::no_nested_ternary::NoNestedTernary as biome_analyze::Rule>::Options;
 pub type NoNewSymbol =
     <lint::correctness::no_new_symbol::NoNewSymbol as biome_analyze::Rule>::Options;
 pub type NoNodejsModules =
@@ -152,6 +154,8 @@ pub type NoNonNullAssertion =
 pub type NoNoninteractiveElementToInteractiveRole = < lint :: a11y :: no_noninteractive_element_to_interactive_role :: NoNoninteractiveElementToInteractiveRole as biome_analyze :: Rule > :: Options ;
 pub type NoNoninteractiveTabindex = < lint :: a11y :: no_noninteractive_tabindex :: NoNoninteractiveTabindex as biome_analyze :: Rule > :: Options ;
 pub type NoNonoctalDecimalEscape = < lint :: correctness :: no_nonoctal_decimal_escape :: NoNonoctalDecimalEscape as biome_analyze :: Rule > :: Options ;
+pub type NoOctalEscape =
+    <lint::nursery::no_octal_escape::NoOctalEscape as biome_analyze::Rule>::Options;
 pub type NoParameterAssign =
     <lint::style::no_parameter_assign::NoParameterAssign as biome_analyze::Rule>::Options;
 pub type NoParameterProperties =
@@ -204,6 +208,7 @@ pub type NoSuspiciousSemicolonInJsx = < lint :: suspicious :: no_suspicious_semi
 pub type NoSvgWithoutTitle =
     <lint::a11y::no_svg_without_title::NoSvgWithoutTitle as biome_analyze::Rule>::Options;
 pub type NoSwitchDeclarations = < lint :: correctness :: no_switch_declarations :: NoSwitchDeclarations as biome_analyze :: Rule > :: Options ;
+pub type NoTemplateCurlyInString = < lint :: nursery :: no_template_curly_in_string :: NoTemplateCurlyInString as biome_analyze :: Rule > :: Options ;
 pub type NoThenProperty =
     <lint::suspicious::no_then_property::NoThenProperty as biome_analyze::Rule>::Options;
 pub type NoThisInStatic =
@@ -303,6 +308,7 @@ pub type UseEnumInitializers =
 pub type UseErrorMessage =
     <lint::suspicious::use_error_message::UseErrorMessage as biome_analyze::Rule>::Options;
 pub type UseExhaustiveDependencies = < lint :: correctness :: use_exhaustive_dependencies :: UseExhaustiveDependencies as biome_analyze :: Rule > :: Options ;
+pub type UseExplicitFunctionReturnType = < lint :: nursery :: use_explicit_function_return_type :: UseExplicitFunctionReturnType as biome_analyze :: Rule > :: Options ;
 pub type UseExplicitLengthCheck = < lint :: style :: use_explicit_length_check :: UseExplicitLengthCheck as biome_analyze :: Rule > :: Options ;
 pub type UseExponentiationOperator = < lint :: style :: use_exponentiation_operator :: UseExponentiationOperator as biome_analyze :: Rule > :: Options ;
 pub type UseExportType =

@@ -86,8 +86,18 @@ fn rename_partial_references_in_schema(mut schema: RootSchema) -> RootSchema {
                 key = "RuleFixConfiguration".to_string();
             } else if let Some(stripped) = key.strip_prefix("RuleWithOptions_for_") {
                 key = format!("RuleWith{stripped}");
+                if let Schema::Object(schema_object) = &mut schema {
+                    if let Some(object) = &mut schema_object.object {
+                        object.required.remove("options");
+                    }
+                }
             } else if let Some(stripped) = key.strip_prefix("RuleWithFixOptions_for_") {
                 key = format!("RuleWith{stripped}");
+                if let Schema::Object(schema_object) = &mut schema {
+                    if let Some(object) = &mut schema_object.object {
+                        object.required.remove("options");
+                    }
+                }
             } else if let Some(stripped) = key
                 .strip_prefix("RuleConfiguration_for_")
                 .map(|x| x.strip_suffix("Options").unwrap_or(x))
