@@ -52,7 +52,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) no lonjger reports NodeJSs builtin modules as undeclared dependencies.
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) no longer reports Node.js builtin modules as undeclared dependencies.
 
   The rule no longer reports the following code:
 

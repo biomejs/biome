@@ -64,7 +64,7 @@ impl Rule for NoUndeclaredDependencies {
             // TODO: we should also check that an `.` exports exists.
             // See https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name
             || ctx.name() == Some(package_name)
-            // ignore NodeJS builtin modules
+            // ignore Node.js builtin modules
             || is_node_builtin_module(package_name)
             // Ignore `bun` import
             || package_name == "bun"
