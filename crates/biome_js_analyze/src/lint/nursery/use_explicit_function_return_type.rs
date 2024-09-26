@@ -3,7 +3,9 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
-use biome_js_syntax::{AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyTsType, JsSyntaxKind};
+use biome_js_syntax::{
+    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyTsType, JsFileSource, JsSyntaxKind,
+};
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
     JsMethodObjectMember,
@@ -128,6 +130,14 @@ impl Rule for UseExplicitFunctionReturnType {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let source_type = ctx.source_type::<JsFileSource>().language();
+        let is_ts_source = source_type.is_typescript();
+        let is_declaration = source_type.is_definition_file();
+
+        if is_declaration || !is_ts_source {
+            return None;
+        }
+
         let node = ctx.query();
         match node {
             AnyJsFunctionWithReturnType::AnyJsFunction(func) => {
