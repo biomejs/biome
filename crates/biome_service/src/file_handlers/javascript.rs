@@ -21,8 +21,8 @@ use crate::{
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
-    ActionCategory, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
-    QueryMatch, Rule, RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
+    RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
 };
 use biome_configuration::javascript::JsxRuntime;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};

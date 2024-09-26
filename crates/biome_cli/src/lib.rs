@@ -222,7 +222,6 @@ impl<'app> CliSession<'app> {
                     formatter_configuration,
                     stdin_file_path,
                     write,
-                    write_suppressions,
                     fix,
                     cli_options,
                     paths,

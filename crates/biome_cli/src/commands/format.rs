@@ -33,7 +33,6 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) write: bool,
-    pub(crate) write_suppressions: bool,
     pub(crate) fix: bool,
     pub(crate) cli_options: CliOptions,
     pub(crate) paths: Vec<OsString>,
@@ -56,7 +55,6 @@ pub(crate) fn format(
         stdin_file_path,
         files_configuration,
         write,
-        write_suppressions,
         fix,
         mut json_formatter,
         css_formatter,
@@ -71,7 +69,6 @@ pub(crate) fn format(
         apply: false,
         apply_unsafe: false,
         write,
-        write_suppressions,
         fix,
         unsafe_: false,
     })?;
