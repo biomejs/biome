@@ -28,3 +28,9 @@ import "#internal";
 import type * as jest from "lodash";
 
 import "bun";
+
+// NodeJS builtin
+import "fs";
+import "os";
+import "path";
+import "process";
