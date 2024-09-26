@@ -6,12 +6,11 @@ use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
-    push_to_analyzer_rules, BiomeDiagnostic, CssConfiguration, FilesConfiguration,
-    FormatterConfiguration, GraphqlConfiguration, JavascriptConfiguration, JsonConfiguration,
-    LinterConfiguration, OverrideAssistsConfiguration, OverrideFormatterConfiguration,
-    OverrideLinterConfiguration, OverrideOrganizeImportsConfiguration, Overrides,
-    PartialConfiguration, PartialCssConfiguration, PartialGraphqlConfiguration,
-    PartialJavascriptConfiguration, PartialJsonConfiguration,
+    push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
+    JavascriptConfiguration, LinterConfiguration, OverrideAssistsConfiguration,
+    OverrideFormatterConfiguration, OverrideLinterConfiguration,
+    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
+    PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -258,15 +257,15 @@ impl Settings {
         }
         // json settings
         if let Some(json) = configuration.json {
-            self.languages.json = JsonConfiguration::from(json).into();
+            self.languages.json = json.into()
         }
         // css settings
         if let Some(css) = configuration.css {
-            self.languages.css = CssConfiguration::from(css).into();
+            self.languages.css = css.into()
         }
         // graphql settings
         if let Some(graphql) = configuration.graphql {
-            self.languages.graphql = GraphqlConfiguration::from(graphql).into();
+            self.languages.graphql = graphql.into()
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
@@ -598,54 +597,72 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
     }
 }
 
-impl From<JsonConfiguration> for LanguageSettings<JsonLanguage> {
-    fn from(json: JsonConfiguration) -> Self {
+impl From<PartialJsonConfiguration> for LanguageSettings<JsonLanguage> {
+    fn from(json: PartialJsonConfiguration) -> Self {
         let mut language_setting: LanguageSettings<JsonLanguage> = LanguageSettings::default();
 
-        language_setting.parser.allow_comments = Some(json.parser.allow_comments);
-        language_setting.parser.allow_trailing_commas = Some(json.parser.allow_trailing_commas);
-        language_setting.formatter.trailing_commas = json.formatter.trailing_commas;
-        language_setting.formatter.enabled = Some(json.formatter.enabled);
-        language_setting.formatter.line_width = json.formatter.line_width;
-        language_setting.formatter.indent_width = json.formatter.indent_width.map(Into::into);
-        language_setting.formatter.indent_style = json.formatter.indent_style.map(Into::into);
-        language_setting.linter.enabled = Some(json.linter.enabled);
+        if let Some(parser) = json.parser {
+            language_setting.parser.allow_comments = parser.allow_comments;
+            language_setting.parser.allow_trailing_commas = parser.allow_trailing_commas;
+        }
+        if let Some(formatter) = json.formatter {
+            language_setting.formatter.trailing_commas = formatter.trailing_commas;
+            language_setting.formatter.enabled = formatter.enabled;
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+        }
+        if let Some(linter) = json.linter {
+            language_setting.linter.enabled = linter.enabled;
+        }
 
         language_setting
     }
 }
 
-impl From<CssConfiguration> for LanguageSettings<CssLanguage> {
-    fn from(css: CssConfiguration) -> Self {
+impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
+    fn from(css: PartialCssConfiguration) -> Self {
         let mut language_setting: LanguageSettings<CssLanguage> = LanguageSettings::default();
 
-        language_setting.parser.allow_wrong_line_comments =
-            Some(css.parser.allow_wrong_line_comments);
-        language_setting.parser.css_modules = Some(css.parser.css_modules);
-        language_setting.formatter.enabled = Some(css.formatter.enabled);
-        language_setting.formatter.indent_width = css.formatter.indent_width;
-        language_setting.formatter.indent_style = css.formatter.indent_style.map(Into::into);
-        language_setting.formatter.line_width = css.formatter.line_width;
-        language_setting.formatter.line_ending = css.formatter.line_ending;
-        language_setting.formatter.quote_style = Some(css.formatter.quote_style);
-        language_setting.linter.enabled = Some(css.linter.enabled);
+        if let Some(parser) = css.parser {
+            language_setting.parser.allow_wrong_line_comments = parser.allow_wrong_line_comments;
+            language_setting.parser.css_modules = parser.css_modules;
+        }
+        if let Some(formatter) = css.formatter {
+            language_setting.formatter.enabled = formatter.enabled;
+            language_setting.formatter.indent_width = formatter.indent_width;
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.line_ending = formatter.line_ending;
+            language_setting.formatter.quote_style = formatter.quote_style;
+        }
+        if let Some(linter) = css.linter {
+            language_setting.linter.enabled = linter.enabled;
+        }
 
         language_setting
     }
 }
 
-impl From<GraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
-    fn from(graphql: GraphqlConfiguration) -> Self {
+impl From<PartialGraphqlConfiguration> for LanguageSettings<GraphqlLanguage> {
+    fn from(graphql: PartialGraphqlConfiguration) -> Self {
         let mut language_setting: LanguageSettings<GraphqlLanguage> = LanguageSettings::default();
 
-        language_setting.formatter.enabled = Some(graphql.formatter.enabled.unwrap_or_default());
-        language_setting.formatter.indent_width = graphql.formatter.indent_width;
-        language_setting.formatter.indent_style = graphql.formatter.indent_style.map(Into::into);
-        language_setting.formatter.line_width = graphql.formatter.line_width;
-        language_setting.formatter.line_ending = graphql.formatter.line_ending;
-        language_setting.formatter.quote_style = graphql.formatter.quote_style;
-        language_setting.formatter.bracket_spacing = graphql.formatter.bracket_spacing;
-        language_setting.linter.enabled = Some(graphql.linter.enabled);
+        if let Some(formatter) = graphql.formatter {
+            // TODO: change RHS to `formatter.enabled` when graphql formatting is enabled by default
+            language_setting.formatter.enabled = Some(formatter.enabled.unwrap_or_default());
+            language_setting.formatter.indent_width = formatter.indent_width;
+            language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
+            language_setting.formatter.line_width = formatter.line_width;
+            language_setting.formatter.line_ending = formatter.line_ending;
+            language_setting.formatter.quote_style = formatter.quote_style;
+            language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
+        }
+
+        if let Some(linter) = graphql.linter {
+            // TODO: change RHS to `linter.enabled` when graphql linting is enabled by default
+            language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
+        }
 
         language_setting
     }
