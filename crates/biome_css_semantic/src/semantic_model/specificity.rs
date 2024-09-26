@@ -31,26 +31,31 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
     // https://www.w3.org/TR/selectors-4/#specificity-rules
     match class {
         AnyCssPseudoClass::CssBogusPseudoClass(_) => ZERO_SPECIFICITY,
-        AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(selector) => selector
-            .selector()
-            .map_or(ZERO_SPECIFICITY, |s| evaluate_any_compound_selector(&s)),
+        AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelector(selector) => {
+            CLASS_SPECIFICITY
+                + selector
+                    .selector()
+                    .map_or(ZERO_SPECIFICITY, |s| evaluate_any_compound_selector(&s))
+        }
         AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
-            selector_list
+            let list_max = selector_list
                 .compound_selectors()
                 .into_iter()
                 .map(|s| s.map_or(ZERO_SPECIFICITY, |s| evaluate_any_compound_selector(&s)))
                 .reduce(|acc, e| acc.max(e))
-                .unwrap_or(ZERO_SPECIFICITY)
+                .unwrap_or(ZERO_SPECIFICITY);
+
+            CLASS_SPECIFICITY + list_max
         }
         AnyCssPseudoClass::CssPseudoClassFunctionIdentifier(_) => CLASS_SPECIFICITY,
-        AnyCssPseudoClass::CssPseudoClassFunctionNth(s) => CLASS_SPECIFICITY,
+        AnyCssPseudoClass::CssPseudoClassFunctionNth(_) => CLASS_SPECIFICITY,
         AnyCssPseudoClass::CssPseudoClassFunctionRelativeSelectorList(selector_list) => {
             if let Some(base) = selector_list
                 .name_token()
                 .ok()
                 .and_then(|name| evaluate_pseudo_function_selector(name.text()))
             {
-                selector_list
+                let list_max = selector_list
                     .relative_selectors()
                     .into_iter()
                     .map(|relative_selector| {
@@ -58,7 +63,8 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
                             .map_or(ZERO_SPECIFICITY, |s| evaluate_any_relative_selector(&s))
                     })
                     .reduce(|acc, e| acc.max(e))
-                    .unwrap_or(ZERO_SPECIFICITY)
+                    .unwrap_or(ZERO_SPECIFICITY);
+                base + list_max
             } else {
                 ZERO_SPECIFICITY
             }
@@ -69,8 +75,9 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
                 .ok()
                 .and_then(|name| evaluate_pseudo_function_selector(name.text()))
             {
-                s.selector()
-                    .map_or(base, |selctor| evaluate_any_selector(&selctor))
+                base + s.selector().map_or(ZERO_SPECIFICITY, |selector| {
+                    evaluate_any_selector(&selector)
+                })
             } else {
                 ZERO_SPECIFICITY
             }
@@ -81,14 +88,15 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
                 .ok()
                 .and_then(|name| evaluate_pseudo_function_selector(name.text()))
             {
-                selector_list
+                let list_max = selector_list
                     .selectors()
                     .into_iter()
                     .map(|selector| {
                         selector.map_or(ZERO_SPECIFICITY, |s| evaluate_any_selector(&s))
                     })
                     .reduce(|acc, e| acc.max(e))
-                    .unwrap_or(ZERO_SPECIFICITY)
+                    .unwrap_or(ZERO_SPECIFICITY);
+                base + list_max
             } else {
                 ZERO_SPECIFICITY
             }
