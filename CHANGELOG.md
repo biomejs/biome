@@ -52,6 +52,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- [noUselessEscapeInRegex](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/) no longer panics on regexes that start with an empty character class. Contributed by @Conaclos
+
 - [noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/) no longer panics when it encounters malformed code. Contributed by @Conaclos
 
 - [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) no longer reports unused parameters inside an object pattern with a rest parameter.
