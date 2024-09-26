@@ -1,6 +1,5 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 86
 expression: invalid.json
 ---
 # Input
@@ -13,12 +12,12 @@ let a = undefined;
 invalid.json:1:9 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ let a = undefined;
       │         ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -32,12 +31,12 @@ let a = undefined, b = 2;
 invalid.json:1:9 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ let a = undefined, b = 2;
       │         ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -51,12 +50,12 @@ var a = undefined;
 invalid.json:1:9 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ var a = undefined;
       │         ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -70,12 +69,12 @@ var a = undefined, b = 2;
 invalid.json:1:9 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ var a = undefined, b = 2;
       │         ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -89,18 +88,32 @@ function foo() {return undefined;}
 invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ function foo() {return undefined;}
       │                        ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
 # Input
 ```cjs
 const foo = () => undefined;
+```
+
+# Diagnostics
+```
+invalid.json:1:19 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ const foo = () => undefined;
+      │                   ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+
 ```
 
 # Input
@@ -113,12 +126,12 @@ const foo = () => {return undefined;};
 invalid.json:1:27 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ const foo = () => {return undefined;};
       │                           ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -132,12 +145,12 @@ function foo() {return undefined;}
 invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ function foo() {return undefined;}
       │                        ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -151,31 +164,12 @@ function foo() {return /* comment */ undefined;}
 invalid.json:1:38 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ function foo() {return /* comment */ undefined;}
       │                                      ^^^^^^^^^
-
-  i
-
-
-```
-
-# Input
-```cjs
-function* foo() {yield undefined;}
-```
-
-# Diagnostics
-```
-invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use unnecessary undefined.
-
-  > 1 │ function* foo() {yield undefined;}
-      │                        ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -189,32 +183,37 @@ function* foo() {yield undefined;}
 invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ function* foo() {yield undefined;}
       │                        ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
-  i
+```
 
+# Input
+```cjs
+function* foo() {yield undefined;}
+```
+
+# Diagnostics
+```
+invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ function* foo() {yield undefined;}
+      │                        ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
 # Input
 ```cjs
 foo(undefined);
-```
-
-# Diagnostics
-```
-invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use unnecessary undefined.
-
-  > 1 │ foo(undefined);
-      │     ^^^^^^^^^
-
-  i
-
-
 ```
 
 # Input
@@ -224,48 +223,21 @@ foo(undefined, undefined);
 
 # Diagnostics
 ```
-invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use unnecessary undefined.
-
-  > 1 │ foo(undefined, undefined);
-      │     ^^^^^^^^^
-
-  i
-
-
-```
-
-```
 invalid.json:1:16 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, undefined);
       │                ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
 # Input
 ```cjs
 foo(undefined,);
-```
-
-# Diagnostics
-```
-invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use unnecessary undefined.
-
-  > 1 │ foo(undefined,);
-      │     ^^^^^^^^^
-
-  i
-
-
 ```
 
 # Input
@@ -275,28 +247,15 @@ foo(undefined, undefined,);
 
 # Diagnostics
 ```
-invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use unnecessary undefined.
-
-  > 1 │ foo(undefined, undefined,);
-      │     ^^^^^^^^^
-
-  i
-
-
-```
-
-```
 invalid.json:1:16 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, undefined,);
       │                ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -310,12 +269,12 @@ foo(bar, undefined);
 invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(bar, undefined);
       │          ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -329,12 +288,12 @@ foo(bar, undefined, undefined);
 invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(bar, undefined, undefined);
       │          ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -342,12 +301,12 @@ invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━
 invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(bar, undefined, undefined);
       │                     ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -358,28 +317,15 @@ foo(undefined, bar, undefined);
 
 # Diagnostics
 ```
-invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use unnecessary undefined.
-
-  > 1 │ foo(undefined, bar, undefined);
-      │     ^^^^^^^^^
-
-  i
-
-
-```
-
-```
 invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, bar, undefined);
       │                     ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -393,12 +339,12 @@ foo(bar, undefined,);
 invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(bar, undefined,);
       │          ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -409,28 +355,15 @@ foo(undefined, bar, undefined,);
 
 # Diagnostics
 ```
-invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use unnecessary undefined.
-
-  > 1 │ foo(undefined, bar, undefined,);
-      │     ^^^^^^^^^
-
-  i
-
-
-```
-
-```
 invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, bar, undefined,);
       │                     ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -444,12 +377,12 @@ foo(bar, undefined, undefined,);
 invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(bar, undefined, undefined,);
       │          ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -457,12 +390,12 @@ invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━
 invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(bar, undefined, undefined,);
       │                     ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -473,28 +406,15 @@ foo(undefined, bar, undefined, undefined,);
 
 # Diagnostics
 ```
-invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use unnecessary undefined.
-
-  > 1 │ foo(undefined, bar, undefined, undefined,);
-      │     ^^^^^^^^^
-
-  i
-
-
-```
-
-```
 invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, bar, undefined, undefined,);
       │                     ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -502,12 +422,12 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
 invalid.json:1:32 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, bar, undefined, undefined,);
       │                                ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -518,28 +438,15 @@ foo(undefined, bar, undefined, undefined, undefined, undefined,)
 
 # Diagnostics
 ```
-invalid.json:1:5 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use unnecessary undefined.
-
-  > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
-      │     ^^^^^^^^^
-
-  i
-
-
-```
-
-```
 invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
       │                     ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -547,12 +454,12 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
 invalid.json:1:32 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
       │                                ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -560,12 +467,12 @@ invalid.json:1:32 lint/nursery/noUselessUndefined ━━━━━━━━━━
 invalid.json:1:43 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
       │                                           ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -573,12 +480,12 @@ invalid.json:1:43 lint/nursery/noUselessUndefined ━━━━━━━━━━
 invalid.json:1:54 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
-
+  
   > 1 │ foo(undefined, bar, undefined, undefined, undefined, undefined,)
       │                                                      ^^^^^^^^^
-
-  i
-
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
 
 ```
 
@@ -587,9 +494,37 @@ invalid.json:1:54 lint/nursery/noUselessUndefined ━━━━━━━━━━
 const {foo = undefined} = {};
 ```
 
+# Diagnostics
+```
+invalid.json:1:14 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ const {foo = undefined} = {};
+      │              ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+
+```
+
 # Input
 ```cjs
 const [foo = undefined] = [];
+```
+
+# Diagnostics
+```
+invalid.json:1:14 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ const [foo = undefined] = [];
+      │              ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+
 ```
 
 # Input
@@ -597,9 +532,37 @@ const [foo = undefined] = [];
 function foo(bar = undefined) {}
 ```
 
+# Diagnostics
+```
+invalid.json:1:20 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ function foo(bar = undefined) {}
+      │                    ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+
+```
+
 # Input
 ```cjs
 function foo({bar = undefined}) {}
+```
+
+# Diagnostics
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ function foo({bar = undefined}) {}
+      │                     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+
 ```
 
 # Input
@@ -607,12 +570,54 @@ function foo({bar = undefined}) {}
 function foo({bar = undefined} = {}) {}
 ```
 
+# Diagnostics
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ function foo({bar = undefined} = {}) {}
+      │                     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+
+```
+
 # Input
 ```cjs
 function foo([bar = undefined]) {}
 ```
 
+# Diagnostics
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ function foo([bar = undefined]) {}
+      │                     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+
+```
+
 # Input
 ```cjs
 function foo([bar = undefined] = []) {}
+```
+
+# Diagnostics
+```
+invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ function foo([bar = undefined] = []) {}
+      │                     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+
 ```
