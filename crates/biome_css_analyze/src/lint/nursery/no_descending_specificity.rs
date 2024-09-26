@@ -32,6 +32,15 @@ declare_lint_rule! {
     /// b { color: red; }
     /// ```
     ///
+    /// ```css,expect_diagnostic
+    /// :root input {
+    ///     color: red;
+    /// }
+    /// html input {
+    ///     color: red;
+    /// }
+    /// ```
+    ///
     ///
     /// ### Valid
     ///
