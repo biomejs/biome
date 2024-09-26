@@ -21,8 +21,8 @@ use crate::{
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch, Rule,
-    RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
+    ActionCategory, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    QueryMatch, Rule, RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
 };
 use biome_configuration::javascript::JsxRuntime;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
@@ -659,8 +659,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
 
                 for action in signal.actions() {
-                    if action.is_suppression() {
-                        continue;
+                    if action.is_suppression()
+                        && params.fix_file_mode == FixFileMode::ApplySuppressions
+                    {
+                        return ControlFlow::Break(action);
                     }
 
                     match params.fix_file_mode {
@@ -683,9 +685,10 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             }
                         }
                         FixFileMode::ApplySuppressions => {
-                            // TODO: Now where do I get ctx, text_range, and suppression_action
-                            // from...?
-                            Rule::suppress();
+                            // println!("Action: {:#?}", action);
+                            // if action.category == ActionCategory::Other {
+                            //     return ControlFlow::Break(action);
+                            // }
                         }
                     }
                 }
