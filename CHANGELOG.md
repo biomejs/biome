@@ -263,6 +263,8 @@ function Component() {
 }
 ```
 
+Contributed by @fireairforce
+
 ### Parser
 
 #### Bug fixes
