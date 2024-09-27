@@ -38,12 +38,21 @@ e {
     color: red;
 }
 
-
-:where(#fake#fake#fake#fake#fake#fake,*) g {
+:where(#fake#fake#fake#fake#fake#fake, *) g {
     color: red;
 }
 
 :where(*) g {
+    color: red;
+}
+
+
+#h h {
+    color: red;
+}
+
+/* This selector is overwritten by the one above it, but this is not an error because the rule only evaluates it as a compound selector */
+:where(#h) :is(h) {
     color: red;
 }
 ```

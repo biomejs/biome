@@ -60,6 +60,16 @@ declare_lint_rule! {
     /// a:hover { color: red; }
     /// a { color: red; }
     /// ```
+    /// 
+    /// ```css
+    /// a b {
+    ///     color: red;
+    /// }
+    /// /* This selector is overwritten by the one above it, but this is not an error because the rule only evaluates it as a compound selector */
+    /// :where(a) :is(b) {
+    ///     color: blue;
+    /// }
+    /// ```
     ///
     pub NoDescendingSpecificity {
         version: "next",
