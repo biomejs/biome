@@ -139,6 +139,22 @@ pub struct Selector {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct Specificity(pub u32, pub u32, pub u32);
 
+/// In CSS, when selectors are combined (e.g., in a compound selector), their specificities are summed.
+/// This implementation mirrors that behavior by adding the ID, class, and type selector counts separately.
+/// 
+/// Consider the following selector.
+/// ```css
+/// #id .class {}
+/// ```
+/// 
+/// The specificity of each component is as follows:
+/// - `#id` has a specificity of `Specificity(1, 0, 0)`
+/// - `.class` has a specificity of `Specificity(0, 1, 0)`
+/// 
+/// Therefore, the combined selector `#id .class` has a specificity of:
+/// - `Specificity(1 + 0, 0 + 1, 0 + 0) = Specificity(1, 1, 0)`
+/// 
+/// More details https://drafts.csswg.org/selectors/#example-d97bd125
 impl std::ops::Add for Specificity {
     type Output = Specificity;
     fn add(self, rhs: Self) -> Self::Output {
