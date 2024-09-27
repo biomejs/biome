@@ -1,12 +1,14 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::{
     JsArrayBindingPatternElement, JsArrowFunctionExpression, JsCallExpression, JsFormalParameter,
     JsObjectBindingPattern, JsReturnStatement, JsVariableStatement, JsYieldArgument,
 };
-use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
+
+use crate::JsRuleAction;
 
 declare_lint_rule! {
     /// Disallow useless `undefined`.
@@ -309,5 +311,26 @@ impl Rule for NoUselessUndefined {
         )
     }
 
-    // fn action(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<()> {}
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let mut mutation = ctx.root().begin();
+
+        match node {
+            RuleQuery::JsVariableStatement(js_variable_statement) => {}
+            RuleQuery::JsObjectBindingPattern(js_object_binding_pattern) => {}
+            RuleQuery::JsYieldArgument(js_yield_argument) => {}
+            RuleQuery::JsReturnStatement(js_return_statement) => {}
+            RuleQuery::JsArrayBindingPatternElement(js_array_binding_pattern_element) => {}
+            RuleQuery::JsCallExpression(js_call_expression) => {}
+            RuleQuery::JsArrowFunctionExpression(js_arrow_function_expression) => {}
+            RuleQuery::JsFormalParameter(js_formal_parameter) => {}
+        };
+
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Remove the undefined."}.to_owned(),
+            mutation,
+        ))
+    }
 }

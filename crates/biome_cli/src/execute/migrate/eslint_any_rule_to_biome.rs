@@ -1510,6 +1510,14 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "unicorn/no-useless-undefined" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_useless_undefined.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/prefer-array-flat-map" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_flat_map.get_or_insert(Default::default());
