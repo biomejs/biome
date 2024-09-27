@@ -86,7 +86,7 @@ pub struct DescendingSelector {
     low: (TextRange, Specificity),
 }
 /// find tail selector
-/// /// ```css
+/// ```css
 /// a b:hover {
 ///   ^^^^^^^
 /// }
