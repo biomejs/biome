@@ -6,6 +6,8 @@ use biome_css_syntax::{
     CssPseudoClassSelector,
 };
 
+use biome_rowan::{AstNodeList, AstSeparatedList};
+
 const ID_SPECIFICITY: Specificity = Specificity(1, 0, 0);
 const CLASS_SPECIFICITY: Specificity = Specificity(0, 1, 0);
 const TYPE_SPECIFICITY: Specificity = Specificity(0, 0, 1);
@@ -40,7 +42,7 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
         AnyCssPseudoClass::CssPseudoClassFunctionCompoundSelectorList(selector_list) => {
             let list_max = selector_list
                 .compound_selectors()
-                .into_iter()
+                .iter()
                 .map(|s| s.map_or(ZERO_SPECIFICITY, |s| evaluate_any_compound_selector(&s)))
                 .reduce(|acc, e| acc.max(e))
                 .unwrap_or(ZERO_SPECIFICITY);
@@ -57,7 +59,7 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
             {
                 let list_max = selector_list
                     .relative_selectors()
-                    .into_iter()
+                    .iter()
                     .map(|relative_selector| {
                         relative_selector
                             .map_or(ZERO_SPECIFICITY, |s| evaluate_any_relative_selector(&s))
@@ -90,7 +92,7 @@ fn evaluate_any_pseudo_class(class: &AnyCssPseudoClass) -> Specificity {
             {
                 let list_max = selector_list
                     .selectors()
-                    .into_iter()
+                    .iter()
                     .map(|selector| {
                         selector.map_or(ZERO_SPECIFICITY, |s| evaluate_any_selector(&s))
                     })
@@ -132,7 +134,7 @@ pub fn evaluate_compound_selector(selector: &CssCompoundSelector) -> Specificity
         .map_or(ZERO_SPECIFICITY, |s| evaluate_any_simple_selector(&s));
     let subselector_specificity = selector
         .sub_selectors()
-        .into_iter()
+        .iter()
         .map(|s| evaluate_any_subselector(&s))
         .reduce(|acc, e| acc + e)
         .unwrap_or(ZERO_SPECIFICITY);
