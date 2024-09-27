@@ -88,7 +88,7 @@ pub struct DescendingSelector {
 /// find tail selector
 /// ```css
 /// a b:hover {
-///   ^^^^^^^
+///   ^^^^^^^ 
 /// }
 /// ```
 fn find_tail_selector(selector: &AnyCssSelector) -> Option<String> {
@@ -109,6 +109,9 @@ fn find_tail_selector(selector: &AnyCssSelector) -> Option<String> {
     }
 }
 
+/// This function traverses the CSS rules starting from the given rule and checks for selectors that have the same tail selector.
+/// For each selector, it compares its specificity with the previously encountered specificity of the same tail selector.
+/// If a lower specificity selector is found after a higher specificity selector with the same tail selector, it records this as a descending selector.
 fn find_descending_selector(
     rule: &CssSemanticRule,
     model: &SemanticModel,
