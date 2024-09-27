@@ -39,9 +39,11 @@ where
                     // Consider the CSS example: `font: first , second;`
                     // The desired format is: `font: first, second;`
                     // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
-                    let is_comma = CssGenericDelimiter::cast_ref(element.syntax())
+                    let token_kind = CssGenericDelimiter::cast_ref(element.syntax())
                         .and_then(|node| node.value().ok())
-                        .map_or(false, |node| node.kind() == CssSyntaxKind::COMMA);
+                        .map(|token| token.kind());
+
+                    let is_comma = matches!(token_kind, Some(CssSyntaxKind::COMMA));
 
                     if !is_comma {
                         if matches!(

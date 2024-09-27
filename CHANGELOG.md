@@ -44,6 +44,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#3924](https://github.com/biomejs/biome/issues/3924) where GraphQL formatter panics in block comments with empty line. Contributed by @vohoanglong0107
+
+- Fix a case where raw values inside `url()` functions weren't properly trimmed.
+  ```diff
+  .value {
+  -  background: url(
+  -   whitespace-around-string
+  -  );
+  + background: url(whitespace-around-string);
+  }
+  ```
+  Contributed by @ematipico
+
 - Fixed [#4076](https://github.com/biomejs/biome/issues/4076), where a media query wasn't correctly formatted:
   ```diff
   .class {
@@ -54,6 +66,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
   Contributed by @blaze-d83
+
 ### JavaScript API
 
 ### Linter
