@@ -31,6 +31,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#4077](https://github.com/biomejs/biome/issues/4077): Grit queries no longer need to match the statement's trailing semicolon. Contributed by @arendjr
 
+- Fix [#4102](https://github.com/biomejs/biome/issues/4102). Now the CLI command `lint` doesn't exit with an error code when using `--write`/`--fix`. Contributed by @ematipico
+
 ### Configuration
 
 ### Editors
