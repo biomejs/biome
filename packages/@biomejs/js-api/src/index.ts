@@ -5,12 +5,12 @@ import type {
 	PartialConfiguration,
 	Workspace,
 } from "@biomejs/wasm-nodejs";
-import {Distribution, type WasmModule, loadModule, wrapError} from "./wasm";
+import { Distribution, type WasmModule, loadModule, wrapError } from "./wasm";
 
 // Re-export of some useful types for users
 export type Configuration = PartialConfiguration;
-export type {Diagnostic};
-export {Distribution};
+export type { Diagnostic };
+export { Distribution };
 
 export interface FormatContentDebugOptions extends FormatContentOptions {
 	/**
@@ -92,8 +92,7 @@ export class Biome {
 	private constructor(
 		private readonly module: WasmModule,
 		private readonly workspace: Workspace,
-	) {
-	}
+	) {}
 
 	/**
 	 * It creates a new instance of the class {Biome}.
@@ -160,7 +159,7 @@ export class Biome {
 			const biomePath: BiomePath = {
 				path,
 				was_written: false,
-				kind: "Handleable"
+				kind: "Handleable",
 			};
 
 			this.workspace.openFile({
@@ -198,7 +197,7 @@ export class Biome {
 		return this.withFile(options.filePath, content, (path) => {
 			let code = content;
 
-			const {diagnostics} = this.workspace.pullDiagnostics({
+			const { diagnostics } = this.workspace.pullDiagnostics({
 				path,
 				categories: ["Syntax"],
 				max_diagnostics: Number.MAX_SAFE_INTEGER,
@@ -251,26 +250,26 @@ export class Biome {
 	 */
 	lintContent(
 		content: string,
-		{filePath, fixFileMode}: LintContentOptions,
+		{ filePath, fixFileMode }: LintContentOptions,
 	): LintResult {
 		const maybeFixedContent = fixFileMode
 			? this.withFile(filePath, content, (path) => {
-				let code = content;
+					let code = content;
 
-				const result = this.workspace.fixFile({
-					path,
-					fix_file_mode: fixFileMode,
-					should_format: false,
-				});
+					const result = this.workspace.fixFile({
+						path,
+						fix_file_mode: fixFileMode,
+						should_format: false,
+					});
 
-				code = result.code;
+					code = result.code;
 
-				return code;
-			})
+					return code;
+				})
 			: content;
 
 		return this.withFile(filePath, maybeFixedContent, (path) => {
-			const {diagnostics} = this.workspace.pullDiagnostics({
+			const { diagnostics } = this.workspace.pullDiagnostics({
 				path,
 				categories: ["Syntax", "Lint"],
 				max_diagnostics: Number.MAX_SAFE_INTEGER,
