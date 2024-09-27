@@ -198,7 +198,7 @@ impl Rule for NoUselessFragments {
                                     child.syntax().text().to_string().trim().to_string();
 
                                 if (in_jsx_expr || in_js_logical_expr)
-                                    && contains_html_entity(&child_text)
+                                    && contains_html_character_references(&child_text)
                                 {
                                     children_where_fragments_must_preserved = true;
                                     break;
@@ -416,7 +416,7 @@ impl Rule for NoUselessFragments {
     }
 }
 
-fn contains_html_entity(s: &str) -> bool {
+fn contains_html_character_references(s: &str) -> bool {
     let and = s.find('&');
     let semi = s.find(';');
     matches!((and, semi), (Some(and), Some(semi)) if and < semi)
