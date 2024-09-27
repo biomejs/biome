@@ -392,6 +392,18 @@ impl Execution {
             TraversalMode::Migrate { .. } | TraversalMode::Search { .. } => false,
         }
     }
+
+    /// Returns [true] if the user used the `--write`/`--fix` option
+    pub(crate) fn is_write(&self) -> bool {
+        match self.traversal_mode {
+            TraversalMode::Check { fix_file_mode, .. } => fix_file_mode.is_some(),
+            TraversalMode::Lint { fix_file_mode, .. } => fix_file_mode.is_some(),
+            TraversalMode::CI { .. } => false,
+            TraversalMode::Format { write, .. } => write,
+            TraversalMode::Migrate { write, .. } => write,
+            TraversalMode::Search { .. } => false,
+        }
+    }
 }
 
 /// Based on the [mode](TraversalMode), the function might launch a traversal of the file system
