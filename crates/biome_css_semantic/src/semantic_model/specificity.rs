@@ -116,7 +116,7 @@ fn evaluate_pseudo_selector(selector: &CssPseudoClassSelector) -> Specificity {
 }
 
 fn evaluate_any_subselector(selector: &AnyCssSubSelector) -> Specificity {
-    // https://drafts.csswg.org/selectors/#typedef-pseudo-class-selector
+    // https://www.w3.org/TR/selectors-4/#typedef-subclass-selector
     match selector {
         AnyCssSubSelector::CssIdSelector(_) => ID_SPECIFICITY,
         AnyCssSubSelector::CssClassSelector(_) => CLASS_SPECIFICITY,
