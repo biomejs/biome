@@ -252,6 +252,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) don't create invaild JSX code when Fragments children contains JSX Expression and in a LogicalExpression. Contributed by @fireairforce
 
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) Fragments containing HTML escapes (e.g. &nbsp;) inside expression escapes `{ ... }` should not be considered useless.
+The following code is no longer reported:
+
+```jsx
+function Component() {
+  return (
+    <div key={index}>{line || <>&nbsp;</>}</div>
+  )
+}
+```
+
 ### Parser
 
 #### Bug fixes
