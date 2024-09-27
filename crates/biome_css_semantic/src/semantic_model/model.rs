@@ -170,9 +170,12 @@ impl std::ops::AddAssign for Specificity {
     }
 }
 
+/// Formats the `Specificity` instance to match the notation used in the official CSS specification.
+///
+/// More details https://www.w3.org/TR/selectors-4/#specificity-rules
 impl std::fmt::Display for Specificity {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}-{}-{}", self.0, self.1, self.2)
+        write!(f, "{}, {}, {}", self.0, self.1, self.2)
     }
 }
 
