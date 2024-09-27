@@ -21,10 +21,10 @@ fn evaluate_any_simple_selector(selector: &AnyCssSimpleSelector) -> Specificity 
 }
 
 /// See https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity#the_is_not_has_and_css_nesting_exceptions
-fn evaluate_pseudo_function_selector(name: &str) -> Option<Specificity> {
-    match name {
-        "where" => None,
-        "is" | "not" | "has" | "matches" => Some(ZERO_SPECIFICITY),
+const fn evaluate_pseudo_function_selector(name: &str) -> Option<Specificity> {
+    match name.as_bytes() {
+        b"where" => None,
+        b"is" | b"not" | b"has" | b"matches" => Some(ZERO_SPECIFICITY),
         _ => Some(CLASS_SPECIFICITY),
     }
 }
