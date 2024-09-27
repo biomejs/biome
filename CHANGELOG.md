@@ -35,6 +35,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Editors
 
+- Fix a case where CSS files weren't correctly linted using the default configuration. Contributed by @ematipico
+
 ### Formatter
 
 #### Bug fixes
