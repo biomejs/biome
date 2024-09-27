@@ -15,6 +15,7 @@ use crate::keywords::{
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
+use biome_string_case::StrOnlyExtension;
 
 pub fn is_font_family_keyword(value: &str) -> bool {
     BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)
@@ -38,14 +39,15 @@ pub fn is_font_shorthand_keyword(value: &str) -> bool {
 }
 
 pub fn is_css_variable(value: &str) -> bool {
-    value.to_lowercase().starts_with("var(")
+    value.to_lowercase_cow().starts_with("var(")
 }
 
 /// Get the font-families within a `font` shorthand property value.
 pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue> {
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {
-        let lower_case_value = v.text().to_lowercase();
+        let value = v.text();
+        let lower_case_value = value.to_lowercase_cow();
 
         // Ignore CSS variables
         if is_css_variable(&lower_case_value) {
@@ -110,7 +112,7 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
 /// Check if the value is a known CSS value function.
 pub fn is_function_keyword(value: &str) -> bool {
     FUNCTION_KEYWORDS
-        .binary_search(&value.to_lowercase().as_str())
+        .binary_search(&value.to_lowercase_cow().as_ref())
         .is_ok()
 }
 
@@ -178,8 +180,8 @@ pub fn vendor_prefixed(props: &str) -> bool {
 
 /// Check if the input string is a media feature name.
 pub fn is_media_feature_name(prop: &str) -> bool {
-    let input = prop.to_lowercase();
-    let count = MEDIA_FEATURE_NAMES.binary_search(&input.as_str());
+    let input = prop.to_lowercase_cow();
+    let count = MEDIA_FEATURE_NAMES.binary_search(&input.as_ref());
     if count.is_ok() {
         return true;
     }

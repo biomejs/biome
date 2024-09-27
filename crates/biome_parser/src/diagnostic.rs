@@ -440,8 +440,8 @@ pub fn expect_one_of(names: &[&str], range: TextRange) -> ParseDiagnostic {
 }
 
 fn article_for(name: &str) -> &'static str {
-    match name.chars().next() {
-        Some('a' | 'e' | 'i' | 'o' | 'u') => "an",
+    match name.bytes().next() {
+        Some(b'a' | b'e' | b'i' | b'o' | b'u') => "an",
         _ => "a",
     }
 }

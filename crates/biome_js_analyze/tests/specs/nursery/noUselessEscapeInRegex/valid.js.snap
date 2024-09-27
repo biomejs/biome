@@ -104,4 +104,7 @@ expression: valid.js
 
 /[z-]/;
 
+// Edge case
+/[]/;
+
 ```

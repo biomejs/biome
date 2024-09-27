@@ -17,23 +17,29 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="checkbox">
+    /// <div role="checkbox"></div>
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <div role="img">
+    /// <div role="separator"></div>
     /// ```
     ///
     /// ### Valid
     ///
     /// ```jsx
     /// <>
-    ///  <div></div>
-    ///  <header></header>
-    ///  <img alt="" src="image.jpg" />
-    /// </>
+    ///   <input type="checkbox">label</input>
+    ///   <hr/>
+    /// </>;
     /// ```
     ///
+    /// All elements with `role="img"` are ignored:
+    ///
+    /// ```jsx
+    /// <div role="img" aria-label="That cat is so cute">
+    ///   <p>&#x1F408; &#x1F602;</p>
+    /// </div>
+    /// ```
     pub UseSemanticElements {
         version: "1.8.0",
         name: "useSemanticElements",

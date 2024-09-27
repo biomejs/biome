@@ -11,7 +11,7 @@ use biome_rowan::{SyntaxResult, TextLen, TextRange, TextSize, TokenText};
 
 use crate::{comments::HtmlComments, context::HtmlFormatContext, HtmlFormatter};
 
-pub(crate) static HTML_WHITESPACE_CHARS: [char; 4] = [' ', '\n', '\t', '\r'];
+pub(crate) static HTML_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
 
 /// Meaningful HTML text is defined to be text that has either non-whitespace
 /// characters, or does not contain a newline. Whitespace is defined as ASCII
@@ -29,11 +29,11 @@ pub(crate) static HTML_WHITESPACE_CHARS: [char; 4] = [' ', '\n', '\t', '\r'];
 /// ```
 pub fn is_meaningful_html_text(text: &str) -> bool {
     let mut has_newline = false;
-    for c in text.chars() {
+    for byte in text.bytes() {
         // If there is a non-whitespace character
-        if !HTML_WHITESPACE_CHARS.contains(&c) {
+        if !HTML_WHITESPACE_CHARS.contains(&byte) {
             return true;
-        } else if c == '\n' {
+        } else if byte == b'\n' {
             has_newline = true;
         }
     }
@@ -191,7 +191,7 @@ where
                                     // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
                                     // It can be entirely removed from the content without changing the semantics.
                                     let newlines =
-                                        whitespace.chars().filter(|c| *c == '\n').count();
+                                        whitespace.bytes().filter(|b| *b == b'\n').count();
 
                                     // Keep up to one blank line between tags.
                                     // ```html

@@ -3,6 +3,7 @@ use crate::{
     grit_resolved_pattern::GritResolvedPattern,
 };
 use anyhow::{anyhow, bail, Result};
+use biome_string_case::StrOnlyExtension;
 use grit_pattern_matcher::{
     binding::Binding,
     constant::Constant,
@@ -116,7 +117,9 @@ fn capitalize_fn<'a>(
     };
 
     let string = arg1.text(&state.files, context.language())?;
-    Ok(ResolvedPattern::from_string(capitalize(&string)))
+    Ok(ResolvedPattern::from_string(
+        capitalize(&string).to_string(),
+    ))
 }
 
 fn distinct_fn<'a>(
@@ -234,7 +237,9 @@ fn lowercase_fn<'a>(
     };
 
     let string = arg1.text(&state.files, context.language())?;
-    Ok(ResolvedPattern::from_string(string.to_lowercase()))
+    Ok(ResolvedPattern::from_string(
+        string.to_lowercase_cow().to_string(),
+    ))
 }
 
 fn random_fn<'a>(
@@ -379,12 +384,14 @@ fn uppercase_fn<'a>(
     Ok(ResolvedPattern::from_string(string.to_uppercase()))
 }
 
-fn capitalize(s: &str) -> String {
-    let mut chars = s.chars();
-    match chars.next() {
-        None => String::new(),
-        Some(c) => c.to_uppercase().collect::<String>() + chars.as_str(),
+fn capitalize(s: &str) -> Cow<str> {
+    if let Some(first_char) = s.chars().next() {
+        if !first_char.is_uppercase() {
+            let rest = &s[first_char.len_utf8()..];
+            return Cow::Owned(first_char.to_ascii_uppercase().to_string() + rest);
+        }
     }
+    Cow::Borrowed(s)
 }
 
 fn resolve<'a>(target_path: Cow<'a, str>, from_file: Cow<'a, str>) -> Result<String> {

@@ -11,6 +11,7 @@ use super::{
 use crate::generate_node_factory::generate_node_factory;
 use crate::generate_nodes_mut::generate_nodes_mut;
 use crate::generate_syntax_factory::generate_syntax_factory;
+use crate::generate_target_language_constants::generate_target_language_constants;
 use crate::js_kinds_src::{
     AstEnumSrc, AstListSeparatorConfiguration, AstListSrc, AstNodeSrc, TokenKind,
 };
@@ -76,6 +77,9 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
         .join("crates")
         .join(language_kind.factory_crate_name())
         .join("src/generated");
+    let target_language_path = project_root()
+        .join("crates/biome_grit_patterns/src/grit_target_language")
+        .join(language_kind.grit_target_language_module_name());
 
     let kind_src = language_kind.kinds();
 
@@ -102,6 +106,12 @@ pub(crate) fn generate_syntax(ast: AstSrc, mode: &Mode, language_kind: LanguageK
     let ast_macros_file = syntax_generated_path.join("macros.rs");
     let contents = generate_macros(&ast, language_kind)?;
     update(ast_macros_file.as_path(), &contents, mode)?;
+
+    if language_kind.supports_grit() {
+        let target_language_constants_file = target_language_path.join("constants.rs");
+        let contents = generate_target_language_constants(&ast, language_kind)?;
+        update(target_language_constants_file.as_path(), &contents, mode)?;
+    }
 
     Ok(())
 }

@@ -6,6 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssKeyframesItem, AnyCssKeyframesSelector, CssKeyframesBlock};
 use biome_rowan::AstNode;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Disallow duplicate selectors within keyframe blocks.
@@ -53,12 +54,14 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let mut selector_list = HashSet::new();
+        let mut selector_list: HashSet<String> = HashSet::new();
         for keyframe_item in node.items() {
             match keyframe_item {
                 AnyCssKeyframesItem::CssKeyframesItem(item) => {
                     let keyframe_selector = item.selectors().into_iter().next()?.ok()?;
-                    if !selector_list.insert(keyframe_selector.text().to_lowercase()) {
+                    if !selector_list
+                        .insert(keyframe_selector.text().to_lowercase_cow().to_string())
+                    {
                         return Some(keyframe_selector);
                     }
                 }

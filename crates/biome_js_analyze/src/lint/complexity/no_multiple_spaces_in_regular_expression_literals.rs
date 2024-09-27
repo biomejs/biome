@@ -67,7 +67,6 @@ impl Rule for NoMultipleSpacesInRegularExpressionLiterals {
         let mut range_list = vec![];
         let mut previous_is_space = false;
         let mut first_consecutive_space_index = 0;
-        // We use `char_indices` to get the byte index of every character
         for (i, ch) in trimmed_text.bytes().enumerate() {
             if ch == b' ' {
                 if !previous_is_space {

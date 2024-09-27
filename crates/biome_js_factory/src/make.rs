@@ -60,7 +60,7 @@ pub fn jsx_string_literal_single_quotes(text: &str) -> JsSyntaxToken {
 pub fn js_template_chunk(text: &str) -> JsSyntaxToken {
     JsSyntaxToken::new_detached(
         JsSyntaxKind::TEMPLATE_CHUNK,
-        &utils::escape(text, &["${", "`"], '\\'),
+        &utils::escape(text, &["${", "`"], b'\\'),
         [],
         [],
     )
