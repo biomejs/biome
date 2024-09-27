@@ -60,7 +60,7 @@ declare_lint_rule! {
     /// a:hover { color: red; }
     /// a { color: red; }
     /// ```
-    /// 
+    ///
     /// ```css
     /// a b {
     ///     color: red;
@@ -88,7 +88,7 @@ pub struct DescendingSelector {
 /// find tail selector
 /// ```css
 /// a b:hover {
-///   ^^^^^^^ 
+///   ^^^^^^^
 /// }
 /// ```
 fn find_tail_selector(selector: &AnyCssSelector) -> Option<String> {
