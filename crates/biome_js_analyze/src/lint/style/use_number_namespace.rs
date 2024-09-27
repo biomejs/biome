@@ -16,8 +16,8 @@ declare_lint_rule! {
     ///
     /// _ES2015_ moved some globals into the `Number` properties for consistency.
     ///
-    /// The rule doesn't report the globals `isFinite` and `isNan` because they have a slightly different behavior to their corresponding `Number`'s properties `Number.isFinite` and `Number.isNan`.
-    /// You can use the dedicated rules [noGlobalIsFinite](https://biomejs.dev/linter/rules/no-global-is-finite/) and  [noGlobalIsNan](https://biomejs.dev/linter/rules/no-global-is-nan/) to enforce the use of `Number.isFinite` and `Number.isNan`.
+    /// The rule doesn't report the globals `isFinite` and `isNaN` because they have a slightly different behavior to their corresponding `Number`'s properties `Number.isFinite` and `Number.isNaN`.
+    /// You can use the dedicated rules [noGlobalIsFinite](https://biomejs.dev/linter/rules/no-global-is-finite/) and  [noGlobalIsNan](https://biomejs.dev/linter/rules/no-global-is-nan/) to enforce the use of `Number.isFinite` and `Number.isNaN`.
     ///
     /// ## Examples
     ///
