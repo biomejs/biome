@@ -19,7 +19,7 @@ b {
 ```
 nested.invalid.css:7:1 lint/nursery/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Descending specificity selector found. This selector specificity is 0, 0, 1
+  ! Descending specificity selector found. This selector specificity is (0, 0, 1)
   
     5 │ }
     6 │ 
@@ -28,7 +28,7 @@ nested.invalid.css:7:1 lint/nursery/noDescendingSpecificity ━━━━━━�
     8 │     color: red;
     9 │ }
   
-  i This selector specificity is 0, 0, 2
+  i This selector specificity is (0, 0, 2)
   
     1 │ a {
   > 2 │     & > b {

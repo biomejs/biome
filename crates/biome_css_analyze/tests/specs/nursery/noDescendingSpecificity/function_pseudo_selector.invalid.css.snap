@@ -25,7 +25,7 @@ expression: function_pseudo_selector.invalid.css
 ```
 function_pseudo_selector.invalid.css:5:1 lint/nursery/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Descending specificity selector found. This selector specificity is 0, 0, 2
+  ! Descending specificity selector found. This selector specificity is (0, 0, 2)
   
     3 │ }
     4 │ 
@@ -34,7 +34,7 @@ function_pseudo_selector.invalid.css:5:1 lint/nursery/noDescendingSpecificity �
     6 │     color: red;
     7 │ }
   
-  i This selector specificity is 1, 0, 1
+  i This selector specificity is (1, 0, 1)
   
   > 1 │ :is(#a, a) f {
       │ ^^^^^^^^^^^^
@@ -49,7 +49,7 @@ function_pseudo_selector.invalid.css:5:1 lint/nursery/noDescendingSpecificity �
 ```
 function_pseudo_selector.invalid.css:13:1 lint/nursery/noDescendingSpecificity ━━━━━━━━━━━━━━━━━━━━━
 
-  ! Descending specificity selector found. This selector specificity is 0, 0, 1
+  ! Descending specificity selector found. This selector specificity is (0, 0, 1)
   
     11 │ }
     12 │ 
@@ -58,7 +58,7 @@ function_pseudo_selector.invalid.css:13:1 lint/nursery/noDescendingSpecificity �
     14 │     color: red;
     15 │ }
   
-  i This selector specificity is 6, 0, 1
+  i This selector specificity is (6, 0, 1)
   
      7 │ }
      8 │ 
