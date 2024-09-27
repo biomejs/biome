@@ -116,13 +116,14 @@ fn evaluate_pseudo_selector(selector: &CssPseudoClassSelector) -> Specificity {
 }
 
 fn evaluate_any_subselector(selector: &AnyCssSubSelector) -> Specificity {
+    // https://drafts.csswg.org/selectors/#typedef-pseudo-class-selector
     match selector {
-        AnyCssSubSelector::CssAttributeSelector(_) => TYPE_SPECIFICITY,
-        AnyCssSubSelector::CssBogusSubSelector(_) => ZERO_SPECIFICITY,
-        AnyCssSubSelector::CssClassSelector(_) => CLASS_SPECIFICITY,
         AnyCssSubSelector::CssIdSelector(_) => ID_SPECIFICITY,
+        AnyCssSubSelector::CssClassSelector(_) => CLASS_SPECIFICITY,
+        AnyCssSubSelector::CssAttributeSelector(_) => CLASS_SPECIFICITY,
         AnyCssSubSelector::CssPseudoClassSelector(s) => evaluate_pseudo_selector(s),
         AnyCssSubSelector::CssPseudoElementSelector(_) => TYPE_SPECIFICITY,
+        AnyCssSubSelector::CssBogusSubSelector(_) => ZERO_SPECIFICITY,
     }
 }
 
