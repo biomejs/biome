@@ -417,5 +417,5 @@ impl Rule for NoUselessFragments {
 }
 
 fn contains_html_entity(s: &str) -> bool {
-    s.contains("&") && s.contains(";")
+    s.contains('&') && s.contains(';')
 }
