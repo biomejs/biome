@@ -436,22 +436,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- Updated format of query_feature_range_interval. [#4076]
-  ```
-  Before:
-      .class {
-      @media (1024px <= width <=1280px) {
-        color: red;
-      }
+- Fixed [#4076](https://github.com/biomejs/biome/issues/4076), where a media query wasn't correctly formatted:
+  ```diff
+  .class {
+-    @media (1024px <= width <=1280px) {
++    @media (1024px <= width <= 1280px) {
+      color: red;
     }
-
-  Now:
-      .class {
-      @media (1024px <= width <= 1280px) {
-        color: red;
-      }
-    }
-
+  }
   ```
   Contributed by @blaze-d83
 

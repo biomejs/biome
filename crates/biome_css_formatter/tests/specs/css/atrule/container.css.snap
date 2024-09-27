@@ -112,7 +112,7 @@ Quote style: Double Quotes
 @container card (inline-size > 30em) and (inline-size < 45em) {
 }
 
-@container (100px > width >150px) {
+@container (100px > width > 150px) {
 }
 
 @container (not (width <= 150px)) {
