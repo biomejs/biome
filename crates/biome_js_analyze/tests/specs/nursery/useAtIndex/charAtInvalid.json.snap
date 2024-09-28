@@ -118,7 +118,7 @@ charAtInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━�
   i Unsafe fix: Replace index references with .at().
   
   - string.charAt(string.length·-·((·1·)));
-  + string.at(-1·);
+  + string.at(-1);
   
 
 ```
@@ -142,7 +142,7 @@ charAtInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━�
   i Unsafe fix: Replace index references with .at().
   
   - string.charAt(((·string.length·-·1·)));
-  + string.at(-1·);
+  + string.at(-1);
   
 
 ```

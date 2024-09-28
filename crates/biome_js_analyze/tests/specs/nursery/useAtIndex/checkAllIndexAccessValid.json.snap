@@ -5,15 +5,30 @@ expression: checkAllIndexAccessValid.json
 ---
 # Input
 ```cjs
-new _.last(array)
+++array[1]
 ```
 
 # Input
 ```cjs
-_.last(array, 2)
+const offset = 5;const extraArgument = 6;string.charAt(offset + 9, extraArgument)
 ```
 
 # Input
 ```cjs
-_.last(...array)
+array[unknown]
+```
+
+# Input
+```cjs
+array[-1]
+```
+
+# Input
+```cjs
+array[1.5]
+```
+
+# Input
+```cjs
+array[1n]
 ```

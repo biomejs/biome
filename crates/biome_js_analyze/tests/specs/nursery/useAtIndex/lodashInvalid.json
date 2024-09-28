@@ -1,0 +1,8 @@
+[
+  "_.last(array)",
+  "lodash.last(array)",
+  "underscore.last(array)",
+  "_.last(new Array)",
+  "if (foo) _.last([bar])",
+  "function foo() {return _.last(arguments)}"
+]

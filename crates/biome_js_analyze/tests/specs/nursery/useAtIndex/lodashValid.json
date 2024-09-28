@@ -1,0 +1,5 @@
+[
+  "new _.last(array)",
+  "_.last(array, 2)",
+  "_.last(...array)"
+]

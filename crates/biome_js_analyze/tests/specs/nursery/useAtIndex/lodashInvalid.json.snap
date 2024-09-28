@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: lodashInvalid.json
+---
+# Input
+```cjs
+_.last(array)
+```
+
+# Diagnostics
+```
+lodashInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ _.last(array)
+      │ ^^^^^^^^^^^^^
+  
+  i Prefer X.at(-1) over _.last(X).
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - _.last(array)
+  + array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+lodash.last(array)
+```
+
+# Diagnostics
+```
+lodashInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ lodash.last(array)
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-1) over _.last(X).
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - lodash.last(array)
+  + array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+underscore.last(array)
+```
+
+# Diagnostics
+```
+lodashInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ underscore.last(array)
+      │ ^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-1) over _.last(X).
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - underscore.last(array)
+  + array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+_.last(new Array)
+```
+
+# Diagnostics
+```
+lodashInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ _.last(new Array)
+      │ ^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-1) over _.last(X).
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - _.last(new·Array)
+  + (new·Array).at(-1)
+  
+
+```
+
+# Input
+```cjs
+if (foo) _.last([bar])
+```
+
+# Diagnostics
+```
+lodashInvalid.json:1:10 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ if (foo) _.last([bar])
+      │          ^^^^^^^^^^^^^
+  
+  i Prefer X.at(-1) over _.last(X).
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - if·(foo)·_.last([bar])
+  + if·(foo)·[bar].at(-1)
+  
+
+```
+
+# Input
+```cjs
+function foo() {return _.last(arguments)}
+```
+
+# Diagnostics
+```
+lodashInvalid.json:1:24 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ function foo() {return _.last(arguments)}
+      │                        ^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-1) over _.last(X).
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - function·foo()·{return·_.last(arguments)}
+  + function·foo()·{return·arguments.at(-1)}
+  
+
+```

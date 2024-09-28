@@ -1,0 +1,168 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: sliceValid.json
+---
+# Input
+```cjs
+array.slice(-1)
+```
+
+# Input
+```cjs
+new array.slice(-1)
+```
+
+# Input
+```cjs
+array.slice(-9).pop()
+```
+
+# Diagnostics
+```
+sliceValid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ array.slice(-9).pop()
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-1) over X.slice(-a).pop().
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - array.slice(-9).pop()
+  + array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-1.1)[0]
+```
+
+# Input
+```cjs
+array.slice(-1)?.[0]
+```
+
+# Input
+```cjs
+array.slice?.(-1)[0]
+```
+
+# Input
+```cjs
+array?.slice(-1)[0]
+```
+
+# Input
+```cjs
+array.notSlice(-1)[0]
+```
+
+# Input
+```cjs
+array.slice()[0]
+```
+
+# Input
+```cjs
+array.slice(...[-1])[0]
+```
+
+# Input
+```cjs
+array.slice(-1).shift?.()
+```
+
+# Input
+```cjs
+array.slice(-1)?.shift()
+```
+
+# Input
+```cjs
+array.slice(-1).shift(...[])
+```
+
+# Input
+```cjs
+new array.slice(-1).shift()
+```
+
+# Input
+```cjs
+array.slice(-1)[0] += 1
+```
+
+# Input
+```cjs
+++ array.slice(-1)[0]
+```
+
+# Input
+```cjs
+array.slice(-1)[0] --
+```
+
+# Input
+```cjs
+delete array.slice(-1)[0]
+```
+
+# Input
+```cjs
+array.slice(-9.1, -8.1)[0]
+```
+
+# Input
+```cjs
+array.slice(-unknown, -unknown2)[0]
+```
+
+# Input
+```cjs
+array.slice(-9.1, unknown)[0]
+```
+
+# Input
+```cjs
+array.slice(-9, unknown).pop()
+```
+
+# Input
+```cjs
+array.slice(-9, ...unknown)[0]
+```
+
+# Input
+```cjs
+array.slice(...[-9], unknown)[0]
+```
+
+# Input
+```cjs
+array.slice(-9, unknown)[0]
+```
+
+# Input
+```cjs
+array.slice(-9, unknown).shift()
+```
+
+# Input
+```cjs
+const KNOWN = -8; array.slice(-9, KNOWN).shift()
+```
+
+# Input
+```cjs
+(( (( array.slice( ((-9)), ((unknown)), ).shift ))() ));
+```
+
+# Input
+```cjs
+array.slice(-9, (a, really, _really, complicated, second) => argument)[0]
+```

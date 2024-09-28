@@ -214,7 +214,7 @@ indexInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   i Unsafe fix: Replace index references with .at().
   
   - array[array.length·-·((·1·))];
-  + array.at(-1·);
+  + array.at(-1);
   
 
 ```
@@ -238,7 +238,7 @@ indexInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   i Unsafe fix: Replace index references with .at().
   
   - array[((·array.length·-·1·))];
-  + array.at(-1·);
+  + array.at(-1);
   
 
 ```

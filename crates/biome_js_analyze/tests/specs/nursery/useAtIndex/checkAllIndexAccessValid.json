@@ -1,5 +1,8 @@
 [
-  "new _.last(array)",
-  "_.last(array, 2)",
-  "_.last(...array)"
+  "++array[1]",
+  "const offset = 5;const extraArgument = 6;string.charAt(offset + 9, extraArgument)",
+  "array[unknown]",
+  "array[-1]",
+  "array[1.5]",
+  "array[1n]"
 ]

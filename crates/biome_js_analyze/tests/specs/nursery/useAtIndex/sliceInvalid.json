@@ -24,5 +24,6 @@
   "array.slice((( -9 )), (( -8 )), ).shift()",
   "(( array.slice(-9, -8).shift ))()",
   "array.slice(-0o11, -7)[0]",
-  "array.slice(-9, 0)[0]"
+  "array.slice(-9, 0)[0]",
+  "array.slice(-4).pop()"
 ]

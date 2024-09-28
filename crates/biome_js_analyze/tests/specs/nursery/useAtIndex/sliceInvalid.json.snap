@@ -89,7 +89,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice(-1).pop()
       │ ^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(-1) over X.slice(-a).pop().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -113,7 +113,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice(-1.0).shift()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y) over X.slice(Y).shift().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -185,7 +185,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice(-9).shift()
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y) over X.slice(Y).shift().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -353,7 +353,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ (( array.slice(-1) )).pop();
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(-1) over X.slice(-a).pop().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -377,7 +377,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ (( array.slice(-1).pop ))();
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(-1) over X.slice(-a).pop().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -401,7 +401,7 @@ sliceInvalid.json:1:4 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ (( array.slice(-1).pop() ));
       │    ^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(-1) over X.slice(-a).pop().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -449,7 +449,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice(-9, -8)[0]
       │ ^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y) over X.slice(Y, a)[0].
   
   i Unsafe fix: Replace index references with .at().
   
@@ -473,7 +473,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice(-9, -0o10)[0]
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y) over X.slice(Y, a)[0].
   
   i Unsafe fix: Replace index references with .at().
   
@@ -497,7 +497,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice(-9, -8).pop()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y - 1) over X.slice(a, Y).pop().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -521,7 +521,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice(-9, -8).shift()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y) over X.slice(Y, a).shift().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -545,7 +545,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice((( -9 )), (( -8 )), ).shift()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y) over X.slice(Y, a).shift().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -569,7 +569,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ (( array.slice(-9, -8).shift ))()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y) over X.slice(Y, a).shift().
   
   i Unsafe fix: Replace index references with .at().
   
@@ -593,7 +593,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice(-0o11, -7)[0]
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y) over X.slice(Y, a)[0].
   
   i Unsafe fix: Replace index references with .at().
   
@@ -617,12 +617,36 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   > 1 │ array.slice(-9, 0)[0]
       │ ^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Prefer X.at(Y) over X.slice(Y, a)[0].
   
   i Unsafe fix: Replace index references with .at().
   
   - array.slice(-9,·0)[0]
   + array.at(-9)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-4).pop()
+```
+
+# Diagnostics
+```
+sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ array.slice(-4).pop()
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-1) over X.slice(-a).pop().
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - array.slice(-4).pop()
+  + array.at(-1)
   
 
 ```
