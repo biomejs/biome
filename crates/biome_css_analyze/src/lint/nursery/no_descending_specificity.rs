@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet};
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
@@ -75,7 +75,7 @@ declare_lint_rule! {
         version: "next",
         name: "noDescendingSpecificity",
         language: "css",
-        recommended: false,
+        recommended: true,
         sources: &[RuleSource::Stylelint("no-descending-specificity")],
     }
 }
@@ -115,8 +115,8 @@ fn find_tail_selector(selector: &AnyCssSelector) -> Option<String> {
 fn find_descending_selector(
     rule: &CssSemanticRule,
     model: &SemanticModel,
-    visited_rules: &mut BTreeSet<RuleId>,
-    visited_selectors: &mut BTreeMap<String, (TextRange, Specificity)>,
+    visited_rules: &mut FxHashSet<RuleId>,
+    visited_selectors: &mut FxHashMap<String, (TextRange, Specificity)>,
     descending_selectors: &mut Vec<DescendingSelector>,
 ) {
     if visited_rules.contains(&rule.id) {
@@ -147,18 +147,16 @@ fn find_descending_selector(
         }
     }
 
-    for child_rule in rule
-        .child_ids
-        .iter()
-        .filter_map(|id| model.get_rule_by_id(*id))
-    {
-        find_descending_selector(
-            child_rule,
-            model,
-            visited_rules,
-            visited_selectors,
-            descending_selectors,
-        );
+    for child_id in &rule.child_ids {
+        if let Some(child_rule) = model.get_rule_by_id(*child_id) {
+            find_descending_selector(
+                child_rule,
+                model,
+                visited_rules,
+                visited_selectors,
+                descending_selectors,
+            );
+        }
     }
 }
 
@@ -170,8 +168,8 @@ impl Rule for NoDescendingSpecificity {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.model();
-        let mut visited_rules = BTreeSet::new();
-        let mut visited_selectors = BTreeMap::new();
+        let mut visited_rules = FxHashSet::default();
+        let mut visited_selectors = FxHashMap::default();
         let mut descending_selectors = Vec::new();
         for rule in model.rules() {
             find_descending_selector(
@@ -187,10 +185,6 @@ impl Rule for NoDescendingSpecificity {
     }
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
-        //
-        // Read our guidelines to write great diagnostics:
-        // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
-        //
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
