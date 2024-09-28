@@ -3457,6 +3457,7 @@ impl Nursery {
         "useValidAutocomplete",
     ];
     const RECOMMENDED_RULES: &'static [&'static str] = &[
+        "noDescendingSpecificity",
         "noDuplicateCustomProperties",
         "noDuplicateElseIf",
         "noDuplicatedFields",
@@ -3470,6 +3471,7 @@ impl Nursery {
         "useStrictMode",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
