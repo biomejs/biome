@@ -69,6 +69,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### JavaScript API
 
+#### Bug fixes
+
+- Fix [#3881](https://github.com/biomejs/biome/issues/3881), by updating the APIs to use the latest WASM changes. Contributed by @ematipico
+
 ### Linter
 
 #### New features
