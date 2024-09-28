@@ -6,8 +6,7 @@ use crate::{
     comments::HtmlComments,
     prelude::*,
     utils::children::{
-        html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator,
-        HtmlRawSpace, HtmlSpace,
+        html_split_children, is_meaningful_html_text, HtmlChild, HtmlChildrenIterator, HtmlSpace,
     },
 };
 use biome_formatter::{best_fitting, prelude::*, CstFormatContext};
@@ -106,7 +105,6 @@ impl FormatHtmlElementList {
 
         while let Some(child) = children_iter.next() {
             let mut child_breaks = false;
-
             match &child {
                 // A single word: Both `a` and `b` are a word in `a b` because they're separated by HTML Whitespace.
                 HtmlChild::Word(word) => {
@@ -148,34 +146,7 @@ impl FormatHtmlElementList {
                 // * Whitespace before an opening tag: `a <div>`
                 HtmlChild::Whitespace => {
                     flat.write(&HtmlSpace, f);
-
-                    // ```javascript
-                    // <div>a
-                    // {' '}</div>
-                    // ```
-                    let is_after_line_break =
-                        last.as_ref().map_or(false, |last| last.is_any_line());
-
-                    // `<div>aaa </div>` or `<div> </div>`
-                    let is_trailing_or_only_whitespace = children_iter.peek().is_none();
-
-                    if is_trailing_or_only_whitespace || is_after_line_break {
-                        multiline.write_separator(&HtmlRawSpace, f);
-                    }
-                    // Leading whitespace. Only possible if used together with a expression child
-                    //
-                    // ```
-                    // <div>
-                    //
-                    //   {' '}
-                    //   <b />
-                    // </div>
-                    // ```
-                    else if last.is_none() {
-                        multiline.write_with_separator(&HtmlRawSpace, &hard_line_break(), f);
-                    } else {
-                        multiline.write_separator(&HtmlSpace, f);
-                    }
+                    multiline.write_separator(&soft_line_break_or_space(), f);
                 }
 
                 // A new line between some JSX text and an element
@@ -245,30 +216,7 @@ impl FormatHtmlElementList {
                 // An empty line between some JSX text and an element
                 HtmlChild::EmptyLine => {
                     child_breaks = true;
-
-                    // Additional empty lines are not preserved when any of
-                    // the children are a meaningful text node.
-                    //
-                    // <>
-                    //   <div>First</div>
-                    //
-                    //   <div>Second</div>
-                    //
-                    //   Third
-                    // </>
-                    //
-                    // Becomes:
-                    //
-                    // <>
-                    //   <div>First</div>
-                    //   <div>Second</div>
-                    //   Third
-                    // </>
-                    if children_meta.meaningful_text {
-                        multiline.write_separator(&hard_line_break(), f);
-                    } else {
-                        multiline.write_separator(&empty_line(), f);
-                    }
+                    multiline.write_separator(&empty_line(), f);
                 }
 
                 // Any child that isn't text

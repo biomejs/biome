@@ -105,6 +105,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                         .and_then(|property_node| property_node.name().ok())
                     {
                         let prop = prop_node.text();
+                        #[allow(clippy::disallowed_methods)]
                         let prop_lowercase = prop.to_lowercase();
 
                         let prop_prefix = vender_prefix(&prop_lowercase);

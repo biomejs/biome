@@ -5,7 +5,9 @@ use crate::runner::{
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, ModuleKind};
 use biome_rowan::{AstNode, SyntaxKind};
+use biome_string_case::StrOnlyExtension;
 use regex::Regex;
+use std::borrow::Cow;
 use std::convert::TryFrom;
 use std::fmt::Write;
 use std::io;
@@ -140,12 +142,13 @@ fn extract_metadata(code: &str, path: &str) -> TestCaseMetadata {
 
     for line in code.lines() {
         if let Some(option) = options_regex.captures(line) {
-            let option_name = option.name("name").unwrap().as_str().to_lowercase();
+            let option_name = option.name("name").unwrap().as_str().to_lowercase_cow();
             let option_value = option.name("value").unwrap().as_str().trim();
 
             if option_name == "alwaysstrict" {
                 write!(current_file_content, "\"use strict\";{line_ending}").unwrap();
-            } else if matches!(option_name.as_str(), "module" | "target") && files.is_empty() {
+            } else if matches!(option_name, Cow::Borrowed("module" | "target")) && files.is_empty()
+            {
                 run_options.extend(
                     option_value
                         .split(',')

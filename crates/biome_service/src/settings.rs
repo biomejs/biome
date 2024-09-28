@@ -257,15 +257,15 @@ impl Settings {
         }
         // json settings
         if let Some(json) = configuration.json {
-            self.languages.json = json.into();
+            self.languages.json = json.into()
         }
         // css settings
         if let Some(css) = configuration.css {
-            self.languages.css = css.into();
+            self.languages.css = css.into()
         }
         // graphql settings
         if let Some(graphql) = configuration.graphql {
-            self.languages.graphql = graphql.into();
+            self.languages.graphql = graphql.into()
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
@@ -315,6 +315,7 @@ impl Settings {
     /// Whether the linter is disabled for CSS files
     pub fn css_linter_disabled(&self) -> bool {
         let enabled = self.languages.css.linter.enabled.as_ref();
+        trace!("CSS LINTER DISABLED {:?}", enabled);
         enabled == Some(&false)
     }
 

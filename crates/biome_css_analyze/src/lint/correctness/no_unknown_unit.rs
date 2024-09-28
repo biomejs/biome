@@ -6,6 +6,7 @@ use biome_css_syntax::{
     AnyCssDimension, CssFunction, CssGenericProperty, CssQueryFeaturePlain, CssSyntaxKind,
 };
 use biome_rowan::{SyntaxNodeCast, TextRange};
+use biome_string_case::StrOnlyExtension;
 
 const RESOLUTION_MEDIA_FEATURE_NAMES: [&str; 3] =
     ["resolution", "min-resolution", "max-resolution"];
@@ -103,14 +104,14 @@ impl Rule for NoUnknownUnit {
                     for ancestor in dimension.unit_token().ok()?.ancestors() {
                         match ancestor.kind() {
                             CssSyntaxKind::CSS_FUNCTION => {
-                                let function_name = ancestor
+                                let function_name_token = ancestor
                                     .cast::<CssFunction>()?
                                     .name()
                                     .ok()?
                                     .value_token()
-                                    .ok()?
-                                    .text_trimmed()
-                                    .to_lowercase();
+                                    .ok()?;
+                                let function_name =
+                                    function_name_token.text_trimmed().to_lowercase_cow();
 
                                 if function_name.ends_with("image-set") {
                                     allow_x = true;
@@ -118,15 +119,15 @@ impl Rule for NoUnknownUnit {
                                 }
                             }
                             CssSyntaxKind::CSS_GENERIC_PROPERTY => {
-                                let property_name = ancestor
+                                let property_name_token = ancestor
                                     .cast::<CssGenericProperty>()?
                                     .name()
                                     .ok()?
                                     .as_css_identifier()?
                                     .value_token()
-                                    .ok()?
-                                    .text_trimmed()
-                                    .to_lowercase();
+                                    .ok()?;
+                                let property_name =
+                                    property_name_token.text_trimmed().to_lowercase_cow();
 
                                 if property_name == "image-resolution" {
                                     allow_x = true;
@@ -134,16 +135,16 @@ impl Rule for NoUnknownUnit {
                                 }
                             }
                             CssSyntaxKind::CSS_QUERY_FEATURE_PLAIN => {
-                                let feature_name = ancestor
+                                let feature_name_token = ancestor
                                     .cast::<CssQueryFeaturePlain>()?
                                     .name()
                                     .ok()?
                                     .value_token()
-                                    .ok()?
-                                    .text_trimmed()
-                                    .to_lowercase();
+                                    .ok()?;
+                                let feature_name =
+                                    feature_name_token.text_trimmed().to_lowercase_cow();
 
-                                if RESOLUTION_MEDIA_FEATURE_NAMES.contains(&feature_name.as_str()) {
+                                if RESOLUTION_MEDIA_FEATURE_NAMES.contains(&feature_name.as_ref()) {
                                     allow_x = true;
                                     break;
                                 }

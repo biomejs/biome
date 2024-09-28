@@ -126,6 +126,7 @@ impl Rule for NoUselessEscapeInRegex {
                                     b'&' | b'!' | b'#' | b'$' | b'%' | b'*' | b'+' | b','
                                     | b'.' | b':' | b';' | b'<' | b'=' | b'>' | b'?'
                                     | b'@' | b'`' | b'~' if has_v_flag => {
+                                        // SAFETY: there is at least one preceding character (`[`)
                                         if bytes[index-1] != *escaped && !byte_it.next().is_some_and(|(_, byte)| byte == escaped) {
                                             return Some(State {
                                                 backslash_index: index as u16,
@@ -149,8 +150,12 @@ impl Rule for NoUselessEscapeInRegex {
                                         let must_be_escaped =
                                             // `[_^\^]`
                                             // `[^^\^]`
-                                            (matches!(bytes.get(index-2), Some(&b'_' | &b'^')) && bytes[index-1] == b'^') ||
-                                            (byte_it.next().is_some_and(|(_, byte)| *byte == b'^') && (
+                                            (
+                                                matches!(bytes[index-2], b'_' | b'^')
+                                                && bytes[index-1] == b'^'
+                                            ) || (
+                                                byte_it.next().is_some_and(|(_, byte)| *byte == b'^'
+                                            ) && (
                                                 // `[_\^^]`
                                                 // `[^\^^]`
                                                 matches!(bytes[index-1], b'_' | b'^') ||
@@ -183,6 +188,7 @@ impl Rule for NoUselessEscapeInRegex {
                                 if has_v_flag && inner_class_count != 0 {
                                     inner_class_count -= 1;
                                 } else if !has_v_flag
+                                    && index >= 2 // handle edge case `[]`
                                     && bytes[index - 2] == b'\\'
                                     && bytes[index - 1] == b'-'
                                 {

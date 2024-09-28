@@ -256,6 +256,15 @@ fn html_text_spaces_with_lines() {
 }
 
 #[test]
+fn long_text() {
+    assert_lex! {
+        HtmlLexContext::OutsideTag,
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dapibus velit non justo",
+        HTML_LITERAL: 84,
+    }
+}
+
+#[test]
 fn unquoted_attribute_value_1() {
     assert_lex! {
         HtmlLexContext::AttributeValue,

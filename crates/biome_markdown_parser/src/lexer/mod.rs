@@ -3,13 +3,13 @@
 #[rustfmt::skip]
 mod tests;
 
+use biome_markdown_syntax::MarkdownSyntaxKind;
 use biome_markdown_syntax::MarkdownSyntaxKind::*;
-use biome_markdown_syntax::{MarkdownSyntaxKind, T};
 use biome_parser::diagnostic::ParseDiagnostic;
 use biome_parser::lexer::{
     LexContext, Lexer, LexerCheckpoint, LexerWithCheckpoint, ReLexer, TokenFlags,
 };
-use biome_rowan::TextSize;
+use biome_rowan::{SyntaxKind, TextSize};
 use biome_unicode_table::{lookup_byte, Dispatch::*};
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Default)]
@@ -98,7 +98,14 @@ impl<'src> Lexer<'src> for MarkdownLexer<'src> {
             Some(current) => self.consume_token(current),
             None => EOF,
         };
+
+        self.current_flags
+            .set(TokenFlags::PRECEDING_LINE_BREAK, self.after_newline);
         self.current_kind = kind;
+
+        if !kind.is_trivia() {
+            self.after_newline = false;
+        }
 
         kind
     }
@@ -173,9 +180,7 @@ impl<'src> MarkdownLexer<'src> {
         let dispatched = lookup_byte(current);
         match dispatched {
             WHS => self.consume_newline_or_whitespace(),
-            MUL => self.consume_byte(T![*]),
-            MIN => self.consume_byte(T![-]),
-            IDT => self.consume_byte(T![_]),
+            MUL | MIN | IDT => self.consume_thematic_break_literal(),
             _ => self.consume_textual(),
         }
     }
@@ -238,6 +243,7 @@ impl<'src> MarkdownLexer<'src> {
             }
             _ => unreachable!(),
         }
+        self.after_newline = true;
         NEWLINE
     }
 
@@ -261,6 +267,33 @@ impl<'src> MarkdownLexer<'src> {
             self.advance(1)
         }
         TAB
+    }
+
+    fn consume_thematic_break_literal(&mut self) -> MarkdownSyntaxKind {
+        self.assert_at_char_boundary();
+
+        let start_char = match self.current_byte() {
+            Some(b'-') => b'-',
+            Some(b'*') => b'*',
+            Some(b'_') => b'_',
+            _ => return self.consume_textual(),
+        };
+
+        let mut count = 0;
+        loop {
+            self.consume_whitespace();
+            if matches!(self.current_byte(), Some(ch) if ch == start_char) {
+                self.advance(1);
+                count += 1;
+            } else {
+                break;
+            }
+        }
+        // until next newline or eof
+        if matches!(self.current_byte(), Some(b'\n' | b'\r') | None) && count >= 3 {
+            return MD_THEMATIC_BREAK_LITERAL;
+        }
+        ERROR_TOKEN
     }
 
     /// Get the UTF8 char which starts at the current byte
@@ -326,10 +359,11 @@ impl<'src> MarkdownLexer<'src> {
         let char = self.current_char_unchecked();
         self.advance(char.len_utf8());
 
-        MarkdownSyntaxKind::MARKDOWN_TEXTUAL_LITERAL
+        MD_TEXTUAL_LITERAL
     }
 
     /// Bumps the current byte and creates a lexed token of the passed in kind
+    #[expect(dead_code)]
     fn consume_byte(&mut self, tok: MarkdownSyntaxKind) -> MarkdownSyntaxKind {
         self.advance(1);
         tok

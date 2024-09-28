@@ -13,17 +13,17 @@ impl From<u16> for MarkdownSyntaxKind {
     }
 }
 
-impl biome_rowan::SyntaxKind for MarkdownSyntaxKind {
+impl SyntaxKind for MarkdownSyntaxKind {
     const TOMBSTONE: Self = MarkdownSyntaxKind::TOMBSTONE;
 
     const EOF: Self = MarkdownSyntaxKind::EOF;
 
     fn is_bogus(&self) -> bool {
-        matches!(self, MarkdownSyntaxKind::MARKDOWN_BOGUS)
+        matches!(self, MarkdownSyntaxKind::MD_BOGUS)
     }
 
     fn to_bogus(&self) -> Self {
-        Self::MARKDOWN_BOGUS
+        Self::MD_BOGUS
     }
 
     fn to_raw(&self) -> biome_rowan::RawSyntaxKind {
@@ -43,7 +43,10 @@ impl biome_rowan::SyntaxKind for MarkdownSyntaxKind {
     }
 
     fn is_trivia(self) -> bool {
-        matches!(self, MarkdownSyntaxKind::NEWLINE)
+        matches!(
+            self,
+            MarkdownSyntaxKind::NEWLINE | MarkdownSyntaxKind::WHITESPACE | MarkdownSyntaxKind::TAB
+        )
     }
 
     fn to_string(&self) -> Option<&'static str> {
@@ -59,6 +62,7 @@ impl TryFrom<MarkdownSyntaxKind> for TriviaPieceKind {
             match value {
                 MarkdownSyntaxKind::NEWLINE => Ok(TriviaPieceKind::Newline),
                 MarkdownSyntaxKind::WHITESPACE => Ok(TriviaPieceKind::Whitespace),
+                MarkdownSyntaxKind::TAB => Ok(TriviaPieceKind::Skipped),
                 _ => unreachable!("Not Trivia"),
             }
         } else {

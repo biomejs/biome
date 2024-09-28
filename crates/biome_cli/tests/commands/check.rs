@@ -2358,7 +2358,7 @@ fn check_stdin_returns_text_if_content_is_not_changed() {
         ),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     let message = console
         .out_buffer

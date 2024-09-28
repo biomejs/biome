@@ -308,6 +308,10 @@ pub(crate) fn is_at_ts_interface_declaration(p: &mut JsParser) -> bool {
 // interface C {
 //     protected  [a: number]: string;
 // }
+
+// test_err ts interface_cannot_be_reserved_world
+// interface undefined {}
+// interface any {}
 pub(crate) fn parse_ts_interface_declaration(p: &mut JsParser) -> ParsedSyntax {
     if !is_at_ts_interface_declaration(p) {
         return Absent;

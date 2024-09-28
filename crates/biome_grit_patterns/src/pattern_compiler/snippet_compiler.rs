@@ -213,7 +213,7 @@ fn pattern_from_node(
         return Ok(metavariable);
     }
 
-    if node.slots().is_none() {
+    let Some(slots) = node.slots() else {
         let content = node.text();
         let lang = &context.compilation.lang;
         let pattern = if let Some(regex_pattern) = lang
@@ -227,22 +227,19 @@ fn pattern_from_node(
         };
 
         return Ok(pattern);
-    }
+    };
 
     let kind = node.kind();
-    let args = node
-        .slots()
-        .map(|slots| {
-            // TODO: Implement filtering for disregarded snippet fields.
-            // Implementing this will make it more convenient to match
-            // CST nodes without needing to match all the trivia in the
-            // snippet (if I understand correctly).
-            slots
-                .map(|slot| pattern_arg_from_slot(slot, context_range, range_map, context, is_rhs))
-                .collect::<Result<Vec<GritNodePatternArg>, CompileError>>()
+    let args = slots
+        .filter(|slot| {
+            !context.compilation.lang.is_disregarded_snippet_field(
+                kind,
+                slot.index(),
+                node.child_by_slot_index(slot.index()),
+            )
         })
-        .transpose()?
-        .unwrap_or_default();
+        .map(|slot| pattern_arg_from_slot(slot, context_range, range_map, context, is_rhs))
+        .collect::<Result<Vec<GritNodePatternArg>, CompileError>>()?;
 
     Ok(Pattern::AstNode(Box::new(GritNodePattern { kind, args })))
 }

@@ -28,7 +28,7 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
             let min_indent = trimmed_content
                 .lines()
                 .filter(|line| !line.trim().is_empty()) // Ignore empty lines
-                .map(|line| line.chars().take_while(|&c| c.is_whitespace()).count())
+                .map(|line| line.bytes().take_while(|b| b.is_ascii_whitespace()).count())
                 .min()
                 .unwrap_or(0);
 
@@ -73,5 +73,5 @@ impl FormatNodeRule<GraphqlStringValue> for FormatGraphqlStringValue {
 }
 
 fn is_blank(line: &str) -> bool {
-    line.chars().all(|c| c.is_whitespace())
+    line.bytes().all(|byte| byte.is_ascii_whitespace())
 }

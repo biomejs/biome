@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::{AnyJsxChild, JsxElement, TextRange};
 use biome_rowan::AstNode;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Enforces that `audio` and `video` elements must have a `track` for captions.
@@ -86,7 +87,7 @@ impl Rule for UseMediaCaption {
                             .as_jsx_string()?
                             .inner_string_text()
                             .ok()?
-                            .to_lowercase()
+                            .to_lowercase_cow()
                             == "captions";
 
                         Some(has_track && has_valid_kind)

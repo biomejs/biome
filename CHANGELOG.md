@@ -15,9 +15,29 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### New features
+
+- GritQL queries that match functions or methods will now match async functions or methods as well.
+
+  If this is not what you want, you can capture the `async` keyword (or its absence) in a metavariable and assert its emptiness:
+
+  ```grit
+  $async function foo() {} where $async <: .
+  ```
+
+  Contributed by @arendjr
+
+#### Bug fixes
+
+- Fix [#4077](https://github.com/biomejs/biome/issues/4077): Grit queries no longer need to match the statement's trailing semicolon. Contributed by @arendjr
+
+- Fix [#4102](https://github.com/biomejs/biome/issues/4102). Now the CLI command `lint` doesn't exit with an error code when using `--write`/`--fix`. Contributed by @ematipico
+
 ### Configuration
 
 ### Editors
+
+- Fix a case where CSS files weren't correctly linted using the default configuration. Contributed by @ematipico
 
 ### Formatter
 
@@ -25,11 +45,60 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#3924](https://github.com/biomejs/biome/issues/3924) where GraphQL formatter panics in block comments with empty line. Contributed by @vohoanglong0107
 
+- Fix a case where raw values inside `url()` functions weren't properly trimmed.
+  ```diff
+  .value {
+  -  background: url(
+  -   whitespace-around-string
+  -  );
+  + background: url(whitespace-around-string);
+  }
+  ```
+  Contributed by @ematipico
+
+- Fixed [#4076](https://github.com/biomejs/biome/issues/4076), where a media query wasn't correctly formatted:
+  ```diff
+  .class {
+  -  @media (1024px <= width <=1280px) {
+  +  @media (1024px <= width <= 1280px) {
+     color: red;
+     }
+  }
+  ```
+  Contributed by @blaze-d83
+
 ### JavaScript API
 
 ### Linter
 
+#### New features
+
+- Add [noTemplateCurlyInString](https://biomejs.dev/linter/rules/no-template-curly-in-string/). Contributed by @fireairforce
+- Add [NoOctalEscape](https://biomejs.dev/linter/rules/no-octal-escape/). Contributed by @fireairforce
+
 #### Bug fixes
+
+- [noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class/) no longer reports issues outside of character classes.
+
+  The following code is no longer reported:
+
+  ```js
+  /[a-z]👍/;
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) no longer reports Node.js builtin modules as undeclared dependencies.
+
+  The rule no longer reports the following code:
+
+  ```js
+  import * as fs from "fs";
+  ```
+
+  Contributed by @Conaclos
+
+- [noUselessEscapeInRegex](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/) no longer panics on regexes that start with an empty character class. Contributed by @Conaclos
 
 - [noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/) no longer panics when it encounters malformed code. Contributed by @Conaclos
 
@@ -47,7 +116,38 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useButtonType](https://biomejs.dev/linter/rules/use-button-type/) no longer reports dynamically created button with a valid type ([#4072](https://github.com/biomejs/biome/issues/4072)).
+
+  The following code is no longer reported:
+
+  ```js
+  React.createElement("button", { type: "button" }, "foo")
+  ```
+
+  Contributed by @Conaclos
+
+- [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores elements with the `img` role ([#3994](https://github.com/biomejs/biome/issues/3994)).
+
+  [MDN recommends](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role) using `role="img"` for grouping images or creating an image from other elements.
+  The following code is no longer reported:
+
+  ```jsx
+  <div role="img" aria-label="That cat is so cute">
+    <p>&#x1F408; &#x1F602;</p>
+  </div>
+  ```
+
+  Contributed by @Conaclos
+
+- [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([#3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
+
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) don't create invaild JSX code when Fragments children contains JSX Expression and in a LogicalExpression. Contributed by @fireairforce
+
 ### Parser
+
+#### Bug fixes
+
+- Forbid undefined as type name for typescript parser. Contributed by @fireairforce
 
 ## v1.9.2 (2024-09-19)
 
@@ -132,8 +232,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/noProcessEnv](https://biomejs.dev/linter/rules/no-process-env/). Contributed by @unvalley
 
 #### Bug fixes
-
-- [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
 
 - [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now ignores `@/` imports and recognizes type imports from Definitely Typed and `bun` imports. Contributed by @Conaclos
 

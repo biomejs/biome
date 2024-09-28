@@ -26,6 +26,11 @@ impl<'source> MarkdownParser<'source> {
             source: self.source.checkpoint(),
         }
     }
+
+    pub fn before_whitespace_count(&self) -> usize {
+        self.source.before_whitespace_count()
+    }
+
     #[allow(dead_code)]
     pub fn rewind(&mut self, checkpoint: MarkdownParserCheckpoint) {
         let MarkdownParserCheckpoint { context, source } = checkpoint;

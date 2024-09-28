@@ -793,25 +793,18 @@ fn show_unmatched_assertion(
 ) {
     let assertion_code = &code[assertion_range];
 
-    // eat all trivia at the start
+    // eat all trivia at the start and at the end
     let mut start: usize = assertion_range.start().into();
-    for chr in assertion_code.chars() {
-        if chr.is_ascii_whitespace() {
-            start += chr.len_utf8();
-        } else {
-            break;
-        }
-    }
-
-    // eat all trivia at the end
+    start += assertion_code
+        .bytes()
+        .take_while(u8::is_ascii_whitespace)
+        .count();
     let mut end: usize = assertion_range.end().into();
-    for chr in assertion_code.chars().rev() {
-        if chr.is_ascii_whitespace() {
-            end -= chr.len_utf8();
-        } else {
-            break;
-        }
-    }
+    end -= assertion_code
+        .bytes()
+        .rev()
+        .take_while(u8::is_ascii_whitespace)
+        .count();
 
     let diagnostic = TestSemanticDiagnostic::new(
         format!("This assertion was not matched: {assertion:?}"),
@@ -850,27 +843,19 @@ fn show_all_events<F>(
     for e in all_events {
         let diagnostic = match e {
             SemanticEvent::ScopeStarted { range, .. } => {
-                let mut start: usize = range.start().into();
                 let code = &code[range];
-                for chr in code.chars() {
-                    if chr.is_ascii_whitespace() {
-                        start += chr.len_utf8();
-                    } else {
-                        break;
-                    }
-                }
+                let mut start: usize = range.start().into();
+                start += code.bytes().take_while(|b| b.is_ascii_whitespace()).count();
                 TestSemanticDiagnostic::new(format!("{e:?}"), start..start + 1)
             }
             SemanticEvent::ScopeEnded { range, .. } => {
-                let mut start: usize = range.end().into();
                 let code = &code[range];
-                for chr in code.chars().rev() {
-                    if chr.is_ascii_whitespace() {
-                        start -= chr.len_utf8();
-                    } else {
-                        break;
-                    }
-                }
+                let mut start: usize = range.end().into();
+                start -= code
+                    .bytes()
+                    .rev()
+                    .take_while(|b| b.is_ascii_whitespace())
+                    .count();
                 TestSemanticDiagnostic::new(format!("{e:?}"), start - 1..start)
             }
             _ => TestSemanticDiagnostic::new(format!("{e:?}"), e.range()),
