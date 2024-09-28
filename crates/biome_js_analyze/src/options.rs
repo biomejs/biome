@@ -284,6 +284,7 @@ pub type UseArrowFunction =
     <lint::complexity::use_arrow_function::UseArrowFunction as biome_analyze::Rule>::Options;
 pub type UseAsConstAssertion =
     <lint::style::use_as_const_assertion::UseAsConstAssertion as biome_analyze::Rule>::Options;
+pub type UseAtIndex = <lint::nursery::use_at_index::UseAtIndex as biome_analyze::Rule>::Options;
 pub type UseAwait = <lint::suspicious::use_await::UseAwait as biome_analyze::Rule>::Options;
 pub type UseBlockStatements =
     <lint::style::use_block_statements::UseBlockStatements as biome_analyze::Rule>::Options;

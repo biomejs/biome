@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: checkAllIndexAccessValid.json
+---
+# Input
+```cjs
+new _.last(array)
+```
+
+# Input
+```cjs
+_.last(array, 2)
+```
+
+# Input
+```cjs
+_.last(...array)
+```

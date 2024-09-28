@@ -1,0 +1,74 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: valid.json
+---
+# Input
+```cjs
+array.at(-1)
+```
+
+# Input
+```cjs
+array[array.length - 0];
+```
+
+# Input
+```cjs
+array[array.length + 1]
+```
+
+# Input
+```cjs
+array[array.length + -1]
+```
+
+# Input
+```cjs
+foo[bar.length - 1]
+```
+
+# Input
+```cjs
+array?.[array.length - 1];
+```
+
+# Input
+```cjs
+array[array.length - 1] = 1
+```
+
+# Input
+```cjs
+array[array.length - 1] %= 1
+```
+
+# Input
+```cjs
+++ array[array.length - 1]
+```
+
+# Input
+```cjs
+array[array.length - 1] --
+```
+
+# Input
+```cjs
+delete array[array.length - 1]
+```
+
+# Input
+```cjs
+class Foo {bar; #bar; baz() {return this.#bar[this.bar.length - 1]}}
+```
+
+# Input
+```cjs
+([array[array.length - 1]] = [])
+```
+
+# Input
+```cjs
+({foo: array[array.length - 1] = 9} = {})
+```

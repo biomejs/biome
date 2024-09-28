@@ -1319,6 +1319,10 @@ export interface Nursery {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	useAtIndex?: RuleFixConfiguration_for_UseAtIndexOptions;
+	/**
 	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */
 	useComponentExportOnlyModules?: RuleConfiguration_for_UseComponentExportOnlyModulesOptions;
@@ -1996,6 +2000,9 @@ export type RuleConfiguration_for_RestrictedImportsOptions =
 export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
+export type RuleFixConfiguration_for_UseAtIndexOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseAtIndexOptions;
 export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseComponentExportOnlyModulesOptions;
@@ -2156,6 +2163,20 @@ export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	 * Rule's options
 	 */
 	options: NoRestrictedTypesOptions;
+}
+export interface RuleWithFixOptions_for_UseAtIndexOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseAtIndexOptions;
 }
 export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
 	/**
@@ -2344,6 +2365,9 @@ export interface RestrictedImportsOptions {
 }
 export interface NoRestrictedTypesOptions {
 	types: {};
+}
+export interface UseAtIndexOptions {
+	checkAllIndexAccess: boolean;
 }
 export interface UseComponentExportOnlyModulesOptions {
 	/**
@@ -2874,6 +2898,7 @@ export type Category =
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
+	| "lint/nursery/useAtIndex"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentCurlyBraces"

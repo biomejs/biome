@@ -1,0 +1,11 @@
+[
+  "string.charAt(string.length - 0);",
+  "string.charAt(string.length + 1)",
+  "string.charAt(string.length + -1)",
+  "foo.charAt(bar.length - 1)",
+  "string?.charAt?.(string.length - 1);",
+  "string?.charAt(string.length - 1);",
+  "string.charAt(9);",
+  "string1.charAt(string2.length - 1);",
+  "string.charAt(hoge.string.length - 1)"
+]

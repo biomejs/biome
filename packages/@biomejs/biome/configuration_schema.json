@@ -2248,6 +2248,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAtIndex": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/UseAtIndexConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useComponentExportOnlyModules": {
 					"description": "Enforce declaring components only within modules that export React Components exclusively.",
 					"anyOf": [
@@ -2849,6 +2856,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/RestrictedImportsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseAtIndexOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseAtIndexOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3978,6 +4004,18 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UseAtIndexConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseAtIndexOptions" }
+			]
+		},
+		"UseAtIndexOptions": {
+			"type": "object",
+			"required": ["checkAllIndexAccess"],
+			"properties": { "checkAllIndexAccess": { "type": "boolean" } },
+			"additionalProperties": false
 		},
 		"UseComponentExportOnlyModulesConfiguration": {
 			"anyOf": [

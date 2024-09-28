@@ -1,0 +1,11 @@
+[
+  "string.charAt(string.length - 1);",
+  "string.charAt(string.length - 0o11);",
+  "some.string.charAt(some.string.length - 1);",
+  "string.charAt((( string.length )) - 0xFF);",
+  "string.charAt(string.length - (( 1 )));",
+  "string.charAt((( string.length - 1 )));",
+  "(( string )).charAt(string.length - 1);",
+  "(( string.charAt ))(string.length - 1);",
+  "(( string.charAt(string.length - 1) ));"
+]

@@ -1,0 +1,49 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: charAtValid.json
+---
+# Input
+```cjs
+string.charAt(string.length - 0);
+```
+
+# Input
+```cjs
+string.charAt(string.length + 1)
+```
+
+# Input
+```cjs
+string.charAt(string.length + -1)
+```
+
+# Input
+```cjs
+foo.charAt(bar.length - 1)
+```
+
+# Input
+```cjs
+string?.charAt?.(string.length - 1);
+```
+
+# Input
+```cjs
+string?.charAt(string.length - 1);
+```
+
+# Input
+```cjs
+string.charAt(9);
+```
+
+# Input
+```cjs
+string1.charAt(string2.length - 1);
+```
+
+# Input
+```cjs
+string.charAt(hoge.string.length - 1)
+```
