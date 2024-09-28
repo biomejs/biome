@@ -1319,7 +1319,7 @@ export interface Nursery {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce using .at to retrieve elements.
 	 */
 	useAtIndex?: RuleFixConfiguration_for_UseAtIndexOptions;
 	/**

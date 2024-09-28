@@ -17,17 +17,78 @@ use crate::JsRuleAction;
 use schemars::JsonSchema;
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Enforce using .at to retrieve elements.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// When extracting elements from an array, especially when retrieving from the end, `.at` is convenient. Replace the previously used syntax with `.at()`.
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// ## Options
+    ///
+    /// ### `checkAllIndexAccess`
+    ///
+    /// By default, only negative element accesses will use errors, but I will also generate errors for positive accesses.
+    ///
+    /// ```json,ignore
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "checkAllIndexAccess": true
+    ///     }
+    /// }
+    /// ```
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
+    /// ```js,expect_diagnostic
+    /// const foo = array[array.length - 1];
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = array[array.length - 5];
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = array.slice(-1)[0];
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = array.slice(-1).pop();
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = array.slice(-5).shift();
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = string.charAt(string.length - 5);
+    /// ```
+    ///
+    /// ```js,expect_diagnostic
+    /// const foo = lodash.last(array);
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js
+    /// const foo = array.at(-1);
+    /// ```
+    ///
+    /// ```js
+    /// const foo = array.at(-5);
+    /// ```
+    ///
+    /// ```js
+    /// const foo = array[100];
+    /// ```
+    ///
+    /// ```js
+    /// const foo = array.at(array.length - 1);
+    /// ```
+    ///
+    /// ```js
+    /// array[array.length - 1] = foo;
+    /// ```
     pub UseAtIndex {
         version: "next",
         name: "useAtIndex",

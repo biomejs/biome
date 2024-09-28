@@ -3359,7 +3359,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_aria_props_supported_by_role:
         Option<RuleConfiguration<biome_js_analyze::options::UseAriaPropsSupportedByRole>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce using .at to retrieve elements."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_at_index: Option<RuleFixConfiguration<biome_js_analyze::options::UseAtIndex>>,
     #[doc = "Enforce declaring components only within modules that export React Components exclusively."]

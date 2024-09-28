@@ -2249,7 +2249,7 @@
 					]
 				},
 				"useAtIndex": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce using .at to retrieve elements.",
 					"anyOf": [
 						{ "$ref": "#/definitions/UseAtIndexConfiguration" },
 						{ "type": "null" }
