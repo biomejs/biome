@@ -62,6 +62,7 @@ pub struct GritFormatOptions {
     line_width: LineWidth,
     quote_style: QuoteStyle,
     attribute_position: AttributePosition,
+    bracket_spacing: BracketSpacing,
 }
 
 impl GritFormatOptions {
@@ -73,8 +74,15 @@ impl GritFormatOptions {
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
             attribute_position: AttributePosition::default(),
+            bracket_spacing: BracketSpacing::default(),
         }
     }
+
+    pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
+        self.bracket_spacing = bracket_spacing;
+        self
+    }
+
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
         self.indent_style = indent_style;
         self
@@ -100,6 +108,10 @@ impl GritFormatOptions {
         self
     }
 
+    pub fn set_bracket_spacing(&mut self, bracket_spacing: BracketSpacing) {
+        self.bracket_spacing = bracket_spacing;
+    }
+
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -120,6 +132,10 @@ impl GritFormatOptions {
         self.quote_style = quote_style;
     }
 
+    pub fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
+    }
+
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
     }
@@ -135,6 +151,7 @@ impl Display for GritFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
+        writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
         writeln!(f, "Attribute Position: {}", self.attribute_position)
     }
 }
@@ -160,8 +177,8 @@ impl FormatOptions for GritFormatOptions {
         self.attribute_position
     }
 
-    fn bracket_spacing(&self) -> biome_formatter::BracketSpacing {
-        BracketSpacing::default()
+    fn bracket_spacing(&self) -> BracketSpacing {
+        self.bracket_spacing
     }
 
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {
