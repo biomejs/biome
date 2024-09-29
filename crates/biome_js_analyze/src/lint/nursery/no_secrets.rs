@@ -36,7 +36,7 @@ declare_lint_rule! {
         version: "1.9.0",
         name: "noSecrets",
         language: "js",
-        recommended: true,
+        recommended: false,
         sources: &[RuleSource::EslintNoSecrets("no-secrets")],
         source_kind: RuleSourceKind::Inspired,
     }
