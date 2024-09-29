@@ -1,11 +1,9 @@
-use std::borrow::Cow;
-
 use ::serde::{Deserialize, Serialize};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource, RuleSourceKind,
 };
-use biome_console::markup;
+use biome_console::{markup, MarkupBuf};
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
     AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression,
@@ -101,28 +99,6 @@ declare_lint_rule! {
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,
     }
-}
-
-declare_node_union! {
-    pub AnyJsArrayAccess = JsComputedMemberExpression | JsCallExpression
-}
-
-pub struct UseAtIndexState {
-    at_number_exp: AnyJsExpression,
-    error_type: ErrorType,
-    object: AnyJsExpression,
-}
-
-pub enum ErrorType {
-    NegativeIndex,
-    IdIndex,
-    StringCharAtNegativeIndex,
-    StringCharAt,
-    Slice(Cow<'static, str>),
-    SlicePop,
-    Slice2(Cow<'static, str>),
-    Slice2Pop,
-    GetLastFunction,
 }
 
 /// If the node is a parenthized expression, it returns the expression inside.
@@ -386,7 +362,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
         return None;
     }
     // selector
-    let (selected_exp, at_value, taker): (AnyJsExpression, i64, &str) = match node {
+    let (selected_exp, extract): (AnyJsExpression, SliceExtractType) = match node {
         // .pop() or .shift()
         AnyJsExpression::JsCallExpression(call_exp) => {
             let arg_length = call_exp.arguments().ok()?.args().into_iter().count();
@@ -409,9 +385,9 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
                 .token_text_trimmed();
             let object = solve_parenthesized_expression(member.object().ok()?)?;
             if member_name == "pop" {
-                (object, -1, ".pop()")
+                (object, SliceExtractType::Pop)
             } else if member_name == "shift" {
-                (object, 0, ".shift()")
+                (object, SliceExtractType::Shift)
             } else {
                 return None;
             }
@@ -427,7 +403,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
             if value != 0 {
                 return None;
             }
-            (object, value, "[0]")
+            (object, SliceExtractType::ZeroMember)
         }
         _ => return None,
     };
@@ -465,36 +441,38 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
     let start_exp = solve_parenthesized_expression(arg0)?;
     let sliced_exp = member.object().ok()?;
 
-    match (at_value, args.len()) {
-        (0, 1) => Some(UseAtIndexState {
+    match (extract.clone(), args.len()) {
+        (SliceExtractType::ZeroMember | SliceExtractType::Shift, 1) => Some(UseAtIndexState {
             at_number_exp: start_exp,
-            error_type: ErrorType::Slice(Cow::Borrowed(taker)),
+            error_type: ErrorType::Slice(SliceArgType::OneArg, extract),
             object: sliced_exp,
         }),
-        (-1, 1) if get_integer_from_literal(&start_exp)? < 0 => Some(UseAtIndexState {
-            at_number_exp: make_number_literal(-1),
-            error_type: ErrorType::SlicePop,
-            object: sliced_exp,
-        }),
-        (0, 2) => {
+        (SliceExtractType::Pop, 1) if get_integer_from_literal(&start_exp)? < 0 => {
+            Some(UseAtIndexState {
+                at_number_exp: make_number_literal(-1),
+                error_type: ErrorType::Slice(SliceArgType::OneArg, SliceExtractType::Pop),
+                object: sliced_exp,
+            })
+        }
+        (SliceExtractType::ZeroMember | SliceExtractType::Shift, 2) => {
             let start_index = get_integer_from_literal(&start_exp)?;
             let end_index = get_integer_from_literal(&solve_parenthesized_expression(
                 args[1].as_any_js_expression()?.clone(),
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
                 at_number_exp: start_exp,
-                error_type: ErrorType::Slice2(Cow::Borrowed(taker)),
+                error_type: ErrorType::Slice(SliceArgType::TwoArg, extract),
                 object: sliced_exp,
             })
         }
-        (-1, 2) => {
+        (SliceExtractType::Pop, 2) => {
             let start_index = get_integer_from_literal(&start_exp)?;
             let end_index = get_integer_from_literal(&solve_parenthesized_expression(
                 args[1].as_any_js_expression()?.clone(),
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
                 at_number_exp: make_number_literal(end_index - 1),
-                error_type: ErrorType::Slice2Pop,
+                error_type: ErrorType::Slice(SliceArgType::TwoArg, SliceExtractType::Pop),
                 object: sliced_exp,
             })
         }
@@ -513,13 +491,13 @@ fn check_binary_expression_member(
     if let Some(negative_index) = negative_index_exp {
         return Some(UseAtIndexState {
             at_number_exp: negative_index,
-            error_type: ErrorType::NegativeIndex,
+            error_type: ErrorType::Index(IndexType::Negative),
             object,
         });
     }
     option.check_all_index_access.then_some(UseAtIndexState {
         at_number_exp: member,
-        error_type: ErrorType::NegativeIndex,
+        error_type: ErrorType::Index(IndexType::Negative),
         object,
     })
 }
@@ -536,7 +514,7 @@ fn check_literal_expression_member(
     let number = value_token.text_trimmed().parse::<i64>().ok()?;
     (number >= 0 && option.check_all_index_access).then_some(UseAtIndexState {
         at_number_exp: make_number_literal(number),
-        error_type: ErrorType::IdIndex,
+        error_type: ErrorType::Index(IndexType::Positive),
         object,
     })
 }
@@ -562,7 +540,7 @@ fn check_unary_expression_member(
     }
     Some(UseAtIndexState {
         at_number_exp: AnyJsExpression::JsUnaryExpression(member),
-        error_type: ErrorType::IdIndex,
+        error_type: ErrorType::Index(IndexType::Positive),
         object,
     })
 }
@@ -604,7 +582,7 @@ fn check_computed_member_expression(
         AnyJsExpression::JsIdentifierExpression(_) => None,
         _ => option.check_all_index_access.then_some(UseAtIndexState {
             at_number_exp: member,
-            error_type: ErrorType::IdIndex,
+            error_type: ErrorType::Index(IndexType::Positive),
             object,
         }),
     }
@@ -672,13 +650,13 @@ fn check_call_expression_char_at(
             if let Some(at_number_exp) = at_number_exp {
                 Some(UseAtIndexState {
                     at_number_exp,
-                    error_type: ErrorType::StringCharAtNegativeIndex,
+                    error_type: ErrorType::StringCharAt(IndexType::Negative),
                     object: char_at_parent,
                 })
             } else {
                 option.check_all_index_access.then_some(UseAtIndexState {
                     at_number_exp: core_arg0,
-                    error_type: ErrorType::StringCharAt,
+                    error_type: ErrorType::StringCharAt(IndexType::Positive),
                     object: char_at_parent,
                 })
             }
@@ -687,13 +665,13 @@ fn check_call_expression_char_at(
         AnyJsExpression::AnyJsLiteralExpression(_member) => {
             option.check_all_index_access.then_some(UseAtIndexState {
                 at_number_exp: core_arg0,
-                error_type: ErrorType::StringCharAt,
+                error_type: ErrorType::StringCharAt(IndexType::Positive),
                 object: char_at_parent.clone(),
             })
         }
         _ => option.check_all_index_access.then_some(UseAtIndexState {
             at_number_exp: core_arg0,
-            error_type: ErrorType::StringCharAt,
+            error_type: ErrorType::StringCharAt(IndexType::Positive),
             object: char_at_parent.clone(),
         }),
     }
@@ -754,6 +732,100 @@ fn make_at_method(object: AnyJsExpression, arg: AnyJsExpression) -> JsCallExpres
     make::js_call_expression(at_member.into(), args).build()
 }
 
+/// Method of specifying the index
+pub enum IndexType {
+    Negative,
+    Positive,
+}
+
+/// The method to retrieve values from `.slice()`
+#[derive(Clone)]
+pub enum SliceExtractType {
+    Pop,
+    Shift,
+    ZeroMember,
+}
+
+/// The number of arguments for `.slice()`
+pub enum SliceArgType {
+    OneArg,
+    TwoArg,
+}
+
+/// Type of Code to Fix
+pub enum ErrorType {
+    Index(IndexType),
+    StringCharAt(IndexType),
+    Slice(SliceArgType, SliceExtractType),
+    GetLastFunction,
+}
+
+/// Return the error message corresponding to the ErrorType.
+fn get_error_message(error_type: &ErrorType) -> MarkupBuf {
+    match error_type {
+        ErrorType::Index(index) => {
+            match index {
+                IndexType::Negative => {
+                    markup! { "Prefer "<Emphasis>"X.at(-Y)"</Emphasis>" over "<Emphasis>"X[X.length - Y]"</Emphasis>"." }.to_owned()
+                }
+                IndexType::Positive => {
+                    markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X[Y]"</Emphasis>"." }.to_owned()
+                }
+            }
+        }
+        ErrorType::StringCharAt(index) => {
+            match index {
+                IndexType::Negative => {
+                    markup! { "Prefer "<Emphasis>"X.at(-Y)"</Emphasis>" over "<Emphasis>"X.charAt(X.length - Y)"</Emphasis>"." }.to_owned()
+                }
+                IndexType::Positive => {
+                    markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X.charAt(Y)"</Emphasis>"." }.to_owned()
+                }
+            }
+        }
+        ErrorType::Slice(arg, extract) => {
+            match extract {
+                SliceExtractType::Pop => match arg {
+                    SliceArgType::TwoArg => {
+                        markup! { "Prefer "<Emphasis>"X.at(Y - 1)"</Emphasis>" over "<Emphasis>"X.slice(a, Y).pop()"</Emphasis>"." }.to_owned()
+                    }
+                    SliceArgType::OneArg =>{
+                        markup! { "Prefer "<Emphasis>"X.at(-1)"</Emphasis>" over "<Emphasis>"X.slice(-a).pop()"</Emphasis>"." }.to_owned()
+                    }
+                }
+                _ => {
+                    let extract_string = match extract {
+                        SliceExtractType::Pop => ".pop()",
+                        SliceExtractType::Shift => ".shift()",
+                        SliceExtractType::ZeroMember => "[0]",
+                    };
+                    match arg {
+                        SliceArgType::OneArg => {
+                            markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X.slice(Y)"{extract_string}</Emphasis>"." }.to_owned()
+                        }
+                        SliceArgType::TwoArg => {
+                            markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X.slice(Y, a)"{extract_string}</Emphasis>"." }.to_owned()
+                        }
+                    }
+                }
+            }
+        }
+        ErrorType::GetLastFunction => {
+            markup! { "Prefer "<Emphasis>"X.at(-1)"</Emphasis>" over "<Emphasis>"_.last(X)"</Emphasis>"." }.to_owned()
+        }
+    }
+}
+
+declare_node_union! {
+    pub AnyJsArrayAccess = JsComputedMemberExpression | JsCallExpression
+}
+
+pub struct UseAtIndexState {
+    at_number_exp: AnyJsExpression,
+    error_type: ErrorType,
+    object: AnyJsExpression,
+}
+
 #[derive(
     Clone,
     Debug,
@@ -794,43 +866,17 @@ impl Rule for UseAtIndex {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        Some(RuleDiagnostic::new(
-            rule_category!(),
-            node.range(),
-            markup! {
-                "Replace index references with "<Emphasis>".at()"</Emphasis>"."
-            }.to_owned(),
-        ).note(
-            match &state.error_type {
-                ErrorType::NegativeIndex => {
-                    markup! { "Prefer "<Emphasis>"X.at(-Y)"</Emphasis>" over "<Emphasis>"X[X.length - Y]"</Emphasis>"." }.to_owned()
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Replace index references with "<Emphasis>".at()"</Emphasis>"."
                 }
-                ErrorType::IdIndex => {
-                    markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X[Y]"</Emphasis>"." }.to_owned()
-                }
-                ErrorType::StringCharAtNegativeIndex => {
-                    markup! { "Prefer "<Emphasis>"X.at(-Y)"</Emphasis>" over "<Emphasis>"X.charAt(X.length - Y)"</Emphasis>"." }.to_owned()
-                }
-                ErrorType::StringCharAt => {
-                    markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X.charAt(Y)"</Emphasis>"." }.to_owned()
-                }
-                ErrorType::Slice(taker) => {
-                    markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X.slice(Y)"{taker}</Emphasis>"." }.to_owned()
-                }
-                ErrorType::SlicePop => {
-                    markup! { "Prefer "<Emphasis>"X.at(-1)"</Emphasis>" over "<Emphasis>"X.slice(-a).pop()"</Emphasis>"." }.to_owned()
-                }
-                ErrorType::Slice2(taker) => {
-                    markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X.slice(Y, a)"{taker}</Emphasis>"." }.to_owned()
-                }
-                ErrorType::Slice2Pop => {
-                    markup! { "Prefer "<Emphasis>"X.at(Y - 1)"</Emphasis>" over "<Emphasis>"X.slice(a, Y).pop()"</Emphasis>"." }.to_owned()
-                }
-                ErrorType::GetLastFunction => {
-                    markup! { "Prefer "<Emphasis>"X.at(-1)"</Emphasis>" over "<Emphasis>"_.last(X)"</Emphasis>"." }.to_owned()
-                }
-            }
-        ))
+                .to_owned(),
+            )
+            .note(get_error_message(&state.error_type)),
+        )
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
