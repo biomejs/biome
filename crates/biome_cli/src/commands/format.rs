@@ -34,6 +34,7 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) write: bool,
     pub(crate) suppress: bool,
+    pub(crate) suppress_reason: Option<String>,
     pub(crate) fix: bool,
     pub(crate) cli_options: CliOptions,
     pub(crate) paths: Vec<OsString>,
@@ -57,6 +58,7 @@ pub(crate) fn format(
         files_configuration,
         write,
         suppress,
+        suppress_reason,
         fix,
         mut json_formatter,
         css_formatter,
@@ -72,6 +74,7 @@ pub(crate) fn format(
         apply_unsafe: false,
         write,
         suppress,
+        suppress_reason,
         fix,
         unsafe_: false,
     })?;

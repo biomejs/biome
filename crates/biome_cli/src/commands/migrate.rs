@@ -14,6 +14,7 @@ pub(crate) fn migrate(
     cli_options: CliOptions,
     write: bool,
     suppress: bool,
+    suppress_reason: Option<String>,
     fix: bool,
     sub_command: Option<MigrateSubCommand>,
 ) -> Result<(), CliDiagnostic> {
@@ -31,6 +32,7 @@ pub(crate) fn migrate(
         apply_unsafe: false,
         write,
         suppress,
+        suppress_reason,
         fix,
         unsafe_: false,
     })?;

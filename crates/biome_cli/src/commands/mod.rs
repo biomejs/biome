@@ -108,8 +108,11 @@ pub enum BiomeCommand {
         write: bool,
 
         /// Writes inline biome-ignore comments to ignore existing diagnostics
-        #[bpaf(long("write"), switch)]
+        #[bpaf(long("suppress"), switch)]
         suppress: bool,
+
+        #[bpaf(long("suppress-reason"))]
+        suppress_reason: Option<String>,
 
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
@@ -191,6 +194,9 @@ pub enum BiomeCommand {
 
         #[bpaf(long("suppress"))]
         suppress: bool,
+
+        #[bpaf(long("suppress-reason"))]
+        suppress_reason: Option<String>,
 
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
@@ -312,6 +318,10 @@ pub enum BiomeCommand {
         #[bpaf(long("suppress"), switch)]
         suppress: bool,
 
+        /// Writes inline biome-ignore comments to ignore existing diagnostics
+        #[bpaf(long("suppress-reason"))]
+        suppress_reason: Option<String>,
+
         /// Alias of `--write`, writes formatted files to file system.
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
@@ -422,8 +432,11 @@ pub enum BiomeCommand {
         write: bool,
 
         /// Writes inline biome-ignore comments to ignore existing diagnostics
-        #[bpaf(long("write"), switch)]
-        write_suppressions: bool,
+        #[bpaf(long("suppress"), switch)]
+        suppress: bool,
+
+        #[bpaf(long("suppress-reason"))]
+        suppress_reason: Option<String>,
 
         /// Alias of `--write`, writes the new configuration file to disk
         #[bpaf(long("fix"), switch, hide_usage)]
