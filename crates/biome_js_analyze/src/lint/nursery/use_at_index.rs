@@ -470,47 +470,40 @@ fn check_get_element_by_slice(node: &AnyJsExpression) -> Option<UseAtIndexState>
     let start_exp = solve_parenthesized_expression(arg0)?;
     let sliced_exp = member.object().ok()?;
 
-    if args.len() == 1 {
-        if at_value == 0 {
-            return Some(UseAtIndexState {
-                at_number_exp: start_exp,
-                error_type: ErrorType::Slice(Cow::Borrowed(taker)),
-                object: sliced_exp,
-            });
-        }
-        let start_index = get_integer_from_literal(&start_exp)?;
-        if start_index < 0 && at_value == -1 {
-            return Some(UseAtIndexState {
-                at_number_exp: make_number_literal(-1),
-                error_type: ErrorType::SlicePop,
-                object: sliced_exp,
-            });
-        }
-        return None;
-    }
-    let start_index = get_integer_from_literal(&start_exp)?;
-    let AnyJsCallArgument::AnyJsExpression(arg1) = &args[1] else {
-        return None;
-    };
-    let end_exp = solve_parenthesized_expression(arg1)?;
-    let end_index = get_integer_from_literal(&end_exp)?;
-    // enable only x.slice(2, 4)
-    if start_index * end_index >= 0 && start_index < end_index {
-        if at_value == 0 {
-            Some(UseAtIndexState {
+    match (at_value, args.len()) {
+        (0, 1) => Some(UseAtIndexState {
+            at_number_exp: start_exp,
+            error_type: ErrorType::Slice(Cow::Borrowed(taker)),
+            object: sliced_exp,
+        }),
+        (-1, 1) if get_integer_from_literal(&start_exp)? < 0 => Some(UseAtIndexState {
+            at_number_exp: make_number_literal(-1),
+            error_type: ErrorType::SlicePop,
+            object: sliced_exp,
+        }),
+        (0, 2) => {
+            let start_index = get_integer_from_literal(&start_exp)?;
+            let end_index = get_integer_from_literal(&solve_parenthesized_expression(
+                &args[1].as_any_js_expression()?.clone(),
+            )?)?;
+            (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
                 at_number_exp: start_exp,
                 error_type: ErrorType::Slice2(Cow::Borrowed(taker)),
                 object: sliced_exp,
             })
-        } else {
-            Some(UseAtIndexState {
+        }
+        (-1, 2) => {
+            let start_index = get_integer_from_literal(&start_exp)?;
+            let end_index = get_integer_from_literal(&solve_parenthesized_expression(
+                &args[1].as_any_js_expression()?.clone(),
+            )?)?;
+            (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
                 at_number_exp: make_number_literal(end_index - 1),
                 error_type: ErrorType::Slice2Pop,
                 object: sliced_exp,
             })
         }
-    } else {
-        None
+        _ => None,
     }
 }
 
