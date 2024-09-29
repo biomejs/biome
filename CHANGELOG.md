@@ -39,6 +39,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix a case where CSS files weren't correctly linted using the default configuration. Contributed by @ematipico
 
+#### Bug fixes
+
+- Fix [#4116](https://github.com/biomejs/biome/issues/4116). Unify LSP code action kinds. Contributed by @vitallium
+
 ### Formatter
 
 #### Bug fixes
