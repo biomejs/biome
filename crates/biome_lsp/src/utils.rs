@@ -128,18 +128,7 @@ pub(crate) fn code_fix_to_lsp(
         })
         .unwrap_or_default();
 
-    let kind = action.category.to_str();
-    let mut kind = kind.into_owned();
-
-    if !matches!(action.category, ActionCategory::Source(_)) {
-        if let Some((group, rule)) = action.rule_name {
-            kind.push('.');
-            kind.push_str(group.as_ref());
-            kind.push('.');
-            kind.push_str(rule.as_ref());
-        }
-    }
-
+    let kind = action.category.to_str().into_owned();
     let suggestion = action.suggestion;
 
     let mut changes = HashMap::new();
