@@ -660,7 +660,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
                 for action in signal.actions() {
                     if action.is_suppression()
-                        && params.write_suppressions
+                        && params.suppress
                         && action.applicability == Applicability::Always
                         // TODO: I was getting suppressions written for nursery rules, but I don't know
                         // why so I hacked this.

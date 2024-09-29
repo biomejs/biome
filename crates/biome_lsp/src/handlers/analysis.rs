@@ -242,7 +242,7 @@ fn fix_all(
     let fixed = session.workspace.fix_file(FixFileParams {
         path: biome_path,
         fix_file_mode: FixFileMode::SafeFixes,
-        write_suppressions: false,
+        suppress: false,
         should_format,
         only: vec![],
         skip: vec![],
