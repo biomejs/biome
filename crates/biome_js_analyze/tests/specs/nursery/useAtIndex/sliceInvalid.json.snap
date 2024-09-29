@@ -149,6 +149,54 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
 
 # Input
 ```cjs
+array.slice(-9).pop()
+```
+
+# Diagnostics
+```
+sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ array.slice(-9).pop()
+      │ ^^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-1) over X.slice(-a).pop().
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - array.slice(-9).pop()
+  + array.at(-1)
+  
+
+```
+
+# Input
+```cjs
+array.slice(-1.1)[0]
+```
+
+# Diagnostics
+```
+sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ array.slice(-1.1)[0]
+      │ ^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(Y) over X.slice(Y)[0].
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - array.slice(-1.1)[0]
+  + array.at(-1.1)
+  
+
+```
+
+# Input
+```cjs
 array.slice(-0xA)[0b000]
 ```
 
@@ -629,7 +677,7 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
 
 # Input
 ```cjs
-array.slice(-4).pop()
+array.slice(hoge)[0]
 ```
 
 # Diagnostics
@@ -638,15 +686,39 @@ sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
 
   ! Replace index references with .at().
   
-  > 1 │ array.slice(-4).pop()
-      │ ^^^^^^^^^^^^^^^^^^^^^
+  > 1 │ array.slice(hoge)[0]
+      │ ^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-1) over X.slice(-a).pop().
+  i Prefer X.at(Y) over X.slice(Y)[0].
   
   i Unsafe fix: Replace index references with .at().
   
-  - array.slice(-4).pop()
-  + array.at(-1)
+  - array.slice(hoge)[0]
+  + array.at(hoge)
+  
+
+```
+
+# Input
+```cjs
+array.slice(hoge).shift()
+```
+
+# Diagnostics
+```
+sliceInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ array.slice(hoge).shift()
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(Y) over X.slice(Y).shift().
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - array.slice(hoge).shift()
+  + array.at(hoge)
   
 
 ```

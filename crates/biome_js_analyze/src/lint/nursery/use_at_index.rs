@@ -466,8 +466,6 @@ fn check_get_element_by_slice(node: &AnyJsExpression) -> Option<UseAtIndexState>
         return None;
     };
     let start_exp = solve_parenthesized_expression(arg0)?;
-    let start_index = get_integer_from_literal(&start_exp)?;
-
     let sliced_exp = member.object().ok()?;
 
     if args.len() == 1 {
@@ -478,6 +476,7 @@ fn check_get_element_by_slice(node: &AnyJsExpression) -> Option<UseAtIndexState>
                 object: sliced_exp,
             });
         }
+        let start_index = get_integer_from_literal(&start_exp)?;
         if start_index < 0 && at_value == -1 {
             return Some(UseAtIndexState {
                 at_number_exp: make_number_literal(-1),
@@ -487,6 +486,7 @@ fn check_get_element_by_slice(node: &AnyJsExpression) -> Option<UseAtIndexState>
         }
         return None;
     }
+    let start_index = get_integer_from_literal(&start_exp)?;
     let AnyJsCallArgument::AnyJsExpression(arg1) = &args[1] else {
         return None;
     };
