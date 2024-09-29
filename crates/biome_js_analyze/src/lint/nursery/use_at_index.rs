@@ -154,52 +154,47 @@ fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bo
     // solve JsParenthesizedExpression
     let left = solve_parenthesized_expression(left)?;
     let right = solve_parenthesized_expression(right)?;
-    match left {
+    match (left, right) {
         // x[0]
-        AnyJsExpression::JsComputedMemberExpression(left) => match right {
-            AnyJsExpression::JsComputedMemberExpression(right) => {
-                let AnyJsExpression::AnyJsLiteralExpression(left_member) =
-                    solve_parenthesized_expression(left.member().ok()?)?
-                else {
-                    return Some(false);
-                };
-                let AnyJsExpression::AnyJsLiteralExpression(right_member) =
-                    solve_parenthesized_expression(right.member().ok()?)?
-                else {
-                    return Some(false);
-                };
-                if left_member.text() != right_member.text() {
-                    return Some(false);
-                }
+        (
+            AnyJsExpression::JsComputedMemberExpression(left),
+            AnyJsExpression::JsComputedMemberExpression(right),
+        ) => {
+            let AnyJsExpression::AnyJsLiteralExpression(left_member) =
+                solve_parenthesized_expression(left.member().ok()?)?
+            else {
+                return Some(false);
+            };
+            let AnyJsExpression::AnyJsLiteralExpression(right_member) =
+                solve_parenthesized_expression(right.member().ok()?)?
+            else {
+                return Some(false);
+            };
+            if left_member.text() != right_member.text() {
+                return Some(false);
+            }
+            is_same_reference(left.object().ok()?, right.object().ok()?)
+        }
+        // x.y
+        (
+            AnyJsExpression::JsStaticMemberExpression(left),
+            AnyJsExpression::JsStaticMemberExpression(right),
+        ) => {
+            let left_member = left.member().ok()?;
+            let right_member = right.member().ok()?;
+            if left_member.text() != right_member.text() {
+                Some(false)
+            } else {
                 is_same_reference(left.object().ok()?, right.object().ok()?)
             }
-            _ => Some(false),
-        },
-        // x.y
-        AnyJsExpression::JsStaticMemberExpression(left) => match right {
-            AnyJsExpression::JsStaticMemberExpression(right) => {
-                let left_member = left.member().ok()?;
-                let right_member = right.member().ok()?;
-                if left_member.text() != right_member.text() {
-                    Some(false)
-                } else {
-                    is_same_reference(left.object().ok()?, right.object().ok()?)
-                }
-            }
-            _ => Some(false),
-        },
+        }
         // x
-        AnyJsExpression::JsIdentifierExpression(left) => match right {
-            AnyJsExpression::JsIdentifierExpression(right) => {
-                Some(left.name().ok()?.text() == right.name().ok()?.text())
-            }
-            _ => Some(false),
-        },
+        (
+            AnyJsExpression::JsIdentifierExpression(left),
+            AnyJsExpression::JsIdentifierExpression(right),
+        ) => Some(left.name().ok()?.text() == right.name().ok()?.text()),
         // this
-        AnyJsExpression::JsThisExpression(_) => match right {
-            AnyJsExpression::JsThisExpression(_) => Some(true),
-            _ => Some(false),
-        },
+        (AnyJsExpression::JsThisExpression(_), AnyJsExpression::JsThisExpression(_)) => Some(true),
         _ => Some(false),
     }
 }
