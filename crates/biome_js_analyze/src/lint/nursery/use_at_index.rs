@@ -362,7 +362,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
         return None;
     }
     // selector
-    let (selected_exp, extract): (AnyJsExpression, SliceExtractType) = match node {
+    let (selected_exp, extract_type): (AnyJsExpression, SliceExtractType) = match node {
         // .pop() or .shift()
         AnyJsExpression::JsCallExpression(call_exp) => {
             let arg_length = call_exp.arguments().ok()?.args().into_iter().count();
@@ -441,16 +441,22 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
     let start_exp = solve_parenthesized_expression(arg0)?;
     let sliced_exp = member.object().ok()?;
 
-    match (extract.clone(), args.len()) {
+    match (extract_type.clone(), args.len()) {
         (SliceExtractType::ZeroMember | SliceExtractType::Shift, 1) => Some(UseAtIndexState {
             at_number_exp: start_exp,
-            error_type: ErrorType::Slice(SliceArgType::OneArg, extract),
+            error_type: ErrorType::Slice {
+                arg_type: SliceArgType::OneArg,
+                extract_type,
+            },
             object: sliced_exp,
         }),
         (SliceExtractType::Pop, 1) if get_integer_from_literal(&start_exp)? < 0 => {
             Some(UseAtIndexState {
                 at_number_exp: make_number_literal(-1),
-                error_type: ErrorType::Slice(SliceArgType::OneArg, SliceExtractType::Pop),
+                error_type: ErrorType::Slice {
+                    arg_type: SliceArgType::OneArg,
+                    extract_type: SliceExtractType::Pop,
+                },
                 object: sliced_exp,
             })
         }
@@ -461,7 +467,10 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
                 at_number_exp: start_exp,
-                error_type: ErrorType::Slice(SliceArgType::TwoArg, extract),
+                error_type: ErrorType::Slice {
+                    arg_type: SliceArgType::TwoArg,
+                    extract_type,
+                },
                 object: sliced_exp,
             })
         }
@@ -472,7 +481,10 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
                 at_number_exp: make_number_literal(end_index - 1),
-                error_type: ErrorType::Slice(SliceArgType::TwoArg, SliceExtractType::Pop),
+                error_type: ErrorType::Slice {
+                    arg_type: SliceArgType::TwoArg,
+                    extract_type: SliceExtractType::Pop,
+                },
                 object: sliced_exp,
             })
         }
@@ -491,13 +503,13 @@ fn check_binary_expression_member(
     if let Some(negative_index) = negative_index_exp {
         return Some(UseAtIndexState {
             at_number_exp: negative_index,
-            error_type: ErrorType::Index(IndexType::Negative),
+            error_type: ErrorType::Index { is_negative: true },
             object,
         });
     }
     option.check_all_index_access.then_some(UseAtIndexState {
         at_number_exp: member,
-        error_type: ErrorType::Index(IndexType::Negative),
+        error_type: ErrorType::Index { is_negative: true },
         object,
     })
 }
@@ -514,7 +526,7 @@ fn check_literal_expression_member(
     let number = value_token.text_trimmed().parse::<i64>().ok()?;
     (number >= 0 && option.check_all_index_access).then_some(UseAtIndexState {
         at_number_exp: make_number_literal(number),
-        error_type: ErrorType::Index(IndexType::Positive),
+        error_type: ErrorType::Index { is_negative: false },
         object,
     })
 }
@@ -540,7 +552,7 @@ fn check_unary_expression_member(
     }
     Some(UseAtIndexState {
         at_number_exp: AnyJsExpression::JsUnaryExpression(member),
-        error_type: ErrorType::Index(IndexType::Positive),
+        error_type: ErrorType::Index { is_negative: false },
         object,
     })
 }
@@ -582,7 +594,7 @@ fn check_computed_member_expression(
         AnyJsExpression::JsIdentifierExpression(_) => None,
         _ => option.check_all_index_access.then_some(UseAtIndexState {
             at_number_exp: member,
-            error_type: ErrorType::Index(IndexType::Positive),
+            error_type: ErrorType::Index { is_negative: false },
             object,
         }),
     }
@@ -650,13 +662,13 @@ fn check_call_expression_char_at(
             if let Some(at_number_exp) = at_number_exp {
                 Some(UseAtIndexState {
                     at_number_exp,
-                    error_type: ErrorType::StringCharAt(IndexType::Negative),
+                    error_type: ErrorType::StringCharAt { is_negative: true },
                     object: char_at_parent,
                 })
             } else {
                 option.check_all_index_access.then_some(UseAtIndexState {
                     at_number_exp: core_arg0,
-                    error_type: ErrorType::StringCharAt(IndexType::Positive),
+                    error_type: ErrorType::StringCharAt { is_negative: false },
                     object: char_at_parent,
                 })
             }
@@ -665,13 +677,13 @@ fn check_call_expression_char_at(
         AnyJsExpression::AnyJsLiteralExpression(_member) => {
             option.check_all_index_access.then_some(UseAtIndexState {
                 at_number_exp: core_arg0,
-                error_type: ErrorType::StringCharAt(IndexType::Positive),
+                error_type: ErrorType::StringCharAt { is_negative: false },
                 object: char_at_parent.clone(),
             })
         }
         _ => option.check_all_index_access.then_some(UseAtIndexState {
             at_number_exp: core_arg0,
-            error_type: ErrorType::StringCharAt(IndexType::Positive),
+            error_type: ErrorType::StringCharAt { is_negative: false },
             object: char_at_parent.clone(),
         }),
     }
@@ -732,12 +744,6 @@ fn make_at_method(object: AnyJsExpression, arg: AnyJsExpression) -> JsCallExpres
     make::js_call_expression(at_member.into(), args).build()
 }
 
-/// Method of specifying the index
-pub enum IndexType {
-    Negative,
-    Positive,
-}
-
 /// The method to retrieve values from `.slice()`
 #[derive(Clone)]
 pub enum SliceExtractType {
@@ -754,62 +760,44 @@ pub enum SliceArgType {
 
 /// Type of Code to Fix
 pub enum ErrorType {
-    Index(IndexType),
-    StringCharAt(IndexType),
-    Slice(SliceArgType, SliceExtractType),
+    Index {
+        is_negative: bool,
+    },
+    StringCharAt {
+        is_negative: bool,
+    },
+    Slice {
+        arg_type: SliceArgType,
+        extract_type: SliceExtractType,
+    },
     GetLastFunction,
 }
 
 /// Return the error message corresponding to the ErrorType.
 fn get_error_message(error_type: &ErrorType) -> MarkupBuf {
     match error_type {
-        ErrorType::Index(index) => {
-            match index {
-                IndexType::Negative => {
-                    markup! { "Prefer "<Emphasis>"X.at(-Y)"</Emphasis>" over "<Emphasis>"X[X.length - Y]"</Emphasis>"." }.to_owned()
-                }
-                IndexType::Positive => {
-                    markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X[Y]"</Emphasis>"." }.to_owned()
-                }
-            }
-        }
-        ErrorType::StringCharAt(index) => {
-            match index {
-                IndexType::Negative => {
-                    markup! { "Prefer "<Emphasis>"X.at(-Y)"</Emphasis>" over "<Emphasis>"X.charAt(X.length - Y)"</Emphasis>"." }.to_owned()
-                }
-                IndexType::Positive => {
-                    markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X.charAt(Y)"</Emphasis>"." }.to_owned()
-                }
-            }
-        }
-        ErrorType::Slice(arg, extract) => {
-            match extract {
-                SliceExtractType::Pop => match arg {
-                    SliceArgType::TwoArg => {
-                        markup! { "Prefer "<Emphasis>"X.at(Y - 1)"</Emphasis>" over "<Emphasis>"X.slice(a, Y).pop()"</Emphasis>"." }.to_owned()
-                    }
-                    SliceArgType::OneArg =>{
-                        markup! { "Prefer "<Emphasis>"X.at(-1)"</Emphasis>" over "<Emphasis>"X.slice(-a).pop()"</Emphasis>"." }.to_owned()
-                    }
-                }
-                _ => {
-                    let extract_string = match extract {
-                        SliceExtractType::Pop => ".pop()",
-                        SliceExtractType::Shift => ".shift()",
-                        SliceExtractType::ZeroMember => "[0]",
-                    };
-                    match arg {
-                        SliceArgType::OneArg => {
-                            markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X.slice(Y)"{extract_string}</Emphasis>"." }.to_owned()
-                        }
-                        SliceArgType::TwoArg => {
-                            markup! { "Prefer "<Emphasis>"X.at(Y)"</Emphasis>" over "<Emphasis>"X.slice(Y, a)"{extract_string}</Emphasis>"." }.to_owned()
-                        }
-                    }
-                }
-            }
-        }
+        ErrorType::Index { is_negative } | ErrorType::StringCharAt { is_negative } => {
+            let (method, old_method) = if *is_negative {
+                ("X.at(-Y)", if matches!(error_type, ErrorType::StringCharAt { .. }) { "X.charAt(X.length - Y)" } else { "X[X.length - Y]" })
+            } else {
+                ("X.at(Y)", if matches!(error_type, ErrorType::StringCharAt { .. }) { "X.charAt(Y)" } else { "X[Y]" })
+            };
+            markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
+        },
+        ErrorType::Slice { arg_type, extract_type } => {
+            let extract_string = match extract_type {
+                SliceExtractType::Pop => ".pop()",
+                SliceExtractType::Shift => ".shift()",
+                SliceExtractType::ZeroMember => "[0]",
+            };
+            let (method, old_method) = match (arg_type, extract_type) {
+                (SliceArgType::OneArg, SliceExtractType::Pop) => ("X.at(-1)", format!("X.slice(-a){}", extract_string)),
+                (SliceArgType::TwoArg, SliceExtractType::Pop) => ("X.at(Y - 1)", format!("X.slice(a, Y){}", extract_string)),
+                (SliceArgType::OneArg, _) => ("X.at(Y)", format!("X.slice(Y){}", extract_string)),
+                (SliceArgType::TwoArg, _) => ("X.at(Y)", format!("X.slice(Y, a){}", extract_string)),
+            };
+            markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
+        },
         ErrorType::GetLastFunction => {
             markup! { "Prefer "<Emphasis>"X.at(-1)"</Emphasis>" over "<Emphasis>"_.last(X)"</Emphasis>"." }.to_owned()
         }
