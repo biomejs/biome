@@ -807,8 +807,7 @@ impl ErrorType {
                 let (method, old_method) = match (arg_type, extract_type) {
                     (SliceArgType::OneArg, SliceExtractType::Pop) => ("X.at(-1)", format!("X.slice(-a){}", extract_string)),
                     (SliceArgType::TwoArg, SliceExtractType::Pop) => ("X.at(Y - 1)", format!("X.slice(a, Y){}", extract_string)),
-                    (SliceArgType::OneArg, _) => ("X.at(Y)", format!("X.slice(Y){}", extract_string)),
-                    (SliceArgType::TwoArg, _) => ("X.at(Y)", format!("X.slice(Y, a){}", extract_string)),
+                    _ => ("X.at(Y)", format!("X.slice({}){}", if matches!(arg_type, SliceArgType::OneArg) { "Y" } else { "Y, a" }, extract_string)),
                 };
                 markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
             },
