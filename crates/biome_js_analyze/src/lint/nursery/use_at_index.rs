@@ -598,13 +598,12 @@ fn check_computed_member_expression(
             check_unary_expression_member(unary, object, option)
         }
         AnyJsExpression::JsIdentifierExpression(_) => None,
-        _ => option
-            .check_all_index_access
-            .then_some(UseAtIndexState::new(
-                member,
-                ErrorType::Index { is_negative: false },
-                object,
-            )),
+        _ if option.check_all_index_access => Some(UseAtIndexState::new(
+            member,
+            ErrorType::Index { is_negative: false },
+            object,
+        )),
+        _ => None,
     }
 }
 
