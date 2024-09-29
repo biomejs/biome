@@ -8,8 +8,9 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_factory::make::{self};
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallExpression,
-    JsComputedMemberExpression, JsParenthesizedExpression, JsUnaryExpression, T,
+    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsBinaryExpression,
+    JsCallExpression, JsComputedMemberExpression, JsParenthesizedExpression,
+    JsStaticMemberExpression, JsUnaryExpression, T,
 };
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
 
@@ -317,7 +318,7 @@ fn make_plus_binary_expression(list: Vec<AnyJsExpression>) -> Option<AnyJsExpres
 ///     hoge[hoge.length - 1] // => Some(-1)
 ///     hoge[fuga.length - 2] // => None
 /// ```
-fn get_negative_index(
+fn extract_negative_index_expression(
     member: &AnyJsExpression,
     object: &AnyJsExpression,
 ) -> Option<AnyJsExpression> {
@@ -360,7 +361,7 @@ fn get_negative_index(
 }
 
 /// Is the node a child node of `delete`?
-fn is_delete_child(node: &AnyJsExpression) -> Option<bool> {
+fn is_within_delete_expression(node: &AnyJsExpression) -> Option<bool> {
     node.syntax().parent()?.ancestors().find_map(|ancestor| {
         if let Some(unary) = JsUnaryExpression::cast(ancestor.clone()) {
             unary
@@ -386,8 +387,8 @@ fn make_number_literal(value: i64) -> AnyJsExpression {
 ///     .slice(0)[0]
 ///     .slice(0, 1).pop(0)
 /// ```
-fn check_get_element_by_slice(node: &AnyJsExpression) -> Option<UseAtIndexState> {
-    if is_delete_child(node).unwrap_or(false) {
+fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexState> {
+    if is_within_delete_expression(node).unwrap_or(false) {
         return None;
     }
     // selector
@@ -507,6 +508,242 @@ fn check_get_element_by_slice(node: &AnyJsExpression) -> Option<UseAtIndexState>
     }
 }
 
+fn check_binary_expression_member(
+    member: JsBinaryExpression,
+    object: AnyJsExpression,
+    option: &UseAtIndexOptions,
+) -> Option<UseAtIndexState> {
+    let member = AnyJsExpression::JsBinaryExpression(member);
+    let negative_index_exp =
+        extract_negative_index_expression(&member, &solve_parenthesized_expression(&object)?);
+    if let Some(negative_index) = negative_index_exp {
+        return Some(UseAtIndexState {
+            at_number_exp: negative_index,
+            error_type: ErrorType::NegativeIndex,
+            object,
+        });
+    }
+    option.check_all_index_access.then_some(UseAtIndexState {
+        at_number_exp: member,
+        error_type: ErrorType::NegativeIndex,
+        object,
+    })
+}
+
+fn check_literal_expression_member(
+    member: AnyJsLiteralExpression,
+    object: AnyJsExpression,
+    option: &UseAtIndexOptions,
+) -> Option<UseAtIndexState> {
+    let AnyJsLiteralExpression::JsNumberLiteralExpression(member) = member else {
+        return None;
+    };
+    let value_token = member.value_token().ok()?;
+    let number = value_token.text_trimmed().parse::<i64>().ok()?;
+    (number >= 0 && option.check_all_index_access).then_some(UseAtIndexState {
+        at_number_exp: make_number_literal(number),
+        error_type: ErrorType::IdIndex,
+        object,
+    })
+}
+
+fn check_unary_expression_member(
+    member: JsUnaryExpression,
+    object: AnyJsExpression,
+    option: &UseAtIndexOptions,
+) -> Option<UseAtIndexState> {
+    if !option.check_all_index_access {
+        return None;
+    }
+    // ignore -5
+    let token = member.operator_token().ok()?;
+    if token.kind() == T![-] {
+        if let Some(arg) =
+            get_integer_from_literal(&solve_parenthesized_expression(&member.argument().ok()?)?)
+        {
+            if arg >= 0 {
+                return None;
+            }
+        }
+    }
+    Some(UseAtIndexState {
+        at_number_exp: AnyJsExpression::JsUnaryExpression(member),
+        error_type: ErrorType::IdIndex,
+        object,
+    })
+}
+
+/// check hoge[0]
+fn check_computed_member_expression(
+    exp: &JsComputedMemberExpression,
+    option: &UseAtIndexOptions,
+) -> Option<UseAtIndexState> {
+    // check slice
+    if let Some(slice_err) =
+        analyze_slice_element_access(&AnyJsExpression::JsComputedMemberExpression(exp.clone()))
+    {
+        return Some(slice_err);
+    }
+    // invalid optional chain, mutable case
+    if exp.is_optional_chain()
+        || is_within_delete_expression(&AnyJsExpression::JsComputedMemberExpression(exp.clone()))
+            .unwrap_or(false)
+    {
+        return None;
+    }
+    // check member
+    let member = solve_parenthesized_expression(&exp.member().ok()?)?;
+    let object = exp.object().ok()?;
+    match member.clone() {
+        // hoge[hoge.length - 1]
+        AnyJsExpression::JsBinaryExpression(binary) => {
+            check_binary_expression_member(binary, object, option)
+        }
+        // hoge[1]
+        AnyJsExpression::AnyJsLiteralExpression(literal) => {
+            check_literal_expression_member(literal, object, option)
+        }
+        // hoge[-x]
+        AnyJsExpression::JsUnaryExpression(unary) => {
+            check_unary_expression_member(unary, object, option)
+        }
+        AnyJsExpression::JsIdentifierExpression(_) => None,
+        _ => option.check_all_index_access.then_some(UseAtIndexState {
+            at_number_exp: member,
+            error_type: ErrorType::IdIndex,
+            object,
+        }),
+    }
+}
+
+fn check_call_expression_last(
+    call_exp: &JsCallExpression,
+    member: &JsStaticMemberExpression,
+) -> Option<UseAtIndexState> {
+    let args: Vec<_> = call_exp
+        .arguments()
+        .ok()?
+        .args()
+        .into_iter()
+        .flatten()
+        .collect();
+    if args.len() != 1 {
+        return None;
+    }
+    let object = member.object().ok()?;
+    let AnyJsExpression::JsIdentifierExpression(object) = object else {
+        return None;
+    };
+    let lodash_function = ["_", "lodash", "underscore"];
+    let object_name = object.syntax().text().to_string();
+    if lodash_function.contains(&object_name.as_str()) {
+        let AnyJsCallArgument::AnyJsExpression(arg0) = &args[0] else {
+            return None;
+        };
+        Some(UseAtIndexState {
+            at_number_exp: make_number_literal(-1),
+            error_type: ErrorType::GetLastFunction,
+            object: solve_parenthesized_expression(arg0)?,
+        })
+    } else {
+        None
+    }
+}
+
+fn check_call_expression_char_at(
+    call_exp: &JsCallExpression,
+    member: &JsStaticMemberExpression,
+    option: &UseAtIndexOptions,
+) -> Option<UseAtIndexState> {
+    let args: Vec<_> = call_exp
+        .arguments()
+        .ok()?
+        .args()
+        .into_iter()
+        .flatten()
+        .collect();
+    if args.len() != 1 {
+        return None;
+    }
+    let AnyJsCallArgument::AnyJsExpression(arg0) = &args[0] else {
+        return None;
+    };
+    let core_arg0 = solve_parenthesized_expression(arg0)?;
+    let char_at_parent = &solve_parenthesized_expression(&member.object().ok()?)?;
+    match core_arg0.clone() {
+        // hoge.charAt(hoge.length - 1)
+        AnyJsExpression::JsBinaryExpression(_) => {
+            let at_number_exp = extract_negative_index_expression(&core_arg0, char_at_parent);
+            if let Some(at_number_exp) = at_number_exp {
+                Some(UseAtIndexState {
+                    at_number_exp,
+                    error_type: ErrorType::StringCharAtNegativeIndex,
+                    object: char_at_parent.clone(),
+                })
+            } else {
+                option.check_all_index_access.then_some(UseAtIndexState {
+                    at_number_exp: core_arg0,
+                    error_type: ErrorType::StringCharAt,
+                    object: char_at_parent.clone(),
+                })
+            }
+        }
+        // hoge.charAt(1)
+        AnyJsExpression::AnyJsLiteralExpression(_member) => {
+            option.check_all_index_access.then_some(UseAtIndexState {
+                at_number_exp: core_arg0,
+                error_type: ErrorType::StringCharAt,
+                object: char_at_parent.clone(),
+            })
+        }
+        _ => option.check_all_index_access.then_some(UseAtIndexState {
+            at_number_exp: core_arg0,
+            error_type: ErrorType::StringCharAt,
+            object: char_at_parent.clone(),
+        }),
+    }
+}
+
+/// check hoge.fuga()
+fn check_call_expression(
+    call_exp: &JsCallExpression,
+    option: &UseAtIndexOptions,
+) -> Option<UseAtIndexState> {
+    // check slice
+    if let Some(slice_err) =
+        analyze_slice_element_access(&AnyJsExpression::JsCallExpression(call_exp.clone()))
+    {
+        return Some(slice_err);
+    }
+
+    if call_exp.is_optional_chain() {
+        return None;
+    }
+
+    let member = solve_parenthesized_expression(&call_exp.callee().ok()?)?;
+    match member {
+        AnyJsExpression::JsStaticMemberExpression(member) => {
+            if member.is_optional_chain() {
+                return None;
+            }
+            let member_name = member
+                .member()
+                .ok()?
+                .as_js_name()?
+                .value_token()
+                .ok()?
+                .token_text_trimmed();
+            match member_name.text() {
+                "last" => check_call_expression_last(call_exp, &member),
+                "charAt" => check_call_expression_char_at(call_exp, &member, option),
+                //"lastIndexOf" => Some(ErrorType::GetLastFunction),
+                _ => None,
+            }
+        }
+        _ => None,
+    }
+}
+
 /// make `object.at(arg)`
 fn make_at_method(object: AnyJsExpression, arg: AnyJsExpression) -> JsCallExpression {
     let at_member = make::js_static_member_expression(
@@ -552,208 +789,10 @@ impl Rule for UseAtIndex {
         let result: Option<UseAtIndexState> = match exp {
             // hoge[a]
             AnyJsArrayAccess::JsComputedMemberExpression(exp) => {
-                // check slice
-                if let Some(slice_err) = check_get_element_by_slice(
-                    &AnyJsExpression::JsComputedMemberExpression(exp.clone()),
-                ) {
-                    return Some(slice_err);
-                }
-                // invalid optional chain
-                if exp.is_optional_chain() {
-                    return None;
-                }
-                // invalid mutable case
-                if is_delete_child(&AnyJsExpression::JsComputedMemberExpression(exp.clone()))
-                    .unwrap_or(false)
-                {
-                    return None;
-                }
-                // check member
-                let member = solve_parenthesized_expression(&exp.member().ok()?)?;
-                match member.clone() {
-                    // hoge[hoge.length - 1]
-                    AnyJsExpression::JsBinaryExpression(_binary) => {
-                        let negative_index_exp = get_negative_index(
-                            &member,
-                            &solve_parenthesized_expression(&exp.object().ok()?)?,
-                        );
-                        if let Some(negative_index) = negative_index_exp {
-                            return Some(UseAtIndexState {
-                                at_number_exp: negative_index,
-                                error_type: ErrorType::NegativeIndex,
-                                object: exp.object().ok()?,
-                            });
-                        }
-                        option.check_all_index_access.then_some(UseAtIndexState {
-                            at_number_exp: member,
-                            error_type: ErrorType::NegativeIndex,
-                            object: exp.object().ok()?,
-                        })
-                    }
-                    // hoge[1]
-                    AnyJsExpression::AnyJsLiteralExpression(member) => {
-                        let AnyJsLiteralExpression::JsNumberLiteralExpression(member) = member
-                        else {
-                            return None;
-                        };
-                        let value_token = member.value_token().ok()?;
-                        let number = value_token.text_trimmed().parse::<i64>().ok()?;
-                        if number >= 0 {
-                            option.check_all_index_access.then_some(UseAtIndexState {
-                                at_number_exp: make_number_literal(number),
-                                error_type: ErrorType::IdIndex,
-                                object: exp.object().ok()?,
-                            })
-                        } else {
-                            None
-                        }
-                    }
-                    AnyJsExpression::JsUnaryExpression(unary) => {
-                        if !option.check_all_index_access {
-                            return None;
-                        }
-                        // ignore -5
-                        let token = unary.operator_token().ok()?;
-                        if token.kind() == T![-] {
-                            if let Some(arg) = get_integer_from_literal(
-                                &solve_parenthesized_expression(&unary.argument().ok()?)?,
-                            ) {
-                                if arg >= 0 {
-                                    return None;
-                                }
-                            }
-                        }
-                        Some(UseAtIndexState {
-                            at_number_exp: member,
-                            error_type: ErrorType::IdIndex,
-                            object: exp.object().ok()?,
-                        })
-                    }
-                    AnyJsExpression::JsIdentifierExpression(_) => None,
-                    _ => option.check_all_index_access.then_some(UseAtIndexState {
-                        at_number_exp: member,
-                        error_type: ErrorType::IdIndex,
-                        object: exp.object().ok()?,
-                    }),
-                }
+                check_computed_member_expression(exp, option)
             }
             // hoge.fuga()
-            AnyJsArrayAccess::JsCallExpression(call_exp) => {
-                // check slice
-                if let Some(slice_err) =
-                    check_get_element_by_slice(&AnyJsExpression::JsCallExpression(call_exp.clone()))
-                {
-                    return Some(slice_err);
-                }
-
-                if call_exp.is_optional_chain() {
-                    return None;
-                }
-
-                let member = solve_parenthesized_expression(&call_exp.callee().ok()?)?;
-                match member {
-                    AnyJsExpression::JsStaticMemberExpression(member) => {
-                        if member.is_optional_chain() {
-                            return None;
-                        }
-                        let member_name = member
-                            .member()
-                            .ok()?
-                            .as_js_name()?
-                            .value_token()
-                            .ok()?
-                            .token_text_trimmed();
-                        match member_name.text() {
-                            "last" => {
-                                let args: Vec<_> = call_exp
-                                    .arguments()
-                                    .ok()?
-                                    .args()
-                                    .into_iter()
-                                    .flatten()
-                                    .collect();
-                                if args.len() != 1 {
-                                    return None;
-                                }
-                                let object = member.object().ok()?;
-                                let AnyJsExpression::JsIdentifierExpression(object) = object else {
-                                    return None;
-                                };
-                                let lodash_function = ["_", "lodash", "underscore"];
-                                let object_name = object.syntax().text().to_string();
-                                if lodash_function.contains(&object_name.as_str()) {
-                                    let AnyJsCallArgument::AnyJsExpression(arg0) = &args[0] else {
-                                        return None;
-                                    };
-                                    Some(UseAtIndexState {
-                                        at_number_exp: make_number_literal(-1),
-                                        error_type: ErrorType::GetLastFunction,
-                                        object: solve_parenthesized_expression(arg0)?,
-                                    })
-                                } else {
-                                    None
-                                }
-                            }
-                            "charAt" => {
-                                let args: Vec<_> = call_exp
-                                    .arguments()
-                                    .ok()?
-                                    .args()
-                                    .into_iter()
-                                    .flatten()
-                                    .collect();
-                                if args.len() != 1 {
-                                    return None;
-                                }
-                                let AnyJsCallArgument::AnyJsExpression(arg0) = &args[0] else {
-                                    return None;
-                                };
-                                let core_arg0 = solve_parenthesized_expression(arg0)?;
-                                let char_at_parent =
-                                    &solve_parenthesized_expression(&member.object().ok()?)?;
-                                match core_arg0.clone() {
-                                    // hoge.charAt(hoge.length - 1)
-                                    AnyJsExpression::JsBinaryExpression(_) => {
-                                        let at_number_exp =
-                                            get_negative_index(&core_arg0, char_at_parent);
-                                        if let Some(at_number_exp) = at_number_exp {
-                                            Some(UseAtIndexState {
-                                                at_number_exp,
-                                                error_type: ErrorType::StringCharAtNegativeIndex,
-                                                object: char_at_parent.clone(),
-                                            })
-                                        } else {
-                                            option.check_all_index_access.then_some(
-                                                UseAtIndexState {
-                                                    at_number_exp: core_arg0,
-                                                    error_type: ErrorType::StringCharAt,
-                                                    object: char_at_parent.clone(),
-                                                },
-                                            )
-                                        }
-                                    }
-                                    // hoge.charAt(1)
-                                    AnyJsExpression::AnyJsLiteralExpression(_member) => {
-                                        option.check_all_index_access.then_some(UseAtIndexState {
-                                            at_number_exp: core_arg0,
-                                            error_type: ErrorType::StringCharAt,
-                                            object: char_at_parent.clone(),
-                                        })
-                                    }
-                                    _ => option.check_all_index_access.then_some(UseAtIndexState {
-                                        at_number_exp: core_arg0,
-                                        error_type: ErrorType::StringCharAt,
-                                        object: char_at_parent.clone(),
-                                    }),
-                                }
-                            }
-                            //"lastIndexOf" => Some(ErrorType::GetLastFunction),
-                            _ => None,
-                        }
-                    }
-                    _ => return None,
-                }
-            }
+            AnyJsArrayAccess::JsCallExpression(call_exp) => check_call_expression(call_exp, option),
         };
         result
     }
