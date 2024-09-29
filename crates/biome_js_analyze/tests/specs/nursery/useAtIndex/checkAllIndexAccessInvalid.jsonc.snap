@@ -1,7 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 assertion_line: 86
-expression: checkAllIndexAccessInvalid.json
+expression: checkAllIndexAccessInvalid.jsonc
 ---
 # Input
 ```cjs
@@ -10,7 +10,7 @@ array[0]
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -34,7 +34,7 @@ array[1]
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -58,7 +58,7 @@ array[5 + 9]
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -82,7 +82,7 @@ const offset = 5;array[offset + 9]
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:18 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:18 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -106,7 +106,7 @@ array[array.length - 1]
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -130,7 +130,7 @@ string.charAt(9)
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -154,7 +154,7 @@ string.charAt(5 + 9)
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -178,7 +178,7 @@ const offset = 5;string.charAt(offset + 9)
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:18 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:18 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -202,7 +202,7 @@ string.charAt(unknown)
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -226,7 +226,7 @@ string.charAt(-1)
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -250,7 +250,7 @@ string.charAt(1.5)
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -274,7 +274,7 @@ string.charAt(1n)
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -298,7 +298,7 @@ string.charAt(string.length - 1)
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   
@@ -322,7 +322,7 @@ foo.charAt(bar.length - 1)
 
 # Diagnostics
 ```
-checkAllIndexAccessInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+checkAllIndexAccessInvalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Replace index references with .at().
   

@@ -4,6 +4,7 @@
   "array[5 + 9]",
   "const offset = 5;array[offset + 9]",
   "array[array.length - 1]",
+  // `charAt` don't care about value
   "string.charAt(9)",
   "string.charAt(5 + 9)",
   "const offset = 5;string.charAt(offset + 9)",
