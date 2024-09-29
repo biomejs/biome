@@ -822,14 +822,11 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
     } else if suppress && write {
         return Err(CliDiagnostic::incompatible_arguments(
-            "--write-suppressions",
+            "--suppress",
             "--write",
         ));
     } else if suppress && fix {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--write-suppressions",
-            "--fix",
-        ));
+        return Err(CliDiagnostic::incompatible_arguments("--suppress", "--fix"));
     }
     Ok(())
 }
