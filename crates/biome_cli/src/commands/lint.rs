@@ -28,7 +28,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) apply: bool,
     pub(crate) apply_unsafe: bool,
     pub(crate) write: bool,
-    pub(crate) write_suppressions: bool,
+    pub(crate) suppress: bool,
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
     pub(crate) cli_options: CliOptions,
@@ -54,6 +54,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         apply,
         apply_unsafe,
         write,
+        suppress,
         fix,
         unsafe_,
         cli_options,
@@ -71,7 +72,6 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         css_linter,
         json_linter,
         graphql_linter,
-        write_suppressions,
     } = payload;
     setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
 
@@ -80,7 +80,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
             apply,
             apply_unsafe,
             write,
-            write_suppressions,
+            suppress,
             fix,
             unsafe_,
         },
@@ -184,7 +184,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
             only,
             skip,
             vcs_targeted: VcsTargeted { staged, changed },
-            write_suppressions,
+            suppress,
         })
         .set_report(&cli_options),
         session,

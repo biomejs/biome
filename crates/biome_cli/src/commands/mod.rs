@@ -107,7 +107,7 @@ pub enum BiomeCommand {
 
         /// Writes inline biome-ignore comments to ignore existing diagnostics
         #[bpaf(long("write"), switch)]
-        write_suppressions: bool,
+        suppress: bool,
 
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
@@ -187,6 +187,9 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
+        #[bpaf(long("suppress"))]
+        suppress: bool,
+
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
@@ -223,9 +226,6 @@ pub enum BiomeCommand {
 
         #[bpaf(external(partial_graphql_linter), optional, hide_usage, hide)]
         graphql_linter: Option<PartialGraphqlLinter>,
-
-        #[bpaf(long("write-suppressions"))]
-        write_suppressions: bool,
 
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
@@ -305,7 +305,10 @@ pub enum BiomeCommand {
         /// Writes formatted files to file system.
         #[bpaf(long("write"), switch)]
         write: bool,
-        write_suppressions: bool,
+
+        /// Writes inline biome-ignore comments to ignore existing diagnostics
+        #[bpaf(long("suppress"), switch)]
+        suppress: bool,
 
         /// Alias of `--write`, writes formatted files to file system.
         #[bpaf(long("fix"), switch, hide_usage)]
@@ -736,7 +739,7 @@ pub(crate) struct FixFileModeOptions {
     apply: bool,
     apply_unsafe: bool,
     write: bool,
-    write_suppressions: bool,
+    suppress: bool,
     fix: bool,
     unsafe_: bool,
 }
@@ -753,7 +756,7 @@ pub(crate) fn determine_fix_file_mode(
         apply_unsafe,
         write,
         fix,
-        write_suppressions,
+        suppress,
         unsafe_,
     } = options;
 
@@ -778,7 +781,7 @@ pub(crate) fn determine_fix_file_mode(
         Ok(Some(FixFileMode::SafeAndUnsafeFixes))
     } else if safe_fixes {
         Ok(Some(FixFileMode::SafeFixes))
-    } else if write_suppressions {
+    } else if suppress {
         Ok(Some(FixFileMode::ApplySuppressions))
     } else {
         Ok(None)
@@ -791,7 +794,7 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         apply,
         apply_unsafe,
         write,
-        write_suppressions,
+        suppress,
         fix,
         unsafe_,
     } = options;
@@ -817,12 +820,12 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ));
     } else if write && fix {
         return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
-    } else if write_suppressions && write {
+    } else if suppress && write {
         return Err(CliDiagnostic::incompatible_arguments(
             "--write-suppressions",
             "--write",
         ));
-    } else if write_suppressions && fix {
+    } else if suppress && fix {
         return Err(CliDiagnostic::incompatible_arguments(
             "--write-suppressions",
             "--fix",
@@ -839,7 +842,7 @@ mod tests {
 
     #[test]
     fn incompatible_arguments() {
-        for (apply, apply_unsafe, write, fix, unsafe_) in [
+        for (apply, apply_unsafe, write, suppress, fix, unsafe_) in [
             (true, true, false, false, false), // --apply --apply-unsafe
             (true, false, true, false, false), // --apply --write
             (true, false, false, true, false), // --apply --fix
@@ -852,7 +855,7 @@ mod tests {
                 apply,
                 apply_unsafe,
                 write,
-                write_suppressions,
+                suppress,
                 fix,
                 unsafe_
             })
@@ -875,7 +878,7 @@ mod tests {
                         apply,
                         apply_unsafe,
                         write,
-                        write_suppressions,
+                        suppress,
                         fix,
                         unsafe_
                     },
@@ -902,7 +905,7 @@ mod tests {
                         apply,
                         apply_unsafe,
                         write,
-                        write_suppressions,
+                        suppress,
                         fix,
                         unsafe_
                     },
@@ -925,7 +928,7 @@ mod tests {
                     apply,
                     apply_unsafe,
                     write,
-                    write_suppressions,
+                    suppress,
                     fix,
                     unsafe_
                 },
