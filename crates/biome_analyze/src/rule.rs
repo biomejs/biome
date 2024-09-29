@@ -128,6 +128,8 @@ pub enum RuleSource {
     EslintN(&'static str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
     Stylelint(&'static str),
+    /// Rules from  [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
+    EslintNoSecrets(&'static str),
 }
 
 impl PartialEq for RuleSource {
