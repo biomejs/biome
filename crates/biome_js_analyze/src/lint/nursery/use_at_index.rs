@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use ::serde::{Deserialize, Serialize};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
@@ -115,9 +117,9 @@ pub enum ErrorType {
     IdIndex,
     StringCharAtNegativeIndex,
     StringCharAt,
-    Slice(String),
+    Slice(Cow<'static, str>),
     SlicePop,
-    Slice2(String),
+    Slice2(Cow<'static, str>),
     Slice2Pop,
     GetLastFunction,
 }
@@ -472,7 +474,7 @@ fn check_get_element_by_slice(node: &AnyJsExpression) -> Option<UseAtIndexState>
         if at_value == 0 {
             return Some(UseAtIndexState {
                 at_number_exp: start_exp,
-                error_type: ErrorType::Slice(taker.to_string()),
+                error_type: ErrorType::Slice(Cow::Borrowed(taker)),
                 object: sliced_exp,
             });
         }
@@ -497,7 +499,7 @@ fn check_get_element_by_slice(node: &AnyJsExpression) -> Option<UseAtIndexState>
         if at_value == 0 {
             Some(UseAtIndexState {
                 at_number_exp: start_exp,
-                error_type: ErrorType::Slice2(taker.to_string()),
+                error_type: ErrorType::Slice2(Cow::Borrowed(taker)),
                 object: sliced_exp,
             })
         } else {
