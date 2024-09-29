@@ -1,6 +1,8 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
-use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
+use crate::diagnostics::{
+    DeprecatedArgument, DeprecatedConfigurationFile, IncompatibleEndConfiguration,
+};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, LoggingLevel, VERSION};
@@ -740,6 +742,7 @@ pub(crate) struct FixFileModeOptions {
     apply_unsafe: bool,
     write: bool,
     suppress: bool,
+    suppress_reason: Option<String>,
     fix: bool,
     unsafe_: bool,
 }
@@ -757,6 +760,7 @@ pub(crate) fn determine_fix_file_mode(
         write,
         fix,
         suppress,
+        ref suppress_reason,
         unsafe_,
     } = options;
 
@@ -795,6 +799,7 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         apply_unsafe,
         write,
         suppress,
+        suppress_reason,
         fix,
         unsafe_,
     } = options;
@@ -827,6 +832,12 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ));
     } else if suppress && fix {
         return Err(CliDiagnostic::incompatible_arguments("--suppress", "--fix"));
+    } else if !suppress && suppress_reason.is_some() {
+        return Err(CliDiagnostic::IncompatibleEndConfiguration(
+            IncompatibleEndConfiguration {
+                reason: "--suppress-reason must be used with --suppress".to_string(),
+            },
+        ));
     }
     Ok(())
 }

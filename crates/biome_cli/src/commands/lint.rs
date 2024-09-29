@@ -29,6 +29,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) apply_unsafe: bool,
     pub(crate) write: bool,
     pub(crate) suppress: bool,
+    pub(crate) suppress_reason: bool,
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
     pub(crate) cli_options: CliOptions,
@@ -55,6 +56,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         apply_unsafe,
         write,
         suppress,
+        suppress_reason,
         fix,
         unsafe_,
         cli_options,
@@ -81,6 +83,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
             apply_unsafe,
             write,
             suppress,
+            suppress_reason
             fix,
             unsafe_,
         },

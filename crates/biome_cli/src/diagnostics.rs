@@ -223,7 +223,7 @@ pub struct ServerNotRunning;
     )
 )]
 pub struct IncompatibleEndConfiguration {
-    reason: String,
+    pub reason: String,
 }
 
 #[derive(Debug, Diagnostic)]
