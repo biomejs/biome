@@ -118,7 +118,7 @@ charAtInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━�
   i Unsafe fix: Replace index references with .at().
   
   - string.charAt(string.length·-·((·1·)));
-  + string.at(-1);
+  + string.at(-((·1·)));
   
 
 ```
@@ -215,6 +215,54 @@ charAtInvalid.json:1:4 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━�
   
   - ((·string.charAt(string.length·-·1)·));
   + ((·string.at(-1)·));
+  
+
+```
+
+# Input
+```cjs
+string.charAt(string.length - unknown - 1 );
+```
+
+# Diagnostics
+```
+charAtInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ string.charAt(string.length - unknown - 1 );
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - string.charAt(string.length·-·unknown·-·1·);
+  + string.at(unknown·+1);
+  
+
+```
+
+# Input
+```cjs
+string.charAt(string.length - (unknown + 1));
+```
+
+# Diagnostics
+```
+charAtInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ string.charAt(string.length - (unknown + 1));
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - string.charAt(string.length·-·(unknown·+·1));
+  + string.at(-(unknown·+·1));
   
 
 ```

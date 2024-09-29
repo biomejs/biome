@@ -214,7 +214,7 @@ indexInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━
   i Unsafe fix: Replace index references with .at().
   
   - array[array.length·-·((·1·))];
-  + array.at(-1);
+  + array.at(-((·1·)));
   
 
 ```
@@ -479,6 +479,54 @@ indexInvalid.json:1:32 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━�
   
   - class·Foo·{#bar;·baz()·{return·this.#bar[this.#bar.length·-·1]}}
   + class·Foo·{#bar;·baz()·{return·this.#bar.at(-1)}}
+  
+
+```
+
+# Input
+```cjs
+array[array.length - unknown - 1]
+```
+
+# Diagnostics
+```
+indexInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ array[array.length - unknown - 1]
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - array[array.length·-·unknown·-·1]
+  + array.at(unknown·+1)
+  
+
+```
+
+# Input
+```cjs
+array[array.length - (unknown + 1)]
+```
+
+# Diagnostics
+```
+indexInvalid.json:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Replace index references with .at().
+  
+  > 1 │ array[array.length - (unknown + 1)]
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Prefer X.at(-Y) over X[X.length - Y].
+  
+  i Unsafe fix: Replace index references with .at().
+  
+  - array[array.length·-·(unknown·+·1)]
+  + array.at(-(unknown·+·1))
   
 
 ```

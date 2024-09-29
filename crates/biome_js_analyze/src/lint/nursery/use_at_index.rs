@@ -202,6 +202,37 @@ fn is_same_reference(left: &AnyJsExpression, right: &AnyJsExpression) -> Option<
     }
 }
 
+/// When using this expression in other operations, enclose it in parentheses as needed.
+fn overwrap_parentheses_expression(node: &AnyJsExpression) -> Option<AnyJsExpression> {
+    match node {
+        AnyJsExpression::JsArrayExpression(exp) => {
+            Some(AnyJsExpression::JsArrayExpression(exp.clone()))
+        }
+        AnyJsExpression::JsCallExpression(exp) => {
+            Some(AnyJsExpression::JsCallExpression(exp.clone()))
+        }
+        AnyJsExpression::JsComputedMemberExpression(exp) => {
+            Some(AnyJsExpression::JsComputedMemberExpression(exp.clone()))
+        }
+        AnyJsExpression::JsIdentifierExpression(exp) => Some(
+            AnyJsExpression::JsIdentifierExpression(exp.clone().trim_trivia()?),
+        ),
+        AnyJsExpression::JsParenthesizedExpression(exp) => {
+            Some(AnyJsExpression::JsParenthesizedExpression(exp.clone()))
+        }
+        AnyJsExpression::JsStaticMemberExpression(exp) => {
+            Some(AnyJsExpression::JsStaticMemberExpression(exp.clone()))
+        }
+        _ => Some(AnyJsExpression::JsParenthesizedExpression(
+            make::js_parenthesized_expression(
+                make::token(T!['(']),
+                node.clone(),
+                make::token(T![')']),
+            ),
+        )),
+    }
+}
+
 /// If the node is a length method, it returns the object of interest.
 fn get_length_node(node: &AnyJsExpression) -> Option<AnyJsExpression> {
     let AnyJsExpression::JsStaticMemberExpression(node) = node else {
@@ -243,6 +274,40 @@ fn get_integer_from_literal(node: &AnyJsExpression) -> Option<i64> {
     }
 }
 
+/// Retrieve the value subtracted from the subtraction expression.
+/// # Examples
+/// ```js
+///    a - b // => Some((a, [b]))
+///    a - b - c // => Some((a, [b, c]))
+/// ```
+fn get_left_node_from_minus_binary_expressions(
+    mut expression: AnyJsExpression,
+) -> Option<(AnyJsExpression, Vec<AnyJsExpression>)> {
+    let mut right_list = vec![];
+
+    while let AnyJsExpression::JsBinaryExpression(binary) = expression {
+        let token = binary.operator_token().ok()?;
+        if token.kind() != T![-] {
+            return Some((AnyJsExpression::JsBinaryExpression(binary), right_list));
+        }
+
+        right_list.push(binary.right().ok()?);
+        expression = binary.left().ok()?;
+    }
+    Some((expression, right_list))
+}
+
+/// Combine the expressions in the list with the addition operator.
+fn make_plus_binary_expression(list: Vec<AnyJsExpression>) -> Option<AnyJsExpression> {
+    list.into_iter().rev().reduce(|left, right| {
+        AnyJsExpression::JsBinaryExpression(make::js_binary_expression(
+            left,
+            make::token(T![+]),
+            right,
+        ))
+    })
+}
+
 /// If the node is a negative index, it returns the negative index.
 /// # Examples
 /// ```js
@@ -254,29 +319,41 @@ fn get_negative_index(
     member: &AnyJsExpression,
     object: &AnyJsExpression,
 ) -> Option<AnyJsExpression> {
-    let AnyJsExpression::JsBinaryExpression(member) = member else {
-        return None;
-    };
-    let token = member.operator_token().ok()?;
-    if token.kind() != T![-] {
+    let (left, right_list) = get_left_node_from_minus_binary_expressions(member.clone())?;
+    if right_list.is_empty() {
         return None;
     }
+
     // left expression should be hoge.length
-    let left = solve_parenthesized_expression(&member.left().ok()?)?;
+    let left = solve_parenthesized_expression(&left)?;
     let length_parent = get_length_node(&left)?;
     // left expression should be the same as the object
     if !is_same_reference(object, &length_parent)? {
         return None;
     }
-    let number_exp = solve_parenthesized_expression(&member.right().ok()?)?;
-    // right expression should be integer
-    let number = get_integer_from_literal(&number_exp)?;
-    if number > 0 {
-        Some(AnyJsExpression::JsUnaryExpression(
-            make::js_unary_expression(make::token(T![-]), number_exp),
-        ))
+
+    if right_list.len() == 1 {
+        // right expression should be integer
+        if let Some(number) =
+            get_integer_from_literal(&solve_parenthesized_expression(&right_list[0])?)
+        {
+            if number > 0 {
+                Some(AnyJsExpression::JsUnaryExpression(
+                    make::js_unary_expression(make::token(T![-]), right_list[0].clone()),
+                ))
+            } else {
+                None
+            }
+        } else {
+            Some(AnyJsExpression::JsUnaryExpression(
+                make::js_unary_expression(
+                    make::token(T![-]),
+                    overwrap_parentheses_expression(&right_list[0])?,
+                ),
+            ))
+        }
     } else {
-        None
+        make_plus_binary_expression(right_list)
     }
 }
 
@@ -743,31 +820,7 @@ impl Rule for UseAtIndex {
             error_type: _,
             object,
         } = state;
-        let object = match object {
-            AnyJsExpression::JsArrayExpression(exp) => {
-                AnyJsExpression::JsArrayExpression(exp.clone())
-            }
-            AnyJsExpression::JsCallExpression(exp) => {
-                AnyJsExpression::JsCallExpression(exp.clone())
-            }
-            AnyJsExpression::JsComputedMemberExpression(exp) => {
-                AnyJsExpression::JsComputedMemberExpression(exp.clone())
-            }
-            AnyJsExpression::JsIdentifierExpression(exp) => {
-                AnyJsExpression::JsIdentifierExpression(exp.clone().trim_trivia()?)
-            }
-            AnyJsExpression::JsParenthesizedExpression(exp) => {
-                AnyJsExpression::JsParenthesizedExpression(exp.clone())
-            }
-            AnyJsExpression::JsStaticMemberExpression(exp) => {
-                AnyJsExpression::JsStaticMemberExpression(exp.clone())
-            }
-            _ => AnyJsExpression::JsParenthesizedExpression(make::js_parenthesized_expression(
-                make::token(T!['(']),
-                object.clone(),
-                make::token(T![')']),
-            )),
-        };
+        let object = overwrap_parentheses_expression(object)?;
 
         mutation.replace_node(
             prev_node,

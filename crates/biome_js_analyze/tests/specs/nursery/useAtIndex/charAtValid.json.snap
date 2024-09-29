@@ -47,3 +47,13 @@ string1.charAt(string2.length - 1);
 ```cjs
 string.charAt(hoge.string.length - 1)
 ```
+
+# Input
+```cjs
+string.charAt(string.length - 1 + 1)
+```
+
+# Input
+```cjs
+string.charAt(string.length + 1 - 1)
+```

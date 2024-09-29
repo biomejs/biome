@@ -7,5 +7,7 @@
   "string.charAt((( string.length - 1 )));",
   "(( string )).charAt(string.length - 1);",
   "(( string.charAt ))(string.length - 1);",
-  "(( string.charAt(string.length - 1) ));"
+  "(( string.charAt(string.length - 1) ));",
+  "string.charAt(string.length - unknown - 1 );",
+  "string.charAt(string.length - (unknown + 1));"
 ]
