@@ -277,3 +277,23 @@ _.last(array, 2)
 ```cjs
 _.last(...array)
 ```
+
+# Input
+```cjs
+_.last()
+```
+
+# Input
+```cjs
+other._.last(array)
+```
+
+# Input
+```cjs
+other.underscore.last(array)
+```
+
+# Input
+```cjs
+other.lodash.last(array)
+```

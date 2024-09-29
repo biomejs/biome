@@ -67,9 +67,14 @@
   "(( (( array.slice( ((-9)), ((unknown)), ).shift ))() ));",
   "array.slice(-9, (a, really, _really, complicated, second) => argument)[0]",
   // ========================================================================
-  // `lodash.last()`
+  // `lodash.last(array)`
   // ========================================================================
   "new _.last(array)",
   "_.last(array, 2)",
-  "_.last(...array)"
+  "_.last(...array)",
+  // not lodash
+  "_.last()",
+  "other._.last(array)",
+  "other.underscore.last(array)",
+  "other.lodash.last(array)"
 ]
