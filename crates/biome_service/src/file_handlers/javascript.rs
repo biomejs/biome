@@ -662,7 +662,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     if action.is_suppression()
                         && params.suppress
                         && action.applicability == Applicability::Always
-                        // TODO: I was getting suppressions written for nursery rules, but I don't know
+                        // TODO: I was getting suppressions written for the "use strict" nursery rule, but I don't know
                         // why so I hacked this.
                         && action
                             .rule_name

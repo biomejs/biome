@@ -111,7 +111,8 @@ pub enum BiomeCommand {
         #[bpaf(long("suppress"), switch)]
         suppress: bool,
 
-        #[bpaf(long("suppress-reason"))]
+        /// Reason for suppressing diagnostics with --suppress
+        #[bpaf(long("reason"))]
         suppress_reason: Option<String>,
 
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
