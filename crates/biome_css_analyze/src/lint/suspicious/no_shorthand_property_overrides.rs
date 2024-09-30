@@ -7,12 +7,12 @@ use biome_console::markup;
 use biome_css_syntax::{AnyCssDeclarationName, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_rowan::{AstNode, Language, SyntaxNode, TextRange, WalkEvent};
 
-fn remove_vendor_prefix(prop: &str, prefix: &str) -> String {
+fn remove_vendor_prefix<'a>(prop: &'a str, prefix: &'a str) -> &'a str {
     if let Some(prop) = prop.strip_prefix(prefix) {
-        return prop.to_string();
+        return prop;
     }
 
-    prop.to_string()
+    prop
 }
 
 fn get_override_props(property: &str) -> Vec<&str> {
@@ -118,9 +118,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                                 remove_vendor_prefix(&prior_prop.lowercase, &prior_prop_prefix);
 
                             if prop_prefix == prior_prop_prefix
-                                && override_props
-                                    .binary_search(&unprefixed_prior_prop.as_str())
-                                    .is_ok()
+                                && override_props.binary_search(&unprefixed_prior_prop).is_ok()
                             {
                                 ctx.match_query(
                                     NoDeclarationBlockShorthandPropertyOverridesQuery {
