@@ -1251,6 +1251,10 @@ export interface Nursery {
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
 	/**
+	 * Prevent usage of \<head> element.
+	 */
+	noHeadElement?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
@@ -1262,10 +1266,6 @@ export interface Nursery {
 	 * Disallow nested ternary expressions.
 	 */
 	noNestedTernary?: RuleConfiguration_for_Null;
-	/**
-	 * Prevent usage of \<head> element.
-	 */
-	noNextHeadElement?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow octal escape sequences in string literals
 	 */
@@ -2858,7 +2858,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
-	| "lint/nursery/noNextHeadElement"
+	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"

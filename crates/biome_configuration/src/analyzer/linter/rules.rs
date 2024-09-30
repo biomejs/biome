@@ -3301,6 +3301,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_exported_imports:
         Option<RuleConfiguration<biome_js_analyze::options::NoExportedImports>>,
+    #[doc = "Prevent usage of \\<head> element."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub no_head_element: Option<RuleConfiguration<biome_js_analyze::options::NoHeadElement>>,
     #[doc = "Disallows the use of irregular whitespace characters."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_irregular_whitespace:
@@ -3312,10 +3315,6 @@ pub struct Nursery {
     #[doc = "Disallow nested ternary expressions."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_nested_ternary: Option<RuleConfiguration<biome_js_analyze::options::NoNestedTernary>>,
-    #[doc = "Prevent usage of \\<head> element."]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_next_head_element:
-        Option<RuleConfiguration<biome_js_analyze::options::NoNextHeadElement>>,
     #[doc = "Disallow octal escape sequences in string literals"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_octal_escape: Option<RuleConfiguration<biome_js_analyze::options::NoOctalEscape>>,
@@ -3432,10 +3431,10 @@ impl Nursery {
         "noDynamicNamespaceImportAccess",
         "noEnum",
         "noExportedImports",
+        "noHeadElement",
         "noIrregularWhitespace",
         "noMissingVarFunction",
         "noNestedTernary",
-        "noNextHeadElement",
         "noOctalEscape",
         "noProcessEnv",
         "noRestrictedImports",
@@ -3480,7 +3479,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[3]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[4]),
-        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[20]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[21]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[22]),
@@ -3582,22 +3581,22 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_irregular_whitespace.as_ref() {
+        if let Some(rule) = self.no_head_element.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_missing_var_function.as_ref() {
+        if let Some(rule) = self.no_irregular_whitespace.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_nested_ternary.as_ref() {
+        if let Some(rule) = self.no_missing_var_function.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_next_head_element.as_ref() {
+        if let Some(rule) = self.no_nested_ternary.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
@@ -3766,22 +3765,22 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]));
             }
         }
-        if let Some(rule) = self.no_irregular_whitespace.as_ref() {
+        if let Some(rule) = self.no_head_element.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[8]));
             }
         }
-        if let Some(rule) = self.no_missing_var_function.as_ref() {
+        if let Some(rule) = self.no_irregular_whitespace.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[9]));
             }
         }
-        if let Some(rule) = self.no_nested_ternary.as_ref() {
+        if let Some(rule) = self.no_missing_var_function.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[10]));
             }
         }
-        if let Some(rule) = self.no_next_head_element.as_ref() {
+        if let Some(rule) = self.no_nested_ternary.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[11]));
             }
@@ -3974,6 +3973,10 @@ impl Nursery {
                 .no_exported_imports
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
+            "noHeadElement" => self
+                .no_head_element
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             "noIrregularWhitespace" => self
                 .no_irregular_whitespace
                 .as_ref()
@@ -3984,10 +3987,6 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "noNestedTernary" => self
                 .no_nested_ternary
-                .as_ref()
-                .map(|conf| (conf.level(), conf.get_options())),
-            "noNextHeadElement" => self
-                .no_next_head_element
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noOctalEscape" => self

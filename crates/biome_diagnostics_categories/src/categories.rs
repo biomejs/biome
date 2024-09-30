@@ -153,7 +153,7 @@ define_categories! {
     "lint/nursery/noMissingGenericFamilyKeyword": "https://biomejs.dev/linter/rules/no-missing-generic-family-keyword",
     "lint/nursery/noMissingVarFunction": "https://biomejs.dev/linter/rules/no-missing-var-function",
     "lint/nursery/noNestedTernary": "https://biomejs.dev/linter/rules/no-nested-ternary",
-    "lint/nursery/noNextHeadElement": "https://biomejs.dev/linter/rules/no-next-head-element",
+    "lint/nursery/noHeadElement": "https://biomejs.dev/linter/rules/no-head-element",
     "lint/nursery/noOctalEscape": "https://biomejs.dev/linter/rules/no-octal-escape",
     "lint/nursery/noProcessEnv": "https://biomejs.dev/linter/rules/no-process-env",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",

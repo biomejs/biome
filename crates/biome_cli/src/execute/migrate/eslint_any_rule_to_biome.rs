@@ -19,7 +19,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group.no_next_head_element.get_or_insert(Default::default());
+            let rule = group.no_head_element.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@stylistic/jsx-self-closing-comp" => {

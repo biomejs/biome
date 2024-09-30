@@ -2132,6 +2132,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noHeadElement": {
+					"description": "Prevent usage of \\<head> element.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
@@ -2148,13 +2155,6 @@
 				},
 				"noNestedTernary": {
 					"description": "Disallow nested ternary expressions.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noNextHeadElement": {
-					"description": "Prevent usage of \\<head> element.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

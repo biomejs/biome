@@ -13,7 +13,7 @@ expression: invalid.jsx
 
 # Diagnostics
 ```
-invalid.jsx:1:1 lint/nursery/noNextHeadElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.jsx:1:1 lint/nursery/noHeadElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Do not use <head> element. Use <Head /> from next/head instead.
   

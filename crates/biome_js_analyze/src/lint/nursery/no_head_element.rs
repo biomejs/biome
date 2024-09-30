@@ -42,9 +42,9 @@ declare_lint_rule! {
     ///   )
     /// }
     /// ```
-    pub NoNextHeadElement {
+    pub NoHeadElement {
         version: "next",
-        name: "noNextHeadElement",
+        name: "noHeadElement",
         language: "js",
         sources: &[RuleSource::EslintNext("no-head-element")],
         source_kind: RuleSourceKind::SameLogic,
@@ -52,7 +52,7 @@ declare_lint_rule! {
     }
 }
 
-impl Rule for NoNextHeadElement {
+impl Rule for NoHeadElement {
     type Query = Ast<JsxOpeningElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;

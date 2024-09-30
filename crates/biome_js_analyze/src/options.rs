@@ -111,6 +111,8 @@ pub type NoGlobalIsFinite =
 pub type NoGlobalIsNan =
     <lint::suspicious::no_global_is_nan::NoGlobalIsNan as biome_analyze::Rule>::Options;
 pub type NoGlobalObjectCalls = < lint :: correctness :: no_global_object_calls :: NoGlobalObjectCalls as biome_analyze :: Rule > :: Options ;
+pub type NoHeadElement =
+    <lint::nursery::no_head_element::NoHeadElement as biome_analyze::Rule>::Options;
 pub type NoHeaderScope =
     <lint::a11y::no_header_scope::NoHeaderScope as biome_analyze::Rule>::Options;
 pub type NoImplicitAnyLet =
@@ -147,8 +149,6 @@ pub type NoNestedTernary =
     <lint::nursery::no_nested_ternary::NoNestedTernary as biome_analyze::Rule>::Options;
 pub type NoNewSymbol =
     <lint::correctness::no_new_symbol::NoNewSymbol as biome_analyze::Rule>::Options;
-pub type NoNextHeadElement =
-    <lint::nursery::no_next_head_element::NoNextHeadElement as biome_analyze::Rule>::Options;
 pub type NoNodejsModules =
     <lint::correctness::no_nodejs_modules::NoNodejsModules as biome_analyze::Rule>::Options;
 pub type NoNonNullAssertion =
