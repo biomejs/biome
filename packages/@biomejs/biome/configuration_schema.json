@@ -3993,15 +3993,16 @@
 		"UseExhaustiveDependenciesOptions": {
 			"description": "Options for the rule `useExhaustiveDependencies`",
 			"type": "object",
-			"required": ["hooks", "reportUnnecessaryDependencies"],
 			"properties": {
 				"hooks": {
 					"description": "List of hooks of which the dependencies should be validated.",
+					"default": [],
 					"type": "array",
 					"items": { "$ref": "#/definitions/Hook" }
 				},
 				"reportUnnecessaryDependencies": {
 					"description": "Whether to report errors when a dependency is not used in the closure function.",
+					"default": false,
 					"type": "boolean"
 				}
 			},

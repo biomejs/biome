@@ -2321,11 +2321,11 @@ export interface UseExhaustiveDependenciesOptions {
 	/**
 	 * List of hooks of which the dependencies should be validated.
 	 */
-	hooks: Hook[];
+	hooks?: Hook[];
 	/**
 	 * Whether to report errors when a dependency is not used in the closure function.
 	 */
-	reportUnnecessaryDependencies: boolean;
+	reportUnnecessaryDependencies?: boolean;
 }
 /**
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.

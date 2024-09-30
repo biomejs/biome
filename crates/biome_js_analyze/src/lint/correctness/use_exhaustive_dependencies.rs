@@ -294,9 +294,11 @@ impl Default for HookConfigMaps {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseExhaustiveDependenciesOptions {
     /// Whether to report errors when a dependency is not used in the closure function.
+    #[serde(default)]
     pub report_unnecessary_dependencies: bool,
 
     /// List of hooks of which the dependencies should be validated.
+    #[serde(default)]
     #[deserializable(validate = "non_empty")]
     pub hooks: Vec<Hook>,
 }
