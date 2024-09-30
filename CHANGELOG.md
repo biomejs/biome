@@ -105,6 +105,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer panics when suggesting the renaming of a variable at the start of a file ([#4114](https://github.com/biomejs/biome/issues/4114)). Contributed by @Conaclos
+
 - [noUselessEscapeInRegex](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/) no longer panics on regexes that start with an empty character class. Contributed by @Conaclos
 
 - [noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/) no longer panics when it encounters malformed code. Contributed by @Conaclos
