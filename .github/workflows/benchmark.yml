@@ -51,7 +51,7 @@ jobs:
         run: cargo codspeed build --features codspeed -p xtask_bench
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@9481de2550a3d73cdac24ddd54ee6b9ee31f7ec2 # v2.4.5
+        uses: CodSpeedHQ/action@v3
         timeout-minutes: 30
         with:
           run: cargo codspeed run
