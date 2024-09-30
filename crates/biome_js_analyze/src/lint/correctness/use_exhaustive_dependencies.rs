@@ -293,7 +293,7 @@ impl Default for HookConfigMaps {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseExhaustiveDependenciesOptions {
-    /// Whether to report errors when a dependency is listed in the dependencies array but isn't used. Defaults to true.
+    /// Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
     #[serde(default)]
     pub report_unnecessary_dependencies: bool,
 
