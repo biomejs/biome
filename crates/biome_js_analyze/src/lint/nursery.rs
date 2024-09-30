@@ -9,6 +9,7 @@ pub mod no_enum;
 pub mod no_exported_imports;
 pub mod no_irregular_whitespace;
 pub mod no_nested_ternary;
+pub mod no_next_head_element;
 pub mod no_octal_escape;
 pub mod no_process_env;
 pub mod no_restricted_imports;
@@ -41,6 +42,7 @@ declare_lint_group! {
             self :: no_exported_imports :: NoExportedImports ,
             self :: no_irregular_whitespace :: NoIrregularWhitespace ,
             self :: no_nested_ternary :: NoNestedTernary ,
+            self :: no_next_head_element :: NoNextHeadElement ,
             self :: no_octal_escape :: NoOctalEscape ,
             self :: no_process_env :: NoProcessEnv ,
             self :: no_restricted_imports :: NoRestrictedImports ,

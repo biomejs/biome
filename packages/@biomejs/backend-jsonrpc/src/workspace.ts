@@ -1263,6 +1263,10 @@ export interface Nursery {
 	 */
 	noNestedTernary?: RuleConfiguration_for_Null;
 	/**
+	 * Prevent usage of \<head> element.
+	 */
+	noNextHeadElement?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow octal escape sequences in string literals
 	 */
 	noOctalEscape?: RuleConfiguration_for_Null;
@@ -2854,6 +2858,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
+	| "lint/nursery/noNextHeadElement"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"

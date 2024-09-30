@@ -2153,6 +2153,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noNextHeadElement": {
+					"description": "Prevent usage of \\<head> element.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noOctalEscape": {
 					"description": "Disallow octal escape sequences in string literals",
 					"anyOf": [

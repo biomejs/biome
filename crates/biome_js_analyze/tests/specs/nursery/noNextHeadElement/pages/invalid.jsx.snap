@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalid.jsx
+---
+# Input
+```jsx
+<head>
+  <title>Invalid</title>
+</head>
+
+```
+
+# Diagnostics
+```
+invalid.jsx:1:1 lint/nursery/noNextHeadElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Do not use <head> element. Use <Head /> from next/head instead.
+  
+  > 1 │ <head>
+      │ ^^^^^^
+    2 │   <title>Invalid</title>
+    3 │ </head>
+  
+
+```
