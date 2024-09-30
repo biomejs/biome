@@ -4000,7 +4000,10 @@
 					"type": "array",
 					"items": { "$ref": "#/definitions/Hook" }
 				},
-				"reportUnnecessaryDependencies": { "type": "boolean" }
+				"reportUnnecessaryDependencies": {
+					"description": "Whether to report errors when a dependency is not used in the closure function.",
+					"type": "boolean"
+				}
 			},
 			"additionalProperties": false
 		},
