@@ -2291,15 +2291,15 @@ export interface NoLabelWithoutControlOptions {
 	/**
 	 * Array of component names that should be considered the same as an `input` element.
 	 */
-	inputComponents: string[];
+	inputComponents?: string[];
 	/**
 	 * Array of attributes that should be treated as the `label` accessible text content.
 	 */
-	labelAttributes: string[];
+	labelAttributes?: string[];
 	/**
 	 * Array of component names that should be considered the same as a `label` element.
 	 */
-	labelComponents: string[];
+	labelComponents?: string[];
 }
 export interface ValidAriaRoleOptions {
 	allowInvalidRoles: string[];

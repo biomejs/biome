@@ -35,6 +35,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Configuration
 
+#### Bug fixes
+- Fix [#4125](https://github.com/biomejs/biome/issues/4125), where `noLabelWithoutControl` options where incorrectly marked as mandatory. Contributed by @ematipico
+
 ### Editors
 
 - Fix a case where CSS files weren't correctly linted using the default configuration. Contributed by @ematipico

@@ -161,16 +161,16 @@ We would like to set the options in the `biome.json` configuration file:
 }
 ```
 
-The first step is to create the Rust data representation of the rule's options.
+The first step is to create the Rust data representation of the rule's options. Each option must be wrapped in a `Option`, this is required so the configuration schema won't mark them as required.
 
 ```rust
 use biome_deserialize_macros::Deserializable;
 
 #[derive(Clone, Debug, Default, Deserializable)]
 pub struct MyRuleOptions {
-    behavior: Behavior,
-    threshold: u8,
-    behavior_exceptions: Vec<String>
+    behavior: Option<Behavior>,
+    threshold: Option<u8>,
+    behavior_exceptions: Option<Vec<String>>
 }
 
 #[derive(Clone, Debug, Default, Deserializable)]
@@ -215,10 +215,10 @@ You can simply use a derive macros:
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct MyRuleOptions {
     #[serde(default, skip_serializing_if = "is_default")]
-    main_behavior: Behavior,
+    main_behavior: Option<Behavior>,
 
     #[serde(default, skip_serializing_if = "is_default")]
-    extra_behaviors: Vec<Behavior>,
+    extra_behaviors: Option<Vec<Behavior>>,
 }
 
 #[derive(Debug, Default, Clone)]
