@@ -44,7 +44,8 @@ Attribute Position: Auto
 -----
 
 ```grit
-file(body = contains `console.$method` => `println`)```
+file(body = contains `console.$method` => `println`)
+```
 
 
 
