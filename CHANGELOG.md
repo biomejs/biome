@@ -15,6 +15,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Enhancements
+
+- The `--summary` reporter now reports parsing diagnostics too. Contributed by @ematipico
+
 ### Configuration
 
 ### Editors
