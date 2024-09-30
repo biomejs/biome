@@ -2,11 +2,16 @@ use biome_grit_patterns::{compile_pattern, GritTargetFile, GritTargetLanguage, J
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 use criterion::measurement::WallTime;
-use criterion::{black_box, BenchmarkGroup, BenchmarkId, Throughput};
 use std::collections::HashMap;
 use std::path::Path;
 use xtask_bench::TestCase;
-use xtask_bench::{criterion_group, criterion_main, Criterion};
+
+#[cfg(not(feature = "codspeed"))]
+pub use criterion::*;
+
+#[cfg(feature = "codspeed")]
+pub use codspeed_criterion_compat::*;
+
 #[cfg(target_os = "windows")]
 #[global_allocator]
 static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
