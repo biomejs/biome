@@ -109,13 +109,13 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                         let prop_lowercase = prop.to_lowercase();
 
                         let prop_prefix = vender_prefix(&prop_lowercase);
-                        let unprefixed_prop = remove_vendor_prefix(&prop_lowercase, &prop_prefix);
-                        let override_props = get_override_props(&unprefixed_prop);
+                        let unprefixed_prop = remove_vendor_prefix(&prop_lowercase, prop_prefix);
+                        let override_props = get_override_props(unprefixed_prop);
 
                         self.prior_props_in_block.iter().for_each(|prior_prop| {
                             let prior_prop_prefix = vender_prefix(&prior_prop.lowercase);
                             let unprefixed_prior_prop =
-                                remove_vendor_prefix(&prior_prop.lowercase, &prior_prop_prefix);
+                                remove_vendor_prefix(&prior_prop.lowercase, prior_prop_prefix);
 
                             if prop_prefix == prior_prop_prefix
                                 && override_props.binary_search(&unprefixed_prior_prop).is_ok()
