@@ -175,8 +175,9 @@ impl NoLabelWithoutControlOptions {
             && !self
                 .label_attributes
                 .as_ref()
-                .map(|label_attributes| label_attributes.iter().any(|name| name == attribute_name))
-                .unwrap_or_default()
+                .is_some_and(|label_attributes| {
+                    label_attributes.iter().any(|name| name == attribute_name)
+                })
         {
             return false;
         }
@@ -246,10 +247,9 @@ impl NoLabelWithoutControlOptions {
                             || self
                                 .input_components
                                 .as_ref()
-                                .map(|input_components| {
+                                .is_some_and(|input_components| {
                                     input_components.iter().any(|name| name == element_name)
                                 })
-                                .unwrap_or_default()
                         {
                             return true;
                         }
@@ -264,12 +264,11 @@ impl NoLabelWithoutControlOptions {
     fn has_element_name(&self, element_name: &str) -> bool {
         self.label_components
             .as_ref()
-            .map(|label_components| {
+            .is_some_and(|label_components| {
                 label_components
                     .iter()
                     .any(|label_component_name| label_component_name == element_name)
             })
-            .unwrap_or_default()
     }
 }
 
