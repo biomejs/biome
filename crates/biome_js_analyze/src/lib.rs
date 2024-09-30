@@ -176,7 +176,9 @@ mod tests {
     use biome_project::{Dependencies, PackageJson};
     use std::slice;
 
-    use crate::lint::correctness::use_exhaustive_dependencies::{Hook, HooksOptions};
+    use crate::lint::correctness::use_exhaustive_dependencies::{
+        Hook, UseExhaustiveDependenciesOptions,
+    };
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
     #[ignore]
@@ -207,7 +209,13 @@ mod tests {
 
         options.configuration.rules.push_rule(
             RuleKey::new("nursery", "useHookAtTopLevel"),
-            RuleOptions::new(HooksOptions { hooks: vec![hook] }, None),
+            RuleOptions::new(
+                UseExhaustiveDependenciesOptions {
+                    hooks: vec![hook],
+                    report_unnecessary_dependencies: false,
+                },
+                None,
+            ),
         );
 
         let mut dependencies = Dependencies::default();

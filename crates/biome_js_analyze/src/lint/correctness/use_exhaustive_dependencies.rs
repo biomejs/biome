@@ -250,12 +250,12 @@ declare_lint_rule! {
 }
 
 #[derive(Debug, Clone)]
-pub struct ReactExtensiveDependenciesOptions {
+pub struct HookConfigMaps {
     pub(crate) hooks_config: FxHashMap<String, ReactHookConfiguration>,
     pub(crate) stable_config: FxHashSet<StableReactHookConfiguration>,
 }
 
-impl Default for ReactExtensiveDependenciesOptions {
+impl Default for HookConfigMaps {
     fn default() -> Self {
         let hooks_config = FxHashMap::from_iter([
             ("useEffect".to_string(), (0, 1, true).into()),
@@ -289,13 +289,25 @@ impl Default for ReactExtensiveDependenciesOptions {
 }
 
 /// Options for the rule `useExhaustiveDependencies`
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct HooksOptions {
+pub struct UseExhaustiveDependenciesOptions {
+    // Whether to report errors when a dependency is not used in the closure function
+    pub report_unnecessary_dependencies: bool,
+
     /// List of hooks of which the dependencies should be validated.
     #[deserializable(validate = "non_empty")]
     pub hooks: Vec<Hook>,
+}
+
+impl Default for UseExhaustiveDependenciesOptions {
+    fn default() -> Self {
+        Self {
+            report_unnecessary_dependencies: true,
+            hooks: vec![],
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
@@ -356,15 +368,15 @@ impl DeserializableValidator for Hook {
     }
 }
 
-impl ReactExtensiveDependenciesOptions {
-    pub fn new(hooks: HooksOptions) -> Self {
-        let mut result = ReactExtensiveDependenciesOptions::default();
-        for hook in hooks.hooks {
-            if let Some(stable_result) = hook.stable_result {
-                if stable_result != StableHookResult::None {
+impl HookConfigMaps {
+    pub fn new(hooks: &UseExhaustiveDependenciesOptions) -> Self {
+        let mut result = HookConfigMaps::default();
+        for hook in &hooks.hooks {
+            if let Some(stable_result) = &hook.stable_result {
+                if *stable_result != StableHookResult::None {
                     result.stable_config.insert(StableReactHookConfiguration {
                         hook_name: hook.name.clone(),
-                        result: stable_result,
+                        result: stable_result.clone(),
                         builtin: false,
                     });
                 }
@@ -373,7 +385,7 @@ impl ReactExtensiveDependenciesOptions {
                 (hook.closure_index, hook.dependencies_index)
             {
                 result.hooks_config.insert(
-                    hook.name,
+                    hook.name.clone(),
                     ReactHookConfiguration {
                         closure_index,
                         dependencies_index,
@@ -448,7 +460,7 @@ fn capture_needs_to_be_in_the_dependency_list(
     capture: &Capture,
     component_function_range: &TextRange,
     model: &SemanticModel,
-    options: &ReactExtensiveDependenciesOptions,
+    options: &HookConfigMaps,
 ) -> bool {
     // Ignore if referenced in TS typeof
     if capture
@@ -712,18 +724,20 @@ impl Rule for UseExhaustiveDependencies {
     type Query = Semantic<JsCallExpression>;
     type State = Fix;
     type Signals = Vec<Self::State>;
-    type Options = Box<HooksOptions>;
+    type Options = Box<UseExhaustiveDependenciesOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
         let options = ctx.options();
-        let options = ReactExtensiveDependenciesOptions::new(options.as_ref().clone());
+        let hook_config_maps = HookConfigMaps::new(options);
 
         let mut signals = vec![];
 
         let call = ctx.query();
         let model = ctx.model();
 
-        if let Some(result) = react_hook_with_dependency(call, &options.hooks_config, model) {
+        if let Some(result) =
+            react_hook_with_dependency(call, &hook_config_maps.hooks_config, model)
+        {
             let Some(component_function) = function_of_hook_call(call) else {
                 return vec![];
             };
@@ -741,7 +755,7 @@ impl Rule for UseExhaustiveDependencies {
                         capture,
                         &component_function_range,
                         model,
-                        &options,
+                        &hook_config_maps,
                     )
                 })
                 .map(|capture| {
@@ -862,7 +876,7 @@ impl Rule for UseExhaustiveDependencies {
                 });
             }
 
-            if !excessive_deps.is_empty() {
+            if options.report_unnecessary_dependencies && !excessive_deps.is_empty() {
                 signals.push(Fix::RemoveDependency {
                     function_name_range: result.function_name_range,
                     component_function,

@@ -1051,7 +1051,7 @@
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified in a React hook.",
 					"anyOf": [
-						{ "$ref": "#/definitions/HooksConfiguration" },
+						{ "$ref": "#/definitions/UseExhaustiveDependenciesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1481,25 +1481,6 @@
 						{ "$ref": "#/definitions/StableHookResult" },
 						{ "type": "null" }
 					]
-				}
-			},
-			"additionalProperties": false
-		},
-		"HooksConfiguration": {
-			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithHooksOptions" }
-			]
-		},
-		"HooksOptions": {
-			"description": "Options for the rule `useExhaustiveDependencies`",
-			"type": "object",
-			"required": ["hooks"],
-			"properties": {
-				"hooks": {
-					"description": "List of hooks of which the dependencies should be validated.",
-					"type": "array",
-					"items": { "$ref": "#/definitions/Hook" }
 				}
 			},
 			"additionalProperties": false
@@ -2706,21 +2687,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithHooksOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithNamingConventionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -2865,6 +2831,23 @@
 					"description": "Rule's options",
 					"allOf": [
 						{ "$ref": "#/definitions/UseComponentExportOnlyModulesOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseExhaustiveDependenciesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseExhaustiveDependenciesOptions" }
 					]
 				}
 			},
@@ -3998,6 +3981,26 @@
 					"type": "array",
 					"items": { "type": "string" }
 				}
+			},
+			"additionalProperties": false
+		},
+		"UseExhaustiveDependenciesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseExhaustiveDependenciesOptions" }
+			]
+		},
+		"UseExhaustiveDependenciesOptions": {
+			"description": "Options for the rule `useExhaustiveDependencies`",
+			"type": "object",
+			"required": ["hooks", "reportUnnecessaryDependencies"],
+			"properties": {
+				"hooks": {
+					"description": "List of hooks of which the dependencies should be validated.",
+					"type": "array",
+					"items": { "$ref": "#/definitions/Hook" }
+				},
+				"reportUnnecessaryDependencies": { "type": "boolean" }
 			},
 			"additionalProperties": false
 		},
