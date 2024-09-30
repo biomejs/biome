@@ -15,12 +15,14 @@ expression: invalid.jsx
 ```
 invalid.jsx:1:1 lint/nursery/noHeadElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not use <head> element. Use <Head /> from next/head instead.
+  ! Don't use <head> element.
   
   > 1 │ <head>
       │ ^^^^^^
     2 │   <title>Invalid</title>
     3 │ </head>
+  
+  i Using <head> element can cause unexpected behavior in a Next.js application. Use <Head /> from next/head instead.
   
 
 ```

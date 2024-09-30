@@ -8,17 +8,19 @@ use biome_rowan::AstNode;
 use biome_rowan::TextRange;
 
 declare_lint_rule! {
-    /// Prevent usage of `<head>` element.
+    /// Prevent usage of `<head>` element in a Next.js project.
     ///
-    /// A `<head>` element was used to include page-level metadata, but this can
-    /// cause unexpected behavior in a Next.js application. Use Next.js' built-in
-    /// `next/head` component instead.
+    /// Next.js provides a specialized `<Head />` component from `next/head` that manages
+    /// the `<head>` tag for optimal server-side rendering, client-side navigation, and
+    /// automatic deduplication of tags such as `<meta>` and `<title>`.
+    ///
+    /// This rule only checks outside of the `app/` directory, as it's typically
+    /// handled differently in Next.js.
     ///
     /// ## Examples
     ///
     /// ### Invalid
     /// ```jsx,expect_diagnostic
-    /// // /pages/index.jsx
     /// function Index() {
     ///   return (
     ///     <head>
@@ -31,7 +33,6 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```jsx
-    /// // /pages/index.jsx
     /// import Head from 'next/head'
     ///
     /// function Index() {
@@ -45,7 +46,7 @@ declare_lint_rule! {
     pub NoHeadElement {
         version: "next",
         name: "noHeadElement",
-        language: "js",
+        language: "jsx",
         sources: &[RuleSource::EslintNext("no-head-element")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: false,
@@ -80,9 +81,9 @@ impl Rule for NoHeadElement {
         return Some(RuleDiagnostic::new(
             rule_category!(),
             range,
-            markup! {
-                "Do not use "<Emphasis>"<head>"</Emphasis>" element. Use "<Emphasis>"<Head />"</Emphasis>" from "<Emphasis>"next/head"</Emphasis>" instead."
-            },
-        ));
+            markup! { "Don't use "<Emphasis>"<head>"</Emphasis>" element." },
+        ).note(markup! {
+            "Using "<Emphasis>"<head>"</Emphasis>" element can cause unexpected behavior in a Next.js application. Use "<Emphasis>"<Head />"</Emphasis>" from "<Emphasis>"next/head"</Emphasis>" instead."
+        }));
     }
 }

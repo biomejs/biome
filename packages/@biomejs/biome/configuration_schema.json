@@ -2133,7 +2133,7 @@
 					]
 				},
 				"noHeadElement": {
-					"description": "Prevent usage of \\<head> element.",
+					"description": "Prevent usage of \\<head> element in a Next.js project.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

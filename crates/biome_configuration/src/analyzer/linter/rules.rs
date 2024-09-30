@@ -3301,7 +3301,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_exported_imports:
         Option<RuleConfiguration<biome_js_analyze::options::NoExportedImports>>,
-    #[doc = "Prevent usage of \\<head> element."]
+    #[doc = "Prevent usage of \\<head> element in a Next.js project."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_head_element: Option<RuleConfiguration<biome_js_analyze::options::NoHeadElement>>,
     #[doc = "Disallows the use of irregular whitespace characters."]
