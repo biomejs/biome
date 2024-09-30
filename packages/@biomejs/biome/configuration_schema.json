@@ -2083,6 +2083,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDescendingSpecificity": {
+					"description": "Disallow a lower specificity selector from coming after a higher specificity selector.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateCustomProperties": {
 					"description": "Disallow duplicate custom properties within declaration blocks.",
 					"anyOf": [
