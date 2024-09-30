@@ -1223,6 +1223,10 @@ export interface Nursery {
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow a lower specificity selector from coming after a higher specificity selector.
+	 */
+	noDescendingSpecificity?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate custom properties within declaration blocks.
 	 */
 	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
@@ -2833,6 +2837,7 @@ export type Category =
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
+	| "lint/nursery/noDescendingSpecificity"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
