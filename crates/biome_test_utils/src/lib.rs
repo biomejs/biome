@@ -204,22 +204,16 @@ pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerActi
 /// corresponding to the directory name. E.g., `style/useWhile/test.js`
 /// will be analyzed with just the `style/useWhile` rule.
 pub fn parse_test_path(file: &Path) -> (&str, &str) {
-    let mut root_found = false;
     let mut group_name = "";
     let mut rule_name = "";
 
     for component in file.iter().rev() {
         if component == "specs" || component == "suppression" {
-            root_found = true;
             break;
         }
 
         rule_name = group_name;
         group_name = component.to_str().unwrap_or_default();
-    }
-
-    if !root_found {
-        panic!("Failed to find group and rule");
     }
 
     (group_name, rule_name)
