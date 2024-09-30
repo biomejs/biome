@@ -60,12 +60,6 @@ setTimeout(function() { console.log("Hello!"); }, 1000);
 // check higher order functions
 const arrowFn = () => (): void => {};
 const arrowFn = () => function(): void {}
-function fn() {
-  let str = "hey";
-  return function (): string {
-      return str;
-  };
-}
 const arrowFn = () => {
   return (): void => { };
 }

@@ -48,17 +48,12 @@ export default function () {}
 // check higher order functions
 const arrowFn = () => () => {};
 const arrowFn = () => function() {}
-function fn() {
-  let str = "hey";
-  return function () {
-      return str;
-  };
-}
 const arrowFn = () => {
   return () => { };
 }
 
 // does not support detecting a return of a function inside other statements like if, switch, etc.
+// we check only the first statment 
 const arrowFn = (a: number) => {
   if (a === 1) {
     return (): void => { };
@@ -80,4 +75,18 @@ const arrowFn = (a: number) => {
       return (): void => { };
     }
   }
+}
+
+function f() {
+  if (x) {
+    return 0;
+  }
+  return (): void => {}
+}
+
+function fn() {
+  let str = "hey";
+  return function (): string {
+      return str;
+  };
 }

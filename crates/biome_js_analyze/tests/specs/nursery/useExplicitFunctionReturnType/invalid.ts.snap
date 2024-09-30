@@ -54,17 +54,12 @@ export default function () {}
 // check higher order functions
 const arrowFn = () => () => {};
 const arrowFn = () => function() {}
-function fn() {
-  let str = "hey";
-  return function () {
-      return str;
-  };
-}
 const arrowFn = () => {
   return () => { };
 }
 
 // does not support detecting a return of a function inside other statements like if, switch, etc.
+// we check only the first statment 
 const arrowFn = (a: number) => {
   if (a === 1) {
     return (): void => { };
@@ -86,6 +81,20 @@ const arrowFn = (a: number) => {
       return (): void => { };
     }
   }
+}
+
+function f() {
+  if (x) {
+    return 0;
+  }
+  return (): void => {}
+}
+
+function fn() {
+  let str = "hey";
+  return function (): string {
+      return str;
+  };
 }
 ```
 
@@ -380,7 +389,7 @@ invalid.ts:49:23 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
   > 49 │ const arrowFn = () => () => {};
        │                       ^^^^^^^^
     50 │ const arrowFn = () => function() {}
-    51 │ function fn() {
+    51 │ const arrowFn = () => {
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -398,8 +407,8 @@ invalid.ts:50:23 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
     49 │ const arrowFn = () => () => {};
   > 50 │ const arrowFn = () => function() {}
        │                       ^^^^^^^^^^^^^
-    51 │ function fn() {
-    52 │   let str = "hey";
+    51 │ const arrowFn = () => {
+    52 │   return () => { };
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -409,38 +418,16 @@ invalid.ts:50:23 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:53:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:52:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
-    51 │ function fn() {
-    52 │   let str = "hey";
-  > 53 │   return function () {
-       │          ^^^^^^^^^^^^^
-  > 54 │       return str;
-  > 55 │   };
-       │   ^
-    56 │ }
-    57 │ const arrowFn = () => {
-  
-  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
-  
-  i Add a return type annotation.
-  
-
-```
-
-```
-invalid.ts:58:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing return type on function.
-  
-    56 │ }
-    57 │ const arrowFn = () => {
-  > 58 │   return () => { };
+    50 │ const arrowFn = () => function() {}
+    51 │ const arrowFn = () => {
+  > 52 │   return () => { };
        │          ^^^^^^^^^
-    59 │ }
-    60 │ 
+    53 │ }
+    54 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -450,20 +437,21 @@ invalid.ts:58:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:62:17 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:57:17 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
-    61 │ // does not support detecting a return of a function inside other statements like if, switch, etc.
-  > 62 │ const arrowFn = (a: number) => {
+    55 │ // does not support detecting a return of a function inside other statements like if, switch, etc.
+    56 │ // we check only the first statment·
+  > 57 │ const arrowFn = (a: number) => {
        │                 ^^^^^^^^^^^^^^^^
-  > 63 │   if (a === 1) {
+  > 58 │   if (a === 1) {
         ...
-  > 69 │   }
-  > 70 │ }
+  > 64 │   }
+  > 65 │ }
        │ ^
-    71 │ const arrowFn = (a: number) => {
-    72 │   switch (a) {
+    66 │ const arrowFn = (a: number) => {
+    67 │   switch (a) {
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -473,21 +461,65 @@ invalid.ts:62:17 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:71:17 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:66:17 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
-    69 │   }
-    70 │ }
-  > 71 │ const arrowFn = (a: number) => {
+    64 │   }
+    65 │ }
+  > 66 │ const arrowFn = (a: number) => {
        │                 ^^^^^^^^^^^^^^^^
-  > 72 │   switch (a) {
+  > 67 │   switch (a) {
         ...
-  > 80 │       return (): void => { };
-  > 81 │     }
-  > 82 │   }
-  > 83 │ }
+  > 77 │   }
+  > 78 │ }
        │ ^
+    79 │ 
+    80 │ function f() {
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:78:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    76 │     }
+    77 │   }
+  > 78 │ }
+       │  
+  > 79 │ 
+  > 80 │ function f() {
+       │ ^^^^^^^^^^
+    81 │   if (x) {
+    82 │     return 0;
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:85:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    83 │   }
+    84 │   return (): void => {}
+  > 85 │ }
+       │  
+  > 86 │ 
+  > 87 │ function fn() {
+       │ ^^^^^^^^^^^
+    88 │   let str = "hey";
+    89 │   return function (): string {
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   

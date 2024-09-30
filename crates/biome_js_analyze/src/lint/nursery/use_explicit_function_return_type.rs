@@ -69,6 +69,8 @@ declare_lint_rule! {
     /// const func = (value: number) => ({ type: 'X', value }) as any;
     /// ```
     ///
+    /// The following pattern is considered incorrect code for a higher-order function, as the returned function does not specify a return type:
+    ///
     /// ```ts,expect_diagnostic
     /// const arrowFn = () => () => {};
     /// ```
@@ -76,6 +78,28 @@ declare_lint_rule! {
     /// ```ts,expect_diagnostic
     /// const arrowFn = () => {
     ///   return () => { };
+    /// }
+    /// ```
+    ///
+    /// The following pattern is considered incorrect code for a higher-order function because the function body contains multiple statements. We only check whether the first statement is a function return.
+    ///
+    /// ```ts,expect_diagnostic
+    /// // A function has multiple statements in the body
+    /// function f() {
+    ///   if (x) {
+    ///     return 0;
+    ///   }
+    ///   return (): void => {}
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // A function has multiple statements in the body
+    /// function f() {
+    ///   let str = "test";
+    ///   return (): string => {
+    ///     str;
+    ///   }
     /// }
     /// ```
     ///
@@ -108,9 +132,13 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// The following patterns are considered correct code for a function immediately returning a value with `as const`:
+    ///
     /// ```ts
     /// const func = (value: number) => ({ foo: 'bar', value }) as const;
     /// ```
+    ///
+    /// The following patterns are considered correct code for a function allowed within specific expression contexts, such as an IIFE, a function passed as an argument, or a function inside an array:
     ///
     /// ```ts
     /// // Callbacks without return types
@@ -122,13 +150,23 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```ts
+    /// // a function inside an array
+    /// [function () {}, () => {}];
+    /// ```
+    ///
+    /// The following pattern is considered correct code for a higher-order function, where the returned function explicitly specifies a return type and the function body contains only one statement:
+    ///
+    /// ```ts
+    /// // the outer function returns an inner function that has a `void` return type
     /// const arrowFn = () => (): void => {};
     /// ```
     ///
     /// ```ts
+    /// // the outer function returns an inner function that has a `void` return type
     /// const arrowFn = () => {
     ///   return (): void => { };
     /// }
+    /// ```
     ///
     pub UseExplicitFunctionReturnType {
         version: "next",
@@ -294,9 +332,6 @@ fn is_function_used_in_argument_or_expression_list(func: &AnyJsFunction) -> bool
 /// Checks whether the given function is a higher-order function, i.e., a function
 /// that returns another function either directly in its body or as an expression.
 ///
-/// A higher-order function is one that returns either a regular function or an arrow
-/// function from within its body.
-///
 /// # Arguments
 ///
 /// * `func` - A reference to an `AnyJsFunction` that represents the JavaScript function to inspect.
@@ -309,8 +344,8 @@ fn is_function_used_in_argument_or_expression_list(func: &AnyJsFunction) -> bool
 /// # Note
 ///
 /// This function currently **does not support** detecting a return of a function
-/// inside other statements like `if` statements or `switch` statements. It only detects
-/// direct returns of functions or function returns in a straightforward function body.
+/// inside other statements, such as `if` statements or `switch` statements. It only checks
+/// whether the first statement is a return of a function in a straightforward function body.
 fn is_higher_order_function(func: &AnyJsFunction) -> bool {
     match func.body().ok() {
         Some(AnyJsFunctionBody::AnyJsExpression(expr)) => {
@@ -321,13 +356,13 @@ fn is_higher_order_function(func: &AnyJsFunction) -> bool {
             )
         }
         Some(AnyJsFunctionBody::JsFunctionBody(func_body)) => {
-            check_statements_for_function_return(func_body.statements())
+            is_first_statement_function_return(func_body.statements())
         }
         _ => false,
     }
 }
 
-/// Checks whether the given list of JavaScript statements contains a return statement
+/// Checks whether the first statement in the given list of JavaScript statements is a return statement
 /// that returns a function expression (either a regular function or an arrow function).
 ///
 /// # Arguments
@@ -338,17 +373,22 @@ fn is_higher_order_function(func: &AnyJsFunction) -> bool {
 ///
 /// * `true` if the list contains a return statement with a function expression as its argument.
 /// * `false` if no such return statement is found or if the list is empty.
-fn check_statements_for_function_return(statements: JsStatementList) -> bool {
-    statements.into_iter().any(|statement| {
-        if let AnyJsStatement::JsReturnStatement(return_stmt) = statement {
-            if let Some(args) = return_stmt.argument() {
-                return matches!(
-                    args,
-                    AnyJsExpression::JsFunctionExpression(_)
-                        | AnyJsExpression::JsArrowFunctionExpression(_)
-                );
+fn is_first_statement_function_return(statements: JsStatementList) -> bool {
+    statements
+        .into_iter()
+        .next()
+        .and_then(|stmt| {
+            if let AnyJsStatement::JsReturnStatement(return_stmt) = stmt {
+                return_stmt.argument()
+            } else {
+                None
             }
-        }
-        false
-    })
+        })
+        .map_or(false, |args| {
+            matches!(
+                args,
+                AnyJsExpression::JsFunctionExpression(_)
+                    | AnyJsExpression::JsArrowFunctionExpression(_)
+            )
+        })
 }
