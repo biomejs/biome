@@ -5,6 +5,16 @@ pub(crate) struct FormatGritDefinitionList;
 impl FormatRule<GritDefinitionList> for FormatGritDefinitionList {
     type Context = GritFormatContext;
     fn fmt(&self, node: &GritDefinitionList, f: &mut GritFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let mut join = f.join_nodes_with_hardline();
+
+        for definition in node {
+            let def_clone = definition.clone().unwrap();
+            join.entry(
+                definition?.syntax(),
+                &format_or_verbatim(def_clone.format()),
+            );
+        }
+
+        join.finish()
     }
 }
