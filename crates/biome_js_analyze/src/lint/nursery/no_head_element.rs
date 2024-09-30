@@ -63,8 +63,10 @@ impl Rule for NoHeadElement {
         let name = element.name().ok()?.name_value_token()?;
 
         if name.text_trimmed() == "head" {
-            let path = ctx.file_path().as_os_str().to_str()?;
-            let is_in_app_dir = path.contains(&format!("app{}", std::path::MAIN_SEPARATOR));
+            let is_in_app_dir = ctx
+                .file_path()
+                .ancestors()
+                .any(|a| a.file_name().map_or(false, |f| f == "app" && a.is_dir()));
 
             if !is_in_app_dir {
                 return Some(element.syntax().text_range());
