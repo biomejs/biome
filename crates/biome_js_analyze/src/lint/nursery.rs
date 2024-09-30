@@ -18,6 +18,7 @@ pub mod no_static_element_interactions;
 pub mod no_substr;
 pub mod no_template_curly_in_string;
 pub mod no_useless_escape_in_regex;
+pub mod no_useless_undefined;
 pub mod use_adjacent_overload_signatures;
 pub mod use_aria_props_supported_by_role;
 pub mod use_component_export_only_modules;
@@ -50,6 +51,7 @@ declare_lint_group! {
             self :: no_substr :: NoSubstr ,
             self :: no_template_curly_in_string :: NoTemplateCurlyInString ,
             self :: no_useless_escape_in_regex :: NoUselessEscapeInRegex ,
+            self :: no_useless_undefined :: NoUselessUndefined ,
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
             self :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRole ,
             self :: use_component_export_only_modules :: UseComponentExportOnlyModules ,
