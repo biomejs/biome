@@ -4001,7 +4001,7 @@
 					"items": { "$ref": "#/definitions/Hook" }
 				},
 				"reportUnnecessaryDependencies": {
-					"description": "Whether to report errors when a dependency is not used in the closure function.",
+					"description": "Whether to report errors when a dependency is listed in the dependencies array but isn't used. Defaults to true.",
 					"default": false,
 					"type": "boolean"
 				}

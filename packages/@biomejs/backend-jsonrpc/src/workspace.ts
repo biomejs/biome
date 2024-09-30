@@ -2323,7 +2323,7 @@ export interface UseExhaustiveDependenciesOptions {
 	 */
 	hooks?: Hook[];
 	/**
-	 * Whether to report errors when a dependency is not used in the closure function.
+	 * Whether to report errors when a dependency is listed in the dependencies array but isn't used. Defaults to true.
 	 */
 	reportUnnecessaryDependencies?: boolean;
 }
