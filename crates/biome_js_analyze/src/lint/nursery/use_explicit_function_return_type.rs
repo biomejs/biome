@@ -4,7 +4,8 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyTsType, JsFileSource, JsSyntaxKind,
+    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsFileSource,
+    JsStatementList, JsSyntaxKind,
 };
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
@@ -68,6 +69,40 @@ declare_lint_rule! {
     /// const func = (value: number) => ({ type: 'X', value }) as any;
     /// ```
     ///
+    /// The following pattern is considered incorrect code for a higher-order function, as the returned function does not specify a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// const arrowFn = () => () => {};
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// const arrowFn = () => {
+    ///   return () => { };
+    /// }
+    /// ```
+    ///
+    /// The following pattern is considered incorrect code for a higher-order function because the function body contains multiple statements. We only check whether the first statement is a function return.
+    ///
+    /// ```ts,expect_diagnostic
+    /// // A function has multiple statements in the body
+    /// function f() {
+    ///   if (x) {
+    ///     return 0;
+    ///   }
+    ///   return (): void => {}
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// // A function has multiple statements in the body
+    /// function f() {
+    ///   let str = "test";
+    ///   return (): string => {
+    ///     str;
+    ///   }
+    /// }
+    /// ```
+    ///
     /// ### Valid
     /// ```ts
     /// // No return value should be expected (void)
@@ -97,9 +132,13 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// The following patterns are considered correct code for a function immediately returning a value with `as const`:
+    ///
     /// ```ts
     /// const func = (value: number) => ({ foo: 'bar', value }) as const;
     /// ```
+    ///
+    /// The following patterns are considered correct code for a function allowed within specific expression contexts, such as an IIFE, a function passed as an argument, or a function inside an array:
     ///
     /// ```ts
     /// // Callbacks without return types
@@ -108,6 +147,25 @@ declare_lint_rule! {
     /// ```ts
     /// // IIFE
     /// (() => {})();
+    /// ```
+    ///
+    /// ```ts
+    /// // a function inside an array
+    /// [function () {}, () => {}];
+    /// ```
+    ///
+    /// The following pattern is considered correct code for a higher-order function, where the returned function explicitly specifies a return type and the function body contains only one statement:
+    ///
+    /// ```ts
+    /// // the outer function returns an inner function that has a `void` return type
+    /// const arrowFn = () => (): void => {};
+    /// ```
+    ///
+    /// ```ts
+    /// // the outer function returns an inner function that has a `void` return type
+    /// const arrowFn = () => {
+    ///   return (): void => { };
+    /// }
     /// ```
     ///
     pub UseExplicitFunctionReturnType {
@@ -147,6 +205,10 @@ impl Rule for UseExplicitFunctionReturnType {
                 }
 
                 if is_function_used_in_argument_or_expression_list(func) {
+                    return None;
+                }
+
+                if is_higher_order_function(func) {
                     return None;
                 }
 
@@ -265,4 +327,68 @@ fn is_function_used_in_argument_or_expression_list(func: &AnyJsFunction) -> bool
                 | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
         )
     )
+}
+
+/// Checks whether the given function is a higher-order function, i.e., a function
+/// that returns another function either directly in its body or as an expression.
+///
+/// # Arguments
+///
+/// * `func` - A reference to an `AnyJsFunction` that represents the JavaScript function to inspect.
+///
+/// # Returns
+///
+/// * `true` if the function returns another function (either a regular function or an arrow function).
+/// * `false` if it does not return a function or if the body is not a valid returnable function expression.
+///
+/// # Note
+///
+/// This function currently **does not support** detecting a return of a function
+/// inside other statements, such as `if` statements or `switch` statements. It only checks
+/// whether the first statement is a return of a function in a straightforward function body.
+fn is_higher_order_function(func: &AnyJsFunction) -> bool {
+    match func.body().ok() {
+        Some(AnyJsFunctionBody::AnyJsExpression(expr)) => {
+            matches!(
+                expr,
+                AnyJsExpression::JsArrowFunctionExpression(_)
+                    | AnyJsExpression::JsFunctionExpression(_)
+            )
+        }
+        Some(AnyJsFunctionBody::JsFunctionBody(func_body)) => {
+            is_first_statement_function_return(func_body.statements())
+        }
+        _ => false,
+    }
+}
+
+/// Checks whether the first statement in the given list of JavaScript statements is a return statement
+/// that returns a function expression (either a regular function or an arrow function).
+///
+/// # Arguments
+///
+/// * `statements` - A list of JavaScript statements (`JsStatementList`) to inspect.
+///
+/// # Returns
+///
+/// * `true` if the list contains a return statement with a function expression as its argument.
+/// * `false` if no such return statement is found or if the list is empty.
+fn is_first_statement_function_return(statements: JsStatementList) -> bool {
+    statements
+        .into_iter()
+        .next()
+        .and_then(|stmt| {
+            if let AnyJsStatement::JsReturnStatement(return_stmt) = stmt {
+                return_stmt.argument()
+            } else {
+                None
+            }
+        })
+        .map_or(false, |args| {
+            matches!(
+                args,
+                AnyJsExpression::JsFunctionExpression(_)
+                    | AnyJsExpression::JsArrowFunctionExpression(_)
+            )
+        })
 }
