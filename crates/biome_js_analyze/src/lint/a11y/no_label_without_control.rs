@@ -155,11 +155,11 @@ impl Rule for NoLabelWithoutControl {
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoLabelWithoutControlOptions {
     /// Array of component names that should be considered the same as an `input` element.
-    pub input_components: Option<Vec<String>>,
+    pub input_components: Vec<String>,
     /// Array of attributes that should be treated as the `label` accessible text content.
-    pub label_attributes: Option<Vec<String>>,
+    pub label_attributes: Vec<String>,
     /// Array of component names that should be considered the same as a `label` element.
-    pub label_components: Option<Vec<String>>,
+    pub label_components: Vec<String>,
 }
 
 impl NoLabelWithoutControlOptions {
@@ -174,10 +174,8 @@ impl NoLabelWithoutControlOptions {
         if !DEFAULT_LABEL_ATTRIBUTES.contains(&attribute_name)
             && !self
                 .label_attributes
-                .as_ref()
-                .is_some_and(|label_attributes| {
-                    label_attributes.iter().any(|name| name == attribute_name)
-                })
+                .iter()
+                .any(|name| name == attribute_name)
         {
             return false;
         }
@@ -246,10 +244,8 @@ impl NoLabelWithoutControlOptions {
                         if DEFAULT_INPUT_COMPONENTS.contains(&element_name)
                             || self
                                 .input_components
-                                .as_ref()
-                                .is_some_and(|input_components| {
-                                    input_components.iter().any(|name| name == element_name)
-                                })
+                                .iter()
+                                .any(|name| name == element_name)
                         {
                             return true;
                         }
@@ -263,12 +259,8 @@ impl NoLabelWithoutControlOptions {
 
     fn has_element_name(&self, element_name: &str) -> bool {
         self.label_components
-            .as_ref()
-            .is_some_and(|label_components| {
-                label_components
-                    .iter()
-                    .any(|label_component_name| label_component_name == element_name)
-            })
+            .iter()
+            .any(|label_component_name| label_component_name == element_name)
     }
 }
 

@@ -2032,20 +2032,20 @@
 			"properties": {
 				"inputComponents": {
 					"description": "Array of component names that should be considered the same as an `input` element.",
-					"default": null,
-					"type": ["array", "null"],
+					"default": [],
+					"type": "array",
 					"items": { "type": "string" }
 				},
 				"labelAttributes": {
 					"description": "Array of attributes that should be treated as the `label` accessible text content.",
-					"default": null,
-					"type": ["array", "null"],
+					"default": [],
+					"type": "array",
 					"items": { "type": "string" }
 				},
 				"labelComponents": {
 					"description": "Array of component names that should be considered the same as a `label` element.",
-					"default": null,
-					"type": ["array", "null"],
+					"default": [],
+					"type": "array",
 					"items": { "type": "string" }
 				}
 			},
