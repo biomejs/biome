@@ -197,7 +197,7 @@ impl GritTargetLanguage {
                 .root_node()
                 .descendants()
                 .map_or(false, |mut descendants| {
-                    !descendants.any(|descendant| descendant.kind().is_bogus())
+                    descendants.any(|descendant| descendant.kind().is_bogus())
                 });
             if has_errors {
                 continue;
