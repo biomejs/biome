@@ -9,9 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
-
-### Analyzer
+## v1.9.3 (2024-10-01)
 
 ### CLI
 
@@ -79,6 +77,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Linter
 
 #### New features
+
+- Add [noDescendingSpecificity](https://biomejs.dev/linter/rules/no-descending-specificity/). Contributed by @tunamaguro
+
+- Add [noNestedTernary](https://biomejs.dev/linter/rules/no-nested-ternary/). Contributed by @kaykdm
 
 - Add [noTemplateCurlyInString](https://biomejs.dev/linter/rules/no-template-curly-in-string/). Contributed by @fireairforce
 
