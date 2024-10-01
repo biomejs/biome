@@ -4007,6 +4007,11 @@
 					"type": "array",
 					"items": { "$ref": "#/definitions/Hook" }
 				},
+				"reportMissingDependenciesArray": {
+					"description": "Whether to report an error when a hook has no dependencies array.",
+					"default": false,
+					"type": "boolean"
+				},
 				"reportUnnecessaryDependencies": {
 					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.",
 					"default": true,

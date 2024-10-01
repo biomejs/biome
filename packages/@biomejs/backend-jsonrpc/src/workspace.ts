@@ -2327,6 +2327,10 @@ export interface UseExhaustiveDependenciesOptions {
 	 */
 	hooks?: Hook[];
 	/**
+	 * Whether to report an error when a hook has no dependencies array.
+	 */
+	reportMissingDependenciesArray?: boolean;
+	/**
 	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
 	 */
 	reportUnnecessaryDependencies?: boolean;
