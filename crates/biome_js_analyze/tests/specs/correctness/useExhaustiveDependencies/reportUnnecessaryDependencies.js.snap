@@ -6,8 +6,8 @@ expression: reportUnnecessaryDependencies.js
 ```jsx
 import {useEffect} from "react";
 
-// should not report errors for the unused `b` when the reportUnecessaryDependencies option is false
-function ReportUnecessaryDependencies() {
+// should not report errors for the unused `b` when the reportUnnecessaryDependencies option is false
+function ReportUnnecessaryDependencies() {
     const [b] = useState("hello")
     const [a] = useState("world");
 

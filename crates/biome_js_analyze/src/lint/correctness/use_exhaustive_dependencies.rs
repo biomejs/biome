@@ -294,7 +294,7 @@ impl Default for HookConfigMaps {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct UseExhaustiveDependenciesOptions {
     /// Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
-    #[serde(default)]
+    #[serde(default = "report_unnecessary_dependencies_default")]
     pub report_unnecessary_dependencies: bool,
 
     /// List of hooks of which the dependencies should be validated.
@@ -306,10 +306,14 @@ pub struct UseExhaustiveDependenciesOptions {
 impl Default for UseExhaustiveDependenciesOptions {
     fn default() -> Self {
         Self {
-            report_unnecessary_dependencies: true,
+            report_unnecessary_dependencies: report_unnecessary_dependencies_default(),
             hooks: vec![],
         }
     }
+}
+
+fn report_unnecessary_dependencies_default() -> bool {
+    true
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]

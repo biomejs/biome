@@ -4002,7 +4002,7 @@
 				},
 				"reportUnnecessaryDependencies": {
 					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.",
-					"default": false,
+					"default": true,
 					"type": "boolean"
 				}
 			},
