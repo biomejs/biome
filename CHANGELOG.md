@@ -78,6 +78,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [noDescendingSpecificity](https://biomejs.dev/linter/rules/no-descending-specificity/). Contributed by @tunamaguro
+
+- Add [noNestedTernary](https://biomejs.dev/linter/rules/no-nested-ternary/). Contributed by @kaykdm
+
 - Add [noTemplateCurlyInString](https://biomejs.dev/linter/rules/no-template-curly-in-string/). Contributed by @fireairforce
 
 - Add [noOctalEscape](https://biomejs.dev/linter/rules/no-octal-escape/). Contributed by @fireairforce
