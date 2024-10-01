@@ -1184,7 +1184,7 @@ export interface Correctness {
 	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
-	useExhaustiveDependencies?: RuleConfiguration_for_HooksOptions;
+	useExhaustiveDependencies?: RuleConfiguration_for_UseExhaustiveDependenciesOptions;
 	/**
 	 * Enforce that all React hooks are being called from the Top Level component functions.
 	 */
@@ -1985,9 +1985,9 @@ export type RuleFixConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
-export type RuleConfiguration_for_HooksOptions =
+export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_HooksOptions;
+	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
@@ -2103,7 +2103,7 @@ export interface RuleWithOptions_for_ComplexityOptions {
 	 */
 	options: ComplexityOptions;
 }
-export interface RuleWithOptions_for_HooksOptions {
+export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -2111,7 +2111,7 @@ export interface RuleWithOptions_for_HooksOptions {
 	/**
 	 * Rule's options
 	 */
-	options: HooksOptions;
+	options: UseExhaustiveDependenciesOptions;
 }
 export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	/**
@@ -2321,11 +2321,15 @@ export interface ComplexityOptions {
 /**
  * Options for the rule `useExhaustiveDependencies`
  */
-export interface HooksOptions {
+export interface UseExhaustiveDependenciesOptions {
 	/**
 	 * List of hooks of which the dependencies should be validated.
 	 */
-	hooks: Hook[];
+	hooks?: Hook[];
+	/**
+	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
+	 */
+	reportUnnecessaryDependencies?: boolean;
 }
 /**
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
