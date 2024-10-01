@@ -169,7 +169,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseExplicitFunctionReturnType {
-        version: "next",
+        version: "1.9.3",
         name: "useExplicitFunctionReturnType",
         language: "ts",
         recommended: false,
