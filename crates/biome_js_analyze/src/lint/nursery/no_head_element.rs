@@ -14,7 +14,7 @@ declare_lint_rule! {
     /// the `<head>` tag for optimal server-side rendering, client-side navigation, and
     /// automatic deduplication of tags such as `<meta>` and `<title>`.
     ///
-    /// This rule only checks outside of the `app/` directory, as it's typically
+    /// This rule only checks files that are outside of the [`app/` directory](https://nextjs.org/docs/app), as it's typically
     /// handled differently in Next.js.
     ///
     /// ## Examples
@@ -83,7 +83,7 @@ impl Rule for NoHeadElement {
             range,
             markup! { "Don't use "<Emphasis>"<head>"</Emphasis>" element." },
         ).note(markup! {
-            "Using "<Emphasis>"<head>"</Emphasis>" element can cause unexpected behavior in a Next.js application. Use "<Emphasis>"<Head />"</Emphasis>" from "<Emphasis>"next/head"</Emphasis>" instead."
+            "Using the "<Emphasis>"<head>"</Emphasis>" element can cause unexpected behavior in a Next.js application. Use "<Emphasis>"<Head />"</Emphasis>" from "<Emphasis>"next/head"</Emphasis>" instead."
         }));
     }
 }
