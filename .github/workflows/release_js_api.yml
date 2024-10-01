@@ -4,10 +4,10 @@ on:
   schedule:
     - cron: '0 0 * * 2-6'
   push:
-#    branches:
-#      - main
-#    paths:
-#      - npm/js-api/package.json
+    branches:
+      - main
+    paths:
+      - packages/@biomejs/js-api/package.json
 
 jobs:
   check:
