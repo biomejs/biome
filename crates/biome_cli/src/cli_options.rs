@@ -84,6 +84,13 @@ pub struct CliOptions {
     )]
     /// The level of diagnostics to show. In order, from the lowest to the most important: info, warn, error. Passing `--diagnostic-level=error` will cause Biome to print only diagnostics that contain only errors.
     pub diagnostic_level: Severity,
+
+    #[bpaf(
+        long("output-to-file"),
+        short('o'),
+        argument("<FILE>"),
+    )]
+    pub output_to_file: String,
 }
 
 impl CliOptions {
