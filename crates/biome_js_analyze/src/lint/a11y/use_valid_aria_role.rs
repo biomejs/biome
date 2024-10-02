@@ -49,7 +49,7 @@ declare_lint_rule! {
     ///     "//": "...",
     ///     "options": {
     ///         "allowInvalidRoles": ["invalid-role", "text"],
-    ///         "nonIgnoreDom": true
+    ///         "ignoreNonDom": true
     ///     }
     /// }
     /// ```
