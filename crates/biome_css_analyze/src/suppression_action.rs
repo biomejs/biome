@@ -15,6 +15,7 @@ impl SuppressionAction for CssSuppressionAction {
             token_has_trailing_comments: false,
             token_to_apply_suppression: token.clone(),
             should_insert_leading_newline: false,
+            suppression_reason: None,
         };
         let mut current_token = token;
         loop {
@@ -46,6 +47,7 @@ impl SuppressionAction for CssSuppressionAction {
             token_to_apply_suppression,
             token_has_trailing_comments,
             should_insert_leading_newline: _,
+            suppression_reason: _,
         } = apply_suppression;
 
         let mut new_token = token_to_apply_suppression.clone();

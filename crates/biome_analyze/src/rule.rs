@@ -869,6 +869,7 @@ pub trait Rule: RuleMeta + Sized {
         ctx: &RuleContext<Self>,
         text_range: &TextRange,
         suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
+        suppression_reason: Option<String>,
     ) -> Option<SuppressAction<RuleLanguage<Self>>>
     where
         Self: 'static,
@@ -886,6 +887,7 @@ pub trait Rule: RuleMeta + Sized {
             let mut mutation = root.begin();
             suppression_action.apply_suppression_comment(SuppressionCommentEmitterPayload {
                 suppression_text: suppression_text.as_str(),
+                suppression_reason,
                 mutation: &mut mutation,
                 token_offset: token,
                 diagnostic_text_range: text_range,

@@ -21,8 +21,8 @@ use crate::{
 };
 use biome_analyze::options::PreferredQuote;
 use biome_analyze::{
-    ActionCategory, AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
-    QueryMatch, RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never, QueryMatch,
+    RuleCategoriesBuilder, RuleCategory, RuleError, RuleFilter,
 };
 use biome_configuration::javascript::JsxRuntime;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
@@ -662,11 +662,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     if action.is_suppression()
                         && params.suppress
                         && action.applicability == Applicability::Always
-                        // TODO: I was getting suppressions written for the "use strict" nursery rule, but I don't know
-                        // why so I hacked this.
-                        && action
-                            .rule_name
-                            .is_some_and(|(first, _)| first != "nursery")
                     {
                         return ControlFlow::Break(action);
                     }

@@ -428,6 +428,7 @@ impl<L: Language + Default> RegistryRule<L> {
                     result,
                     params.services,
                     params.suppression_action,
+                    None,
                     params.options,
                 ));
 

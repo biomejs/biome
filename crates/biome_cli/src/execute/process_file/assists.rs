@@ -25,6 +25,7 @@ pub(crate) fn assists_with_guard<'ctx>(
                 .fix_file(
                     FixFileMode::SafeFixes,
                     ctx.execution.as_write_suppressions_mode().is_some(),
+                    None,
                     false,
                     RuleCategoriesBuilder::default().with_action().build(),
                     only.clone(),

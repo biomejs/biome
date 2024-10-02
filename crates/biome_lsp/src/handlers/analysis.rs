@@ -243,6 +243,7 @@ fn fix_all(
         path: biome_path,
         fix_file_mode: FixFileMode::SafeFixes,
         suppress: false,
+        suppression_reason: None,
         should_format,
         only: vec![],
         skip: vec![],

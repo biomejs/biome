@@ -784,6 +784,8 @@ pub struct SuppressionCommentEmitterPayload<'a, L: Language> {
     pub mutation: &'a mut BatchMutation<L>,
     /// A string equals to "rome-ignore: lint(<RULE_GROUP>/<RULE_NAME>)"
     pub suppression_text: &'a str,
+    /// Reason for the suppression with --suppress
+    pub suppression_reason: Option<String>,
     /// The original range of the diagnostic where the rule was triggered
     pub diagnostic_text_range: &'a TextRange,
 }
