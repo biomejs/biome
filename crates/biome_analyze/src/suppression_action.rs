@@ -9,7 +9,6 @@ pub trait SuppressionAction {
             token_offset,
             mutation,
             suppression_text,
-            suppression_reason,
             diagnostic_text_range,
         } = payload;
 

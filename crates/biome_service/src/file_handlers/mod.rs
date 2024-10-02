@@ -358,7 +358,6 @@ pub struct FixAllParams<'a> {
     pub(crate) parse: AnyParse,
     pub(crate) fix_file_mode: FixFileMode,
     pub(crate) suppress: bool,
-    pub(crate) suppression_reason: Option<String>,
     pub(crate) workspace: WorkspaceSettingsHandle<'a>,
     /// Whether it should format the code action
     pub(crate) should_format: bool,
