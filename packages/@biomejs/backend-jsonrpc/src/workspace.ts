@@ -3238,15 +3238,14 @@ export interface FixFileParams {
 	rule_categories: RuleCategories;
 	should_format: boolean;
 	skip: RuleCode[];
-	suppress: boolean;
 }
 /**
  * Which fixes should be applied during the analyzing phase
  */
 export type FixFileMode =
-	| "ApplySuppressions"
-	| "SafeFixes"
-	| "SafeAndUnsafeFixes";
+ | "ApplySuppressions"
+ | "SafeFixes"
+ | "SafeAndUnsafeFixes";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
