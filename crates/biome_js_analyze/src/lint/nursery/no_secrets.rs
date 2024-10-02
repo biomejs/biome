@@ -75,14 +75,14 @@ impl Rule for NoSecrets {
             return None;
         }
 
-        let hasSpaces = text.contains(' ');
+        let has_spaces = text.contains(' ');
 
         for sensitive_pattern in SENSITIVE_PATTERNS.iter() {
             if text.len() < sensitive_pattern.min_len {
                 continue;
             }
 
-            if hasSpaces && !sensitive_pattern.allows_spaces {
+            if has_spaces && !sensitive_pattern.allows_spaces {
                 continue;
             }
 
@@ -96,8 +96,12 @@ impl Rule for NoSecrets {
             }
         }
 
-        if !hasSpaces {
-            return detect_secret(ctx, text)
+        if !has_spaces {
+            if is_known_safe_pattern(text) {
+                return None;
+            }
+            let entropy_threshold = ctx.options().entropy_threshold.unwrap_or(DEFAULT_HIGH_ENTROPY_THRESHOLD);
+            return detect_secret(&text, &entropy_threshold)
         } else {
             None
         }
@@ -117,17 +121,18 @@ impl Rule for NoSecrets {
                 "\n1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree."
                 "\n2. If needed, use environment variables or a secure secret management system to store sensitive data."
                 "\n3. If this is a false positive, consider adding an inline disable comment."
+                "\nThis rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/"
             })
         )
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoSecretsOptions {
     /// Set entropy threshold (default is 4.5).
-    entropy_threshold: f64, // @TODO: Doesn't work currently.
+    entropy_threshold: Option<f64>, // @TODO: Doesn't work currently.
 }
 
 const DEFAULT_HIGH_ENTROPY_THRESHOLD: f64 = 4.5;
@@ -304,20 +309,12 @@ static KNOWN_SAFE_PATTERNS: &[&LazyLock<Regex>] = &[
     &WINDOWS_PATH_REGEX,
 ];
 
-
-fn detect_secret(ctx: &RuleContext, data: &str) -> std::option::Option<&str> {
-    if is_known_safe_pattern(data) {
-        return None;
-    }
-
-    let entropy_threshold = ctx.options().entropy_threshold.unwrap_or(DEFAULT_HIGH_ENTROPY_THRESHOLD);
+fn detect_secret(data: &str, entropy_threshold: &f64) -> Option<&'static str> {
     let entropy = calculate_shannon_entropy(data);
     
-    if entropy > entropy_threshold {
-        Some(format!(
-            "Detected high entropy string: {:.2} (Threshold: {:.2})",
-            entropy, entropy_threshold
-        ))
+    if entropy > *entropy_threshold {
+        // Return a static message since &str is required to be static
+        Some("Detected high entropy string")
     } else {
         None
     }
