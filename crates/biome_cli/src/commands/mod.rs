@@ -880,10 +880,10 @@ mod tests {
     fn safe_and_unsafe_fixes() {
         let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, suppress, suppress_reason, fix, unsafe_) in [
-            (false, true, false, false, None, false, false), // --apply-unsafe
-            (false, false, true, false, None, false, true),  // --write --unsafe
-            (false, false, false, false, None, true, true),  // --fix --unsafe
+        for (apply, apply_unsafe, write, suppress, fix, unsafe_) in [
+            (false, true, false, false, false, false), // --apply-unsafe
+            (false, false, true, false, false, true),  // --write --unsafe
+            (false, false, false, false, true, true),  // --fix --unsafe
         ] {
             assert_eq!(
                 determine_fix_file_mode(
