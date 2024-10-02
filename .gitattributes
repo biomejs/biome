@@ -26,6 +26,8 @@
 /crates/biome_js_analyze/src/{lint,assists,syntax}/*.rs linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/src/options.rs linguist-generated=true text=auto eol=lf
 /crates/biome_js_analyze/src/registry.rs linguist-generated=true text=auto eol=lf
+# Grit
+/crates/biome_grit_patterns/src/grit_target_language/*/constants.rs linguist-generated=true text=auto eol=lf
 
 # Other
 /crates/biome_unicode_table/src/tables.rs linguist-generated=true text=auto eol=lf

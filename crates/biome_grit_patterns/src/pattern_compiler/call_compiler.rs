@@ -1,4 +1,6 @@
-use super::{compilation_context::NodeCompilationContext, PatternCompiler};
+use super::{
+    compilation_context::NodeCompilationContext, log_compiler::LogCompiler, PatternCompiler,
+};
 use crate::{grit_context::GritQueryContext, CompileError, NodeLikeArgumentError};
 use biome_grit_syntax::{
     AnyGritMaybeNamedArg, AnyGritPattern, GritNamedArgList, GritNodeLike, GritSyntaxKind,
@@ -18,6 +20,11 @@ pub(super) fn call_pattern_from_node_with_name(
     context: &mut NodeCompilationContext,
     is_rhs: bool,
 ) -> Result<Pattern<GritQueryContext>, CompileError> {
+    if name == "log" {
+        return LogCompiler::from_named_args(node.named_args(), context)
+            .map(|log| Pattern::Log(Box::new(log)));
+    }
+
     let named_args = named_args_from_node(node, &name, context)?;
     let mut args = named_args_to_map(named_args, context)?;
     let named_args_count = node.named_args().into_iter().count();

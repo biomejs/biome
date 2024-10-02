@@ -1,4 +1,5 @@
 use biome_rowan::FileSourceError;
+use biome_string_case::StrLikeExtension;
 use std::{ffi::OsStr, path::Path};
 
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -73,6 +74,6 @@ impl TryFrom<&Path> for CssFileSource {
         };
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
-        Self::try_from_extension(&extension.to_ascii_lowercase())
+        Self::try_from_extension(&extension.to_ascii_lowercase_cow())
     }
 }

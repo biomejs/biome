@@ -1,1 +1,7 @@
 allow-dbg-in-tests = true
+
+disallowed-methods = [
+  { path = "str::to_ascii_lowercase", reason = "Avoid memory allocation. Use `biome_string_case::StrOnlyExtension::to_ascii_lowercase_cow` instead." },
+  { path = "std::ffi::OsStr::to_ascii_lowercase", reason = "Avoid memory allocation. Use `biome_string_case::StrLikeExtension::to_ascii_lowercase_cow` instead." },
+  { path = "str::to_lowercase", reason = "Avoid memory allocation. Use `biome_string_case::StrOnlyExtension::to_lowercase_cow` instead." },
+]

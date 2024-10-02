@@ -25,4 +25,5 @@ Attribute Position: Auto
 -----
 
 ```html
-<img src="foo.png'" alt='should keep "these" quotes' />```
+<img src="foo.png'" alt='should keep "these" quotes' />
+```

@@ -16,8 +16,8 @@ const RECOVER_ATTRIBUTE_LIST: TokenSet<HtmlSyntaxKind> = token_set!(T![>], T![<]
 
 /// These elements are effectively always self-closing. They should not have a closing tag (if they do, it should be a parsing error). They might not contain a `/` like in `<img />`.
 static VOID_ELEMENTS: &[&str] = &[
-    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track",
-    "wbr",
+    "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source",
+    "track", "wbr",
 ];
 
 /// For these elements, the content is treated as raw text and no parsing is done inside them. This is so that the contents of these tags can be parsed by a different parser.
@@ -29,7 +29,7 @@ pub(crate) fn parse_root(p: &mut HtmlParser) {
     p.eat(UNICODE_BOM);
 
     parse_doc_type(p).ok();
-    parse_element(p).ok();
+    ElementList.parse_list(p);
 
     m.complete(p, HTML_ROOT);
 }
@@ -144,7 +144,7 @@ fn parse_closing_element(p: &mut HtmlParser) -> ParsedSyntax {
         p.error(void_element_should_not_have_closing_tag(p, p.cur_range()).into_diagnostic(p));
     }
     let _name = parse_literal(p);
-    p.bump(T![>]);
+    p.bump_with_context(T![>], HtmlLexContext::OutsideTag);
     Present(m.complete(p, HTML_CLOSING_ELEMENT))
 }
 
@@ -158,6 +158,7 @@ impl ParseNodeList for ElementList {
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         match p.cur() {
+            T![<!--] => parse_comment(p),
             T![<] => parse_element(p),
             HTML_LITERAL => {
                 let m = p.start();
@@ -262,4 +263,15 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
     parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
+}
+
+fn parse_comment(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![<!--]) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump_with_context(T![<!--], HtmlLexContext::Comment);
+    p.bump_with_context(HTML_LITERAL, HtmlLexContext::Comment);
+    p.expect(T![-->]);
+    Present(m.complete(p, HTML_COMMENT))
 }

@@ -158,6 +158,8 @@ export class Biome {
 		return this.tryCatchWrapper(() => {
 			const biomePath: BiomePath = {
 				path,
+				was_written: false,
+				kind: "Handleable",
 			};
 
 			this.workspace.openFile({

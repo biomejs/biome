@@ -26,6 +26,22 @@ impl fmt::Debug for TextRange {
     }
 }
 
+impl PartialOrd for TextRange {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for TextRange {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match self.start.cmp(&other.start) {
+            Ordering::Less => Ordering::Less,
+            Ordering::Greater => Ordering::Greater,
+            Ordering::Equal => self.end.cmp(&other.end),
+        }
+    }
+}
+
 impl TextRange {
     /// Creates a new `TextRange` with the given `start` and `end` (`start..end`).
     ///
@@ -46,8 +62,8 @@ impl TextRange {
     /// assert_eq!(range.len(), end - start);
     /// ```
     #[inline]
-    pub fn new(start: TextSize, end: TextSize) -> TextRange {
-        assert!(start <= end);
+    pub const fn new(start: TextSize, end: TextSize) -> TextRange {
+        assert!(start.raw <= end.raw);
         TextRange { start, end }
     }
 
@@ -67,8 +83,13 @@ impl TextRange {
     /// assert_eq!(&text[range], "23456")
     /// ```
     #[inline]
-    pub fn at(offset: TextSize, len: TextSize) -> TextRange {
-        TextRange::new(offset, offset + len)
+    pub const fn at(offset: TextSize, len: TextSize) -> TextRange {
+        TextRange {
+            start: offset,
+            end: TextSize {
+                raw: offset.raw + len.raw,
+            },
+        }
     }
 
     /// Create a zero-length range at the specified offset (`offset..offset`).
@@ -84,7 +105,7 @@ impl TextRange {
     /// assert_eq!(range, TextRange::new(point, point));
     /// ```
     #[inline]
-    pub fn empty(offset: TextSize) -> TextRange {
+    pub const fn empty(offset: TextSize) -> TextRange {
         TextRange {
             start: offset,
             end: offset,
@@ -106,9 +127,9 @@ impl TextRange {
     /// assert_eq!(range, TextRange::at(0.into(), point));
     /// ```
     #[inline]
-    pub fn up_to(end: TextSize) -> TextRange {
+    pub const fn up_to(end: TextSize) -> TextRange {
         TextRange {
-            start: 0.into(),
+            start: TextSize { raw: 0 },
             end,
         }
     }

@@ -30,3 +30,42 @@ pub const ISO_LANGUAGES: [&str; 150] = [
     "tt", "te", "th", "bo", "ti", "to", "ts", "tr", "tk", "tw", "ug", "uk", "ur", "uz", "vi", "vo",
     "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
 ];
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum AriaPropertyTypeEnum {
+    /// true/false
+    Boolean,
+    /// Id reference
+    Id,
+    /// List of Id references
+    Idlist,
+    Integer,
+    Number,
+    String,
+    /// Value among a set of allowed terms
+    Token,
+    /// List of values among a set of allowed terms
+    Tokenlist,
+    /// true/false/mixed
+    /// FIXME: Also true/false/undefined?
+    Tristate,
+}
+
+// TODO: to remove once the code that depends on that is refactored.
+impl std::str::FromStr for AriaPropertyTypeEnum {
+    type Err = &'static str;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "boolean" => Ok(AriaPropertyTypeEnum::Boolean),
+            "id" => Ok(AriaPropertyTypeEnum::Id),
+            "idlist" => Ok(AriaPropertyTypeEnum::Idlist),
+            "integer" => Ok(AriaPropertyTypeEnum::Integer),
+            "number" => Ok(AriaPropertyTypeEnum::Number),
+            "string" => Ok(AriaPropertyTypeEnum::String),
+            "token" => Ok(AriaPropertyTypeEnum::Token),
+            "tokenlist" => Ok(AriaPropertyTypeEnum::Tokenlist),
+            "tristate" => Ok(AriaPropertyTypeEnum::Tristate),
+            _ => Err("aria property type not implemented"),
+        }
+    }
+}

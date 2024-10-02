@@ -190,9 +190,9 @@ impl TemplateElementIndention {
                 let tab_width: u32 = u8::from(tab_width).into();
                 let mut size: u32 = 0;
 
-                for c in after_new_line.chars() {
-                    match c {
-                        '\t' => {
+                for byte in after_new_line.bytes() {
+                    match byte {
+                        b'\t' => {
                             // Tabs behave in a way that they are aligned to the nearest
                             // multiple of tab_width:
                             // number of spaces -> added size
@@ -201,7 +201,7 @@ impl TemplateElementIndention {
                             // Or in other words, it clips the size to the next multiple of tab width.
                             size = size + tab_width - (size % tab_width);
                         }
-                        ' ' => {
+                        b' ' => {
                             size += 1;
                         }
                         _ => break,

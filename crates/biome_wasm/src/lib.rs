@@ -40,12 +40,12 @@ impl Workspace {
     pub fn file_features(
         &self,
         params: ISupportsFeatureParams,
-    ) -> Result<ISupportsFeatureResult, Error> {
+    ) -> Result<IFileFeaturesResult, Error> {
         let params: SupportsFeatureParams =
             serde_wasm_bindgen::from_value(params.into()).map_err(into_error)?;
         let result = self.inner.file_features(params).map_err(into_error)?;
         to_value(&result)
-            .map(ISupportsFeatureResult::from)
+            .map(IFileFeaturesResult::from)
             .map_err(into_error)
     }
 

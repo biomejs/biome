@@ -48,19 +48,10 @@ pub struct CssFormatterSettings {
     pub enabled: Option<bool>,
 }
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssLinterSettings {
     pub enabled: Option<bool>,
-}
-
-// NOTE: we want to make the linter opt-in for now
-impl Default for CssLinterSettings {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]

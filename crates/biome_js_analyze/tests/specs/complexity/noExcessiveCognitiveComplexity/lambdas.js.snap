@@ -40,7 +40,7 @@ function lambdas(array) {
 ```
 lambdas.js:4:26 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity detected.
+  ! Excessive complexity of 4 detected (max: 3).
   
     2 │     for (item of array) {              // +1, nesting = 1
     3 │         if (item) {                    // +2, nesting = 2
@@ -57,7 +57,7 @@ lambdas.js:4:26 lint/complexity/noExcessiveCognitiveComplexity ━━━━━�
 ```
 lambdas.js:10:22 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity detected.
+  ! Excessive complexity of 4 detected (max: 3).
   
      8 │             };
      9 │ 
@@ -74,7 +74,7 @@ lambdas.js:10:22 lint/complexity/noExcessiveCognitiveComplexity ━━━━━�
 ```
 lambdas.js:16:23 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity detected.
+  ! Excessive complexity of 4 detected (max: 3).
   
     14 │             }
     15 │ 
@@ -91,7 +91,7 @@ lambdas.js:16:23 lint/complexity/noExcessiveCognitiveComplexity ━━━━━�
 ```
 lambdas.js:22:32 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Excessive complexity detected.
+  ! Excessive complexity of 4 detected (max: 3).
   
     20 │             };
     21 │ 

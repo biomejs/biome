@@ -1,5 +1,6 @@
 use biome_rowan::FileSourceError;
 use std::{ffi::OsStr, path::Path};
+use biome_string_case::StrOnlyExtension;
 
 #[cfg_attr(feature = "schema", derive(schemars::YamlSchema))]
 #[derive(
@@ -88,7 +89,7 @@ impl TryFrom<&Path> for YamlFileSource {
         };
         // We assume the file extensions are case-insensitive
         // and we use the lowercase form of them for pattern matching
-        Self::try_from_extension(&extension.to_ascii_lowercase())
+        Self::try_from_extension(&extension.to_ascii_lowercase_cow())
     }
 }
 

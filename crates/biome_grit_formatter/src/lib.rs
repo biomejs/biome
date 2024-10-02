@@ -6,11 +6,13 @@ mod grit;
 mod prelude;
 
 use biome_formatter::{
+    comments::Comments,
     prelude::*,
     trivia::{format_dangling_comments, format_leading_comments, format_trailing_comments},
     write, CstFormatContext, Format, FormatLanguage, FormatResult, Formatted,
 };
 use biome_grit_syntax::{GritLanguage, GritSyntaxNode};
+use comments::GritCommentStyle;
 
 pub(crate) use crate::context::GritFormatContext;
 
@@ -120,15 +122,18 @@ impl FormatLanguage for GritFormatLanguage {
     }
 
     fn options(&self) -> &<Self::Context as biome_formatter::FormatContext>::Options {
-        todo!()
+        &self.options
     }
 
     fn create_context(
         self,
-        _root: &biome_rowan::SyntaxNode<Self::SyntaxLanguage>,
-        _source_map: Option<biome_formatter::TransformSourceMap>,
+        root: &biome_rowan::SyntaxNode<Self::SyntaxLanguage>,
+        source_map: Option<biome_formatter::TransformSourceMap>,
     ) -> Self::Context {
-        todo!()
+        let comments: Comments<GritLanguage> =
+            Comments::from_node(root, &GritCommentStyle, source_map.as_ref());
+
+        GritFormatContext::new(self.options, comments).with_source_map(source_map)
     }
 }
 

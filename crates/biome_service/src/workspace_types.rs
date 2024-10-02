@@ -453,7 +453,7 @@ macro_rules! workspace_method {
 /// Returns a list of signature for all the methods in the [Workspace] trait
 pub fn methods() -> [WorkspaceMethod; 19] {
     [
-        WorkspaceMethod::of::<SupportsFeatureParams, SupportsFeatureResult>("file_features"),
+        workspace_method!(file_features),
         workspace_method!(update_settings),
         workspace_method!(register_project_folder),
         workspace_method!(set_manifest_for_project),

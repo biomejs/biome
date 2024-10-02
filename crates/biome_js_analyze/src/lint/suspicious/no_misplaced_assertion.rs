@@ -177,7 +177,7 @@ impl Rule for NoMisplacedAssertion {
                 return None;
             }
 
-            let is_exception = is_exception_for_expect(node);
+            let is_exception = is_exception_for_expect(node)?;
             let binding = model.binding(&assertion_call);
             if let Some(binding) = binding {
                 let ident = JsIdentifierBinding::cast_ref(binding.syntax())?;
@@ -234,21 +234,21 @@ fn may_extract_nested_expr(callee: AnyJsExpression) -> Option<AnyJsExpression> {
 }
 
 /// Returns whether the assertion call is an exception for the `expect` assertion function.
-fn is_exception_for_expect(node: &AnyJsExpression) -> bool {
-    let assertion_call = node.get_callee_object_identifier().unwrap();
-    let callee_text = assertion_call.syntax().parent().unwrap().text_trimmed();
+fn is_exception_for_expect(node: &AnyJsExpression) -> Option<bool> {
+    let assertion_call = node.get_callee_object_identifier()?;
+    let callee_text = assertion_call.syntax().parent()?.text_trimmed();
 
-    let parent = node.syntax().parent().unwrap();
-    let last_token = parent.last_token().unwrap();
+    let parent = node.syntax().parent()?;
+    let last_token = parent.last_token()?;
     let last_token_text = last_token.text();
 
-    let member = node.get_callee_member_name().unwrap();
+    let member = node.get_callee_member_name()?;
     let member_text = member.text_trimmed();
 
-    if callee_text == "expect" {
+    Some(if callee_text == "expect" {
         EXCEPTION_MEMBERS_FOR_EXPECT.contains(&member_text)
             || EXCEPTION_MEMBERS_FOR_EXPECT.contains(&last_token_text)
     } else {
         false
-    }
+    })
 }

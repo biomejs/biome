@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsLanguage, JsReturnStatement, JsSwitchStatement, JsSyntaxElement, JsSyntaxKind, JsSyntaxNode,
     JsTryFinallyStatement, JsTryStatement, JsVariableStatement, JsWhileStatement, TextRange,
 };
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{declare_node_union, AstNode, NodeOrToken};
 use roaring::bitmap::RoaringBitmap;
 use rustc_hash::FxHashMap;
 
@@ -535,14 +535,17 @@ fn has_side_effects(inst: &Instruction<JsLanguage>) -> bool {
         None => return false,
     };
 
-    match element.kind() {
+    let NodeOrToken::Node(node) = element else {
+        return false;
+    };
+
+    match node.kind() {
         JsSyntaxKind::JS_RETURN_STATEMENT => {
-            let node = JsReturnStatement::unwrap_cast(element.as_node().unwrap().clone());
+            let node = JsReturnStatement::unwrap_cast(node.clone());
             node.argument().is_some()
         }
-
         JsSyntaxKind::JS_BREAK_STATEMENT | JsSyntaxKind::JS_CONTINUE_STATEMENT => false,
-        kind => element.as_node().is_some() && !kind.is_literal(),
+        kind => !kind.is_literal(),
     }
 }
 
