@@ -907,8 +907,8 @@ mod tests {
     fn no_fix() {
         let mut console = BufferConsole::default();
 
-        let (apply, apply_unsafe, write, suppress, suppress_reason, fix, unsafe_) =
-            (false, false, false, false, None, false, false);
+        let (apply, apply_unsafe, write, suppress, fix, unsafe_) =
+            (false, false, false, false, false, false);
         assert_eq!(
             determine_fix_file_mode(
                 FixFileModeOptions {
@@ -916,7 +916,6 @@ mod tests {
                     apply_unsafe,
                     write,
                     suppress,
-                    suppress_reason,
                     fix,
                     unsafe_
                 },
