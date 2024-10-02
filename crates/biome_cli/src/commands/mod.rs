@@ -183,7 +183,7 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Suppress existing diagnostics with a `// biome-ignore` comment
+        /// Suppress existing diagnostics with a `// biome-ignore` comment (Only implemented for JavaScript)
         #[bpaf(long("suppress"))]
         suppress: bool,
 
