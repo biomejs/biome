@@ -83,6 +83,4 @@ pub struct ApplySuppression<L: Language> {
     pub token_to_apply_suppression: SyntaxToken<L>,
     /// If the suppression should have a leading newline
     pub should_insert_leading_newline: bool,
-    /// Explanation for the suppression with --suppress
-    pub suppression_reason: Option<String>,
 }
