@@ -38,3 +38,15 @@ const facebookAndAwsString = {
 const IsoString = {
     key: 'ISO-27001 information , GDPR'
 };
+
+// Postgres json path query
+const isNumeric = '@.scoreDisplayMode == "numeric" || @.scoreDisplayMode == "metricSavings"'
+const tailwindClassNames = 'whitespace-nowrap bg-base-4 px-1 text-[0.65rem] group-hover:w-auto group-hover:overflow-visible'
+const tailwindConfigOptions = {
+  theme: {
+    animation: {
+      slideDown: 'slideDown 300ms cubic-bezier(0.87, 0, 0.13, 1)',
+    }
+  }
+}
+export const url = 'https://www.nytimes.com/2024/03/05/arts/design/pritzker-prize-riken-yamamoto-architecture.html'

@@ -161,6 +161,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintBarrelFiles(_) => write!(f, "eslint-plugin-barrel-files"),
             Self::EslintN(_) => write!(f, "eslint-plugin-n"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
+            Self::EslintNoSecrets(_) => write!(f, "eslint-plugin-no-secrets"),
         }
     }
 }
@@ -209,7 +210,8 @@ impl RuleSource {
             | Self::EslintMysticatea(rule_name)
             | Self::EslintBarrelFiles(rule_name)
             | Self::EslintN(rule_name)
-            | Self::Stylelint(rule_name) => rule_name,
+            | Self::Stylelint(rule_name)
+            | Self::EslintNoSecrets(rule_name) => rule_name
         }
     }
 
@@ -234,6 +236,7 @@ impl RuleSource {
             Self::EslintBarrelFiles(rule_name) => format!("barrel-files/{rule_name}"),
             Self::EslintN(rule_name) => format!("n/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
+            Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
         }
     }
 
@@ -259,6 +262,7 @@ impl RuleSource {
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
+            Self::EslintNoSecrets(_rule_name) => format!("https://github.com/nickdeis/eslint-plugin-no-secrets/README.md"),
         }
     }
 

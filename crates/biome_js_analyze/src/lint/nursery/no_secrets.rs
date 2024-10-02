@@ -10,14 +10,27 @@ use regex::Regex;
 
 use std::sync::LazyLock;
 
+use biome_deserialize_macros::Deserializable;
+use serde::{Deserialize, Serialize};
+
 // TODO: Try to get this to work in JavaScript comments as well
 declare_lint_rule! {
     /// Disallow usage of sensitive data such as API keys and tokens.
     ///
     /// This rule checks for high-entropy strings and matches common patterns
-    /// for secrets, such as AWS keys, Slack tokens, and private keys.
+    /// for secrets, including AWS keys, Slack tokens, and private keys.
+    /// It aims to help users identify immediate potential secret leaks in their codebase,
+    /// especially for those who may not be aware of the risks associated with
+    /// sensitive data exposure.
     ///
-    /// While this rule is helpful, it's not infallible. Always review your code carefully and consider implementing additional security measures like automated secret scanning in your CI/CD and git pipeline, such as GitGuardian or GitHub protections.
+    /// While this rule is beneficial for catching the most egregious cases,
+    /// it is not infallible and may yield false positives. Therefore, always
+    /// review your code carefully and consider implementing additional security
+    /// measures, such as automated secret scanning in your CI/CD and git pipeline.
+    /// Some recommended tools for more comprehensive secret detection include:
+    /// - [Gitleaks](https://github.com/gitleaks/gitleaks/): A mature secret scanning tool.
+    /// - [Trufflehog](https://github.com/trufflesecurity/trufflehog): A tool for finding secrets in git history.
+    /// - [Sensleak](https://github.com/crates-pro/sensleak-rs): A Rust-based solution for secret detection.
     ///
     /// ## Examples
     ///
@@ -32,6 +45,11 @@ declare_lint_rule! {
     /// ```js
     /// const nonSecret = "hello world";
     /// ```
+    ///
+    /// ## Disclaimer
+    /// This rule is intended to catch obvious secret leaks, but for more robust detection
+    /// across different languages and scenarios, we encourage users to explore the dedicated
+    /// tools mentioned above.
     pub NoSecrets {
         version: "1.9.0",
         name: "noSecrets",
@@ -46,7 +64,7 @@ impl Rule for NoSecrets {
     type Query = Ast<JsStringLiteralExpression>;
     type State = &'static str;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = NoSecretsOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
@@ -57,8 +75,14 @@ impl Rule for NoSecrets {
             return None;
         }
 
+        let hasSpaces = text.contains(' ');
+
         for sensitive_pattern in SENSITIVE_PATTERNS.iter() {
             if text.len() < sensitive_pattern.min_len {
+                continue;
+            }
+
+            if hasSpaces && !sensitive_pattern.allows_spaces {
                 continue;
             }
 
@@ -72,8 +96,8 @@ impl Rule for NoSecrets {
             }
         }
 
-        if is_high_entropy(text) {
-            Some("The string has a high entropy value")
+        if !hasSpaces {
+            return detect_secret(ctx, text)
         } else {
             None
         }
@@ -98,10 +122,17 @@ impl Rule for NoSecrets {
     }
 }
 
-const HIGH_ENTROPY_THRESHOLD: f64 = 4.5;
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NoSecretsOptions {
+    /// Set entropy threshold (default is 4.5).
+    entropy_threshold: f64, // @TODO: Doesn't work currently.
+}
 
-// Workaround: Since I couldn't figure out how to declare them inline,
-// declare the LazyLock patterns separately
+const DEFAULT_HIGH_ENTROPY_THRESHOLD: f64 = 4.5;
+
+// Known sensitive patterns start here
 static SLACK_TOKEN_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"xox[baprs]-([0-9a-zA-Z]{10,48})?").unwrap());
 
@@ -155,6 +186,7 @@ struct SensitivePattern {
     pattern: Pattern,
     comment: &'static str,
     min_len: usize,
+    allows_spaces: bool,
 }
 
 static SENSITIVE_PATTERNS: &[SensitivePattern] = &[
@@ -162,89 +194,142 @@ static SENSITIVE_PATTERNS: &[SensitivePattern] = &[
         pattern: Pattern::Regex(&SLACK_TOKEN_REGEX),
         comment: "Slack Token",
         min_len: 32,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&SLACK_WEBHOOK_REGEX),
         comment: "Slack Webhook",
         min_len: 24,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&GITHUB_TOKEN_REGEX),
         comment: "GitHub",
         min_len: 35,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&TWITTER_OAUTH_REGEX),
         comment: "Twitter OAuth",
         min_len: 35,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&FACEBOOK_OAUTH_REGEX),
         comment: "Facebook OAuth",
         min_len: 32,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&GOOGLE_OAUTH_REGEX),
         comment: "Google OAuth",
         min_len: 24,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&AWS_API_KEY_REGEX),
         comment: "AWS API Key",
         min_len: 16,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&HEROKU_API_KEY_REGEX),
         comment: "Heroku API Key",
         min_len: 12,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&PASSWORD_IN_URL_REGEX),
         comment: "Password in URL",
         min_len: 14,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&GOOGLE_SERVICE_ACCOUNT_REGEX),
         comment: "Google (GCP) Service-account",
         min_len: 14,
+        allows_spaces: true,
     },
     SensitivePattern {
         pattern: Pattern::Regex(&TWILIO_API_KEY_REGEX),
         comment: "Twilio API Key",
         min_len: 32,
+        allows_spaces: false,
     },
     SensitivePattern {
         pattern: Pattern::Contains("-----BEGIN RSA PRIVATE KEY-----"),
         comment: "RSA Private Key",
         min_len: 64,
+        allows_spaces: true,
     },
     SensitivePattern {
         pattern: Pattern::Contains("-----BEGIN OPENSSH PRIVATE KEY-----"),
         comment: "SSH (OPENSSH) Private Key",
         min_len: 64,
+        allows_spaces: true,
     },
     SensitivePattern {
         pattern: Pattern::Contains("-----BEGIN DSA PRIVATE KEY-----"),
         comment: "SSH (DSA) Private Key",
         min_len: 64,
+        allows_spaces: true,
     },
     SensitivePattern {
         pattern: Pattern::Contains("-----BEGIN EC PRIVATE KEY-----"),
         comment: "SSH (EC) Private Key",
         min_len: 64,
+        allows_spaces: true,
     },
     SensitivePattern {
         pattern: Pattern::Contains("-----BEGIN PGP PRIVATE KEY BLOCK-----"),
         comment: "PGP Private Key Block",
         min_len: 64,
+        allows_spaces: true,
     },
 ];
 
 const MIN_PATTERN_LEN: usize = 12;
 
-fn is_high_entropy(text: &str) -> bool {
-    let entropy = calculate_shannon_entropy(text);
-    entropy > HIGH_ENTROPY_THRESHOLD // TODO: Make this optional, or controllable
+// Known safe patterns start here
+static BASE64_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[A-Za-z0-9+/]{40,}={0,2}$").unwrap());
+static URL_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^https?://[a-zA-Z0-9.-]+(/[a-zA-Z0-9./_-]*)?$").unwrap());
+static UNIX_PATH_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(/[^/\0]+)+/?$").unwrap());
+static WINDOWS_PATH_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[a-zA-Z]:\\(?:[^\\\0]+\\?)*$").unwrap());
+
+// Since list is smaller, heuristics may not be needed as were in sensitive patterns.
+static KNOWN_SAFE_PATTERNS: &[&LazyLock<Regex>] = &[
+    &BASE64_REGEX,
+    &URL_REGEX,
+    &UNIX_PATH_REGEX,
+    &WINDOWS_PATH_REGEX,
+];
+
+
+fn detect_secret(ctx: &RuleContext, data: &str) -> std::option::Option<&str> {
+    if is_known_safe_pattern(data) {
+        return None;
+    }
+
+    let entropy_threshold = ctx.options().entropy_threshold.unwrap_or(DEFAULT_HIGH_ENTROPY_THRESHOLD);
+    let entropy = calculate_shannon_entropy(data);
+    
+    if entropy > entropy_threshold {
+        Some(format!(
+            "Detected high entropy string: {:.2} (Threshold: {:.2})",
+            entropy, entropy_threshold
+        ))
+    } else {
+        None
+    }
+}
+
+fn is_known_safe_pattern(data: &str) -> bool {
+    for pattern in KNOWN_SAFE_PATTERNS {
+        if pattern.is_match(data) {
+            return true;
+        }
+    }
+    false
 }
 
 /// Inspired by https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/utils.js#L93
