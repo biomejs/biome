@@ -659,18 +659,18 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
 
                 for action in signal.actions() {
-                    if action.is_suppression()
-                        && params.suppress
-                        && action.applicability == Applicability::Always
-                    {
-                        return ControlFlow::Break(action);
-                    }
-
                     match params.fix_file_mode {
                         FixFileMode::ApplySuppressions => {
-                            // return ControlFlow::Continue(());
+                            if action.is_suppression()
+                                && action.applicability == Applicability::Always
+                            {
+                                return ControlFlow::Break(action);
+                            }
                         }
                         FixFileMode::SafeFixes => {
+                            if action.is_suppression() {
+                                continue;
+                            }
                             if action.applicability == Applicability::MaybeIncorrect {
                                 skipped_suggested_fixes += 1;
                             }
@@ -680,6 +680,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             }
                         }
                         FixFileMode::SafeAndUnsafeFixes => {
+                            if action.is_suppression() {
+                                continue;
+                            }
                             if matches!(
                                 action.applicability,
                                 Applicability::Always | Applicability::MaybeIncorrect
