@@ -113,7 +113,7 @@ declare_lint_rule! {
 
 #[derive(Debug, Clone, Deserialize, Deserializable, Eq, PartialEq, Serialize, Default)]
 #[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseComponentExportOnlyModulesOptions {
     /// Allows the export of constants. This option is for environments that support it, such as [Vite](https://vitejs.dev/)
     #[serde(default)]

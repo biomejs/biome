@@ -39,7 +39,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoTemplateCurlyInString {
-        version: "next",
+        version: "1.9.3",
         name: "noTemplateCurlyInString",
         language: "js",
         sources: &[RuleSource::Eslint("no-template-curly-in-string")],

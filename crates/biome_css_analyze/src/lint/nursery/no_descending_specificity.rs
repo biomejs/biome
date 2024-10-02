@@ -72,7 +72,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDescendingSpecificity {
-        version: "next",
+        version: "1.9.3",
         name: "noDescendingSpecificity",
         language: "css",
         recommended: true,

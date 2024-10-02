@@ -207,12 +207,18 @@ let options = ctx.options();
 
 The compiler should warn you that `MyRuleOptions` does not implement some required types.
 We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
+
+Also, we use other `serde` macros to adjust the JSON configuration:
+- `rename_all = "camelCase"`: it renames all fields in camel-case, so they are in line with the naming style of the `biome.json`.
+- `deny_unknown_fields`: it raises an error if the configuration contains extraneous fields.
+- `default`: it uses the `Default` value when the field is missing from `biome.json`. This macro makes the field optional.
+
 You can simply use a derive macros:
 
 ```rust
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct MyRuleOptions {
     #[serde(default, skip_serializing_if = "is_default")]
     main_behavior: Behavior,

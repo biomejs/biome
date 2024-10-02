@@ -49,7 +49,7 @@ declare_lint_rule! {
     ///     "//": "...",
     ///     "options": {
     ///         "allowInvalidRoles": ["invalid-role", "text"],
-    ///         "nonIgnoreDom": true
+    ///         "ignoreNonDom": true
     ///     }
     /// }
     /// ```
@@ -76,7 +76,7 @@ declare_lint_rule! {
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct ValidAriaRoleOptions {
     pub allow_invalid_roles: Vec<String>,
     pub ignore_non_dom: bool,

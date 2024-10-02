@@ -553,7 +553,7 @@ impl Rule for UseHookAtTopLevel {
 /// hook.
 #[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct DeprecatedHooksOptions {}
 
 impl Deserializable for DeprecatedHooksOptions {
