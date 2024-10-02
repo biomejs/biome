@@ -1,8 +1,8 @@
-import {resolve} from "node:path";
-import {fileURLToPath} from "node:url";
-import {describe, expect, it} from "vitest";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { describe, expect, it } from "vitest";
 
-import {createWorkspaceWithBinary} from "../dist/index.js";
+import { createWorkspaceWithBinary } from "../dist/index.js";
 
 describe("Workspace API", () => {
 	it("should process remote requests", async () => {
@@ -21,7 +21,7 @@ describe("Workspace API", () => {
 			path: {
 				path: "test.js",
 				was_written: false,
-				kind: ["Handleable"]
+				kind: ["Handleable"],
 			},
 			content: "statement()",
 			version: 0,
@@ -31,7 +31,7 @@ describe("Workspace API", () => {
 			path: {
 				path: "test.js",
 				was_written: false,
-				kind: ["Handleable"]
+				kind: ["Handleable"],
 			},
 		});
 
@@ -41,7 +41,7 @@ describe("Workspace API", () => {
 			path: {
 				path: "test.js",
 				was_written: false,
-				kind: ["Handleable"]
+				kind: ["Handleable"],
 			},
 		});
 
