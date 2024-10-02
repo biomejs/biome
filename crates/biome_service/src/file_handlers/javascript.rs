@@ -668,7 +668,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
 
                     match params.fix_file_mode {
                         FixFileMode::ApplySuppressions => {
-                            return ControlFlow::Continue(());
+                            // return ControlFlow::Continue(());
                         }
                         FixFileMode::SafeFixes => {
                             if action.applicability == Applicability::MaybeIncorrect {
