@@ -36,7 +36,6 @@ pub(crate) fn lint_with_guard<'ctx>(
                     .fix_file(
                         *fix_mode,
                         ctx.execution.as_write_suppressions_mode().is_some(),
-                        None,
                         false,
                         RuleCategoriesBuilder::default()
                             .with_syntax()
