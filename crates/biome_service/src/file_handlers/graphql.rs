@@ -530,7 +530,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         }
                     }
                     FixFileMode::ApplySuppressions => {
-                        println!("No-op'ing in JSON.")
+                        // Not implemented
                     }
                 }
             }

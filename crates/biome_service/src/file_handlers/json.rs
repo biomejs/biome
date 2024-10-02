@@ -585,7 +585,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                         }
                     }
                     FixFileMode::ApplySuppressions => {
-                        println!("No-op'ing in JSON.")
+                        // Not implemented
                     }
                 }
             }
