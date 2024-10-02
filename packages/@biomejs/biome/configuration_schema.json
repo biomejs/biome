@@ -693,10 +693,8 @@
 			"type": "object",
 			"properties": {
 				"accessibility": {
-					"anyOf": [
-						{ "$ref": "#/definitions/Accessibility" },
-						{ "type": "null" }
-					]
+					"default": "noPublic",
+					"allOf": [{ "$ref": "#/definitions/Accessibility" }]
 				}
 			},
 			"additionalProperties": false

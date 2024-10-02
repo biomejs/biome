@@ -223,10 +223,9 @@ declare_lint_rule! {
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct ConsistentMemberAccessibilityOptions {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub accessibility: Option<Accessibility>,
+    pub accessibility: Accessibility,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
@@ -249,11 +248,7 @@ impl Rule for UseConsistentMemberAccessibility {
         let node = ctx.query();
         let accessibility = node.accessibility_modifier();
         let options = ctx.options();
-        let accessibility_option = match &options.accessibility {
-            None => &Accessibility::default(),
-            Some(option) => option,
-        };
-        match accessibility_option {
+        match &options.accessibility {
             Accessibility::NoPublic => accessibility
                 .filter(|accessibility| accessibility.is_public())
                 .map(|accessibility| accessibility.range()),
@@ -264,11 +259,11 @@ impl Rule for UseConsistentMemberAccessibility {
 
     fn diagnostic(ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
         let options = ctx.options();
-        let accessibility_option = match &options.accessibility {
-            None => &Accessibility::default(),
-            Some(option) => option,
-        };
-        let (diag_msg, note_msg) = match accessibility_option {
+        // let accessibility_option = match &options.accessibility {
+        //     None => &Accessibility::default(),
+        //     Some(option) => option,
+        // };
+        let (diag_msg, note_msg) = match &options.accessibility {
             Accessibility::NoPublic => (
                 markup! {
                     "The "<Emphasis>"public"</Emphasis>" modifier is disallowed."
