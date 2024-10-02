@@ -181,7 +181,7 @@ impl Rule for NoUselessUndefined {
                 if let Ok(callee) = js_call_expr.callee() {
                     if let Some(member_expr) = callee.as_js_static_member_expression() {
                         if let Ok(member) = member_expr.member() {
-                            if should_ignore(&member.text().as_str()) {
+                            if should_ignore(member.text().as_str()) {
                                 return signals;
                             }
                         }
@@ -196,7 +196,7 @@ impl Rule for NoUselessUndefined {
                     if idx == 0 {
                         continue;
                     }
-                    if let Some(argument) = argument.ok() {
+                    if let Ok(argument) = argument {
                         if let Some(expr) = argument.as_any_js_expression() {
                             if let Some(keyword) = expr.as_js_reference_identifier() {
                                 if keyword.is_undefined() {
@@ -269,7 +269,7 @@ impl Rule for NoUselessUndefined {
             }
             // const noop = () => undefined
             RuleQuery::JsArrowFunctionExpression(js_arrow_function_expression) => {
-                if let Some(body) = js_arrow_function_expression.body().ok() {
+                if let Ok(body) = js_arrow_function_expression.body() {
                     if let Some(expr) = body.as_any_js_expression() {
                         if let Some(keyword) = expr.as_js_reference_identifier() {
                             if keyword.is_undefined() {
