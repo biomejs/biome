@@ -1,8 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
-use crate::diagnostics::{
-    DeprecatedArgument, DeprecatedConfigurationFile, IncompatibleEndConfiguration,
-};
+use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{CliDiagnostic, LoggingLevel, VERSION};
@@ -107,14 +105,6 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Writes inline biome-ignore comments to ignore existing diagnostics
-        #[bpaf(long("suppress"), switch)]
-        suppress: bool,
-
-        /// Reason for suppressing diagnostics with --suppress
-        #[bpaf(long("reason"))]
-        suppress_reason: Option<String>,
-
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
@@ -195,9 +185,6 @@ pub enum BiomeCommand {
 
         #[bpaf(long("suppress"))]
         suppress: bool,
-
-        #[bpaf(long("reason"))]
-        suppress_reason: Option<String>,
 
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
@@ -315,14 +302,6 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Writes inline biome-ignore comments to ignore existing diagnostics
-        #[bpaf(long("suppress"), switch)]
-        suppress: bool,
-
-        /// Writes inline biome-ignore comments to ignore existing diagnostics
-        #[bpaf(long("suppress-reason"))]
-        suppress_reason: Option<String>,
-
         /// Alias of `--write`, writes formatted files to file system.
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
@@ -431,13 +410,6 @@ pub enum BiomeCommand {
         /// Writes the new configuration file to disk
         #[bpaf(long("write"), switch)]
         write: bool,
-
-        /// Writes inline biome-ignore comments to ignore existing diagnostics
-        #[bpaf(long("suppress"), switch)]
-        suppress: bool,
-
-        #[bpaf(long("suppress-reason"))]
-        suppress_reason: Option<String>,
 
         /// Alias of `--write`, writes the new configuration file to disk
         #[bpaf(long("fix"), switch, hide_usage)]
@@ -756,7 +728,6 @@ pub(crate) struct FixFileModeOptions {
     apply_unsafe: bool,
     write: bool,
     suppress: bool,
-    suppress_reason: Option<String>,
     fix: bool,
     unsafe_: bool,
 }
@@ -774,7 +745,6 @@ pub(crate) fn determine_fix_file_mode(
         write,
         fix,
         suppress,
-        suppress_reason: _,
         unsafe_,
     } = options;
 
@@ -813,7 +783,6 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         apply_unsafe,
         write,
         suppress,
-        suppress_reason,
         fix,
         unsafe_,
     } = options;
@@ -846,12 +815,6 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ));
     } else if suppress && fix {
         return Err(CliDiagnostic::incompatible_arguments("--suppress", "--fix"));
-    } else if !suppress && suppress_reason.is_some() {
-        return Err(CliDiagnostic::IncompatibleEndConfiguration(
-            IncompatibleEndConfiguration {
-                reason: "--suppress-reason must be used with --suppress".to_string(),
-            },
-        ));
     }
     Ok(())
 }
@@ -864,21 +827,20 @@ mod tests {
 
     #[test]
     fn incompatible_arguments() {
-        for (apply, apply_unsafe, write, suppress, suppression_reason, fix, unsafe_) in [
-            (true, true, false, None, false, false), // --apply --apply-unsafe
-            (true, false, true, None, false, false), // --apply --write
-            (true, false, false, None, true, false), // --apply --fix
-            (false, true, false, None, false, true), // --apply-unsafe --unsafe
-            (false, true, true, None, false, false), // --apply-unsafe --write
-            (false, true, false, None, true, false), // --apply-unsafe --fix
-            (false, false, true, None, true, false), // --write --fix
+        for (apply, apply_unsafe, write, suppress, fix, unsafe_) in [
+            (true, true, false, false, false, false), // --apply --apply-unsafe
+            (true, false, true, false, false, false), // --apply --write
+            (true, false, false, false, true, false), // --apply --fix
+            (false, true, false, false, false, true), // --apply-unsafe --unsafe
+            (false, true, true, false, false, false), // --apply-unsafe --write
+            (false, true, false, false, true, false), // --apply-unsafe --fix
+            (false, false, true, false, true, false), // --write --fix
         ] {
             assert!(check_fix_incompatible_arguments(FixFileModeOptions {
                 apply,
                 apply_unsafe,
                 write,
                 suppress,
-                suppress_reason: None,
                 fix,
                 unsafe_
             })
@@ -890,10 +852,10 @@ mod tests {
     fn safe_fixes() {
         let mut console = BufferConsole::default();
 
-        for (apply, apply_unsafe, write, fix, unsafe_) in [
-            (true, false, false, false, false), // --apply
-            (false, false, true, false, false), // --write
-            (false, false, false, true, false), // --fix
+        for (apply, apply_unsafe, write, suppress, fix, unsafe_) in [
+            (true, false, false, false, false, false), // --apply
+            (false, false, true, false, false, false), // --write
+            (false, false, false, false, true, false), // --fix
         ] {
             assert_eq!(
                 determine_fix_file_mode(
@@ -929,7 +891,6 @@ mod tests {
                         apply_unsafe,
                         write,
                         suppress,
-                        suppress_reason,
                         fix,
                         unsafe_
                     },
