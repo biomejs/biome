@@ -341,7 +341,7 @@ pub enum FileNamingConventionState {
 /// Rule's options.
 #[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct FilenamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
