@@ -1,8 +1,8 @@
-import { resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { describe, expect, it } from "vitest";
+import {resolve} from "node:path";
+import {fileURLToPath} from "node:url";
+import {describe, expect, it} from "vitest";
 
-import { createWorkspaceWithBinary } from "../dist/index.js";
+import {createWorkspaceWithBinary} from "../dist/index.js";
 
 describe("Workspace API", () => {
 	it("should process remote requests", async () => {
@@ -20,7 +20,8 @@ describe("Workspace API", () => {
 		await workspace.openFile({
 			path: {
 				path: "test.js",
-				id: 0,
+				was_written: false,
+				kind: ["Handleable"]
 			},
 			content: "statement()",
 			version: 0,
@@ -29,7 +30,8 @@ describe("Workspace API", () => {
 		const printed = await workspace.formatFile({
 			path: {
 				path: "test.js",
-				id: 0,
+				was_written: false,
+				kind: ["Handleable"]
 			},
 		});
 
@@ -38,7 +40,8 @@ describe("Workspace API", () => {
 		await workspace.closeFile({
 			path: {
 				path: "test.js",
-				id: 0,
+				was_written: false,
+				kind: ["Handleable"]
 			},
 		});
 
