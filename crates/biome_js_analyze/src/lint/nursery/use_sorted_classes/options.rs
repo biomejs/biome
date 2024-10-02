@@ -12,7 +12,7 @@ const CLASS_ATTRIBUTES: [&str; 2] = ["class", "className"];
 
 #[derive(Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UtilityClassSortingOptions {
     /// Additional attributes that will be sorted.
     #[serde(skip_serializing_if = "Option::is_none")]

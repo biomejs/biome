@@ -124,7 +124,7 @@ impl Rule for NoRestrictedTypes {
     PartialEq,
 )]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoRestrictedTypesOptions {
     types: FxHashMap<String, CustomRestrictedType>,
 }
@@ -140,7 +140,7 @@ pub struct NoRestrictedTypesOptions {
     PartialEq,
 )]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct CustomRestrictedTypeOptions {
     message: String,
     #[serde(rename = "use")]
