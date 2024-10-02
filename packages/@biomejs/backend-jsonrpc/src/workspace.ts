@@ -3246,7 +3246,7 @@ export interface FixFileParams {
 export type FixFileMode =
 	| "ApplySuppressions"
 	| "SafeFixes"
-	| "SafeAndUnsafeFixes" ;
+	| "SafeAndUnsafeFixes";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
