@@ -9,7 +9,7 @@ use biome_js_syntax::{JsSyntaxKind, TextRange};
 declare_lint_rule! {
     /// Disallow assignments to native objects and read-only global variables.
     ///
-    /// _JavaScript environments contain numerous built-in global variables, such as `window` in browsers and `process` in _Node.js.
+    /// JavaScript's environments contain numerous built-in global variables, such as `window` in browsers and `process` in Node.js.
     /// Assigning values to these global variables can be problematic as it can override essential functionality.
     ///
     /// ## Examples
