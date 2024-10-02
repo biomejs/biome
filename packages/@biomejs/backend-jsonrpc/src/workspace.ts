@@ -2306,8 +2306,8 @@ export interface NoLabelWithoutControlOptions {
 	labelComponents?: string[];
 }
 export interface ValidAriaRoleOptions {
-	allowInvalidRoles: string[];
-	ignoreNonDom: boolean;
+	allowInvalidRoles?: string[];
+	ignoreNonDom?: boolean;
 }
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
@@ -2316,7 +2316,7 @@ export interface ComplexityOptions {
 	/**
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
-	maxAllowedComplexity: number;
+	maxAllowedComplexity?: number;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`
@@ -2339,7 +2339,7 @@ export interface UseImportExtensionsOptions {
 	/**
 	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
 	 */
-	suggestedExtensions: {};
+	suggestedExtensions?: {};
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -2351,7 +2351,7 @@ export interface RestrictedImportsOptions {
 	paths: {};
 }
 export interface NoRestrictedTypesOptions {
-	types: {};
+	types?: {};
 }
 export interface UseComponentExportOnlyModulesOptions {
 	/**
@@ -2364,7 +2364,7 @@ export interface UseComponentExportOnlyModulesOptions {
 	allowExportNames: string[];
 }
 export interface ConsistentMemberAccessibilityOptions {
-	accessibility: Accessibility;
+	accessibility?: Accessibility;
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -2380,7 +2380,7 @@ export interface UseValidAutocompleteOptions {
 	/**
 	 * `input` like custom components that should be checked.
 	 */
-	inputComponents: string[];
+	inputComponents?: string[];
 }
 /**
  * Options for the rule `noRestrictedGlobals`.
@@ -2392,7 +2392,7 @@ export interface RestrictedGlobalsOptions {
 	deniedGlobals: string[];
 }
 export interface ConsistentArrayTypeOptions {
-	syntax: ConsistentArrayType;
+	syntax?: ConsistentArrayType;
 }
 /**
  * Rule's options.
@@ -2465,7 +2465,7 @@ For example, for React's `useEffect()` hook, the dependencies index is 1.
 	/**
 	 * The name of the hook.
 	 */
-	name: string;
+	name?: string;
 	/**
 	* Whether the result of the hook is stable.
 

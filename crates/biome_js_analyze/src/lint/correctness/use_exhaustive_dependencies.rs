@@ -291,7 +291,7 @@ impl Default for HookConfigMaps {
 /// Options for the rule `useExhaustiveDependencies`
 #[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseExhaustiveDependenciesOptions {
     /// Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
     #[serde(default = "report_unnecessary_dependencies_default")]
@@ -318,7 +318,7 @@ fn report_unnecessary_dependencies_default() -> bool {
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 #[deserializable(with_validator)]
 pub struct Hook {
     /// The name of the hook.

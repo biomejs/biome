@@ -942,7 +942,7 @@ fn renamable(
 /// Rule's options.
 #[derive(Debug, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].

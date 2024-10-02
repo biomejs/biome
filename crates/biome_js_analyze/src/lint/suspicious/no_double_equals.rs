@@ -156,7 +156,7 @@ impl Rule for NoDoubleEquals {
 /// Rule's options
 #[derive(Clone, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoDoubleEqualsOptions {
     /// If `true`, an exception is made when comparing with `null`, as it's often relied on to check
     /// both for `null` or `undefined`.
