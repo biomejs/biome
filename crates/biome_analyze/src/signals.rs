@@ -326,6 +326,7 @@ where
         suppression_action: &'phase dyn SuppressionAction<
             Language = <<R as Rule>::Query as Queryable>::Language,
         >,
+
         options: &'phase AnalyzerOptions,
     ) -> Self {
         Self {

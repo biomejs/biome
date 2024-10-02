@@ -245,7 +245,6 @@ mod tests {
 
                 ControlFlow::<Never>::Continue(())
             },
-            suppression_reason,
         );
 
         // assert_eq!(error_ranges.as_slice(), &[]);
@@ -341,7 +340,6 @@ mod tests {
 
                 ControlFlow::<Never>::Continue(())
             },
-            suppress_reason,
         );
         assert_eq!(
             lint_ranges.as_slice(),
@@ -414,7 +412,6 @@ mod tests {
 
                 ControlFlow::<Never>::Continue(())
             },
-            suppress_reason,
-        )
+        );
     }
 }
