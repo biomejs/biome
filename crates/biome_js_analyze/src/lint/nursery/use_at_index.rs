@@ -436,55 +436,51 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
     let sliced_exp = member.object().ok()?;
 
     match (extract_type.clone(), optional_arg1) {
-        (SliceExtractType::ZeroMember | SliceExtractType::Shift, None) => Some(UseAtIndexState::new(
-            start_exp,
-            ErrorType::Slice {
+        (SliceExtractType::ZeroMember | SliceExtractType::Shift, None) => Some(UseAtIndexState {
+            at_number_exp: start_exp,
+            error_type: ErrorType::Slice {
                 arg_type: SliceArgType::OneArg,
                 extract_type,
             },
-            sliced_exp,
-        )),
+            object: sliced_exp,
+        }),
         (SliceExtractType::Pop, None) if get_integer_from_literal(&start_exp)? < 0 => {
-            Some(UseAtIndexState::new(
-                make_number_literal(-1),
-                ErrorType::Slice {
+            Some(UseAtIndexState {
+                at_number_exp: make_number_literal(-1),
+                error_type: ErrorType::Slice {
                     arg_type: SliceArgType::OneArg,
                     extract_type: SliceExtractType::Pop,
                 },
-                sliced_exp,
-            ))
+                object: sliced_exp,
+            })
         }
         (SliceExtractType::ZeroMember | SliceExtractType::Shift, Some(arg1)) => {
             let start_index = get_integer_from_literal(&start_exp)?;
             let end_index = get_integer_from_literal(&solve_parenthesized_expression(
                 args1.as_any_js_expression()?.clone(),
             )?)?;
-            (start_index * end_index >= 0 && start_index < end_index).then_some(
-                UseAtIndexState::new(
-                    start_exp,
-                    ErrorType::Slice {
-                        arg_type: SliceArgType::TwoArg,
-                        extract_type,
-                    },
-                    sliced_exp,
-                ),
-            )
+            (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
+                at_number_exp: start_exp,
+                error_type: ErrorType::Slice {
+                    arg_type: SliceArgType::TwoArg,
+                    extract_type,
+                },
+                object: sliced_exp,
+            })
         }
         (SliceExtractType::Pop, Some(arg1)) => {
             let start_index = get_integer_from_literal(&start_exp)?;
             let end_index = get_integer_from_literal(&solve_parenthesized_expression(
                 args1.as_any_js_expression()?.clone(),
             )?)?;
-            (start_index * end_index >= 0 && start_index < end_index).then_some(
-                UseAtIndexState::new(
-                    make_number_literal(end_index - 1),
-                    ErrorType::Slice {
-                        arg_type: SliceArgType::TwoArg,
-                        extract_type: SliceExtractType::Pop,
-                    },
-                    sliced_exp,
-                ),
-            )
+            (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
+                at_number_exp: make_number_literal(end_index - 1),
+                error_type: ErrorType::Slice {
+                    arg_type: SliceArgType::TwoArg,
+                    extract_type: SliceExtractType::Pop,
+                },
+                object: sliced_exp,
+            })
         }
         _ => None,
     }
@@ -499,19 +495,17 @@ fn check_binary_expression_member(
     let negative_index_exp =
         extract_negative_index_expression(&member, solve_parenthesized_expression(object.clone())?);
     if let Some(negative_index) = negative_index_exp {
-        return Some(UseAtIndexState::new(
-            negative_index,
-            ErrorType::Index { is_negative: true },
+        return Some(UseAtIndexState {
+            at_number_exp: negative_index,
+            error_type: ErrorType::Index { is_negative: true },
             object,
-        ));
+        });
     }
-    option
-        .check_all_index_access
-        .then_some(UseAtIndexState::new(
-            member,
-            ErrorType::Index { is_negative: true },
-            object,
-        ))
+    option.check_all_index_access.then_some(UseAtIndexState {
+        at_number_exp: member,
+        error_type: ErrorType::Index { is_negative: true },
+        object,
+    })
 }
 
 fn check_literal_expression_member(
@@ -524,11 +518,11 @@ fn check_literal_expression_member(
     };
     let value_token = member.value_token().ok()?;
     let number = value_token.text_trimmed().parse::<i64>().ok()?;
-    (number >= 0 && option.check_all_index_access).then_some(UseAtIndexState::new(
-        make_number_literal(number),
-        ErrorType::Index { is_negative: false },
+    (number >= 0 && option.check_all_index_access).then_some(UseAtIndexState {
+        at_number_exp: make_number_literal(number),
+        error_type: ErrorType::Index { is_negative: false },
         object,
-    ))
+    })
 }
 
 fn check_unary_expression_member(
@@ -550,11 +544,11 @@ fn check_unary_expression_member(
             }
         }
     }
-    Some(UseAtIndexState::new(
-        AnyJsExpression::JsUnaryExpression(member),
-        ErrorType::Index { is_negative: false },
+    Some(UseAtIndexState {
+        at_number_exp: AnyJsExpression::JsUnaryExpression(member),
+        error_type: ErrorType::Index { is_negative: false },
         object,
-    ))
+    })
 }
 
 /// check hoge[0]
@@ -592,11 +586,11 @@ fn check_computed_member_expression(
             check_unary_expression_member(unary, object, option)
         }
         AnyJsExpression::JsIdentifierExpression(_) => None,
-        _ if option.check_all_index_access => Some(UseAtIndexState::new(
-            member,
-            ErrorType::Index { is_negative: false },
+        _ if option.check_all_index_access => Some(UseAtIndexState {
+            at_number_exp: member,
+            error_type: ErrorType::Index { is_negative: false },
             object,
-        )),
+        }),
         _ => None,
     }
 }
@@ -661,36 +655,32 @@ fn check_call_expression_char_at(
             let at_number_exp =
                 extract_negative_index_expression(&core_arg0, char_at_parent.clone());
             if let Some(at_number_exp) = at_number_exp {
-                Some(UseAtIndexState::new(
+                Some(UseAtIndexState {
                     at_number_exp,
-                    ErrorType::StringCharAt { is_negative: true },
-                    char_at_parent,
-                ))
+                    error_type: ErrorType::StringCharAt { is_negative: true },
+                    object: char_at_parent,
+                })
             } else {
-                option
-                    .check_all_index_access
-                    .then_some(UseAtIndexState::new(
-                        core_arg0,
-                        ErrorType::StringCharAt { is_negative: false },
-                        char_at_parent,
-                    ))
+                option.check_all_index_access.then_some(UseAtIndexState {
+                    at_number_exp: core_arg0,
+                    error_type: ErrorType::StringCharAt { is_negative: false },
+                    object: char_at_parent,
+                })
             }
         }
         // hoge.charAt(1)
-        AnyJsExpression::AnyJsLiteralExpression(_member) => option
-            .check_all_index_access
-            .then_some(UseAtIndexState::new(
-                core_arg0,
-                ErrorType::StringCharAt { is_negative: false },
-                char_at_parent.clone(),
-            )),
-        _ => option
-            .check_all_index_access
-            .then_some(UseAtIndexState::new(
-                core_arg0,
-                ErrorType::StringCharAt { is_negative: false },
-                char_at_parent.clone(),
-            )),
+        AnyJsExpression::AnyJsLiteralExpression(_member) => {
+            option.check_all_index_access.then_some(UseAtIndexState {
+                at_number_exp: core_arg0,
+                error_type: ErrorType::StringCharAt { is_negative: false },
+                object: char_at_parent.clone(),
+            })
+        }
+        _ => option.check_all_index_access.then_some(UseAtIndexState {
+            at_number_exp: core_arg0,
+            error_type: ErrorType::StringCharAt { is_negative: false },
+            object: char_at_parent.clone(),
+        }),
     }
 }
 
