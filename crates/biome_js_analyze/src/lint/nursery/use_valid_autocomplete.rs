@@ -137,7 +137,7 @@ const BILLING_AND_SHIPPING_ADDRESS: &[&str; 11] = &[
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseValidAutocompleteOptions {
     /// `input` like custom components that should be checked.
     pub input_components: Vec<String>,

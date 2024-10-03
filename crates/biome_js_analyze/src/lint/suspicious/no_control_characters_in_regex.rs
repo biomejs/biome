@@ -3,8 +3,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression, JsRegexLiteralExpression,
-    JsStringLiteralExpression,
+    static_value::StaticValue, AnyJsExpression, JsCallArguments, JsCallExpression, JsNewExpression,
+    JsRegexLiteralExpression,
 };
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, TextRange, TextSize};
 use core::str;
@@ -69,7 +69,7 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub RegexExpressionLike = JsNewExpression | JsCallExpression | JsRegexLiteralExpression
+    pub AnyRegexExpression = JsNewExpression | JsCallExpression | JsRegexLiteralExpression
 }
 
 fn decode_hex(digits: &[u8]) -> Option<u32> {
@@ -111,7 +111,7 @@ fn collect_control_characters(
                 };
                 let hex_index = escaped_index + 1;
                 match c {
-                    b'x' => (
+                    b'x' if (hex_index + 2) <= bytes.len() => (
                         decode_hex(&bytes[hex_index..(hex_index + 2)]),
                         hex_index + 2,
                     ),
@@ -129,7 +129,7 @@ fn collect_control_characters(
                             )
                         }
                     }
-                    b'u' => (
+                    b'u' if (hex_index + 4) <= bytes.len() => (
                         decode_hex(&bytes[hex_index..(hex_index + 4)]),
                         hex_index + 4,
                     ),
@@ -169,31 +169,32 @@ fn collect_control_characters_from_expression(
         .is_some_and(|name| name.has_name("RegExp"))
     {
         let mut args = js_call_arguments.args().iter();
-        let Some(js_string_literal) = args
+        let Some(static_value) = args
             .next()
-            .and_then(|arg| arg.ok())
-            .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
+            .and_then(|arg| arg.ok()?.as_any_js_expression()?.as_static_value())
         else {
             return Default::default();
         };
-        let Ok(pattern) = js_string_literal.inner_string_text() else {
+        let Some(pattern) = static_value.as_string_constant() else {
             return Default::default();
         };
-        let pattern_start = js_string_literal.range().start() + TextSize::from(1);
+        let pattern_start = static_value.range().start() + TextSize::from(1);
         let flags = args
             .next()
-            .and_then(|arg| arg.ok())
-            .and_then(|arg| JsStringLiteralExpression::cast(arg.into_syntax()))
-            .map(|js_string_literal| js_string_literal.text())
-            .unwrap_or_default();
-        collect_control_characters(pattern_start, &pattern, &flags, true).unwrap_or_default()
+            .and_then(|arg| arg.ok()?.as_any_js_expression()?.as_static_value());
+        let flags = if let Some(StaticValue::String(flags)) = &flags {
+            flags.text()
+        } else {
+            ""
+        };
+        collect_control_characters(pattern_start, pattern, flags, true).unwrap_or_default()
     } else {
         Vec::new()
     }
 }
 
 impl Rule for NoControlCharactersInRegex {
-    type Query = Ast<RegexExpressionLike>;
+    type Query = Ast<AnyRegexExpression>;
     type State = TextRange;
     type Signals = Vec<Self::State>;
     type Options = ();
@@ -201,19 +202,19 @@ impl Rule for NoControlCharactersInRegex {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         match node {
-            RegexExpressionLike::JsNewExpression(new_expr) => {
+            AnyRegexExpression::JsNewExpression(new_expr) => {
                 let (Ok(callee), Some(args)) = (new_expr.callee(), new_expr.arguments()) else {
                     return Default::default();
                 };
                 collect_control_characters_from_expression(&callee, &args)
             }
-            RegexExpressionLike::JsCallExpression(call_expr) => {
+            AnyRegexExpression::JsCallExpression(call_expr) => {
                 let (Ok(callee), Ok(args)) = (call_expr.callee(), call_expr.arguments()) else {
                     return Default::default();
                 };
                 collect_control_characters_from_expression(&callee, &args)
             }
-            RegexExpressionLike::JsRegexLiteralExpression(regex_literal_expr) => {
+            AnyRegexExpression::JsRegexLiteralExpression(regex_literal_expr) => {
                 let Ok((pattern, flags)) = regex_literal_expr.decompose() else {
                     return Default::default();
                 };

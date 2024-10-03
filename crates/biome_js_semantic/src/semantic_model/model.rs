@@ -124,13 +124,16 @@ impl SemanticModelData {
 
     /// Returns the [ScopeId] which the syntax is part of.
     pub(crate) fn scope(&self, range: TextRange) -> ScopeId {
+        // Seeking an interval in `self.scope_by_range` require a non-empty interval
+        debug_assert!(range.len() > 0.into(), "the range must not be empty.");
         let start = range.start().into();
         let end = range.end().into();
         let scopes = self
             .scope_by_range
+            // Find overlapping intervals
             .find(start, end)
+            // Only take intersecting intervals
             .filter(|x| !(start < x.start || end > x.stop));
-
         // We always want the most tight scope
         match scopes.map(|x| x.val).max() {
             Some(val) => val,
