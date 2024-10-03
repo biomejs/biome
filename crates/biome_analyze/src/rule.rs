@@ -118,7 +118,7 @@ pub enum RuleSource {
     EslintTypeScript(&'static str),
     /// Rules from [Eslint Plugin Unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
     EslintUnicorn(&'static str),
-    /// Rules from  [Eslint Plugin Unused Imports](https://github.com/sweepline/eslint-plugin-unused-imports)
+    /// Rules from [Eslint Plugin Unused Imports](https://github.com/sweepline/eslint-plugin-unused-imports)
     EslintUnusedImports(&'static str),
     /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
     EslintMysticatea(&'static str),
@@ -128,7 +128,7 @@ pub enum RuleSource {
     EslintN(&'static str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
     Stylelint(&'static str),
-    /// Rules from  [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
+    /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
     EslintNoSecrets(&'static str),
 }
 
