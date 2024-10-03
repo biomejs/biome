@@ -663,11 +663,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         FixFileMode::ApplySuppressions => {
                             if action.is_suppression()
                                 && action.applicability == Applicability::Always
-                            // TODO: This doesn't seem correct. I'm having to set `"nursery": { "all": false }` in my configuration
-                            // to make sure ignores aren't writetn for nursery rules.
-                            // This doesn't make sense, since I'm not having to worry about nursery rules for a regular `biome lint .`...
-                            && action.rule_name.unwrap().0 != "nursery"
-                            //
                             {
                                 return ControlFlow::Break(action);
                             }
