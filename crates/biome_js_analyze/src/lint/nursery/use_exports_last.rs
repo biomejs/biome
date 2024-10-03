@@ -46,14 +46,13 @@ impl Rule for UseExportsLast {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let items = ctx.query();
-        let mut seen_export = false;
+        let mut last_export = None;
 
         for item in items.iter() {
             if is_export_declaration(&item) {
-                seen_export = true;
-            } else if seen_export {
-                // Found a non-export statement after an export statement
-                return Some(item.syntax().clone());
+                last_export = Some(item.syntax().clone());
+            } else if last_export.is_some() {
+                return last_export;
             }
         }
         None
@@ -65,11 +64,11 @@ impl Rule for UseExportsLast {
                 rule_category!(),
                 node.text_range(),
                 markup! {
-                    "All exports should be declared after all non-export statements."
+                    "Export statements should appear at the end of the file."
                 },
             )
             .note(markup! {
-                "Move this statement before the export statements to keep all exports at the end of the module."
+                "Move this export to the end of the file."
             }),
         )
     }

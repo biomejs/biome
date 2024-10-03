@@ -12,18 +12,16 @@ const b = 2;
 
 # Diagnostics
 ```
-invalid.js:1:20 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports should be declared after all non-export statements.
+  ! Export statements should appear at the end of the file.
   
   > 1 │ export const a = 1;
-      │                    
-  > 2 │ 
-  > 3 │ const b = 2;
-      │ ^^^^^^^^^^^^
-    4 │ 
+      │ ^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ const b = 2;
   
-  i Move this statement before the export statements to keep all exports at the end of the module.
+  i Move this export to the end of the file.
   
 
 ```
