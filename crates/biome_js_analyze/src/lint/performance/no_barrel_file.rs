@@ -44,7 +44,7 @@ declare_lint_rule! {
     pub NoBarrelFile {
         version: "1.6.0",
         name: "noBarrelFile",
-        language: "ts",
+        language: "js",
         recommended: false,
         sources: &[RuleSource::EslintBarrelFiles("avoid-barrel-files")],
         source_kind: RuleSourceKind::Inspired,
