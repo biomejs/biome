@@ -49,7 +49,7 @@ impl Rule for UseExportsLast {
         let mut last_export = None;
 
         for item in items.iter() {
-            if is_export_declaration(&item) {
+            if matches!(item, AnyJsModuleItem::JsExport(_)) {
                 last_export = Some(item.syntax().clone());
             } else if last_export.is_some() {
                 return last_export;
@@ -72,8 +72,4 @@ impl Rule for UseExportsLast {
             }),
         )
     }
-}
-
-fn is_export_declaration(item: &AnyJsModuleItem) -> bool {
-    matches!(item, AnyJsModuleItem::JsExport(_))
 }

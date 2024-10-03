@@ -1,0 +1,19 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: validOther.js
+---
+# Input
+```jsx
+const arr = ["bar"];
+
+export const bool = true;
+
+export default bool;
+
+export function func() {
+	console.log("Hello World 🌍");
+}
+
+export const str = "foo";
+
+```

@@ -1,0 +1,32 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidOther.js
+---
+# Input
+```jsx
+const bool = true;
+
+export default bool;
+
+const str = "foo";
+
+```
+
+# Diagnostics
+```
+invalidOther.js:1:19 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Export statements should appear at the end of the file.
+  
+  > 1 │ const bool = true;
+      │                   
+  > 2 │ 
+  > 3 │ export default bool;
+      │ ^^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ const str = "foo";
+  
+  i Move this export to the end of the file.
+  
+
+```
