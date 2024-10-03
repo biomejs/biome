@@ -14,6 +14,6 @@ impl FormatNodeRule<GritPatternWhere> for FormatGritPatternWhere {
         let pattern_format = pattern.format();
         let side_condition = side_condition.format();
         let where_token = where_token.format();
-        write!(f, [pattern_format, side_condition, where_token,])
+        write!(f, [pattern_format, where_token, side_condition,])
     }
 }
