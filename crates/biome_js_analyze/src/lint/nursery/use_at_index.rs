@@ -18,7 +18,7 @@ use crate::JsRuleAction;
 use schemars::JsonSchema;
 
 declare_lint_rule! {
-    /// Enforce using .at to retrieve elements.
+    /// Use `at()` instead of integer index access.
     ///
     /// When extracting elements from an array, especially when retrieving from the end, `.at` is convenient. Replace the previously used syntax with `.at()`.
     ///
