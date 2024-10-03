@@ -1,5 +1,4 @@
 use crate::JsRuleAction;
-use ::serde::{Deserialize, Serialize};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource, RuleSourceKind,
@@ -12,9 +11,6 @@ use biome_js_syntax::{
     JsStaticMemberExpression, JsUnaryExpression, T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
-
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
 
 declare_lint_rule! {
     /// Use `at()` instead of integer index access.
@@ -459,75 +455,23 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
 fn check_binary_expression_member(
     member: JsBinaryExpression,
     object: AnyJsExpression,
-    option: &UseAtIndexOptions,
 ) -> Option<UseAtIndexState> {
     let member = AnyJsExpression::JsBinaryExpression(member);
     let negative_index_exp = extract_negative_index_expression(
         &member,
         unwrap_parenthesized_expression(object.clone())?,
     );
-    if let Some(negative_index) = negative_index_exp {
-        return Some(UseAtIndexState {
-            at_number_exp: negative_index,
-            error_type: ErrorType::Index { is_negative: true },
-            object,
-        });
-    }
-    option.check_all_index_access.then_some(UseAtIndexState {
-        at_number_exp: member,
+    let negative_index = negative_index_exp?;
+
+    Some(UseAtIndexState {
+        at_number_exp: negative_index,
         error_type: ErrorType::Index { is_negative: true },
         object,
     })
 }
 
-fn check_literal_expression_member(
-    member: AnyJsLiteralExpression,
-    object: AnyJsExpression,
-    option: &UseAtIndexOptions,
-) -> Option<UseAtIndexState> {
-    let AnyJsLiteralExpression::JsNumberLiteralExpression(member) = member else {
-        return None;
-    };
-    let value_token = member.value_token().ok()?;
-    let number = value_token.text_trimmed().parse::<i64>().ok()?;
-    (number >= 0 && option.check_all_index_access).then_some(UseAtIndexState {
-        at_number_exp: make_number_literal(number),
-        error_type: ErrorType::Index { is_negative: false },
-        object,
-    })
-}
-
-fn check_unary_expression_member(
-    member: JsUnaryExpression,
-    object: AnyJsExpression,
-    option: &UseAtIndexOptions,
-) -> Option<UseAtIndexState> {
-    if !option.check_all_index_access {
-        return None;
-    }
-    // ignore -5
-    let token = member.operator_token().ok()?;
-    if token.kind() == T![-] {
-        if let Some(arg) =
-            get_integer_from_literal(&unwrap_parenthesized_expression(member.argument().ok()?)?)
-        {
-            if arg >= 0 {
-                return None;
-            }
-        }
-    }
-    Some(UseAtIndexState {
-        at_number_exp: AnyJsExpression::JsUnaryExpression(member),
-        error_type: ErrorType::Index { is_negative: false },
-        object,
-    })
-}
-
 /// check hoge[0]
-fn check_computed_member_expression(
-    exp: &JsComputedMemberExpression,
-    option: &UseAtIndexOptions,
-) -> Option<UseAtIndexState> {
+fn check_computed_member_expression(exp: &JsComputedMemberExpression) -> Option<UseAtIndexState> {
     // check slice
     if let Some(slice_err) =
         analyze_slice_element_access(&AnyJsExpression::JsComputedMemberExpression(exp.clone()))
@@ -547,22 +491,8 @@ fn check_computed_member_expression(
     match member.clone() {
         // hoge[hoge.length - 1]
         AnyJsExpression::JsBinaryExpression(binary) => {
-            check_binary_expression_member(binary, object, option)
+            check_binary_expression_member(binary, object)
         }
-        // hoge[1]
-        AnyJsExpression::AnyJsLiteralExpression(literal) => {
-            check_literal_expression_member(literal, object, option)
-        }
-        // hoge[-x]
-        AnyJsExpression::JsUnaryExpression(unary) => {
-            check_unary_expression_member(unary, object, option)
-        }
-        AnyJsExpression::JsIdentifierExpression(_) => None,
-        _ if option.check_all_index_access => Some(UseAtIndexState {
-            at_number_exp: member,
-            error_type: ErrorType::Index { is_negative: false },
-            object,
-        }),
         _ => None,
     }
 }
@@ -570,7 +500,6 @@ fn check_computed_member_expression(
 fn check_call_expression_char_at(
     call_exp: &JsCallExpression,
     member: &JsStaticMemberExpression,
-    option: &UseAtIndexOptions,
 ) -> Option<UseAtIndexState> {
     let args: Vec<_> = call_exp
         .arguments()
@@ -592,41 +521,18 @@ fn check_call_expression_char_at(
         AnyJsExpression::JsBinaryExpression(_) => {
             let at_number_exp =
                 extract_negative_index_expression(&core_arg0, char_at_parent.clone());
-            if let Some(at_number_exp) = at_number_exp {
-                Some(UseAtIndexState {
-                    at_number_exp,
-                    error_type: ErrorType::StringCharAt { is_negative: true },
-                    object: char_at_parent,
-                })
-            } else {
-                option.check_all_index_access.then_some(UseAtIndexState {
-                    at_number_exp: core_arg0,
-                    error_type: ErrorType::StringCharAt { is_negative: false },
-                    object: char_at_parent,
-                })
-            }
-        }
-        // hoge.charAt(1)
-        AnyJsExpression::AnyJsLiteralExpression(_member) => {
-            option.check_all_index_access.then_some(UseAtIndexState {
-                at_number_exp: core_arg0,
-                error_type: ErrorType::StringCharAt { is_negative: false },
-                object: char_at_parent.clone(),
+            at_number_exp.map(|at_number_exp| UseAtIndexState {
+                at_number_exp,
+                error_type: ErrorType::StringCharAt { is_negative: true },
+                object: char_at_parent,
             })
         }
-        _ => option.check_all_index_access.then_some(UseAtIndexState {
-            at_number_exp: core_arg0,
-            error_type: ErrorType::StringCharAt { is_negative: false },
-            object: char_at_parent.clone(),
-        }),
+        _ => None,
     }
 }
 
 /// check hoge.fuga()
-fn check_call_expression(
-    call_exp: &JsCallExpression,
-    option: &UseAtIndexOptions,
-) -> Option<UseAtIndexState> {
+fn check_call_expression(call_exp: &JsCallExpression) -> Option<UseAtIndexState> {
     // check slice
     if let Some(slice_err) =
         analyze_slice_element_access(&AnyJsExpression::JsCallExpression(call_exp.clone()))
@@ -645,7 +551,7 @@ fn check_call_expression(
             }
             let member_name = member.member().ok()?.as_js_name()?.value_token().ok()?;
             match member_name.text_trimmed() {
-                "charAt" => check_call_expression_char_at(call_exp, &member, option),
+                "charAt" => check_call_expression_char_at(call_exp, &member),
                 _ => None,
             }
         }
@@ -769,40 +675,22 @@ pub struct UseAtIndexState {
     object: AnyJsExpression,
 }
 
-#[derive(
-    Clone,
-    Debug,
-    Default,
-    biome_deserialize_macros::Deserializable,
-    Deserialize,
-    Serialize,
-    Eq,
-    PartialEq,
-)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub struct UseAtIndexOptions {
-    // Force the use of the `.at()` method in cases other than positive integers.
-    pub check_all_index_access: bool,
-}
-
 impl Rule for UseAtIndex {
     type Query = Ast<AnyJsArrayAccess>;
     type State = UseAtIndexState;
     type Signals = Option<Self::State>;
-    type Options = UseAtIndexOptions;
+    type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let exp = ctx.query();
-        let option = ctx.options();
 
         let result: Option<UseAtIndexState> = match exp {
             // hoge[a]
             AnyJsArrayAccess::JsComputedMemberExpression(exp) => {
-                check_computed_member_expression(exp, option)
+                check_computed_member_expression(exp)
             }
             // hoge.fuga()
-            AnyJsArrayAccess::JsCallExpression(call_exp) => check_call_expression(call_exp, option),
+            AnyJsArrayAccess::JsCallExpression(call_exp) => check_call_expression(call_exp),
         };
         result
     }
