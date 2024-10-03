@@ -711,7 +711,7 @@ fn check_call_expression(
     }
 
     let member = solve_parenthesized_expression(call_exp.callee().ok()?)?;
-    match member {
+    match call_exp.callee().ok()?.omit_parentheses() {
         AnyJsExpression::JsStaticMemberExpression(member) => {
             if member.is_optional_chain() {
                 return None;
