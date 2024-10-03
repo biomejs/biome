@@ -347,7 +347,6 @@ fn detect_secret(data: &str, entropy_threshold: &u16) -> Option<&'static str> {
 
     for token in tokens {
         if token.len() >= MIN_PATTERN_LEN {
-
             if is_known_safe_pattern(token) {
                 continue;
             }
