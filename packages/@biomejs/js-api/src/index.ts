@@ -260,6 +260,7 @@ export class Biome {
 						path,
 						fix_file_mode: fixFileMode,
 						should_format: false,
+						suppress: false,
 					});
 
 					code = result.code;
