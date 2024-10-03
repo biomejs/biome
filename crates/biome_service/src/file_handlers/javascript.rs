@@ -48,6 +48,7 @@ use biome_rowan::{AstNode, BatchMutationExt, Direction, NodeCache};
 use serde::{Deserialize, Serialize};
 use std::borrow::Cow;
 use std::fmt::Debug;
+use std::time::SystemTime;
 use tracing::{debug, debug_span, error, info, trace, trace_span};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -663,7 +664,13 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         FixFileMode::ApplySuppressions => {
                             if action.is_suppression()
                                 && action.applicability == Applicability::Always
+                            // TODO: This doesn't seem correct. I'm having to set `"nursery": { "all": false }` in my configuration
+                            // to make sure ignores aren't writetn for nursery rules.
+                            // This doesn't make sense, since I'm not having to worry about nursery rules for a regular `biome lint .`...
+                            && action.rule_name.unwrap().0 != "nursery"
+                            //
                             {
+                                println!("Applying suppression at {:#?}", SystemTime::now());
                                 return ControlFlow::Break(action);
                             }
                         }
