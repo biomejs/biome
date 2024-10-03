@@ -670,7 +670,6 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             && action.rule_name.unwrap().0 != "nursery"
                             //
                             {
-                                println!("Applying suppression at {:#?}", SystemTime::now());
                                 return ControlFlow::Break(action);
                             }
                         }
