@@ -479,26 +479,18 @@ fn check_call_expression_char_at(
     call_exp: &JsCallExpression,
     member: &JsStaticMemberExpression,
 ) -> Option<UseAtIndexState> {
-    let args: Vec<_> = call_exp
-        .arguments()
-        .ok()?
-        .args()
-        .into_iter()
-        .flatten()
-        .collect();
-    if args.len() != 1 {
-        return None;
-    }
-    let AnyJsCallArgument::AnyJsExpression(arg0) = args[0].clone() else {
+    let [Some(arg0), None] = call_exp.arguments().ok()?.get_arguments_by_index([0, 1]) else {
         return None;
     };
-    let core_arg0 = arg0.omit_parentheses();
+    let AnyJsCallArgument::AnyJsExpression(arg0) = arg0.clone() else {
+        return None;
+    };
+    let arg0 = arg0.omit_parentheses();
     let char_at_parent = member.object().ok()?.omit_parentheses();
-    match core_arg0.clone() {
+    match arg0.clone() {
         // hoge.charAt(hoge.length - 1)
         AnyJsExpression::JsBinaryExpression(_) => {
-            let at_number_exp =
-                extract_negative_index_expression(&core_arg0, char_at_parent.clone());
+            let at_number_exp = extract_negative_index_expression(&arg0, char_at_parent.clone());
             at_number_exp.map(|at_number_exp| UseAtIndexState {
                 at_number_exp,
                 error_type: ErrorType::StringCharAt { is_negative: true },
