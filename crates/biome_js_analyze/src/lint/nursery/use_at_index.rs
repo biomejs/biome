@@ -732,7 +732,6 @@ fn check_call_expression(
             match member_name.text() {
                 "last" => check_call_expression_last(call_exp, &member),
                 "charAt" => check_call_expression_char_at(call_exp, &member, option),
-                //"lastIndexOf" => Some(ErrorType::GetLastFunction),
                 _ => None,
             }
         }
