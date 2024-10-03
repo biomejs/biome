@@ -96,15 +96,15 @@ impl Rule for NoSecrets {
             }
         }
 
-        if !has_spaces {
-            if is_known_safe_pattern(text) {
-                return None;
-            }
-            let entropy_threshold = ctx.options().entropy_threshold.unwrap_or(DEFAULT_HIGH_ENTROPY_THRESHOLD);
-            return detect_secret(&text, &entropy_threshold)
-        } else {
-            None
+        if is_path(text) {
+            return None;
         }
+
+        let entropy_threshold = ctx
+            .options()
+            .entropy_threshold
+            .unwrap_or(DEFAULT_HIGH_ENTROPY_THRESHOLD);
+        detect_secret(text, &entropy_threshold)
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -127,17 +127,30 @@ impl Rule for NoSecrets {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoSecretsOptions {
-    /// Set entropy threshold (default is 4.5).
-    entropy_threshold: Option<f64>, // @TODO: Doesn't work currently.
+    /// Set entropy threshold (default is 41).
+    entropy_threshold: Option<u16>, // @TODO: Doesn't work currently.
 }
 
-const DEFAULT_HIGH_ENTROPY_THRESHOLD: f64 = 4.5;
+fn is_path(text: &str) -> bool {
+    // Check for common path indicators
+    text.starts_with("./") || text.starts_with("../")
+}
+
+const DEFAULT_HIGH_ENTROPY_THRESHOLD: u16 = 41;
 
 // Known sensitive patterns start here
+static JWT_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"\b(ey[a-zA-Z0-9]{17,}\.ey[a-zA-Z0-9\/\\_-]{17,}\.(?:[a-zA-Z0-9\/\\_-]{10,}={0,2})?)(?:['|\"|\n|\r|\s|\x60|;]|$)"#).unwrap()
+});
+
+static JWT_BASE64_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"\bZXlK(?:(?P<alg>aGJHY2lPaU)|(?P<apu>aGNIVWlPaU)|(?P<apv>aGNIWWlPaU)|(?P<aud>aGRXUWlPaU)|(?P<b64>aU5qUWlP)|(?P<crit>amNtbDBJanBi)|(?P<cty>amRIa2lPaU)|(?P<epk>bGNHc2lPbn)|(?P<enc>bGJtTWlPaU)|(?P<jku>cWEzVWlPaU)|(?P<jwk>cWQyc2lPb)|(?P<iss>cGMzTWlPaU)|(?P<iv>cGRpSTZJ)|(?P<kid>cmFXUWlP)|(?P<key_ops>clpYbGZiM0J6SWpwY)|(?P<kty>cmRIa2lPaUp)|(?P<nonce>dWIyNWpaU0k2)|(?P<p2c>d01tTWlP)|(?P<p2s>d01uTWlPaU)|(?P<ppt>d2NIUWlPaU)|(?P<sub>emRXSWlPaU)|(?P<svt>emRuUWlP)|(?P<tag>MFlXY2lPaU)|(?P<typ>MGVYQWlPaUp)|(?P<url>MWNtd2l)|(?P<use>MWMyVWlPaUp)|(?P<ver>MlpYSWlPaU)|(?P<version>MlpYSnphVzl1SWpv)|(?P<x>NElqb2)|(?P<x5c>NE5XTWlP)|(?P<x5t>NE5YUWlPaU)|(?P<x5ts256>NE5YUWpVekkxTmlJNkl)|(?P<x5u>NE5YVWlPaU)|(?P<zip>NmFYQWlPaU))[a-zA-Z0-9\/\\_+\-\r\n]{40,}={0,2}"#).unwrap()
+});
+
 static SLACK_TOKEN_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"xox[baprs]-([0-9a-zA-Z]{10,48})?").unwrap());
 
@@ -156,13 +169,6 @@ static TWITTER_OAUTH_REGEX: LazyLock<Regex> =
 
 static FACEBOOK_OAUTH_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#"[fF][aA][cC][eE][bB][oO][oO][kK].*(?:.{0,42})"#).unwrap());
-
-static HEROKU_API_KEY_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(
-        r"[hH][eE][rR][oO][kK][uU].*[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}",
-    )
-    .unwrap()
-});
 
 static PASSWORD_IN_URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r#"[a-zA-Z]{3,10}://[^/\s:@]{3,20}:[^/\s:@]{3,20}@.{1,100}['"\s]"#).unwrap()
@@ -195,6 +201,18 @@ struct SensitivePattern {
 }
 
 static SENSITIVE_PATTERNS: &[SensitivePattern] = &[
+    SensitivePattern {
+        pattern: Pattern::Regex(&JWT_REGEX),
+        comment: "JSON Web Token (JWT)",
+        min_len: 100,
+        allows_spaces: false,
+    },
+    SensitivePattern {
+        pattern: Pattern::Regex(&JWT_BASE64_REGEX),
+        comment: "Base64-encoded JWT",
+        min_len: 100,
+        allows_spaces: false,
+    },
     SensitivePattern {
         pattern: Pattern::Regex(&SLACK_TOKEN_REGEX),
         comment: "Slack Token",
@@ -235,12 +253,6 @@ static SENSITIVE_PATTERNS: &[SensitivePattern] = &[
         pattern: Pattern::Regex(&AWS_API_KEY_REGEX),
         comment: "AWS API Key",
         min_len: 16,
-        allows_spaces: false,
-    },
-    SensitivePattern {
-        pattern: Pattern::Regex(&HEROKU_API_KEY_REGEX),
-        comment: "Heroku API Key",
-        min_len: 12,
         allows_spaces: false,
     },
     SensitivePattern {
@@ -292,33 +304,33 @@ static SENSITIVE_PATTERNS: &[SensitivePattern] = &[
         allows_spaces: true,
     },
 ];
-
-const MIN_PATTERN_LEN: usize = 12;
+const MIN_PATTERN_LEN: usize = 14;
 
 // Known safe patterns start here
-static BASE64_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[A-Za-z0-9+/]{40,}={0,2}$").unwrap());
-static URL_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^https?://[a-zA-Z0-9.-]+(/[a-zA-Z0-9./_-]*)?$").unwrap());
-static UNIX_PATH_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(/[^/\0]+)+/?$").unwrap());
-static WINDOWS_PATH_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^[a-zA-Z]:\\(?:[^\\\0]+\\?)*$").unwrap());
+static BASE64_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$").unwrap()
+});
+static URL_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^https?://[a-zA-Z0-9.-]+(/[a-zA-Z0-9./_-]*)?$").unwrap());
+static RELATIVE_PATH_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^(?:\.\./|\./|[a-zA-Z0-9_-]+)/?$").unwrap());
+static UNIX_PATH_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^(/[^/]+)+/?$").unwrap());
+static WINDOWS_PATH_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[a-zA-Z]:\\(?:[^\\]+\\?)*$").unwrap());
+static EMAIL_REGEX: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").unwrap());
+static PHONE_REGEX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\+?[1-9]\d{1,14}$").unwrap()); // E.164 format
 
-// Since list is smaller, heuristics may not be needed as were in sensitive patterns.
+// Combine all known safe patterns into a single list
 static KNOWN_SAFE_PATTERNS: &[&LazyLock<Regex>] = &[
     &BASE64_REGEX,
     &URL_REGEX,
+    &RELATIVE_PATH_REGEX,
     &UNIX_PATH_REGEX,
     &WINDOWS_PATH_REGEX,
+    &EMAIL_REGEX,
+    &PHONE_REGEX,
 ];
-
-fn detect_secret(data: &str, entropy_threshold: &f64) -> Option<&'static str> {
-    let entropy = calculate_shannon_entropy(data);
-    
-    if entropy > *entropy_threshold {
-        // Return a static message since &str is required to be static
-        Some("Detected high entropy string")
-    } else {
-        None
-    }
-}
 
 fn is_known_safe_pattern(data: &str) -> bool {
     for pattern in KNOWN_SAFE_PATTERNS {
@@ -329,27 +341,132 @@ fn is_known_safe_pattern(data: &str) -> bool {
     false
 }
 
-/// Inspired by https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/utils.js#L93
-/// Adapted from https://docs.rs/entropy/latest/src/entropy/lib.rs.html#14-33
-/// Calculates Shannon entropy to measure the randomness of data. High entropy values indicate potentially
-/// secret or sensitive information, as such data is typically more random and less predictable than regular text.
-/// Useful for detecting API keys, passwords, and other secrets within code or configuration files.
-fn calculate_shannon_entropy(data: &str) -> f64 {
+fn detect_secret(data: &str, entropy_threshold: &u16) -> Option<&'static str> {
+    let tokens: Vec<&str> = split_into_tokens(data);
+
+    for token in tokens {
+        println!("Token: {}, length: {}", token, token.len());
+
+        if token.len() >= MIN_PATTERN_LEN {
+            // Skip known safe patterns
+            if is_known_safe_pattern(token) {
+                continue;
+            }
+
+            let entropy =
+                calculate_entropy_with_case_and_classes(token, *entropy_threshold as f64, 15.0);
+            println!("Token: {}, entropy: {}", token, entropy);
+            if (entropy as u16) > *entropy_threshold {
+                return Some("Detected high entropy string");
+            }
+        }
+    }
+    None
+}
+
+fn calculate_entropy_with_case_and_classes(
+    data: &str,
+    base_threshold: f64,
+    scaling_factor: f64,
+) -> f64 {
     let mut freq = [0usize; 256];
     let len = data.len();
+
     for &byte in data.as_bytes() {
         freq[byte as usize] += 1;
     }
 
-    let mut entropy = 0.0;
+    let mut shannon_entropy = 0.0;
+    let mut letter_count = 0;
+    let mut uppercase_count = 0;
+    let mut lowercase_count = 0;
+    let mut digit_count = 0;
+    let mut symbol_count = 0;
+    let mut case_switches = 0;
+    let mut previous_char_was_upper = false;
+
     for count in freq.iter() {
         if *count > 0 {
             let p = *count as f64 / len as f64;
-            entropy -= p * p.log2();
+            shannon_entropy -= p * p.log2();
         }
     }
 
-    entropy
+    // Letter classification and case switching
+    for (i, c) in data.chars().enumerate() {
+        if c.is_ascii_alphabetic() {
+            letter_count += 1;
+            if c.is_uppercase() {
+                uppercase_count += 1;
+                if i > 0 && !previous_char_was_upper {
+                    case_switches += 1;
+                }
+                previous_char_was_upper = true;
+            } else {
+                lowercase_count += 1;
+                if i > 0 && previous_char_was_upper {
+                    case_switches += 1;
+                }
+                previous_char_was_upper = false;
+            }
+        } else if c.is_ascii_digit() {
+            digit_count += 1;
+        } else if !c.is_whitespace() {
+            symbol_count += 1;
+        }
+    }
+
+    // Adjust entropy: case switches and symbol boosts
+    let case_entropy_boost = if uppercase_count > 0 && lowercase_count > 0 {
+        (case_switches as f64 / letter_count as f64) * 2.0
+    } else {
+        0.0
+    };
+
+    let symbol_entropy_boost = if symbol_count > 0 {
+        symbol_count as f64 / len as f64
+    } else {
+        0.0
+    };
+
+    let digit_entropy_boost = if digit_count > 0 {
+        digit_count as f64 / len as f64
+    } else {
+        0.0
+    };
+
+    let adjusted_entropy = shannon_entropy
+        + (case_entropy_boost * 2.5)
+        + (symbol_entropy_boost * 1.5)
+        + digit_entropy_boost;
+
+    // Apply exponential scaling to avoid excessive boosting for long, structured tokens
+    apply_exponential_entropy_scaling(adjusted_entropy, len, base_threshold, scaling_factor)
+}
+
+fn apply_exponential_entropy_scaling(
+    entropy: f64,
+    token_length: usize,
+    base_threshold: f64,
+    scaling_factor: f64,
+) -> f64 {
+    // We will apply a logarithmic dampening to prevent excessive scaling for long tokens
+    let scaling_adjustment = (token_length as f64 / scaling_factor).ln();
+    base_threshold + entropy * scaling_adjustment
+}
+
+fn split_into_tokens(value: &str) -> Vec<&str> {
+    let delimiters = [' ', '\t', '\n', '.', ',', ';', ':', '/', '-', '_', '@'];
+    let mut tokens = vec![value];
+
+    for &delimiter in delimiters.iter() {
+        tokens = tokens
+            .into_iter()
+            .flat_map(|token| token.split(delimiter).filter(|&s| !s.is_empty()))
+            .collect();
+    }
+
+    tokens
 }
 
 #[cfg(test)]

@@ -211,7 +211,7 @@ impl RuleSource {
             | Self::EslintBarrelFiles(rule_name)
             | Self::EslintN(rule_name)
             | Self::Stylelint(rule_name)
-            | Self::EslintNoSecrets(rule_name) => rule_name
+            | Self::EslintNoSecrets(rule_name) => rule_name,
         }
     }
 
@@ -262,7 +262,7 @@ impl RuleSource {
             Self::EslintBarrelFiles(rule_name) => format!("https://github.com/thepassle/eslint-plugin-barrel-files/blob/main/docs/rules/{rule_name}.md"),
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
-            Self::EslintNoSecrets(_rule_name) => format!("https://github.com/nickdeis/eslint-plugin-no-secrets/README.md"),
+            Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
         }
     }
 
