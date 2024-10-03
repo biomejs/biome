@@ -819,15 +819,6 @@ pub struct UseAtIndexState {
     object: AnyJsExpression,
 }
 
-impl UseAtIndexState {
-    fn new(at_number_exp: AnyJsExpression, error_type: ErrorType, object: AnyJsExpression) -> Self {
-        Self {
-            at_number_exp,
-            error_type,
-            object,
-        }
-    }
-}
 
 #[derive(
     Clone,
