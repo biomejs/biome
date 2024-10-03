@@ -418,9 +418,8 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
         .ok()?
         .as_js_name()?
         .value_token()
-        .ok()?
-        .token_text_trimmed();
-    if member_name != "slice" {
+        .ok()?;
+    if member_name.text_trimmed() != "slice" {
         return None;
     }
     // arg length should be 1 or 2
