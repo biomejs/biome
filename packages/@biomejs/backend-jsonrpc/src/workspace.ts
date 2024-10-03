@@ -3242,7 +3242,10 @@ export interface FixFileParams {
 /**
  * Which fixes should be applied during the analyzing phase
  */
-export type FixFileMode = "SafeFixes" | "SafeAndUnsafeFixes";
+export type FixFileMode =
+  | "ApplySuppressions"
+  | "SafeFixes"
+  | "SafeAndUnsafeFixes";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
