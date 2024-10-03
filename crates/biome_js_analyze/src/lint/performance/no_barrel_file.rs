@@ -20,23 +20,23 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// export * from "foo";
     /// export * from "bar";
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// export { foo } from "foo";
     /// export { bar } from "bar";
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// export { default as module1 } from "./module1";
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```ts
+    /// ```js
     /// export type * from "foo";
     /// export type { foo } from "foo";
     /// ```
