@@ -423,16 +423,12 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
         return None;
     }
     // arg length should be 1 or 2
-    let args: Vec<_> = call_exp
+    let [Some(arg0), optional_arg1, None] = call_exp
         .arguments()
         .ok()?
-        .args()
-        .into_iter()
-        .flatten()
-        .collect();
-    if args.is_empty() || args.len() > 2 {
+        .get_arguments_by_index([0, 1, 2])) else {
         return None;
-    }
+    };
     let AnyJsCallArgument::AnyJsExpression(arg0) = args[0].clone() else {
         return None;
     };
