@@ -103,7 +103,7 @@ declare_lint_rule! {
 ///    (a) // Some(a)
 ///    (a + b) // Some(a + b)
 /// ```
-fn solve_parenthesized_expression(mut node: AnyJsExpression) -> Option<AnyJsExpression> {
+fn unwrap_parenthesized_expression(mut node: AnyJsExpression) -> Option<AnyJsExpression> {
     while let AnyJsExpression::JsParenthesizedExpression(parenthesized_exp) = node {
         let exp = parenthesized_exp.expression().ok()?;
         node = exp;
@@ -123,8 +123,8 @@ fn solve_parenthesized_expression(mut node: AnyJsExpression) -> Option<AnyJsExpr
 /// ```
 fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bool> {
     // solve JsParenthesizedExpression
-    let left = solve_parenthesized_expression(left)?;
-    let right = solve_parenthesized_expression(right)?;
+    let left = unwrap_parenthesized_expression(left)?;
+    let right = unwrap_parenthesized_expression(right)?;
     match (left, right) {
         // x[0]
         (
@@ -132,12 +132,12 @@ fn is_same_reference(left: AnyJsExpression, right: AnyJsExpression) -> Option<bo
             AnyJsExpression::JsComputedMemberExpression(right),
         ) => {
             let AnyJsExpression::AnyJsLiteralExpression(left_member) =
-                solve_parenthesized_expression(left.member().ok()?)?
+                unwrap_parenthesized_expression(left.member().ok()?)?
             else {
                 return Some(false);
             };
             let AnyJsExpression::AnyJsLiteralExpression(right_member) =
-                solve_parenthesized_expression(right.member().ok()?)?
+                unwrap_parenthesized_expression(right.member().ok()?)?
             else {
                 return Some(false);
             };
@@ -225,7 +225,7 @@ fn get_integer_from_literal(node: &AnyJsExpression) -> Option<i64> {
         if token.kind() != T![-] {
             return None;
         }
-        return get_integer_from_literal(&solve_parenthesized_expression(unary.argument().ok()?)?)
+        return get_integer_from_literal(&unwrap_parenthesized_expression(unary.argument().ok()?)?)
             .map(|num| -num);
     }
     let AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsNumberLiteralExpression(
@@ -248,7 +248,7 @@ fn get_integer_from_literal(node: &AnyJsExpression) -> Option<i64> {
 ///    a - b // => Some((a, [b]))
 ///    a - b - c // => Some((a, [b, c]))
 /// ```
-fn get_left_node_from_minus_binary_expressions(
+fn split_minus_binary_expressions(
     mut expression: AnyJsExpression,
 ) -> Option<(AnyJsExpression, Vec<AnyJsExpression>)> {
     let mut right_list = vec![];
@@ -287,13 +287,13 @@ fn extract_negative_index_expression(
     member: &AnyJsExpression,
     object: AnyJsExpression,
 ) -> Option<AnyJsExpression> {
-    let (left, right_list) = get_left_node_from_minus_binary_expressions(member.clone())?;
+    let (left, right_list) = split_minus_binary_expressions(member.clone())?;
     if right_list.is_empty() {
         return None;
     }
 
     // left expression should be hoge.length
-    let left = solve_parenthesized_expression(left)?;
+    let left = unwrap_parenthesized_expression(left)?;
     let length_parent = get_length_node(&left)?;
     // left expression should be the same as the object
     if !is_same_reference(object, length_parent)? {
@@ -303,7 +303,7 @@ fn extract_negative_index_expression(
     if right_list.len() == 1 {
         // right expression should be integer
         if let Some(number) =
-            get_integer_from_literal(&solve_parenthesized_expression(right_list[0].clone())?)
+            get_integer_from_literal(&unwrap_parenthesized_expression(right_list[0].clone())?)
         {
             if number > 0 {
                 Some(AnyJsExpression::JsUnaryExpression(
@@ -364,7 +364,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
             if has_args {
                 return None;
             }
-            let member = solve_parenthesized_expression(call_exp.callee().ok()?)?;
+            let member = unwrap_parenthesized_expression(call_exp.callee().ok()?)?;
             let AnyJsExpression::JsStaticMemberExpression(member) = member else {
                 return None;
             };
@@ -382,12 +382,12 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
             }
         }
         AnyJsExpression::JsComputedMemberExpression(member) => {
-            let object = solve_parenthesized_expression(member.object().ok()?)?;
+            let object = unwrap_parenthesized_expression(member.object().ok()?)?;
             if member.is_optional_chain() {
                 return None;
             }
             let value =
-                get_integer_from_literal(&solve_parenthesized_expression(member.member().ok()?)?)?;
+                get_integer_from_literal(&unwrap_parenthesized_expression(member.member().ok()?)?)?;
             // enable only x[0]
             if value != 0 {
                 return None;
@@ -416,7 +416,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
     let AnyJsCallArgument::AnyJsExpression(arg0) = arg0.clone() else {
         return None;
     };
-    let start_exp = solve_parenthesized_expression(arg0)?;
+    let start_exp = unwrap_parenthesized_expression(arg0)?;
     let sliced_exp = member.object().ok()?;
 
     match (extract_type.clone(), optional_arg1) {
@@ -440,7 +440,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
         }
         (SliceExtractType::ZeroMember | SliceExtractType::Shift, Some(arg1)) => {
             let start_index = get_integer_from_literal(&start_exp)?;
-            let end_index = get_integer_from_literal(&solve_parenthesized_expression(
+            let end_index = get_integer_from_literal(&unwrap_parenthesized_expression(
                 arg1.as_any_js_expression()?.clone(),
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
@@ -454,7 +454,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
         }
         (SliceExtractType::Pop, Some(arg1)) => {
             let start_index = get_integer_from_literal(&start_exp)?;
-            let end_index = get_integer_from_literal(&solve_parenthesized_expression(
+            let end_index = get_integer_from_literal(&unwrap_parenthesized_expression(
                 arg1.as_any_js_expression()?.clone(),
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
@@ -476,8 +476,10 @@ fn check_binary_expression_member(
     option: &UseAtIndexOptions,
 ) -> Option<UseAtIndexState> {
     let member = AnyJsExpression::JsBinaryExpression(member);
-    let negative_index_exp =
-        extract_negative_index_expression(&member, solve_parenthesized_expression(object.clone())?);
+    let negative_index_exp = extract_negative_index_expression(
+        &member,
+        unwrap_parenthesized_expression(object.clone())?,
+    );
     if let Some(negative_index) = negative_index_exp {
         return Some(UseAtIndexState {
             at_number_exp: negative_index,
@@ -521,7 +523,7 @@ fn check_unary_expression_member(
     let token = member.operator_token().ok()?;
     if token.kind() == T![-] {
         if let Some(arg) =
-            get_integer_from_literal(&solve_parenthesized_expression(member.argument().ok()?)?)
+            get_integer_from_literal(&unwrap_parenthesized_expression(member.argument().ok()?)?)
         {
             if arg >= 0 {
                 return None;
@@ -554,7 +556,7 @@ fn check_computed_member_expression(
         return None;
     }
     // check member
-    let member = solve_parenthesized_expression(exp.member().ok()?)?;
+    let member = unwrap_parenthesized_expression(exp.member().ok()?)?;
     let object = exp.object().ok()?;
     match member.clone() {
         // hoge[hoge.length - 1]
@@ -597,8 +599,8 @@ fn check_call_expression_char_at(
     let AnyJsCallArgument::AnyJsExpression(arg0) = args[0].clone() else {
         return None;
     };
-    let core_arg0 = solve_parenthesized_expression(arg0)?;
-    let char_at_parent = solve_parenthesized_expression(member.object().ok()?)?;
+    let core_arg0 = unwrap_parenthesized_expression(arg0)?;
+    let char_at_parent = unwrap_parenthesized_expression(member.object().ok()?)?;
     match core_arg0.clone() {
         // hoge.charAt(hoge.length - 1)
         AnyJsExpression::JsBinaryExpression(_) => {
