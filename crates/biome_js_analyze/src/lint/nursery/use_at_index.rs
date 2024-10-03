@@ -365,8 +365,8 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
     let (selected_exp, extract_type): (AnyJsExpression, SliceExtractType) = match node {
         // .pop() or .shift()
         AnyJsExpression::JsCallExpression(call_exp) => {
-            let arg_length = call_exp.arguments().ok()?.args().into_iter().count();
-            if arg_length != 0 {
+            let has_args = !call_exp.arguments().ok()?.args().is_empty();
+            if has_args {
                 return None;
             }
             let member = solve_parenthesized_expression(call_exp.callee().ok()?)?;
