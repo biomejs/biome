@@ -435,8 +435,8 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
     let start_exp = solve_parenthesized_expression(arg0)?;
     let sliced_exp = member.object().ok()?;
 
-    match (extract_type.clone(), args.len()) {
-        (SliceExtractType::ZeroMember | SliceExtractType::Shift, 1) => Some(UseAtIndexState::new(
+    match (extract_type.clone(), optional_arg1) {
+        (SliceExtractType::ZeroMember | SliceExtractType::Shift, None) => Some(UseAtIndexState::new(
             start_exp,
             ErrorType::Slice {
                 arg_type: SliceArgType::OneArg,
@@ -444,7 +444,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
             },
             sliced_exp,
         )),
-        (SliceExtractType::Pop, 1) if get_integer_from_literal(&start_exp)? < 0 => {
+        (SliceExtractType::Pop, None) if get_integer_from_literal(&start_exp)? < 0 => {
             Some(UseAtIndexState::new(
                 make_number_literal(-1),
                 ErrorType::Slice {
@@ -454,10 +454,10 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
                 sliced_exp,
             ))
         }
-        (SliceExtractType::ZeroMember | SliceExtractType::Shift, 2) => {
+        (SliceExtractType::ZeroMember | SliceExtractType::Shift, Some(arg1)) => {
             let start_index = get_integer_from_literal(&start_exp)?;
             let end_index = get_integer_from_literal(&solve_parenthesized_expression(
-                args[1].as_any_js_expression()?.clone(),
+                args1.as_any_js_expression()?.clone(),
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(
                 UseAtIndexState::new(
@@ -470,10 +470,10 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
                 ),
             )
         }
-        (SliceExtractType::Pop, 2) => {
+        (SliceExtractType::Pop, Some(arg1)) => {
             let start_index = get_integer_from_literal(&start_exp)?;
             let end_index = get_integer_from_literal(&solve_parenthesized_expression(
-                args[1].as_any_js_expression()?.clone(),
+                args1.as_any_js_expression()?.clone(),
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(
                 UseAtIndexState::new(
