@@ -294,4 +294,4 @@ The reviewers will determine responses based on the information gathered and the
 - Revoked contributor or moderator status
 
 [gh-org]: https://github.com/biomejs
-[discord]: https://discord.gg/BypW39g6Yc
+[discord]: https://biomejs.dev/chat

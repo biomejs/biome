@@ -126,7 +126,7 @@ declare_lint_rule! {
 
 #[derive(Clone, Debug, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseImportExtensionsOptions {
     /// A map of custom import extension mappings, where the key is the inspected file extension,
     /// and the value is a pair of `module` extension and `component` import extension
@@ -135,7 +135,7 @@ pub struct UseImportExtensionsOptions {
 
 #[derive(Debug, Clone, Default, Deserializable, Deserialize, Serialize, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct SuggestedExtensionMapping {
     /// Extension that should be used for module imports
     pub module: String,
