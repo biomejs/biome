@@ -9,6 +9,8 @@ declare_lint_rule! {
     ///
     /// Enforces that export statements are placed at the end of the module, after all other statements.
     ///
+    /// Source: https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/exports-last.md
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -20,12 +22,12 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```js,expect_diagnostic
     /// const a = 1;
     /// export const b = 2;
     /// ```
     ///
-    /// ```js
+    /// ```js,expect_diagnostic
     /// const a = 1;
     /// export { a };
     /// ```

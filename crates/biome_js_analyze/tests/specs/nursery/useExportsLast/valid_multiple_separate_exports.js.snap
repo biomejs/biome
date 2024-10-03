@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: validOther.js
+expression: valid_multiple_separate_exports.js
 ---
 # Input
 ```jsx
