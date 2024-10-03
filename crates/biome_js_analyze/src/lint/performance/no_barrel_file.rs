@@ -36,7 +36,7 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js
+    /// ```ts
     /// export type * from "foo";
     /// export type { foo } from "foo";
     /// ```
