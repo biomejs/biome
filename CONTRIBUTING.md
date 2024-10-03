@@ -12,6 +12,8 @@ We can use help in a bunch of areas and any help is greatly appreciated!
   - [Install the required tools](#install-the-required-tools)
   - [Testing](#testing)
     - [Debugging](#debugging)
+  - [Debug binaries](#debug-binaries)
+  - [Production binaries](#production-binaries)
   - [Checks](#checks)
   - [Crates development](#crates-development)
     - [Create new crates](#create-new-crates)
@@ -40,7 +42,7 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/biomejs/biome/discussions).
 Make sure your comment adds value: [don't post a comment just to get attention](https://jacobtomlinson.dev/posts/2022/dont-be-that-open-source-user-dont-be-me/).
 
-Our [Discord server](https://discord.gg/BypW39g6Yc) is open for help and more ad-hoc discussion.
+Our [Discord server](https://biomejs.dev/chat) is open for help and more ad-hoc discussion.
 All activity on the Discord is still moderated and will be strictly enforced under the project's [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 Remember that we are doing this project on our own time.
@@ -196,6 +198,48 @@ fn test_some_function() {
 
 ```shell
 cargo t test_some_function --show-output
+```
+
+## Debug binaries
+
+Creating a development binary is very useful in case you need to triage a reproduction, and you require more information like logging, trace logs, etc.
+
+Additionally, you can use this binary when you need to debug issues related to LSP clients.
+
+From the root of the repository, run the following command:
+
+```shell
+cargo build --bin biome
+```
+`cargo` will create a binary called `biome` in the `target/debug/` directory.
+
+If you're debugging a CLI reproduction, copy the `biome` binary inside the root of the reproduction, and change any script that uses the npm package to use the binary instead:
+
+```diff
+{
+  "scripts": {
+-    "lint": "biome lint",
++    "lint": "./biome lint"
+  }
+}
+```
+
+If you're debugging an LSP reproduction, make sure that the client allows to use custom binary, like VSCode and Zed. Provide an absolute URL to the binary that was emitted.
+
+```json
+{
+  "biome.lspBin": "/Users/john/www/biome/target/debug/biome"
+}
+```
+
+## Production binaries
+
+_Usually_, the easiest way to create a production build is to use the `--release` flag, **however** Biome requires an environment variable called `BIOME_VERSION` to generate different code at compile time.
+
+When you provide a `BIOME_VERSION` that is _different_ from `0.0.0`, the build will turn off all the nursery rules that are recommended. The value of `BIOME_VERSION` doesn't matter, as long as it's different from `0.0.0`. This means that you'll have to provide a command similar to this:
+
+```shell
+BIOME_VERSION=0.0.1 cargo build --bin biome --release
 ```
 
 ## Checks
