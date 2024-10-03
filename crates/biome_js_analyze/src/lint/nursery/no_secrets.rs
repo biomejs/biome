@@ -133,7 +133,7 @@ impl Rule for NoSecrets {
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct NoSecretsOptions {
     /// Set entropy threshold (default is 41).
-    entropy_threshold: Option<u16>, // @TODO: Doesn't work currently.
+    entropy_threshold: Option<u16>,
 }
 
 fn is_path(text: &str) -> bool {
@@ -349,7 +349,7 @@ fn detect_secret(data: &str, entropy_threshold: &u16) -> Option<&'static str> {
         println!("Token: {}, length: {}", token, token.len());
 
         if token.len() >= MIN_PATTERN_LEN {
-            // Skip known safe patterns
+
             if is_known_safe_pattern(token) {
                 continue;
             }
