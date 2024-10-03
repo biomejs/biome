@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsModuleItem, JsModuleItemList, JsSyntaxNode};
 use biome_rowan::AstNode;
@@ -22,12 +22,12 @@ declare_lint_rule! {
     ///
     /// ### Valid
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// const a = 1;
     /// export const b = 2;
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```js
     /// const a = 1;
     /// export { a };
     /// ```
@@ -37,6 +37,7 @@ declare_lint_rule! {
         name: "useExportsLast",
         language: "js",
         recommended: false,
+        sources: &[RuleSource::EslintImport("exports-last")],
     }
 }
 
