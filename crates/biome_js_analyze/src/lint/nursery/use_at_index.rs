@@ -726,9 +726,8 @@ fn check_call_expression(
                 .ok()?
                 .as_js_name()?
                 .value_token()
-                .ok()?
-                .token_text_trimmed();
-            match member_name.text() {
+                .ok()?;
+            match member_name.text_trimmed() {
                 "charAt" => check_call_expression_char_at(call_exp, &member, option),
                 _ => None,
             }
