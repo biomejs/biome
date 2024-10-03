@@ -1,3 +1,4 @@
+use crate::JsRuleAction;
 use ::serde::{Deserialize, Serialize};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
@@ -10,9 +11,7 @@ use biome_js_syntax::{
     JsCallExpression, JsComputedMemberExpression, JsParenthesizedExpression,
     JsStaticMemberExpression, JsUnaryExpression, T,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt};
-
-use crate::JsRuleAction;
+use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
 
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
@@ -63,10 +62,6 @@ declare_lint_rule! {
     ///
     /// ```js,expect_diagnostic
     /// const foo = string.charAt(string.length - 5);
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// const foo = lodash.last(array);
     /// ```
     ///
     /// ### Valid
@@ -376,12 +371,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
             if call_exp.is_optional_chain() || member.is_optional_chain() {
                 return None;
             }
-            let member_name = member
-                .member()
-                .ok()?
-                .as_js_name()?
-                .value_token()
-                .ok()?;
+            let member_name = member.member().ok()?.as_js_name()?.value_token().ok()?;
             let object = member.object().ok()?.omit_parentheses();
             match member_name.text_trimmed() {
                 "pop" => (object, SliceExtractType::Pop),
@@ -413,23 +403,17 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
     let AnyJsExpression::JsStaticMemberExpression(member) = call_exp.callee().ok()? else {
         return None;
     };
-    let member_name = member
-        .member()
-        .ok()?
-        .as_js_name()?
-        .value_token()
-        .ok()?;
+    let member_name = member.member().ok()?.as_js_name()?.value_token().ok()?;
     if member_name.text_trimmed() != "slice" {
         return None;
     }
     // arg length should be 1 or 2
-    let [Some(arg0), optional_arg1, None] = call_exp
-        .arguments()
-        .ok()?
-        .get_arguments_by_index([0, 1, 2])) else {
+    let [Some(arg0), optional_arg1, None] =
+        call_exp.arguments().ok()?.get_arguments_by_index([0, 1, 2])
+    else {
         return None;
     };
-    let AnyJsCallArgument::AnyJsExpression(arg0) = args[0].clone() else {
+    let AnyJsCallArgument::AnyJsExpression(arg0) = arg0.clone() else {
         return None;
     };
     let start_exp = solve_parenthesized_expression(arg0)?;
@@ -457,7 +441,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
         (SliceExtractType::ZeroMember | SliceExtractType::Shift, Some(arg1)) => {
             let start_index = get_integer_from_literal(&start_exp)?;
             let end_index = get_integer_from_literal(&solve_parenthesized_expression(
-                args1.as_any_js_expression()?.clone(),
+                arg1.as_any_js_expression()?.clone(),
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
                 at_number_exp: start_exp,
@@ -471,7 +455,7 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
         (SliceExtractType::Pop, Some(arg1)) => {
             let start_index = get_integer_from_literal(&start_exp)?;
             let end_index = get_integer_from_literal(&solve_parenthesized_expression(
-                args1.as_any_js_expression()?.clone(),
+                arg1.as_any_js_expression()?.clone(),
             )?)?;
             (start_index * end_index >= 0 && start_index < end_index).then_some(UseAtIndexState {
                 at_number_exp: make_number_literal(end_index - 1),
@@ -666,18 +650,12 @@ fn check_call_expression(
         return None;
     }
 
-    let member = solve_parenthesized_expression(call_exp.callee().ok()?)?;
     match call_exp.callee().ok()?.omit_parentheses() {
         AnyJsExpression::JsStaticMemberExpression(member) => {
             if member.is_optional_chain() {
                 return None;
             }
-            let member_name = member
-                .member()
-                .ok()?
-                .as_js_name()?
-                .value_token()
-                .ok()?;
+            let member_name = member.member().ok()?.as_js_name()?.value_token().ok()?;
             match member_name.text_trimmed() {
                 "charAt" => check_call_expression_char_at(call_exp, &member, option),
                 _ => None,
@@ -738,22 +716,54 @@ impl ErrorType {
         match self {
             ErrorType::Index { is_negative } | ErrorType::StringCharAt { is_negative } => {
                 let (method, old_method) = if *is_negative {
-                    ("X.at(-Y)", if matches!(self, ErrorType::StringCharAt { .. }) { "X.charAt(X.length - Y)" } else { "X[X.length - Y]" })
+                    (
+                        "X.at(-Y)",
+                        if matches!(self, ErrorType::StringCharAt { .. }) {
+                            "X.charAt(X.length - Y)"
+                        } else {
+                            "X[X.length - Y]"
+                        },
+                    )
                 } else {
-                    ("X.at(Y)", if matches!(self, ErrorType::StringCharAt { .. }) { "X.charAt(Y)" } else { "X[Y]" })
+                    (
+                        "X.at(Y)",
+                        if matches!(self, ErrorType::StringCharAt { .. }) {
+                            "X.charAt(Y)"
+                        } else {
+                            "X[Y]"
+                        },
+                    )
                 };
                 markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
-            },
-            ErrorType::Slice { arg_type, extract_type } => {
+            }
+            ErrorType::Slice {
+                arg_type,
+                extract_type,
+            } => {
                 let extract_string = match extract_type {
                     SliceExtractType::Pop => ".pop()",
                     SliceExtractType::Shift => ".shift()",
                     SliceExtractType::ZeroMember => "[0]",
                 };
                 let (method, old_method) = match (arg_type, extract_type) {
-                    (SliceArgType::OneArg, SliceExtractType::Pop) => ("X.at(-1)", format!("X.slice(-a){}", extract_string)),
-                    (SliceArgType::TwoArg, SliceExtractType::Pop) => ("X.at(Y - 1)", format!("X.slice(a, Y){}", extract_string)),
-                    _ => ("X.at(Y)", format!("X.slice({}){}", if matches!(arg_type, SliceArgType::OneArg) { "Y" } else { "Y, a" }, extract_string)),
+                    (SliceArgType::OneArg, SliceExtractType::Pop) => {
+                        ("X.at(-1)", format!("X.slice(-a){}", extract_string))
+                    }
+                    (SliceArgType::TwoArg, SliceExtractType::Pop) => {
+                        ("X.at(Y - 1)", format!("X.slice(a, Y){}", extract_string))
+                    }
+                    _ => (
+                        "X.at(Y)",
+                        format!(
+                            "X.slice({}){}",
+                            if matches!(arg_type, SliceArgType::OneArg) {
+                                "Y"
+                            } else {
+                                "Y, a"
+                            },
+                            extract_string
+                        ),
+                    ),
                 };
                 markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
             }
@@ -770,7 +780,6 @@ pub struct UseAtIndexState {
     error_type: ErrorType,
     object: AnyJsExpression,
 }
-
 
 #[derive(
     Clone,
