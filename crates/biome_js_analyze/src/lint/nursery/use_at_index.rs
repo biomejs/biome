@@ -355,7 +355,7 @@ fn make_number_literal(value: i64) -> AnyJsExpression {
 /// # Examples
 /// ```js
 ///     .slice(0)[0]
-///     .slice(0, 1).pop(0)
+///     .slice(0, 1).pop()
 /// ```
 fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexState> {
     if is_within_delete_expression(node).unwrap_or(false) {
