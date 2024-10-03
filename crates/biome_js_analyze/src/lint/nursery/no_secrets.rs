@@ -346,8 +346,6 @@ fn detect_secret(data: &str, entropy_threshold: &u16) -> Option<&'static str> {
     let tokens: Vec<&str> = split_into_tokens(data);
 
     for token in tokens {
-        println!("Token: {}, length: {}", token, token.len());
-
         if token.len() >= MIN_PATTERN_LEN {
 
             if is_known_safe_pattern(token) {
@@ -356,7 +354,6 @@ fn detect_secret(data: &str, entropy_threshold: &u16) -> Option<&'static str> {
 
             let entropy =
                 calculate_entropy_with_case_and_classes(token, *entropy_threshold as f64, 15.0);
-            println!("Token: {}, entropy: {}", token, entropy);
             if (entropy as u16) > *entropy_threshold {
                 return Some("Detected high entropy string");
             }
