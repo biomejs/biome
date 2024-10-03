@@ -21,20 +21,6 @@ declare_lint_rule! {
     ///
     /// When extracting elements from an array, especially when retrieving from the end, `.at` is convenient. Replace the previously used syntax with `.at()`.
     ///
-    /// ## Options
-    ///
-    /// ### `checkAllIndexAccess`
-    ///
-    /// By default, only negative element accesses will use errors, but I will also generate errors for positive accesses.
-    ///
-    /// ```json,ignore
-    /// {
-    ///     "//": "...",
-    ///     "options": {
-    ///         "checkAllIndexAccess": true
-    ///     }
-    /// }
-    /// ```
     ///
     /// ## Examples
     ///
