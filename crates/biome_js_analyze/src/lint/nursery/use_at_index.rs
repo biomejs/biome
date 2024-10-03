@@ -381,15 +381,14 @@ fn analyze_slice_element_access(node: &AnyJsExpression) -> Option<UseAtIndexStat
                 .ok()?
                 .as_js_name()?
                 .value_token()
-                .ok()?
-                .token_text_trimmed();
-            let object = solve_parenthesized_expression(member.object().ok()?)?;
-            if member_name == "pop" {
-                (object, SliceExtractType::Pop)
-            } else if member_name == "shift" {
-                (object, SliceExtractType::Shift)
-            } else {
-                return None;
+                .ok()?;
+            let object = member.object().ok()?.omit_parentheses();
+            match member_name.text_trimmed() {
+                "pop" => (object, SliceExtractType::Pop),
+                "shift" => (object, SliceExtractType::Shift),
+                _ => {
+                    return None;
+                }
             }
         }
         AnyJsExpression::JsComputedMemberExpression(member) => {
