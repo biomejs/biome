@@ -265,6 +265,51 @@ array.slice(-9, (a, really, _really, complicated, second) => argument)[0]
 
 # Input
 ```cjs
+_.last(array)
+```
+
+# Input
+```cjs
+lodash.last(array)
+```
+
+# Input
+```cjs
+underscore.last(array)
+```
+
+# Input
+```cjs
+_.last(new Array)
+```
+
+# Input
+```cjs
+const foo = []; _.last([bar])
+```
+
+# Input
+```cjs
+const foo = []; _.last(new Array)
+```
+
+# Input
+```cjs
+const foo = []; _.last(((new Array)))
+```
+
+# Input
+```cjs
+if (foo) _.last([bar])
+```
+
+# Input
+```cjs
+function foo() {return _.last(arguments)}
+```
+
+# Input
+```cjs
 new _.last(array)
 ```
 

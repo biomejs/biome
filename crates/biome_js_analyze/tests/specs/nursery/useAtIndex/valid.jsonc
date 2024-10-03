@@ -69,6 +69,17 @@
   // ========================================================================
   // `lodash.last(array)`
   // ========================================================================
+  // Under the original rules, it was considered an error, but due to concerns about false positives, it is currently allowed.
+  "_.last(array)",
+  "lodash.last(array)",
+  "underscore.last(array)",
+  "_.last(new Array)",
+  "const foo = []; _.last([bar])",
+  "const foo = []; _.last(new Array)",
+  "const foo = []; _.last(((new Array)))",
+  "if (foo) _.last([bar])",
+  "function foo() {return _.last(arguments)}",
+  // valid
   "new _.last(array)",
   "_.last(array, 2)",
   "_.last(...array)",

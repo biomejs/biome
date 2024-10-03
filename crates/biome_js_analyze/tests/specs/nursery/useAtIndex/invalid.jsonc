@@ -74,17 +74,5 @@
   "array.slice(-0o11, -7)[0]",
   "array.slice(-9, 0)[0]",
   "array.slice(hoge)[0]",
-  "array.slice(hoge).shift()",
-  // ========================================================================
-  // `lodash.last(array)`
-  // ========================================================================
-  "_.last(array)",
-  "lodash.last(array)",
-  "underscore.last(array)",
-  "_.last(new Array)",
-  "const foo = []; _.last([bar])",
-  "const foo = []; _.last(new Array)",
-  "const foo = []; _.last(((new Array)))",
-  "if (foo) _.last([bar])",
-  "function foo() {return _.last(arguments)}"
+  "array.slice(hoge).shift()"
 ]

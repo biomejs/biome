@@ -595,40 +595,6 @@ fn check_computed_member_expression(
     }
 }
 
-fn check_call_expression_last(
-    call_exp: &JsCallExpression,
-    member: &JsStaticMemberExpression,
-) -> Option<UseAtIndexState> {
-    let args: Vec<_> = call_exp
-        .arguments()
-        .ok()?
-        .args()
-        .into_iter()
-        .flatten()
-        .collect();
-    if args.len() != 1 {
-        return None;
-    }
-    let object = member.object().ok()?;
-    let AnyJsExpression::JsIdentifierExpression(object) = object else {
-        return None;
-    };
-    let lodash_function = ["_", "lodash", "underscore"];
-    let object_name = object.syntax().text().to_string();
-    if lodash_function.contains(&object_name.as_str()) {
-        let AnyJsCallArgument::AnyJsExpression(arg0) = args[0].clone() else {
-            return None;
-        };
-        Some(UseAtIndexState::new(
-            make_number_literal(-1),
-            ErrorType::GetLastFunction,
-            solve_parenthesized_expression(arg0)?,
-        ))
-    } else {
-        None
-    }
-}
-
 fn check_call_expression_char_at(
     call_exp: &JsCallExpression,
     member: &JsStaticMemberExpression,
@@ -764,7 +730,6 @@ pub enum ErrorType {
         arg_type: SliceArgType,
         extract_type: SliceExtractType,
     },
-    GetLastFunction,
 }
 
 impl ErrorType {
@@ -791,9 +756,6 @@ impl ErrorType {
                     _ => ("X.at(Y)", format!("X.slice({}){}", if matches!(arg_type, SliceArgType::OneArg) { "Y" } else { "Y, a" }, extract_string)),
                 };
                 markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
-            },
-            ErrorType::GetLastFunction => {
-                markup! { "Prefer "<Emphasis>"X.at(-1)"</Emphasis>" over "<Emphasis>"_.last(X)"</Emphasis>"." }.to_owned()
             }
         }
     }
