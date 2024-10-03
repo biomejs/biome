@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/atrule/page_complex.css
 ---
-
 # Input
 
 ```css
@@ -153,25 +152,25 @@ Quote style: Double Quotes
 @page :first:right:left:blank, name:first:right:left:blank {
 	color: green;
 
-	@container (500px <= width <=500px) {
+	@container (500px <= width <= 500px) {
 	}
 
 	@top-left-corner {
 		content: "foo";
 		color: blue;
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 	}
 
 	@top-left {
 		content: "foo";
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		color: blue;
 	}
 	@top-center {
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		content: "foo";
@@ -181,13 +180,13 @@ Quote style: Double Quotes
 	@top-right {
 		content: "foo";
 
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 		color: blue;
 	}
 
 	@top-right-corner {
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		content: "foo";
@@ -196,7 +195,7 @@ Quote style: Double Quotes
 
 	@bottom-left-corner {
 		content: "foo";
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		color: blue;
@@ -205,12 +204,12 @@ Quote style: Double Quotes
 	@bottom-left {
 		content: "foo";
 		color: blue;
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 	}
 
 	@bottom-center {
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		content: "foo";
@@ -219,7 +218,7 @@ Quote style: Double Quotes
 
 	@bottom-right {
 		content: "foo";
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		color: blue;
@@ -228,12 +227,12 @@ Quote style: Double Quotes
 	@bottom-right-corner {
 		content: "foo";
 		color: blue;
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 	}
 
 	@left-top {
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		content: "foo";
@@ -241,25 +240,25 @@ Quote style: Double Quotes
 	}
 
 	@left-middle {
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		content: "foo";
 		color: blue;
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 	}
 
 	@left-bottom {
 		content: "foo";
 		color: blue;
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 	}
 
 	@right-top {
 		content: "foo";
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		color: blue;
@@ -267,23 +266,21 @@ Quote style: Double Quotes
 
 	@right-middle {
 		content: "foo";
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		color: blue;
 	}
 	content: "foo";
-	@container (500px <= width <=500px) {
+	@container (500px <= width <= 500px) {
 	}
 
 	@right-bottom {
 		content: "foo";
-		@container (500px <= width <=500px) {
+		@container (500px <= width <= 500px) {
 		}
 
 		color: blue;
 	}
 }
 ```
-
-

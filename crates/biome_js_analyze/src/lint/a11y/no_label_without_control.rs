@@ -102,24 +102,17 @@ impl Rule for NoLabelWithoutControl {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let options = ctx.options();
-        let label_attributes = &options.label_attributes;
-        let label_components = &options.label_components;
-        let input_components = &options.input_components;
-
         let element_name = node.name()?.name_value_token()?;
         let element_name = element_name.text_trimmed();
-        let is_allowed_element = label_components
-            .iter()
-            .any(|label_component_name| label_component_name == element_name)
+        let is_allowed_element = options.has_element_name(element_name)
             || DEFAULT_LABEL_COMPONENTS.contains(&element_name);
 
         if !is_allowed_element {
             return None;
         }
 
-        let has_text_content = has_accessible_label(node, label_attributes);
-        let has_control_association =
-            has_for_attribute(node) || has_nested_control(node, input_components);
+        let has_text_content = options.has_accessible_label(node);
+        let has_control_association = has_for_attribute(node) || options.has_nested_control(node);
 
         if has_text_content && has_control_association {
             return None;
@@ -159,7 +152,7 @@ impl Rule for NoLabelWithoutControl {
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoLabelWithoutControlOptions {
     /// Array of component names that should be considered the same as an `input` element.
     pub input_components: Vec<String>,
@@ -167,6 +160,108 @@ pub struct NoLabelWithoutControlOptions {
     pub label_attributes: Vec<String>,
     /// Array of component names that should be considered the same as a `label` element.
     pub label_components: Vec<String>,
+}
+
+impl NoLabelWithoutControlOptions {
+    /// Returns `true` whether the passed `attribute` meets one of the following conditions:
+    /// - Has a label attribute that corresponds to the `label_attributes` parameter
+    /// - Has a label among `DEFAULT_LABEL_ATTRIBUTES`
+    fn has_label_attribute(&self, attribute: &JsxAttribute) -> bool {
+        let Ok(attribute_name) = attribute.name().and_then(|name| name.name_token()) else {
+            return false;
+        };
+        let attribute_name = attribute_name.text_trimmed();
+        if !DEFAULT_LABEL_ATTRIBUTES.contains(&attribute_name)
+            && !self
+                .label_attributes
+                .iter()
+                .any(|name| name == attribute_name)
+        {
+            return false;
+        }
+        attribute
+            .initializer()
+            .and_then(|init| init.value().ok())
+            .is_some_and(|v| has_label_attribute_value(&v))
+    }
+
+    /// Returns `true` whether the passed `jsx_tag` meets one of the following conditions:
+    /// - Has a label attribute that corresponds to the `label_attributes` parameter
+    /// - Has a label among `DEFAULT_LABEL_ATTRIBUTES`
+    /// - Has a child that acts as a label
+    fn has_accessible_label(&self, jsx_tag: &AnyJsxTag) -> bool {
+        let mut child_iter = jsx_tag.syntax().preorder();
+        while let Some(event) = child_iter.next() {
+            match event {
+                WalkEvent::Enter(child) => match child.kind() {
+                    JsSyntaxKind::JSX_EXPRESSION_CHILD
+                    | JsSyntaxKind::JSX_SPREAD_CHILD
+                    | JsSyntaxKind::JSX_TEXT => {
+                        return true;
+                    }
+                    JsSyntaxKind::JSX_ELEMENT
+                    | JsSyntaxKind::JSX_OPENING_ELEMENT
+                    | JsSyntaxKind::JSX_CHILD_LIST
+                    | JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
+                    | JsSyntaxKind::JSX_ATTRIBUTE_LIST => {}
+                    JsSyntaxKind::JSX_ATTRIBUTE => {
+                        let attribute = JsxAttribute::unwrap_cast(child);
+                        if self.has_label_attribute(&attribute) {
+                            return true;
+                        }
+                        child_iter.skip_subtree();
+                    }
+                    _ => {
+                        child_iter.skip_subtree();
+                    }
+                },
+                WalkEvent::Leave(_) => {}
+            }
+        }
+        false
+    }
+
+    /// Returns whether the passed `AnyJsxTag` have a child that is considered an input component
+    /// according to the passed `input_components` parameter
+    fn has_nested_control(&self, jsx_tag: &AnyJsxTag) -> bool {
+        let mut child_iter = jsx_tag.syntax().preorder();
+        while let Some(event) = child_iter.next() {
+            match event {
+                WalkEvent::Enter(child) => match child.kind() {
+                    JsSyntaxKind::JSX_ELEMENT
+                    | JsSyntaxKind::JSX_OPENING_ELEMENT
+                    | JsSyntaxKind::JSX_CHILD_LIST
+                    | JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => {}
+                    _ => {
+                        let Some(element_name) = AnyJsxElementName::cast(child) else {
+                            child_iter.skip_subtree();
+                            continue;
+                        };
+                        let Some(element_name) = element_name.name_value_token() else {
+                            continue;
+                        };
+                        let element_name = element_name.text_trimmed();
+                        if DEFAULT_INPUT_COMPONENTS.contains(&element_name)
+                            || self
+                                .input_components
+                                .iter()
+                                .any(|name| name == element_name)
+                        {
+                            return true;
+                        }
+                    }
+                },
+                WalkEvent::Leave(_) => {}
+            }
+        }
+        false
+    }
+
+    fn has_element_name(&self, element_name: &str) -> bool {
+        self.label_components
+            .iter()
+            .any(|label_component_name| label_component_name == element_name)
+    }
 }
 
 pub struct NoLabelWithoutControlState {
@@ -199,94 +294,6 @@ fn has_for_attribute(jsx_tag: &AnyJsxTag) -> bool {
             .is_some_and(|jsx_name| for_attributes.contains(&jsx_name.text_trimmed())),
         AnyJsxAttribute::JsxSpreadAttribute(_) => false,
     })
-}
-
-/// Returns whether the passed `AnyJsxTag` have a child that is considered an input component
-/// according to the passed `input_components` parameter
-fn has_nested_control(jsx_tag: &AnyJsxTag, input_components: &[String]) -> bool {
-    let mut child_iter = jsx_tag.syntax().preorder();
-    while let Some(event) = child_iter.next() {
-        match event {
-            WalkEvent::Enter(child) => match child.kind() {
-                JsSyntaxKind::JSX_ELEMENT
-                | JsSyntaxKind::JSX_OPENING_ELEMENT
-                | JsSyntaxKind::JSX_CHILD_LIST
-                | JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT => {}
-                _ => {
-                    let Some(element_name) = AnyJsxElementName::cast(child) else {
-                        child_iter.skip_subtree();
-                        continue;
-                    };
-                    let Some(element_name) = element_name.name_value_token() else {
-                        continue;
-                    };
-                    let element_name = element_name.text_trimmed();
-                    if DEFAULT_INPUT_COMPONENTS.contains(&element_name)
-                        || input_components.iter().any(|name| name == element_name)
-                    {
-                        return true;
-                    }
-                }
-            },
-            WalkEvent::Leave(_) => {}
-        }
-    }
-    false
-}
-
-/// Returns `true` whether the passed `jsx_tag` meets one of the following conditions:
-/// - Has a label attribute that corresponds to the `label_attributes` parameter
-/// - Has a label among `DEFAULT_LABEL_ATTRIBUTES`
-/// - Has a child that acts as a label
-fn has_accessible_label(jsx_tag: &AnyJsxTag, label_attributes: &[String]) -> bool {
-    let mut child_iter = jsx_tag.syntax().preorder();
-    while let Some(event) = child_iter.next() {
-        match event {
-            WalkEvent::Enter(child) => match child.kind() {
-                JsSyntaxKind::JSX_EXPRESSION_CHILD
-                | JsSyntaxKind::JSX_SPREAD_CHILD
-                | JsSyntaxKind::JSX_TEXT => {
-                    return true;
-                }
-                JsSyntaxKind::JSX_ELEMENT
-                | JsSyntaxKind::JSX_OPENING_ELEMENT
-                | JsSyntaxKind::JSX_CHILD_LIST
-                | JsSyntaxKind::JSX_SELF_CLOSING_ELEMENT
-                | JsSyntaxKind::JSX_ATTRIBUTE_LIST => {}
-                JsSyntaxKind::JSX_ATTRIBUTE => {
-                    let attribute = JsxAttribute::unwrap_cast(child);
-                    if has_label_attribute(&attribute, label_attributes) {
-                        return true;
-                    }
-                    child_iter.skip_subtree();
-                }
-                _ => {
-                    child_iter.skip_subtree();
-                }
-            },
-            WalkEvent::Leave(_) => {}
-        }
-    }
-    false
-}
-
-/// Returns `true` whether the passed `attribute` meets one of the following conditions:
-/// - Has a label attribute that corresponds to the `label_attributes` parameter
-/// - Has a label among `DEFAULT_LABEL_ATTRIBUTES`
-fn has_label_attribute(attribute: &JsxAttribute, label_attributes: &[String]) -> bool {
-    let Ok(attribute_name) = attribute.name().and_then(|name| name.name_token()) else {
-        return false;
-    };
-    let attribute_name = attribute_name.text_trimmed();
-    if !DEFAULT_LABEL_ATTRIBUTES.contains(&attribute_name)
-        && !label_attributes.iter().any(|name| name == attribute_name)
-    {
-        return false;
-    }
-    attribute
-        .initializer()
-        .and_then(|init| init.value().ok())
-        .is_some_and(|v| has_label_attribute_value(&v))
 }
 
 /// Returns whether the passed `jsx_attribute_value` has a valid value inside it

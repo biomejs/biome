@@ -41,7 +41,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoNestedTernary {
-        version: "next",
+        version: "1.9.3",
         name: "noNestedTernary",
         language: "js",
         recommended: false,

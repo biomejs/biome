@@ -44,3 +44,49 @@ const func = (value: number) => ({ type: 'X', value }) as Action;
 
 export default () => {};
 export default function () {}
+
+// check higher order functions
+const arrowFn = () => () => {};
+const arrowFn = () => function() {}
+const arrowFn = () => {
+  return () => { };
+}
+
+// does not support detecting a return of a function inside other statements like if, switch, etc.
+// we check only the first statment 
+const arrowFn = (a: number) => {
+  if (a === 1) {
+    return (): void => { };
+  } else {
+    return (): number => {
+      return a + 2
+    }
+  }
+}
+const arrowFn = (a: number) => {
+  switch (a) {
+    case 1: {
+      return (): void => { };
+    }
+    case 2: {
+      return (): void => { };
+    }
+    default: {
+      return (): void => { };
+    }
+  }
+}
+
+function f() {
+  if (x) {
+    return 0;
+  }
+  return (): void => {}
+}
+
+function fn() {
+  let str = "hey";
+  return function (): string {
+      return str;
+  };
+}

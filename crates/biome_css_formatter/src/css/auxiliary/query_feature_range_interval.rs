@@ -28,6 +28,7 @@ impl FormatNodeRule<CssQueryFeatureRangeInterval> for FormatCssQueryFeatureRange
                 name.format(),
                 space(),
                 right_comparison.format(),
+                space(),
                 right.format()
             ]
         )

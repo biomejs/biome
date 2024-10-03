@@ -122,13 +122,13 @@ pub fn is_custom_function(value: &str) -> bool {
 }
 
 // Returns the vendor prefix extracted from an input string.
-pub fn vender_prefix(prop: &str) -> String {
+pub fn vender_prefix(prop: &str) -> &str {
     for prefix in VENDOR_PREFIXES.iter() {
         if prop.starts_with(prefix) {
-            return (*prefix).to_string();
+            return prefix;
         }
     }
-    String::new()
+    ""
 }
 
 pub fn is_pseudo_elements(prop: &str) -> bool {
@@ -138,7 +138,7 @@ pub fn is_pseudo_elements(prop: &str) -> bool {
         || OTHER_PSEUDO_ELEMENTS.contains(&prop)
 }
 
-/// Check if the input string is custom selector  
+/// Check if the input string is custom selector
 /// See https://drafts.csswg.org/css-extensions/#custom-selectors for more details
 pub fn is_custom_selector(prop: &str) -> bool {
     prop.starts_with("--")
