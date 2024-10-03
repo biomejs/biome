@@ -23,6 +23,7 @@ declare_lint_rule! {
     /// especially for those who may not be aware of the risks associated with
     /// sensitive data exposure.
     ///
+    /// ## Recommendations
     /// While this rule is beneficial for catching the most egregious cases,
     /// it is not infallible and may yield false positives. Therefore, always
     /// review your code carefully and consider implementing additional security
@@ -120,8 +121,8 @@ impl Rule for NoSecrets {
                 "Storing secrets in source code is a security risk. Consider the following steps:"
                 "\n1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree."
                 "\n2. If needed, use environment variables or a secure secret management system to store sensitive data."
-                "\n3. If this is a false positive, consider adding an inline disable comment."
-                "\nThis rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/"
+                "\n3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. Learn more: https://biomejs.dev/linter/rules/no-secrets/#options"
+                "\nThis rule only catches very basic vulnerabilities. For more robust, proper solutions, we recommend heading over to https://biomejs.dev/linter/rules/no-secrets/#recommendations"
             })
         )
     }
