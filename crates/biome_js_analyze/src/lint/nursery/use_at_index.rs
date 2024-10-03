@@ -78,6 +78,177 @@ declare_lint_rule! {
     }
 }
 
+/// The method to retrieve values from `.slice()`
+#[derive(Clone)]
+pub enum SliceExtractType {
+    Pop,
+    Shift,
+    ZeroMember,
+}
+
+/// The number of arguments for `.slice()`
+#[derive(Clone)]
+pub enum SliceArgType {
+    OneArg,
+    TwoArg,
+}
+
+/// Type of Code to Fix
+#[derive(Clone)]
+pub enum ErrorType {
+    Index {
+        is_negative: bool,
+    },
+    StringCharAt {
+        is_negative: bool,
+    },
+    Slice {
+        arg_type: SliceArgType,
+        extract_type: SliceExtractType,
+    },
+}
+
+declare_node_union! {
+    pub AnyJsArrayAccess = JsComputedMemberExpression | JsCallExpression
+}
+
+pub struct UseAtIndexState {
+    at_number_exp: AnyJsExpression,
+    error_type: ErrorType,
+    object: AnyJsExpression,
+}
+
+impl Rule for UseAtIndex {
+    type Query = Ast<AnyJsArrayAccess>;
+    type State = UseAtIndexState;
+    type Signals = Option<Self::State>;
+    type Options = ();
+
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let exp = ctx.query();
+
+        let result: Option<UseAtIndexState> = match exp {
+            // foo[a]
+            AnyJsArrayAccess::JsComputedMemberExpression(exp) => {
+                check_computed_member_expression(exp)
+            }
+            // foo.bar()
+            AnyJsArrayAccess::JsCallExpression(call_exp) => check_call_expression(call_exp),
+        };
+        result
+    }
+
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let node = ctx.query();
+        Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                node.range(),
+                markup! {
+                    "Replace index references with "<Emphasis>".at()"</Emphasis>"."
+                }
+                .to_owned(),
+            )
+            .note(state.error_type.get_error_message()),
+        )
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let node = ctx.query();
+        let mut mutation = ctx.root().begin();
+        let prev_node = match node {
+            AnyJsArrayAccess::JsComputedMemberExpression(node) => {
+                AnyJsExpression::JsComputedMemberExpression(node.clone())
+            }
+            AnyJsArrayAccess::JsCallExpression(node) => {
+                AnyJsExpression::JsCallExpression(node.clone())
+            }
+        };
+        let UseAtIndexState {
+            at_number_exp,
+            error_type: _,
+            object,
+        } = state;
+        let object = overwrap_parentheses_expression(object)?;
+
+        mutation.replace_node(
+            prev_node,
+            AnyJsExpression::JsCallExpression(make_at_method(
+                object,
+                at_number_exp.clone().trim_trivia()?,
+            )),
+        );
+
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            markup! { "Replace index references with "<Emphasis>".at()"</Emphasis>"." }.to_owned(),
+            mutation,
+        ))
+    }
+}
+
+impl ErrorType {
+    /// Return the error message corresponding to the ErrorType.
+    fn get_error_message(self: &ErrorType) -> MarkupBuf {
+        match self {
+            ErrorType::Index { is_negative } | ErrorType::StringCharAt { is_negative } => {
+                let (method, old_method) = if *is_negative {
+                    (
+                        "X.at(-Y)",
+                        if matches!(self, ErrorType::StringCharAt { .. }) {
+                            "X.charAt(X.length - Y)"
+                        } else {
+                            "X[X.length - Y]"
+                        },
+                    )
+                } else {
+                    (
+                        "X.at(Y)",
+                        if matches!(self, ErrorType::StringCharAt { .. }) {
+                            "X.charAt(Y)"
+                        } else {
+                            "X[Y]"
+                        },
+                    )
+                };
+                markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
+            }
+            ErrorType::Slice {
+                arg_type,
+                extract_type,
+            } => {
+                let extract_string = match extract_type {
+                    SliceExtractType::Pop => ".pop()",
+                    SliceExtractType::Shift => ".shift()",
+                    SliceExtractType::ZeroMember => "[0]",
+                };
+                let (method, old_method) = match (arg_type, extract_type) {
+                    (SliceArgType::OneArg, SliceExtractType::Pop) => {
+                        ("X.at(-1)", format!("X.slice(-a){}", extract_string))
+                    }
+                    (SliceArgType::TwoArg, SliceExtractType::Pop) => {
+                        ("X.at(Y - 1)", format!("X.slice(a, Y){}", extract_string))
+                    }
+                    _ => (
+                        "X.at(Y)",
+                        format!(
+                            "X.slice({}){}",
+                            if matches!(arg_type, SliceArgType::OneArg) {
+                                "Y"
+                            } else {
+                                "Y, a"
+                            },
+                            extract_string
+                        ),
+                    ),
+                };
+                markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
+            }
+        }
+    }
+}
+
 /// Check if two expressions reference the same value.
 /// Only literals are allowed for members.
 /// # Examples
@@ -543,175 +714,4 @@ fn make_at_method(object: AnyJsExpression, arg: AnyJsExpression) -> JsCallExpres
         make::token(T![')']),
     );
     make::js_call_expression(at_member.into(), args).build()
-}
-
-/// The method to retrieve values from `.slice()`
-#[derive(Clone)]
-pub enum SliceExtractType {
-    Pop,
-    Shift,
-    ZeroMember,
-}
-
-/// The number of arguments for `.slice()`
-#[derive(Clone)]
-pub enum SliceArgType {
-    OneArg,
-    TwoArg,
-}
-
-/// Type of Code to Fix
-#[derive(Clone)]
-pub enum ErrorType {
-    Index {
-        is_negative: bool,
-    },
-    StringCharAt {
-        is_negative: bool,
-    },
-    Slice {
-        arg_type: SliceArgType,
-        extract_type: SliceExtractType,
-    },
-}
-
-impl ErrorType {
-    /// Return the error message corresponding to the ErrorType.
-    fn get_error_message(self: &ErrorType) -> MarkupBuf {
-        match self {
-            ErrorType::Index { is_negative } | ErrorType::StringCharAt { is_negative } => {
-                let (method, old_method) = if *is_negative {
-                    (
-                        "X.at(-Y)",
-                        if matches!(self, ErrorType::StringCharAt { .. }) {
-                            "X.charAt(X.length - Y)"
-                        } else {
-                            "X[X.length - Y]"
-                        },
-                    )
-                } else {
-                    (
-                        "X.at(Y)",
-                        if matches!(self, ErrorType::StringCharAt { .. }) {
-                            "X.charAt(Y)"
-                        } else {
-                            "X[Y]"
-                        },
-                    )
-                };
-                markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
-            }
-            ErrorType::Slice {
-                arg_type,
-                extract_type,
-            } => {
-                let extract_string = match extract_type {
-                    SliceExtractType::Pop => ".pop()",
-                    SliceExtractType::Shift => ".shift()",
-                    SliceExtractType::ZeroMember => "[0]",
-                };
-                let (method, old_method) = match (arg_type, extract_type) {
-                    (SliceArgType::OneArg, SliceExtractType::Pop) => {
-                        ("X.at(-1)", format!("X.slice(-a){}", extract_string))
-                    }
-                    (SliceArgType::TwoArg, SliceExtractType::Pop) => {
-                        ("X.at(Y - 1)", format!("X.slice(a, Y){}", extract_string))
-                    }
-                    _ => (
-                        "X.at(Y)",
-                        format!(
-                            "X.slice({}){}",
-                            if matches!(arg_type, SliceArgType::OneArg) {
-                                "Y"
-                            } else {
-                                "Y, a"
-                            },
-                            extract_string
-                        ),
-                    ),
-                };
-                markup! { "Prefer "<Emphasis>{method}</Emphasis>" over "<Emphasis>{old_method}</Emphasis>"." }.to_owned()
-            }
-        }
-    }
-}
-
-declare_node_union! {
-    pub AnyJsArrayAccess = JsComputedMemberExpression | JsCallExpression
-}
-
-pub struct UseAtIndexState {
-    at_number_exp: AnyJsExpression,
-    error_type: ErrorType,
-    object: AnyJsExpression,
-}
-
-impl Rule for UseAtIndex {
-    type Query = Ast<AnyJsArrayAccess>;
-    type State = UseAtIndexState;
-    type Signals = Option<Self::State>;
-    type Options = ();
-
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let exp = ctx.query();
-
-        let result: Option<UseAtIndexState> = match exp {
-            // foo[a]
-            AnyJsArrayAccess::JsComputedMemberExpression(exp) => {
-                check_computed_member_expression(exp)
-            }
-            // foo.bar()
-            AnyJsArrayAccess::JsCallExpression(call_exp) => check_call_expression(call_exp),
-        };
-        result
-    }
-
-    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let node = ctx.query();
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                node.range(),
-                markup! {
-                    "Replace index references with "<Emphasis>".at()"</Emphasis>"."
-                }
-                .to_owned(),
-            )
-            .note(state.error_type.get_error_message()),
-        )
-    }
-
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
-        let node = ctx.query();
-        let mut mutation = ctx.root().begin();
-        let prev_node = match node {
-            AnyJsArrayAccess::JsComputedMemberExpression(node) => {
-                AnyJsExpression::JsComputedMemberExpression(node.clone())
-            }
-            AnyJsArrayAccess::JsCallExpression(node) => {
-                AnyJsExpression::JsCallExpression(node.clone())
-            }
-        };
-        let UseAtIndexState {
-            at_number_exp,
-            error_type: _,
-            object,
-        } = state;
-        let object = overwrap_parentheses_expression(object)?;
-
-        mutation.replace_node(
-            prev_node,
-            AnyJsExpression::JsCallExpression(make_at_method(
-                object,
-                at_number_exp.clone().trim_trivia()?,
-            )),
-        );
-
-        Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
-            ctx.metadata().applicability(),
-            markup! { "Replace index references with "<Emphasis>".at()"</Emphasis>"." }.to_owned(),
-            mutation,
-        ))
-    }
 }
