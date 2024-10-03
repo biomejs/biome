@@ -246,9 +246,9 @@ fn make_plus_binary_expression(list: Vec<AnyJsExpression>) -> Option<AnyJsExpres
 /// If the node is a negative index, it returns the negative index.
 /// # Examples
 /// ```js
-///     hoge[hoge.length - 0] // => None
-///     hoge[hoge.length - 1] // => Some(-1)
-///     hoge[fuga.length - 2] // => None
+///     foo[bar.length - 0] // => None
+///     foo[bar.length - 1] // => Some(-1)
+///     foo[bar.length - 2] // => None
 /// ```
 fn extract_negative_index_expression(
     member: &AnyJsExpression,
@@ -259,7 +259,7 @@ fn extract_negative_index_expression(
         return None;
     }
 
-    // left expression should be hoge.length
+    // left expression should be foo.length
     let left = left.omit_parentheses();
     let length_parent = get_length_node(&left)?;
     // left expression should be the same as the object
@@ -448,7 +448,7 @@ fn check_binary_expression_member(
     })
 }
 
-/// check hoge[0]
+/// check foo[foo.length - 1]
 fn check_computed_member_expression(exp: &JsComputedMemberExpression) -> Option<UseAtIndexState> {
     // check slice
     if let Some(slice_err) =
@@ -467,7 +467,7 @@ fn check_computed_member_expression(exp: &JsComputedMemberExpression) -> Option<
     let member = exp.member().ok()?.omit_parentheses();
     let object = exp.object().ok()?;
     match member.clone() {
-        // hoge[hoge.length - 1]
+        // foo[foo.length - 1]
         AnyJsExpression::JsBinaryExpression(binary) => {
             check_binary_expression_member(binary, object)
         }
@@ -475,6 +475,7 @@ fn check_computed_member_expression(exp: &JsComputedMemberExpression) -> Option<
     }
 }
 
+/// check foo.charAt(foo.length - 1)
 fn check_call_expression_char_at(
     call_exp: &JsCallExpression,
     member: &JsStaticMemberExpression,
@@ -488,7 +489,7 @@ fn check_call_expression_char_at(
     let arg0 = arg0.omit_parentheses();
     let char_at_parent = member.object().ok()?.omit_parentheses();
     match arg0.clone() {
-        // hoge.charAt(hoge.length - 1)
+        // foo.charAt(foo.length - 1)
         AnyJsExpression::JsBinaryExpression(_) => {
             let at_number_exp = extract_negative_index_expression(&arg0, char_at_parent.clone());
             at_number_exp.map(|at_number_exp| UseAtIndexState {
@@ -501,7 +502,7 @@ fn check_call_expression_char_at(
     }
 }
 
-/// check hoge.fuga()
+/// check foo.bar()
 fn check_call_expression(call_exp: &JsCallExpression) -> Option<UseAtIndexState> {
     // check slice
     if let Some(slice_err) =
@@ -655,11 +656,11 @@ impl Rule for UseAtIndex {
         let exp = ctx.query();
 
         let result: Option<UseAtIndexState> = match exp {
-            // hoge[a]
+            // foo[a]
             AnyJsArrayAccess::JsComputedMemberExpression(exp) => {
                 check_computed_member_expression(exp)
             }
-            // hoge.fuga()
+            // foo.bar()
             AnyJsArrayAccess::JsCallExpression(call_exp) => check_call_expression(call_exp),
         };
         result
