@@ -64,7 +64,7 @@ declare_lint_rule! {
     ///
     /// Default: `false`
     ///
-    /// This option allows you to specify whether or not to ignore checking native HTML elements.
+    /// This option allows you to specify whether to ignore checking native HTML elements.
     ///
     /// In the following example, when the option is set to "true", it will not self close native HTML elements.
     ///
