@@ -62,6 +62,8 @@ declare_lint_rule! {
     ///
     /// ### `ignoreHtmlElements`
     ///
+    /// **Since version 2.0.0**.
+    ///
     /// Default: `false`
     ///
     /// This option allows you to specify whether to ignore checking native HTML elements.
