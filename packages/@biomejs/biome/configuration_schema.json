@@ -4077,8 +4077,10 @@
 		"UseSelfClosingElementsOptions": {
 			"description": "Options for the `useSelfClosingElements` rule.",
 			"type": "object",
-			"required": ["ignoreHtmlElements"],
-			"properties": { "ignoreHtmlElements": { "type": "boolean" } }
+			"properties": {
+				"ignoreHtmlElements": { "default": false, "type": "boolean" }
+			},
+			"additionalProperties": false
 		},
 		"UseValidAutocompleteConfiguration": {
 			"anyOf": [

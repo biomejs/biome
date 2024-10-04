@@ -2457,7 +2457,7 @@ export interface NamingConventionOptions {
  * Options for the `useSelfClosingElements` rule.
  */
 export interface UseSelfClosingElementsOptions {
-	ignoreHtmlElements: boolean;
+	ignoreHtmlElements?: boolean;
 }
 export interface NoConsoleOptions {
 	/**
