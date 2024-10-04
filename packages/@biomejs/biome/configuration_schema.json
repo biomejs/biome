@@ -2889,7 +2889,7 @@
 		},
 		"RuleWithUseSelfClosingElementsOptions": {
 			"type": "object",
-			"required": ["level", "options"],
+			"required": ["level"],
 			"properties": {
 				"fix": {
 					"description": "The kind of the code actions emitted by the rule",
