@@ -23,11 +23,12 @@ mod panic;
 mod reporter;
 mod service;
 
-use crate::cli_options::ColorsArg;
+use crate::cli_options::{CliOptions, ColorsArg};
 use crate::commands::check::CheckCommandPayload;
 use crate::commands::ci::CiCommandPayload;
 use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
+use crate::commands::CommandRunner;
 pub use crate::commands::{biome_command, BiomeCommand};
 pub use crate::logging::{setup_cli_subscriber, LoggingLevel};
 pub use diagnostics::CliDiagnostic;
@@ -210,15 +211,15 @@ impl<'app> CliSession<'app> {
                 staged,
                 changed,
                 since,
-            } => commands::format::format(
+            } => run_command(
                 self,
+                &cli_options,
                 FormatCommandPayload {
                     javascript_formatter,
                     formatter_configuration,
                     stdin_file_path,
                     write,
                     fix,
-                    cli_options,
                     paths,
                     vcs_configuration,
                     files_configuration,
@@ -290,4 +291,13 @@ pub fn to_color_mode(color: Option<&ColorsArg>) -> ColorMode {
         Some(ColorsArg::Force) => ColorMode::Enabled,
         None => ColorMode::Auto,
     }
+}
+
+pub(crate) fn run_command(
+    session: CliSession,
+    cli_options: &CliOptions,
+    mut command: impl CommandRunner,
+) -> Result<(), CliDiagnostic> {
+    let command = &mut command;
+    command.run(session, cli_options)
 }

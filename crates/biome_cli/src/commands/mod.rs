@@ -3,7 +3,9 @@ use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
 use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
-use crate::{CliDiagnostic, LoggingLevel, VERSION};
+use crate::{
+    execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, LoggingLevel, VERSION,
+};
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::PartialCssLinter;
 use biome_configuration::javascript::PartialJavascriptLinter;
@@ -22,10 +24,12 @@ use biome_configuration::{BiomeDiagnostic, PartialConfiguration};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem};
-use biome_service::configuration::LoadedConfiguration;
+use biome_service::configuration::{
+    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+};
 use biome_service::documentation::Doc;
-use biome_service::workspace::FixFileMode;
-use biome_service::{DynRef, WorkspaceError};
+use biome_service::workspace::{FixFileMode, RegisterProjectFolderParams, UpdateSettingsParams};
+use biome_service::{DynRef, Workspace, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -692,7 +696,7 @@ pub(crate) fn get_stdin(
 }
 
 fn get_files_to_process(
-    since: Option<String>,
+    since: Option<&String>,
     changed: bool,
     staged: bool,
     fs: &DynRef<'_, dyn FileSystem>,
@@ -802,6 +806,139 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
     }
     Ok(())
+}
+
+/// Generic interface for executing commands.
+///
+/// Consumers must implement the following methods:
+///
+/// - [CommandRunner::merge_configuration]
+/// - [CommandRunner::get_files_to_process]
+/// - [CommandRunner::get_stdin_file_path]
+/// - [CommandRunner::should_write]
+/// - [CommandRunner::get_execution]
+///
+/// Optional methods:
+/// - [CommandRunner::check_incompatible_arguments]
+pub(crate) trait CommandRunner: Sized {
+    const COMMAND_NAME: &'static str;
+
+    /// The main command to use.
+    fn run(&mut self, session: CliSession, cli_options: &CliOptions) -> Result<(), CliDiagnostic> {
+        setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+        let fs = &session.app.fs;
+        let console = &mut *session.app.console;
+        let workspace = &*session.app.workspace;
+        self.check_incompatible_arguments()?;
+        let (execution, paths) = self.configure_workspace(fs, console, workspace, cli_options)?;
+        execute_mode(execution, session, &cli_options, paths)
+    }
+
+    /// This function prepares the workspace with the following:
+    /// - Loading the configuration file.
+    /// - Configure the VCS integration
+    /// - Computes the paths to traverse/handle. This changes based on the VCS arguments that were passed.
+    /// - Register a project folder using the working directory.
+    /// - Resolves the closets manifest AKA `package.json` and registers it.
+    /// - Updates the settings that belong to the project registered
+    fn configure_workspace(
+        &mut self,
+        fs: &DynRef<'_, dyn FileSystem>,
+        console: &mut dyn Console,
+        workspace: &dyn Workspace,
+        cli_options: &CliOptions,
+    ) -> Result<(Execution, Vec<OsString>), CliDiagnostic> {
+        let loaded_configuration =
+            load_configuration(fs, cli_options.as_configuration_path_hint())?;
+        validate_configuration_diagnostics(&loaded_configuration, console, cli_options.verbose)?;
+        let configuration_path = loaded_configuration.directory_path.clone();
+        let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
+        let vcs_base_path = configuration_path.or(fs.working_directory());
+        let (vcs_base_path, gitignore_matches) =
+            configuration.retrieve_gitignore_matches(fs, vcs_base_path.as_deref())?;
+        let paths = self.get_files_to_process(fs, &configuration)?;
+        workspace.register_project_folder(RegisterProjectFolderParams {
+            path: fs.working_directory(),
+            set_as_current_workspace: true,
+        })?;
+
+        let manifest_data = resolve_manifest(fs)?;
+
+        if let Some(manifest_data) = manifest_data {
+            workspace.set_manifest_for_project(manifest_data.into())?;
+        }
+        workspace.update_settings(UpdateSettingsParams {
+            workspace_directory: fs.working_directory(),
+            configuration,
+            vcs_base_path,
+            gitignore_matches,
+        })?;
+
+        let execution = self.get_execution(cli_options, console)?;
+        Ok((execution, paths))
+    }
+
+    /// Computes [Stdin] if the CLI has the necessary information.
+    ///
+    /// ## Errors
+    /// - If the user didn't provide anything via `stdin` but the option `--stdin-file-path` is passed.
+    fn get_stdin(&self, console: &mut dyn Console) -> Result<Option<Stdin>, CliDiagnostic> {
+        let stdin = if let Some(stdin_file_path) = self.get_stdin_file_path() {
+            let input_code = console.read();
+            if let Some(input_code) = input_code {
+                let path = PathBuf::from(stdin_file_path);
+                Some((path, input_code).into())
+            } else {
+                // we provided the argument without a piped stdin, we bail
+                return Err(CliDiagnostic::missing_argument("stdin", Self::COMMAND_NAME));
+            }
+        } else {
+            None
+        };
+
+        Ok(stdin)
+    }
+
+    // Below, the methods that consumers must implement.
+
+    /// Implements this method if you need to merge CLI arguments to the loaded configuration.
+    ///
+    /// The CLI arguments take precedence over the option configured in the configuration file.
+    fn merge_configuration(
+        &mut self,
+        loaded_configuration: LoadedConfiguration,
+        fs: &DynRef<'_, dyn FileSystem>,
+        console: &mut dyn Console,
+    ) -> Result<PartialConfiguration, WorkspaceError>;
+
+    /// It returns the paths that need to be handled/traversed.
+    fn get_files_to_process(
+        &self,
+        fs: &DynRef<'_, dyn FileSystem>,
+        configuration: &PartialConfiguration,
+    ) -> Result<Vec<OsString>, CliDiagnostic>;
+
+    /// It returns the file path to use in `stdin` mode.
+    fn get_stdin_file_path(&self) -> Option<&String>;
+
+    /// Whether the command should write the files.
+    fn should_write(&self) -> bool;
+
+    /// Returns the [Execution] mode.
+    fn get_execution(
+        &self,
+        cli_options: &CliOptions,
+        console: &mut dyn Console,
+    ) -> Result<Execution, CliDiagnostic>;
+
+    // Below, methods that consumers can implement
+
+    /// Optional method that can be implemented to check if some CLI arguments aren't compatible.
+    ///
+    /// The method is called before loading the configuration from disk.
+    fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
+        Ok(())
+    }
 }
 
 #[cfg(test)]

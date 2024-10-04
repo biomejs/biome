@@ -138,8 +138,13 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
         json.linter.merge_with(json_linter);
     }
 
-    let vcs_targeted_paths =
-        get_files_to_process(since, changed, staged, &session.app.fs, &fs_configuration)?;
+    let vcs_targeted_paths = get_files_to_process(
+        since.as_ref(),
+        changed,
+        staged,
+        &session.app.fs,
+        &fs_configuration,
+    )?;
 
     // check if support of git ignore files is enabled
     let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
