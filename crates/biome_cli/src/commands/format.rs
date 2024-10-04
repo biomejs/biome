@@ -185,7 +185,7 @@ impl CommandRunner for FormatCommandPayload {
             self.changed,
             self.staged,
             fs,
-            &configuration,
+            configuration,
         )? {
             Ok(paths)
         } else {
@@ -215,6 +215,6 @@ impl CommandRunner for FormatCommandPayload {
                 changed: self.changed,
             },
         })
-        .set_report(&cli_options))
+        .set_report(cli_options))
     }
 }
