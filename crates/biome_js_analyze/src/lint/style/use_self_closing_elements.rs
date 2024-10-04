@@ -62,7 +62,7 @@ declare_lint_rule! {
     ///
     /// ### `ignoreHtmlElements`
     ///
-    /// Default: false
+    /// Default: `false`
     ///
     /// This option allows you to specify whether or not to ignore checking native HTML elements.
     ///
@@ -186,7 +186,7 @@ impl Rule for UseSelfClosingElements {
 /// Options for the `useSelfClosingElements` rule.
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseSelfClosingElementsOptions {
     // Whether or not to ignore checking native HTML elements. Default is false.
     pub ignore_html_elements: bool,
