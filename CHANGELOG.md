@@ -29,6 +29,24 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Bug Fixes
+
+- The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
+
+  Browsers accept more emoji than the standard allows.
+  Biome now accepts these additional emoji.
+
+  The following code is now correctly parsed:
+
+  ```css
+  p {
+    --✨-color: red;
+    color: var(--✨-color);
+  }
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
 
 ## v1.9.3 (2024-10-01)
