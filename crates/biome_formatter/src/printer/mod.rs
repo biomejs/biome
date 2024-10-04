@@ -1784,6 +1784,30 @@ Group 1 breaks"#
         );
     }
 
+    #[test]
+    fn break_group_if_partial_string_exceeds_print_width() {
+        let options = PrinterOptions {
+            print_width: PrintWidth::new(10),
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options(
+            &format_args![group(&format_args!(
+                text("("),
+                soft_line_break(),
+                text("This is a string\n containing a newline"),
+                soft_line_break(),
+                text(")")
+            ))],
+            options,
+        );
+
+        assert_eq!(
+            "(\nThis is a string\n containing a newline\n)",
+            result.as_code()
+        );
+    }
+
     struct FormatArrayElements<'a> {
         items: Vec<&'a dyn Format<SimpleFormatContext>>,
     }
