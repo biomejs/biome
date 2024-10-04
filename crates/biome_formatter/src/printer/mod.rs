@@ -1283,7 +1283,9 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             let char_width = match c {
                 '\t' => self.options().indent_width.value() as usize,
                 '\n' => {
-                    return if self.must_be_flat {
+                    return if self.must_be_flat
+                        || self.state.line_width > self.options().print_width.into()
+                    {
                         Fits::No
                     } else {
                         Fits::Yes
