@@ -973,6 +973,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_negation_else.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "no-nested-ternary" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_nested_ternary.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "no-new-native-nonconstructor" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
             let rule = group
@@ -1097,6 +1105,16 @@ pub(crate) fn migrate_eslint_any_rule(
         "no-sparse-arrays" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.no_sparse_array.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "no-template-curly-in-string" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_template_curly_in_string
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "no-this-before-super" => {

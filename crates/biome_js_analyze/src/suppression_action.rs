@@ -13,12 +13,12 @@ use biome_rowan::{AstNode, BatchMutation, TriviaPieceKind};
 /// This new element will serve as trailing "newline" for the suppression comment.
 fn make_indentation_from_jsx_element(current_element: &JsxText) -> JsxText {
     if let Ok(text) = current_element.value_token() {
-        let chars = text.text().chars();
+        let bytes = text.text().bytes();
         let mut newlines = 0;
         let mut spaces = 0;
         let mut string_found = false;
-        for char in chars {
-            if char == '\"' {
+        for byte in bytes {
+            if byte == b'\"' {
                 if string_found {
                     string_found = false;
                 } else {
@@ -30,10 +30,10 @@ fn make_indentation_from_jsx_element(current_element: &JsxText) -> JsxText {
                 continue;
             }
 
-            if matches!(char, '\r' | '\n') {
+            if matches!(byte, b'\r' | b'\n') {
                 newlines += 1;
             }
-            if matches!(char, ' ') && newlines == 1 && !string_found {
+            if matches!(byte, b' ') && newlines == 1 && !string_found {
                 spaces += 1;
             }
         }

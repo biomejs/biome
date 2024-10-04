@@ -17,6 +17,7 @@ use crate::reporters::{
 };
 use crate::runner::{run_test_suite, TestRunContext, TestSuite};
 use biome_parser::diagnostic::ParseDiagnostic;
+use biome_string_case::StrOnlyExtension;
 use jsx::jsx_babel::BabelJsxTestSuite;
 use serde::{Deserialize, Serialize};
 use std::any::Any;
@@ -165,7 +166,7 @@ const ALL_JSX_SUITES: &str = "jsx";
 const ALL_SYMBOLS_SUITES: &str = "symbols";
 
 fn get_test_suites(suites: Option<&str>) -> Vec<Box<dyn TestSuite>> {
-    let suites = suites.unwrap_or("*").to_lowercase();
+    let suites = suites.unwrap_or("*").to_lowercase_cow();
     let mut ids: Vec<_> = suites.split(',').collect();
 
     let mut suites: Vec<Box<dyn TestSuite>> = vec![];

@@ -131,6 +131,10 @@ impl LanguageKind {
         format!("biome_{self}_factory")
     }
 
+    pub fn grit_target_language_module_name(&self) -> String {
+        format!("{self}_target_language")
+    }
+
     pub fn kinds(&self) -> KindsSrc {
         match self {
             LanguageKind::Js => JS_KINDS_SRC,
@@ -155,5 +159,9 @@ impl LanguageKind {
             LanguageKind::Yaml => include_str!("../yaml.ungram"),
             LanguageKind::Markdown => include_str!("../markdown.ungram"),
         }
+    }
+
+    pub fn supports_grit(&self) -> bool {
+        matches!(self, Self::Js)
     }
 }

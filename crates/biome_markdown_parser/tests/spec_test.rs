@@ -72,6 +72,7 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                 .clone()
                 .with_file_path(file_name)
                 .with_file_source_code(&content);
+
             formatter
                 .write_markup(markup! {
                     {PrintDiagnostic::verbose(&error)}
@@ -101,7 +102,12 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
                     .descendants()
                     .any(|node| node.kind().is_bogus())
             {
-                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes");
+                panic!("Parsed tree of a 'OK' test case should not contain any missing required children or bogus nodes: \n {formatted_ast:#?} \n\n {formatted_ast}");
+            }
+
+            let syntax = parsed.syntax();
+            if has_bogus_nodes_or_empty_slots(&syntax) {
+                panic!("modified tree has bogus nodes or empty slots:\n{syntax:#?} \n\n {syntax}")
             }
         }
         ExpectedOutcome::Fail => {
@@ -124,7 +130,8 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-    "#;
+your test code
+"#;
 
     let root = parse_markdown(code);
     let syntax = root.syntax();

@@ -1,9 +1,12 @@
+use std::borrow::Cow;
+
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxElementName};
 use biome_rowan::AstNode;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Enforce onClick is accompanied by at least one of the following: `onKeyUp`, `onKeyDown`, `onKeyPress`.
@@ -74,13 +77,14 @@ impl Rule for UseKeyWithClickEvents {
 
         match element.name() {
             Ok(AnyJsxElementName::JsxName(name)) => {
-                let element_name = name.value_token().ok()?.text_trimmed().to_lowercase();
+                let name_token = name.value_token().ok()?;
+                let element_name = name_token.text_trimmed().to_lowercase_cow();
 
                 // Don't handle interactive roles
                 // TODO Support aria roles https://github.com/rome/tools/issues/3640
                 if matches!(
-                    element_name.as_str(),
-                    "button" | "checkbox" | "combobox" | "a" | "input"
+                    element_name,
+                    Cow::Borrowed("button" | "checkbox" | "combobox" | "a" | "input")
                 ) {
                     return None;
                 }

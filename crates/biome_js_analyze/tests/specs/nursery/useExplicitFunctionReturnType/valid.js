@@ -1,0 +1,38 @@
+/* should not generate diagnostics */
+function test() {
+  return;
+}
+
+var fn = function () {
+  return 1;
+};
+
+var arrowFn = () => 'test';
+
+class Test {
+  constructor() {}
+  get prop() {
+    return 1;
+  }
+  set prop() {}
+  method() {
+    return;
+  }
+  arrow = () => 'arrow';
+}
+
+const obj = {
+	method() {
+		return "test"
+	}
+}
+
+export default () => {};
+export default function () {}
+
+const func = (value) => ({ foo: 'bar', value });
+const func = () => x;
+
+
+node.addEventListener('click', () => {});
+node.addEventListener('click', function () {});

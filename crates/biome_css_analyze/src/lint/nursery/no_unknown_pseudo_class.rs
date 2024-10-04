@@ -14,6 +14,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Disallow unknown pseudo-class selectors.
@@ -168,17 +169,18 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        let lower_name = name.to_lowercase();
+        let lower_name = name.to_lowercase_cow();
+        let lower_name = lower_name.as_ref();
 
         let is_valid_class = match pseudo_type {
-            PseudoClassType::PagePseudoClass => is_page_pseudo_class(&lower_name),
+            PseudoClassType::PagePseudoClass => is_page_pseudo_class(lower_name),
             PseudoClassType::WebkitScrollbarPseudoClass => {
-                WEBKIT_SCROLLBAR_PSEUDO_CLASSES.contains(&lower_name.as_str())
+                WEBKIT_SCROLLBAR_PSEUDO_CLASSES.contains(&lower_name)
             }
             PseudoClassType::Other => {
-                is_custom_selector(&lower_name)
-                    || vendor_prefixed(&lower_name)
-                    || is_known_pseudo_class(&lower_name)
+                is_custom_selector(lower_name)
+                    || vendor_prefixed(lower_name)
+                    || is_known_pseudo_class(lower_name)
             }
         };
 

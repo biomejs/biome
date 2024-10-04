@@ -3,30 +3,22 @@
 use crate::{generated::nodes::*, MarkdownSyntaxToken as SyntaxToken};
 use biome_rowan::AstNode;
 use std::iter::once;
-impl MarkdownBreakBlock {
-    pub fn with_value_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-}
-impl MarkdownBulletListItem {
-    pub fn with_markdown_bullet_list(self, element: MarkdownBulletList) -> Self {
+impl MdBulletListItem {
+    pub fn with_md_bullet_list(self, element: MdBulletList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownDocument {
+impl MdDocument {
     pub fn with_bom_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
         )
     }
-    pub fn with_value(self, element: MarkdownBlockList) -> Self {
+    pub fn with_value(self, element: MdBlockList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
@@ -39,15 +31,15 @@ impl MarkdownDocument {
         )
     }
 }
-impl MarkdownFencedCodeBlock {
-    pub fn with_markdown_textual(self, element: MarkdownTextual) -> Self {
+impl MdFencedCodeBlock {
+    pub fn with_md_textual(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownHardLine {
+impl MdHardLine {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -55,7 +47,7 @@ impl MarkdownHardLine {
         )
     }
 }
-impl MarkdownHash {
+impl MdHash {
     pub fn with_hash_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -63,35 +55,35 @@ impl MarkdownHash {
         )
     }
 }
-impl MarkdownHeader {
-    pub fn with_before(self, element: MarkdownHashList) -> Self {
+impl MdHeader {
+    pub fn with_before(self, element: MdHashList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_markdown_paragraph(self, element: Option<MarkdownParagraph>) -> Self {
+    pub fn with_md_paragraph(self, element: Option<MdParagraph>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
-    pub fn with_after(self, element: MarkdownHashList) -> Self {
+    pub fn with_after(self, element: MdHashList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownHtmlBlock {
-    pub fn with_markdown_textual(self, element: MarkdownTextual) -> Self {
+impl MdHtmlBlock {
+    pub fn with_md_textual(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownIndent {
+impl MdIndent {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -99,123 +91,123 @@ impl MarkdownIndent {
         )
     }
 }
-impl MarkdownIndentCodeBlock {
-    pub fn with_markdown_textual(self, element: MarkdownTextual) -> Self {
+impl MdIndentCodeBlock {
+    pub fn with_md_textual(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownInlineCode {
-    pub fn with_markdown_textual(self, element: MarkdownTextual) -> Self {
+impl MdInlineCode {
+    pub fn with_md_textual(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownInlineEmphasis {
-    pub fn with_markdown_textual(self, element: MarkdownTextual) -> Self {
+impl MdInlineEmphasis {
+    pub fn with_md_textual(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownInlineImage {
-    pub fn with_alt(self, element: MarkdownTextual) -> Self {
+impl MdInlineImage {
+    pub fn with_alt(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_src(self, element: MarkdownTextual) -> Self {
+    pub fn with_src(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_title(self, element: Option<MarkdownTextual>) -> Self {
+    pub fn with_title(self, element: Option<MdTextual>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
 }
-impl MarkdownInlineLink {
-    pub fn with_label(self, element: MarkdownTextual) -> Self {
+impl MdInlineLink {
+    pub fn with_label(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_url(self, element: MarkdownTextual) -> Self {
+    pub fn with_url(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_title(self, element: Option<MarkdownTextual>) -> Self {
+    pub fn with_title(self, element: Option<MdTextual>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
 }
-impl MarkdownLinkBlock {
-    pub fn with_label(self, element: MarkdownTextual) -> Self {
+impl MdLinkBlock {
+    pub fn with_label(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_url(self, element: MarkdownTextual) -> Self {
+    pub fn with_url(self, element: MdTextual) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_title(self, element: Option<MarkdownTextual>) -> Self {
+    pub fn with_title(self, element: Option<MdTextual>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
     }
 }
-impl MarkdownOrderListItem {
-    pub fn with_markdown_bullet_list(self, element: MarkdownBulletList) -> Self {
+impl MdOrderListItem {
+    pub fn with_md_bullet_list(self, element: MdBulletList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownParagraph {
-    pub fn with_markdown_paragraph_item_list(self, element: MarkdownParagraphItemList) -> Self {
+impl MdParagraph {
+    pub fn with_md_paragraph_item_list(self, element: MdParagraphItemList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownQuote {
-    pub fn with_any_markdown_block(self, element: AnyMarkdownBlock) -> Self {
+impl MdQuote {
+    pub fn with_any_md_block(self, element: AnyMdBlock) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownSetextHeader {
-    pub fn with_markdown_paragraph(self, element: MarkdownParagraph) -> Self {
+impl MdSetextHeader {
+    pub fn with_md_paragraph(self, element: MdParagraph) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
-impl MarkdownSoftBreak {
+impl MdSoftBreak {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -223,7 +215,15 @@ impl MarkdownSoftBreak {
         )
     }
 }
-impl MarkdownTextual {
+impl MdTextual {
+    pub fn with_value_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
+impl MdThematicBreakBlock {
     pub fn with_value_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax

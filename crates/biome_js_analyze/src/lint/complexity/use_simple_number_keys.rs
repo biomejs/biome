@@ -102,51 +102,48 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
         };
         match token.kind() {
             JsSyntaxKind::JS_NUMBER_LITERAL | JsSyntaxKind::JS_BIGINT_LITERAL => {
-                let chars: Vec<char> = token.text_trimmed().chars().collect();
+                let text = token.text_trimmed();
                 let mut value = String::new();
 
                 let mut is_first_char_zero: bool = false;
-                let mut is_second_char_a_letter: Option<char> = None;
+                let mut is_second_char_a_letter: Option<u8> = None;
                 let mut contains_dot: bool = false;
                 let mut exponent: bool = false;
-                let mut largest_digit: char = '0';
+                let mut largest_digit: u8 = b'0';
                 let mut underscore: bool = false;
                 let mut big_int: bool = false;
 
-                for i in 0..chars.len() {
-                    if i == 0 && chars[i] == '0' && chars.len() > 1 {
-                        is_first_char_zero = true;
-                        continue;
+                for (i, b) in text.bytes().enumerate() {
+                    match b {
+                        b'0' if i == 0 && text.len() > 1 => {
+                            is_first_char_zero = true;
+                            continue;
+                        }
+                        b'n' => {
+                            big_int = true;
+                            break;
+                        }
+                        b'e' | b'E' => {
+                            exponent = true;
+                        }
+                        b'_' => {
+                            underscore = true;
+                            continue;
+                        }
+                        b'.' => {
+                            contains_dot = true;
+                        }
+                        b if i == 1 && b.is_ascii_alphabetic() => {
+                            is_second_char_a_letter = Some(b);
+                            continue;
+                        }
+                        _ => {
+                            if largest_digit < b {
+                                largest_digit = b;
+                            }
+                        }
                     }
-
-                    if chars[i] == 'n' {
-                        big_int = true;
-                        break;
-                    }
-
-                    if chars[i] == 'e' || chars[i] == 'E' {
-                        exponent = true;
-                    }
-
-                    if i == 1 && chars[i].is_alphabetic() && !exponent {
-                        is_second_char_a_letter = Some(chars[i]);
-                        continue;
-                    }
-
-                    if chars[i] == '_' {
-                        underscore = true;
-                        continue;
-                    }
-
-                    if chars[i] == '.' {
-                        contains_dot = true;
-                    }
-
-                    if largest_digit < chars[i] {
-                        largest_digit = chars[i];
-                    }
-
-                    value.push(chars[i])
+                    value.push(b as char);
                 }
 
                 if contains_dot {
@@ -167,21 +164,21 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
                 };
 
                 match is_second_char_a_letter {
-                    Some('b' | 'B') => {
+                    Some(b'b' | b'B') => {
                         return Ok(Self::Binary {
                             node: literal_member_name,
                             value,
                             big_int,
                         })
                     }
-                    Some('o' | 'O') => {
+                    Some(b'o' | b'O') => {
                         return Ok(Self::Octal {
                             node: literal_member_name,
                             value,
                             big_int,
                         })
                     }
-                    Some('x' | 'X') => {
+                    Some(b'x' | b'X') => {
                         return Ok(Self::Hexadecimal {
                             node: literal_member_name,
                             value,
@@ -191,7 +188,7 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
                     _ => (),
                 }
 
-                if largest_digit < '8' {
+                if largest_digit < b'8' {
                     return Ok(Self::Octal {
                         node: literal_member_name,
                         value,

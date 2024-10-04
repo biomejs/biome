@@ -434,7 +434,7 @@ fn parse_jsx_any_element_name(p: &mut JsParser) -> ParsedSyntax {
 /// Tests if this is an intrinsic element name. Intrinsic elements are such elements
 /// that are built in, for example HTML elements. This implementation uses React's semantic
 /// and assumes that anything starting with a lower case character is an intrinsic element, and
-/// that custom components start with an uper case character.
+/// that custom components start with an upper case character.
 ///
 /// Resources: [TypeScript's documentation on intrinsic elements](https://www.typescriptlang.org/docs/handbook/jsx.html#intrinsic-elements)
 fn is_intrinsic_element(element_name: &str) -> bool {
