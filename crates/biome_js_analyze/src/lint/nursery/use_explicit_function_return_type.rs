@@ -5,7 +5,8 @@ use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsFileSource,
-    JsStatementList, JsSyntaxKind,
+    JsFormalParameter, JsInitializerClause, JsPropertyClassMember, JsStatementList, JsSyntaxKind,
+    JsVariableDeclarator,
 };
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
@@ -168,6 +169,38 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// The following patterns are considered correct for type annotations on variables in function expressions:
+    ///
+    /// ```ts
+    /// // A function with a type assertion using `as`
+    /// const asTyped = (() => '') as () => string;
+    /// ```
+    ///
+    /// ```ts
+    /// // A function with a type assertion using `<>`
+    /// const castTyped = <() => string>(() => '');
+    /// ```
+    ///
+    /// ```ts
+    /// // A variable declarator with a type annotation.
+    /// type FuncType = () => string;
+    /// const arrowFn: FuncType = () => 'test';
+    /// ```
+    ///
+    /// ```ts
+    /// // A function is a default parameter with a type annotation
+    /// type CallBack = () => void;
+    /// const f = (gotcha: CallBack = () => { }): void => { };
+    /// ```
+    ///
+    /// ```ts
+    /// // A class property with a type annotation
+    /// type MethodType = () => void;
+    /// class App {
+    ///     private method: MethodType = () => { };
+    /// }
+    /// ```
+    ///
     pub UseExplicitFunctionReturnType {
         version: "1.9.3",
         name: "useExplicitFunctionReturnType",
@@ -209,6 +242,10 @@ impl Rule for UseExplicitFunctionReturnType {
                 }
 
                 if is_higher_order_function(func) {
+                    return None;
+                }
+
+                if is_typed_function_expressions(func) {
                     return None;
                 }
 
@@ -316,13 +353,15 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
 /// JS_PARENTHESIZED_EXPRESSION:
 /// - `(function () {});`
 /// - `(() => {})();`
+/// - `const asTyped = (() => '') as () => string;`
+/// - `const castTyped = <() => string>(() => '');`
 fn is_function_used_in_argument_or_expression_list(func: &AnyJsFunction) -> bool {
     matches!(
         func.syntax().parent().kind(),
         Some(
             JsSyntaxKind::JS_CALL_ARGUMENT_LIST
                 | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST
-                // We include JS_PARENTHESIZED_EXPRESSION for IIFE (Immediately Invoked Function Expressions).
+                // We include JS_PARENTHESIZED_EXPRESSION for IIFE (Immediately Invoked Function Expressions) or a function with a type assertion
                 // We also assume that the parent of the parent is a call expression.
                 | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
         )
@@ -391,4 +430,61 @@ fn is_first_statement_function_return(statements: JsStatementList) -> bool {
                     | AnyJsExpression::JsArrowFunctionExpression(_)
             )
         })
+}
+
+/// Checks if a given function expression has a type annotation.
+fn is_typed_function_expressions(func: &AnyJsFunction) -> bool {
+    is_variable_declarator_with_type_annotation(func)
+        || is_default_function_parameter_with_type_annotation(func)
+        || is_class_property_with_type_annotation(func)
+}
+
+/// Checks if a function is a variable declarator with a type annotation.
+///
+/// # Examples
+///
+/// ```typescript
+/// type FuncType = () => string;
+/// const arrowFn: FuncType = () => 'test';
+/// ```
+fn is_variable_declarator_with_type_annotation(func: &AnyJsFunction) -> bool {
+    func.syntax()
+        .parent()
+        .and_then(JsInitializerClause::cast)
+        .and_then(|init| init.parent::<JsVariableDeclarator>())
+        .map_or(false, |decl| decl.variable_annotation().is_some())
+}
+
+/// Checks if a function is a default parameter with a type annotation.
+///
+/// # Examples
+///
+/// ```typescript
+/// type CallBack = () => void;
+/// const f = (gotcha: CallBack = () => { }): void => { };
+/// ```
+fn is_default_function_parameter_with_type_annotation(func: &AnyJsFunction) -> bool {
+    func.syntax()
+        .parent()
+        .and_then(JsInitializerClause::cast)
+        .and_then(|init| init.parent::<JsFormalParameter>())
+        .map_or(false, |param| param.type_annotation().is_some())
+}
+
+/// Checks if a function is a class property with a type annotation.
+///
+/// # Examples
+///
+/// ```typescript
+/// type MethodType = () => void;
+/// class App {
+///     private method: MethodType = () => { };
+/// }
+/// ```
+fn is_class_property_with_type_annotation(func: &AnyJsFunction) -> bool {
+    func.syntax()
+        .parent()
+        .and_then(JsInitializerClause::cast)
+        .and_then(|init| init.parent::<JsPropertyClassMember>())
+        .map_or(false, |prop| prop.property_annotation().is_some())
 }

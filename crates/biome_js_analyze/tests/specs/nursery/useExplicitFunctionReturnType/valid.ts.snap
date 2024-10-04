@@ -69,4 +69,27 @@ const arrowFn = () => function(): void {}
 const arrowFn = () => {
   return (): void => { };
 }
+
+
+// type assertion
+const asTyped = (() => '') as () => string;
+const castTyped = <() => string>(() => '');
+
+// variable declarator with a type annotation 
+type FuncType = () => string;
+const arrowFn: FuncType = () => 'test';
+const funcExpr: FuncType = function () {
+  return 'test';
+};
+
+// default parameter with a type annotation
+type CallBack = () => void;
+const f = (gotcha: CallBack = () => { }): void => { };
+function f(gotcha: CallBack = () => {}): void {}
+
+// class property with a type annotation
+type MethodType = () => void;
+class App {
+    private method: MethodType = () => { };
+}
 ```
