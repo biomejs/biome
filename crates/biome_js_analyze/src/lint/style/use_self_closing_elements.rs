@@ -60,19 +60,19 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// #### `checkHtmlElements`
+    /// ### `ignoreHtmlElements`
     ///
-    /// Default: true
+    /// Default: false
     ///
     /// This option allows you to specify whether or not to check native HTML elements.
     ///
-    /// In the following example, when the option is set to "false", it will not self close native HTML elements.
+    /// In the following example, when the option is set to "true", it will not self close native HTML elements.
     ///
     /// ```json
     /// {
     ///     "//":"...",
     ///     "options": {
-    ///         "checkHtmlElements": true
+    ///         "ignoreHtmlElements": true
     ///     }
     /// }
     /// ```
@@ -104,7 +104,7 @@ impl Rule for UseSelfClosingElements {
             .opening_element()
             .is_ok_and(|node| node.name().is_ok_and(|name| name.as_jsx_name().is_some()));
 
-        if node.children().is_empty() && (ctx.options().check_html_elements || !is_html_element) {
+        if node.children().is_empty() && !(ctx.options().ignore_html_elements && is_html_element) {
             Some(())
         } else {
             None
@@ -188,14 +188,14 @@ impl Rule for UseSelfClosingElements {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct UseSelfClosingElementsOptions {
-    // Whether or not to check native HTML elements. Default is true.
-    pub check_html_elements: bool,
+    // Whether or not to ignore checking native HTML elements. Default is false.
+    pub ignore_html_elements: bool,
 }
 
 impl Default for UseSelfClosingElementsOptions {
     fn default() -> Self {
         Self {
-            check_html_elements: true,
+            ignore_html_elements: false,
         }
     }
 }
