@@ -117,7 +117,6 @@ pub(crate) fn run<'a>(
             if file_features.supports_lint() {
                 let fix_file_result = workspace.fix_file(FixFileParams {
                     fix_file_mode: *fix_file_mode,
-                    suppress: mode.as_write_suppressions_mode(),
                     path: biome_path.clone(),
                     should_format: mode.is_check() && file_features.supports_format(),
                     only: only.clone(),

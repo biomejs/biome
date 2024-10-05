@@ -665,6 +665,7 @@ pub enum FixFileMode {
     SafeFixes,
     /// Applies [safe](biome_diagnostics::Applicability::Always) and [unsafe](biome_diagnostics::Applicability::MaybeIncorrect) fixes
     SafeAndUnsafeFixes,
+    /// Applies suppression comments to existing diagnostics when using `--suppress`
     ApplySuppressions,
 }
 
@@ -673,7 +674,6 @@ pub enum FixFileMode {
 pub struct FixFileParams {
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
-    pub suppress: bool,
     pub should_format: bool,
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
@@ -1099,7 +1099,6 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
     pub fn fix_file(
         &self,
         fix_file_mode: FixFileMode,
-        suppress: bool,
         should_format: bool,
         rule_categories: RuleCategories,
         only: Vec<RuleSelector>,
@@ -1108,7 +1107,6 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         self.workspace.fix_file(FixFileParams {
             path: self.path.clone(),
             fix_file_mode,
-            suppress,
             should_format,
             only,
             skip,

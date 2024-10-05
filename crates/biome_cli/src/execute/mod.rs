@@ -306,17 +306,6 @@ impl Execution {
         }
     }
 
-    pub(crate) fn as_write_suppressions_mode(&self) -> bool {
-        match &self.traversal_mode {
-            TraversalMode::Lint { suppress, .. } => *suppress,
-            TraversalMode::Check { .. }
-            | TraversalMode::Format { .. }
-            | TraversalMode::CI { .. }
-            | TraversalMode::Migrate { .. }
-            | TraversalMode::Search { .. } => false,
-        }
-    }
-
     pub(crate) fn as_diagnostic_category(&self) -> &'static Category {
         match self.traversal_mode {
             TraversalMode::Check { .. } => category!("check"),
