@@ -2246,6 +2246,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useCollapsedIf": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useComponentExportOnlyModules": {
 					"description": "Enforce declaring components only within modules that export React Components exclusively.",
 					"anyOf": [
