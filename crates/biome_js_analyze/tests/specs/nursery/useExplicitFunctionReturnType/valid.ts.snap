@@ -92,4 +92,19 @@ type MethodType = () => void;
 class App {
     private method: MethodType = () => { };
 }
+
+// function as a property or a nested property of a typed object
+const x: Foo = { prop: () => {} }
+const x = { prop: () => {} } as Foo
+const x = <Foo>{ prop: () => {} }
+
+const x: Foo = { bar: { prop: () => {} } }
+
+class Accumulator {
+  private count: number = 0;
+  public accumulate(fn: () => number): void {
+      this.count += fn();
+  }
+}
+new Accumulator().accumulate(() => 1);
 ```

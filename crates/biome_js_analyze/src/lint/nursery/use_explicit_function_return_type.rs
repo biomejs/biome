@@ -5,14 +5,14 @@ use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsFileSource,
-    JsFormalParameter, JsInitializerClause, JsPropertyClassMember, JsStatementList, JsSyntaxKind,
-    JsVariableDeclarator,
+    JsFormalParameter, JsInitializerClause, JsLanguage, JsObjectExpression, JsPropertyClassMember,
+    JsPropertyObjectMember, JsStatementList, JsSyntaxKind, JsVariableDeclarator,
 };
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
     JsMethodObjectMember,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{declare_node_union, AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange};
 
 declare_lint_rule! {
     /// Require explicit return types on functions and class methods.
@@ -434,9 +434,11 @@ fn is_first_statement_function_return(statements: JsStatementList) -> bool {
 
 /// Checks if a given function expression has a type annotation.
 fn is_typed_function_expressions(func: &AnyJsFunction) -> bool {
-    is_variable_declarator_with_type_annotation(func)
-        || is_default_function_parameter_with_type_annotation(func)
-        || is_class_property_with_type_annotation(func)
+    let syntax = func.syntax();
+    is_variable_declarator_with_type_annotation(syntax)
+        || is_default_function_parameter_with_type_annotation(syntax)
+        || is_class_property_with_type_annotation(syntax)
+        || is_property_of_object_with_type(syntax)
 }
 
 /// Checks if a function is a variable declarator with a type annotation.
@@ -447,8 +449,8 @@ fn is_typed_function_expressions(func: &AnyJsFunction) -> bool {
 /// type FuncType = () => string;
 /// const arrowFn: FuncType = () => 'test';
 /// ```
-fn is_variable_declarator_with_type_annotation(func: &AnyJsFunction) -> bool {
-    func.syntax()
+fn is_variable_declarator_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    syntax
         .parent()
         .and_then(JsInitializerClause::cast)
         .and_then(|init| init.parent::<JsVariableDeclarator>())
@@ -463,8 +465,8 @@ fn is_variable_declarator_with_type_annotation(func: &AnyJsFunction) -> bool {
 /// type CallBack = () => void;
 /// const f = (gotcha: CallBack = () => { }): void => { };
 /// ```
-fn is_default_function_parameter_with_type_annotation(func: &AnyJsFunction) -> bool {
-    func.syntax()
+fn is_default_function_parameter_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    syntax
         .parent()
         .and_then(JsInitializerClause::cast)
         .and_then(|init| init.parent::<JsFormalParameter>())
@@ -481,10 +483,44 @@ fn is_default_function_parameter_with_type_annotation(func: &AnyJsFunction) -> b
 ///     private method: MethodType = () => { };
 /// }
 /// ```
-fn is_class_property_with_type_annotation(func: &AnyJsFunction) -> bool {
-    func.syntax()
+fn is_class_property_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    syntax
         .parent()
         .and_then(JsInitializerClause::cast)
         .and_then(|init| init.parent::<JsPropertyClassMember>())
         .map_or(false, |prop| prop.property_annotation().is_some())
+}
+
+/// Checks if a function is a property or a nested property of a typed object:
+///
+/// # Examples
+///
+/// ```typescript
+/// const x: Foo = { prop: () => {} }
+/// const x = { prop: () => {} } as Foo
+/// const x = <Foo>{ prop: () => {} }
+/// const x: Foo = { bar: { prop: () => {} } }
+/// ```
+fn is_property_of_object_with_type(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    syntax
+        .parent()
+        .and_then(JsPropertyObjectMember::cast)
+        .and_then(|prop| prop.syntax().grand_parent())
+        .and_then(JsObjectExpression::cast)
+        .map_or(false, |obj_expression| {
+            let obj_syntax = obj_expression.syntax();
+            is_type_assertion(obj_syntax)
+                || is_variable_declarator_with_type_annotation(obj_syntax)
+                || is_property_of_object_with_type(obj_syntax)
+        })
+}
+
+/// Checks if a function is a type assertion:
+fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    syntax.parent().kind().is_some_and(|kind| {
+        matches!(
+            kind,
+            JsSyntaxKind::TS_AS_EXPRESSION | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+        )
+    })
 }
