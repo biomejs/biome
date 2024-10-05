@@ -12,6 +12,7 @@ info: grit/patterns/if_pattern.grit
     $method => `console.warn`
   }
 }
+
 ```
 
 
@@ -26,11 +27,12 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
+Bracket spacing: true
 Attribute Position: Auto
 -----
 
 ```grit
-`$method('$message')` where {
+`$method('$message')` where{
   if ($message <: r"Hello, .*!") {
     $method => `console.info`
   } else {
@@ -43,4 +45,32 @@ Attribute Position: Auto
 
 ## Unimplemented nodes/tokens
 
-"`$method('$message')` where {\n  if ($message <: r\"Hello, .*!\") {\n    $method => `console.info`\n  } else {\n    $method => `console.warn`\n  }\n}" => 0..141
+"`$method('$message')` " => 0..22
+"{\n  if ($message <: r\"Hello, .*!\") {\n    $method => `console.info`\n  } else {\n    $method => `console.warn`\n  }\n}" => 27..140
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Bracket spacing: true
+Attribute Position: Auto
+-----
+
+```grit
+`$method('$message')` where{
+  if ($message <: r"Hello, .*!") {
+    $method => `console.info`
+  } else {
+    $method => `console.warn`
+  }
+}
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"`$method('$message')` " => 0..22
+"{\n  if ($message <: r\"Hello, .*!\") {\n    $method => `console.info`\n  } else {\n    $method => `console.warn`\n  }\n}" => 27..140
