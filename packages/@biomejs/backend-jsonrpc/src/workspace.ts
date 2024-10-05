@@ -1184,7 +1184,7 @@ export interface Correctness {
 	/**
 	 * Enforce all dependencies are correctly specified in a React hook.
 	 */
-	useExhaustiveDependencies?: RuleConfiguration_for_UseExhaustiveDependenciesOptions;
+	useExhaustiveDependencies?: RuleConfiguration_for_HooksOptions;
 	/**
 	 * Enforce that all React hooks are being called from the Top Level component functions.
 	 */
@@ -1985,9 +1985,9 @@ export type RuleFixConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
-export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
+export type RuleConfiguration_for_HooksOptions =
 	| RulePlainConfiguration
-	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
+	| RuleWithOptions_for_HooksOptions;
 export type RuleConfiguration_for_DeprecatedHooksOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_DeprecatedHooksOptions;
@@ -2103,7 +2103,7 @@ export interface RuleWithOptions_for_ComplexityOptions {
 	 */
 	options: ComplexityOptions;
 }
-export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
+export interface RuleWithOptions_for_HooksOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
 	 */
@@ -2111,7 +2111,7 @@ export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
 	/**
 	 * Rule's options
 	 */
-	options: UseExhaustiveDependenciesOptions;
+	options: HooksOptions;
 }
 export interface RuleWithOptions_for_DeprecatedHooksOptions {
 	/**
@@ -2295,19 +2295,19 @@ export interface NoLabelWithoutControlOptions {
 	/**
 	 * Array of component names that should be considered the same as an `input` element.
 	 */
-	inputComponents?: string[];
+	inputComponents: string[];
 	/**
 	 * Array of attributes that should be treated as the `label` accessible text content.
 	 */
-	labelAttributes?: string[];
+	labelAttributes: string[];
 	/**
 	 * Array of component names that should be considered the same as a `label` element.
 	 */
-	labelComponents?: string[];
+	labelComponents: string[];
 }
 export interface ValidAriaRoleOptions {
-	allowInvalidRoles?: string[];
-	ignoreNonDom?: boolean;
+	allowInvalidRoles: string[];
+	ignoreNonDom: boolean;
 }
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
@@ -2316,24 +2316,16 @@ export interface ComplexityOptions {
 	/**
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
-	maxAllowedComplexity?: number;
+	maxAllowedComplexity: number;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`
  */
-export interface UseExhaustiveDependenciesOptions {
+export interface HooksOptions {
 	/**
 	 * List of hooks of which the dependencies should be validated.
 	 */
-	hooks?: Hook[];
-	/**
-	 * Whether to report an error when a hook has no dependencies array.
-	 */
-	reportMissingDependenciesArray?: boolean;
-	/**
-	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
-	 */
-	reportUnnecessaryDependencies?: boolean;
+	hooks: Hook[];
 }
 /**
  * Options for the `useHookAtTopLevel` rule have been deprecated, since we now use the React hook naming convention to determine whether a function is a hook.
@@ -2343,7 +2335,7 @@ export interface UseImportExtensionsOptions {
 	/**
 	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
 	 */
-	suggestedExtensions?: {};
+	suggestedExtensions: {};
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -2355,7 +2347,7 @@ export interface RestrictedImportsOptions {
 	paths: {};
 }
 export interface NoRestrictedTypesOptions {
-	types?: {};
+	types: {};
 }
 export interface UseComponentExportOnlyModulesOptions {
 	/**
@@ -2368,7 +2360,7 @@ export interface UseComponentExportOnlyModulesOptions {
 	allowExportNames: string[];
 }
 export interface ConsistentMemberAccessibilityOptions {
-	accessibility?: Accessibility;
+	accessibility: Accessibility;
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -2384,7 +2376,7 @@ export interface UseValidAutocompleteOptions {
 	/**
 	 * `input` like custom components that should be checked.
 	 */
-	inputComponents?: string[];
+	inputComponents: string[];
 }
 /**
  * Options for the rule `noRestrictedGlobals`.
@@ -2396,7 +2388,7 @@ export interface RestrictedGlobalsOptions {
 	deniedGlobals: string[];
 }
 export interface ConsistentArrayTypeOptions {
-	syntax?: ConsistentArrayType;
+	syntax: ConsistentArrayType;
 }
 /**
  * Rule's options.
@@ -2469,7 +2461,7 @@ For example, for React's `useEffect()` hook, the dependencies index is 1.
 	/**
 	 * The name of the hook.
 	 */
-	name?: string;
+	name: string;
 	/**
 	* Whether the result of the hook is stable.
 
@@ -3246,15 +3238,11 @@ export interface FixFileParams {
 	rule_categories: RuleCategories;
 	should_format: boolean;
 	skip: RuleCode[];
-	suppress: boolean;
 }
 /**
  * Which fixes should be applied during the analyzing phase
  */
-export type FixFileMode =
-	| "ApplySuppressions"
-	| "SafeFixes"
-	| "SafeAndUnsafeFixes";
+export type FixFileMode = "SafeFixes" | "SafeAndUnsafeFixes";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
