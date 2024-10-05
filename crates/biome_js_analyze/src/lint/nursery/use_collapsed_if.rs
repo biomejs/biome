@@ -100,7 +100,7 @@ impl Rule for UseCollapsedIf {
         let AnyJsStatement::JsIfStatement(child_if_statement) = statements.first()? else {
             return None;
         };
-        if let Some(_) = child_if_statement.else_clause() {
+        if child_if_statement.else_clause().is_some() {
             return None;
         }
         Some(RuleState {
