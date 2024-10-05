@@ -159,7 +159,7 @@ export class Biome {
 			const biomePath: BiomePath = {
 				path,
 				was_written: false,
-				kind: "Handleable",
+				kind: ["Handleable"],
 			};
 
 			this.workspace.openFile({
@@ -260,6 +260,9 @@ export class Biome {
 						path,
 						fix_file_mode: fixFileMode,
 						should_format: false,
+						only: [],
+						skip: [],
+						rule_categories: ["Syntax", "Lint"],
 					});
 
 					code = result.code;
