@@ -1,0 +1,312 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+/**
+ * Safe fixes:
+ */
+
+if (condition) {
+	if (anotherCondition) {
+		// ...
+	}
+}
+
+if (condition) {
+	if (anotherCondition) {
+		// ...
+	}
+} else {
+	// ...
+}
+
+/**
+ * Suggested fixes:
+ */
+
+if (condition) { // Comment
+	if (anotherCondition) {
+		// ...
+	}
+}
+
+if (condition) {
+	// Comment
+	if (anotherCondition) {
+		// ...
+	}
+}
+
+if (condition) {
+	if (anotherCondition) {
+		// ...
+	} // Comment
+}
+
+if (condition) {
+	if (anotherCondition) {
+		// ...
+	}
+	// Comment
+}
+
+if (condition) { // Comment
+	if (anotherCondition) {
+		// ...
+	}
+} else {
+	// ...
+}
+
+if (condition) {
+	// Comment
+	if (anotherCondition) {
+		// ...
+	}
+} else {
+	// ...
+}
+
+if (condition) {
+	if (anotherCondition) {
+		// ...
+	} // Comment
+} else {
+	// ...
+}
+
+if (condition) {
+	if (anotherCondition) {
+		// ...
+	}
+	// Comment
+} else {
+	// ...
+}
+
+```
+
+# Diagnostics
+```
+invalid.js:5:17 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+     3 │  */
+     4 │ 
+   > 5 │ if (condition) {
+       │                 
+   > 6 │ 	if (anotherCondition) {
+   > 7 │ 		// ...
+   > 8 │ 	}
+       │ 	^
+     9 │ }
+    10 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     3  3 │    */
+     4  4 │   
+     5    │ - if·(condition)·{
+     6    │ - → if·(anotherCondition)·{
+     7    │ - → → //·...
+     8    │ - → }
+     9    │ - }
+        5 │ + if·(condition&&anotherCondition)·{
+        6 │ + → → //·...
+        7 │ + → }
+    10  8 │   
+    11  9 │   if (condition) {
+  
+
+```
+
+```
+invalid.js:11:17 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+     9 │ }
+    10 │ 
+  > 11 │ if (condition) {
+       │                 
+  > 12 │ 	if (anotherCondition) {
+  > 13 │ 		// ...
+  > 14 │ 	}
+       │ 	^
+    15 │ } else {
+    16 │ 	// ...
+  
+  i Safe fix: Use collapsed if instead.
+  
+     9  9 │   }
+    10 10 │   
+    11    │ - if·(condition)·{
+    12    │ - → if·(anotherCondition)·{
+    13    │ - → → //·...
+    14    │ - → }
+    15    │ - }·else·{
+       11 │ + if·(condition&&anotherCondition)·{
+       12 │ + → → //·...
+       13 │ + → }·else·{
+    16 14 │   	// ...
+    17 15 │   }
+  
+
+```
+
+```
+invalid.js:23:28 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    21 │  */
+    22 │ 
+  > 23 │ if (condition) { // Comment
+       │                            
+  > 24 │ 	if (anotherCondition) {
+  > 25 │ 		// ...
+  > 26 │ 	}
+       │ 	^
+    27 │ }
+    28 │ 
+  
+
+```
+
+```
+invalid.js:29:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    27 │ }
+    28 │ 
+  > 29 │ if (condition) {
+       │                 
+  > 30 │ 	// Comment
+  > 31 │ 	if (anotherCondition) {
+  > 32 │ 		// ...
+  > 33 │ 	}
+       │ 	^
+    34 │ }
+    35 │ 
+  
+
+```
+
+```
+invalid.js:36:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    34 │ }
+    35 │ 
+  > 36 │ if (condition) {
+       │                 
+  > 37 │ 	if (anotherCondition) {
+  > 38 │ 		// ...
+  > 39 │ 	} // Comment
+       │ 	^^^^^^^^^^^^
+    40 │ }
+    41 │ 
+  
+
+```
+
+```
+invalid.js:42:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    40 │ }
+    41 │ 
+  > 42 │ if (condition) {
+       │                 
+  > 43 │ 	if (anotherCondition) {
+  > 44 │ 		// ...
+  > 45 │ 	}
+       │ 	^
+    46 │ 	// Comment
+    47 │ }
+  
+
+```
+
+```
+invalid.js:49:28 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    47 │ }
+    48 │ 
+  > 49 │ if (condition) { // Comment
+       │                            
+  > 50 │ 	if (anotherCondition) {
+  > 51 │ 		// ...
+  > 52 │ 	}
+       │ 	^
+    53 │ } else {
+    54 │ 	// ...
+  
+
+```
+
+```
+invalid.js:57:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    55 │ }
+    56 │ 
+  > 57 │ if (condition) {
+       │                 
+  > 58 │ 	// Comment
+  > 59 │ 	if (anotherCondition) {
+  > 60 │ 		// ...
+  > 61 │ 	}
+       │ 	^
+    62 │ } else {
+    63 │ 	// ...
+  
+
+```
+
+```
+invalid.js:66:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    64 │ }
+    65 │ 
+  > 66 │ if (condition) {
+       │                 
+  > 67 │ 	if (anotherCondition) {
+  > 68 │ 		// ...
+  > 69 │ 	} // Comment
+       │ 	^^^^^^^^^^^^
+    70 │ } else {
+    71 │ 	// ...
+  
+
+```
+
+```
+invalid.js:74:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    72 │ }
+    73 │ 
+  > 74 │ if (condition) {
+       │                 
+  > 75 │ 	if (anotherCondition) {
+  > 76 │ 		// ...
+  > 77 │ 	}
+       │ 	^
+    78 │ 	// Comment
+    79 │ } else {
+  
+
+```
