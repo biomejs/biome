@@ -1,4 +1,4 @@
-`$method('$message')` where {
+`$method('$message')`where{
   if ($message <: r"Hello, .*!") {
     $method => `console.info`
   } else {

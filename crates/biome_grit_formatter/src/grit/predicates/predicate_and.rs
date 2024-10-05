@@ -1,6 +1,5 @@
 use crate::prelude::*;
-use biome_formatter::write;
-use biome_grit_syntax::{GritPredicateAnd, GritPredicateAndFields};
+use biome_grit_syntax::GritPredicateAnd;
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPredicateAnd;
 impl FormatNodeRule<GritPredicateAnd> for FormatGritPredicateAnd {

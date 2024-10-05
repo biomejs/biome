@@ -5,7 +5,7 @@ info: grit/patterns/if_pattern.grit
 # Input
 
 ```grit
-`$method('$message')` where {
+`$method('$message')`where{
   if ($message <: r"Hello, .*!") {
     $method => `console.info`
   } else {
@@ -32,7 +32,7 @@ Attribute Position: Auto
 -----
 
 ```grit
-`$method('$message')` where{
+`$method('$message')` where {
   if ($message <: r"Hello, .*!") {
     $method => `console.info`
   } else {
@@ -45,8 +45,8 @@ Attribute Position: Auto
 
 ## Unimplemented nodes/tokens
 
-"`$method('$message')` " => 0..22
-"{\n  if ($message <: r\"Hello, .*!\") {\n    $method => `console.info`\n  } else {\n    $method => `console.warn`\n  }\n}" => 27..140
+"`$method('$message')`" => 0..21
+" {\n  if ($message <: r\"Hello, .*!\") {\n    $method => `console.info`\n  } else {\n    $method => `console.warn`\n  }\n" => 27..140
 ## Output 1
 
 -----
@@ -59,7 +59,7 @@ Attribute Position: Auto
 -----
 
 ```grit
-`$method('$message')` where{
+`$method('$message')` where {
   if ($message <: r"Hello, .*!") {
     $method => `console.info`
   } else {
@@ -72,5 +72,5 @@ Attribute Position: Auto
 
 ## Unimplemented nodes/tokens
 
-"`$method('$message')` " => 0..22
-"{\n  if ($message <: r\"Hello, .*!\") {\n    $method => `console.info`\n  } else {\n    $method => `console.warn`\n  }\n}" => 27..140
+"`$method('$message')`" => 0..21
+" {\n  if ($message <: r\"Hello, .*!\") {\n    $method => `console.info`\n  } else {\n    $method => `console.warn`\n  }\n" => 27..140

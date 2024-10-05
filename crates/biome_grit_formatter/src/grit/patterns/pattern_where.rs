@@ -21,8 +21,8 @@ impl FormatNodeRule<GritPatternWhere> for FormatGritPatternWhere {
                 pattern_format,
                 space(),
                 where_token,
+                space(),
                 side_condition,
-                hard_line_break(),
             ]
         )
     }
