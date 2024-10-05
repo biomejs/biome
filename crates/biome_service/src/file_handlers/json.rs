@@ -585,7 +585,7 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                         }
                     }
                     FixFileMode::ApplySuppressions => {
-                        // Not implemented
+                        // TODO: implement once a JSON suppression action is available
                     }
                 }
             }
