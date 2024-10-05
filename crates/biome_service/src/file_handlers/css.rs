@@ -555,7 +555,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         }
                     }
                     FixFileMode::ApplySuppressions => {
-                        // Not implemented
+                        // TODO: to implement
                     }
                 }
             }

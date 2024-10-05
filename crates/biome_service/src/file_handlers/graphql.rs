@@ -530,7 +530,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         }
                     }
                     FixFileMode::ApplySuppressions => {
-                        // Not implemented
+                        // TODO: implement once a GraphQL suppression action is available
                     }
                 }
             }
