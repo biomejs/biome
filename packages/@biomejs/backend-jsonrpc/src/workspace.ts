@@ -1323,9 +1323,9 @@ export interface Nursery {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Enforce using single if instead of nested if clauses.
 	 */
-	useCollapsedIf?: RuleConfiguration_for_Null;
+	useCollapsedIf?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */

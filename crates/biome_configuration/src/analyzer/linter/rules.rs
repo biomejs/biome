@@ -3363,9 +3363,9 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_aria_props_supported_by_role:
         Option<RuleConfiguration<biome_js_analyze::options::UseAriaPropsSupportedByRole>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Enforce using single if instead of nested if clauses."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_collapsed_if: Option<RuleConfiguration<biome_js_analyze::options::UseCollapsedIf>>,
+    pub use_collapsed_if: Option<RuleFixConfiguration<biome_js_analyze::options::UseCollapsedIf>>,
     #[doc = "Enforce declaring components only within modules that export React Components exclusively."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_component_export_only_modules:

@@ -2247,9 +2247,9 @@
 					]
 				},
 				"useCollapsedIf": {
-					"description": "Succinct description of the rule.",
+					"description": "Enforce using single if instead of nested if clauses.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
