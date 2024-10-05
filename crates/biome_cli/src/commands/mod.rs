@@ -183,7 +183,7 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Fix diagnostics with suppression comments if the language supports it. 
+        /// Fix diagnostics with suppression comments if the language supports it.
         #[bpaf(long("suppress"))]
         suppress: bool,
 
