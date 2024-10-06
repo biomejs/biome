@@ -12,7 +12,7 @@ import Head from "next/head";
 ```
 _document.jsx:1:1 lint/nursery/noHeadImportInDocument ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Don't use next/head in pages/document.js
+  ! Don't use next/head in pages/_document.jsx
   
   > 1 │ import Head from "next/head";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

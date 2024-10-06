@@ -2,7 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_js_syntax::JsImport;
+use biome_js_syntax::{JsFileSource, JsImport};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -62,7 +62,7 @@ impl Rule for NoHeadImportInDocument {
         let import_source = import.import_clause().ok()?.source().ok()?;
         let module_name = import_source.inner_string_text().ok()?;
 
-        if module_name != "next/head" {
+        if !ctx.source_type::<JsFileSource>().is_jsx() || module_name != "next/head" {
             return None;
         }
 
@@ -75,17 +75,17 @@ impl Rule for NoHeadImportInDocument {
             return None;
         }
 
-        let file_name = path.file_name()?.to_str()?;
+        let file_name = path.file_stem()?.to_str()?;
 
         // pages/_document.(jsx|tsx)
-        if file_name.starts_with("_document.") {
+        if file_name == "_document" {
             return Some(());
         }
 
-        let parent_name = path.parent()?.file_name()?.to_str()?;
+        let parent_name = path.parent()?.file_stem()?.to_str()?;
 
         // pages/_document/index.(jsx|tsx)
-        if parent_name == "_document" && file_name.starts_with("index.") {
+        if parent_name == "_document" && file_name == "index" {
             return Some(());
         }
 
@@ -93,12 +93,14 @@ impl Rule for NoHeadImportInDocument {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
+        let path = ctx.file_path().to_str()?.split("pages/").nth(1)?;
+
         return Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 ctx.query().range(),
                 markup! {
-                    "Don't use "<Emphasis>"next/head"</Emphasis>" in pages/document.js"
+                    "Don't use "<Emphasis>"next/head"</Emphasis>" in pages/"{path}""
                 },
             )
             .note(markup! {
