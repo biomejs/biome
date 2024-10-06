@@ -408,6 +408,15 @@ impl AnyJsxElement {
         }
     }
 
+    pub fn get_attribute_inner_string_text(&self, name_to_lookup: &str) -> Option<String> {
+        if let Some(attr) = self.find_attribute_by_name(name_to_lookup) {
+            let initializer = attr.initializer()?.value().ok()?;
+            let binding = initializer.as_jsx_string()?.inner_string_text().ok()?;
+            return Some(binding.to_string());
+        };
+        None
+    }
+
     pub fn has_truthy_attribute(&self, name_to_lookup: &str) -> bool {
         self.find_attribute_by_name(name_to_lookup)
             .map_or(false, |attribute| {
