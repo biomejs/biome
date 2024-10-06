@@ -86,12 +86,7 @@ pub struct CliOptions {
     pub diagnostic_level: Severity,
 
     /// Specify file to write report to
-    #[bpaf(
-        long("report-output-file"),
-        short('o'),
-        argument("<FILE>"),
-        optional
-    )]
+    #[bpaf(long("report-output-file"), short('o'), argument("<FILE>"), optional)]
     pub report_output_file: Option<String>,
 }
 
