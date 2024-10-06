@@ -19,7 +19,7 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:2 lint/nursery/noImgElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using <img> could result in slower LCP and higher bandwidth.
+  ! Don't use <img> element.
   
     1 │ <>
   > 2 │ 	<img alt="Foo" />
@@ -27,9 +27,7 @@ invalid.jsx:2:2 lint/nursery/noImgElement ━━━━━━━━━━━━�
     3 │ 
     4 │ 	<div>
   
-  i Consider using <Image /> from next/image to automatically optimize images.
-  
-  i This may incur additional usage or cost from your provider.
+  i Using the <img> can lead to slower LCP and higher bandwidth. Consider using <Image /> from next/image to automatically optimize images.
   
 
 ```
@@ -37,7 +35,7 @@ invalid.jsx:2:2 lint/nursery/noImgElement ━━━━━━━━━━━━�
 ```
 invalid.jsx:5:3 lint/nursery/noImgElement ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Using <img> could result in slower LCP and higher bandwidth.
+  ! Don't use <img> element.
   
     4 │ 	<div>
   > 5 │ 		<img alt="Foo" />
@@ -45,9 +43,7 @@ invalid.jsx:5:3 lint/nursery/noImgElement ━━━━━━━━━━━━�
     6 │ 	</div>
     7 │ </>
   
-  i Consider using <Image /> from next/image to automatically optimize images.
-  
-  i This may incur additional usage or cost from your provider.
+  i Using the <img> can lead to slower LCP and higher bandwidth. Consider using <Image /> from next/image to automatically optimize images.
   
 
 ```

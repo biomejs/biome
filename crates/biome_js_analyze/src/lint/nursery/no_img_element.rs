@@ -15,6 +15,10 @@ declare_lint_rule! {
     /// component from `next/image`. Next.js's `<Image />` automatically optimizes images
     /// by serving responsive sizes and using modern formats, improving performance and reducing bandwidth.
     ///
+    /// If your project is self-hosted, ensure that you have sufficient storage and have
+    /// installed the `sharp` package to support optimized images. When deploying to managed
+    /// hosting providers, be aware of potential additional costs or usage.
+    ///
     /// ## Examples
     ///
     /// ### Invalid
@@ -98,11 +102,12 @@ impl Rule for NoImgElement {
                 rule_category!(),
                 ctx.query().range(),
                 markup! {
-                    "Using "<Emphasis>"<img>"</Emphasis>" could result in slower LCP and higher bandwidth."
+                    "Don't use "<Emphasis>"<img>"</Emphasis>" element."
                 },
             )
-            .note(markup! { "Consider using "<Emphasis>"<Image />"</Emphasis>" from "<Emphasis>"next/image"</Emphasis>" to automatically optimize images." })
-            .note(markup! { "This may incur additional usage or cost from your provider." })
+            .note(markup! {
+                "Using the "<Emphasis>"<img>"</Emphasis>" can lead to slower LCP and higher bandwidth. Consider using "<Emphasis>"<Image />"</Emphasis>" from "<Emphasis>"next/image"</Emphasis>" to automatically optimize images."
+            })
         );
     }
 }
