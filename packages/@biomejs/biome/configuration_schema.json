@@ -2130,6 +2130,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noHeadImportInDocument": {
+					"description": "Prevent usage of next/head in pages/_document.js on Next.js projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImgElement": {
 					"description": "Prevent usage of \\<img> element in a Next.js project.",
 					"anyOf": [
