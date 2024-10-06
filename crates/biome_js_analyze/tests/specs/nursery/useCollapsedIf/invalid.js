@@ -72,12 +72,6 @@ async function foo() {
 if (((a || b))) if (((c || d)));
 
 // Semicolon
-// TODO
-// if (a) {
-// 	if (b) foo()
-// }
-// [].forEach(bar)
-
 if (a)
 	if (b) foo()
 	;[].forEach(bar)
@@ -154,3 +148,9 @@ if (condition) {
 if (condition)
 	if (anotherCondition) // Comment
 		doSomething();
+
+// Semicolon
+if (a) {
+	if (b) foo()
+}
+[].forEach(bar)

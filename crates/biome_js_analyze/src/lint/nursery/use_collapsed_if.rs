@@ -166,11 +166,18 @@ impl Rule for UseCollapsedIf {
             parenthesized_if_needed(&child_test),
         );
 
+        // If the inner `if` statement has no block and the statement does not end with semicolon,
+        // it cannot be fixed automatically because that will break the ASI rule.
+        if !matches!(&child_consequent, AnyJsStatement::JsBlockStatement(_)) {
+            let last_token = child_consequent.syntax().last_token()?;
+            if last_token.kind() != T![;] {
+                return None;
+            }
+        }
+
         let mut mutation = ctx.root().begin();
         mutation.replace_node(parent_test, binary_expression.into());
         mutation.replace_node(parent_consequent, child_consequent);
-
-        // TODO: Insert semicolon before the next statement if needed
 
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
