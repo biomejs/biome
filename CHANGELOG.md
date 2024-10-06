@@ -45,6 +45,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
+- Biome no longer crashes when it encounters a string that contain a multibyte character ([#4181](https://github.com/biomejs/biome/issues/4181)).
+
+  This fixes a regression introduced in Biome 1.9.3
+  The regression affected the following linter rules:
+
+  - nursery/useSortedClasses
+  - nursery/useTrimStartEnd
+  - style/useTemplate
+  - suspicious/noMisleadingCharacterClass
+
   Contributed by @Conaclos
 
 ### Parser
