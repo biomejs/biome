@@ -133,7 +133,10 @@ impl Format<JsFormatContext> for FormatClass<'_> {
             let heritage_id = f.group_id("heritageGroup");
             write!(
                 f,
-                [group(&indented).with_group_id(Some(heritage_id)), hard_space()]
+                [
+                    group(&indented).with_group_id(Some(heritage_id)),
+                    hard_space()
+                ]
             )?;
 
             if !members.is_empty() {
