@@ -23,4 +23,17 @@ if (condition) {
 	}
 }
 
+if (condition) {
+	anotherCondition ? c() : d()
+}
+
+// Covered by `useCollapsedElseIf`
+if (condition) {
+	// ...
+} else {
+	if (anotherCondition) {
+		// ...
+	}
+}
+
 ```
