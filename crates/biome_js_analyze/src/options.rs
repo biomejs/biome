@@ -337,6 +337,7 @@ pub type UseGetterReturn =
     <lint::suspicious::use_getter_return::UseGetterReturn as biome_analyze::Rule>::Options;
 pub type UseGoogleFontDisplay =
     <lint::nursery::use_google_font_display::UseGoogleFontDisplay as biome_analyze::Rule>::Options;
+pub type UseGoogleFontPreconnect = < lint :: nursery :: use_google_font_preconnect :: UseGoogleFontPreconnect as biome_analyze :: Rule > :: Options ;
 pub type UseGuardForIn =
     <lint::nursery::use_guard_for_in::UseGuardForIn as biome_analyze::Rule>::Options;
 pub type UseHeadingContent =

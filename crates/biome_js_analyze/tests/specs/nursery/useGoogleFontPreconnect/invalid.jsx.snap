@@ -1,0 +1,45 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+	<link href="https://fonts.gstatic.com"/>
+	<link rel="preload" href="https://fonts.gstatic.com"/>
+</>
+```
+
+# Diagnostics
+```
+invalid.jsx:2:2 lint/nursery/useGoogleFontPreconnect  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! rel="preconnect" is missing from Google Font.
+  
+    1 │ <>
+  > 2 │ 	<link href="https://fonts.gstatic.com"/>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
+    4 │ </>
+  
+  i Safe fix: Add rel="preconnect" attribute.
+  
+    2 │ → <link·href="https://fonts.gstatic.com"·rel="preconnect"/>
+      │                                         +++++++++++++++++  
+
+```
+
+```
+invalid.jsx:3:2 lint/nursery/useGoogleFontPreconnect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! rel="preconnect" is missing from Google Font.
+  
+    1 │ <>
+    2 │ 	<link href="https://fonts.gstatic.com"/>
+  > 3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
+      │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ </>
+  
+
+```

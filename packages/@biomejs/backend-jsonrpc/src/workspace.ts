@@ -1391,6 +1391,10 @@ export interface Nursery {
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
 	/**
+	 * Ensure preconnect is used with Google Fonts.
+	 */
+	useGoogleFontPreconnect?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require for-in loops to include an if statement.
 	 */
 	useGuardForIn?: RuleConfiguration_for_Null;
@@ -3004,6 +3008,7 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useGoogleFontDisplay"
+	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
