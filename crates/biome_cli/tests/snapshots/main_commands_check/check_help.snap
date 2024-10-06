@@ -152,6 +152,7 @@ Global options applied to all commands
                               `--diagnostic-level=error` will cause Biome to print only diagnostics
                               that contain only errors.
                               [default: info]
+    -o, --report-output-file=<<FILE>>  Specify file to write report to
 
 Available positional items:
     PATH                      Single file, single path or list of paths

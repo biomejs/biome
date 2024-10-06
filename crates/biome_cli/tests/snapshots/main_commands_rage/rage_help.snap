@@ -42,6 +42,7 @@ Global options applied to all commands
                               `--diagnostic-level=error` will cause Biome to print only diagnostics
                               that contain only errors.
                               [default: info]
+    -o, --report-output-file=<<FILE>>  Specify file to write report to
 
 Available options:
         --daemon-logs         Prints the Biome daemon server logs
