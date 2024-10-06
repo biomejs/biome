@@ -4,9 +4,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsFileSource,
-    JsFormalParameter, JsInitializerClause, JsLanguage, JsObjectExpression, JsPropertyClassMember,
-    JsPropertyObjectMember, JsStatementList, JsSyntaxKind, JsVariableDeclarator,
+    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsCallExpression,
+    JsFileSource, JsFormalParameter, JsInitializerClause, JsLanguage, JsObjectExpression,
+    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsStatementList,
+    JsSyntaxKind, JsVariableDeclarator,
 };
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
@@ -237,7 +238,11 @@ impl Rule for UseExplicitFunctionReturnType {
                     return None;
                 }
 
-                if is_function_used_in_argument_or_expression_list(func) {
+                if is_iife(func) {
+                    return None;
+                }
+
+                if is_function_used_in_argument_or_array(func) {
                     return None;
                 }
 
@@ -350,22 +355,27 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
 /// JS_ARRAY_ELEMENT_LIST:
 /// - `[function () {}, () => {}];`
 ///
-/// JS_PARENTHESIZED_EXPRESSION:
-/// - `(function () {});`
-/// - `(() => {})();`
-/// - `const asTyped = (() => '') as () => string;`
-/// - `const castTyped = <() => string>(() => '');`
-fn is_function_used_in_argument_or_expression_list(func: &AnyJsFunction) -> bool {
+fn is_function_used_in_argument_or_array(func: &AnyJsFunction) -> bool {
     matches!(
         func.syntax().parent().kind(),
-        Some(
-            JsSyntaxKind::JS_CALL_ARGUMENT_LIST
-                | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST
-                // We include JS_PARENTHESIZED_EXPRESSION for IIFE (Immediately Invoked Function Expressions) or a function with a type assertion
-                // We also assume that the parent of the parent is a call expression.
-                | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
-        )
+        Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST)
     )
+}
+
+/// Checks if a function is an IIFE (Immediately Invoked Function Expressions)
+///
+/// # Examples
+///
+/// ```typescript
+/// (function () {});
+/// (() => {})();
+/// ```
+fn is_iife(func: &AnyJsFunction) -> bool {
+    func.syntax()
+        .parent()
+        .and_then(JsParenthesizedExpression::cast)
+        .and_then(|expr| expr.parent::<JsCallExpression>())
+        .is_some()
 }
 
 /// Checks whether the given function is a higher-order function, i.e., a function
@@ -435,7 +445,8 @@ fn is_first_statement_function_return(statements: JsStatementList) -> bool {
 /// Checks if a given function expression has a type annotation.
 fn is_typed_function_expressions(func: &AnyJsFunction) -> bool {
     let syntax = func.syntax();
-    is_variable_declarator_with_type_annotation(syntax)
+    is_type_assertion(syntax)
+        || is_variable_declarator_with_type_annotation(syntax)
         || is_default_function_parameter_with_type_annotation(syntax)
         || is_class_property_with_type_annotation(syntax)
         || is_property_of_object_with_type(syntax)
@@ -491,7 +502,7 @@ fn is_class_property_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) -> bo
         .map_or(false, |prop| prop.property_annotation().is_some())
 }
 
-/// Checks if a function is a property or a nested property of a typed object:
+/// Checks if a function is a property or a nested property of a typed object.
 ///
 /// # Examples
 ///
@@ -515,12 +526,29 @@ fn is_property_of_object_with_type(syntax: &SyntaxNode<JsLanguage>) -> bool {
         })
 }
 
-/// Checks if a function is a type assertion:
+/// Checks if a function has a type assertion.
+///
+/// # Examples
+///
+/// ```typescript
+/// const asTyped = (() => '') as () => string;
+/// const castTyped = <() => string>(() => '');
+/// ```
 fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
-    syntax.parent().kind().is_some_and(|kind| {
+    fn is_assertion_kind(kind: JsSyntaxKind) -> bool {
         matches!(
             kind,
             JsSyntaxKind::TS_AS_EXPRESSION | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
         )
+    }
+
+    syntax.parent().map_or(false, |parent| {
+        if parent.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+            parent
+                .parent()
+                .map_or(false, |grandparent| is_assertion_kind(grandparent.kind()))
+        } else {
+            is_assertion_kind(parent.kind())
+        }
     })
 }
