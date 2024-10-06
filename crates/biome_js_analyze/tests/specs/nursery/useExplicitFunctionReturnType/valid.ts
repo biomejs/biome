@@ -47,6 +47,8 @@ node.addEventListener('click', function () {});
 const foo = arr.map(i => i * i);
 fn(() => {});
 fn(function () {});
+new Promise(resolve => {});
+new Foo(1, () => {});
 [function () {}, () => {}];
 (function () {
   console.log("This is an IIFE");
