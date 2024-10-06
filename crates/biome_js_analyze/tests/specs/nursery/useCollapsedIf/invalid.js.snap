@@ -22,6 +22,77 @@ if (condition) {
 	// ...
 }
 
+if (condition) // Comment
+	if (anotherCondition)
+		doSomething();
+
+// Inner one is `JsBlockStatement`
+if (condition) if (anotherCondition) {
+	// ...
+}
+
+// Outer one is `JsBlockStatement`
+if (condition) {
+	if (anotherCondition) doSomething();
+}
+
+// No `JsBlockStatement`
+if (condition) if (anotherCondition) doSomething();
+
+// `JsEmptyStatement`
+if (condition) if (anotherCondition);
+
+// Nested
+if (a) {
+	if (b) {
+		// ...
+	}
+} else if (c) {
+	if (d) {
+		// ...
+	}
+}
+
+// Need parenthesis
+function* foo() {
+	if (a || b)
+		if (a ?? b)
+			if (a ? b : c)
+				if (a = b)
+					if (a += b)
+						if (a -= b)
+							if (a &&= b)
+								if (yield a)
+									if (a, b);
+}
+
+// Should not add parenthesis
+async function foo() {
+	if (a)
+		if (await a)
+			if (a.b)
+				if (a && b);
+}
+
+// Don't case parenthesis in outer test
+if (((a || b))) if (((c || d)));
+
+// Semicolon
+// TODO
+// if (a) {
+// 	if (b) foo()
+// }
+// [].forEach(bar)
+
+if (a)
+	if (b) foo()
+	;[].forEach(bar)
+
+if (a) {
+	if (b) foo()
+}
+;[].forEach(bar)
+
 /**
  * Suggested fixes:
  */
@@ -86,6 +157,10 @@ if (condition) {
 	// ...
 }
 
+if (condition)
+	if (anotherCondition) // Comment
+		doSomething();
+
 ```
 
 # Diagnostics
@@ -107,18 +182,18 @@ invalid.js:5:17 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Use collapsed if instead.
   
-     3  3 │    */
-     4  4 │   
-     5    │ - if·(condition)·{
-     6    │ - → if·(anotherCondition)·{
-     7    │ - → → //·...
-     8    │ - → }
-     9    │ - }
-        5 │ + if·(condition&&anotherCondition)·{
-        6 │ + → → //·...
-        7 │ + → }
-    10  8 │   
-    11  9 │   if (condition) {
+      3   3 │    */
+      4   4 │   
+      5     │ - if·(condition)·{
+      6     │ - → if·(anotherCondition)·{
+      7     │ - → → //·...
+      8     │ - → }
+      9     │ - }
+          5 │ + if·(condition&&anotherCondition)·{
+          6 │ + → → //·...
+          7 │ + → }
+     10   8 │   
+     11   9 │   if (condition) {
   
 
 ```
@@ -141,172 +216,804 @@ invalid.js:11:17 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
   
   i Safe fix: Use collapsed if instead.
   
-     9  9 │   }
-    10 10 │   
-    11    │ - if·(condition)·{
-    12    │ - → if·(anotherCondition)·{
-    13    │ - → → //·...
-    14    │ - → }
-    15    │ - }·else·{
-       11 │ + if·(condition&&anotherCondition)·{
-       12 │ + → → //·...
-       13 │ + → }·else·{
-    16 14 │   	// ...
-    17 15 │   }
+      9   9 │   }
+     10  10 │   
+     11     │ - if·(condition)·{
+     12     │ - → if·(anotherCondition)·{
+     13     │ - → → //·...
+     14     │ - → }
+     15     │ - }·else·{
+         11 │ + if·(condition&&anotherCondition)·{
+         12 │ + → → //·...
+         13 │ + → }·else·{
+     16  14 │   	// ...
+     17  15 │   }
   
 
 ```
 
 ```
-invalid.js:23:28 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:19:26 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into another if statement.
   
-    21 │  */
+    17 │ }
+    18 │ 
+  > 19 │ if (condition) // Comment
+       │                          
+  > 20 │ 	if (anotherCondition)
+  > 21 │ 		doSomething();
+       │ 		^^^^^^^^^^^^^^
     22 │ 
-  > 23 │ if (condition) { // Comment
-       │                            
-  > 24 │ 	if (anotherCondition) {
-  > 25 │ 		// ...
-  > 26 │ 	}
-       │ 	^
-    27 │ }
-    28 │ 
+    23 │ // Inner one is `JsBlockStatement`
+  
+  i Safe fix: Use collapsed if instead.
+  
+     17  17 │   }
+     18  18 │   
+     19     │ - if·(condition)·//·Comment
+     20     │ - → if·(anotherCondition)
+     21     │ - → → doSomething();
+         19 │ + if·(condition&&anotherCondition)·//·Comment
+         20 │ + → doSomething();
+     22  21 │   
+     23  22 │   // Inner one is `JsBlockStatement`
   
 
 ```
 
 ```
-invalid.js:29:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:24:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into another if statement.
   
-    27 │ }
-    28 │ 
+    23 │ // Inner one is `JsBlockStatement`
+  > 24 │ if (condition) if (anotherCondition) {
+       │                ^^^^^^^^^^^^^^^^^^^^^^^
+  > 25 │ 	// ...
+  > 26 │ }
+       │ ^
+    27 │ 
+    28 │ // Outer one is `JsBlockStatement`
+  
+  i Safe fix: Use collapsed if instead.
+  
+     22  22 │   
+     23  23 │   // Inner one is `JsBlockStatement`
+     24     │ - if·(condition)·if·(anotherCondition)·{
+         24 │ + if·(condition&&anotherCondition)·{
+     25  25 │   	// ...
+     26  26 │   }
+  
+
+```
+
+```
+invalid.js:29:17 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    28 │ // Outer one is `JsBlockStatement`
   > 29 │ if (condition) {
        │                 
-  > 30 │ 	// Comment
-  > 31 │ 	if (anotherCondition) {
-  > 32 │ 		// ...
-  > 33 │ 	}
-       │ 	^
-    34 │ }
+  > 30 │ 	if (anotherCondition) doSomething();
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    31 │ }
+    32 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     27  27 │   
+     28  28 │   // Outer one is `JsBlockStatement`
+     29     │ - if·(condition)·{
+     30     │ - → if·(anotherCondition)·doSomething();
+     31     │ - }
+         29 │ + if·(condition&&anotherCondition)·doSomething();
+     32  30 │   
+     33  31 │   // No `JsBlockStatement`
+  
+
+```
+
+```
+invalid.js:34:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    33 │ // No `JsBlockStatement`
+  > 34 │ if (condition) if (anotherCondition) doSomething();
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     35 │ 
+    36 │ // `JsEmptyStatement`
+  
+  i Safe fix: Use collapsed if instead.
+  
+     32  32 │   
+     33  33 │   // No `JsBlockStatement`
+     34     │ - if·(condition)·if·(anotherCondition)·doSomething();
+         34 │ + if·(condition&&anotherCondition)·doSomething();
+     35  35 │   
+     36  36 │   // `JsEmptyStatement`
   
 
 ```
 
 ```
-invalid.js:36:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:37:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into another if statement.
   
-    34 │ }
-    35 │ 
-  > 36 │ if (condition) {
-       │                 
-  > 37 │ 	if (anotherCondition) {
-  > 38 │ 		// ...
-  > 39 │ 	} // Comment
-       │ 	^^^^^^^^^^^^
-    40 │ }
-    41 │ 
+    36 │ // `JsEmptyStatement`
+  > 37 │ if (condition) if (anotherCondition);
+       │                ^^^^^^^^^^^^^^^^^^^^^^
+    38 │ 
+    39 │ // Nested
+  
+  i Safe fix: Use collapsed if instead.
+  
+     35  35 │   
+     36  36 │   // `JsEmptyStatement`
+     37     │ - if·(condition)·if·(anotherCondition);
+         37 │ + if·(condition&&anotherCondition)·;
+     38  38 │   
+     39  39 │   // Nested
   
 
 ```
 
 ```
-invalid.js:42:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:40:9 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into another if statement.
   
-    40 │ }
-    41 │ 
-  > 42 │ if (condition) {
-       │                 
-  > 43 │ 	if (anotherCondition) {
-  > 44 │ 		// ...
-  > 45 │ 	}
+    39 │ // Nested
+  > 40 │ if (a) {
+       │         
+  > 41 │ 	if (b) {
+  > 42 │ 		// ...
+  > 43 │ 	}
        │ 	^
-    46 │ 	// Comment
-    47 │ }
+    44 │ } else if (c) {
+    45 │ 	if (d) {
+  
+  i Safe fix: Use collapsed if instead.
+  
+     38  38 │   
+     39  39 │   // Nested
+     40     │ - if·(a)·{
+     41     │ - → if·(b)·{
+     42     │ - → → //·...
+     43     │ - → }
+     44     │ - }·else·if·(c)·{
+         40 │ + if·(a&&b)·{
+         41 │ + → → //·...
+         42 │ + → }·else·if·(c)·{
+     45  43 │   	if (d) {
+     46  44 │   		// ...
   
 
 ```
 
 ```
-invalid.js:49:28 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:44:16 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into another if statement.
   
-    47 │ }
-    48 │ 
-  > 49 │ if (condition) { // Comment
-       │                            
-  > 50 │ 	if (anotherCondition) {
-  > 51 │ 		// ...
-  > 52 │ 	}
+    42 │ 		// ...
+    43 │ 	}
+  > 44 │ } else if (c) {
+       │                
+  > 45 │ 	if (d) {
+  > 46 │ 		// ...
+  > 47 │ 	}
        │ 	^
-    53 │ } else {
-    54 │ 	// ...
+    48 │ }
+    49 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     42  42 │   		// ...
+     43  43 │   	}
+     44     │ - }·else·if·(c)·{
+     45     │ - → if·(d)·{
+     46     │ - → → //·...
+     47     │ - → }
+     48     │ - }
+         44 │ + }·else·if·(c&&d)·{
+         45 │ + → → //·...
+         46 │ + → }
+     49  47 │   
+     50  48 │   // Need parenthesis
   
 
 ```
 
 ```
-invalid.js:57:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:52:13 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into another if statement.
   
-    55 │ }
-    56 │ 
-  > 57 │ if (condition) {
-       │                 
-  > 58 │ 	// Comment
-  > 59 │ 	if (anotherCondition) {
-  > 60 │ 		// ...
-  > 61 │ 	}
-       │ 	^
-    62 │ } else {
-    63 │ 	// ...
+    50 │ // Need parenthesis
+    51 │ function* foo() {
+  > 52 │ 	if (a || b)
+       │ 	           
+  > 53 │ 		if (a ?? b)
+        ...
+  > 59 │ 								if (yield a)
+  > 60 │ 									if (a, b);
+       │ 									^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     50  50 │   // Need parenthesis
+     51  51 │   function* foo() {
+     52     │ - → if·(a·||·b)
+     53     │ - → → if·(a·??·b)
+     54     │ - → → → if·(a·?·b·:·c)
+         52 │ + → if·((a·||·b)&&(a·??·b))
+         53 │ + → → if·(a·?·b·:·c)
+     55  54 │   				if (a = b)
+     56  55 │   					if (a += b)
   
 
 ```
 
 ```
-invalid.js:66:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:53:14 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into another if statement.
   
-    64 │ }
-    65 │ 
-  > 66 │ if (condition) {
-       │                 
-  > 67 │ 	if (anotherCondition) {
-  > 68 │ 		// ...
-  > 69 │ 	} // Comment
-       │ 	^^^^^^^^^^^^
-    70 │ } else {
-    71 │ 	// ...
+    51 │ function* foo() {
+    52 │ 	if (a || b)
+  > 53 │ 		if (a ?? b)
+       │ 		           
+  > 54 │ 			if (a ? b : c)
+        ...
+  > 59 │ 								if (yield a)
+  > 60 │ 									if (a, b);
+       │ 									^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     51  51 │   function* foo() {
+     52  52 │   	if (a || b)
+     53     │ - → → if·(a·??·b)
+     54     │ - → → → if·(a·?·b·:·c)
+     55     │ - → → → → if·(a·=·b)
+         53 │ + → → if·((a·??·b)&&(a·?·b·:·c))
+         54 │ + → → → if·(a·=·b)
+     56  55 │   					if (a += b)
+     57  56 │   						if (a -= b)
   
 
 ```
 
 ```
-invalid.js:74:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:54:18 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This if statement can be collapsed into another if statement.
   
-    72 │ }
+    52 │ 	if (a || b)
+    53 │ 		if (a ?? b)
+  > 54 │ 			if (a ? b : c)
+       │ 			              
+  > 55 │ 				if (a = b)
+        ...
+  > 59 │ 								if (yield a)
+  > 60 │ 									if (a, b);
+       │ 									^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     52  52 │   	if (a || b)
+     53  53 │   		if (a ?? b)
+     54     │ - → → → if·(a·?·b·:·c)
+     55     │ - → → → → if·(a·=·b)
+     56     │ - → → → → → if·(a·+=·b)
+         54 │ + → → → if·((a·?·b·:·c)&&(a·=·b))
+         55 │ + → → → → if·(a·+=·b)
+     57  56 │   						if (a -= b)
+     58  57 │   							if (a &&= b)
+  
+
+```
+
+```
+invalid.js:55:15 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    53 │ 		if (a ?? b)
+    54 │ 			if (a ? b : c)
+  > 55 │ 				if (a = b)
+       │ 				          
+  > 56 │ 					if (a += b)
+  > 57 │ 						if (a -= b)
+  > 58 │ 							if (a &&= b)
+  > 59 │ 								if (yield a)
+  > 60 │ 									if (a, b);
+       │ 									^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     53  53 │   		if (a ?? b)
+     54  54 │   			if (a ? b : c)
+     55     │ - → → → → if·(a·=·b)
+     56     │ - → → → → → if·(a·+=·b)
+     57     │ - → → → → → → if·(a·-=·b)
+         55 │ + → → → → if·((a·=·b)&&(a·+=·b))
+         56 │ + → → → → → if·(a·-=·b)
+     58  57 │   							if (a &&= b)
+     59  58 │   								if (yield a)
+  
+
+```
+
+```
+invalid.js:56:17 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    54 │ 			if (a ? b : c)
+    55 │ 				if (a = b)
+  > 56 │ 					if (a += b)
+       │ 					           
+  > 57 │ 						if (a -= b)
+  > 58 │ 							if (a &&= b)
+  > 59 │ 								if (yield a)
+  > 60 │ 									if (a, b);
+       │ 									^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     54  54 │   			if (a ? b : c)
+     55  55 │   				if (a = b)
+     56     │ - → → → → → if·(a·+=·b)
+     57     │ - → → → → → → if·(a·-=·b)
+     58     │ - → → → → → → → if·(a·&&=·b)
+         56 │ + → → → → → if·((a·+=·b)&&(a·-=·b))
+         57 │ + → → → → → → if·(a·&&=·b)
+     59  58 │   								if (yield a)
+     60  59 │   									if (a, b);
+  
+
+```
+
+```
+invalid.js:57:18 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    55 │ 				if (a = b)
+    56 │ 					if (a += b)
+  > 57 │ 						if (a -= b)
+       │ 						           
+  > 58 │ 							if (a &&= b)
+  > 59 │ 								if (yield a)
+  > 60 │ 									if (a, b);
+       │ 									^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     55  55 │   				if (a = b)
+     56  56 │   					if (a += b)
+     57     │ - → → → → → → if·(a·-=·b)
+     58     │ - → → → → → → → if·(a·&&=·b)
+     59     │ - → → → → → → → → if·(yield·a)
+         57 │ + → → → → → → if·((a·-=·b)&&(a·&&=·b))
+         58 │ + → → → → → → → if·(yield·a)
+     60  59 │   									if (a, b);
+     61  60 │   }
+  
+
+```
+
+```
+invalid.js:58:20 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    56 │ 					if (a += b)
+    57 │ 						if (a -= b)
+  > 58 │ 							if (a &&= b)
+       │ 							            
+  > 59 │ 								if (yield a)
+  > 60 │ 									if (a, b);
+       │ 									^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     56  56 │   					if (a += b)
+     57  57 │   						if (a -= b)
+     58     │ - → → → → → → → if·(a·&&=·b)
+     59     │ - → → → → → → → → if·(yield·a)
+     60     │ - → → → → → → → → → if·(a,·b);
+         58 │ + → → → → → → → if·((a·&&=·b)&&(yield·a))
+         59 │ + → → → → → → → → if·(a,·b);
+     61  60 │   }
+     62  61 │   
+  
+
+```
+
+```
+invalid.js:59:21 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    57 │ 						if (a -= b)
+    58 │ 							if (a &&= b)
+  > 59 │ 								if (yield a)
+       │ 								            
+  > 60 │ 									if (a, b);
+       │ 									^^^^^^^^^^
+    61 │ }
+    62 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     57  57 │   						if (a -= b)
+     58  58 │   							if (a &&= b)
+     59     │ - → → → → → → → → if·(yield·a)
+     60     │ - → → → → → → → → → if·(a,·b);
+         59 │ + → → → → → → → → if·((yield·a)&&(a,·b))
+         60 │ + → → → → → → → → → ;
+     61  61 │   }
+     62  62 │   
+  
+
+```
+
+```
+invalid.js:65:8 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    63 │ // Should not add parenthesis
+    64 │ async function foo() {
+  > 65 │ 	if (a)
+       │ 	      
+  > 66 │ 		if (await a)
+  > 67 │ 			if (a.b)
+  > 68 │ 				if (a && b);
+       │ 				^^^^^^^^^^^^
+    69 │ }
+    70 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     63  63 │   // Should not add parenthesis
+     64  64 │   async function foo() {
+     65     │ - → if·(a)
+     66     │ - → → if·(await·a)
+     67     │ - → → → if·(a.b)
+         65 │ + → if·(a&&await·a)
+         66 │ + → → if·(a.b)
+     68  67 │   				if (a && b);
+     69  68 │   }
+  
+
+```
+
+```
+invalid.js:66:15 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    64 │ async function foo() {
+    65 │ 	if (a)
+  > 66 │ 		if (await a)
+       │ 		            
+  > 67 │ 			if (a.b)
+  > 68 │ 				if (a && b);
+       │ 				^^^^^^^^^^^^
+    69 │ }
+    70 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     64  64 │   async function foo() {
+     65  65 │   	if (a)
+     66     │ - → → if·(await·a)
+     67     │ - → → → if·(a.b)
+     68     │ - → → → → if·(a·&&·b);
+         66 │ + → → if·(await·a&&a.b)
+         67 │ + → → → if·(a·&&·b);
+     69  68 │   }
+     70  69 │   
+  
+
+```
+
+```
+invalid.js:67:12 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    65 │ 	if (a)
+    66 │ 		if (await a)
+  > 67 │ 			if (a.b)
+       │ 			        
+  > 68 │ 				if (a && b);
+       │ 				^^^^^^^^^^^^
+    69 │ }
+    70 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+     65  65 │   	if (a)
+     66  66 │   		if (await a)
+     67     │ - → → → if·(a.b)
+     68     │ - → → → → if·(a·&&·b);
+         67 │ + → → → if·(a.b&&a·&&·b)
+         68 │ + → → → → ;
+     69  69 │   }
+     70  70 │   
+  
+
+```
+
+```
+invalid.js:72:17 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    71 │ // Don't case parenthesis in outer test
+  > 72 │ if (((a || b))) if (((c || d)));
+       │                 ^^^^^^^^^^^^^^^^
     73 │ 
-  > 74 │ if (condition) {
-       │                 
-  > 75 │ 	if (anotherCondition) {
-  > 76 │ 		// ...
-  > 77 │ 	}
+    74 │ // Semicolon
+  
+  i Safe fix: Use collapsed if instead.
+  
+     70  70 │   
+     71  71 │   // Don't case parenthesis in outer test
+     72     │ - if·(((a·||·b)))·if·(((c·||·d)));
+         72 │ + if·(((a·||·b))&&((c·||·d)))·;
+     73  73 │   
+     74  74 │   // Semicolon
+  
+
+```
+
+```
+invalid.js:81:7 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    79 │ // [].forEach(bar)
+    80 │ 
+  > 81 │ if (a)
+       │       
+  > 82 │ 	if (b) foo()
+  > 83 │ 	;[].forEach(bar)
        │ 	^
-    78 │ 	// Comment
-    79 │ } else {
+    84 │ 
+    85 │ if (a) {
+  
+  i Safe fix: Use collapsed if instead.
+  
+     79  79 │   // [].forEach(bar)
+     80  80 │   
+     81     │ - if·(a)
+     82     │ - → if·(b)·foo()
+         81 │ + if·(a&&b)
+         82 │ + → foo()
+     83  83 │   	;[].forEach(bar)
+     84  84 │   
+  
+
+```
+
+```
+invalid.js:85:9 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    83 │ 	;[].forEach(bar)
+    84 │ 
+  > 85 │ if (a) {
+       │         
+  > 86 │ 	if (b) foo()
+       │ 	^^^^^^^^^^^^
+    87 │ }
+    88 │ ;[].forEach(bar)
+  
+  i Safe fix: Use collapsed if instead.
+  
+     83  83 │   	;[].forEach(bar)
+     84  84 │   
+     85     │ - if·(a)·{
+     86     │ - → if·(b)·foo()
+     87     │ - }
+         85 │ + if·(a&&b)·foo()
+     88  86 │   ;[].forEach(bar)
+     89  87 │   
+  
+
+```
+
+```
+invalid.js:94:28 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    92 │  */
+    93 │ 
+  > 94 │ if (condition) { // Comment
+       │                            
+  > 95 │ 	if (anotherCondition) {
+  > 96 │ 		// ...
+  > 97 │ 	}
+       │ 	^
+    98 │ }
+    99 │ 
+  
+
+```
+
+```
+invalid.js:100:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+     98 │ }
+     99 │ 
+  > 100 │ if (condition) {
+        │                 
+  > 101 │ 	// Comment
+  > 102 │ 	if (anotherCondition) {
+  > 103 │ 		// ...
+  > 104 │ 	}
+        │ 	^
+    105 │ }
+    106 │ 
+  
+
+```
+
+```
+invalid.js:107:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    105 │ }
+    106 │ 
+  > 107 │ if (condition) {
+        │                 
+  > 108 │ 	if (anotherCondition) {
+  > 109 │ 		// ...
+  > 110 │ 	} // Comment
+        │ 	^^^^^^^^^^^^
+    111 │ }
+    112 │ 
+  
+
+```
+
+```
+invalid.js:113:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    111 │ }
+    112 │ 
+  > 113 │ if (condition) {
+        │                 
+  > 114 │ 	if (anotherCondition) {
+  > 115 │ 		// ...
+  > 116 │ 	}
+        │ 	^
+    117 │ 	// Comment
+    118 │ }
+  
+
+```
+
+```
+invalid.js:120:28 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    118 │ }
+    119 │ 
+  > 120 │ if (condition) { // Comment
+        │                            
+  > 121 │ 	if (anotherCondition) {
+  > 122 │ 		// ...
+  > 123 │ 	}
+        │ 	^
+    124 │ } else {
+    125 │ 	// ...
+  
+
+```
+
+```
+invalid.js:128:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    126 │ }
+    127 │ 
+  > 128 │ if (condition) {
+        │                 
+  > 129 │ 	// Comment
+  > 130 │ 	if (anotherCondition) {
+  > 131 │ 		// ...
+  > 132 │ 	}
+        │ 	^
+    133 │ } else {
+    134 │ 	// ...
+  
+
+```
+
+```
+invalid.js:137:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    135 │ }
+    136 │ 
+  > 137 │ if (condition) {
+        │                 
+  > 138 │ 	if (anotherCondition) {
+  > 139 │ 		// ...
+  > 140 │ 	} // Comment
+        │ 	^^^^^^^^^^^^
+    141 │ } else {
+    142 │ 	// ...
+  
+
+```
+
+```
+invalid.js:145:17 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    143 │ }
+    144 │ 
+  > 145 │ if (condition) {
+        │                 
+  > 146 │ 	if (anotherCondition) {
+  > 147 │ 		// ...
+  > 148 │ 	}
+        │ 	^
+    149 │ 	// Comment
+    150 │ } else {
+  
+
+```
+
+```
+invalid.js:154:15 lint/nursery/useCollapsedIf ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    152 │ }
+    153 │ 
+  > 154 │ if (condition)
+        │               
+  > 155 │ 	if (anotherCondition) // Comment
+  > 156 │ 		doSomething();
+        │ 		^^^^^^^^^^^^^^
+    157 │ 
   
 
 ```

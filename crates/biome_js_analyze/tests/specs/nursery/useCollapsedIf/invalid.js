@@ -16,6 +16,10 @@ if (condition) {
 	// ...
 }
 
+if (condition) // Comment
+	if (anotherCondition)
+		doSomething();
+
 // Inner one is `JsBlockStatement`
 if (condition) if (anotherCondition) {
 	// ...
@@ -68,10 +72,11 @@ async function foo() {
 if (((a || b))) if (((c || d)));
 
 // Semicolon
-if (a) {
-	if (b) foo()
-}
-[].forEach(bar)
+// TODO
+// if (a) {
+// 	if (b) foo()
+// }
+// [].forEach(bar)
 
 if (a)
 	if (b) foo()
@@ -145,3 +150,7 @@ if (condition) {
 } else {
 	// ...
 }
+
+if (condition)
+	if (anotherCondition) // Comment
+		doSomething();

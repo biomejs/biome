@@ -24,6 +24,15 @@ if (condition) {
 }
 
 if (condition) {
+	if (anotherCondition) {
+		// ...
+	}
+	doSomething();
+} else {
+	// ...
+}
+
+if (condition) {
 	anotherCondition ? c() : d()
 }
 
