@@ -4,6 +4,7 @@ use biome_formatter::{
     AttributePosition, BracketSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle,
     IndentWidth, LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
 };
+use biome_grit_syntax::file_source::GritFileSource;
 use biome_grit_syntax::GritLanguage;
 use std::fmt::Display;
 use std::rc::Rc;
@@ -54,7 +55,7 @@ impl CstFormatContext for GritFormatContext {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct GritFormatOptions {
     indent_style: IndentStyle,
     indent_width: IndentWidth,
@@ -62,25 +63,20 @@ pub struct GritFormatOptions {
     line_width: LineWidth,
     quote_style: QuoteStyle,
     attribute_position: AttributePosition,
-    bracket_spacing: BracketSpacing,
+    _file_source: GritFileSource,
 }
 
 impl GritFormatOptions {
-    pub fn new() -> Self {
+    pub fn new(file_source: GritFileSource) -> Self {
         Self {
+            _file_source: file_source,
             indent_style: IndentStyle::default(),
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
             quote_style: QuoteStyle::default(),
             attribute_position: AttributePosition::default(),
-            bracket_spacing: BracketSpacing::default(),
         }
-    }
-
-    pub fn with_bracket_spacing(mut self, bracket_spacing: BracketSpacing) -> Self {
-        self.bracket_spacing = bracket_spacing;
-        self
     }
 
     pub fn with_indent_style(mut self, indent_style: IndentStyle) -> Self {
@@ -108,10 +104,6 @@ impl GritFormatOptions {
         self
     }
 
-    pub fn set_bracket_spacing(&mut self, bracket_spacing: BracketSpacing) {
-        self.bracket_spacing = bracket_spacing;
-    }
-
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -132,10 +124,6 @@ impl GritFormatOptions {
         self.quote_style = quote_style;
     }
 
-    pub fn bracket_spacing(&self) -> BracketSpacing {
-        self.bracket_spacing
-    }
-
     pub fn quote_style(&self) -> QuoteStyle {
         self.quote_style
     }
@@ -151,7 +139,6 @@ impl Display for GritFormatOptions {
         writeln!(f, "Indent width: {}", self.indent_width.value())?;
         writeln!(f, "Line ending: {}", self.line_ending)?;
         writeln!(f, "Line width: {}", self.line_width.value())?;
-        writeln!(f, "Bracket spacing: {}", self.bracket_spacing.value())?;
         writeln!(f, "Attribute Position: {}", self.attribute_position)
     }
 }
@@ -177,8 +164,8 @@ impl FormatOptions for GritFormatOptions {
         self.attribute_position
     }
 
-    fn bracket_spacing(&self) -> BracketSpacing {
-        self.bracket_spacing
+    fn bracket_spacing(&self) -> biome_formatter::BracketSpacing {
+        BracketSpacing::default()
     }
 
     fn as_print_options(&self) -> biome_formatter::prelude::PrinterOptions {

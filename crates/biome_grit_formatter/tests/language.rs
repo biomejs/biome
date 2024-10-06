@@ -22,10 +22,11 @@ impl TestFormatLanguage for GritTestFormatLanguage {
         settings: &biome_service::settings::Settings,
         file_source: &biome_service::workspace::DocumentFileSource,
     ) -> Self::FormatLanguage {
+        let language_settings = &settings.languages.grit.formatter;
         let options = Self::ServiceLanguage::resolve_format_options(
             Some(&settings.formatter),
             Some(&settings.override_settings),
-            None,
+            Some(language_settings),
             &BiomePath::new(""),
             file_source,
         );

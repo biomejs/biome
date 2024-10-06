@@ -22,7 +22,7 @@ fn quick_test() {
 }
 "#;
     let tree = parse_grit(src);
-    let options = GritFormatOptions::new()
+    let options = GritFormatOptions::default()
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())
         .with_quote_style(QuoteStyle::Double);

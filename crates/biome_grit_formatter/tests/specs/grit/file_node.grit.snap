@@ -20,27 +20,6 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
-Bracket spacing: true
-Attribute Position: Auto
------
-
-```grit
-file(body = contains `console.$method` => `println`)
-```
-
-
-
-## Unimplemented nodes/tokens
-
-"file(body = contains `console.$method` => `println`)" => 0..52
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
 Attribute Position: Auto
 -----
 

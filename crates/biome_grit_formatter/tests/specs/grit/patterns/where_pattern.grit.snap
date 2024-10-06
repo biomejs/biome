@@ -23,30 +23,6 @@ Indent style: Tab
 Indent width: 2
 Line ending: LF
 Line width: 80
-Bracket spacing: true
-Attribute Position: Auto
------
-
-```grit
-`$method('$message')` where {
-
-}
-```
-
-
-
-## Unimplemented nodes/tokens
-
-"`$method('$message')`" => 0..21
-" {\n\n" => 27..31
-## Output 1
-
------
-Indent style: Tab
-Indent width: 2
-Line ending: LF
-Line width: 80
-Bracket spacing: true
 Attribute Position: Auto
 -----
 
