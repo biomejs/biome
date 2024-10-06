@@ -7,12 +7,14 @@ impl FormatRule<GritPredicateList> for FormatGritPredicateList {
     fn fmt(&self, node: &GritPredicateList, f: &mut GritFormatter) -> FormatResult<()> {
         let mut join = f.join_nodes_with_hardline();
 
+        // TODO: Add separator
         for predicate in node {
-            let pred_clone = predicate.clone().unwrap();
-            join.entry(
-                predicate?.syntax(),
-                &format_or_verbatim(pred_clone.format()),
-            );
+            match predicate {
+                Ok(predicate) => {
+                    join.entry(predicate.syntax(), &format_or_verbatim(predicate.format()));
+                }
+                Err(_) => (),
+            }
         }
 
         join.finish()

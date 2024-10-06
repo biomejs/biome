@@ -5,14 +5,20 @@ pub(crate) struct FormatGritDefinitionList;
 impl FormatRule<GritDefinitionList> for FormatGritDefinitionList {
     type Context = GritFormatContext;
     fn fmt(&self, node: &GritDefinitionList, f: &mut GritFormatter) -> FormatResult<()> {
-        let mut join = f.join_nodes_with_hardline();
+        let mut join: JoinNodesBuilder<'_, '_, Line, GritFormatContext> =
+            f.join_nodes_with_hardline();
 
+        // TODO: Add separator
         for definition in node {
-            let def_clone = definition.clone().unwrap();
-            join.entry(
-                definition?.syntax(),
-                &format_or_verbatim(def_clone.format()),
-            );
+            match definition {
+                Ok(definition) => {
+                    join.entry(
+                        definition.syntax(),
+                        &format_or_verbatim(definition.format()),
+                    );
+                }
+                Err(_) => (),
+            }
         }
 
         join.finish()
