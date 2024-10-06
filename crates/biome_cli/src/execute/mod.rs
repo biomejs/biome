@@ -27,6 +27,7 @@ use biome_service::workspace::{
 use std::borrow::Borrow;
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
+use std::fs;
 use std::path::{Path, PathBuf};
 use tracing::info;
 
@@ -521,6 +522,11 @@ pub fn execute_mode(
                     console.log(markup! {
                         {code.as_code()}
                     });
+
+                    if let Some(report_output_file) = &cli_options.report_output_file {
+                        fs::write(report_output_file.clone(), code.as_code())
+                            .expect("Unable to write report file");
+                    }
                 } else {
                     console.log(markup! {
                         {buffer}
