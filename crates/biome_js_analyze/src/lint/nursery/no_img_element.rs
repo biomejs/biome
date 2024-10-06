@@ -3,11 +3,9 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::{
-    JsSyntaxToken, JsxAttributeList, JsxChildList, JsxElement, JsxOpeningElement,
-    JsxSelfClosingElement,
-};
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, TextRange};
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_js_syntax::{JsxChildList, JsxElement};
+use biome_rowan::{AstNode, AstNodeList};
 
 declare_lint_rule! {
     /// Prevent usage of `<img>` element in a Next.js project.
@@ -59,26 +57,46 @@ declare_lint_rule! {
     }
 }
 
-declare_node_union! {
-    pub NoImgElementQuery = JsxOpeningElement | JsxSelfClosingElement
-}
-
 impl Rule for NoImgElement {
-    type Query = Ast<NoImgElementQuery>;
-    type State = TextRange;
+    type Query = Ast<AnyJsxElement>;
+    type State = ();
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        node.is_target_valid()?.then(|| node.range())
+
+        if node.name().ok()?.name_value_token()?.text_trimmed() != "img"
+            || node.attributes().is_empty()
+        {
+            return None;
+        }
+
+        if let AnyJsxElement::JsxSelfClosingElement(jsx) = &node {
+            let Some(parent) = jsx.parent::<JsxChildList>() else {
+                return Some(());
+            };
+            let Some(parent) = parent.parent::<JsxElement>() else {
+                return Some(());
+            };
+            let Some(opening_element) = parent.opening_element().ok() else {
+                return Some(());
+            };
+            let name = opening_element.name().ok()?.name_value_token()?;
+
+            if name.text_trimmed() == "picture" {
+                return None;
+            }
+        }
+
+        Some(())
     }
 
-    fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         return Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                range,
+                ctx.query().range(),
                 markup! {
                     "Using "<Emphasis>"<img>"</Emphasis>" could result in slower LCP and higher bandwidth."
                 },
@@ -86,52 +104,5 @@ impl Rule for NoImgElement {
             .note(markup! { "Consider using "<Emphasis>"<Image />"</Emphasis>" from "<Emphasis>"next/image"</Emphasis>" to automatically optimize images." })
             .note(markup! { "This may incur additional usage or cost from your provider." })
         );
-    }
-}
-
-impl NoImgElementQuery {
-    fn range(&self) -> TextRange {
-        match self {
-            NoImgElementQuery::JsxOpeningElement(jsx) => jsx.range(),
-            NoImgElementQuery::JsxSelfClosingElement(jsx) => jsx.range(),
-        }
-    }
-
-    fn name(&self) -> Option<JsSyntaxToken> {
-        match self {
-            NoImgElementQuery::JsxOpeningElement(jsx) => jsx.name().ok()?.name_value_token(),
-            NoImgElementQuery::JsxSelfClosingElement(jsx) => jsx.name().ok()?.name_value_token(),
-        }
-    }
-
-    fn attributes(&self) -> JsxAttributeList {
-        match self {
-            NoImgElementQuery::JsxOpeningElement(jsx) => jsx.attributes(),
-            NoImgElementQuery::JsxSelfClosingElement(jsx) => jsx.attributes(),
-        }
-    }
-
-    fn get_grandparent(&self) -> Option<JsxOpeningElement> {
-        if let NoImgElementQuery::JsxSelfClosingElement(jsx) = self {
-            return jsx
-                .parent::<JsxChildList>()?
-                .parent::<JsxElement>()?
-                .opening_element()
-                .ok();
-        }
-        None
-    }
-
-    fn is_target_valid(&self) -> Option<bool> {
-        if self.name()?.text_trimmed() != "img" || self.attributes().is_empty() {
-            return Some(false);
-        }
-
-        if let Some(grandparent) = self.get_grandparent() {
-            let name = grandparent.name().ok()?.name_value_token();
-            return Some(name.map_or(true, |name| name.text_trimmed() != "picture"));
-        }
-
-        Some(true)
     }
 }
