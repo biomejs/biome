@@ -2123,6 +2123,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noHeadElement": {
+					"description": "Prevent usage of \\<head> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
