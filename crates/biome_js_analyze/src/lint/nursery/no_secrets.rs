@@ -23,12 +23,14 @@ declare_lint_rule! {
     /// especially for those who may not be aware of the risks associated with
     /// sensitive data exposure.
     ///
-    /// ## Recommendations
-    /// While this rule is beneficial for catching the most egregious cases,
-    /// it is not infallible and may yield false positives. Therefore, always
-    /// review your code carefully and consider implementing additional security
+    /// ## Disclaimer
+    /// While this rule helps with most common cases, it is not intended to handle all of them.
+    /// Therefore, always review your code carefully and consider implementing additional security
     /// measures, such as automated secret scanning in your CI/CD and git pipeline.
+    ///
+    /// ## Recommendations
     /// Some recommended tools for more comprehensive secret detection include:
+    /// - [SonarQube](https://www.sonarsource.com/products/sonarqube/downloads/): Clean Code scanning solution which has a secret scanner (Community version).
     /// - [Gitleaks](https://github.com/gitleaks/gitleaks/): A mature secret scanning tool.
     /// - [Trufflehog](https://github.com/trufflesecurity/trufflehog): A tool for finding secrets in git history.
     /// - [Sensleak](https://github.com/crates-pro/sensleak-rs): A Rust-based solution for secret detection.
@@ -47,10 +49,6 @@ declare_lint_rule! {
     /// const nonSecret = "hello world";
     /// ```
     ///
-    /// ## Disclaimer
-    /// This rule is intended to catch obvious secret leaks, but for more robust detection
-    /// across different languages and scenarios, we encourage users to explore the dedicated
-    /// tools mentioned above.
     pub NoSecrets {
         version: "1.9.0",
         name: "noSecrets",
