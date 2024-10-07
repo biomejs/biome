@@ -47,8 +47,8 @@ invalid.js:1:13 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -69,8 +69,8 @@ invalid.js:2:20 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -92,8 +92,8 @@ invalid.js:3:20 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -115,8 +115,8 @@ invalid.js:4:19 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -138,8 +138,8 @@ invalid.js:5:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -161,8 +161,8 @@ invalid.js:6:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -184,8 +184,8 @@ invalid.js:7:23 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -207,8 +207,8 @@ invalid.js:8:21 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -230,8 +230,8 @@ invalid.js:9:26 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -253,8 +253,8 @@ invalid.js:10:22 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -276,8 +276,8 @@ invalid.js:11:18 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -299,8 +299,8 @@ invalid.js:12:22 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -322,8 +322,8 @@ invalid.js:13:15 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -345,8 +345,8 @@ invalid.js:14:18 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -368,8 +368,8 @@ invalid.js:15:28 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -391,8 +391,8 @@ invalid.js:16:24 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```
@@ -414,8 +414,8 @@ invalid.js:18:10 lint/nursery/noSecrets ━━━━━━━━━━━━━�
   i Storing secrets in source code is a security risk. Consider the following steps:
     1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree.
     2. If needed, use environment variables or a secure secret management system to store sensitive data.
-    3. If this is a false positive, consider adding an inline disable comment.
-    This rule catches only basic vulnerabilities. For a detailed list of proper solutions, head over to https://biomejs.dev/linter/rules/no-secrets/
+    3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options in our docs.
+    This rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: https://biomejs.dev/linter/rules/no-secrets/#recommendations
   
 
 ```

@@ -368,7 +368,13 @@ fn is_known_safe_pattern(data: &str) -> bool {
 }
 
 fn detect_secret(data: &str, entropy_threshold: &u16) -> Option<&'static str> {
-    let tokens: Vec<&str> = split_into_tokens(data);
+    if is_known_safe_pattern(data) {
+        return None;
+    }
+
+    let tokens = data
+        .split([' ', '\t', '\n', '.', ',', ';', ':', '/', '-', '_', '@'])
+        .filter(|s| !s.is_empty());
 
     for token in tokens {
         if token.len() >= MIN_PATTERN_LEN {
@@ -493,14 +499,6 @@ fn apply_exponential_entropy_scaling(
     // We will apply a logarithmic dampening to prevent excessive scaling for long tokens
     let scaling_adjustment = (token_length as f64 / scaling_factor).ln();
     base_threshold + entropy * scaling_adjustment
-}
-
-fn split_into_tokens(value: &str) -> Vec<&str> {
-    let delimiters = [' ', '\t', '\n', '.', ',', ';', ':', '/', '-', '_', '@'];
-    value
-        .split(|c| delimiters.contains(&c))
-        .filter(|s| !s.is_empty())
-        .collect()
 }
 
 #[cfg(test)]
