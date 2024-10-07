@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{JsFileSource, JsImport};
 use biome_rowan::AstNode;
+use std::path::MAIN_SEPARATOR;
 
 declare_lint_rule! {
     /// Prevent usage of `next/head` in `pages/_document.js` on Next.js projects.
@@ -93,14 +94,15 @@ impl Rule for NoHeadImportInDocument {
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
-        let path = ctx.file_path().to_str()?.split("pages/").nth(1)?;
+        let path = ctx.file_path().to_str()?.split("pages").nth(1)?;
+        let normalized_path = path.replace(MAIN_SEPARATOR, "/");
 
         return Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 ctx.query().range(),
                 markup! {
-                    "Don't use "<Emphasis>"next/head"</Emphasis>" in pages/"{path}""
+                    "Don't use "<Emphasis>"next/head"</Emphasis>" in pages"{normalized_path}""
                 },
             )
             .note(markup! {
