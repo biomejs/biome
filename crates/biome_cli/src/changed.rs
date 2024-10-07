@@ -7,7 +7,7 @@ use std::ffi::OsString;
 pub(crate) fn get_changed_files(
     fs: &DynRef<'_, dyn FileSystem>,
     configuration: &PartialConfiguration,
-    since: Option<&String>,
+    since: Option<&str>,
 ) -> Result<Vec<OsString>, CliDiagnostic> {
     let default_branch = configuration
         .vcs

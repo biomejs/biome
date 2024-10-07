@@ -181,7 +181,7 @@ impl CommandRunner for FormatCommandPayload {
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         if let Some(paths) = get_files_to_process(
-            self.since.as_ref(),
+            self.since.as_deref(),
             self.changed,
             self.staged,
             fs,

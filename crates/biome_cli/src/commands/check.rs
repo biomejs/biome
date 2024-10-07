@@ -169,7 +169,7 @@ pub(crate) fn check(
     let stdin = get_stdin(stdin_file_path, &mut *session.app.console, "check")?;
 
     let vcs_targeted_paths = get_files_to_process(
-        since.as_ref(),
+        since.as_deref(),
         changed,
         staged,
         &session.app.fs,

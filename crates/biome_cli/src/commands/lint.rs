@@ -139,7 +139,7 @@ pub(crate) fn lint(session: CliSession, payload: LintCommandPayload) -> Result<(
     }
 
     let vcs_targeted_paths = get_files_to_process(
-        since.as_ref(),
+        since.as_deref(),
         changed,
         staged,
         &session.app.fs,

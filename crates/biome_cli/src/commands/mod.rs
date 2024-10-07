@@ -696,7 +696,7 @@ pub(crate) fn get_stdin(
 }
 
 fn get_files_to_process(
-    since: Option<&String>,
+    since: Option<&str>,
     changed: bool,
     staged: bool,
     fs: &DynRef<'_, dyn FileSystem>,
