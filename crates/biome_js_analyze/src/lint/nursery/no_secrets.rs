@@ -146,8 +146,8 @@ impl Rule for NoSecrets {
                 "Storing secrets in source code is a security risk. Consider the following steps:"
                 "\n1. Remove the secret from your code. If you've already committed it, consider removing the commit entirely from your git tree."
                 "\n2. If needed, use environment variables or a secure secret management system to store sensitive data."
-                "\n3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. Learn more: https://biomejs.dev/linter/rules/no-secrets/#options"
-                "\nThis rule only catches very basic vulnerabilities. For more robust, proper solutions, we recommend heading over to https://biomejs.dev/linter/rules/no-secrets/#recommendations"
+                "\n3. If this is a false positive, consider adding an inline disable comment, or tweak the entropy threshold. See options "<Hyperlink href="https://biomejs.dev/linter/rules/no-secrets/#options">"in our docs."</Hyperlink>
+                "\nThis rule only catches basic vulnerabilities. For more robust, proper solutions, check out our recommendations at: "<Hyperlink href="https://biomejs.dev/linter/rules/no-secrets/#recommendations">"https://biomejs.dev/linter/rules/no-secrets/#recommendations"</Hyperlink>
             })
         )
     }
@@ -386,6 +386,17 @@ fn detect_secret(data: &str, entropy_threshold: &u16) -> Option<&'static str> {
     None
 }
 
+/*
+Uses Shannon Entropy as a base algorithm, then adds "boosts" for special patterns/occurrences.
+For example, Continuous mixed cases (lIkE tHiS) are more likely to contribute to a higher score than single cases.
+Symbols also contribute highly to secrets.
+
+TODO: This needs work. False positives/negatives are highlighted in valid.js and invalid.js.
+
+References:
+- ChatGPT chat: https://chatgpt.com/share/670370bf-3e18-8011-8454-f3bd01be0319
+- Original paper for Shannon Entropy: https://ieeexplore.ieee.org/abstract/document/6773024/
+*/
 fn calculate_entropy_with_case_and_classes(
     data: &str,
     base_threshold: f64,
@@ -466,6 +477,13 @@ fn calculate_entropy_with_case_and_classes(
     apply_exponential_entropy_scaling(adjusted_entropy, len, base_threshold, scaling_factor)
 }
 
+/*
+    A simple mechanism to scale entropy as the string length increases, the reason being that
+    large length strings are likely to be secrets.
+    TODO: However, at some point there should definitely be a cutoff i.e. 100 characters, because it's
+    probably base64 data or something similar at that point.
+    This was taken from GPT, and I sadly couldn't find references for it.
+*/
 fn apply_exponential_entropy_scaling(
     entropy: f64,
     token_length: usize,
@@ -479,16 +497,10 @@ fn apply_exponential_entropy_scaling(
 
 fn split_into_tokens(value: &str) -> Vec<&str> {
     let delimiters = [' ', '\t', '\n', '.', ',', ';', ':', '/', '-', '_', '@'];
-    let mut tokens = vec![value];
-
-    for &delimiter in delimiters.iter() {
-        tokens = tokens
-            .into_iter()
-            .flat_map(|token| token.split(delimiter).filter(|&s| !s.is_empty()))
-            .collect();
-    }
-
-    tokens
+    value
+        .split(|c| delimiters.contains(&c))
+        .filter(|s| !s.is_empty())
+        .collect()
 }
 
 #[cfg(test)]
