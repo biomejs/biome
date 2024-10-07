@@ -72,7 +72,6 @@ fn analyze(
     let options = create_analyzer_options(input_file, &mut diagnostics);
     let manifest = load_manifest(input_file, &mut diagnostics);
 
-    dbg!("eree4");
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, source_type, manifest, |event| {
             if let Some(mut diag) = event.diagnostic() {
