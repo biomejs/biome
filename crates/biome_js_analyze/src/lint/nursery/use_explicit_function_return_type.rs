@@ -431,7 +431,7 @@ fn is_first_statement_function_return(statements: JsStatementList) -> bool {
                 None
             }
         })
-        .map_or(false, |args| {
+        .is_some_and(|args| {
             matches!(
                 args,
                 AnyJsExpression::JsFunctionExpression(_)
@@ -463,7 +463,7 @@ fn is_variable_declarator_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) 
         .parent()
         .and_then(JsInitializerClause::cast)
         .and_then(|init| init.parent::<JsVariableDeclarator>())
-        .map_or(false, |decl| decl.variable_annotation().is_some())
+        .is_some_and(|decl| decl.variable_annotation().is_some())
 }
 
 /// Checks if a function is a default parameter with a type annotation.
@@ -479,7 +479,7 @@ fn is_default_function_parameter_with_type_annotation(syntax: &SyntaxNode<JsLang
         .parent()
         .and_then(JsInitializerClause::cast)
         .and_then(|init| init.parent::<JsFormalParameter>())
-        .map_or(false, |param| param.type_annotation().is_some())
+        .is_some_and(|param| param.type_annotation().is_some())
 }
 
 /// Checks if a function is a class property with a type annotation.
@@ -497,7 +497,7 @@ fn is_class_property_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) -> bo
         .parent()
         .and_then(JsInitializerClause::cast)
         .and_then(|init| init.parent::<JsPropertyClassMember>())
-        .map_or(false, |prop| prop.property_annotation().is_some())
+        .is_some_and(|prop| prop.property_annotation().is_some())
 }
 
 /// Checks if a function is a property or a nested property of a typed object.
@@ -516,7 +516,7 @@ fn is_property_of_object_with_type(syntax: &SyntaxNode<JsLanguage>) -> bool {
         .and_then(JsPropertyObjectMember::cast)
         .and_then(|prop| prop.syntax().grand_parent())
         .and_then(JsObjectExpression::cast)
-        .map_or(false, |obj_expression| {
+        .is_some_and(|obj_expression| {
             let obj_syntax = obj_expression.syntax();
             is_type_assertion(obj_syntax)
                 || is_variable_declarator_with_type_annotation(obj_syntax)
