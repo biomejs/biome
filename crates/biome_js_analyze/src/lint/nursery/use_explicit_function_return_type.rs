@@ -371,9 +371,7 @@ fn is_function_used_in_argument_or_array(func: &AnyJsFunction) -> bool {
 /// (() => {})();
 /// ```
 fn is_iife(func: &AnyJsFunction) -> bool {
-    func.syntax()
-        .parent()
-        .and_then(JsParenthesizedExpression::cast)
+    func.parent::<JsParenthesizedExpression>()
         .and_then(|expr| expr.parent::<JsCallExpression>())
         .is_some()
 }
@@ -546,7 +544,7 @@ fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
         if parent.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
             parent
                 .parent()
-                .map_or(false, |grandparent| is_assertion_kind(grandparent.kind()))
+                .is_some_and(|grandparent| is_assertion_kind(grandparent.kind()))
         } else {
             is_assertion_kind(parent.kind())
         }
