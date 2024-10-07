@@ -3,6 +3,9 @@
 //!
 //! See the [ECMAScript spec](https://www.ecma-international.org/ecma-262/5.1/#sec-11).
 
+use std::ops::{BitOr, BitOrAssign, Sub};
+
+use super::metavariable::{is_at_metavariable, parse_metavariable};
 use super::typescript::*;
 use crate::lexer::{JsLexContext, JsReLexContext};
 use crate::parser::rewrite_parser::{RewriteMarker, RewriteParser};
@@ -34,7 +37,7 @@ use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_token;
 use biome_parser::parse_lists::ParseSeparatedList;
 use biome_parser::ParserProgress;
-use bitflags::bitflags;
+use enumflags2::{bitflags, make_bitflags, BitFlags};
 
 pub const EXPR_RECOVERY_SET: TokenSet<JsSyntaxKind> =
     token_set![VAR_KW, R_PAREN, L_PAREN, L_BRACK, R_BRACK];
@@ -42,27 +45,65 @@ pub const EXPR_RECOVERY_SET: TokenSet<JsSyntaxKind> =
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub(crate) struct ExpressionContext(ExpressionContextFlags);
 
-bitflags! {
-    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-    struct ExpressionContextFlags: u8 {
-        /// Whether `in` should be counted in a binary expression.
-        /// This is for `for...in` statements to prevent ambiguity.
-        /// Corresponds to `[+In]` in the EcmaScript spec if true
-        const INCLUDE_IN = 1 << 0;
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u8)]
+enum ExpressionContextFlag {
+    IncludeIn = 1 << 0,
+    AllowObjectExpression = 1 << 1,
+    InDecorator = 1 << 2,
+    AllowTSTypeAssertion = 1 << 3,
+}
 
-        /// If false, object expressions are not allowed to be parsed
-        /// inside an expression.
-        ///
-        /// Also applies for object patterns
-        const ALLOW_OBJECT_EXPRESSION = 1 << 1;
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+struct ExpressionContextFlags(BitFlags<ExpressionContextFlag>);
 
-        /// If `true` then, don't parse computed member expressions because they can as well indicate
-        /// the start of a computed class member.
-        const IN_DECORATOR = 1 << 2;
+impl ExpressionContextFlags {
+    /// Whether `in` should be counted in a binary expression.
+    /// This is for `for...in` statements to prevent ambiguity.
+    /// Corresponds to `[+In]` in the EcmaScript spec if true
+    const INCLUDE_IN: Self = Self(make_bitflags!(ExpressionContextFlag::{IncludeIn}));
 
-        /// If `true` allows a typescript type assertion.
-        /// Currently disabled on "new" expressions.
-        const ALLOW_TS_TYPE_ASSERTION = 1 << 3;
+    /// If false, object expressions are not allowed to be parsed
+    /// inside an expression.
+    ///
+    /// Also applies for object patterns
+    const ALLOW_OBJECT_EXPRESSION: Self =
+        Self(make_bitflags!(ExpressionContextFlag::{AllowObjectExpression}));
+
+    /// If `true` then, don't parse computed member expressions because they can as well indicate
+    /// the start of a computed class member.
+    const IN_DECORATOR: Self = Self(make_bitflags!(ExpressionContextFlag::{InDecorator}));
+
+    /// If `true` allows a typescript type assertion.
+    /// Currently disabled on "new" expressions.
+    const ALLOW_TS_TYPE_ASSERTION: Self =
+        Self(make_bitflags!(ExpressionContextFlag::{AllowTSTypeAssertion}));
+
+    pub fn contains(&self, other: impl Into<ExpressionContextFlags>) -> bool {
+        self.0.contains(other.into().0)
+    }
+}
+
+impl BitOr for ExpressionContextFlags {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        ExpressionContextFlags(self.0 | rhs.0)
+    }
+}
+
+impl BitOrAssign for ExpressionContextFlags {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
+    }
+}
+
+impl Sub for ExpressionContextFlags {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self(self.0 & !rhs.0)
     }
 }
 
@@ -84,18 +125,18 @@ impl ExpressionContext {
     }
 
     /// Returns true if object expressions or object patterns are valid in this context
-    pub(crate) const fn is_object_expression_allowed(&self) -> bool {
+    pub(crate) fn is_object_expression_allowed(&self) -> bool {
         self.0
             .contains(ExpressionContextFlags::ALLOW_OBJECT_EXPRESSION)
     }
 
     /// Returns `true` if the expression parsing includes binary in expressions.
-    pub(crate) const fn is_in_included(&self) -> bool {
+    pub(crate) fn is_in_included(&self) -> bool {
         self.0.contains(ExpressionContextFlags::INCLUDE_IN)
     }
 
     /// Returns `true` if currently parsing a decorator expression `@<expr>`.
-    pub(crate) const fn is_in_decorator(&self) -> bool {
+    pub(crate) fn is_in_decorator(&self) -> bool {
         self.0.contains(ExpressionContextFlags::IN_DECORATOR)
     }
 
@@ -213,10 +254,9 @@ pub(crate) fn parse_number_literal_expression(p: &mut JsParser) -> ParsedSyntax 
     if p.state().strict().is_some()
         && cur_src.starts_with('0')
         && cur_src
-            .chars()
-            .nth(1)
-            .filter(|c| c.is_ascii_digit())
-            .is_some()
+            .as_bytes()
+            .get(1)
+            .is_some_and(|b| b.is_ascii_digit())
     {
         let err_msg = if cur_src.contains(['8', '9']) {
             "Decimals with leading zeros are not allowed in strict mode."
@@ -1033,6 +1073,7 @@ pub(super) fn parse_private_name(p: &mut JsParser) -> ParsedSyntax {
 pub(super) fn parse_any_name(p: &mut JsParser) -> ParsedSyntax {
     match p.cur() {
         T![#] => parse_private_name(p),
+        t if t.is_metavariable() => parse_metavariable(p),
         _ => parse_name(p),
     }
 }
@@ -1210,6 +1251,10 @@ fn parse_parenthesized_expression(p: &mut JsParser) -> ParsedSyntax {
 
 /// A general expression.
 pub(crate) fn parse_expression(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
+    if is_at_metavariable(p) {
+        return parse_metavariable(p);
+    }
+
     let first = parse_assignment_expression_or_higher(p, context);
 
     if p.at(T![,]) {
@@ -1299,6 +1344,7 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
     }
 
     let complete = match p.cur() {
+        t if t.is_metavariable() => return parse_metavariable(p),
         T![this] => {
             // test js this_expr
             // this
@@ -1544,6 +1590,10 @@ pub(crate) fn is_nth_at_reference_identifier(p: &mut JsParser, n: usize) -> bool
 /// * It is named `await` inside of an async function
 /// * It is named `yield` inside of a generator function or in strict mode
 pub(super) fn parse_identifier(p: &mut JsParser, kind: JsSyntaxKind) -> ParsedSyntax {
+    if is_at_metavariable(p) {
+        return parse_metavariable(p);
+    }
+
     if !is_at_identifier(p) {
         return Absent;
     }
@@ -2111,7 +2161,7 @@ pub(super) fn parse_unary_expr(p: &mut JsParser, context: ExpressionContext) -> 
             let mut rewriter = DeleteExpressionRewriter::default();
             rewrite_events(&mut rewriter, checkpoint, p);
 
-            rewriter.result.take().map(|res| {
+            rewriter.result.take().inspect(|_| {
                 if StrictMode.is_supported(p) {
                     if let Some(range) = rewriter.exited_ident_expr {
                         kind = JS_BOGUS_EXPRESSION;
@@ -2129,8 +2179,6 @@ pub(super) fn parse_unary_expr(p: &mut JsParser, context: ExpressionContext) -> 
                         range,
                     ));
                 }
-
-                res
             })
         } else {
             parse_unary_expr(p, context).ok()

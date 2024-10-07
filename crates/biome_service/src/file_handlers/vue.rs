@@ -11,11 +11,11 @@ use crate::WorkspaceError;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_parser::{parse_js_with_cache, JsParserOptions};
-use biome_js_syntax::{EmbeddingKind, JsFileSource, Language, TextRange, TextSize};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, TextRange, TextSize};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
-use lazy_static::lazy_static;
 use regex::{Match, Regex};
+use std::sync::LazyLock;
 use tracing::debug;
 
 use super::{parse_lang_from_script_opening_tag, SearchCapabilities};
@@ -23,13 +23,10 @@ use super::{parse_lang_from_script_opening_tag, SearchCapabilities};
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct VueFileHandler;
 
-lazy_static! {
-    // https://regex101.com/r/E4n4hh/6
-    pub static ref VUE_FENCE: Regex = Regex::new(
-        r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#
-    )
-    .unwrap();
-}
+// https://regex101.com/r/E4n4hh/6
+pub static VUE_FENCE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"(?ixs)(?<opening><script(?:\s.*?)?>)\r?\n(?<script>(?U:.*))</script>"#).unwrap()
+});
 
 impl VueFileHandler {
     /// It extracts the JavaScript/TypeScript code contained in the script block of a Vue file
@@ -72,14 +69,13 @@ impl VueFileHandler {
         VUE_FENCE
             .captures(text)
             .and_then(|captures| {
-                match parse_lang_from_script_opening_tag(captures.name("opening")?.as_str()) {
-                    Language::JavaScript => {
-                        Some(JsFileSource::js_module().with_embedding_kind(EmbeddingKind::Vue))
-                    }
-                    Language::TypeScript { .. } => {
-                        Some(JsFileSource::ts().with_embedding_kind(EmbeddingKind::Vue))
-                    }
-                }
+                let (language, variant) =
+                    parse_lang_from_script_opening_tag(captures.name("opening")?.as_str());
+                Some(
+                    JsFileSource::from(language)
+                        .with_variant(variant)
+                        .with_embedding_kind(EmbeddingKind::Vue),
+                )
             })
             .map_or(JsFileSource::js_module(), |fs| fs)
     }

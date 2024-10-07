@@ -1,0 +1,127 @@
+// Markdown Un-Grammar.
+//
+// This grammar specifies the structure of Rust's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+// Tokens are processed -- contextual keywords are recognised, compound operators glued.
+//
+// Legend:
+//
+//   //          				-- comment
+//   Name =      				-- non-terminal definition
+//   'ident'     				-- token (terminal)
+//   A B         				-- sequence
+//   A | B       				-- alternation
+//   A*          				-- zero or more repetition
+//   (A (',' A)* ','?)	        -- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)	            -- repetition of node A separated by ',' without a trailing comma
+//   A?          				-- zero or one repetition
+//   (A)         				-- same as A
+//   label:A     				-- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+
+
+///////////////
+// BOGUS NODES
+///////////////
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+
+SyntaxElement = SyntaxElement
+
+MdBogus = SyntaxElement*
+
+MdDocument =
+	bom: 'UNICODE_BOM'?
+    value: MdBlockList
+    eof: 'EOF'
+
+MdBlockList = AnyMdBlock*
+
+AnyMdBlock = AnyLeafBlock  | AnyContainerBlock
+
+AnyLeafBlock = MdThematicBreakBlock | MdHeader | MdSetextHeader
+                | AnyCodeBlock | MdHtmlBlock | MdLinkBlock | MdParagraph
+
+AnyContainerBlock = MdQuote | MdBulletListItem | MdOrderListItem
+
+
+
+// h1..h6
+MdHeader = before:MdHashList MdParagraph? after:MdHashList
+
+MdHashList = MdHash*
+
+MdHash = '#'
+
+
+// setext title
+// foo
+// ===
+// bar
+// ---
+MdSetextHeader  = MdParagraph
+
+// indented code blocks & fenced code blocks
+AnyCodeBlock = MdIndentCodeBlock | MdFencedCodeBlock
+
+// [    ] xxx
+MdIndentCodeBlock = MdTextual
+// ~~~
+// xxx
+// ~~~
+MdFencedCodeBlock = MdTextual
+
+// html block
+MdHtmlBlock = MdTextual
+
+MdLinkBlock = label: MdTextual
+                url: MdTextual
+                title: MdTextual?
+
+MdQuote = AnyMdBlock
+
+MdBulletListItem = MdBulletList
+MdOrderListItem = MdBulletList
+
+
+MdBulletList = AnyCodeBlock*
+MdOrderList = AnyCodeBlock*
+
+
+MdParagraph = MdParagraphItemList
+
+MdParagraphItemList = AnyMdInline*
+
+AnyMdInline = MdInlineCode | MdInlineEmphasis | MdInlineLink | MdInlineImage
+               |  MdHtmlBlock | MdHardLine | MdSoftBreak
+                | MdTextual
+MdInlineCode = MdTextual
+MdInlineEmphasis = MdTextual
+MdInlineLink = label: MdTextual
+                    url: MdTextual
+                    title: MdTextual?
+
+MdInlineImage = alt: MdTextual
+                    src: MdTextual
+                    title: MdTextual?
+
+MdHardLine = value: 'md_hard_line_literal'
+MdSoftBreak = value: 'md_soft_break_literal'
+MdTextual = value: 'md_textual_literal'
+MdIndent = value: 'md_indent_chunk_literal'
+
+// ***
+// ---
+// ___
+// https://spec.commonmark.org/0.31.2/#container-blocks-and-leaf-blocks
+MdThematicBreakBlock = value: 'md_thematic_break_literal'
+

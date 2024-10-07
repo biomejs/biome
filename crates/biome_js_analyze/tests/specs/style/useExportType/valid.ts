@@ -40,5 +40,4 @@ declare enum AmbientEnum {}
 declare class AmbientFunction {}
 export { AmbientClass, AmbientEnum, AmbientFunction }
 
-import type * as Ns from ""
-export { Ns }
+export {}

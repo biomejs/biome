@@ -66,7 +66,7 @@ fn create_data(license_list: LicenseList) -> io::Result<TokenStream> {
             .see_also
             .iter()
             .map(|see_also| {
-                let see_also = Literal::string(&see_also);
+                let see_also = Literal::string(see_also);
                 quote!(#see_also)
             })
             .collect();

@@ -1,4 +1,4 @@
-FROM rust:1.78.0@sha256:5907e96b0293eb53bcc8f09b4883d71449808af289862950ede9a0e3cca44ff5
+FROM rust:1.81.0@sha256:a21d54019c66e3a1e7512651e9a7de99b08f28d49b023ed7220b7fe4d3b9f24e
 WORKDIR /usr/src/
 
 # https://github.com/nodesource/distributions
@@ -14,4 +14,5 @@ WORKDIR /usr/src/benchmark
 COPY ./benchmark .
 
 RUN npm ci
-RUN node run.js
+RUN node bench.js formatter
+RUN node bench.js linter

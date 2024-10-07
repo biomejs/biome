@@ -1,8 +1,8 @@
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    Deserialized, Text, VisitableType,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, Deserialized, Text,
 };
 use biome_json_syntax::JsonLanguage;
 use biome_text_size::TextRange;
@@ -78,7 +78,7 @@ struct PackageJsonVisitor;
 impl DeserializationVisitor for PackageJsonVisitor {
     type Output = PackageJson;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,
@@ -165,4 +165,14 @@ pub enum PackageType {
     #[default]
     Module,
     Commonjs,
+}
+
+impl PackageType {
+    pub const fn is_commonjs(&self) -> bool {
+        matches!(self, Self::Commonjs)
+    }
+
+    pub const fn is_module(&self) -> bool {
+        matches!(self, Self::Module)
+    }
 }

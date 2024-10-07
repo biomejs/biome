@@ -1,0 +1,36 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome's Markdown parser"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_markdown_parser"
+repository.workspace = true
+version              = "0.0.1"
+
+[dependencies]
+biome_console          = { workspace = true }
+biome_diagnostics      = { workspace = true }
+biome_markdown_factory = { workspace = true }
+biome_markdown_syntax  = { workspace = true }
+biome_parser           = { workspace = true }
+biome_rowan            = { workspace = true }
+biome_test_utils       = { workspace = true }
+biome_unicode_table    = { workspace = true }
+tracing                = { workspace = true }
+unicode-bom            = { workspace = true }
+
+[dev-dependencies]
+insta             = { workspace = true }
+quickcheck        = { workspace = true }
+quickcheck_macros = { workspace = true }
+tests_macros      = { path = "../tests_macros" }
+
+# cargo-workspaces metadata
+[package.metadata.workspaces]
+independent = true
+
+[lints]
+workspace = true

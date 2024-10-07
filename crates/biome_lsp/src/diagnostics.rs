@@ -1,5 +1,6 @@
 use crate::utils::into_lsp_error;
 use anyhow::Error;
+use biome_diagnostics::print_diagnostic_to_string;
 use biome_service::WorkspaceError;
 use std::fmt::{Display, Formatter};
 use tower_lsp::lsp_types::MessageType;
@@ -8,11 +9,18 @@ use tower_lsp::lsp_types::MessageType;
 pub enum LspError {
     WorkspaceError(WorkspaceError),
     Anyhow(anyhow::Error),
+    Error(biome_diagnostics::Error),
 }
 
 impl From<WorkspaceError> for LspError {
     fn from(value: WorkspaceError) -> Self {
         Self::WorkspaceError(value)
+    }
+}
+
+impl From<biome_diagnostics::Error> for LspError {
+    fn from(value: biome_diagnostics::Error) -> Self {
+        Self::Error(value)
     }
 }
 
@@ -31,6 +39,7 @@ impl Display for LspError {
             LspError::Anyhow(err) => {
                 write!(f, "{err}")
             }
+            LspError::Error(err) => err.description(f),
         }
     }
 }
@@ -60,5 +69,10 @@ pub(crate) async fn handle_lsp_error<T>(
             }
         },
         LspError::Anyhow(err) => Err(into_lsp_error(err)),
+        LspError::Error(err) => {
+            let message = print_diagnostic_to_string(&err);
+            client.log_message(MessageType::ERROR, message).await;
+            Ok(None)
+        }
     }
 }

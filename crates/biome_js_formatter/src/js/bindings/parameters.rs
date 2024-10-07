@@ -229,7 +229,10 @@ pub(crate) fn should_hug_function_parameters(
                         match parameter.binding()? {
                             // always true for `[a]` or `{a}`
                             AnyJsBindingPattern::JsArrayBindingPattern(_)
-                            | AnyJsBindingPattern::JsObjectBindingPattern(_) => true,
+                            | AnyJsBindingPattern::JsObjectBindingPattern(_)
+                            | AnyJsBindingPattern::AnyJsBinding(AnyJsBinding::JsMetavariable(_)) => {
+                                true
+                            }
                             // if the type parameter is an object type
                             // `a: { prop: string }`
                             // or parameter is an arrow function parameter
@@ -278,7 +281,9 @@ pub(crate) fn should_hug_function_parameters(
                     }
                 }
             }
-            AnyJsFormalParameter::JsBogusParameter(_) => return Err(FormatError::SyntaxError),
+            AnyJsFormalParameter::JsBogusParameter(_) | AnyJsFormalParameter::JsMetavariable(_) => {
+                return Err(FormatError::SyntaxError)
+            }
         };
 
         Ok(result)

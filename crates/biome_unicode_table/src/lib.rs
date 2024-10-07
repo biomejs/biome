@@ -12,16 +12,42 @@ pub fn is_html_id_start(c: char) -> bool {
     ID_Start(c)
 }
 
-/// Tests if `c` is a valid start of a CSS identifier
+/// Is `c` a CSS non-ascii character.
+/// See <https://drafts.csswg.org/css-syntax-3/#ident-token-diagram>
+/// See <https://drafts.csswg.org/css-syntax-3/#non-ascii-ident-code-point>
+///
+/// In contrast to the standard we also accept all characters from:
+/// - the Miscellaneous Symbols Unicode block
+/// - the Dingbats Unicode block
+///
+/// We also accept some characters of the Miscellaneous Technical Unicode block.
 #[inline]
-pub fn is_css_id_start(c: char) -> bool {
-    c == '_' || c == '$' || ID_Start(c)
-}
-
-/// Tests if `c` is a valid continuation of a CSS identifier.
-#[inline]
-pub fn is_css_id_continue(c: char) -> bool {
-    c == '\u{200d}' || c == '\u{200c}' || ID_Continue(c)
+pub fn is_css_non_ascii(c: char) -> bool {
+    matches!(
+        c as u32,
+        0xB7
+        | 0xc0..=0xd6
+        | 0xd8..=0xf6
+        | 0xf8..=0x37D
+        | 0x37F..=0x1FFF
+        | 0x200C
+        | 0x200D
+        | 0x203F
+        | 0x2040
+        | 0x2070..=0x218F
+        // https://en.wikipedia.org/wiki/List_of_Unicode_characters#Miscellaneous_Technical
+        | 0x2318 | 0x231A | 0x231B | 0x2328 | 0x2399
+        | 0x23E9..=0x23F3
+        | 0x23F9..=0x23FE
+        // https://en.wikipedia.org/wiki/List_of_Unicode_characters#Miscellaneous_Symbols
+        // https://en.wikipedia.org/wiki/Dingbats_(Unicode_block)
+        | 0x2600..=0x27BF
+        | 0x2C00..=0x2FEF
+        | 0x3001..=0xD7FF
+        | 0xF900..=0xFDCF
+        | 0xFDF0..=0xFFFD
+        | 0x10000..
+    )
 }
 
 /// Tests if `c` is a valid start of a js identifier

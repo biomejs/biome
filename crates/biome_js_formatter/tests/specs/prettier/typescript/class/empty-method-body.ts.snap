@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/class/empty-method-body.ts
 ---
-
 # Input
 
 ```ts
@@ -54,5 +53,3 @@ class Test {
   foo(/* 2 */) /* 3 */;
 }
 ```
-
-

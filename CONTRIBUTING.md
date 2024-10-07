@@ -4,39 +4,45 @@ We can use help in a bunch of areas and any help is greatly appreciated!
 
 ## Table of Contents
 
-* [Asking questions, making proposals](#asking-questions-making-proposals)
-* [Reporting bugs](#reporting-bugs)
-* [Getting Started](#getting-started)
-* [Install the required tools](#install-the-required-tools)
-* [Testing](#testing)
-  + [Debugging](#debugging)
-* [Checks](#checks)
-* [Crates development](#crates-development)
-  + [Analyzers and lint rules](#analyzers-and-lint-rules)
-  + [Parser](#parser)
-  + [Formatter](#formatter)
-* [Crate dependencies](#crate-dependencies)
-* [Node.js development](#nodejs-development)
-  + [Translations](#translations)
-* [Commit messages](#commit-messages)
-* [Creating pull requests](#creating-pull-requests)
-  + [Changelog](#changelog)
-    - [Writing a changelog line](#writing-a-changelog-line)
-  + [Documentation](#documentation)
-  + [Versioning](#versioning)
-* [Releasing](#releasing)
-* [Resources](#resources)
-* [Current Members](#current-members)
-  + [Lead team](#lead-team)
-  + [Core Contributors team](#core-contributors-team)
-  + [Maintainers team](#maintainers-team)
+- [🚀 Contributing](#-contributing)
+  - [Table of Contents](#table-of-contents)
+  - [Asking questions, making proposals](#asking-questions-making-proposals)
+  - [Reporting bugs](#reporting-bugs)
+  - [Getting Started](#getting-started)
+  - [Install the required tools](#install-the-required-tools)
+  - [Testing](#testing)
+    - [Debugging](#debugging)
+  - [Debug binaries](#debug-binaries)
+  - [Production binaries](#production-binaries)
+  - [Checks](#checks)
+  - [Crates development](#crates-development)
+    - [Create new crates](#create-new-crates)
+    - [Analyzers and lint rules](#analyzers-and-lint-rules)
+    - [Parser](#parser)
+    - [Formatter](#formatter)
+  - [Crate dependencies](#crate-dependencies)
+  - [Node.js development](#nodejs-development)
+    - [Translations](#translations)
+  - [Commit messages](#commit-messages)
+  - [Creating pull requests](#creating-pull-requests)
+    - [Changelog](#changelog)
+      - [Writing a changelog line](#writing-a-changelog-line)
+    - [Documentation](#documentation)
+    - [Versioning](#versioning)
+  - [Releasing](#releasing)
+  - [Resources](#resources)
+  - [Current Members](#current-members)
+    - [Lead team](#lead-team)
+    - [Core Contributors team](#core-contributors-team)
+    - [Maintainers team](#maintainers-team)
+    - [Past Maintainers](#past-maintainers)
 
 ## Asking questions, making proposals
 
 If you have any questions, proposals, or feedbacks, open a [GitHub discussion](https://github.com/biomejs/biome/discussions).
 Make sure your comment adds value: [don't post a comment just to get attention](https://jacobtomlinson.dev/posts/2022/dont-be-that-open-source-user-dont-be-me/).
 
-Our [Discord server](https://discord.gg/BypW39g6Yc) is open for help and more ad-hoc discussion.
+Our [Discord server](https://biomejs.dev/chat) is open for help and more ad-hoc discussion.
 All activity on the Discord is still moderated and will be strictly enforced under the project's [Code of Conduct](./CODE_OF_CONDUCT.md).
 
 Remember that we are doing this project on our own time.
@@ -89,7 +95,6 @@ just install-tools
 This command will install:
 - `cargo-binstall`, to install binary extensions for `cargo`.
 - `cargo-insta`, a `cargo` extension to manage snapshot testing inside the repository.
-- `cargo-nextest`, a `cargo` extension to for optionally running tests faster.
 - `taplo-cli`, a small tool for formatting TOML files.
 - `wasm-pack` and `wasm-tools` for managing the WASM build of Biome.
 
@@ -193,6 +198,48 @@ fn test_some_function() {
 
 ```shell
 cargo t test_some_function --show-output
+```
+
+## Debug binaries
+
+Creating a development binary is very useful in case you need to triage a reproduction, and you require more information like logging, trace logs, etc.
+
+Additionally, you can use this binary when you need to debug issues related to LSP clients.
+
+From the root of the repository, run the following command:
+
+```shell
+cargo build --bin biome
+```
+`cargo` will create a binary called `biome` in the `target/debug/` directory.
+
+If you're debugging a CLI reproduction, copy the `biome` binary inside the root of the reproduction, and change any script that uses the npm package to use the binary instead:
+
+```diff
+{
+  "scripts": {
+-    "lint": "biome lint",
++    "lint": "./biome lint"
+  }
+}
+```
+
+If you're debugging an LSP reproduction, make sure that the client allows to use custom binary, like VSCode and Zed. Provide an absolute URL to the binary that was emitted.
+
+```json
+{
+  "biome.lspBin": "/Users/john/www/biome/target/debug/biome"
+}
+```
+
+## Production binaries
+
+_Usually_, the easiest way to create a production build is to use the `--release` flag, **however** Biome requires an environment variable called `BIOME_VERSION` to generate different code at compile time.
+
+When you provide a `BIOME_VERSION` that is _different_ from `0.0.0`, the build will turn off all the nursery rules that are recommended. The value of `BIOME_VERSION` doesn't matter, as long as it's different from `0.0.0`. This means that you'll have to provide a command similar to this:
+
+```shell
+BIOME_VERSION=0.0.1 cargo build --bin biome --release
 ```
 
 ## Checks
@@ -425,10 +472,12 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 ### Maintainers team
 
+- [Carson McManus @dyc3](https://github.com/dyc3)
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
 - [Vasu Singh @vasucp1207](https://github.com/vasucp1207)
+- [Vo Hoang Long @vohoanglong0107](https://github.com/vohoanglong0107)
 - [Yagiz Nizipli @anonrig](https://github.com/anonrig)
 - [Yoshiaki Togami @togami2864](https://github.com/togami2864)
 - [Yusuke Abe @chansuke](https://github.com/chansuke)

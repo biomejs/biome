@@ -1,0 +1,17 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: log
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:1-1:21",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}
+
+## Logs
+
+Message: This is a debug log
+Syntax: (GritTargetNode { node: JsLanguage(Node(JS_CALL_ARGUMENT_LIST@12..19)) })

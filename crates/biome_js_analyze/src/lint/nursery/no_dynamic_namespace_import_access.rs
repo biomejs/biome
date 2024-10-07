@@ -57,7 +57,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDynamicNamespaceImportAccess {
-        version: "next",
+        version: "1.9.0",
         name: "noDynamicNamespaceImportAccess",
         language: "js",
         recommended: false,

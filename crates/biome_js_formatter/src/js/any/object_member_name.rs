@@ -10,6 +10,7 @@ impl FormatRule<AnyJsObjectMemberName> for FormatAnyJsObjectMemberName {
         match node {
             AnyJsObjectMemberName::JsComputedMemberName(node) => node.format().fmt(f),
             AnyJsObjectMemberName::JsLiteralMemberName(node) => node.format().fmt(f),
+            AnyJsObjectMemberName::JsMetavariable(node) => node.format().fmt(f),
         }
     }
 }

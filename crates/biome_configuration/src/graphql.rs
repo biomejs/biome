@@ -1,6 +1,7 @@
-use crate::PlainIndentStyle;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
-use biome_formatter::{BracketSpacing, IndentWidth, LineEnding, LineWidth, QuoteStyle};
+use biome_formatter::{
+    BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth, QuoteStyle,
+};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
 
@@ -35,7 +36,7 @@ pub struct GraphqlFormatter {
         argument("tab|space"),
         optional
     ))]
-    pub indent_style: Option<PlainIndentStyle>,
+    pub indent_style: Option<IndentStyle>,
 
     /// The size of the indentation applied to GraphQL files. Default to 2.
     #[partial(bpaf(long("graphql-formatter-indent-width"), argument("NUMBER"), optional))]
@@ -96,28 +97,20 @@ impl PartialGraphqlFormatter {
 }
 
 /// Options that changes how the GraphQL linter behaves
-#[derive(Clone, Debug, Deserialize, Eq, Partial, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Eq, Partial, PartialEq, Serialize)]
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
 pub struct GraphqlLinter {
     /// Control the formatter for GraphQL files.
     #[partial(bpaf(long("graphql-linter-enabled"), argument("true|false"), optional))]
-    pub enabled: Option<bool>,
-}
-
-impl Default for GraphqlLinter {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-        }
-    }
+    pub enabled: bool,
 }
 
 impl PartialGraphqlLinter {
     pub fn get_linter_configuration(&self) -> GraphqlLinter {
         GraphqlLinter {
-            enabled: self.enabled,
+            enabled: self.enabled.unwrap_or_default(),
         }
     }
 }
@@ -138,5 +131,5 @@ fn default_graphql_formatter() {
 fn default_graphql_linter() {
     let graphql_configuration = GraphqlLinter::default();
 
-    assert_eq!(graphql_configuration.enabled, Some(false));
+    assert!(!graphql_configuration.enabled);
 }

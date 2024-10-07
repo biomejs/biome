@@ -12,19 +12,14 @@ use biome_analyze::{
 use biome_diagnostics::{category, Error};
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
+use std::ops::Deref;
+use std::sync::LazyLock;
 
-/// Return the static [MetadataRegistry] for the JSON analyzer rules
-pub fn metadata() -> &'static MetadataRegistry {
-    lazy_static::lazy_static! {
-        static ref METADATA: MetadataRegistry = {
-            let mut metadata = MetadataRegistry::default();
-            visit_registry(&mut metadata);
-            metadata
-        };
-    }
-
-    &METADATA
-}
+pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
+    let mut metadata = MetadataRegistry::default();
+    visit_registry(&mut metadata);
+    metadata
+});
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
@@ -109,7 +104,7 @@ where
     }
 
     let mut analyzer = biome_analyze::Analyzer::new(
-        metadata(),
+        METADATA.deref(),
         biome_analyze::InspectMatcher::new(registry, inspect_matcher),
         parse_linter_suppression_comment,
         Box::new(GraphqlSuppressionAction),
@@ -160,7 +155,7 @@ mod tests {
         let parsed = parse_graphql(SOURCE);
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
-        let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClassSelector");
+        let rule_filter = RuleFilter::Rule("nursery", "noUnknownPseudoClass");
         let options = AnalyzerOptions::default();
         analyze(
             &parsed.tree(),

@@ -81,8 +81,6 @@ pub(crate) fn format(
         cli_options.verbose,
     )?;
 
-    resolve_manifest(&session)?;
-
     let editorconfig_search_path = loaded_configuration.directory_path.clone();
     let LoadedConfiguration {
         configuration: biome_configuration,
@@ -92,14 +90,8 @@ pub(crate) fn format(
 
     let should_use_editorconfig = formatter_configuration
         .as_ref()
-        .and_then(|f| f.use_editorconfig)
-        .unwrap_or(
-            biome_configuration
-                .formatter
-                .as_ref()
-                .and_then(|f| f.use_editorconfig)
-                .unwrap_or_default(),
-        );
+        .and_then(|c| c.use_editorconfig)
+        .unwrap_or(biome_configuration.use_editorconfig().unwrap_or_default());
     let mut fs_configuration = if should_use_editorconfig {
         let (editorconfig, editorconfig_diagnostics) = {
             let search_path = editorconfig_search_path.unwrap_or_else(|| {
@@ -236,6 +228,14 @@ pub(crate) fn format(
             set_as_current_workspace: true,
         })?;
 
+    let manifest_data = resolve_manifest(&session.app.fs)?;
+
+    if let Some(manifest_data) = manifest_data {
+        session
+            .app
+            .workspace
+            .set_manifest_for_project(manifest_data.into())?;
+    }
     session
         .app
         .workspace

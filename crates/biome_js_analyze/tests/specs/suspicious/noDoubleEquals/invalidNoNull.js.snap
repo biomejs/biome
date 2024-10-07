@@ -1,0 +1,329 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalidNoNull.js
+---
+# Input
+```jsx
+const foo1 = `
+text
+${a == b}
+`;
+
+const foo2 = `
+text
+${a == null}
+`;
+
+const foo3 = `
+text
+${null == a}
+`;
+
+// existing comment
+a == b;
+
+// existing comment
+null == a;
+
+// existing comment
+a == null;
+
+
+if (a == b) {
+    false;
+}
+
+if (a == null) {
+	false;
+}
+
+if (null == b) {
+	false;
+}
+
+if (/** some weird comment
+    **/ a == b) {
+
+    }
+
+let a1 = `Output of "biome rage":
+  formatter enabled: ${formatter == true}
+  linter: ${linter}
+`;
+
+let a2 = `Output of "biome rage":
+  formatter enabled: ${formatter == null}
+  linter: ${linter}
+`;
+
+let a3 = `Output of "biome rage":
+  formatter enabled: ${null == formatter}
+  linter: ${linter}
+`;
+
+```
+
+# Diagnostics
+```
+invalidNoNull.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    1 │ const foo1 = `
+    2 │ text
+  > 3 │ ${a == b}
+      │     ^^
+    4 │ `;
+    5 │ 
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    3 │ ${a·===·b}
+      │       +   
+
+```
+
+```
+invalidNoNull.js:8:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+     6 │ const foo2 = `
+     7 │ text
+   > 8 │ ${a == null}
+       │     ^^
+     9 │ `;
+    10 │ 
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    8 │ ${a·===·null}
+      │       +      
+
+```
+
+```
+invalidNoNull.js:13:8 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    11 │ const foo3 = `
+    12 │ text
+  > 13 │ ${null == a}
+       │        ^^
+    14 │ `;
+    15 │ 
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    13 │ ${null·===·a}
+       │          +   
+
+```
+
+```
+invalidNoNull.js:17:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    16 │ // existing comment
+  > 17 │ a == b;
+       │   ^^
+    18 │ 
+    19 │ // existing comment
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    17 │ a·===·b;
+       │     +   
+
+```
+
+```
+invalidNoNull.js:20:6 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    19 │ // existing comment
+  > 20 │ null == a;
+       │      ^^
+    21 │ 
+    22 │ // existing comment
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    20 │ null·===·a;
+       │        +   
+
+```
+
+```
+invalidNoNull.js:23:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    22 │ // existing comment
+  > 23 │ a == null;
+       │   ^^
+    24 │ 
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    23 │ a·===·null;
+       │     +      
+
+```
+
+```
+invalidNoNull.js:26:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+  > 26 │ if (a == b) {
+       │       ^^
+    27 │     false;
+    28 │ }
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    26 │ if·(a·===·b)·{
+       │         +     
+
+```
+
+```
+invalidNoNull.js:30:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    28 │ }
+    29 │ 
+  > 30 │ if (a == null) {
+       │       ^^
+    31 │ 	false;
+    32 │ }
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    30 │ if·(a·===·null)·{
+       │         +        
+
+```
+
+```
+invalidNoNull.js:34:10 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    32 │ }
+    33 │ 
+  > 34 │ if (null == b) {
+       │          ^^
+    35 │ 	false;
+    36 │ }
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    34 │ if·(null·===·b)·{
+       │            +     
+
+```
+
+```
+invalidNoNull.js:39:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    38 │ if (/** some weird comment
+  > 39 │     **/ a == b) {
+       │           ^^
+    40 │ 
+    41 │     }
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    39 │ ····**/·a·===·b)·{
+       │             +     
+
+```
+
+```
+invalidNoNull.js:44:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    43 │ let a1 = `Output of "biome rage":
+  > 44 │   formatter enabled: ${formatter == true}
+       │                                  ^^
+    45 │   linter: ${linter}
+    46 │ `;
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    44 │ ··formatter·enabled:·${formatter·===·true}
+       │                                    +      
+
+```
+
+```
+invalidNoNull.js:49:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    48 │ let a2 = `Output of "biome rage":
+  > 49 │   formatter enabled: ${formatter == null}
+       │                                  ^^
+    50 │   linter: ${linter}
+    51 │ `;
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    49 │ ··formatter·enabled:·${formatter·===·null}
+       │                                    +      
+
+```
+
+```
+invalidNoNull.js:54:29 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+    53 │ let a3 = `Output of "biome rage":
+  > 54 │   formatter enabled: ${null == formatter}
+       │                             ^^
+    55 │   linter: ${linter}
+    56 │ `;
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    54 │ ··formatter·enabled:·${null·===·formatter}
+       │                               +           
+
+```

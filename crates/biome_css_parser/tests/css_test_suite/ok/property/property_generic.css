@@ -1,5 +1,6 @@
 div {
     /* Unknown property, always generic */
+    unknown-property: u;
     unknown-property: a value;
     unknown-property: one-value;
     unknown-property: multiple values;
@@ -8,6 +9,7 @@ div {
     unknown-property: mixed, delimiters / can be, used;
 
     /* Custom property, always generic */
+    --custom-property: u;
     --custom-property: a value;
     --custom-property: one-value;
     --custom-property: multiple values;

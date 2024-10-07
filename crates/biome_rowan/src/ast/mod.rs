@@ -29,7 +29,7 @@ pub use mutation::{AstNodeExt, AstNodeListExt, AstSeparatedListExt};
 /// bitfield here being twice as large as it needs to cover all nodes as well
 /// as all token kinds
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct SyntaxKindSet<L: ?Sized + Language>([u128; 4], PhantomData<L>);
+pub struct SyntaxKindSet<L: Language>([u128; 4], PhantomData<L>);
 
 impl<L> SyntaxKindSet<L>
 where
@@ -169,7 +169,7 @@ pub trait AstNode: Clone {
     /// builder.finish_node();
     ///
     /// let root_syntax = builder.finish();
-    /// let root = RawLanguageRoot::cast(root_syntax.clone()).expect("Root to be a raw language root");
+    /// let root = RawLanguageRoot::cast_ref(&root_syntax).expect("Root to be a raw language root");
     ///
     /// // Returns `OK` because syntax is a `RawLanguageRoot`
     /// assert_eq!(RawLanguageRoot::try_cast(root.syntax().clone()), Ok(root.clone()));
@@ -178,44 +178,9 @@ pub trait AstNode: Clone {
     /// ```
     fn try_cast(syntax: SyntaxNode<Self::Language>) -> Result<Self, SyntaxNode<Self::Language>> {
         if Self::can_cast(syntax.kind()) {
-            Ok(Self::cast(syntax).expect("Expected casted node because 'can_cast' returned true."))
+            Ok(Self::unwrap_cast(syntax))
         } else {
             Err(syntax)
-        }
-    }
-
-    /// Tries to cast the AST `node` into this node.
-    ///
-    /// # Returns
-    /// * [Ok] if the passed node can be cast into this [AstNode]
-    /// * [Err] if the node is of another kind
-    /// ```
-    /// # use biome_rowan::AstNode;
-    /// # use biome_rowan::raw_language::{LiteralExpression, RawLanguageKind, RawLanguageRoot, RawSyntaxTreeBuilder};
-    ///
-    /// let mut builder = RawSyntaxTreeBuilder::new();
-    ///
-    /// builder.start_node(RawLanguageKind::ROOT);
-    /// builder.start_node(RawLanguageKind::LITERAL_EXPRESSION);
-    /// builder.token(RawLanguageKind::STRING_TOKEN, "'abcd'");
-    /// builder.finish_node();
-    /// builder.finish_node();
-    ///
-    /// let root_syntax = builder.finish();
-    /// let root = RawLanguageRoot::cast(root_syntax.clone()).expect("Root to be a raw language root");
-    ///
-    /// // Returns `OK` because syntax is a `RawLanguageRoot`
-    /// assert_eq!(RawLanguageRoot::try_cast_node(root.clone()), Ok(root.clone()));
-    ///
-    /// // Returns `Err` with the node passed to `try_cast_node` because `root` isn't a `LiteralExpression`
-    /// assert_eq!(LiteralExpression::try_cast_node(root.clone()), Err(root.clone()));
-    /// ```
-    fn try_cast_node<T: AstNode<Language = Self::Language>>(node: T) -> Result<Self, T> {
-        if Self::can_cast(node.syntax().kind()) {
-            Ok(Self::cast(node.into_syntax())
-                .expect("Expected casted node because 'can_cast' returned true."))
-        } else {
-            Err(node)
         }
     }
 
@@ -777,12 +742,16 @@ pub type SyntaxResult<ResultType> = Result<ResultType, SyntaxError>;
 pub enum SyntaxError {
     /// Error thrown when a mandatory node is not found
     MissingRequiredChild,
+
+    /// Error thrown when a metavariable node is found in an unexpected context
+    UnexpectedMetavariable,
 }
 
 impl Display for SyntaxError {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
         match self {
             SyntaxError::MissingRequiredChild => fmt.write_str("missing required child"),
+            SyntaxError::UnexpectedMetavariable => fmt.write_str("unexpectedd metavariable node"),
         }
     }
 }
@@ -855,6 +824,7 @@ pub mod support {
             match &self.0 {
                 Ok(node) => std::fmt::Debug::fmt(node, f),
                 Err(SyntaxError::MissingRequiredChild) => f.write_str("missing (required)"),
+                Err(SyntaxError::UnexpectedMetavariable) => f.write_str("metavariable"),
             }
         }
     }

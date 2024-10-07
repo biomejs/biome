@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/multiparser-css/issue-6259.ts
 ---
-
 # Input
 
 ```ts
@@ -46,5 +45,3 @@ const yesFrame = (
     }
 `;
 ```
-
-

@@ -1,9 +1,9 @@
 use crate::prelude::*;
-use biome_formatter::write;
 
-use crate::parentheses::{unary_like_expression_needs_parentheses, NeedsParentheses};
+use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsPostUpdateExpression;
 use biome_js_syntax::JsPostUpdateExpressionFields;
-use biome_js_syntax::{JsPostUpdateExpression, JsSyntaxNode};
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPostUpdateExpression;
@@ -20,12 +20,6 @@ impl FormatNodeRule<JsPostUpdateExpression> for FormatJsPostUpdateExpression {
 
     fn needs_parentheses(&self, item: &JsPostUpdateExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsPostUpdateExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        unary_like_expression_needs_parentheses(self.syntax(), parent)
     }
 }
 

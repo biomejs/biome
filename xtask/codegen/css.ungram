@@ -96,7 +96,7 @@ AnyCssSelector =
 	CssComplexSelector
 	| CssCompoundSelector
 	| CssBogusSelector
-	| CssGritMetavariable
+	| CssMetavariable
 
 // div a {}
 // ^^^^^
@@ -442,7 +442,7 @@ AnyCssDeclarationOrRule =
 	AnyCssRule
 	| CssDeclarationWithSemicolon
 	| CssBogus
-	| CssGritMetavariable
+	| CssMetavariable
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1011,7 +1011,7 @@ AnyCssMediaQuery =
 	CssMediaConditionQuery
 	| AnyCssMediaTypeQuery
 	| CssBogusMediaQuery
-	| CssGritMetavariable
+	| CssMetavariable
 
 // @media screen, (width > 500px), print {}
 // 				        ^^^^^^^^^^^^^^^
@@ -1627,7 +1627,7 @@ AnyCssValue =
 	| CssColor
 	| CssBracketedValue
 	| CssUnicodeRange
-	| CssGritMetavariable
+	| CssMetavariable
 
 
 // https://drafts.csswg.org/css-syntax/#typedef-dimension-token
@@ -1801,4 +1801,4 @@ CssUnicodeRangeWildcard = value: 'css_unicode_range_wildcard_literal'
 CssUrlValueRaw = value: 'css_url_value_raw_literal'
 
 // https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-css/grammar.js
-CssGritMetavariable = value: 'grit_metavariable'
+CssMetavariable = value: 'grit_metavariable'

@@ -117,7 +117,12 @@ impl Rule for NoExcessiveCognitiveComplexity {
             RuleDiagnostic::new(
                 rule_category!(),
                 range,
-                markup!("Excessive complexity detected."),
+                markup!({
+                    format!(
+                        "Excessive complexity of {calculated_score} detected \
+                    (max: {max_allowed_complexity})."
+                    )
+                }),
             )
             .note(if calculated_score == &MAX_SCORE {
                 "Please refactor this function to reduce its complexity. \
@@ -198,10 +203,7 @@ impl Visitor for CognitiveComplexityVisitor {
 impl CognitiveComplexityVisitor {
     fn on_enter(&mut self, node: &JsSyntaxNode) {
         let parent = self.stack.last();
-        if parent
-            .map(|parent| parent.score == MAX_SCORE)
-            .unwrap_or_default()
-        {
+        if parent.is_some_and(|parent| parent.score == MAX_SCORE) {
             return; // No need for further processing if we're already at the max.
         }
 
@@ -368,7 +370,7 @@ pub struct ComplexityScore {
 /// Options for the rule `noExcessiveCognitiveComplexity`.
 #[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct ComplexityOptions {
     /// The maximum complexity score that we allow. Anything higher is considered excessive.
     pub max_allowed_complexity: NonZeroU8,

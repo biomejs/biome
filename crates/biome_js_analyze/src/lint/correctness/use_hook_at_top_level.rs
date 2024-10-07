@@ -8,8 +8,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, Text,
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -29,6 +29,8 @@ use schemars::JsonSchema;
 
 declare_lint_rule! {
     /// Enforce that all React hooks are being called from the Top Level component functions.
+    ///
+    /// _This rule should be used only in **React** projects._
     ///
     /// To understand why this required see https://reactjs.org/docs/hooks-rules.html#only-call-hooks-at-the-top-level
     ///
@@ -115,17 +117,19 @@ fn enclosing_function_if_call_is_at_top_level(
     let mut prev_node = None;
 
     for node in call.syntax().ancestors() {
-        if let Some(enclosing_function) = AnyJsFunctionOrMethod::cast_ref(&node) {
-            return Some(enclosing_function);
-        }
-
-        if let Some(prev_node) = prev_node {
-            if is_conditional_expression(&node, &prev_node) {
-                return None;
+        match AnyJsFunctionOrMethod::try_cast(node) {
+            Ok(enclosing_function) => {
+                return Some(enclosing_function);
+            }
+            Err(node) => {
+                if let Some(prev_node) = prev_node {
+                    if is_conditional_expression(&node, &prev_node) {
+                        return None;
+                    }
+                }
+                prev_node = Some(node);
             }
         }
-
-        prev_node = Some(node);
     }
 
     None
@@ -549,7 +553,7 @@ impl Rule for UseHookAtTopLevel {
 /// hook.
 #[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct DeprecatedHooksOptions {}
 
 impl Deserializable for DeprecatedHooksOptions {
@@ -567,7 +571,7 @@ struct DeprecatedHooksOptionsVisitor;
 impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
     type Output = DeprecatedHooksOptions;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,

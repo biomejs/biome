@@ -9,6 +9,7 @@ use biome_graphql_syntax::{
     GraphqlVariableDefinitions,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// No duplicated fields in GraphQL operations.
@@ -20,11 +21,8 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```graphql,expect_diagnostic
-    /// query {
-    ///   user {
-    ///     id
-    ///     id
-    ///   }
+    /// query test($v: String, $t: String, $v: String) {
+    ///   id
     /// }
     /// ```
     ///
@@ -39,7 +37,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicatedFields {
-        version: "next",
+        version: "1.9.0",
         name: "noDuplicatedFields",
         language: "graphql",
         sources: &[RuleSource::EslintGraphql("no-duplicate-fields")],
@@ -81,7 +79,7 @@ impl Rule for NoDuplicatedFields {
             name,
         } = state;
         let field_type = field_type.as_str();
-        let lowercased_field_type = field_type.to_lowercase();
+        let lowercased_field_type = field_type.to_lowercase_cow();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),

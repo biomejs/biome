@@ -1,8 +1,9 @@
-use crate::parentheses::NeedsParentheses;
 use crate::prelude::*;
 use crate::utils::JsObjectPatternLike;
+
 use biome_formatter::write;
-use biome_js_syntax::{JsObjectAssignmentPattern, JsSyntaxNode};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsObjectAssignmentPattern;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsObjectAssignmentPattern;
@@ -27,17 +28,5 @@ impl FormatNodeRule<JsObjectAssignmentPattern> for FormatJsObjectAssignmentPatte
     ) -> FormatResult<()> {
         // Handled inside of `JsObjectPatternLike`
         Ok(())
-    }
-}
-
-impl NeedsParentheses for JsObjectAssignmentPattern {
-    #[inline]
-    fn needs_parentheses(&self) -> bool {
-        false
-    }
-
-    #[inline]
-    fn needs_parentheses_with_parent(&self, _: &JsSyntaxNode) -> bool {
-        false
     }
 }

@@ -18,13 +18,11 @@
   ],
   "main": "biome_wasm.js",
   "homepage": "https://biomejs.dev/",
-  "publishConfig": {
-    "provenance": true
-  },
   "types": "biome_wasm.d.ts",
   "keywords": [
     "parser",
     "linter",
-    "formatter"
+    "formatter",
+    "wasm"
   ]
 }

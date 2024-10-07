@@ -56,7 +56,7 @@ impl MaybeExport {
             MaybeExport::JsExport(_) => true,
             MaybeExport::JsAssignmentExpression(assignment_expr) => {
                 let left = assignment_expr.left().ok();
-                left.and_then(|left| AnyJsMemberAssignment::try_cast_node(left).ok())
+                left.and_then(|left| AnyJsMemberAssignment::cast(left.into_syntax()))
                     .is_some_and(|member_expr| {
                         let object = member_expr.object().ok();
                         object.is_some_and(|object| match object {

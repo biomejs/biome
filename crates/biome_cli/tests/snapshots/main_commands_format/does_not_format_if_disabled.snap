@@ -18,6 +18,17 @@ expression: content
 function f() {return{}}
 ```
 
+# Termination Message
+
+```block
+stdin ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The contents aren't fixed. Use the `--fix` flag to fix them.
+  
+
+
+```
+
 # Emitted Messages
 
 ```block
@@ -27,5 +38,3 @@ function f() {return{}}
 ```block
 The content was not formatted because the formatter is currently disabled.
 ```
-
-

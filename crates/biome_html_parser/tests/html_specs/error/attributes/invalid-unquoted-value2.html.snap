@@ -1,0 +1,296 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<div>
+	<div class=foo"bar >foo</div>
+	<div class=foo'bar >foo</div>
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@4..5 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlBogusElement {
+                    items: [
+                        HtmlBogus {
+                            items: [
+                                L_ANGLE@5..8 "<" [Newline("\n"), Whitespace("\t")] [],
+                                HtmlName {
+                                    value_token: HTML_LITERAL@8..12 "div" [] [Whitespace(" ")],
+                                },
+                                HtmlBogus {
+                                    items: [
+                                        HtmlAttribute {
+                                            name: HtmlName {
+                                                value_token: HTML_LITERAL@12..17 "class" [] [],
+                                            },
+                                            initializer: HtmlAttributeInitializerClause {
+                                                eq_token: EQ@17..18 "=" [] [],
+                                                value: missing (required),
+                                            },
+                                        },
+                                        HtmlBogusElement {
+                                            items: [
+                                                ERROR_TOKEN@18..22 "foo\"" [] [],
+                                                HTML_LITERAL@22..26 "bar" [] [Whitespace(" ")],
+                                            ],
+                                        },
+                                    ],
+                                },
+                                R_ANGLE@26..27 ">" [] [],
+                            ],
+                        },
+                        HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@27..30 "foo" [] [],
+                            },
+                        ],
+                        HtmlClosingElement {
+                            l_angle_token: L_ANGLE@30..31 "<" [] [],
+                            slash_token: SLASH@31..32 "/" [] [],
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@32..35 "div" [] [],
+                            },
+                            r_angle_token: R_ANGLE@35..36 ">" [] [],
+                        },
+                    ],
+                },
+                HtmlBogusElement {
+                    items: [
+                        HtmlBogus {
+                            items: [
+                                L_ANGLE@36..39 "<" [Newline("\n"), Whitespace("\t")] [],
+                                HtmlName {
+                                    value_token: HTML_LITERAL@39..43 "div" [] [Whitespace(" ")],
+                                },
+                                HtmlBogus {
+                                    items: [
+                                        HtmlAttribute {
+                                            name: HtmlName {
+                                                value_token: HTML_LITERAL@43..48 "class" [] [],
+                                            },
+                                            initializer: HtmlAttributeInitializerClause {
+                                                eq_token: EQ@48..49 "=" [] [],
+                                                value: missing (required),
+                                            },
+                                        },
+                                        HtmlBogusElement {
+                                            items: [
+                                                ERROR_TOKEN@49..53 "foo'" [] [],
+                                                HTML_LITERAL@53..57 "bar" [] [Whitespace(" ")],
+                                            ],
+                                        },
+                                    ],
+                                },
+                                R_ANGLE@57..58 ">" [] [],
+                            ],
+                        },
+                        HtmlElementList [
+                            HtmlContent {
+                                value_token: HTML_LITERAL@58..61 "foo" [] [],
+                            },
+                        ],
+                        HtmlClosingElement {
+                            l_angle_token: L_ANGLE@61..62 "<" [] [],
+                            slash_token: SLASH@62..63 "/" [] [],
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@63..66 "div" [] [],
+                            },
+                            r_angle_token: R_ANGLE@66..67 ">" [] [],
+                        },
+                    ],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@67..69 "<" [Newline("\n")] [],
+                slash_token: SLASH@69..70 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@70..73 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@73..74 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@74..75 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..75
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..74
+    0: HTML_ELEMENT@0..74
+      0: HTML_OPENING_ELEMENT@0..5
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..4
+          0: HTML_LITERAL@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..4
+        3: R_ANGLE@4..5 ">" [] []
+      1: HTML_ELEMENT_LIST@5..67
+        0: HTML_BOGUS_ELEMENT@5..36
+          0: HTML_BOGUS@5..27
+            0: L_ANGLE@5..8 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@8..12
+              0: HTML_LITERAL@8..12 "div" [] [Whitespace(" ")]
+            2: HTML_BOGUS@12..26
+              0: HTML_ATTRIBUTE@12..18
+                0: HTML_NAME@12..17
+                  0: HTML_LITERAL@12..17 "class" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@17..18
+                  0: EQ@17..18 "=" [] []
+                  1: (empty)
+              1: HTML_BOGUS_ELEMENT@18..26
+                0: ERROR_TOKEN@18..22 "foo\"" [] []
+                1: HTML_LITERAL@22..26 "bar" [] [Whitespace(" ")]
+            3: R_ANGLE@26..27 ">" [] []
+          1: HTML_ELEMENT_LIST@27..30
+            0: HTML_CONTENT@27..30
+              0: HTML_LITERAL@27..30 "foo" [] []
+          2: HTML_CLOSING_ELEMENT@30..36
+            0: L_ANGLE@30..31 "<" [] []
+            1: SLASH@31..32 "/" [] []
+            2: HTML_NAME@32..35
+              0: HTML_LITERAL@32..35 "div" [] []
+            3: R_ANGLE@35..36 ">" [] []
+        1: HTML_BOGUS_ELEMENT@36..67
+          0: HTML_BOGUS@36..58
+            0: L_ANGLE@36..39 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@39..43
+              0: HTML_LITERAL@39..43 "div" [] [Whitespace(" ")]
+            2: HTML_BOGUS@43..57
+              0: HTML_ATTRIBUTE@43..49
+                0: HTML_NAME@43..48
+                  0: HTML_LITERAL@43..48 "class" [] []
+                1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@48..49
+                  0: EQ@48..49 "=" [] []
+                  1: (empty)
+              1: HTML_BOGUS_ELEMENT@49..57
+                0: ERROR_TOKEN@49..53 "foo'" [] []
+                1: HTML_LITERAL@53..57 "bar" [] [Whitespace(" ")]
+            3: R_ANGLE@57..58 ">" [] []
+          1: HTML_ELEMENT_LIST@58..61
+            0: HTML_CONTENT@58..61
+              0: HTML_LITERAL@58..61 "foo" [] []
+          2: HTML_CLOSING_ELEMENT@61..67
+            0: L_ANGLE@61..62 "<" [] []
+            1: SLASH@62..63 "/" [] []
+            2: HTML_NAME@63..66
+              0: HTML_LITERAL@63..66 "div" [] []
+            3: R_ANGLE@66..67 ">" [] []
+      2: HTML_CLOSING_ELEMENT@67..74
+        0: L_ANGLE@67..69 "<" [Newline("\n")] []
+        1: SLASH@69..70 "/" [] []
+        2: HTML_NAME@70..73
+          0: HTML_LITERAL@70..73 "div" [] []
+        3: R_ANGLE@73..74 ">" [] []
+  3: EOF@74..75 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+invalid-unquoted-value2.html:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an initializer but instead found 'foo"'.
+  
+    1 │ <div>
+  > 2 │ 	<div class=foo"bar >foo</div>
+      │ 	           ^^^^
+    3 │ 	<div class=foo'bar >foo</div>
+    4 │ </div>
+  
+  i Expected an initializer here.
+  
+    1 │ <div>
+  > 2 │ 	<div class=foo"bar >foo</div>
+      │ 	           ^^^^
+    3 │ 	<div class=foo'bar >foo</div>
+    4 │ </div>
+  
+invalid-unquoted-value2.html:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character in unquoted attribute value
+  
+    1 │ <div>
+  > 2 │ 	<div class=foo"bar >foo</div>
+      │ 	              ^
+    3 │ 	<div class=foo'bar >foo</div>
+    4 │ </div>
+  
+invalid-unquoted-value2.html:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `"`
+  
+    1 │ <div>
+  > 2 │ 	<div class=foo"bar >foo</div>
+      │ 	              ^
+    3 │ 	<div class=foo'bar >foo</div>
+    4 │ </div>
+  
+invalid-unquoted-value2.html:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an initializer but instead found 'foo''.
+  
+    1 │ <div>
+    2 │ 	<div class=foo"bar >foo</div>
+  > 3 │ 	<div class=foo'bar >foo</div>
+      │ 	           ^^^^
+    4 │ </div>
+    5 │ 
+  
+  i Expected an initializer here.
+  
+    1 │ <div>
+    2 │ 	<div class=foo"bar >foo</div>
+  > 3 │ 	<div class=foo'bar >foo</div>
+      │ 	           ^^^^
+    4 │ </div>
+    5 │ 
+  
+invalid-unquoted-value2.html:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character in unquoted attribute value
+  
+    1 │ <div>
+    2 │ 	<div class=foo"bar >foo</div>
+  > 3 │ 	<div class=foo'bar >foo</div>
+      │ 	              ^
+    4 │ </div>
+    5 │ 
+  
+invalid-unquoted-value2.html:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `'`
+  
+    1 │ <div>
+    2 │ 	<div class=foo"bar >foo</div>
+  > 3 │ 	<div class=foo'bar >foo</div>
+      │ 	              ^
+    4 │ </div>
+    5 │ 
+  
+```

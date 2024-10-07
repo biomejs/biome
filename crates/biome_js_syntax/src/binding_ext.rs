@@ -68,7 +68,7 @@ impl AnyJsBindingDeclaration {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_js_syntax::{binding_ext::AnyJsBindingDeclaration, T};
+    /// use biome_js_syntax::{AnyTsIdentifierBinding, AnyTsModuleName, binding_ext::AnyJsBindingDeclaration, T};
     ///
     /// let enum_id = make::js_identifier_binding(make::ident("Order"));
     /// let enum_decl: AnyJsBindingDeclaration = make::ts_enum_declaration(
@@ -85,7 +85,7 @@ impl AnyJsBindingDeclaration {
     /// let namespace_id = make::ts_identifier_binding(make::ident("Order"));
     /// let namespace_decl: AnyJsBindingDeclaration = make::ts_module_declaration(
     ///     make::token(T![namespace]),
-    ///     namespace_id.into(),
+    ///     AnyTsModuleName::AnyTsIdentifierBinding(AnyTsIdentifierBinding::from(namespace_id)),
     ///     make::ts_module_block(
     ///         make::token(T!['{']),
     ///         make::js_module_item_list([]),

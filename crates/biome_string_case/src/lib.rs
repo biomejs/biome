@@ -1,5 +1,7 @@
 //! Identify string case and convert to various string cases.
 
+use std::borrow::Cow;
+
 /// Represents the [Case] of a string.
 ///
 /// Note that some cases are superset of others.
@@ -11,40 +13,42 @@
 /// The arrow means "is subset of".
 ///
 /// ```svgbob
-///                    ┌──► Pascal ────────────┐
-/// NumberableCapital ─┤                       │
-///                    └──► Upper ─► Constant ─┤
-///                                            ├──► Unknown
-///                    ┌──► Camel ─────────────┤
-///             Lower ─┤                       │
-///                    └──► Kebab ─────────────┤
-///                    │                       │
-///                    └──► Snake ─────────────┤
-///                                            │
-///               Uni ─────────────────────────┘
+///                     ┌──► Pascal ────────────┐
+/// NumberableCapital ──┤                       │
+///                     └──► Upper ─► Constant ─┤
+///                                             ├──► Unknown
+///                     ┌──► Camel ─────────────┤
+///         ┌──► Lower ─┤                       │
+///         │           └──► Kebab ─────────────┤
+/// Number ─┤           │                       │
+///         │           └──► Snake ─────────────┤
+///         │                                   │
+///         └──► Uni ───────────────────────────┘
 /// ```
 ///
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, PartialOrd, Ord)]
 #[repr(u16)]
 pub enum Case {
+    /// ASCII numbers
+    Number = 1 << 0,
     /// Alphanumeric Characters that cannot be in lowercase or uppercase (numbers and syllabary)
-    Uni = 1 << 0,
+    Uni = Case::Number as u16 | 1 << 1,
     /// A, B1, C42
-    NumberableCapital = 1 << 1,
+    NumberableCapital = 1 << 2,
     /// UPPERCASE
-    Upper = Case::NumberableCapital as u16 | 1 << 2,
+    Upper = Case::NumberableCapital as u16 | 1 << 3,
     // CONSTANT_CASE
-    Constant = Case::Upper as u16 | 1 << 3,
+    Constant = Case::Upper as u16 | 1 << 4,
     /// PascalCase
-    Pascal = Case::NumberableCapital as u16 | 1 << 4,
+    Pascal = Case::NumberableCapital as u16 | 1 << 5,
     /// lowercase
-    Lower = 1 << 5,
+    Lower = Case::Number as u16 | 1 << 6,
     /// snake_case
-    Snake = Case::Lower as u16 | 1 << 6,
+    Snake = Case::Lower as u16 | 1 << 7,
     /// kebab-case
-    Kebab = Case::Lower as u16 | 1 << 7,
+    Kebab = Case::Lower as u16 | 1 << 8,
     // camelCase
-    Camel = Case::Lower as u16 | 1 << 8,
+    Camel = Case::Lower as u16 | 1 << 9,
     /// Unknown case
     #[default]
     Unknown = Case::Camel as u16
@@ -53,7 +57,7 @@ pub enum Case {
         | Case::Pascal as u16
         | Case::Constant as u16
         | Case::Uni as u16
-        | 1 << 9,
+        | 1 << 10,
 }
 
 impl Case {
@@ -93,7 +97,7 @@ impl Case {
     ///
     /// assert_eq!(Case::identify("HTTPSERVER", /* no effect */ true), Case::Upper);
     ///
-    /// assert_eq!(Case::identify("100", /* no effect */ true), Case::Uni);
+    /// assert_eq!(Case::identify("100", /* no effect */ true), Case::Number);
     /// assert_eq!(Case::identify("안녕하세요", /* no effect */ true), Case::Uni);
     ///
     /// assert_eq!(Case::identify("", /* no effect */ true), Case::Unknown);
@@ -105,10 +109,12 @@ impl Case {
         let Some(first_char) = chars.next() else {
             return Case::Unknown;
         };
-        let mut result = if first_char.is_uppercase() {
-            Case::NumberableCapital
-        } else if first_char.is_lowercase() {
+        let mut result = if first_char.is_lowercase() {
             Case::Lower
+        } else if first_char.is_uppercase() {
+            Case::NumberableCapital
+        } else if first_char.is_ascii_digit() {
+            Case::Number
         } else if first_char.is_alphanumeric() {
             Case::Uni
         } else {
@@ -119,13 +125,13 @@ impl Case {
         for current_char in chars {
             result = match current_char {
                 '-' => match result {
-                    Case::Kebab | Case::Lower if previous_char != '-' => Case::Kebab,
+                    Case::Kebab | Case::Lower | Case::Number if previous_char != '-' => Case::Kebab,
                     _ => return Case::Unknown,
                 },
                 '_' => match result {
                     Case::Constant | Case::Snake if previous_char != '_' => result,
                     Case::NumberableCapital | Case::Upper => Case::Constant,
-                    Case::Lower => Case::Snake,
+                    Case::Lower | Case::Number => Case::Snake,
                     _ => return Case::Unknown,
                 },
                 _ if current_char.is_uppercase() => {
@@ -135,20 +141,21 @@ impl Case {
                             return Case::Unknown
                         }
                         Case::Camel | Case::Constant | Case::Pascal => result,
-                        Case::Lower => Case::Camel,
+                        Case::Lower | Case::Number => Case::Camel,
                         Case::NumberableCapital | Case::Upper => Case::Upper,
                         _ => return Case::Unknown,
                     }
                 }
                 _ if current_char.is_lowercase() => match result {
+                    Case::Number => Case::Lower,
                     Case::Camel | Case::Kebab | Case::Lower | Case::Snake => result,
                     Case::Pascal | Case::NumberableCapital => Case::Pascal,
                     Case::Upper if !strict || !has_consecutive_uppercase => Case::Pascal,
                     _ => return Case::Unknown,
                 },
-                _ if current_char.is_numeric() => result,
-                _ if current_char.is_alphabetic() => match result {
-                    Case::Uni => Case::Uni,
+                '0'..='9' => result,
+                _ if current_char.is_alphanumeric() => match result {
+                    Case::Number | Case::Uni => Case::Uni,
                     _ => return Case::Unknown,
                 },
                 _ => return Case::Unknown,
@@ -187,7 +194,7 @@ impl Case {
     /// assert_eq!(Case::Upper.convert("Http_SERVER"), "HTTPSERVER");
     /// ```
     pub fn convert(self, value: &str) -> String {
-        if value.is_empty() || matches!(self, Case::Unknown) {
+        if value.is_empty() || matches!(self, Case::Unknown | Case::Number) {
             return value.to_string();
         }
         let mut word_separator = matches!(self, Case::Pascal);
@@ -211,6 +218,7 @@ impl Case {
                 match self {
                     Case::Camel
                     | Case::Lower
+                    | Case::Number
                     | Case::NumberableCapital
                     | Case::Pascal
                     | Case::Unknown
@@ -240,7 +248,7 @@ impl Case {
                 }
                 Case::Kebab | Case::Snake | Case::Lower => output.extend(current.to_lowercase()),
                 Case::Uni => output.extend(Some(current)),
-                Case::Unknown => (),
+                Case::Number | Case::Unknown => (),
             }
             word_separator = false;
             if let Some(next) = next {
@@ -256,15 +264,16 @@ impl Case {
 impl std::fmt::Display for Case {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = match self {
-            Case::Unknown => "unknown case",
             Case::Camel => "camelCase",
             Case::Constant => "CONSTANT_CASE",
             Case::Kebab => "kebab-case",
             Case::Lower => "lowercase",
+            Case::Number => "number case",
             Case::NumberableCapital => "numberable capital case",
             Case::Pascal => "PascalCase",
             Case::Snake => "snake_case",
             Case::Uni => "unicase",
+            Case::Unknown => "unknown case",
             Case::Upper => "UPPERCASE",
         };
         write!(f, "{repr}")
@@ -277,7 +286,7 @@ impl std::fmt::Display for Case {
 ///
 /// Note that some [Case] are already sets of [Case].
 /// For example, [Case::Unknown] is a set that includes all [Case].
-/// So adding [Case::Unknown] to a [Cases] will superseed all other cases.
+/// So adding [Case::Unknown] to a [Cases] will supersede all other cases.
 ///
 /// A [Cases] is iterable.
 /// A Cases iterator doesn't yield a [Case] that is covered by another [Case] in the set.
@@ -392,7 +401,8 @@ impl Iterator for CasesIterator {
 }
 impl std::iter::FusedIterator for CasesIterator {}
 
-const LEADING_BIT_INDEX_TO_CASE: [Case; 10] = [
+const LEADING_BIT_INDEX_TO_CASE: [Case; 11] = [
+    Case::Number,
     Case::Uni,
     Case::NumberableCapital,
     Case::Upper,
@@ -405,23 +415,101 @@ const LEADING_BIT_INDEX_TO_CASE: [Case; 10] = [
     Case::Unknown,
 ];
 
+pub trait StrLikeExtension: ToOwned {
+    /// Returns the same value as String::to_lowercase. The only difference
+    /// is that this functions returns ```Cow``` and does not allocate
+    /// if the string is already in lowercase.
+    fn to_ascii_lowercase_cow(&self) -> std::borrow::Cow<Self>;
+}
+
+pub trait StrOnlyExtension: ToOwned {
+    /// Returns the same value as String::to_lowercase. The only difference
+    /// is that this functions returns ```Cow``` and does not allocate
+    /// if the string is already in lowercase.
+    fn to_lowercase_cow(&self) -> std::borrow::Cow<Self>;
+    /// Returns the same value as String::to_lowercase. The only difference
+    /// is that this functions returns ```Cow``` and does not allocate
+    /// if the string is already in lowercase.
+    fn to_ascii_lowercase_cow(&self) -> std::borrow::Cow<Self>;
+}
+
+impl StrOnlyExtension for str {
+    fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
+        let has_ascii_uppercase = self.bytes().any(|b| b.is_ascii_uppercase());
+        if has_ascii_uppercase {
+            #[allow(clippy::disallowed_methods)]
+            Cow::Owned(self.to_ascii_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+
+    fn to_lowercase_cow(&self) -> Cow<Self> {
+        let has_uppercase = self.chars().any(char::is_uppercase);
+        if has_uppercase {
+            #[allow(clippy::disallowed_methods)]
+            Cow::Owned(self.to_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+}
+
+impl StrLikeExtension for std::ffi::OsStr {
+    fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
+        let has_ascii_uppercase = self
+            .as_encoded_bytes()
+            .iter()
+            .any(|b| b.is_ascii_uppercase());
+        if has_ascii_uppercase {
+            #[allow(clippy::disallowed_methods)]
+            Cow::Owned(self.to_ascii_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+}
+
+impl StrLikeExtension for [u8] {
+    fn to_ascii_lowercase_cow(&self) -> Cow<Self> {
+        let has_ascii_uppercase = self.iter().any(|b| b.is_ascii_uppercase());
+        if has_ascii_uppercase {
+            Cow::Owned(self.to_ascii_lowercase())
+        } else {
+            Cow::Borrowed(self)
+        }
+    }
+}
+
+// TODO. Once trait-alias are stabilized it would be enough to `use` this trait instead of individual ones.
+// https://doc.rust-lang.org/stable/unstable-book/language-features/trait-alias.html
+pub trait StrExtension: StrOnlyExtension + StrLikeExtension {}
+impl<T: StrOnlyExtension + StrLikeExtension> StrExtension for T {}
+
 #[cfg(test)]
 mod tests {
+    use std::ffi::OsStr;
+
     use super::*;
 
     #[test]
     fn test_case_identify() {
         let no_effect = true;
 
+        assert_eq!(Case::identify("100", no_effect), Case::Number);
+
         assert_eq!(Case::identify("aHttpServer", no_effect), Case::Camel);
         assert_eq!(Case::identify("aHTTPServer", true), Case::Unknown);
         assert_eq!(Case::identify("aHTTPServer", false), Case::Camel);
         assert_eq!(Case::identify("v8Engine", no_effect), Case::Camel);
+        assert_eq!(Case::identify("2024Edition", no_effect), Case::Camel);
 
         assert_eq!(Case::identify("HTTP_SERVER", no_effect), Case::Constant);
         assert_eq!(Case::identify("V8_ENGINE", no_effect), Case::Constant);
+        assert_eq!(Case::identify("2024_EDITION", no_effect), Case::Unknown);
 
         assert_eq!(Case::identify("http-server", no_effect), Case::Kebab);
+        assert_eq!(Case::identify("2024-edition", no_effect), Case::Kebab);
 
         assert_eq!(Case::identify("httpserver", no_effect), Case::Lower);
 
@@ -434,19 +522,21 @@ mod tests {
         assert_eq!(Case::identify("V8Engine", true), Case::Pascal);
 
         assert_eq!(Case::identify("http_server", no_effect), Case::Snake);
+        assert_eq!(Case::identify("2024_edition", no_effect), Case::Snake);
 
         assert_eq!(Case::identify("HTTPSERVER", no_effect), Case::Upper);
+        assert_eq!(Case::identify("2024EDITION", no_effect), Case::Unknown);
 
-        assert_eq!(Case::identify("100", no_effect), Case::Uni);
+        assert_eq!(Case::identify("100안녕하세요", no_effect), Case::Uni);
         assert_eq!(Case::identify("안녕하세요", no_effect), Case::Uni);
 
-        // don't allow identifier that starts/ends with a delimiter
+        // don't allow identifiers that starts/ends with a delimiter
         assert_eq!(Case::identify("-a", no_effect), Case::Unknown);
         assert_eq!(Case::identify("_a", no_effect), Case::Unknown);
         assert_eq!(Case::identify("a-", no_effect), Case::Unknown);
         assert_eq!(Case::identify("a_", no_effect), Case::Unknown);
 
-        // don't allow identifier that use consecutive delimiters
+        // don't allow identifiers that use consecutive delimiters
         assert_eq!(Case::identify("a--a", no_effect), Case::Unknown);
         assert_eq!(Case::identify("a__a", no_effect), Case::Unknown);
 
@@ -671,6 +761,7 @@ mod tests {
         assert_eq!(vec(Case::Constant).as_slice(), &[Case::Constant]);
         assert_eq!(vec(Case::Upper).as_slice(), &[Case::Upper]);
         assert_eq!(vec(Case::Uni).as_slice(), &[Case::Uni]);
+        assert_eq!(vec(Case::Number).as_slice(), &[Case::Number]);
         assert_eq!(
             vec(Case::NumberableCapital).as_slice(),
             &[Case::NumberableCapital]
@@ -717,6 +808,11 @@ mod tests {
         assert_eq!(vec(Case::Camel | Case::Lower).as_slice(), &[Case::Camel]);
         assert_eq!(vec(Case::Kebab | Case::Lower).as_slice(), &[Case::Kebab]);
         assert_eq!(vec(Case::Snake | Case::Lower).as_slice(), &[Case::Snake]);
+
+        assert_eq!(vec(Case::Lower | Case::Number).as_slice(), &[Case::Lower]);
+        assert_eq!(vec(Case::Camel | Case::Number).as_slice(), &[Case::Camel]);
+        assert_eq!(vec(Case::Kebab | Case::Number).as_slice(), &[Case::Kebab]);
+        assert_eq!(vec(Case::Snake | Case::Number).as_slice(), &[Case::Snake]);
 
         assert_eq!(
             vec(Case::Constant | Case::Upper).as_slice(),
@@ -783,5 +879,46 @@ mod tests {
             }
         }
         assert_eq!(cases.into_iter().size_hint().1, Some(max_count));
+    }
+
+    #[test]
+    fn to_ascii_lowercase_cow() {
+        assert_eq!("test", "Test".to_ascii_lowercase_cow());
+        assert_eq!(
+            OsStr::new("test"),
+            OsStr::new("Test").to_ascii_lowercase_cow()
+        );
+        assert_eq!(b"test", b"Test".to_ascii_lowercase_cow().as_ref());
+
+        assert_eq!("test", "teSt".to_ascii_lowercase_cow());
+        assert_eq!("te😀st", "te😀St".to_ascii_lowercase_cow());
+        assert_eq!(
+            OsStr::new("test"),
+            OsStr::new("teSt").to_ascii_lowercase_cow()
+        );
+        assert_eq!(b"test", b"teSt".to_ascii_lowercase_cow().as_ref());
+
+        assert!(matches!("test".to_ascii_lowercase_cow(), Cow::Borrowed(_)));
+        assert!(matches!(
+            OsStr::new("test").to_ascii_lowercase_cow(),
+            Cow::Borrowed(_)
+        ));
+    }
+
+    #[test]
+    fn to_lowercase_cow() {
+        assert_eq!("test", "Test".to_lowercase_cow());
+
+        assert_eq!("test", "teSt".to_lowercase_cow());
+        assert_eq!("te😀st", "te😀St".to_lowercase_cow());
+
+        assert!(matches!("test".to_lowercase_cow(), Cow::Borrowed(_)));
+
+        assert_eq!("ėest", "Ėest".to_lowercase_cow());
+
+        assert_eq!("tešt", "teŠt".to_lowercase_cow());
+        assert_eq!("te😀st", "te😀St".to_lowercase_cow());
+
+        assert!(matches!("tešt".to_lowercase_cow(), Cow::Borrowed(_)));
     }
 }

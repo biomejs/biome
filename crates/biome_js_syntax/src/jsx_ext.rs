@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use crate::{
     inner_string_text, static_value::StaticValue, AnyJsxAttribute, AnyJsxAttributeName,
-    AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName, JsSyntaxToken, JsxAttribute,
+    AnyJsxAttributeValue, AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsSyntaxToken, JsxAttribute,
     JsxAttributeList, JsxElement, JsxName, JsxOpeningElement, JsxSelfClosingElement, JsxString,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, SyntaxResult, TokenText};
@@ -22,6 +22,24 @@ impl JsxString {
     /// ```
     pub fn inner_string_text(&self) -> SyntaxResult<TokenText> {
         Ok(inner_string_text(&self.value_token()?))
+    }
+}
+
+impl AnyJsxTag {
+    pub fn name(&self) -> Option<AnyJsxElementName> {
+        match self {
+            Self::JsxElement(element) => element.opening_element().ok()?.name().ok(),
+            Self::JsxFragment(_) => None,
+            Self::JsxSelfClosingElement(element) => element.name().ok(),
+        }
+    }
+
+    pub fn attributes(&self) -> Option<JsxAttributeList> {
+        match self {
+            Self::JsxElement(element) => Some(element.opening_element().ok()?.attributes()),
+            Self::JsxFragment(_) => None,
+            Self::JsxSelfClosingElement(element) => Some(element.attributes()),
+        }
     }
 }
 
@@ -282,9 +300,9 @@ impl JsxAttributeList {
 
     pub fn find_by_name(&self, name_to_lookup: &str) -> SyntaxResult<Option<JsxAttribute>> {
         let attribute = self.iter().find_map(|attribute| {
-            let attribute = JsxAttribute::cast_ref(attribute.syntax())?;
+            let attribute = JsxAttribute::cast(attribute.into_syntax())?;
             let name = attribute.name().ok()?;
-            let name = JsxName::cast_ref(name.syntax())?;
+            let name = JsxName::cast(name.into_syntax())?;
             if name.value_token().ok()?.text_trimmed() == name_to_lookup {
                 Some(attribute)
             } else {
@@ -328,17 +346,17 @@ declare_node_union! {
 }
 
 impl AnyJsxElement {
-    pub fn attributes(&self) -> JsxAttributeList {
-        match self {
-            AnyJsxElement::JsxOpeningElement(element) => element.attributes(),
-            AnyJsxElement::JsxSelfClosingElement(element) => element.attributes(),
-        }
-    }
-
     pub fn name(&self) -> SyntaxResult<AnyJsxElementName> {
         match self {
             AnyJsxElement::JsxOpeningElement(element) => element.name(),
             AnyJsxElement::JsxSelfClosingElement(element) => element.name(),
+        }
+    }
+
+    pub fn attributes(&self) -> JsxAttributeList {
+        match self {
+            AnyJsxElement::JsxOpeningElement(element) => element.attributes(),
+            AnyJsxElement::JsxSelfClosingElement(element) => element.attributes(),
         }
     }
 
@@ -419,6 +437,27 @@ impl JsxAttribute {
     }
 }
 
+impl AnyJsxAttributeName {
+    pub fn name_token(&self) -> SyntaxResult<JsSyntaxToken> {
+        match self {
+            Self::JsxName(jsx_name) => jsx_name.value_token(),
+            Self::JsxNamespaceName(jsx_namespace_name) => jsx_namespace_name
+                .name()
+                .and_then(|jsx_name| jsx_name.value_token()),
+        }
+    }
+
+    pub fn namespace_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            Self::JsxName(_) => None,
+            Self::JsxNamespaceName(jsx_namespace_name) => jsx_namespace_name
+                .namespace()
+                .and_then(|namespace| namespace.value_token())
+                .ok(),
+        }
+    }
+}
+
 impl AnyJsxAttributeValue {
     pub fn is_value_null_or_undefined(&self) -> bool {
         self.as_static_value()
@@ -454,7 +493,7 @@ impl AnyJsxChild {
             }
             AnyJsxChild::JsxElement(element) => {
                 let opening_element = element.opening_element().ok()?;
-                let jsx_element = AnyJsxElement::cast(opening_element.syntax().clone())?;
+                let jsx_element = AnyJsxElement::cast(opening_element.into_syntax())?;
 
                 // We don't check if a component (e.g. <Text aria-hidden />) is using the `aria-hidden` property,
                 // since we don't have enough information about how the property is used.
@@ -462,7 +501,7 @@ impl AnyJsxChild {
                     || !jsx_element.has_truthy_attribute("aria-hidden")
             }
             AnyJsxChild::JsxSelfClosingElement(element) => {
-                let jsx_element = AnyJsxElement::cast(element.syntax().clone())?;
+                let jsx_element = AnyJsxElement::unwrap_cast(element.syntax().clone());
                 jsx_element.is_custom_component()
                     || !jsx_element.has_truthy_attribute("aria-hidden")
             }

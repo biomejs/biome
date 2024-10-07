@@ -13,12 +13,12 @@ use biome_rowan::{AstNode, BatchMutation, TriviaPieceKind};
 /// This new element will serve as trailing "newline" for the suppression comment.
 fn make_indentation_from_jsx_element(current_element: &JsxText) -> JsxText {
     if let Ok(text) = current_element.value_token() {
-        let chars = text.text().chars();
+        let bytes = text.text().bytes();
         let mut newlines = 0;
         let mut spaces = 0;
         let mut string_found = false;
-        for char in chars {
-            if char == '\"' {
+        for byte in bytes {
+            if byte == b'\"' {
                 if string_found {
                     string_found = false;
                 } else {
@@ -30,10 +30,10 @@ fn make_indentation_from_jsx_element(current_element: &JsxText) -> JsxText {
                 continue;
             }
 
-            if matches!(char, '\r' | '\n') {
+            if matches!(byte, b'\r' | b'\n') {
                 newlines += 1;
             }
-            if matches!(char, ' ') && newlines == 1 && !string_found {
+            if matches!(byte, b' ') && newlines == 1 && !string_found {
                 spaces += 1;
             }
         }
@@ -65,17 +65,14 @@ impl SuppressionAction for JsSuppressionAction {
             // There are some tokens that might contains newlines in their tokens, only
             // few nodes matches this criteria. If the token is inside one of those nodes,
             // then we check its content.
-            let nodes_that_might_contain_newlines = current_token
-                .parent()
-                .map(|node| {
-                    matches!(
-                        node.kind(),
-                        JsSyntaxKind::JSX_TEXT
-                            | JsSyntaxKind::JS_STRING_LITERAL
-                            | JsSyntaxKind::TEMPLATE_CHUNK
-                    )
-                })
-                .unwrap_or_default();
+            let nodes_that_might_contain_newlines = current_token.parent().is_some_and(|node| {
+                matches!(
+                    node.kind(),
+                    JsSyntaxKind::JSX_TEXT
+                        | JsSyntaxKind::JS_STRING_LITERAL
+                        | JsSyntaxKind::TEMPLATE_CHUNK
+                )
+            });
             if current_token
                 .trailing_trivia()
                 .pieces()
@@ -125,8 +122,8 @@ impl SuppressionAction for JsSuppressionAction {
     /// There are some edge cases:
     /// - JSX elements might have newlines in their content;
     /// - JS templates are an exception to the rule. JS templates might contain expressions inside their
-    /// content, and those expressions can contain diagnostics. The function uses the token `${` as boundary
-    /// and tries to place the suppression comment after it;
+    ///     content, and those expressions can contain diagnostics. The function uses the token `${` as boundary
+    ///     and tries to place the suppression comment after it;
     fn apply_suppression(
         &self,
         mutation: &mut BatchMutation<Self::Language>,
@@ -154,8 +151,7 @@ impl SuppressionAction for JsSuppressionAction {
             // quick check is the element is inside a list
             if current_jsx_element
                 .parent()
-                .map(|p| JsxChildList::can_cast(p.kind()))
-                .unwrap_or_default()
+                .is_some_and(|p| JsxChildList::can_cast(p.kind()))
             {
                 let jsx_comment = jsx_expression_child(
                     token(T!['{']).with_trailing_trivia([(

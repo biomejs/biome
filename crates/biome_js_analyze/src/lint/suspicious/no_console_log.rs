@@ -1,7 +1,6 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -36,9 +35,8 @@ declare_lint_rule! {
         version: "1.0.0",
         name: "noConsoleLog",
         language: "js",
-        sources: &[RuleSource::Eslint("no-console")],
-        source_kind: RuleSourceKind::Inspired,
         recommended: false,
+        deprecated: "Use the rule noConsole instead.",
         fix_kind: FixKind::Unsafe,
     }
 }
@@ -53,7 +51,7 @@ impl Rule for NoConsoleLog {
         let call_expression = ctx.query();
         let model = ctx.model();
         let callee = call_expression.callee().ok()?;
-        let member_expression = AnyJsMemberExpression::cast_ref(callee.syntax())?;
+        let member_expression = AnyJsMemberExpression::cast(callee.into_syntax())?;
         if member_expression.member_name()?.text() != "log" {
             return None;
         }

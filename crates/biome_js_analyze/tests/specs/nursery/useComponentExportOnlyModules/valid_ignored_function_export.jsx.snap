@@ -1,0 +1,11 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 84
+expression: valid_ignored_function_export.jsx
+---
+# Input
+```jsx
+export const loader = () => {}
+export const meta = { title: 'Home' }
+
+```

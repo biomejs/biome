@@ -18,7 +18,7 @@ pub struct CliOptions {
     #[bpaf(long("use-server"), switch, fallback(false))]
     pub use_server: bool,
 
-    /// Print additional diagnostics, and some diagnostics show more information.
+    /// Print additional diagnostics, and some diagnostics show more information. Also, print out what files were processed and which ones were modified.
     #[bpaf(long("verbose"), switch, fallback(false))]
     pub verbose: bool,
 
@@ -27,14 +27,14 @@ pub struct CliOptions {
     #[bpaf(long("config-path"), argument("PATH"), optional)]
     pub config_path: Option<String>,
 
-    /// Cap the amount of diagnostics displayed.
+    /// Cap the amount of diagnostics displayed. When `none` is provided, the limit is lifted.
     #[bpaf(
         long("max-diagnostics"),
-        argument("NUMBER"),
-        fallback(20),
+        argument("none|<NUMBER>"),
+        fallback(MaxDiagnostics::default()),
         display_fallback
     )]
-    pub max_diagnostics: u16,
+    pub max_diagnostics: MaxDiagnostics,
 
     /// Skip over files containing syntax errors instead of emitting an error diagnostic.
     #[bpaf(long("skip-errors"), switch)]
@@ -51,7 +51,7 @@ pub struct CliOptions {
     /// Allows to change how diagnostics and summary are reported.
     #[bpaf(
         long("reporter"),
-        argument("json|json-pretty|github|junit|summary"),
+        argument("json|json-pretty|github|junit|summary|gitlab"),
         fallback(CliReporter::default())
     )]
     pub reporter: CliReporter,
@@ -131,6 +131,14 @@ pub enum CliReporter {
     Junit,
     /// Reports linter diagnostics grouped by category and number of hits. Reports formatter diagnostics grouped by file.
     Summary,
+    /// Reports linter diagnostics using the [GitLab Code Quality report](https://docs.gitlab.com/ee/ci/testing/code_quality.html#implement-a-custom-tool).
+    GitLab,
+}
+
+impl CliReporter {
+    pub(crate) const fn is_default(&self) -> bool {
+        matches!(self, Self::Default)
+    }
 }
 
 impl FromStr for CliReporter {
@@ -143,6 +151,7 @@ impl FromStr for CliReporter {
             "summary" => Ok(Self::Summary),
             "github" => Ok(Self::GitHub),
             "junit" => Ok(Self::Junit),
+            "gitlab" => Ok(Self::GitLab),
             _ => Err(format!(
                 "value {s:?} is not valid for the --reporter argument"
             )),
@@ -159,6 +168,75 @@ impl Display for CliReporter {
             CliReporter::Summary => f.write_str("summary"),
             CliReporter::GitHub => f.write_str("github"),
             CliReporter::Junit => f.write_str("junit"),
+            CliReporter::GitLab => f.write_str("gitlab"),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, Bpaf)]
+pub enum MaxDiagnostics {
+    None,
+    Limit(u32),
+}
+
+impl MaxDiagnostics {
+    pub fn ok(&self) -> Option<u32> {
+        match self {
+            MaxDiagnostics::None => None,
+            MaxDiagnostics::Limit(value) => Some(*value),
+        }
+    }
+}
+
+impl Default for MaxDiagnostics {
+    fn default() -> Self {
+        Self::Limit(20)
+    }
+}
+
+impl Display for MaxDiagnostics {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MaxDiagnostics::None => {
+                write!(f, "none")
+            }
+            MaxDiagnostics::Limit(value) => {
+                write!(f, "{value}")
+            }
+        }
+    }
+}
+
+impl FromStr for MaxDiagnostics {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "none" => Ok(MaxDiagnostics::None),
+            _ => {
+                if let Ok(value) = s.parse::<u32>() {
+                    Ok(MaxDiagnostics::Limit(value))
+                } else {
+                    Err(format!("Invalid value provided. Provide 'none' to lift the limit, or a number between 0 and {}.", u32::MAX))
+                }
+            }
+        }
+    }
+}
+
+impl From<MaxDiagnostics> for u64 {
+    fn from(value: MaxDiagnostics) -> Self {
+        match value {
+            MaxDiagnostics::None => u64::MAX,
+            MaxDiagnostics::Limit(value) => value as u64,
+        }
+    }
+}
+
+impl From<MaxDiagnostics> for u32 {
+    fn from(value: MaxDiagnostics) -> Self {
+        match value {
+            MaxDiagnostics::None => u32::MAX,
+            MaxDiagnostics::Limit(value) => value,
         }
     }
 }

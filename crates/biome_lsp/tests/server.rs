@@ -676,7 +676,7 @@ async fn pull_diagnostics() -> Result<()> {
                     }),
                     source: Some(String::from("biome")),
                     message: String::from(
-                        "Use === instead of ==.\n== is only allowed when comparing against `null`",
+                        "Use === instead of ==. == is only allowed when comparing against `null`",
                     ),
                     related_information: Some(vec![lsp::DiagnosticRelatedInformation {
                         location: lsp::Location {
@@ -820,7 +820,7 @@ async fn pull_diagnostics_from_new_file() -> Result<()> {
                     }),
                     source: Some(String::from("biome")),
                     message: String::from(
-                        "Use === instead of ==.\n== is only allowed when comparing against `null`",
+                        "Use === instead of ==. == is only allowed when comparing against `null`",
                     ),
                     related_information: Some(vec![lsp::DiagnosticRelatedInformation {
                         location: lsp::Location {
@@ -1393,7 +1393,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
             "linter": { "enabled": true }
         },
         "linter": {
-            "rules": { "nursery": { "noUnknownProperty": "error" } }
+            "rules": { "correctness": { "noUnknownProperty": "error" } }
         }
     }"#;
 
@@ -1444,7 +1444,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
                     },
                     severity: Some(lsp::DiagnosticSeverity::ERROR),
                     code: Some(lsp::NumberOrString::String(String::from(
-                        "lint/nursery/noUnknownProperty"
+                        "lint/correctness/noUnknownProperty"
                     ))),
                     code_description: Some(CodeDescription {
                         href: Url::parse("https://biomejs.dev/linter/rules/no-unknown-property")

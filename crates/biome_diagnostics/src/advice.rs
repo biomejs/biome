@@ -99,6 +99,28 @@ impl<T: Display> Advices for LogAdvice<T> {
     }
 }
 
+/// Utility advice that prints a list of items.
+#[derive(Debug)]
+pub struct ListAdvice<T> {
+    pub list: Vec<T>,
+}
+
+impl<T: Display> Advices for ListAdvice<T> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        if self.list.is_empty() {
+            visitor.record_log(LogCategory::Warn, &"The list is empty.")
+        } else {
+            let pattern_list: Vec<_> = self
+                .list
+                .iter()
+                .map(|pattern| pattern as &dyn Display)
+                .collect();
+
+            visitor.record_list(&pattern_list)
+        }
+    }
+}
+
 /// Utility type implementing [Advices] that emits a single code frame
 /// advice with the provided path, span and source code.
 #[derive(Debug)]

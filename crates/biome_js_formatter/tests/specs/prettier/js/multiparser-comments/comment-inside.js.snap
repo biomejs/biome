@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/multiparser-comments/comment-inside.js
 ---
-
 # Input
 
 ```js
@@ -209,5 +208,3 @@ expr1 = html`
     )}</div>
 `;
 ```
-
-

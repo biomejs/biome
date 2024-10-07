@@ -16,12 +16,40 @@ pub(crate) struct HtmlTokenSource<'source> {
 
 #[derive(Copy, Clone, Debug, Default)]
 pub(crate) enum HtmlLexContext {
-    /// The default state
+    /// The default state. This state is used for a majority of the lexing, which is inside html tags.
     #[default]
     Regular,
-    #[allow(unused)]
-    /// When the lexer is inside a element list, newlines, spaces and quotes are part of the text
-    ElementList,
+    /// When the lexer is outside of a tag, special characters are lexed as text.
+    ///
+    /// The exeptions being `<` which indicates the start of a tag, and `>` which is invalid syntax if not preceeded with a `<`.
+    OutsideTag,
+    /// When the parser encounters a `=` token (the beginning of the attribute initializer clause), it switches to this context.
+    ///
+    /// This is because attribute values can start and end with a `"` or `'` character, or be unquoted, and the lexer needs to know to start lexing a string literal.
+    AttributeValue,
+    /// Enables the `html` keyword token.
+    ///
+    /// When the parser has encounters the sequence `<!DOCTYPE`, it switches to this context. It will remain in this context until the next `>` token is encountered.
+    Doctype,
+    /// Treat everything as text until the closing tag is encountered.
+    EmbeddedLanguage(HtmlEmbededLanguage),
+    /// Comments are treated as text until the closing comment tag is encountered.
+    Comment,
+}
+
+#[derive(Copy, Clone, Debug)]
+pub(crate) enum HtmlEmbededLanguage {
+    Script,
+    Style,
+}
+
+impl HtmlEmbededLanguage {
+    pub fn end_tag(&self) -> &'static str {
+        match self {
+            Self::Script => "</script>",
+            Self::Style => "</style>",
+        }
+    }
 }
 
 impl LexContext for HtmlLexContext {

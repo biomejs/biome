@@ -1,6 +1,6 @@
 use super::{
-    is_diagnostic_error, CodeActionsParams, ExtensionHandler, FixAllParams, LintParams,
-    LintResults, ParseResult, SearchCapabilities,
+    is_diagnostic_error, AnalyzerVisitorBuilder, CodeActionsParams, ExtensionHandler, FixAllParams,
+    LintParams, LintResults, ParseResult, SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -35,9 +35,9 @@ use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
 use std::borrow::Cow;
-use tracing::{debug_span, error, info, trace, trace_span};
+use tracing::{debug_span, error, info, trace_span};
 
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssFormatterSettings {
     pub line_ending: Option<LineEnding>,
@@ -48,32 +48,10 @@ pub struct CssFormatterSettings {
     pub enabled: Option<bool>,
 }
 
-impl Default for CssFormatterSettings {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-            indent_style: Default::default(),
-            indent_width: Default::default(),
-            line_ending: Default::default(),
-            line_width: Default::default(),
-            quote_style: Default::default(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CssLinterSettings {
     pub enabled: Option<bool>,
-}
-
-// NOTE: we want to make the linter opt-in for now
-impl Default for CssLinterSettings {
-    fn default() -> Self {
-        Self {
-            enabled: Some(false),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -166,7 +144,7 @@ impl ServiceLanguage for CssLanguage {
             rules: global
                 .map(|g| to_analyzer_rules(g, file_path.as_path()))
                 .unwrap_or_default(),
-            globals: vec![],
+            globals: Vec::new(),
             preferred_quote,
             jsx_runtime: None,
         };
@@ -221,7 +199,7 @@ fn parse(
         css_modules: settings
             .and_then(|s| s.languages.css.parser.css_modules)
             .unwrap_or_default(),
-        grit_metavariable: false,
+        grit_metavariables: false,
     };
     if let Some(settings) = settings {
         options = settings
@@ -337,38 +315,21 @@ fn lint(params: LintParams) -> LintResults {
             let analyzer_options =
                 workspace_settings.analyzer_options::<CssLanguage>(params.path, &params.language);
             let tree = params.parse.tree();
-            let mut diagnostics = params.parse.into_diagnostics();
 
             let has_only_filter = !params.only.is_empty();
-            let mut rules = None;
+            let rules = params
+                .workspace
+                .settings()
+                .as_ref()
+                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
-            let enabled_rules = if let Some(settings) = params.workspace.settings() {
-                // Compute final rules (taking `overrides` into account)
-                rules = settings.as_rules(params.path.as_path());
-
-                if has_only_filter {
-                    params
-                        .only
-                        .into_iter()
-                        .map(|selector| selector.into())
-                        .collect::<Vec<_>>()
-                } else {
-                    rules
-                        .as_ref()
-                        .map(|rules| rules.as_enabled_rules())
-                        .unwrap_or_default()
-                        .into_iter()
-                        .collect::<Vec<_>>()
-                }
-            } else {
-                vec![]
-            };
-
-            let disabled_rules = params
-                .skip
-                .into_iter()
-                .map(|selector| selector.into())
-                .collect::<Vec<_>>();
+            let (enabled_rules, disabled_rules) =
+                AnalyzerVisitorBuilder::new(params.workspace.settings())
+                    .with_syntax_rules()
+                    .with_linter_rules(&params.only, &params.skip, params.path.as_path())
+                    .with_assists_rules(&params.only, &params.skip, params.path.as_path())
+                    .finish();
+            let mut diagnostics = params.parse.into_diagnostics();
 
             let filter = AnalysisFilter {
                 categories: params.categories,
@@ -468,37 +429,40 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         path,
         manifest: _,
         language,
-        settings,
+        only,
+        skip,
     } = params;
     debug_span!("Code actions CSS", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
-            let rules = settings.as_rules(params.path.as_path());
-            let filter = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
-
-            let mut filter = AnalysisFilter::from_enabled_rules(filter.as_slice());
-
-            let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
-            if settings.organize_imports.enabled {
-                categories = categories.with_action();
-            }
-            filter.categories = categories.build();
-            filter.range = Some(range);
-
-            let analyzer_options = workspace.analyzer_options::<CssLanguage>(path, &language);
-
             let Some(_) = language.to_css_file_source() else {
                 error!("Could not determine the file source of the file");
-                return PullActionsResult { actions: vec![] };
+                return PullActionsResult {
+                    actions: Vec::new(),
+                };
             };
 
-            trace!("CSS runs the analyzer");
+            let analyzer_options = workspace.analyzer_options::<CssLanguage>(path, &language);
             let mut actions = Vec::new();
+            let (enabled_rules, disabled_rules) =
+                AnalyzerVisitorBuilder::new(params.workspace.settings())
+                    .with_syntax_rules()
+                    .with_linter_rules(&only, &skip, params.path.as_path())
+                    .with_assists_rules(&only, &skip, params.path.as_path())
+                    .finish();
+
+            let filter = AnalysisFilter {
+                categories: RuleCategoriesBuilder::default()
+                    .with_syntax()
+                    .with_lint()
+                    .with_action()
+                    .build(),
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: &disabled_rules,
+                range,
+            };
+
+            info!("CSS runs the analyzer");
 
             analyze(&tree, filter, &analyzer_options, |signal| {
                 actions.extend(signal.actions().into_code_action_iter().map(|item| {
@@ -521,45 +485,40 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let FixAllParams {
-        parse,
-        fix_file_mode,
-        workspace,
-        should_format,
-        biome_path,
-        manifest: _,
-        document_file_source,
-    } = params;
-
-    let settings = workspace.settings();
-    let Some(settings) = settings else {
-        let tree: CssRoot = parse.tree();
-
+    let mut tree: CssRoot = params.parse.tree();
+    let Some(settings) = params.workspace.settings() else {
         return Ok(FixFileResult {
-            actions: vec![],
+            actions: Vec::new(),
             errors: 0,
             skipped_suggested_fixes: 0,
             code: tree.syntax().to_string(),
         });
     };
 
-    let mut tree: CssRoot = parse.tree();
-    let mut actions = Vec::new();
-
     // Compute final rules (taking `overrides` into account)
-    let rules = settings.as_rules(params.biome_path.as_path());
-    let rule_filter_list = rules
-        .as_ref()
-        .map(|rules| rules.as_enabled_rules())
-        .unwrap_or_default()
-        .into_iter()
-        .collect::<Vec<_>>();
-    let filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
+    let rules = settings.as_linter_rules(params.biome_path.as_path());
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_syntax_rules()
+        .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .with_assists_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .finish();
 
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .build(),
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
+    let mut actions = Vec::new();
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options =
-        workspace.analyzer_options::<CssLanguage>(biome_path, &document_file_source);
+    let analyzer_options = params
+        .workspace
+        .analyzer_options::<CssLanguage>(params.biome_path, &params.document_file_source);
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
             let current_diagnostic = signal.diagnostic();
@@ -576,7 +535,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     continue;
                 }
 
-                match fix_file_mode {
+                match params.fix_file_mode {
                     FixFileMode::SafeFixes => {
                         if action.applicability == Applicability::MaybeIncorrect {
                             skipped_suggested_fixes += 1;
@@ -627,9 +586,12 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
             }
             None => {
-                let code = if should_format {
+                let code = if params.should_format {
                     format_node(
-                        workspace.format_options::<CssLanguage>(biome_path, &document_file_source),
+                        params.workspace.format_options::<CssLanguage>(
+                            params.biome_path,
+                            &params.document_file_source,
+                        ),
                         tree.syntax(),
                     )?
                     .print()?

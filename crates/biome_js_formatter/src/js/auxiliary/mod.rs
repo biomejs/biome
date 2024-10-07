@@ -13,6 +13,7 @@ pub(crate) mod finally_clause;
 pub(crate) mod function_body;
 pub(crate) mod initializer_clause;
 pub(crate) mod label;
+pub(crate) mod metavariable;
 pub(crate) mod module;
 pub(crate) mod name;
 pub(crate) mod private_name;

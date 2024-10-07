@@ -6,13 +6,11 @@ use biome_formatter::{
 
 use crate::{AsFormat, IntoFormat};
 use biome_js_syntax::{
-    AnyJsExpression, AnyTsType, JsAssignmentExpression, JsCallExpression,
-    JsComputedMemberExpression, JsConditionalExpression, JsFileSource, JsInitializerClause,
-    JsNewExpression, JsReturnStatement, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
-    JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsAsExpression,
-    TsConditionalType, TsNonNullAssertionExpression, TsSatisfiesExpression,
+    AnyJsExpression, AnyTsType, JsAssignmentExpression, JsConditionalExpression, JsFileSource,
+    JsInitializerClause, JsReturnStatement, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxNode,
+    JsSyntaxToken, JsThrowStatement, JsUnaryExpression, JsYieldArgument, TsConditionalType,
 };
-use biome_rowan::{declare_node_union, match_ast, AstNode, SyntaxResult};
+use biome_rowan::{declare_node_union, AstNode, SyntaxResult};
 
 declare_node_union! {
     pub AnyJsConditional = JsConditionalExpression | TsConditionalType
@@ -323,95 +321,66 @@ impl FormatJsAnyConditionalRule {
         // This tries to find the start of a member chain by iterating over all ancestors of the conditional.
         // The iteration "breaks" as soon as a non-member-chain node is found.
         for ancestor in ancestors {
-            let ancestor = match_ast! {
-                match &ancestor {
-                    JsCallExpression(call_expression) => {
-                        if call_expression
-                            .callee()
-                            .as_ref()
-                            == Ok(&expression)
-                        {
-                            Ancestor::MemberChain(call_expression.into())
-                        } else {
-                            Ancestor::Root(call_expression.into_syntax())
-                        }
-                    },
-
-                    JsStaticMemberExpression(member_expression) => {
-                        if member_expression
-                            .object()
-                            .as_ref()
-                            == Ok(&expression)
-                        {
-                            Ancestor::MemberChain(member_expression.into())
-                        } else {
-                            Ancestor::Root(member_expression.into_syntax())
-                        }
-                    },
-                    JsComputedMemberExpression(member_expression) => {
-                        if member_expression
-                            .object()
-                            .as_ref()
-                            == Ok(&expression)
-                        {
-                            Ancestor::MemberChain(member_expression.into())
-                        } else {
-                            Ancestor::Root(member_expression.into_syntax())
-                        }
-                    },
-                    TsNonNullAssertionExpression(non_null_assertion) => {
-                        if non_null_assertion
-                            .expression()
-                            .as_ref()
-                            == Ok(&expression)
-                        {
-                            Ancestor::MemberChain(non_null_assertion.into())
-                        } else {
-                            Ancestor::Root(non_null_assertion.into_syntax())
-                        }
-                    },
-                    JsNewExpression(new_expression) => {
-                        // Skip over new expressions
-                        if new_expression
-                            .callee()
-                            .as_ref()
-                            == Ok(&expression)
-                        {
-                            parent = new_expression.syntax().parent();
-                            expression = new_expression.into();
-                            break;
-                        }
-
-                        Ancestor::Root(new_expression.into_syntax())
-                    },
-                    TsAsExpression(as_expression) => {
-                        if as_expression
-                            .expression()
-                            .as_ref()
-                            == Ok(&expression)
-                        {
-                            parent = as_expression.syntax().parent();
-                            expression = as_expression.into();
-                            break;
-                        }
-
-                        Ancestor::Root(as_expression.into_syntax())
-                    },
-                    TsSatisfiesExpression(satisfies_expression) => {
-                        if satisfies_expression
-                            .expression()
-                            .as_ref()
-                            == Ok(&expression)
-                        {
-                            parent = satisfies_expression.syntax().parent();
-                            expression = satisfies_expression.into();
-                            break;
-                        }
-
-                        Ancestor::Root(satisfies_expression.into_syntax())
-                    },
-                    _ => Ancestor::Root(ancestor),
+            let ancestor = match AnyJsExpression::try_cast(ancestor) {
+                Ok(AnyJsExpression::JsCallExpression(call_expression)) => {
+                    if call_expression.callee().as_ref() == Ok(&expression) {
+                        Ancestor::MemberChain(call_expression.into())
+                    } else {
+                        Ancestor::Root(call_expression.into_syntax())
+                    }
                 }
+
+                Ok(AnyJsExpression::JsStaticMemberExpression(member_expression)) => {
+                    if member_expression.object().as_ref() == Ok(&expression) {
+                        Ancestor::MemberChain(member_expression.into())
+                    } else {
+                        Ancestor::Root(member_expression.into_syntax())
+                    }
+                }
+                Ok(AnyJsExpression::JsComputedMemberExpression(member_expression)) => {
+                    if member_expression.object().as_ref() == Ok(&expression) {
+                        Ancestor::MemberChain(member_expression.into())
+                    } else {
+                        Ancestor::Root(member_expression.into_syntax())
+                    }
+                }
+                Ok(AnyJsExpression::TsNonNullAssertionExpression(non_null_assertion)) => {
+                    if non_null_assertion.expression().as_ref() == Ok(&expression) {
+                        Ancestor::MemberChain(non_null_assertion.into())
+                    } else {
+                        Ancestor::Root(non_null_assertion.into_syntax())
+                    }
+                }
+                Ok(AnyJsExpression::JsNewExpression(new_expression)) => {
+                    // Skip over new expressions
+                    if new_expression.callee().as_ref() == Ok(&expression) {
+                        parent = new_expression.syntax().parent();
+                        expression = new_expression.into();
+                        break;
+                    }
+
+                    Ancestor::Root(new_expression.into_syntax())
+                }
+                Ok(AnyJsExpression::TsAsExpression(as_expression)) => {
+                    if as_expression.expression().as_ref() == Ok(&expression) {
+                        parent = as_expression.syntax().parent();
+                        expression = as_expression.into();
+                        break;
+                    }
+
+                    Ancestor::Root(as_expression.into_syntax())
+                }
+                Ok(AnyJsExpression::TsSatisfiesExpression(satisfies_expression)) => {
+                    if satisfies_expression.expression().as_ref() == Ok(&expression) {
+                        parent = satisfies_expression.syntax().parent();
+                        expression = satisfies_expression.into();
+                        break;
+                    }
+
+                    Ancestor::Root(satisfies_expression.into_syntax())
+                }
+                Ok(ancestor) => Ancestor::Root(ancestor.into_syntax()),
+                Err(ancestor) => Ancestor::Root(ancestor),
             };
 
             match ancestor {

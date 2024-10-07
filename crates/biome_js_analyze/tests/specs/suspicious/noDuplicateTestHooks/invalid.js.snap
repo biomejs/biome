@@ -308,15 +308,16 @@ invalid.js:69:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━
 ```
 
 ```
-invalid.js:91:3 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:78:2 lint/suspicious/noDuplicateTestHooks ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Disallow duplicate setup and teardown hooks.
   
-    90 │ 	describe.each(["world"])("%s", () => {
-  > 91 │ 		beforeEach(() => {});
-       │ 		^^^^^^^^^^^^^^^^^^^^
-    92 │ 		beforeEach(() => {});
-    93 │ 
+    76 │ describe.each(["hello"])("%s", () => {
+    77 │ 	beforeEach(() => {});
+  > 78 │ 	beforeEach(() => {});
+       │ 	^^^^^^^^^^^^^^^^^^^^
+    79 │ 
+    80 │ 	it("is not fine", () => {});
   
   i Disallow beforeEach duplicacy inside the describe function.
   

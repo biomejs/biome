@@ -2,4 +2,13 @@ query {
   someField # Trailing comment
 }
 
+type Foo {
+  """
+  empty line
 
+  line with spaces and tabs
+               		
+  comment
+  """
+  bar: Int
+}

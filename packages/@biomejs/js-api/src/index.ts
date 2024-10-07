@@ -97,7 +97,7 @@ export class Biome {
 	/**
 	 * It creates a new instance of the class {Biome}.
 	 */
-	public static async create(options: BiomeCreate): Promise<Biome> {
+	static async create(options: BiomeCreate): Promise<Biome> {
 		const module = await loadModule(options.distribution);
 		const workspace = new module.Workspace();
 		const biome = new Biome(module, workspace);
@@ -111,7 +111,7 @@ export class Biome {
 	 * After calling `shutdown()` on this object, it should be considered
 	 * unusable as calling any method on it will fail
 	 */
-	public shutdown() {
+	shutdown() {
 		this.workspace.free();
 	}
 
@@ -122,7 +122,7 @@ export class Biome {
 	 *
 	 * @param configuration
 	 */
-	public applyConfiguration(configuration: Configuration): void {
+	applyConfiguration(configuration: Configuration): void {
 		try {
 			this.workspace.updateSettings({
 				configuration,
@@ -134,8 +134,8 @@ export class Biome {
 		}
 	}
 
-	public registerProjectFolder(): void;
-	public registerProjectFolder(path?: string): void {
+	registerProjectFolder(): void;
+	registerProjectFolder(path?: string): void {
 		this.workspace.registerProjectFolder({
 			path,
 			setAsCurrentWorkspace: true,
@@ -158,6 +158,8 @@ export class Biome {
 		return this.tryCatchWrapper(() => {
 			const biomePath: BiomePath = {
 				path,
+				was_written: false,
+				kind: ["Handleable"],
 			};
 
 			this.workspace.openFile({
@@ -258,6 +260,9 @@ export class Biome {
 						path,
 						fix_file_mode: fixFileMode,
 						should_format: false,
+						only: [],
+						skip: [],
+						rule_categories: ["Syntax", "Lint"],
 					});
 
 					code = result.code;

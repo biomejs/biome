@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: typescript/last-argument-expansion/decorated-function.tsx
 ---
-
 # Input
 
 ```tsx
@@ -225,5 +224,3 @@ const Counter = decorator("foo")(
   ),
 );
 ```
-
-

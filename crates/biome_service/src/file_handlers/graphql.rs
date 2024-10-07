@@ -1,6 +1,6 @@
 use super::{
-    is_diagnostic_error, CodeActionsParams, DocumentFileSource, ExtensionHandler, FixAllParams,
-    LintParams, LintResults, ParseResult, SearchCapabilities,
+    is_diagnostic_error, AnalyzerVisitorBuilder, CodeActionsParams, DocumentFileSource,
+    ExtensionHandler, FixAllParams, LintParams, LintResults, ParseResult, SearchCapabilities,
 };
 use crate::file_handlers::DebugCapabilities;
 use crate::file_handlers::{
@@ -32,7 +32,7 @@ use biome_graphql_syntax::{GraphqlLanguage, GraphqlRoot, GraphqlSyntaxNode, Text
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache, TokenAtOffset};
 use std::borrow::Cow;
-use tracing::{debug_span, error, info, trace, trace_span};
+use tracing::{debug_span, error, info, trace_span};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -295,38 +295,21 @@ fn lint(params: LintParams) -> LintResults {
             let analyzer_options = workspace_settings
                 .analyzer_options::<GraphqlLanguage>(params.path, &params.language);
             let tree = params.parse.tree();
-            let mut diagnostics = params.parse.into_diagnostics();
 
             let has_only_filter = !params.only.is_empty();
-            let mut rules = None;
+            let rules = params
+                .workspace
+                .settings()
+                .as_ref()
+                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
-            let enabled_rules = if let Some(settings) = params.workspace.settings() {
-                // Compute final rules (taking `overrides` into account)
-                rules = settings.as_rules(params.path.as_path());
-
-                if has_only_filter {
-                    params
-                        .only
-                        .into_iter()
-                        .map(|selector| selector.into())
-                        .collect::<Vec<_>>()
-                } else {
-                    rules
-                        .as_ref()
-                        .map(|rules| rules.as_enabled_rules())
-                        .unwrap_or_default()
-                        .into_iter()
-                        .collect::<Vec<_>>()
-                }
-            } else {
-                vec![]
-            };
-
-            let disabled_rules = params
-                .skip
-                .into_iter()
-                .map(|selector| selector.into())
-                .collect::<Vec<_>>();
+            let (enabled_rules, disabled_rules) =
+                AnalyzerVisitorBuilder::new(params.workspace.settings())
+                    .with_syntax_rules()
+                    .with_linter_rules(&params.only, &params.skip, params.path.as_path())
+                    .with_assists_rules(&params.only, &params.skip, params.path.as_path())
+                    .finish();
+            let mut diagnostics = params.parse.into_diagnostics();
 
             let filter = AnalysisFilter {
                 categories: params.categories,
@@ -420,37 +403,40 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         path,
         manifest: _,
         language,
-        settings,
+        only,
+        skip,
     } = params;
     debug_span!("Code actions GraphQL", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
         trace_span!("Parsed file", tree =? tree).in_scope(move || {
-            let rules = settings.as_rules(params.path.as_path());
-            let filter = rules
-                .as_ref()
-                .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>();
-
-            let mut filter = AnalysisFilter::from_enabled_rules(filter.as_slice());
-
-            let mut categories = RuleCategoriesBuilder::default().with_syntax().with_lint();
-            if settings.organize_imports.enabled {
-                categories = categories.with_action();
-            }
-            filter.categories = categories.build();
-            filter.range = Some(range);
-
-            let analyzer_options = workspace.analyzer_options::<GraphqlLanguage>(path, &language);
-
             let Some(_) = language.to_graphql_file_source() else {
                 error!("Could not determine the file source of the file");
-                return PullActionsResult { actions: vec![] };
+                return PullActionsResult {
+                    actions: Vec::new(),
+                };
             };
 
-            trace!("GraphQL runs the analyzer");
+            let analyzer_options = workspace.analyzer_options::<GraphqlLanguage>(path, &language);
             let mut actions = Vec::new();
+            let (enabled_rules, disabled_rules) =
+                AnalyzerVisitorBuilder::new(params.workspace.settings())
+                    .with_syntax_rules()
+                    .with_linter_rules(&only, &skip, params.path.as_path())
+                    .with_assists_rules(&only, &skip, params.path.as_path())
+                    .finish();
+
+            let filter = AnalysisFilter {
+                categories: RuleCategoriesBuilder::default()
+                    .with_syntax()
+                    .with_lint()
+                    .with_action()
+                    .build(),
+                enabled_rules: Some(enabled_rules.as_slice()),
+                disabled_rules: &disabled_rules,
+                range,
+            };
+
+            info!("GraphQL runs the analyzer");
 
             analyze(&tree, filter, &analyzer_options, |signal| {
                 actions.extend(signal.actions().into_code_action_iter().map(|item| {
@@ -473,45 +459,41 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
 /// If applies all the safe fixes to the given syntax tree.
 pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
-    let FixAllParams {
-        parse,
-        fix_file_mode,
-        workspace,
-        should_format: _, // we don't have a formatter yet
-        biome_path,
-        manifest: _,
-        document_file_source,
-    } = params;
-
-    let settings = workspace.settings();
-    let Some(settings) = settings else {
-        let tree: GraphqlRoot = parse.tree();
-
+    let mut tree: GraphqlRoot = params.parse.tree();
+    let Some(settings) = params.workspace.settings() else {
         return Ok(FixFileResult {
-            actions: vec![],
+            actions: Vec::new(),
             errors: 0,
             skipped_suggested_fixes: 0,
             code: tree.syntax().to_string(),
         });
     };
 
-    let mut tree: GraphqlRoot = parse.tree();
-    let mut actions = Vec::new();
-
     // Compute final rules (taking `overrides` into account)
-    let rules = settings.as_rules(params.biome_path.as_path());
-    let rule_filter_list = rules
-        .as_ref()
-        .map(|rules| rules.as_enabled_rules())
-        .unwrap_or_default()
-        .into_iter()
-        .collect::<Vec<_>>();
-    let filter = AnalysisFilter::from_enabled_rules(rule_filter_list.as_slice());
+    let rules = settings.as_linter_rules(params.biome_path.as_path());
 
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_syntax_rules()
+        .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .with_assists_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .finish();
+
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .build(),
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
+
+    let mut actions = Vec::new();
     let mut skipped_suggested_fixes = 0;
     let mut errors: u16 = 0;
-    let analyzer_options =
-        workspace.analyzer_options::<GraphqlLanguage>(biome_path, &document_file_source);
+    let analyzer_options = params
+        .workspace
+        .analyzer_options::<GraphqlLanguage>(params.biome_path, &params.document_file_source);
     loop {
         let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
             let current_diagnostic = signal.diagnostic();
@@ -528,7 +510,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                     continue;
                 }
 
-                match fix_file_mode {
+                match params.fix_file_mode {
                     FixFileMode::SafeFixes => {
                         if action.applicability == Applicability::MaybeIncorrect {
                             skipped_suggested_fixes += 1;
@@ -579,6 +561,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
             }
             None => {
+                // we don't have a formatter yet
                 // let code = if should_format {
                 //     format_node(
                 //         workspace.format_options::<GraphqlLanguage>(biome_path, &document_file_source),

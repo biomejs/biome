@@ -44,13 +44,17 @@ fn parse_ts_identifier_binding(
     ts_identifier_context: TsIdentifierContext,
 ) -> ParsedSyntax {
     parse_identifier(p, TS_IDENTIFIER_BINDING).map(|mut ident| {
-        if ident.kind(p).is_bogus() {
+        if ident.kind(p).is_bogus() || ident.kind(p).is_metavariable() {
             return ident;
         }
 
         let name = p.text(ident.range(p));
         let is_reserved_word_this_context = ts_identifier_context.is_reserved_word(name);
         if is_reserved_word_this_context {
+            // test_err ts ts_type_alias_cannot_be_reserved_word
+            // type undefined = any;
+            // type any = any;
+            // type string = any;
             let error = p.err_builder(format!("Type alias cannot be {name}"), ident.range(p));
             p.error(error);
             ident.change_to_bogus(p);

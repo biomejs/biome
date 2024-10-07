@@ -1,3 +1,9 @@
-const a = <div>{/* comment */}</div>;
-const a1 = <div>{/** comment */}</div>;
-const a2 = <div className={"cls" /* comment */}></div>;
+<>
+    <div>{/* comment */}</div>
+    <div>{/** comment */}</div>
+    <div className={"cls" /* comment */}></div>
+    <div>text {/* comment */}</div>
+    <div>{/* comment */} text</div>
+    <div>https://domain.com</div>
+    <div>/😀</div>
+</>

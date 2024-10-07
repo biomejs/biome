@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_3926.jsx
+---
+# Input
+```jsx
+export function Panic() {
+  return <div>{foo && <>{`(${bar})`}</>}</div>;
+}
+```

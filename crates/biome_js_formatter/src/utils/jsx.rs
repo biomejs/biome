@@ -10,7 +10,7 @@ use biome_rowan::{Direction, SyntaxResult, TextRange, TextSize, TokenText};
 use std::iter::{FusedIterator, Peekable};
 use std::str::Chars;
 
-pub(crate) static JSX_WHITESPACE_CHARS: [char; 4] = [' ', '\n', '\t', '\r'];
+pub(crate) static JSX_WHITESPACE_CHARS: [u8; 4] = [b' ', b'\n', b'\t', b'\r'];
 
 /// Meaningful JSX text is defined to be text that has either non-whitespace
 /// characters, or does not contain a newline. Whitespace is defined as ASCII
@@ -28,11 +28,11 @@ pub(crate) static JSX_WHITESPACE_CHARS: [char; 4] = [' ', '\n', '\t', '\r'];
 /// ```
 pub fn is_meaningful_jsx_text(text: &str) -> bool {
     let mut has_newline = false;
-    for c in text.chars() {
+    for byte in text.bytes() {
         // If there is a non-whitespace character
-        if !JSX_WHITESPACE_CHARS.contains(&c) {
+        if !JSX_WHITESPACE_CHARS.contains(&byte) {
             return true;
-        } else if c == '\n' {
+        } else if byte == b'\n' {
             has_newline = true;
         }
     }
@@ -242,7 +242,7 @@ where
                                     // A text only consisting of whitespace that also contains a new line isn't considered meaningful text.
                                     // It can be entirely removed from the content without changing the semantics.
                                     let newlines =
-                                        whitespace.chars().filter(|c| *c == '\n').count();
+                                        whitespace.bytes().filter(|b| *b == b'\n').count();
 
                                     // Keep up to one blank line between tags/expressions and text.
                                     // ```javascript
@@ -311,6 +311,7 @@ where
 /// The builder is used to:
 /// 1. Remove [JsxChild::EmptyLine], [JsxChild::Newline], [JsxChild::Whitespace] if a next element is [JsxChild::Whitespace]
 /// 2. Don't push a new element [JsxChild::EmptyLine], [JsxChild::Newline], [JsxChild::Whitespace] if previous one is [JsxChild::EmptyLine], [JsxChild::Newline], [JsxChild::Whitespace]
+///     
 /// [Prettier applies]: https://github.com/prettier/prettier/blob/b0d9387b95cdd4e9d50f5999d3be53b0b5d03a97/src/language-js/print/jsx.js#L144-L180
 #[derive(Debug)]
 struct JsxSplitChildrenBuilder {

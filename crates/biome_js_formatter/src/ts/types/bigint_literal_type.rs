@@ -2,10 +2,9 @@ use std::borrow::Cow;
 
 use crate::prelude::*;
 
-use crate::parentheses::NeedsParentheses;
-use biome_formatter::token::string::ToAsciiLowercaseCow;
 use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxNode, TsBigintLiteralType, TsBigintLiteralTypeFields};
+use biome_js_syntax::{TsBigintLiteralType, TsBigintLiteralTypeFields};
+use biome_string_case::StrOnlyExtension;
 
 #[derive(Debug, Clone, Default)]
 pub struct FormatTsBigintLiteralType;
@@ -32,15 +31,5 @@ impl FormatNodeRule<TsBigintLiteralType> for FormatTsBigintLiteralType {
                 )
             }
         }
-    }
-
-    fn needs_parentheses(&self, item: &TsBigintLiteralType) -> bool {
-        item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsBigintLiteralType {
-    fn needs_parentheses_with_parent(&self, _parent: &JsSyntaxNode) -> bool {
-        false
     }
 }

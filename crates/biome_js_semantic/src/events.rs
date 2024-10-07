@@ -2,8 +2,8 @@
 
 use biome_js_syntax::binding_ext::{AnyJsBindingDeclaration, AnyJsIdentifierBinding};
 use biome_js_syntax::{
-    inner_string_text, AnyJsIdentifierUsage, JsLanguage, JsSyntaxKind, JsSyntaxNode, TextRange,
-    TsTypeParameterName,
+    inner_string_text, AnyJsIdentifierUsage, JsDirective, JsLanguage, JsSyntaxKind, JsSyntaxNode,
+    TextRange, TsTypeParameterName,
 };
 use biome_js_syntax::{AnyJsImportClause, AnyJsNamedImportSpecifier, AnyTsType};
 use biome_rowan::TextSize;
@@ -279,6 +279,7 @@ struct Scope {
     shadowed: Vec<(BindingName, BindingInfo)>,
     /// If this scope allows declarations to be hoisted to parent scope or not.
     hoisting: ScopeHoisting,
+    is_in_strict_mode: bool,
 }
 
 impl SemanticEventExtractor {
@@ -299,19 +300,60 @@ impl SemanticEventExtractor {
                 self.enter_identifier_usage(AnyJsIdentifierUsage::unwrap_cast(node.clone()));
             }
 
-            JS_MODULE | JS_SCRIPT => self.push_scope(
-                node.text_trimmed_range(),
-                ScopeHoisting::DontHoistDeclarationsToParent,
-                false,
-            ),
+            JS_MODULE => {
+                self.push_scope(
+                    node.text_trimmed_range(),
+                    ScopeHoisting::DontHoistDeclarationsToParent,
+                    false,
+                    true,
+                );
+            }
+
+            JS_SCRIPT => {
+                self.push_scope(
+                    node.text_trimmed_range(),
+                    ScopeHoisting::DontHoistDeclarationsToParent,
+                    false,
+                    false,
+                );
+            }
+
+            JS_DIRECTIVE => {
+                if JsDirective::unwrap_cast(node.clone())
+                    .inner_string_text()
+                    .is_ok_and(|diretcive| diretcive == "use strict")
+                {
+                    if let Some(scope) = self.scopes.last_mut() {
+                        scope.is_in_strict_mode = true;
+                    }
+                    if node
+                        .grand_parent()
+                        .is_some_and(|grand_parent| grand_parent.kind() == JS_FUNCTION_BODY)
+                    {
+                        // Skip the scope of the function bopdy,
+                        // and set `is_in_strict_mode` on the scope of the function declaration.
+                        if let Some(scope) = self.scopes.iter_mut().rev().nth(1) {
+                            scope.is_in_strict_mode = true;
+                        }
+                    }
+                }
+            }
+
+            JS_CONSTRUCTOR_CLASS_MEMBER
+            | JS_METHOD_CLASS_MEMBER
+            | JS_GETTER_CLASS_MEMBER
+            | JS_SETTER_CLASS_MEMBER => {
+                self.push_scope(
+                    node.text_trimmed_range(),
+                    ScopeHoisting::DontHoistDeclarationsToParent,
+                    true,
+                    true, // classes are in strict mode
+                );
+            }
 
             JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPRESSION
             | JS_ARROW_FUNCTION_EXPRESSION
-            | JS_CONSTRUCTOR_CLASS_MEMBER
-            | JS_METHOD_CLASS_MEMBER
-            | JS_GETTER_CLASS_MEMBER
-            | JS_SETTER_CLASS_MEMBER
             | JS_METHOD_OBJECT_MEMBER
             | JS_GETTER_OBJECT_MEMBER
             | JS_SETTER_OBJECT_MEMBER => {
@@ -319,14 +361,31 @@ impl SemanticEventExtractor {
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     true,
+                    false,
                 );
             }
 
-            JS_FUNCTION_EXPORT_DEFAULT_DECLARATION
-            | JS_CLASS_DECLARATION
+            JS_FUNCTION_EXPORT_DEFAULT_DECLARATION => {
+                self.push_scope(
+                    node.text_trimmed_range(),
+                    ScopeHoisting::DontHoistDeclarationsToParent,
+                    true,
+                    false,
+                );
+            }
+
+            JS_FUNCTION_BODY => {
+                self.push_scope(
+                    node.text_trimmed_range(),
+                    ScopeHoisting::DontHoistDeclarationsToParent,
+                    false,
+                    false,
+                );
+            }
+
+            JS_CLASS_DECLARATION
             | JS_CLASS_EXPORT_DEFAULT_DECLARATION
             | JS_CLASS_EXPRESSION
-            | JS_FUNCTION_BODY
             | JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
             | TS_MODULE_DECLARATION
             | TS_EXTERNAL_MODULE_DECLARATION
@@ -344,6 +403,7 @@ impl SemanticEventExtractor {
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
                     false,
+                    true, // classes and TypeScript imply strict mode
                 );
             }
 
@@ -352,6 +412,7 @@ impl SemanticEventExtractor {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::HoistDeclarationsToParent,
+                    false,
                     false,
                 );
             }
@@ -370,6 +431,7 @@ impl SemanticEventExtractor {
                 node.syntax().text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 false,
+                true, // TypeScript implies strict mode
             );
             self.push_infers_in_scope();
             return;
@@ -383,6 +445,7 @@ impl SemanticEventExtractor {
                 node.text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
                 false,
+                true, // TypeScript implies strict mode
             );
         }
     }
@@ -416,9 +479,20 @@ impl SemanticEventExtractor {
                         }
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
                     }
+                    AnyJsBindingDeclaration::JsFunctionDeclaration(_) => {
+                        let is_in_strict_mode = self
+                            .scopes
+                            .last()
+                            .is_some_and(|scope| scope.is_in_strict_mode);
+                        hoisted_scope_id = if !is_in_strict_mode {
+                            self.scope_index_to_hoist_declarations(1)
+                        } else {
+                            self.scopes.iter().rev().nth(1).map(|scope| scope.scope_id)
+                        };
+                        self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
+                    }
                     AnyJsBindingDeclaration::TsDeclareFunctionDeclaration(_)
                     | AnyJsBindingDeclaration::TsDeclareFunctionExportDefaultDeclaration(_)
-                    | AnyJsBindingDeclaration::JsFunctionDeclaration(_)
                     | AnyJsBindingDeclaration::JsFunctionExportDefaultDeclaration(_) => {
                         hoisted_scope_id = self.scope_index_to_hoist_declarations(1);
                         self.push_binding(hoisted_scope_id, BindingName::Value(name), info);
@@ -775,7 +849,13 @@ impl SemanticEventExtractor {
         }
     }
 
-    fn push_scope(&mut self, range: TextRange, hoisting: ScopeHoisting, is_closure: bool) {
+    fn push_scope(
+        &mut self,
+        range: TextRange,
+        hoisting: ScopeHoisting,
+        is_closure: bool,
+        implies_strict_mode: bool,
+    ) {
         let scope_id = ScopeId::new(self.scope_count);
         self.scope_count += 1;
         self.stash.push_back(SemanticEvent::ScopeStarted {
@@ -789,6 +869,11 @@ impl SemanticEventExtractor {
             references: FxHashMap::default(),
             shadowed: vec![],
             hoisting,
+            is_in_strict_mode: implies_strict_mode
+                || self
+                    .scopes
+                    .last()
+                    .is_some_and(|scope| scope.is_in_strict_mode),
         });
     }
 

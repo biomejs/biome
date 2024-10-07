@@ -1,7 +1,7 @@
 /// Sorted array of TypeScript DOM builtin
 ///
 /// Source: <https://github.com/typescript-eslint/typescript-eslint/blob/4d6d0d5950f587780dec998816d458ae4b27a513/packages/scope-manager/src/lib/dom.ts>
-pub const DOM: &[&str; 1431] = &[
+pub const DOM: &[&str] = &[
     "ANGLE_instanced_arrays",
     "ARIAMixin",
     "AbortController",
@@ -622,6 +622,7 @@ pub const DOM: &[&str; 1431] = &[
     "KeyframeAnimationOptions",
     "KeyframeEffect",
     "KeyframeEffectOptions",
+    "LargestContentfulPaint",
     "LatencyMode",
     "LineAlignSetting",
     "LineAndPositionSetting",
@@ -1438,7 +1439,7 @@ pub const DOM: &[&str; 1431] = &[
 /// Sorted array of TypeScript Web Worker builtin
 ///
 /// Source: <https://github.com/typescript-eslint/typescript-eslint/blob/4d6d0d5950f587780dec998816d458ae4b27a513/packages/scope-manager/src/lib/webworker.ts>
-pub const WEB_WORKER: &[&str; 579] = &[
+pub const WEB_WORKER: &[&str] = &[
     "ANGLE_instanced_arrays",
     "AbortController",
     "AbortSignal",

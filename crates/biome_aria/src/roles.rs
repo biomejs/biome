@@ -153,9 +153,9 @@ define_role! {
     /// https://www.w3.org/TR/wai-aria-1.1/#separator
     SeparatorRole {
         PROPS:  [
-            ("aria-valuemax", true),
-            ("aria-valuemin", true),
-            ("aria-valuenow", true),
+            ("aria-valuemax", false),
+            ("aria-valuemin", false),
+            ("aria-valuenow", false),
         ],
         ROLES: ["structure", "widget"],
         CONCEPTS: &[("hr", &[])],
@@ -199,7 +199,6 @@ define_role! {
     AlertRole {
         PROPS: [],
         ROLES: ["section"],
-        CONCEPTS: &[("alert", &[])],
     }
 }
 define_role! {
@@ -207,7 +206,6 @@ define_role! {
     AlertDialogRole {
         PROPS: [],
         ROLES: ["structure"],
-        CONCEPTS: &[("alert", &[])],
     }
 }
 define_role! {
@@ -853,8 +851,6 @@ impl<'a> AriaRoles {
         "button",
         "article",
         "dialog",
-        "alert",
-        "alertdialog",
         "cell",
         "columnheader",
         "definition",
@@ -1034,6 +1030,14 @@ impl<'a> AriaRoles {
             "marquee" => &MarqueeRole as &dyn AriaRoleDefinition,
             "math" => &MathRole as &dyn AriaRoleDefinition,
             "menu" => &ListRole as &dyn AriaRoleDefinition,
+            "menuitem" => {
+                let type_values = attributes.get("type")?;
+                match type_values.first()?.as_str() {
+                    "checkbox" => &MenuItemCheckboxRole as &dyn AriaRoleDefinition,
+                    "radio" => &MenuItemRadioRole as &dyn AriaRoleDefinition,
+                    _ => &MenuItemRole as &dyn AriaRoleDefinition,
+                }
+            }
             "meter" => &MeterRole as &dyn AriaRoleDefinition,
             "nav" => &NavigationRole as &dyn AriaRoleDefinition,
             "ul" | "ol" => &ListRole as &dyn AriaRoleDefinition,
@@ -1207,8 +1211,6 @@ impl<'a> AriaRoles {
                 "button" => &ButtonRole as &dyn AriaRoleDefinitionWithConcepts,
                 "article" => &ArticleRole as &dyn AriaRoleDefinitionWithConcepts,
                 "dialog" => &DialogRole as &dyn AriaRoleDefinitionWithConcepts,
-                "alert" => &AlertRole as &dyn AriaRoleDefinitionWithConcepts,
-                "alertdialog" => &AlertDialogRole as &dyn AriaRoleDefinitionWithConcepts,
                 "cell" => &CellRole as &dyn AriaRoleDefinitionWithConcepts,
                 "columnheader" => &ColumnHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
                 "definition" => &DefinitionRole as &dyn AriaRoleDefinitionWithConcepts,
@@ -1268,8 +1270,6 @@ impl<'a> AriaRoles {
             "button" => &ButtonRole as &dyn AriaRoleDefinitionWithConcepts,
             "article" => &ArticleRole as &dyn AriaRoleDefinitionWithConcepts,
             "dialog" => &DialogRole as &dyn AriaRoleDefinitionWithConcepts,
-            "alert" => &AlertRole as &dyn AriaRoleDefinitionWithConcepts,
-            "alertdialog" => &AlertDialogRole as &dyn AriaRoleDefinitionWithConcepts,
             "cell" => &CellRole as &dyn AriaRoleDefinitionWithConcepts,
             "columnheader" => &ColumnHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
             "definition" => &DefinitionRole as &dyn AriaRoleDefinitionWithConcepts,
@@ -1311,6 +1311,22 @@ impl<'a> AriaRoles {
         role_candidate.concepts_by_role()
     }
 
+    /// Given an element name and attributes, it returns the role associated with that element.
+    /// If no explicit role attribute is present, an implicit role is returned.
+    pub fn get_role_by_element_name(
+        &self,
+        element_name: &str,
+        attributes: &FxHashMap<String, Vec<String>>,
+    ) -> Option<&'static dyn AriaRoleDefinition> {
+        attributes
+            .get("role")
+            .and_then(|role| role.first())
+            .map_or_else(
+                || self.get_implicit_role(element_name, attributes),
+                |r| self.get_role(r),
+            )
+    }
+
     pub fn is_not_static_element(
         &self,
         element_name: &str,
@@ -1333,14 +1349,7 @@ impl<'a> AriaRoles {
             return true;
         }
 
-        // if the element has a interactive role, it is considered interactive.
-        let role_name = attributes
-            .get("role")
-            .and_then(|role| role.first())
-            .map_or_else(
-                || self.get_implicit_role(element_name, attributes),
-                |r| self.get_role(r),
-            );
+        let role_name = self.get_role_by_element_name(element_name, attributes);
 
         match role_name.map(|role| role.type_name()) {
             Some("biome_aria::roles::PresentationRole" | "biome_aria::roles::GenericRole") => false,

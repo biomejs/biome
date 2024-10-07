@@ -1,9 +1,10 @@
 use super::diagnostic::ParseDiagnostic;
 use biome_rowan::{SyntaxKind, TextRange, TextSize};
 use biome_unicode_table::{lookup_byte, Dispatch::WHS};
-use bitflags::bitflags;
+use enumflags2::{bitflags, make_bitflags, BitFlags};
 use std::collections::VecDeque;
 use std::iter::FusedIterator;
+use std::ops::{BitOr, BitOrAssign};
 use unicode_bom::Bom;
 
 /// `Lexer` trait defines the necessary methods a lexer must implement.
@@ -263,6 +264,58 @@ pub trait Lexer<'src> {
             };
             chr
         }
+    }
+
+    /// Check if the lexer starts a grit metavariable
+    fn is_metavariable_start(&mut self) -> bool {
+        let current_char = self.current_char_unchecked();
+        if current_char == 'µ' {
+            let current_char_length = current_char.len_utf8();
+            // µ[a-zA-Z_][a-zA-Z0-9_]*
+            if matches!(
+                self.byte_at(current_char_length),
+                Some(b'a'..=b'z' | b'A'..=b'Z' | b'_')
+            ) {
+                return true;
+            }
+
+            // µ...
+            if self.byte_at(current_char_length) == Some(b'.')
+                && self.byte_at(current_char_length + 1) == Some(b'.')
+                && self.byte_at(current_char_length + 2) == Some(b'.')
+            {
+                return true;
+            }
+        }
+        false
+    }
+
+    /// Consume a grit metavariable(µ[a-zA-Z_][a-zA-Z0-9_]*|µ...)
+    /// <https://github.com/getgrit/gritql/blob/8f3f077d078ccaf0618510bba904a06309c2435e/resources/language-metavariables/tree-sitter-css/grammar.js#L388>
+    fn consume_metavariable<T>(&mut self, kind: T) -> T {
+        debug_assert!(self.is_metavariable_start());
+
+        // SAFETY: We know the current character is µ.
+        let current_char = self.current_char_unchecked();
+        self.advance(current_char.len_utf8());
+
+        if self.current_byte() == Some(b'.') {
+            // SAFETY: We know that the current token is µ...
+            self.advance(3);
+        } else {
+            // µ[a-zA-Z_][a-zA-Z0-9_]*
+            self.advance(1);
+            while let Some(chr) = self.current_byte() {
+                match chr {
+                    b'a'..=b'z' | b'A'..=b'Z' | b'0'..=b'9' | b'_' => {
+                        self.advance(1);
+                    }
+                    _ => break,
+                }
+            }
+        }
+
+        kind
     }
 }
 
@@ -708,24 +761,56 @@ impl<Kind: SyntaxKind> LexerCheckpoint<Kind> {
     }
 }
 
-bitflags! {
-    /// Flags for a lexed token.
-    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
-    pub struct TokenFlags: u8 {
-        /// Indicates that there has been a line break between the last non-trivia token
-        const PRECEDING_LINE_BREAK = 1 << 0;
-
-        /// Indicates that an identifier contains an unicode escape sequence
-        const UNICODE_ESCAPE = 1 << 1;
-    }
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u8)]
+enum TokenFlag {
+    PrecedingLineBreak = 1 << 0,
+    UnicodeEscape = 1 << 1,
 }
 
+/// Flags for a lexed token.
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub struct TokenFlags(BitFlags<TokenFlag>);
+
 impl TokenFlags {
-    pub const fn has_preceding_line_break(&self) -> bool {
+    /// Indicates that there has been a line break between the last non-trivia token
+    pub const PRECEDING_LINE_BREAK: Self = Self(make_bitflags!(TokenFlag::{PrecedingLineBreak}));
+
+    /// Indicates that an identifier contains an unicode escape sequence
+    pub const UNICODE_ESCAPE: Self = Self(make_bitflags!(TokenFlag::{UnicodeEscape}));
+
+    pub const fn empty() -> Self {
+        Self(BitFlags::EMPTY)
+    }
+
+    pub fn contains(&self, other: impl Into<TokenFlags>) -> bool {
+        self.0.contains(other.into().0)
+    }
+
+    pub fn set(&mut self, other: impl Into<TokenFlags>, cond: bool) {
+        self.0.set(other.into().0, cond)
+    }
+
+    pub fn has_preceding_line_break(&self) -> bool {
         self.contains(TokenFlags::PRECEDING_LINE_BREAK)
     }
 
-    pub const fn has_unicode_escape(&self) -> bool {
+    pub fn has_unicode_escape(&self) -> bool {
         self.contains(TokenFlags::UNICODE_ESCAPE)
+    }
+}
+
+impl BitOr for TokenFlags {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        TokenFlags(self.0 | rhs.0)
+    }
+}
+
+impl BitOrAssign for TokenFlags {
+    fn bitor_assign(&mut self, rhs: Self) {
+        self.0 |= rhs.0;
     }
 }

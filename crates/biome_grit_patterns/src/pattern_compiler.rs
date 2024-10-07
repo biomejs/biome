@@ -37,6 +37,7 @@ mod contains_compiler;
 mod divide_compiler;
 mod equal_compiler;
 mod every_compiler;
+mod function_definition_compiler;
 mod if_compiler;
 mod includes_compiler;
 mod like_compiler;
@@ -44,6 +45,7 @@ mod limit_compiler;
 mod list_compiler;
 mod list_index_compiler;
 mod literal_compiler;
+mod log_compiler;
 mod map_accessor_compiler;
 mod map_compiler;
 mod match_compiler;
@@ -53,9 +55,12 @@ mod multiply_compiler;
 mod node_like_compiler;
 mod not_compiler;
 mod or_compiler;
+mod pattern_definition_compiler;
 mod predicate_call_compiler;
 mod predicate_compiler;
+mod predicate_definition_compiler;
 mod predicate_return_compiler;
+mod regex_compiler;
 mod rewrite_compiler;
 mod sequential_compiler;
 mod snippet_compiler;
@@ -65,6 +70,10 @@ mod subtract_compiler;
 mod variable_compiler;
 mod where_compiler;
 mod within_compiler;
+
+pub use function_definition_compiler::FunctionDefinitionCompiler;
+pub use pattern_definition_compiler::PatternDefinitionCompiler;
+pub use predicate_definition_compiler::PredicateDefinitionCompiler;
 
 use self::{
     accumulate_compiler::AccumulateCompiler, add_compiler::AddCompiler,
@@ -83,10 +92,12 @@ use self::{
     where_compiler::WhereCompiler, within_compiler::WithinCompiler,
 };
 use crate::{grit_context::GritQueryContext, CompileError};
+use as_compiler::AsCompiler;
 use biome_grit_syntax::{AnyGritMaybeCurlyPattern, AnyGritPattern, GritSyntaxKind};
 use biome_rowan::AstNode as _;
 use grit_pattern_matcher::pattern::{DynamicPattern, DynamicSnippet, DynamicSnippetPart, Pattern};
 use node_like_compiler::NodeLikeCompiler;
+use regex_compiler::RegexCompiler;
 
 pub(crate) use self::auto_wrap::auto_wrap_pattern;
 
@@ -177,7 +188,9 @@ impl PatternCompiler {
             AnyGritPattern::GritPatternAny(node) => Ok(Pattern::Any(Box::new(
                 AnyCompiler::from_node(node, context)?,
             ))),
-            AnyGritPattern::GritPatternAs(_) => todo!(),
+            AnyGritPattern::GritPatternAs(node) => Ok(Pattern::Where(Box::new(
+                AsCompiler::from_node(node, context)?,
+            ))),
             AnyGritPattern::GritPatternBefore(node) => Ok(Pattern::Before(Box::new(
                 BeforeCompiler::from_node(node, context)?,
             ))),
@@ -208,7 +221,9 @@ impl PatternCompiler {
             AnyGritPattern::GritPatternWhere(node) => Ok(Pattern::Where(Box::new(
                 WhereCompiler::from_node(node, context)?,
             ))),
-            AnyGritPattern::GritRegexPattern(_) => todo!(),
+            AnyGritPattern::GritRegexPattern(node) => Ok(Pattern::Regex(Box::new(
+                RegexCompiler::from_node(node, context, is_rhs)?,
+            ))),
             AnyGritPattern::GritRewrite(node) => Ok(Pattern::Rewrite(Box::new(
                 RewriteCompiler::from_node(node, context)?,
             ))),

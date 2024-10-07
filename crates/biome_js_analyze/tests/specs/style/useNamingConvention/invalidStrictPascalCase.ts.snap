@@ -1,0 +1,44 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidStrictPascalCase.ts
+---
+# Input
+```ts
+interface VNode {
+	hello: 'world'
+}
+type AAb = any
+```
+
+# Diagnostics
+```
+invalidStrictPascalCase.ts:1:11 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  
+  > 1 │ interface VNode {
+      │           ^^^^^
+    2 │ 	hello: 'world'
+    3 │ }
+  
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+
+```
+
+```
+invalidStrictPascalCase.ts:4:6 lint/style/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Two consecutive uppercase characters are not allowed in PascalCase because strictCase is set to `true`.
+  
+    2 │ 	hello: 'world'
+    3 │ }
+  > 4 │ type AAb = any
+      │      ^^^
+  
+  i If you want to use consecutive uppercase characters in PascalCase, then set the strictCase option to `false`.
+    See the rule options for more details.
+  
+
+```

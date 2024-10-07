@@ -30,6 +30,7 @@ The --json option is unstable/experimental and its output might change between p
 	"summary": {
 		"changed": 0,
 		"unchanged": 1,
+		"matches": 0,
 		"errors": 1,
 		"warnings": 0,
 		"skipped": 0,
@@ -68,7 +69,7 @@ The --json option is unstable/experimental and its output might change between p
 			"location": {
 				"path": { "file": "format.js" },
 				"span": null,
-				"sourceCode": null
+				"sourceCode": "  statement(  )  "
 			},
 			"tags": [],
 			"source": null

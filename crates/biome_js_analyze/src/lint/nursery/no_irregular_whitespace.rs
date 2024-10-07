@@ -20,11 +20,11 @@ declare_lint_rule! {
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// constcount;
+    /// letcount;
     /// ```
     ///
     /// ```js,expect_diagnostic
-    /// const foo;
+    /// let foo;
     /// ```
     ///
     /// ### Valid
@@ -38,7 +38,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoIrregularWhitespace {
-        version: "next",
+        version: "1.9.0",
         name: "noIrregularWhitespace",
         language: "js",
         recommended: false,

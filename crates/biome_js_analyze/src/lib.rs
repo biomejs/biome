@@ -11,7 +11,8 @@ use biome_diagnostics::{category, Error as DiagnosticError};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_project::PackageJson;
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
-use std::sync::Arc;
+use std::ops::Deref;
+use std::sync::{Arc, LazyLock};
 
 mod assists;
 mod ast_utils;
@@ -30,18 +31,11 @@ pub use crate::services::control_flow::ControlFlowGraph;
 
 pub(crate) type JsRuleAction = RuleAction<JsLanguage>;
 
-/// Return the static [MetadataRegistry] for the JS analyzer rules
-pub fn metadata() -> &'static MetadataRegistry {
-    lazy_static::lazy_static! {
-        static ref METADATA: MetadataRegistry = {
-            let mut metadata = MetadataRegistry::default();
-            visit_registry(&mut metadata);
-            metadata
-        };
-    }
-
-    &METADATA
-}
+pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
+    let mut metadata = MetadataRegistry::default();
+    visit_registry(&mut metadata);
+    metadata
+});
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
 /// to selectively restrict analysis to specific rules / a specific source range,
@@ -116,7 +110,7 @@ where
     }
 
     let mut analyzer = Analyzer::new(
-        metadata(),
+        METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
         parse_linter_suppression_comment,
         Box::new(JsSuppressionAction),
@@ -170,8 +164,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use biome_analyze::options::RuleOptions;
-    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter, RuleKey};
+    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{markup, Markup};
     use biome_diagnostics::category;
@@ -182,8 +175,6 @@ mod tests {
     use biome_project::{Dependencies, PackageJson};
     use std::slice;
 
-    use crate::lint::correctness::use_exhaustive_dependencies::{Hook, HooksOptions};
-    use crate::react::hooks::StableHookResult;
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
     #[ignore]
@@ -203,19 +194,8 @@ mod tests {
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
-        let mut options = AnalyzerOptions::default();
-        let hook = Hook {
-            name: "myEffect".to_string(),
-            closure_index: Some(0),
-            dependencies_index: Some(1),
-            stable_result: StableHookResult::None,
-        };
+        let options = AnalyzerOptions::default();
         let rule_filter = RuleFilter::Rule("style", "useNodejsImportProtocol");
-
-        options.configuration.rules.push_rule(
-            RuleKey::new("nursery", "useHookAtTopLevel"),
-            RuleOptions::new(HooksOptions { hooks: vec![hook] }, None),
-        );
 
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");

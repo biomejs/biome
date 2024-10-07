@@ -1,0 +1,50 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<!doctype html>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: HtmlDirective {
+        l_angle_token: L_ANGLE@0..1 "<" [] [],
+        excl_token: BANG@1..2 "!" [] [],
+        doctype_token: DOCTYPE_KW@2..10 "doctype" [] [Whitespace(" ")],
+        html_token: HTML_KW@10..14 "html" [] [],
+        quirk_token: missing (optional),
+        public_id_token: missing (optional),
+        system_id_token: missing (optional),
+        r_angle_token: R_ANGLE@14..15 ">" [] [],
+    },
+    html: HtmlElementList [],
+    eof_token: EOF@15..16 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..16
+  0: (empty)
+  1: HTML_DIRECTIVE@0..15
+    0: L_ANGLE@0..1 "<" [] []
+    1: BANG@1..2 "!" [] []
+    2: DOCTYPE_KW@2..10 "doctype" [] [Whitespace(" ")]
+    3: HTML_KW@10..14 "html" [] []
+    4: (empty)
+    5: (empty)
+    6: (empty)
+    7: R_ANGLE@14..15 ">" [] []
+  2: HTML_ELEMENT_LIST@15..15
+  3: EOF@15..16 "" [Newline("\n")] []
+
+```

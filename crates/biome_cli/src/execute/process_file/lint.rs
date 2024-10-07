@@ -4,7 +4,9 @@ use crate::execute::process_file::{FileResult, FileStatus, Message, SharedTraver
 use crate::TraversalMode;
 use biome_analyze::RuleCategoriesBuilder;
 use biome_diagnostics::{category, Error};
+use biome_rowan::TextSize;
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
+use std::ffi::OsStr;
 use std::path::Path;
 use std::sync::atomic::Ordering;
 
@@ -22,10 +24,25 @@ pub(crate) fn lint_with_guard<'ctx>(
         move || {
             let mut input = workspace_file.input()?;
             let mut changed = false;
+            let (only, skip) =
+                if let TraversalMode::Lint { only, skip, .. } = ctx.execution.traversal_mode() {
+                    (only.clone(), skip.clone())
+                } else {
+                    (Vec::new(), Vec::new())
+                };
             if let Some(fix_mode) = ctx.execution.as_fix_file_mode() {
                 let fix_result = workspace_file
                     .guard()
-                    .fix_file(*fix_mode, false)
+                    .fix_file(
+                        *fix_mode,
+                        false,
+                        RuleCategoriesBuilder::default()
+                            .with_syntax()
+                            .with_lint()
+                            .build(),
+                        only.clone(),
+                        skip.clone(),
+                    )
                     .with_file_path_and_code(
                         workspace_file.path.display().to_string(),
                         category!("lint"),
@@ -37,14 +54,14 @@ pub(crate) fn lint_with_guard<'ctx>(
 
                 let mut output = fix_result.code;
 
-                match workspace_file.as_extension() {
-                    Some("astro") => {
+                match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
+                    Some(b"astro") => {
                         output = AstroFileHandler::output(input.as_str(), output.as_str());
                     }
-                    Some("vue") => {
+                    Some(b"vue") => {
                         output = VueFileHandler::output(input.as_str(), output.as_str());
                     }
-                    Some("svelte") => {
+                    Some(b"svelte") => {
                         output = SvelteFileHandler::output(input.as_str(), output.as_str());
                     }
                     _ => {}
@@ -57,12 +74,6 @@ pub(crate) fn lint_with_guard<'ctx>(
             }
 
             let max_diagnostics = ctx.remaining_diagnostics.load(Ordering::Relaxed);
-            let (only, skip) =
-                if let TraversalMode::Lint { only, skip, .. } = ctx.execution.traversal_mode() {
-                    (only.clone(), skip.clone())
-                } else {
-                    (Vec::new(), Vec::new())
-                };
             let pull_diagnostics_result = workspace_file
                 .guard()
                 .pull_diagnostics(
@@ -70,7 +81,7 @@ pub(crate) fn lint_with_guard<'ctx>(
                         .with_syntax()
                         .with_lint()
                         .build(),
-                    max_diagnostics.into(),
+                    max_diagnostics,
                     only,
                     skip,
                 )
@@ -83,11 +94,11 @@ pub(crate) fn lint_with_guard<'ctx>(
                 && pull_diagnostics_result.skipped_diagnostics == 0;
 
             if !no_diagnostics {
-                let input = match workspace_file.as_extension() {
-                    Some("astro") => AstroFileHandler::input(input.as_str()).to_string(),
-                    Some("vue") => VueFileHandler::input(input.as_str()).to_string(),
-                    Some("svelte") => SvelteFileHandler::input(input.as_str()).to_string(),
-                    _ => input,
+                let offset = match workspace_file.as_extension().map(OsStr::as_encoded_bytes) {
+                    Some(b"vue") => VueFileHandler::start(input.as_str()),
+                    Some(b"astro") => AstroFileHandler::start(input.as_str()),
+                    Some(b"svelte") => SvelteFileHandler::start(input.as_str()),
+                    _ => None,
                 };
 
                 ctx.push_message(Message::Diagnostics {
@@ -96,6 +107,13 @@ pub(crate) fn lint_with_guard<'ctx>(
                     diagnostics: pull_diagnostics_result
                         .diagnostics
                         .into_iter()
+                        .map(|d| {
+                            if let Some(offset) = offset {
+                                d.with_offset(TextSize::from(offset))
+                            } else {
+                                d
+                            }
+                        })
                         .map(Error::from)
                         .collect(),
                     skipped_diagnostics: pull_diagnostics_result.skipped_diagnostics as u32,

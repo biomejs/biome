@@ -12,13 +12,13 @@
 use std::{collections::HashMap, str::FromStr};
 
 use biome_diagnostics::{adapters::IniError, Error};
-use biome_formatter::{IndentWidth, LineEnding, LineWidth};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth};
 use serde::{Deserialize, Deserializer};
 
 use crate::{
     diagnostics::{EditorConfigDiagnostic, ParseFailedDiagnostic},
     OverrideFormatterConfiguration, OverridePattern, Overrides, PartialConfiguration,
-    PartialFormatterConfiguration, PlainIndentStyle,
+    PartialFormatterConfiguration,
 };
 
 pub fn parse_str(s: &str) -> Result<EditorConfig, EditorConfigDiagnostic> {
@@ -83,12 +83,14 @@ impl EditorConfig {
 #[derive(Debug, Clone, Deserialize, Default)]
 #[serde(default)]
 pub struct EditorConfigOptions {
-    indent_style: Option<PlainIndentStyle>,
-    #[serde(deserialize_with = "deserialize_optional_indent_width_from_string")]
-    indent_size: Option<IndentWidth>,
-    end_of_line: Option<LineEnding>,
-    #[serde(deserialize_with = "deserialize_optional_line_width_from_string")]
-    max_line_length: Option<LineWidth>,
+    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
+    indent_style: EditorconfigValue<IndentStyle>,
+    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
+    indent_size: EditorconfigValue<IndentWidth>,
+    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
+    end_of_line: EditorconfigValue<LineEnding>,
+    #[serde(deserialize_with = "deserialize_optional_value_from_string")]
+    max_line_length: EditorconfigValue<LineWidth>,
     // Not a biome option, but we need it to emit a diagnostic when this is set to false.
     #[serde(deserialize_with = "deserialize_optional_bool_from_string")]
     insert_final_newline: Option<bool>,
@@ -97,20 +99,20 @@ pub struct EditorConfigOptions {
 impl EditorConfigOptions {
     pub fn to_biome(self) -> PartialFormatterConfiguration {
         PartialFormatterConfiguration {
-            indent_style: self.indent_style,
-            indent_width: self.indent_size,
-            line_ending: self.end_of_line,
-            line_width: self.max_line_length,
+            indent_style: self.indent_style.into(),
+            indent_width: self.indent_size.into(),
+            line_ending: self.end_of_line.into(),
+            line_width: self.max_line_length.into(),
             ..Default::default()
         }
     }
 
     pub fn to_biome_override(self) -> OverrideFormatterConfiguration {
         OverrideFormatterConfiguration {
-            indent_style: self.indent_style,
-            indent_width: self.indent_size,
-            line_ending: self.end_of_line,
-            line_width: self.max_line_length,
+            indent_style: self.indent_style.into(),
+            indent_width: self.indent_size.into(),
+            line_ending: self.end_of_line.into(),
+            line_width: self.max_line_length.into(),
             ..Default::default()
         }
     }
@@ -121,10 +123,35 @@ impl EditorConfigOptions {
         if let Some(false) = self.insert_final_newline {
             errors.push(EditorConfigDiagnostic::incompatible(
                 "insert_final_newline",
-                "Biome always inserts a final newline.",
+                "Biome always inserts a final newline. Set this option to true.",
             ));
         }
         errors
+    }
+}
+
+/// Represents a value in an .editorconfig file.
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(untagged)]
+pub enum EditorconfigValue<T> {
+    /// The value was explicitly specified.
+    Explicit(T),
+    /// Use the default value for this option. This occurs when the value is `unset`.
+    Default,
+    /// The value was not specified.
+    #[default]
+    None,
+}
+
+// This is an `Into` because implementing `From` is not possible because you can't implement traits for a type you don't own.
+#[allow(clippy::from_over_into)]
+impl<T: Default> Into<Option<T>> for EditorconfigValue<T> {
+    fn into(self) -> Option<T> {
+        match self {
+            EditorconfigValue::Explicit(v) => Some(v),
+            EditorconfigValue::Default => Some(T::default()),
+            EditorconfigValue::None => None,
+        }
     }
 }
 
@@ -147,28 +174,21 @@ where
     deserialize_bool_from_string(deserializer).map(Some)
 }
 
-fn deserialize_optional_indent_width_from_string<'de, D>(
+fn deserialize_optional_value_from_string<'de, D, T>(
     deserializer: D,
-) -> Result<Option<IndentWidth>, D::Error>
+) -> Result<EditorconfigValue<T>, D::Error>
 where
     D: Deserializer<'de>,
+    T: FromStr,
+    T::Err: std::fmt::Display,
 {
     let s = String::deserialize(deserializer)?;
-    IndentWidth::from_str(s.as_str())
-        .map_err(serde::de::Error::custom)
-        .map(Some)
-}
-
-fn deserialize_optional_line_width_from_string<'de, D>(
-    deserializer: D,
-) -> Result<Option<LineWidth>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let s = String::deserialize(deserializer)?;
-    LineWidth::from_str(s.as_str())
-        .map_err(serde::de::Error::custom)
-        .map(Some)
+    match s.as_str() {
+        "unset" | "off" => Ok(EditorconfigValue::Default),
+        _ => T::from_str(s.as_str())
+            .map_err(serde::de::Error::custom)
+            .map(EditorconfigValue::Explicit),
+    }
 }
 
 /// Turn an unknown glob pattern into a list of known glob patterns. This is part of a hack to support all editorconfig patterns.
@@ -259,18 +279,18 @@ fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConf
 
     let mut all_variants = vec![];
     let mut current_variants = None;
-    for (i, c) in pattern.chars().enumerate() {
-        match c {
-            '{' => {
+    for (index, byte) in pattern.bytes().enumerate() {
+        match byte {
+            b'{' => {
                 if current_variants.is_none() {
-                    current_variants = Some(Variants::new(i));
+                    current_variants = Some(Variants::new(index));
                 } else {
                     // TODO: error, recursive brace expansion is not supported
                 }
             }
-            '}' => {
+            b'}' => {
                 if let Some(mut v) = current_variants.take() {
-                    v.end = i;
+                    v.end = index;
                     v.parse_to_variants(&pattern[v.start..=v.end])?;
                     all_variants.push(v);
                 }
@@ -389,7 +409,7 @@ max_line_length = 80
         let (conf, _) = conf.to_biome();
         let conf = conf.expect("Failed to convert editorconfig to biome");
         let formatter = conf.formatter.expect("Formatter not set");
-        assert_eq!(formatter.indent_style, Some(PlainIndentStyle::Space));
+        assert_eq!(formatter.indent_style, Some(IndentStyle::Space));
         assert_eq!(formatter.indent_width.unwrap().value(), 4);
         assert_eq!(formatter.line_ending, Some(LineEnding::Crlf));
         assert_eq!(formatter.line_width.map(|v| v.value()), Some(80));
@@ -408,6 +428,53 @@ insert_final_newline = false
         let (_, errors) = conf.to_biome();
         assert_eq!(errors.len(), 1);
         assert!(matches!(errors[0], EditorConfigDiagnostic::Incompatible(_)));
+    }
+
+    #[test]
+    fn should_parse_editorconfig_with_unset_values() {
+        let input = r#"
+root = true
+
+[*]
+indent_style = unset
+indent_size = unset
+end_of_line = unset
+max_line_length = unset
+"#;
+
+        let conf = parse_str(input).expect("Failed to parse editorconfig");
+        assert!(matches!(
+            conf.options["*"].indent_style,
+            EditorconfigValue::Default
+        ));
+        assert!(matches!(
+            conf.options["*"].indent_size,
+            EditorconfigValue::Default
+        ));
+        assert!(matches!(
+            conf.options["*"].end_of_line,
+            EditorconfigValue::Default
+        ));
+        assert!(matches!(
+            conf.options["*"].max_line_length,
+            EditorconfigValue::Default
+        ));
+    }
+
+    #[test]
+    fn should_parse_editorconfig_with_max_line_length_off() {
+        let input = r#"
+root = true
+
+[*]
+max_line_length = off
+"#;
+
+        let conf = parse_str(input).expect("Failed to parse editorconfig");
+        assert!(matches!(
+            conf.options["*"].max_line_length,
+            EditorconfigValue::Default,
+        ));
     }
 
     #[test]

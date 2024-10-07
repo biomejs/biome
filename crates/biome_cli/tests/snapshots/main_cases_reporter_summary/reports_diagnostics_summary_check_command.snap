@@ -66,13 +66,13 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 Formatter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 The following files needs to be formatted:
-main.ts
 index.ts
+main.ts
 
 Organize Imports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 The following files needs to have their imports sorted:
-main.ts
 index.ts
+main.ts
 
 Analyzer ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Some analyzer rules were triggered
@@ -83,6 +83,12 @@ lint/suspicious/noDoubleEquals                          8 (8 error(s), 0 warning
 lint/suspicious/noRedeclare                             12 (12 error(s), 0 warning(s), 0 info(s))
 lint/suspicious/noDebugger                              8 (8 error(s), 0 warning(s), 0 info(s))
 
+
+```
+
+```block
+Skipped 2 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
 
 ```
 

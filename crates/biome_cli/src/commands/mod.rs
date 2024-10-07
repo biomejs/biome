@@ -3,11 +3,11 @@ use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
 use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
-use crate::{CliDiagnostic, CliSession, LoggingLevel, VERSION};
+use crate::{CliDiagnostic, LoggingLevel, VERSION};
+use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::PartialCssLinter;
 use biome_configuration::javascript::PartialJavascriptLinter;
 use biome_configuration::json::PartialJsonLinter;
-use biome_configuration::linter::RuleSelector;
 use biome_configuration::{
     css::partial_css_formatter, css::partial_css_linter, graphql::partial_graphql_formatter,
     graphql::partial_graphql_linter, javascript::partial_javascript_formatter,
@@ -24,7 +24,7 @@ use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::documentation::Doc;
-use biome_service::workspace::{FixFileMode, OpenProjectParams, UpdateProjectParams};
+use biome_service::workspace::FixFileMode;
 use biome_service::{DynRef, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
@@ -47,34 +47,54 @@ pub(crate) mod version;
 #[bpaf(options, version(VERSION))]
 /// Biome official CLI. Use it to check the health of your project or run it to check single files.
 pub enum BiomeCommand {
-    /// Shows the Biome version information and quit
+    /// Shows the Biome version information and quit.
     #[bpaf(command)]
     Version(#[bpaf(external(cli_options), hide_usage)] CliOptions),
 
     #[bpaf(command)]
-    /// Prints information for debugging
+    /// Prints information for debugging.
     Rage(
         #[bpaf(external(cli_options), hide_usage)] CliOptions,
         /// Prints the Biome daemon server logs
         #[bpaf(long("daemon-logs"), switch)]
         bool,
-        /// Prints the Biome configuration that the applied formatter configuration
+        /// Prints the formatter options applied
         #[bpaf(long("formatter"), switch)]
         bool,
-        /// Prints the Biome configuration that the applied linter configuration
+        /// Prints the linter options applied
         #[bpaf(long("linter"), switch)]
         bool,
     ),
-    /// Start the Biome daemon server process
+    /// Starts the Biome daemon server process.
     #[bpaf(command)]
-    Start(
+    Start {
+        /// Allows to change the prefix applied to the file name of the logs.
+        #[bpaf(
+            env("BIOME_LOG_PREFIX_NAME"),
+            long("log-prefix-name"),
+            argument("STRING"),
+            hide_usage,
+            fallback(String::from("server.log")),
+            display_fallback
+        )]
+        log_prefix_name: String,
+
+        /// Allows to change the folder where logs are stored.
+        #[bpaf(
+            env("BIOME_LOG_PATH"),
+            long("log-path"),
+            argument("PATH"),
+            hide_usage,
+            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        )]
+        log_path: PathBuf,
         /// Allows to set a custom file path to the configuration file,
         /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        Option<PathBuf>,
-    ),
+        config_path: Option<PathBuf>,
+    },
 
-    /// Stop the Biome daemon server process
+    /// Stops the Biome daemon server process.
     #[bpaf(command)]
     Stop,
 
@@ -120,6 +140,11 @@ pub enum BiomeCommand {
             hide_usage
         )]
         organize_imports_enabled: Option<bool>,
+
+        /// Allow to enable or disable the assists.
+        #[bpaf(long("assists-enabled"), argument("true|false"), optional)]
+        assists_enabled: Option<bool>,
+
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,
         #[bpaf(external, hide_usage)]
@@ -133,17 +158,17 @@ pub enum BiomeCommand {
         stdin_file_path: Option<String>,
 
         /// When set to true, only the files that have been staged (the ones prepared to be committed)
-        /// will be linted.
+        /// will be linted. This option should be used when working locally.
         #[bpaf(long("staged"), switch)]
         staged: bool,
 
         /// When set to true, only the files that have been changed compared to your `defaultBranch`
-        /// configuration will be linted.
+        /// configuration will be linted. This option should be used in CI environments.
         #[bpaf(long("changed"), switch)]
         changed: bool,
 
         /// Use this to specify the base branch to compare against when you're using the --changed
-        /// flag and the `defaultBranch` is not set in your biome.json
+        /// flag and the `defaultBranch` is not set in your `biome.json`
         #[bpaf(long("since"), argument("REF"))]
         since: Option<String>,
 
@@ -312,6 +337,10 @@ pub enum BiomeCommand {
         #[bpaf(long("organize-imports-enabled"), argument("true|false"), optional)]
         organize_imports_enabled: Option<bool>,
 
+        /// Allow to enable or disable the assists.
+        #[bpaf(long("assists-enabled"), argument("true|false"), optional)]
+        assists_enabled: Option<bool>,
+
         #[bpaf(external(partial_configuration), hide_usage, optional)]
         configuration: Option<PartialConfiguration>,
         #[bpaf(external, hide_usage)]
@@ -339,18 +368,37 @@ pub enum BiomeCommand {
         #[bpaf(long("jsonc"), switch)]
         bool,
     ),
-    /// Acts as a server for the Language Server Protocol over stdin/stdout
+    /// Acts as a server for the Language Server Protocol over stdin/stdout.
     #[bpaf(command("lsp-proxy"))]
-    LspProxy(
+    LspProxy {
+        /// Allows to change the prefix applied to the file name of the logs.
+        #[bpaf(
+            env("BIOME_LOG_PREFIX_NAME"),
+            long("log-prefix-name"),
+            argument("STRING"),
+            hide_usage,
+            fallback(String::from("server.log")),
+            display_fallback
+        )]
+        log_prefix_name: String,
+        /// Allows to change the folder where logs are stored.
+        #[bpaf(
+            env("BIOME_LOG_PATH"),
+            long("log-path"),
+            argument("PATH"),
+            hide_usage,
+            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        )]
+        log_path: PathBuf,
         /// Allows to set a custom file path to the configuration file,
         /// or a custom directory path to find `biome.json` or `biome.jsonc`
         #[bpaf(env("BIOME_CONFIG_PATH"), long("config-path"), argument("PATH"))]
-        Option<PathBuf>,
+        config_path: Option<PathBuf>,
         /// Bogus argument to make the command work with vscode-languageclient
         #[bpaf(long("stdio"), hide, hide_usage, switch)]
-        bool,
-    ),
-    /// It updates the configuration when there are breaking changes
+        stdio: bool,
+    },
+    /// Updates the configuration when there are breaking changes.
     #[bpaf(command)]
     Migrate {
         #[bpaf(external, hide_usage)]
@@ -368,8 +416,18 @@ pub enum BiomeCommand {
         sub_command: Option<MigrateSubCommand>,
     },
 
-    /// Searches for Grit patterns across a project.
-    #[bpaf(command, hide)] // !! Command is hidden until ready for release.
+    /// EXPERIMENTAL: Searches for Grit patterns across a project.
+    ///
+    /// Note: GritQL escapes code snippets using backticks, but most shells
+    /// interpret backticks as command invocations. To avoid this, it's best to
+    /// put single quotes around your Grit queries.
+    ///
+    /// ## Example
+    ///
+    /// ```shell
+    /// biome search '`console.log($message)`' # find all `console.log` invocations
+    /// ```
+    #[bpaf(command)]
     Search {
         #[bpaf(external, hide_usage)]
         cli_options: CliOptions,
@@ -402,7 +460,7 @@ pub enum BiomeCommand {
         paths: Vec<OsString>,
     },
 
-    /// A command to retrieve the documentation of various aspects of the CLI.
+    /// Shows documentation of various aspects of the CLI.
     ///
     /// ## Examples
     ///
@@ -421,11 +479,31 @@ pub enum BiomeCommand {
     },
 
     #[bpaf(command)]
-    /// Clean the logs emitted by the daemon
+    /// Cleans the logs emitted by the daemon.
     Clean,
 
     #[bpaf(command("__run_server"), hide)]
     RunServer {
+        /// Allows to change the prefix applied to the file name of the logs.
+        #[bpaf(
+            env("BIOME_LOG_PREFIX_NAME"),
+            long("log-prefix-name"),
+            argument("STRING"),
+            hide_usage,
+            fallback(String::from("server.log")),
+            display_fallback
+        )]
+        log_prefix_name: String,
+        /// Allows to change the folder where logs are stored.
+        #[bpaf(
+            env("BIOME_LOG_PATH"),
+            long("log-path"),
+            argument("PATH"),
+            hide_usage,
+            fallback(biome_fs::ensure_cache_dir().join("biome-logs")),
+        )]
+        log_path: PathBuf,
+
         #[bpaf(long("stop-on-disconnect"), hide_usage)]
         stop_on_disconnect: bool,
         /// Allows to set a custom file path to the configuration file,
@@ -471,8 +549,8 @@ impl BiomeCommand {
             | BiomeCommand::Format { cli_options, .. }
             | BiomeCommand::Migrate { cli_options, .. }
             | BiomeCommand::Search { cli_options, .. } => Some(cli_options),
-            BiomeCommand::LspProxy(_, _)
-            | BiomeCommand::Start(_)
+            BiomeCommand::LspProxy { .. }
+            | BiomeCommand::Start { .. }
             | BiomeCommand::Stop
             | BiomeCommand::Init(_)
             | BiomeCommand::Explain { .. }
@@ -572,10 +650,9 @@ pub(crate) fn validate_configuration_diagnostics(
     Ok(())
 }
 
-fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
-    let fs = &*cli_session.app.fs;
-    let workspace = &*cli_session.app.workspace;
-
+fn resolve_manifest(
+    fs: &DynRef<'_, dyn FileSystem>,
+) -> Result<Option<(BiomePath, String)>, WorkspaceError> {
     let result = fs.auto_search(
         &fs.working_directory().unwrap_or_default(),
         &["package.json"],
@@ -583,16 +660,10 @@ fn resolve_manifest(cli_session: &CliSession) -> Result<(), WorkspaceError> {
     )?;
 
     if let Some(result) = result {
-        let biome_path = BiomePath::new(result.file_path);
-        workspace.open_project(OpenProjectParams {
-            path: biome_path.clone(),
-            content: result.content,
-            version: 0,
-        })?;
-        workspace.update_current_project(UpdateProjectParams { path: biome_path })?;
+        return Ok(Some((BiomePath::new(result.file_path), result.content)));
     }
 
-    Ok(())
+    Ok(None)
 }
 
 /// Computes [Stdin] if the CLI has the necessary information.

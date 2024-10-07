@@ -1,8 +1,9 @@
 use crate::prelude::*;
-use biome_formatter::write;
-use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, TsTypeAssertionAssignmentFields};
 
-use crate::parentheses::NeedsParentheses;
+use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::TsTypeAssertionAssignmentFields;
+
 use biome_js_syntax::TsTypeAssertionAssignment;
 
 #[derive(Debug, Clone, Default)]
@@ -34,19 +35,6 @@ impl FormatNodeRule<TsTypeAssertionAssignment> for FormatTsTypeAssertionAssignme
 
     fn needs_parentheses(&self, item: &TsTypeAssertionAssignment) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for TsTypeAssertionAssignment {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        matches!(
-            parent.kind(),
-            JsSyntaxKind::JS_ASSIGNMENT_EXPRESSION
-                | JsSyntaxKind::TS_TYPE_ASSERTION_ASSIGNMENT
-                | JsSyntaxKind::TS_NON_NULL_ASSERTION_ASSIGNMENT
-                | JsSyntaxKind::JS_PRE_UPDATE_EXPRESSION
-                | JsSyntaxKind::JS_POST_UPDATE_EXPRESSION
-        )
     }
 }
 

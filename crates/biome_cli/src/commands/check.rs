@@ -6,6 +6,7 @@ use crate::execute::VcsTargeted;
 use crate::{
     execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
 };
+use biome_configuration::analyzer::assists::PartialAssistsConfiguration;
 use biome_configuration::{
     organize_imports::PartialOrganizeImports, PartialConfiguration, PartialFormatterConfiguration,
     PartialLinterConfiguration,
@@ -36,6 +37,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
+    pub(crate) assists_enabled: Option<bool>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
@@ -60,6 +62,7 @@ pub(crate) fn check(
         organize_imports_enabled,
         formatter_enabled,
         since,
+        assists_enabled,
         staged,
         changed,
     } = payload;
@@ -84,8 +87,6 @@ pub(crate) fn check(
         cli_options.verbose,
     )?;
 
-    resolve_manifest(&session)?;
-
     let editorconfig_search_path = loaded_configuration.directory_path.clone();
     let LoadedConfiguration {
         configuration: biome_configuration,
@@ -95,15 +96,8 @@ pub(crate) fn check(
 
     let should_use_editorconfig = configuration
         .as_ref()
-        .and_then(|f| f.formatter.as_ref())
-        .and_then(|f| f.use_editorconfig)
-        .unwrap_or(
-            biome_configuration
-                .formatter
-                .as_ref()
-                .and_then(|f| f.use_editorconfig)
-                .unwrap_or_default(),
-        );
+        .and_then(|c| c.use_editorconfig())
+        .unwrap_or(biome_configuration.use_editorconfig().unwrap_or_default());
     let mut fs_configuration = if should_use_editorconfig {
         let (editorconfig, editorconfig_diagnostics) = {
             let search_path = editorconfig_search_path.unwrap_or_else(|| {
@@ -148,6 +142,14 @@ pub(crate) fn check(
         organize_imports.enabled = organize_imports_enabled;
     }
 
+    let assists = fs_configuration
+        .assists
+        .get_or_insert_with(PartialAssistsConfiguration::default);
+
+    if assists_enabled.is_some() {
+        assists.enabled = assists_enabled;
+    }
+
     if let Some(mut configuration) = configuration {
         if let Some(linter) = configuration.linter.as_mut() {
             // Don't overwrite rules from the CLI configuration.
@@ -176,6 +178,14 @@ pub(crate) fn check(
             path: session.app.fs.working_directory(),
             set_as_current_workspace: true,
         })?;
+    let manifest_data = resolve_manifest(&session.app.fs)?;
+
+    if let Some(manifest_data) = manifest_data {
+        session
+            .app
+            .workspace
+            .set_manifest_for_project(manifest_data.into())?;
+    }
 
     session
         .app

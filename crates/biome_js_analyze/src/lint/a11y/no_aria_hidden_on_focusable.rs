@@ -4,7 +4,7 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttributeValue, AnyNumberLikeExpression};
 use biome_rowan::{AstNode, BatchMutationExt};
 
 declare_lint_rule! {
@@ -30,6 +30,10 @@ declare_lint_rule! {
     ///
     /// ```jsx
     /// <button aria-hidden="true" tabIndex="-1" />
+    /// ```
+    ///
+    /// ```jsx
+    /// <button aria-hidden="true" tabIndex={-1} />
     /// ```
     ///
     /// ```jsx
@@ -76,12 +80,34 @@ impl Rule for NoAriaHiddenOnFocusable {
             }
 
             if let Some(tabindex_attr) = node.find_attribute_by_name("tabIndex") {
-                if let Some(tabindex_static) = tabindex_attr.as_static_value() {
-                    let tabindex_text = tabindex_static.text();
-                    let tabindex_val = tabindex_text.trim().parse::<i32>();
+                let tabindex_val = tabindex_attr.initializer()?.value().ok()?;
 
-                    if let Ok(num) = tabindex_val {
-                        return (num >= 0).then_some(());
+                match tabindex_val {
+                    AnyJsxAttributeValue::AnyJsxTag(jsx_tag) => {
+                        let value = jsx_tag.text().parse::<i32>();
+                        if let Ok(num) = value {
+                            return (num >= 0).then_some(());
+                        }
+                    }
+                    AnyJsxAttributeValue::JsxString(jsx_string) => {
+                        let value = jsx_string
+                            .inner_string_text()
+                            .ok()?
+                            .to_string()
+                            .parse::<i32>();
+                        if let Ok(num) = value {
+                            return (num >= 0).then_some(());
+                        }
+                    }
+                    AnyJsxAttributeValue::JsxExpressionAttributeValue(value) => {
+                        let expression = value.expression().ok()?;
+                        let expression_value =
+                            AnyNumberLikeExpression::cast(expression.into_syntax())?
+                                .value()?
+                                .parse::<i32>();
+                        if let Ok(num) = expression_value {
+                            return (num >= 0).then_some(());
+                        }
                     }
                 }
             }
@@ -90,7 +116,6 @@ impl Rule for NoAriaHiddenOnFocusable {
                 return Some(());
             }
         }
-
         None
     }
 

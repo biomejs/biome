@@ -19,6 +19,8 @@
 mod errors;
 mod tests;
 
+use std::ops::{BitOr, BitOrAssign};
+
 use biome_js_syntax::JsSyntaxKind::*;
 pub use biome_js_syntax::*;
 use biome_parser::diagnostic::ParseDiagnostic;
@@ -30,7 +32,10 @@ use biome_unicode_table::{
     is_js_id_continue, is_js_id_start, lookup_byte,
     Dispatch::{self, *},
 };
-use bitflags::bitflags;
+
+use enumflags2::{bitflags, make_bitflags, BitFlags};
+
+use crate::JsParserOptions;
 
 use self::errors::invalid_digits_after_unicode_escape_sequence;
 
@@ -131,6 +136,8 @@ pub(crate) struct JsLexer<'src> {
     current_flags: TokenFlags,
 
     diagnostics: Vec<ParseDiagnostic>,
+
+    options: JsParserOptions,
 }
 
 impl<'src> Lexer<'src> for JsLexer<'src> {
@@ -309,7 +316,12 @@ impl<'src> JsLexer<'src> {
             current_flags: TokenFlags::empty(),
             position: 0,
             diagnostics: vec![],
+            options: JsParserOptions::default(),
         }
+    }
+
+    pub(crate) fn with_options(self, options: JsParserOptions) -> Self {
+        Self { options, ..self }
     }
 
     fn re_lex_binary_operator(&mut self) -> JsSyntaxKind {
@@ -843,7 +855,7 @@ impl<'src> JsLexer<'src> {
         let b = unsafe { self.current_unchecked() };
 
         match lookup_byte(b) {
-            IDT | DIG | ZER => Some((b as char, false)),
+            IDT | DOL | DIG | ZER => Some((b as char, false)),
             // FIXME: This should use ID_Continue, not XID_Continue
             UNI => {
                 let chr = self.current_char_unchecked();
@@ -911,7 +923,7 @@ impl<'src> JsLexer<'src> {
                     false
                 }
             }
-            IDT => true,
+            IDT | DOL => true,
             _ => false,
         }
     }
@@ -1430,18 +1442,55 @@ impl<'src> JsLexer<'src> {
     #[inline]
     #[allow(clippy::many_single_char_names)]
     fn read_regex(&mut self) -> JsSyntaxKind {
-        bitflags! {
-            struct RegexFlag: u8 {
-                const G = 1 << 0;
-                const I = 1 << 1;
-                const M = 1 << 2;
-                const S = 1 << 3;
-                const U = 1 << 4;
-                const Y = 1 << 5;
-                const D = 1 << 6;
-                const V = 1 << 7;
+        #[derive(Copy, Clone)]
+        #[bitflags]
+        #[repr(u8)]
+        pub enum RegexFlag {
+            G = 1 << 0,
+            I = 1 << 1,
+            M = 1 << 2,
+            S = 1 << 3,
+            U = 1 << 4,
+            Y = 1 << 5,
+            D = 1 << 6,
+            V = 1 << 7,
+        }
+
+        pub struct RegexFlags(BitFlags<RegexFlag>);
+
+        impl RegexFlags {
+            pub const G: Self = Self(make_bitflags!(RegexFlag::{G}));
+            pub const I: Self = Self(make_bitflags!(RegexFlag::{I}));
+            pub const M: Self = Self(make_bitflags!(RegexFlag::{M}));
+            pub const S: Self = Self(make_bitflags!(RegexFlag::{S}));
+            pub const U: Self = Self(make_bitflags!(RegexFlag::{U}));
+            pub const Y: Self = Self(make_bitflags!(RegexFlag::{Y}));
+            pub const D: Self = Self(make_bitflags!(RegexFlag::{D}));
+            pub const V: Self = Self(make_bitflags!(RegexFlag::{V}));
+
+            pub const fn empty() -> Self {
+                Self(BitFlags::EMPTY)
+            }
+
+            pub fn contains(&self, other: impl Into<RegexFlags>) -> bool {
+                self.0.contains(other.into().0)
             }
         }
+
+        impl BitOr for RegexFlags {
+            type Output = Self;
+
+            fn bitor(self, rhs: Self) -> Self::Output {
+                RegexFlags(self.0 | rhs.0)
+            }
+        }
+
+        impl BitOrAssign for RegexFlags {
+            fn bitor_assign(&mut self, rhs: Self) {
+                self.0 |= rhs.0;
+            }
+        }
+
         let current = unsafe { self.current_unchecked() };
         if current != b'/' {
             return self.lex_token();
@@ -1463,64 +1512,64 @@ impl<'src> JsLexer<'src> {
                 }
                 b'/' => {
                     if !in_class {
-                        let mut flag = RegexFlag::empty();
+                        let mut flag = RegexFlags::empty();
 
                         while let Some(next) = self.next_byte_bounded() {
                             let chr_start = self.position;
                             match next {
                                 b'g' => {
-                                    if flag.contains(RegexFlag::G) {
+                                    if flag.contains(RegexFlags::G) {
                                         self.push_diagnostic(self.flag_err('g'));
                                     }
-                                    flag |= RegexFlag::G;
+                                    flag |= RegexFlags::G;
                                 }
                                 b'i' => {
-                                    if flag.contains(RegexFlag::I) {
+                                    if flag.contains(RegexFlags::I) {
                                         self.push_diagnostic(self.flag_err('i'));
                                     }
-                                    flag |= RegexFlag::I;
+                                    flag |= RegexFlags::I;
                                 }
                                 b'm' => {
-                                    if flag.contains(RegexFlag::M) {
+                                    if flag.contains(RegexFlags::M) {
                                         self.push_diagnostic(self.flag_err('m'));
                                     }
-                                    flag |= RegexFlag::M;
+                                    flag |= RegexFlags::M;
                                 }
                                 b's' => {
-                                    if flag.contains(RegexFlag::S) {
+                                    if flag.contains(RegexFlags::S) {
                                         self.push_diagnostic(self.flag_err('s'));
                                     }
-                                    flag |= RegexFlag::S;
+                                    flag |= RegexFlags::S;
                                 }
                                 b'u' => {
-                                    if flag.contains(RegexFlag::V) {
+                                    if flag.contains(RegexFlags::V) {
                                         self.push_diagnostic(self.flag_uv_err());
                                     }
-                                    if flag.contains(RegexFlag::U) {
+                                    if flag.contains(RegexFlags::U) {
                                         self.push_diagnostic(self.flag_err('u'));
                                     }
-                                    flag |= RegexFlag::U;
+                                    flag |= RegexFlags::U;
                                 }
                                 b'y' => {
-                                    if flag.contains(RegexFlag::Y) {
+                                    if flag.contains(RegexFlags::Y) {
                                         self.push_diagnostic(self.flag_err('y'));
                                     }
-                                    flag |= RegexFlag::Y;
+                                    flag |= RegexFlags::Y;
                                 }
                                 b'd' => {
-                                    if flag.contains(RegexFlag::D) {
+                                    if flag.contains(RegexFlags::D) {
                                         self.push_diagnostic(self.flag_err('d'));
                                     }
-                                    flag |= RegexFlag::D;
+                                    flag |= RegexFlags::D;
                                 }
                                 b'v' => {
-                                    if flag.contains(RegexFlag::U) {
+                                    if flag.contains(RegexFlags::U) {
                                         self.push_diagnostic(self.flag_uv_err());
                                     }
-                                    if flag.contains(RegexFlag::V) {
+                                    if flag.contains(RegexFlags::V) {
                                         self.push_diagnostic(self.flag_err('v'));
                                     }
-                                    flag |= RegexFlag::V;
+                                    flag |= RegexFlags::V;
                                 }
                                 _ if self.cur_ident_part().is_some() => {
                                     self.push_diagnostic(
@@ -1871,7 +1920,7 @@ impl<'src> JsLexer<'src> {
                     ERROR_TOKEN
                 }
             }
-            IDT => self.resolve_identifier(byte as char),
+            IDT | DOL => self.resolve_identifier(byte as char),
             DIG => {
                 self.read_number(false);
                 self.verify_number_end()
@@ -1891,15 +1940,20 @@ impl<'src> JsLexer<'src> {
             PIP => self.resolve_pipe(),
             TLD => self.eat_byte(T![~]),
 
-            // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
-            // perform the check. At any other position, the BOM is just considered plain whitespace.
             UNI => {
+                // A BOM can only appear at the start of a file, so if we haven't advanced at all yet,
+                // perform the check. At any other position, the BOM is just considered plain whitespace.
                 if self.position == 0 {
                     if let Some((bom, bom_size)) = self.consume_potential_bom(UNICODE_BOM) {
                         self.unicode_bom_length = bom_size;
                         return bom;
                     }
                 }
+
+                if self.options.should_parse_metavariables() && self.is_metavariable_start() {
+                    return self.consume_metavariable(GRIT_METAVARIABLE);
+                }
+
                 let chr = self.current_char_unchecked();
                 if is_linebreak(chr)
                     || (UNICODE_WHITESPACE_STARTS.contains(&byte) && UNICODE_SPACES.contains(&chr))

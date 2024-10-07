@@ -1,0 +1,102 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<div class=></div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@5..10 "class" [] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@10..11 "=" [] [],
+                            value: missing (required),
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@11..12 ">" [] [],
+            },
+            children: HtmlElementList [],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@12..13 "<" [] [],
+                slash_token: SLASH@13..14 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@14..17 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@17..18 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@18..19 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..19
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..18
+    0: HTML_ELEMENT@0..18
+      0: HTML_OPENING_ELEMENT@0..12
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..5
+          0: HTML_LITERAL@1..5 "div" [] [Whitespace(" ")]
+        2: HTML_ATTRIBUTE_LIST@5..11
+          0: HTML_ATTRIBUTE@5..11
+            0: HTML_NAME@5..10
+              0: HTML_LITERAL@5..10 "class" [] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@10..11
+              0: EQ@10..11 "=" [] []
+              1: (empty)
+        3: R_ANGLE@11..12 ">" [] []
+      1: HTML_ELEMENT_LIST@12..12
+      2: HTML_CLOSING_ELEMENT@12..18
+        0: L_ANGLE@12..13 "<" [] []
+        1: SLASH@13..14 "/" [] []
+        2: HTML_NAME@14..17
+          0: HTML_LITERAL@14..17 "div" [] []
+        3: R_ANGLE@17..18 ">" [] []
+  3: EOF@18..19 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+missing-initializer.html:1:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an initializer but instead found '>'.
+  
+  > 1 │ <div class=></div>
+      │            ^
+    2 │ 
+  
+  i Expected an initializer here.
+  
+  > 1 │ <div class=></div>
+      │            ^
+    2 │ 
+  
+```

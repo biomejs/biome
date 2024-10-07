@@ -1,3 +1,24 @@
-const a3 = <div>// comment</div>;
-const a4 = <div>/* comment */</div>;
-const a5 = <div>/** comment */</div>;
+<>
+    <div>// comment</div>
+    <div>/* comment */</div>
+    <div>/** comment */</div>
+    <div>text /* comment */</div>
+    <div>/* comment */ text</div>
+    <div>
+        text
+        // comment
+    </div>
+    <div>
+        /* comment */
+        text
+    </div>
+    <div>
+        // comment
+        text
+    </div>
+    <div>
+        /* comment
+        comment */
+    </div>
+    <div>😀//😀 comment </div>
+</>

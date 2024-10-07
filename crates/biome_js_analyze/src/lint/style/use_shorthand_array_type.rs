@@ -237,7 +237,7 @@ fn convert_to_array_type(
             0 => {}
             1 => {
                 // SAFETY: We know that `length` of `array_types` is 1, so unwrap the first element should be safe.
-                let first_type = types_array.into_iter().next().unwrap();
+                let first_type = types_array.into_iter().next()?;
                 return Some(first_type);
             }
             length => {

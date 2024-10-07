@@ -665,3 +665,41 @@ fn migrate_eslintrcjson_extended_rules() {
         result,
     ));
 }
+
+#[test]
+fn migrate_merge_with_overrides() {
+    let biomejson = r#"{
+        "overrides": [{
+            "include": ["*.js"],
+            "linter": { "enabled": false }
+        }]
+    }"#;
+    let eslintrc = r#"{
+        "overrides": [{
+            "files": ["bin/*.js", "lib/*.js"],
+            "excludedFiles": "*.test.js",
+            "rules": {
+                "eqeqeq": ["off"]
+            }
+        }]
+    }"#;
+
+    let mut fs = MemoryFileSystem::default();
+    fs.insert(Path::new("biome.json").into(), biomejson.as_bytes());
+    fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
+
+    let mut console = BufferConsole::default();
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(["migrate", "eslint"].as_slice()),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "migrate_merge_with_overrides",
+        fs,
+        console,
+        result,
+    ));
+}

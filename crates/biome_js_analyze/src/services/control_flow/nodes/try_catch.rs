@@ -1,15 +1,11 @@
 use biome_control_flow::{builder::BlockId, ExceptionHandlerKind};
-use biome_js_syntax::{JsCatchClause, JsFinallyClause, JsTryFinallyStatement, JsTryStatement};
-use biome_rowan::{declare_node_union, SyntaxResult};
+use biome_js_syntax::{AnyJsTryStatement, JsCatchClause, JsFinallyClause};
+use biome_rowan::SyntaxResult;
 
 use crate::services::control_flow::{
     visitor::{NodeVisitor, StatementStack},
     FunctionBuilder,
 };
-
-declare_node_union! {
-    pub(in crate::services::control_flow) AnyJsTryStatement = JsTryStatement | JsTryFinallyStatement
-}
 
 pub(in crate::services::control_flow) struct TryVisitor {
     catch_block: Option<BlockId>,

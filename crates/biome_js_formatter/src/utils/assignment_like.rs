@@ -4,19 +4,20 @@ use crate::prelude::*;
 use crate::ts::bindings::type_parameters::FormatTsTypeParametersOptions;
 use crate::utils::member_chain::is_member_call_chain;
 use crate::utils::object::write_member_name;
-use crate::utils::AnyJsBinaryLikeExpression;
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 use biome_formatter::{format_args, write, CstFormatContext, FormatOptions, VecBuffer};
+use biome_js_syntax::binary_like_expression::AnyJsBinaryLikeExpression;
 use biome_js_syntax::{
     AnyJsAssignmentPattern, AnyJsBindingPattern, AnyJsCallArgument, AnyJsClassMemberName,
     AnyJsExpression, AnyJsFunctionBody, AnyJsObjectAssignmentPatternMember,
-    AnyJsObjectBindingPatternMember, AnyJsObjectMemberName, AnyJsTemplateElement, AnyTsType,
-    AnyTsVariableAnnotation, JsAssignmentExpression, JsInitializerClause, JsLiteralMemberName,
-    JsObjectAssignmentPattern, JsObjectAssignmentPatternProperty, JsObjectBindingPattern,
-    JsPropertyClassMember, JsPropertyClassMemberFields, JsPropertyObjectMember, JsSyntaxKind,
-    JsVariableDeclarator, TsIdentifierBinding, TsInitializedPropertySignatureClassMember,
-    TsInitializedPropertySignatureClassMemberFields, TsPropertySignatureClassMember,
-    TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration, TsTypeArguments, TsUnionType,
+    AnyJsObjectBindingPatternMember, AnyJsObjectMemberName, AnyJsTemplateElement,
+    AnyTsIdentifierBinding, AnyTsType, AnyTsVariableAnnotation, JsAssignmentExpression,
+    JsInitializerClause, JsLiteralMemberName, JsObjectAssignmentPattern,
+    JsObjectAssignmentPatternProperty, JsObjectBindingPattern, JsPropertyClassMember,
+    JsPropertyClassMemberFields, JsPropertyObjectMember, JsSyntaxKind, JsVariableDeclarator,
+    TsInitializedPropertySignatureClassMember, TsInitializedPropertySignatureClassMemberFields,
+    TsPropertySignatureClassMember, TsPropertySignatureClassMemberFields, TsTypeAliasDeclaration,
+    TsTypeArguments, TsUnionType,
 };
 use biome_js_syntax::{AnyJsLiteralExpression, JsUnaryExpression};
 use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, SyntaxResult};
@@ -39,7 +40,7 @@ declare_node_union! {
         AnyJsAssignmentPattern |
         AnyJsObjectMemberName |
         AnyJsBindingPattern |
-        TsIdentifierBinding |
+        AnyTsIdentifierBinding |
         JsLiteralMemberName |
         AnyJsClassMemberName
 }
@@ -933,7 +934,7 @@ impl AnyJsAssignmentLike {
                 let mut has_leading_comments = comments.has_leading_comments(union_type.syntax());
                 while is_nested_union_type(&union_type)? && !has_leading_comments {
                     if let Some(Ok(inner_union_type)) = union_type.types().last() {
-                        let inner_union_type = TsUnionType::cast_ref(inner_union_type.syntax());
+                        let inner_union_type = TsUnionType::cast(inner_union_type.into_syntax());
                         if let Some(inner_union_type) = inner_union_type {
                             has_leading_comments =
                                 comments.has_leading_comments(inner_union_type.syntax());

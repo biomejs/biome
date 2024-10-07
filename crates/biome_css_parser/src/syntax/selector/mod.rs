@@ -28,7 +28,7 @@ use biome_parser::prelude::ParsedSyntax;
 use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{token_set, CompletedMarker, Parser, ParserProgress, TokenSet};
 
-use super::{is_nth_at_grit_metavariable, parse_grit_metavariable};
+use super::{is_nth_at_metavariable, parse_metavariable};
 
 /// Determines the lexical context for parsing CSS selectors.
 ///
@@ -199,7 +199,7 @@ impl ParseRecovery for SelectorListParseRecovery {
 /// the elements to which a set of CSS rules apply.
 #[inline]
 pub(crate) fn is_nth_at_selector(p: &mut CssParser, n: usize) -> bool {
-    is_nth_at_compound_selector(p, n) || is_nth_at_grit_metavariable(p, n)
+    is_nth_at_compound_selector(p, n) || is_nth_at_metavariable(p, n)
 }
 
 /// Parses a CSS selector.
@@ -215,8 +215,8 @@ pub(crate) fn parse_selector(p: &mut CssParser) -> ParsedSyntax {
     if !is_nth_at_selector(p, 0) {
         return Absent;
     }
-    if is_nth_at_grit_metavariable(p, 0) {
-        parse_grit_metavariable(p)
+    if is_nth_at_metavariable(p, 0) {
+        parse_metavariable(p)
     } else {
         // In CSS, we have compound selectors and complex selectors.
         // Compound selectors are simple, unseparated chains of selectors,

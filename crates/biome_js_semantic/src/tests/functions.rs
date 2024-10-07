@@ -15,14 +15,6 @@ assert_semantics! {
           }
           b(1);
         ",
-    ok_function_inner_function3,
-        "function f() {
-            if (true) {
-              function g/*#G*/(){console.log(1)}
-            }
-            g/*READ G*/()
-          }
-        f()",
 }
 
 // modules

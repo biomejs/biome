@@ -1,0 +1,105 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<head>
+	<meta charset="utf-8">
+</head>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..5 "head" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@5..6 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlSelfClosingElement {
+                    l_angle_token: L_ANGLE@6..9 "<" [Newline("\n"), Whitespace("\t")] [],
+                    name: HtmlName {
+                        value_token: HTML_LITERAL@9..14 "meta" [] [Whitespace(" ")],
+                    },
+                    attributes: HtmlAttributeList [
+                        HtmlAttribute {
+                            name: HtmlName {
+                                value_token: HTML_LITERAL@14..21 "charset" [] [],
+                            },
+                            initializer: HtmlAttributeInitializerClause {
+                                eq_token: EQ@21..22 "=" [] [],
+                                value: HtmlString {
+                                    value_token: HTML_STRING_LITERAL@22..29 "\"utf-8\"" [] [],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: missing (optional),
+                    r_angle_token: R_ANGLE@29..30 ">" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@30..32 "<" [Newline("\n")] [],
+                slash_token: SLASH@32..33 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@33..37 "head" [] [],
+                },
+                r_angle_token: R_ANGLE@37..38 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@38..39 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..39
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..38
+    0: HTML_ELEMENT@0..38
+      0: HTML_OPENING_ELEMENT@0..6
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..5
+          0: HTML_LITERAL@1..5 "head" [] []
+        2: HTML_ATTRIBUTE_LIST@5..5
+        3: R_ANGLE@5..6 ">" [] []
+      1: HTML_ELEMENT_LIST@6..30
+        0: HTML_SELF_CLOSING_ELEMENT@6..30
+          0: L_ANGLE@6..9 "<" [Newline("\n"), Whitespace("\t")] []
+          1: HTML_NAME@9..14
+            0: HTML_LITERAL@9..14 "meta" [] [Whitespace(" ")]
+          2: HTML_ATTRIBUTE_LIST@14..29
+            0: HTML_ATTRIBUTE@14..29
+              0: HTML_NAME@14..21
+                0: HTML_LITERAL@14..21 "charset" [] []
+              1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@21..29
+                0: EQ@21..22 "=" [] []
+                1: HTML_STRING@22..29
+                  0: HTML_STRING_LITERAL@22..29 "\"utf-8\"" [] []
+          3: (empty)
+          4: R_ANGLE@29..30 ">" [] []
+      2: HTML_CLOSING_ELEMENT@30..38
+        0: L_ANGLE@30..32 "<" [Newline("\n")] []
+        1: SLASH@32..33 "/" [] []
+        2: HTML_NAME@33..37
+          0: HTML_LITERAL@33..37 "head" [] []
+        3: R_ANGLE@37..38 ">" [] []
+  3: EOF@38..39 "" [Newline("\n")] []
+
+```

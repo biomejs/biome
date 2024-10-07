@@ -1,0 +1,279 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Hello, world!</title>
+	</head>
+	<body>
+		<h1>Hello, world!</h1>
+		<p>This is a test HTML file.</p>
+	</body>
+</html>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: HtmlDirective {
+        l_angle_token: L_ANGLE@0..1 "<" [] [],
+        excl_token: BANG@1..2 "!" [] [],
+        doctype_token: DOCTYPE_KW@2..10 "DOCTYPE" [] [Whitespace(" ")],
+        html_token: HTML_KW@10..14 "html" [] [],
+        quirk_token: missing (optional),
+        public_id_token: missing (optional),
+        system_id_token: missing (optional),
+        r_angle_token: R_ANGLE@14..15 ">" [] [],
+    },
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@15..17 "<" [Newline("\n")] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@17..21 "html" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@21..22 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@22..25 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@25..29 "head" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@29..30 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@30..34 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@34..39 "title" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@39..40 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@40..53 "Hello, world!" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@53..54 "<" [] [],
+                                slash_token: SLASH@54..55 "/" [] [],
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@55..60 "title" [] [],
+                                },
+                                r_angle_token: R_ANGLE@60..61 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@61..64 "<" [Newline("\n"), Whitespace("\t")] [],
+                        slash_token: SLASH@64..65 "/" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@65..69 "head" [] [],
+                        },
+                        r_angle_token: R_ANGLE@69..70 ">" [] [],
+                    },
+                },
+                HtmlElement {
+                    opening_element: HtmlOpeningElement {
+                        l_angle_token: L_ANGLE@70..73 "<" [Newline("\n"), Whitespace("\t")] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@73..77 "body" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        r_angle_token: R_ANGLE@77..78 ">" [] [],
+                    },
+                    children: HtmlElementList [
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@78..82 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@82..84 "h1" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@84..85 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@85..98 "Hello, world!" [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@98..99 "<" [] [],
+                                slash_token: SLASH@99..100 "/" [] [],
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@100..102 "h1" [] [],
+                                },
+                                r_angle_token: R_ANGLE@102..103 ">" [] [],
+                            },
+                        },
+                        HtmlElement {
+                            opening_element: HtmlOpeningElement {
+                                l_angle_token: L_ANGLE@103..107 "<" [Newline("\n"), Whitespace("\t\t")] [],
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@107..108 "p" [] [],
+                                },
+                                attributes: HtmlAttributeList [],
+                                r_angle_token: R_ANGLE@108..109 ">" [] [],
+                            },
+                            children: HtmlElementList [
+                                HtmlContent {
+                                    value_token: HTML_LITERAL@109..134 "This is a test HTML file." [] [],
+                                },
+                            ],
+                            closing_element: HtmlClosingElement {
+                                l_angle_token: L_ANGLE@134..135 "<" [] [],
+                                slash_token: SLASH@135..136 "/" [] [],
+                                name: HtmlName {
+                                    value_token: HTML_LITERAL@136..137 "p" [] [],
+                                },
+                                r_angle_token: R_ANGLE@137..138 ">" [] [],
+                            },
+                        },
+                    ],
+                    closing_element: HtmlClosingElement {
+                        l_angle_token: L_ANGLE@138..141 "<" [Newline("\n"), Whitespace("\t")] [],
+                        slash_token: SLASH@141..142 "/" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@142..146 "body" [] [],
+                        },
+                        r_angle_token: R_ANGLE@146..147 ">" [] [],
+                    },
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@147..149 "<" [Newline("\n")] [],
+                slash_token: SLASH@149..150 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@150..154 "html" [] [],
+                },
+                r_angle_token: R_ANGLE@154..155 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@155..156 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..156
+  0: (empty)
+  1: HTML_DIRECTIVE@0..15
+    0: L_ANGLE@0..1 "<" [] []
+    1: BANG@1..2 "!" [] []
+    2: DOCTYPE_KW@2..10 "DOCTYPE" [] [Whitespace(" ")]
+    3: HTML_KW@10..14 "html" [] []
+    4: (empty)
+    5: (empty)
+    6: (empty)
+    7: R_ANGLE@14..15 ">" [] []
+  2: HTML_ELEMENT_LIST@15..155
+    0: HTML_ELEMENT@15..155
+      0: HTML_OPENING_ELEMENT@15..22
+        0: L_ANGLE@15..17 "<" [Newline("\n")] []
+        1: HTML_NAME@17..21
+          0: HTML_LITERAL@17..21 "html" [] []
+        2: HTML_ATTRIBUTE_LIST@21..21
+        3: R_ANGLE@21..22 ">" [] []
+      1: HTML_ELEMENT_LIST@22..147
+        0: HTML_ELEMENT@22..70
+          0: HTML_OPENING_ELEMENT@22..30
+            0: L_ANGLE@22..25 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@25..29
+              0: HTML_LITERAL@25..29 "head" [] []
+            2: HTML_ATTRIBUTE_LIST@29..29
+            3: R_ANGLE@29..30 ">" [] []
+          1: HTML_ELEMENT_LIST@30..61
+            0: HTML_ELEMENT@30..61
+              0: HTML_OPENING_ELEMENT@30..40
+                0: L_ANGLE@30..34 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_NAME@34..39
+                  0: HTML_LITERAL@34..39 "title" [] []
+                2: HTML_ATTRIBUTE_LIST@39..39
+                3: R_ANGLE@39..40 ">" [] []
+              1: HTML_ELEMENT_LIST@40..53
+                0: HTML_CONTENT@40..53
+                  0: HTML_LITERAL@40..53 "Hello, world!" [] []
+              2: HTML_CLOSING_ELEMENT@53..61
+                0: L_ANGLE@53..54 "<" [] []
+                1: SLASH@54..55 "/" [] []
+                2: HTML_NAME@55..60
+                  0: HTML_LITERAL@55..60 "title" [] []
+                3: R_ANGLE@60..61 ">" [] []
+          2: HTML_CLOSING_ELEMENT@61..70
+            0: L_ANGLE@61..64 "<" [Newline("\n"), Whitespace("\t")] []
+            1: SLASH@64..65 "/" [] []
+            2: HTML_NAME@65..69
+              0: HTML_LITERAL@65..69 "head" [] []
+            3: R_ANGLE@69..70 ">" [] []
+        1: HTML_ELEMENT@70..147
+          0: HTML_OPENING_ELEMENT@70..78
+            0: L_ANGLE@70..73 "<" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_NAME@73..77
+              0: HTML_LITERAL@73..77 "body" [] []
+            2: HTML_ATTRIBUTE_LIST@77..77
+            3: R_ANGLE@77..78 ">" [] []
+          1: HTML_ELEMENT_LIST@78..138
+            0: HTML_ELEMENT@78..103
+              0: HTML_OPENING_ELEMENT@78..85
+                0: L_ANGLE@78..82 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_NAME@82..84
+                  0: HTML_LITERAL@82..84 "h1" [] []
+                2: HTML_ATTRIBUTE_LIST@84..84
+                3: R_ANGLE@84..85 ">" [] []
+              1: HTML_ELEMENT_LIST@85..98
+                0: HTML_CONTENT@85..98
+                  0: HTML_LITERAL@85..98 "Hello, world!" [] []
+              2: HTML_CLOSING_ELEMENT@98..103
+                0: L_ANGLE@98..99 "<" [] []
+                1: SLASH@99..100 "/" [] []
+                2: HTML_NAME@100..102
+                  0: HTML_LITERAL@100..102 "h1" [] []
+                3: R_ANGLE@102..103 ">" [] []
+            1: HTML_ELEMENT@103..138
+              0: HTML_OPENING_ELEMENT@103..109
+                0: L_ANGLE@103..107 "<" [Newline("\n"), Whitespace("\t\t")] []
+                1: HTML_NAME@107..108
+                  0: HTML_LITERAL@107..108 "p" [] []
+                2: HTML_ATTRIBUTE_LIST@108..108
+                3: R_ANGLE@108..109 ">" [] []
+              1: HTML_ELEMENT_LIST@109..134
+                0: HTML_CONTENT@109..134
+                  0: HTML_LITERAL@109..134 "This is a test HTML file." [] []
+              2: HTML_CLOSING_ELEMENT@134..138
+                0: L_ANGLE@134..135 "<" [] []
+                1: SLASH@135..136 "/" [] []
+                2: HTML_NAME@136..137
+                  0: HTML_LITERAL@136..137 "p" [] []
+                3: R_ANGLE@137..138 ">" [] []
+          2: HTML_CLOSING_ELEMENT@138..147
+            0: L_ANGLE@138..141 "<" [Newline("\n"), Whitespace("\t")] []
+            1: SLASH@141..142 "/" [] []
+            2: HTML_NAME@142..146
+              0: HTML_LITERAL@142..146 "body" [] []
+            3: R_ANGLE@146..147 ">" [] []
+      2: HTML_CLOSING_ELEMENT@147..155
+        0: L_ANGLE@147..149 "<" [Newline("\n")] []
+        1: SLASH@149..150 "/" [] []
+        2: HTML_NAME@150..154
+          0: HTML_LITERAL@150..154 "html" [] []
+        3: R_ANGLE@154..155 ">" [] []
+  3: EOF@155..156 "" [Newline("\n")] []
+
+```

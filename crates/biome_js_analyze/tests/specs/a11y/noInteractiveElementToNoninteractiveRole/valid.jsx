@@ -55,6 +55,7 @@
 <body role="button" />;
 <br role="button" />;
 <canvas role="button" />;
+<canvas role="img" />;
 <caption role="button" />;
 <center role="button" />;
 <cite role="button" />;

@@ -3,9 +3,8 @@ use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
 use crate::syntax::{
-    is_at_declaration, is_at_grit_metavariable, is_at_nested_qualified_rule,
-    parse_declaration_with_semicolon, parse_grit_metavariable, parse_nested_qualified_rule,
-    try_parse,
+    is_at_declaration, is_at_metavariable, is_at_nested_qualified_rule,
+    parse_declaration_with_semicolon, parse_metavariable, parse_nested_qualified_rule, try_parse,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
@@ -39,7 +38,7 @@ fn is_at_declaration_or_rule_item(p: &mut CssParser) -> bool {
     is_at_at_rule(p)
         || is_at_nested_qualified_rule(p)
         || is_at_declaration(p)
-        || is_at_grit_metavariable(p)
+        || is_at_metavariable(p)
 }
 
 struct DeclarationOrRuleListParseRecovery;
@@ -128,8 +127,8 @@ impl ParseNodeList for DeclarationOrRuleList {
             parse_declaration_with_semicolon(p)
         } else if is_at_nested_qualified_rule(p) {
             parse_nested_qualified_rule(p)
-        } else if is_at_grit_metavariable(p) {
-            parse_grit_metavariable(p)
+        } else if is_at_metavariable(p) {
+            parse_metavariable(p)
         } else {
             Absent
         }

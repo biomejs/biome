@@ -1,0 +1,77 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<script>
+	if (1 < 2) {
+		console.log('Hello, world!');
+	}
+</script>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..7 "script" [] [],
+                },
+                attributes: HtmlAttributeList [],
+                r_angle_token: R_ANGLE@7..8 ">" [] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@8..58 "\n\tif (1 < 2) {\n\t\tconsole.log('Hello, world!');\n\t}\n" [] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@58..59 "<" [] [],
+                slash_token: SLASH@59..60 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@60..66 "script" [] [],
+                },
+                r_angle_token: R_ANGLE@66..67 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@67..68 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..68
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..67
+    0: HTML_ELEMENT@0..67
+      0: HTML_OPENING_ELEMENT@0..8
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..7
+          0: HTML_LITERAL@1..7 "script" [] []
+        2: HTML_ATTRIBUTE_LIST@7..7
+        3: R_ANGLE@7..8 ">" [] []
+      1: HTML_ELEMENT_LIST@8..58
+        0: HTML_CONTENT@8..58
+          0: HTML_LITERAL@8..58 "\n\tif (1 < 2) {\n\t\tconsole.log('Hello, world!');\n\t}\n" [] []
+      2: HTML_CLOSING_ELEMENT@58..67
+        0: L_ANGLE@58..59 "<" [] []
+        1: SLASH@59..60 "/" [] []
+        2: HTML_NAME@60..66
+          0: HTML_LITERAL@60..66 "script" [] []
+        3: R_ANGLE@66..67 ">" [] []
+  3: EOF@67..68 "" [Newline("\n")] []
+
+```

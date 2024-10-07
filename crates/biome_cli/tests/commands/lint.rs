@@ -2596,8 +2596,8 @@ fn check_json_files() {
         r#"{
 	"linter": {
 		"rules": {
-			"nursery": {
-				"noDuplicateJsonKeys": "error"
+			"suspicious": {
+				"noDuplicateObjectKeys": "error"
 			}
 		}
 	}
@@ -3266,7 +3266,7 @@ fn no_unused_dependencies() {
     "enabled": true,
     "rules": {
       "all": false,
-      "nursery": {
+      "correctness": {
         "noUndeclaredDependencies": "error"
       }
     }
@@ -3730,37 +3730,6 @@ fn lint_only_group() {
 }
 
 #[test]
-fn lint_only_nursery_group() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-    let content = "";
-
-    let file_path = Path::new("check.js");
-    fs.insert(file_path.into(), content.as_bytes());
-
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from(
-            [
-                ("lint"),
-                "--only=nursery",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
-    );
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "lint_only_nursery_group",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn lint_only_group_with_disabled_rule() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
@@ -3800,6 +3769,46 @@ fn lint_only_group_with_disabled_rule() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_only_group_with_disabled_rule",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_only_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{}"#;
+    let content = r#"
+    export const z = function (array) {
+        array.map((sentence) => sentence.split(" ")).flat();
+        return 0;
+    };
+    "#;
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), config.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--write",
+                "--only=complexity/useArrowFunction",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_only_write",
         fs,
         console,
         result,
@@ -3937,6 +3946,46 @@ fn lint_skip_rule_and_group() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "lint_skip_rule_and_group",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn lint_skip_write() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+    let config = r#"{}"#;
+    let content = r#"
+    export const z = function (array) {
+        array.map((sentence) => sentence.split(" ")).flat();
+        return 0;
+    };
+    "#;
+
+    let file_path = Path::new("check.js");
+    fs.insert(file_path.into(), content.as_bytes());
+    let config_path = Path::new("biome.json");
+    fs.insert(config_path.into(), config.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                "--write",
+                "--skip=complexity/useArrowFunction",
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "lint_skip_write",
         fs,
         console,
         result,

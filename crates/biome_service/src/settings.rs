@@ -1,15 +1,16 @@
 use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
+use biome_configuration::analyzer::assists::AssistsConfiguration;
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, FilesConfiguration, FormatterConfiguration,
-    JavascriptConfiguration, LinterConfiguration, OverrideFormatterConfiguration,
-    OverrideLinterConfiguration, OverrideOrganizeImportsConfiguration, Overrides,
-    PartialConfiguration, PartialCssConfiguration, PartialGraphqlConfiguration,
-    PartialJavascriptConfiguration, PartialJsonConfiguration, PlainIndentStyle, Rules,
+    JavascriptConfiguration, LinterConfiguration, OverrideAssistsConfiguration,
+    OverrideFormatterConfiguration, OverrideLinterConfiguration,
+    OverrideOrganizeImportsConfiguration, Overrides, PartialConfiguration, PartialCssConfiguration,
+    PartialGraphqlConfiguration, PartialJavascriptConfiguration, PartialJsonConfiguration,
 };
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
@@ -22,17 +23,21 @@ use biome_formatter::{
 use biome_fs::BiomePath;
 use biome_graphql_formatter::context::GraphqlFormatOptions;
 use biome_graphql_syntax::GraphqlLanguage;
-use biome_js_analyze::metadata;
+use biome_grit_syntax::GritLanguage;
+use biome_html_formatter::HtmlFormatOptions;
+use biome_html_syntax::HtmlLanguage;
 use biome_js_formatter::context::JsFormatOptions;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_json_formatter::context::JsonFormatOptions;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
+use biome_project::{NodeJsProject, PackageJson};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
 use indexmap::IndexSet;
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
 use std::sync::RwLockWriteGuard;
 use std::{
@@ -48,6 +53,8 @@ pub struct ProjectData {
     path: BiomePath,
     /// The settings of the project, usually inferred from the configuration file e.g. `biome.json`.
     settings: Settings,
+    /// Information relative to the current project
+    project: Option<NodeJsProject>,
 }
 
 #[derive(Debug, Default)]
@@ -60,12 +67,31 @@ pub struct WorkspaceSettings {
 }
 
 impl WorkspaceSettings {
+    pub fn get_current_project_key(&self) -> ProjectKey {
+        self.current_project
+    }
+
+    pub fn get_current_project_data_mut(&mut self) -> &mut ProjectData {
+        self.data
+            .get_mut(self.current_project)
+            .expect("You must have at least one workspace.")
+    }
+
     /// Retrieves the settings of the current workspace folder
     pub fn get_current_settings(&self) -> Option<&Settings> {
         trace!("Current key {:?}", self.current_project);
         let data = self.data.get(self.current_project);
         if let Some(data) = data {
             Some(&data.settings)
+        } else {
+            None
+        }
+    }
+
+    pub fn get_current_manifest(&self) -> Option<&PackageJson> {
+        let data = self.data.get(self.current_project);
+        if let Some(data) = data {
+            data.project.as_ref().map(|project| &project.manifest)
         } else {
             None
         }
@@ -93,7 +119,13 @@ impl WorkspaceSettings {
         self.data.insert(ProjectData {
             path,
             settings: Settings::default(),
+            project: None,
         })
+    }
+
+    pub fn insert_manifest(&mut self, manifest: NodeJsProject) {
+        let project_data = self.get_current_project_data_mut();
+        let _ = project_data.project.insert(manifest);
     }
 
     /// Remove a project using its folder.
@@ -162,8 +194,10 @@ pub struct Settings {
     pub languages: LanguageListSettings,
     /// Filesystem settings for the workspace
     pub files: FilesSettings,
-    /// Analyzer settings
+    /// Import sorting settings
     pub organize_imports: OrganizeImportsSettings,
+    /// Assists settings
+    pub assists: AssistsSettings,
     /// overrides
     pub override_settings: OverrideSettings,
 }
@@ -192,6 +226,14 @@ impl Settings {
                 to_linter_settings(working_directory.clone(), LinterConfiguration::from(linter))?;
         }
 
+        // assists part
+        if let Some(assists) = configuration.assists {
+            self.assists = to_assists_settings(
+                working_directory.clone(),
+                AssistsConfiguration::from(assists),
+            )?;
+        }
+
         // Filesystem settings
         if let Some(files) = to_file_settings(
             working_directory.clone(),
@@ -215,15 +257,15 @@ impl Settings {
         }
         // json settings
         if let Some(json) = configuration.json {
-            self.languages.json = json.into();
+            self.languages.json = json.into()
         }
         // css settings
         if let Some(css) = configuration.css {
-            self.languages.css = css.into();
+            self.languages.css = css.into()
         }
         // graphql settings
         if let Some(graphql) = configuration.graphql {
-            self.languages.graphql = graphql.into();
+            self.languages.graphql = graphql.into()
         }
 
         // NOTE: keep this last. Computing the overrides require reading the settings computed by the parent settings.
@@ -273,6 +315,7 @@ impl Settings {
     /// Whether the linter is disabled for CSS files
     pub fn css_linter_disabled(&self) -> bool {
         let enabled = self.languages.css.linter.enabled.as_ref();
+        trace!("CSS LINTER DISABLED {:?}", enabled);
         enabled == Some(&false)
     }
 
@@ -284,6 +327,11 @@ impl Settings {
     /// Retrieves the settings of the organize imports
     pub fn organize_imports(&self) -> &OrganizeImportsSettings {
         &self.organize_imports
+    }
+
+    /// Retrieves the settings of the organize imports
+    pub fn assists(&self) -> &AssistsSettings {
+        &self.assists
     }
 
     /// It retrieves the severity based on the `code` of the rule and the current configuration.
@@ -303,12 +351,39 @@ impl Settings {
         }
     }
 
-    /// Returns rules taking overrides into account.
-    pub fn as_rules(&self, path: &Path) -> Option<Cow<Rules>> {
+    /// Returns linter rules taking overrides into account.
+    pub fn as_linter_rules(
+        &self,
+        path: &Path,
+    ) -> Option<Cow<biome_configuration::analyzer::linter::Rules>> {
         let mut result = self.linter.rules.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
             let pattern_rules = pattern.linter.rules.as_ref();
+            if let Some(pattern_rules) = pattern_rules {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    result = if let Some(mut result) = result.take() {
+                        // Override rules
+                        result.to_mut().merge_with(pattern_rules.clone());
+                        Some(result)
+                    } else {
+                        Some(Cow::Borrowed(pattern_rules))
+                    };
+                }
+            }
+        }
+        result
+    }
+
+    /// Returns assists rules taking overrides into account.
+    pub fn as_assists_rules(
+        &self,
+        path: &Path,
+    ) -> Option<Cow<biome_configuration::analyzer::assists::Actions>> {
+        let mut result = self.assists.actions.as_ref().map(Cow::Borrowed);
+        let overrides = &self.override_settings;
+        for pattern in overrides.patterns.iter() {
+            let pattern_rules = pattern.assists.actions.as_ref();
             if let Some(pattern_rules) = pattern_rules {
                 if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                     result = if let Some(mut result) = result.take() {
@@ -385,7 +460,7 @@ pub struct LinterSettings {
     pub enabled: bool,
 
     /// List of rules
-    pub rules: Option<Rules>,
+    pub rules: Option<biome_configuration::analyzer::linter::Rules>,
 
     /// List of ignored paths/files to match
     pub ignored_files: Matcher,
@@ -398,7 +473,7 @@ impl Default for LinterSettings {
     fn default() -> Self {
         Self {
             enabled: true,
-            rules: Some(Rules::default()),
+            rules: Some(biome_configuration::analyzer::linter::Rules::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         }
@@ -412,7 +487,7 @@ pub struct OverrideLinterSettings {
     pub enabled: Option<bool>,
 
     /// List of rules
-    pub rules: Option<Rules>,
+    pub rules: Option<biome_configuration::analyzer::linter::Rules>,
 }
 
 /// Linter settings for the entire workspace
@@ -438,11 +513,48 @@ impl Default for OrganizeImportsSettings {
     }
 }
 
-/// Linter settings for the entire workspace
+/// Organize imports settings for the entire workspace
 #[derive(Debug, Default)]
 pub struct OverrideOrganizeImportsSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
+}
+
+/// Linter settings for the entire workspace
+#[derive(Debug)]
+pub struct AssistsSettings {
+    /// Enabled by default
+    pub enabled: bool,
+
+    /// List of rules
+    pub actions: Option<biome_configuration::analyzer::assists::Actions>,
+
+    /// List of ignored paths/files to match
+    pub ignored_files: Matcher,
+
+    /// List of included paths/files to match
+    pub included_files: Matcher,
+}
+
+impl Default for AssistsSettings {
+    fn default() -> Self {
+        Self {
+            enabled: true,
+            actions: Default::default(),
+            included_files: Matcher::empty(),
+            ignored_files: Matcher::empty(),
+        }
+    }
+}
+
+/// Assists settings for the entire workspace
+#[derive(Debug, Default)]
+pub struct OverrideAssistsSettings {
+    /// Enabled by default
+    pub enabled: Option<bool>,
+
+    /// List of rules
+    pub actions: Option<biome_configuration::analyzer::assists::Actions>,
 }
 
 /// Static map of language names to language-specific settings
@@ -452,6 +564,8 @@ pub struct LanguageListSettings {
     pub json: LanguageSettings<JsonLanguage>,
     pub css: LanguageSettings<CssLanguage>,
     pub graphql: LanguageSettings<GraphqlLanguage>,
+    pub html: LanguageSettings<HtmlLanguage>,
+    pub grit: LanguageSettings<GritLanguage>,
 }
 
 impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
@@ -515,8 +629,7 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
             language_setting.parser.css_modules = parser.css_modules;
         }
         if let Some(formatter) = css.formatter {
-            // TODO: change RHS to `formatter.enabled` when css formatting is enabled by default
-            language_setting.formatter.enabled = Some(formatter.enabled.unwrap_or_default());
+            language_setting.formatter.enabled = formatter.enabled;
             language_setting.formatter.indent_width = formatter.indent_width;
             language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
             language_setting.formatter.line_width = formatter.line_width;
@@ -524,8 +637,7 @@ impl From<PartialCssConfiguration> for LanguageSettings<CssLanguage> {
             language_setting.formatter.quote_style = formatter.quote_style;
         }
         if let Some(linter) = css.linter {
-            // TODO: change RHS to `linter.enabled` when css linting is enabled by default
-            language_setting.linter.enabled = Some(linter.enabled.unwrap_or_default());
+            language_setting.linter.enabled = linter.enabled;
         }
 
         language_setting
@@ -893,6 +1005,19 @@ impl OverrideSettings {
         options
     }
 
+    pub fn to_override_html_format_options(
+        &self,
+        path: &Path,
+        mut options: HtmlFormatOptions,
+    ) -> HtmlFormatOptions {
+        for pattern in self.patterns.iter() {
+            if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                pattern.apply_overrides_to_html_format_options(&mut options);
+            }
+        }
+        options
+    }
+
     pub fn to_override_js_parser_options(
         &self,
         path: &Path,
@@ -942,7 +1067,26 @@ impl OverrideSettings {
         for pattern in self.patterns.iter() {
             if !pattern.exclude.matches_path(path) && pattern.include.matches_path(path) {
                 if let Some(rules) = pattern.linter.rules.as_ref() {
-                    push_to_analyzer_rules(rules, metadata(), &mut analyzer_rules);
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_js_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_json_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_css_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
+                    push_to_analyzer_rules(
+                        rules,
+                        biome_graphql_analyze::METADATA.deref(),
+                        &mut analyzer_rules,
+                    );
                 }
             }
         }
@@ -987,6 +1131,19 @@ impl OverrideSettings {
             None
         })
     }
+
+    /// Scans the overrides and checks if there's an override that disable the assists for `path`
+    pub fn assists_disabled(&self, path: &Path) -> Option<bool> {
+        // Reverse the traversal as only the last override takes effect
+        self.patterns.iter().rev().find_map(|pattern| {
+            if let Some(enabled) = pattern.assists.enabled {
+                if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
+                    return Some(!enabled);
+                }
+            }
+            None
+        })
+    }
 }
 
 #[derive(Debug, Default)]
@@ -999,6 +1156,8 @@ pub struct OverrideSettingPattern {
     pub linter: OverrideLinterSettings,
     /// Linter settings applied to all files in the workspace
     pub organize_imports: OverrideOrganizeImportsSettings,
+    /// Linter settings applied to all files in the workspace
+    pub assists: OverrideAssistsSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
 
@@ -1010,6 +1169,7 @@ pub struct OverrideSettingPattern {
     pub(crate) cached_json_format_options: RwLock<Option<JsonFormatOptions>>,
     pub(crate) cached_css_format_options: RwLock<Option<CssFormatOptions>>,
     pub(crate) cached_graphql_format_options: RwLock<Option<GraphqlFormatOptions>>,
+    pub(crate) cached_html_format_options: RwLock<Option<HtmlFormatOptions>>,
     pub(crate) cached_js_parser_options: RwLock<Option<JsParserOptions>>,
     pub(crate) _cached_json_parser_options: RwLock<Option<JsonParserOptions>>,
     pub(crate) cached_css_parser_options: RwLock<Option<CssParserOptions>>,
@@ -1179,6 +1339,36 @@ impl OverrideSettingPattern {
         }
     }
 
+    fn apply_overrides_to_html_format_options(&self, options: &mut HtmlFormatOptions) {
+        if let Ok(readonly_cache) = self.cached_html_format_options.read() {
+            if let Some(cached_options) = readonly_cache.as_ref() {
+                *options = cached_options.clone();
+                return;
+            }
+        }
+
+        let html_formatter = &self.languages.html.formatter;
+        let formatter = &self.formatter;
+
+        if let Some(indent_style) = html_formatter.indent_style.or(formatter.indent_style) {
+            options.set_indent_style(indent_style);
+        }
+        if let Some(indent_width) = html_formatter.indent_width.or(formatter.indent_width) {
+            options.set_indent_width(indent_width)
+        }
+        if let Some(line_ending) = html_formatter.line_ending.or(formatter.line_ending) {
+            options.set_line_ending(line_ending);
+        }
+        if let Some(line_width) = html_formatter.line_width.or(formatter.line_width) {
+            options.set_line_width(line_width);
+        }
+
+        if let Ok(mut writeonly_cache) = self.cached_html_format_options.write() {
+            let options = options.clone();
+            let _ = writeonly_cache.insert(options);
+        }
+    }
+
     fn apply_overrides_to_js_parser_options(&self, options: &mut JsParserOptions) {
         if let Ok(readonly_cache) = self.cached_js_parser_options.read() {
             if let Some(cached_options) = readonly_cache.as_ref() {
@@ -1325,9 +1515,7 @@ pub fn to_override_settings(
                 format_with_errors: formatter
                     .format_with_errors
                     .unwrap_or(current_settings.formatter.format_with_errors),
-                indent_style: formatter
-                    .indent_style
-                    .map(|indent_style| indent_style.into()),
+                indent_style: formatter.indent_style,
                 indent_width: formatter.indent_width,
                 line_ending: formatter.line_ending,
                 line_width: formatter.line_width,
@@ -1493,10 +1681,7 @@ pub fn to_format_settings(
     working_directory: Option<PathBuf>,
     conf: FormatterConfiguration,
 ) -> Result<FormatSettings, WorkspaceError> {
-    let indent_style = match conf.indent_style {
-        PlainIndentStyle::Tab => IndentStyle::Tab,
-        PlainIndentStyle::Space => IndentStyle::Space,
-    };
+    let indent_style = conf.indent_style;
     let indent_width = conf.indent_width;
 
     Ok(FormatSettings {
@@ -1518,8 +1703,8 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
 
     fn try_from(conf: OverrideFormatterConfiguration) -> Result<Self, Self::Error> {
         let indent_style = match conf.indent_style {
-            Some(PlainIndentStyle::Tab) => IndentStyle::Tab,
-            Some(PlainIndentStyle::Space) => IndentStyle::Space,
+            Some(IndentStyle::Tab) => IndentStyle::Tab,
+            Some(IndentStyle::Space) => IndentStyle::Space,
             None => IndentStyle::default(),
         };
         let indent_width = conf
@@ -1562,6 +1747,31 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
             rules: conf.rules,
+            ignored_files: Matcher::empty(),
+            included_files: Matcher::empty(),
+        })
+    }
+}
+
+pub fn to_assists_settings(
+    working_directory: Option<PathBuf>,
+    conf: AssistsConfiguration,
+) -> Result<AssistsSettings, WorkspaceError> {
+    Ok(AssistsSettings {
+        enabled: conf.enabled,
+        actions: Some(conf.actions),
+        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
+        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
+    })
+}
+
+impl TryFrom<OverrideAssistsConfiguration> for AssistsSettings {
+    type Error = WorkspaceError;
+
+    fn try_from(conf: OverrideAssistsConfiguration) -> Result<Self, Self::Error> {
+        Ok(Self {
+            enabled: conf.enabled.unwrap_or_default(),
+            actions: conf.rules,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
         })

@@ -1,0 +1,13 @@
+---
+source: crates/biome_grit_patterns/tests/spec_tests.rs
+expression: functionToArrow
+---
+SnapshotResult {
+    messages: [],
+    matched_ranges: [
+        "1:1-2:2",
+        "4:1-6:2",
+    ],
+    rewritten_files: [],
+    created_files: [],
+}

@@ -1035,7 +1035,7 @@ impl JsExportDefaultExpressionClauseBuilder {
 pub fn js_export_from_clause(
     star_token: SyntaxToken,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
 ) -> JsExportFromClauseBuilder {
     JsExportFromClauseBuilder {
         star_token,
@@ -1050,7 +1050,7 @@ pub fn js_export_from_clause(
 pub struct JsExportFromClauseBuilder {
     star_token: SyntaxToken,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
     export_as: Option<JsExportAsClause>,
     assertion: Option<JsImportAssertion>,
@@ -1139,7 +1139,7 @@ pub fn js_export_named_from_clause(
     specifiers: JsExportNamedFromSpecifierList,
     r_curly_token: SyntaxToken,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
 ) -> JsExportNamedFromClauseBuilder {
     JsExportNamedFromClauseBuilder {
         l_curly_token,
@@ -1157,7 +1157,7 @@ pub struct JsExportNamedFromClauseBuilder {
     specifiers: JsExportNamedFromSpecifierList,
     r_curly_token: SyntaxToken,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
     assertion: Option<JsImportAssertion>,
     semicolon_token: Option<SyntaxToken>,
@@ -2017,14 +2017,14 @@ pub fn js_import_assertion_entry(
         ],
     ))
 }
-pub fn js_import_bare_clause(source: JsModuleSource) -> JsImportBareClauseBuilder {
+pub fn js_import_bare_clause(source: AnyJsModuleSource) -> JsImportBareClauseBuilder {
     JsImportBareClauseBuilder {
         source,
         assertion: None,
     }
 }
 pub struct JsImportBareClauseBuilder {
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
     assertion: Option<JsImportAssertion>,
 }
 impl JsImportBareClauseBuilder {
@@ -2060,7 +2060,7 @@ pub fn js_import_combined_clause(
     comma_token: SyntaxToken,
     specifier: AnyJsCombinedSpecifier,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
 ) -> JsImportCombinedClauseBuilder {
     JsImportCombinedClauseBuilder {
         default_specifier,
@@ -2076,7 +2076,7 @@ pub struct JsImportCombinedClauseBuilder {
     comma_token: SyntaxToken,
     specifier: AnyJsCombinedSpecifier,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
     assertion: Option<JsImportAssertion>,
 }
 impl JsImportCombinedClauseBuilder {
@@ -2102,7 +2102,7 @@ impl JsImportCombinedClauseBuilder {
 pub fn js_import_default_clause(
     default_specifier: JsDefaultImportSpecifier,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
 ) -> JsImportDefaultClauseBuilder {
     JsImportDefaultClauseBuilder {
         default_specifier,
@@ -2115,7 +2115,7 @@ pub fn js_import_default_clause(
 pub struct JsImportDefaultClauseBuilder {
     default_specifier: JsDefaultImportSpecifier,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
     assertion: Option<JsImportAssertion>,
 }
@@ -2159,7 +2159,7 @@ pub fn js_import_meta_expression(
 pub fn js_import_named_clause(
     named_specifiers: JsNamedImportSpecifiers,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
 ) -> JsImportNamedClauseBuilder {
     JsImportNamedClauseBuilder {
         named_specifiers,
@@ -2172,7 +2172,7 @@ pub fn js_import_named_clause(
 pub struct JsImportNamedClauseBuilder {
     named_specifiers: JsNamedImportSpecifiers,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
     assertion: Option<JsImportAssertion>,
 }
@@ -2202,7 +2202,7 @@ impl JsImportNamedClauseBuilder {
 pub fn js_import_namespace_clause(
     namespace_specifier: JsNamespaceImportSpecifier,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
 ) -> JsImportNamespaceClauseBuilder {
     JsImportNamespaceClauseBuilder {
         namespace_specifier,
@@ -2215,7 +2215,7 @@ pub fn js_import_namespace_clause(
 pub struct JsImportNamespaceClauseBuilder {
     namespace_specifier: JsNamespaceImportSpecifier,
     from_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
     assertion: Option<JsImportAssertion>,
 }
@@ -2326,6 +2326,12 @@ pub fn js_logical_expression(
             Some(SyntaxElement::Token(operator_token_token)),
             Some(SyntaxElement::Node(right.into_syntax())),
         ],
+    ))
+}
+pub fn js_metavariable(value_token: SyntaxToken) -> JsMetavariable {
+    JsMetavariable::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_METAVARIABLE,
+        [Some(SyntaxElement::Token(value_token))],
     ))
 }
 pub fn js_method_class_member(
@@ -4697,7 +4703,7 @@ pub fn ts_extends_clause(extends_token: SyntaxToken, types: TsTypeList) -> TsExt
 }
 pub fn ts_external_module_declaration(
     module_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
 ) -> TsExternalModuleDeclarationBuilder {
     TsExternalModuleDeclarationBuilder {
         module_token,
@@ -4707,7 +4713,7 @@ pub fn ts_external_module_declaration(
 }
 pub struct TsExternalModuleDeclarationBuilder {
     module_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
     body: Option<AnyTsExternalModuleDeclarationBody>,
 }
 impl TsExternalModuleDeclarationBuilder {
@@ -4730,7 +4736,7 @@ impl TsExternalModuleDeclarationBuilder {
 pub fn ts_external_module_reference(
     require_token: SyntaxToken,
     l_paren_token: SyntaxToken,
-    source: JsModuleSource,
+    source: AnyJsModuleSource,
     r_paren_token: SyntaxToken,
 ) -> TsExternalModuleReference {
     TsExternalModuleReference::unwrap_cast(SyntaxNode::new_detached(
@@ -5232,7 +5238,7 @@ pub fn ts_instantiation_expression(
 }
 pub fn ts_interface_declaration(
     interface_token: SyntaxToken,
-    id: TsIdentifierBinding,
+    id: AnyTsIdentifierBinding,
     l_curly_token: SyntaxToken,
     members: TsTypeMemberList,
     r_curly_token: SyntaxToken,
@@ -5249,7 +5255,7 @@ pub fn ts_interface_declaration(
 }
 pub struct TsInterfaceDeclarationBuilder {
     interface_token: SyntaxToken,
-    id: TsIdentifierBinding,
+    id: AnyTsIdentifierBinding,
     l_curly_token: SyntaxToken,
     members: TsTypeMemberList,
     r_curly_token: SyntaxToken,
@@ -6247,7 +6253,7 @@ pub fn ts_tuple_type(
 }
 pub fn ts_type_alias_declaration(
     type_token: SyntaxToken,
-    binding_identifier: TsIdentifierBinding,
+    binding_identifier: AnyTsIdentifierBinding,
     eq_token: SyntaxToken,
     ty: AnyTsType,
 ) -> TsTypeAliasDeclarationBuilder {
@@ -6262,7 +6268,7 @@ pub fn ts_type_alias_declaration(
 }
 pub struct TsTypeAliasDeclarationBuilder {
     type_token: SyntaxToken,
-    binding_identifier: TsIdentifierBinding,
+    binding_identifier: AnyTsIdentifierBinding,
     eq_token: SyntaxToken,
     ty: AnyTsType,
     type_parameters: Option<TsTypeParameters>,

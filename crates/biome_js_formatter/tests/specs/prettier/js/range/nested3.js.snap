@@ -1,9 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
-assertion_line: 212
 info: js/range/nested3.js
 ---
-
 # Input
 
 ```js
@@ -47,5 +45,3 @@ if (condition) {
 }
 catch (err) {}
 ```
-
-

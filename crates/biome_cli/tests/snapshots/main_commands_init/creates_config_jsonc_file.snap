@@ -6,6 +6,20 @@ expression: content
 
 ```json
 {
+  "$schema": "https://biomejs.dev/schemas/0.0.0/schema.json",
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "files": {
+    "ignoreUnknown": false,
+    "ignore": []
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "tab"
+  },
   "organizeImports": {
     "enabled": true
   },
@@ -13,6 +27,11 @@ expression: content
     "enabled": true,
     "rules": {
       "recommended": true
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double"
     }
   }
 }
@@ -48,6 +67,6 @@ Next Steps
 
   5. Get involved with the community
      Ask questions and contribute on GitHub: https://github.com/biomejs/biome
-     Seek for help on Discord: https://discord.gg/BypW39g6Yc
+     Seek for help on Discord: https://biomejs.dev/chat
 
 ```

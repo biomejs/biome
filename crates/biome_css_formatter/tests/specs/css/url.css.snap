@@ -51,7 +51,7 @@ div {
 
 a {
 	content: url(https://example.com/a.jpg);
-	content: url(https://example.com/f.jpg   );
+	content: url(https://example.com/f.jpg);
 
 	background: no-repeat
 		url(RobotoFlex-VariableFont_GRAD,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,opsz,slnt,wdth,wght.ttf);

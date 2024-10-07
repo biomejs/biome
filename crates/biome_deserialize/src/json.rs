@@ -1,12 +1,15 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
 use crate::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
-    Deserialized, Text, TextNumber, VisitableType,
+    diagnostics::DeserializableType, Deserializable, DeserializableValue,
+    DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text, TextNumber,
 };
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{AnyJsonValue, JsonMemberName, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, TokenText};
+
+#[cfg(feature = "serde")]
+use crate::DeserializableTypes;
 
 /// It attempts to parse and deserialize a source file in JSON. Diagnostics from the parse phase
 /// are consumed and joined with the diagnostics emitted during the deserialization.
@@ -125,15 +128,15 @@ impl DeserializableValue for AnyJsonValue {
         }
     }
 
-    fn visitable_type(&self) -> Option<VisitableType> {
+    fn visitable_type(&self) -> Option<DeserializableType> {
         match self {
-            AnyJsonValue::JsonArrayValue(_) => Some(VisitableType::ARRAY),
+            AnyJsonValue::JsonArrayValue(_) => Some(DeserializableType::Array),
             AnyJsonValue::JsonBogusValue(_) => None,
-            AnyJsonValue::JsonBooleanValue(_) => Some(VisitableType::BOOL),
-            AnyJsonValue::JsonNullValue(_) => Some(VisitableType::NULL),
-            AnyJsonValue::JsonNumberValue(_) => Some(VisitableType::NUMBER),
-            AnyJsonValue::JsonObjectValue(_) => Some(VisitableType::MAP),
-            AnyJsonValue::JsonStringValue(_) => Some(VisitableType::STR),
+            AnyJsonValue::JsonBooleanValue(_) => Some(DeserializableType::Bool),
+            AnyJsonValue::JsonNullValue(_) => Some(DeserializableType::Null),
+            AnyJsonValue::JsonNumberValue(_) => Some(DeserializableType::Number),
+            AnyJsonValue::JsonObjectValue(_) => Some(DeserializableType::Map),
+            AnyJsonValue::JsonStringValue(_) => Some(DeserializableType::Str),
         }
     }
 }
@@ -148,7 +151,7 @@ impl Deserializable for serde_json::Value {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
             type Output = serde_json::Value;
-            const EXPECTED_TYPE: VisitableType = VisitableType::all();
+            const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::all();
             fn visit_null(
                 self,
                 _range: biome_rowan::TextRange,
@@ -249,8 +252,8 @@ impl DeserializableValue for JsonMemberName {
         visitor.visit_str(value, AstNode::range(self), name, diagnostics)
     }
 
-    fn visitable_type(&self) -> Option<VisitableType> {
-        Some(VisitableType::STR)
+    fn visitable_type(&self) -> Option<DeserializableType> {
+        Some(DeserializableType::Str)
     }
 }
 

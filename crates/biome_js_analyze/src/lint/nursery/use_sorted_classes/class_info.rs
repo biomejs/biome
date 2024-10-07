@@ -5,7 +5,7 @@
 //! - The total variants weight that results from the combination of all the variants.
 //! - The text of the class itself.
 //! - The arbitrary variants of the class.
-//! It is generated according to the information contained in a `SortConfig`, which includes:
+//!     It is generated according to the information contained in a `SortConfig`, which includes:
 //! - The list of layers, in order.
 //! - The list of utilities, in order, for each layer.
 //! - The list of variants, in order of importance (which is used to compute the variants weight).
@@ -146,7 +146,7 @@ fn get_utility_info(
                     // `gap-x-4`, and there are targets like `gap-` and `gap-x-`, we want to
                     // make sure that the `gap-x-` target is matched as it is more specific,
                     // regardless of the order in which the targets are defined.
-                    let target_size = target.chars().count();
+                    let target_size = target.len();
                     if target_size > last_size {
                         layer = Some(layer_data.name);
                         match_index = index;
@@ -305,26 +305,25 @@ impl From<(&str, &str)> for VariantMatch {
             return VariantMatch::Exact;
         };
 
-        let variant_chars = variant_text.chars();
-        let mut target_chars = target.chars();
+        let mut target_chars = target.bytes();
         let mut target_found = true;
         let mut dash_found = false;
         let mut bracket_found = false;
         // Checks if variant text has a custom value thus it starts with the target and it's followed by "-["
-        for char in variant_chars {
-            match (char, target_chars.next()) {
-                (_, Some(target_char)) => {
-                    if target_char != char {
+        for byte in variant_text.bytes() {
+            match (byte, target_chars.next()) {
+                (_, Some(target_byte)) => {
+                    if target_byte != byte {
                         target_found = false;
                         break;
                     }
                 }
-                ('-', None) => {
+                (b'-', None) => {
                     if target_found {
                         dash_found = true;
                     }
                 }
-                ('[', None) => {
+                (b'[', None) => {
                     if target_found && dash_found {
                         bracket_found = true;
                     }
@@ -414,7 +413,7 @@ fn find_variant_position(config_variants: VariantsConfig, variant_text: &str) ->
                 // `group-aria-[.custom-class]`, and there are targets like `group` and `group-aria`, we want to
                 // make sure that the `group-aria` target is matched as it is more specific,
                 // so when the target is `group` a Partial match will occur.
-                let target_size = target.chars().count();
+                let target_size = target.len();
                 if target_size > last_size {
                     variant = Some(target);
                     match_index = index;

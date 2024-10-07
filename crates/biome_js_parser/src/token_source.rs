@@ -1,5 +1,5 @@
 use crate::lexer::{JsLexContext, JsLexer, JsReLexContext, TextRange};
-use crate::prelude::*;
+use crate::{prelude::*, JsParserOptions};
 use biome_js_syntax::JsSyntaxKind;
 use biome_js_syntax::JsSyntaxKind::EOF;
 use biome_parser::lexer::BufferedLexer;
@@ -26,8 +26,8 @@ impl<'l> JsTokenSource<'l> {
     }
 
     /// Creates a new token source for the given string
-    pub fn from_str(source: &'l str) -> JsTokenSource<'l> {
-        let lexer = JsLexer::from_str(source);
+    pub fn from_str(source: &'l str, options: JsParserOptions) -> JsTokenSource<'l> {
+        let lexer = JsLexer::from_str(source).with_options(options);
         let buffered = BufferedLexer::new(lexer);
         let mut source = JsTokenSource::new(buffered);
 

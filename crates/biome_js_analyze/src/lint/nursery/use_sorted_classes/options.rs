@@ -1,6 +1,6 @@
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Text,
-    VisitableType,
+    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor, Text,
 };
 use biome_rowan::TextRange;
 #[cfg(feature = "schemars")]
@@ -12,7 +12,7 @@ const CLASS_ATTRIBUTES: [&str; 2] = ["class", "className"];
 
 #[derive(Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UtilityClassSortingOptions {
     /// Additional attributes that will be sorted.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -69,7 +69,7 @@ struct UtilityClassSortingOptionsVisitor;
 impl DeserializationVisitor for UtilityClassSortingOptionsVisitor {
     type Output = UtilityClassSortingOptions;
 
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     fn visit_map(
         self,

@@ -1,3 +1,5 @@
+use std::ops::{BitOr, Sub};
+
 use crate::parser::{RecoveryError, RecoveryResult};
 use crate::prelude::*;
 use crate::state::{EnterType, SignatureFlags};
@@ -15,6 +17,7 @@ use crate::syntax::js_parse_error::{
     expected_parameters, expected_property_or_signature, modifier_already_seen,
     modifier_must_precede_modifier,
 };
+use crate::syntax::metavariable::parse_metavariable;
 use crate::syntax::object::{
     is_at_object_member_name, is_nth_at_type_member_name, parse_object_member_name,
 };
@@ -26,7 +29,7 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_in_out_modifier_cannot_appear_on_a_type_parameter,
 };
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use bitflags::bitflags;
+use enumflags2::{bitflags, make_bitflags, BitFlags};
 use smallvec::SmallVec;
 
 use crate::lexer::{JsLexContext, JsReLexContext};
@@ -40,34 +43,50 @@ use biome_js_syntax::{JsSyntaxKind::*, *};
 
 use super::{expect_ts_index_signature_member, is_at_ts_index_signature_member, MemberParent};
 
-bitflags! {
-    /// Context tracking state that applies to the parsing of all types
-    #[derive(Debug, Default, Copy, Clone, Eq, PartialEq)]
-    pub(crate) struct TypeContext: u8 {
-        /// Whether conditional types `extends string ? string : number` are allowed in the current context.
-        ///
-        /// By default, conditional types are allowed.
-        const DISALLOW_CONDITIONAL_TYPES = 1 << 0;
-
-        /// Whether 'in' and 'out' modifiers are allowed in the current context.
-        ///
-        /// By default, 'in' and 'out' modifiers are not allowed.
-        const ALLOW_IN_OUT_MODIFIER = 1 << 1;
-
-        /// Whether 'const' modifier is allowed in the current context.
-        ///
-        /// By default, 'const' modifier is not allowed.
-        const ALLOW_CONST_MODIFIER = 1 << 2;
-
-        /// Whether the parser is inside a conditional extends
-        const IN_CONDITIONAL_EXTENDS = 1 << 3;
-
-        /// Whether the current context is within a type or interface declaration
-        const TYPE_OR_INTERFACE_DECLARATION = 1 << 4;
-    }
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[bitflags]
+#[repr(u8)]
+enum ContextFlag {
+    DisallowConditionalTypes = 1 << 0,
+    AllowInOutModifier = 1 << 1,
+    AllowConstModifier = 1 << 2,
+    InConditionalExtends = 1 << 3,
+    TypeOrInterfaceDeclaration = 1 << 4,
 }
 
+/// Context tracking state that applies to the parsing of all types
+#[derive(Debug, Default, Copy, Clone)]
+pub(crate) struct TypeContext(BitFlags<ContextFlag>);
+
 impl TypeContext {
+    /// Whether conditional types `extends string ? string : number` are allowed in the current context.
+    ///
+    /// By default, conditional types are allowed.
+    pub const DISALLOW_CONDITIONAL_TYPES: Self =
+        Self(make_bitflags!(ContextFlag::{DisallowConditionalTypes}));
+
+    /// Whether 'in' and 'out' modifiers are allowed in the current context.
+    ///
+    /// By default, 'in' and 'out' modifiers are not allowed.
+    pub const ALLOW_IN_OUT_MODIFIER: Self = Self(make_bitflags!(ContextFlag::{AllowInOutModifier}));
+
+    /// Whether 'const' modifier is allowed in the current context.
+    ///
+    /// By default, 'const' modifier is not allowed.
+    pub const ALLOW_CONST_MODIFIER: Self = Self(make_bitflags!(ContextFlag::{AllowConstModifier}));
+
+    /// Whether the parser is inside a conditional extends
+    pub const IN_CONDITIONAL_EXTENDS: Self =
+        Self(make_bitflags!(ContextFlag::{InConditionalExtends}));
+
+    /// Whether the current context is within a type or interface declaration
+    pub const TYPE_OR_INTERFACE_DECLARATION: Self =
+        Self(make_bitflags!(ContextFlag::{TypeOrInterfaceDeclaration}));
+
+    pub fn contains(&self, other: impl Into<TypeContext>) -> bool {
+        self.0.contains(other.into().0)
+    }
+
     pub(crate) fn and_allow_conditional_types(self, allow: bool) -> Self {
         self.and(TypeContext::DISALLOW_CONDITIONAL_TYPES, !allow)
     }
@@ -88,23 +107,23 @@ impl TypeContext {
         self.and(TypeContext::TYPE_OR_INTERFACE_DECLARATION, allow)
     }
 
-    pub(crate) const fn is_conditional_type_allowed(&self) -> bool {
+    pub(crate) fn is_conditional_type_allowed(&self) -> bool {
         !self.contains(TypeContext::DISALLOW_CONDITIONAL_TYPES)
     }
 
-    pub(crate) const fn is_in_out_modifier_allowed(&self) -> bool {
+    pub(crate) fn is_in_out_modifier_allowed(&self) -> bool {
         self.contains(TypeContext::ALLOW_IN_OUT_MODIFIER)
     }
 
-    pub(crate) const fn is_const_modifier_allowed(&self) -> bool {
+    pub(crate) fn is_const_modifier_allowed(&self) -> bool {
         self.contains(TypeContext::ALLOW_CONST_MODIFIER)
     }
 
-    pub(crate) const fn in_conditional_extends(&self) -> bool {
+    pub(crate) fn in_conditional_extends(&self) -> bool {
         self.contains(TypeContext::IN_CONDITIONAL_EXTENDS)
     }
 
-    pub(crate) const fn is_in_type_or_interface_declaration(&self) -> bool {
+    pub(crate) fn is_in_type_or_interface_declaration(&self) -> bool {
         self.contains(TypeContext::TYPE_OR_INTERFACE_DECLARATION)
     }
 
@@ -118,23 +137,38 @@ impl TypeContext {
     }
 }
 
+impl BitOr for TypeContext {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        Self(self.0 | rhs.0)
+    }
+}
+
+impl Sub for TypeContext {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self(self.0 & !rhs.0)
+    }
+}
+
 pub(crate) fn is_reserved_type_name(name: &str) -> bool {
-    name.len() <= 6
-        && name.len() >= 3
-        && matches!(
-            name,
-            "string"
-                | "null"
-                | "number"
-                | "object"
-                | "any"
-                | "unknown"
-                | "boolean"
-                | "bigint"
-                | "symbol"
-                | "void"
-                | "never"
-        )
+    matches!(
+        name,
+        "string"
+            | "null"
+            | "number"
+            | "object"
+            | "any"
+            | "unknown"
+            | "boolean"
+            | "bigint"
+            | "symbol"
+            | "void"
+            | "never"
+            | "undefined"
+    )
 }
 
 pub(crate) fn is_reserved_module_name(name: &str) -> bool {
@@ -883,6 +917,7 @@ fn parse_ts_non_array_type(p: &mut JsParser, context: TypeContext) -> ParsedSynt
             }
         }
         T![import] => parse_ts_import_type(p, context),
+        t if t.is_metavariable() => parse_metavariable(p),
         _ => {
             if !p.nth_at(1, T![.]) {
                 let mapping = match p.cur() {

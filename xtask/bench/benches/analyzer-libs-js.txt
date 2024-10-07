@@ -1,2 +1,2 @@
-https://raw.githubusercontent.com/prettier/prettier/main/src/language-js/utils/index.js
-https://raw.githubusercontent.com/jquery/jquery/main/src/css.js
+https://cdn.jsdelivr.net/gh/prettier/prettier@c067d27673c6d97d9037eb9b13b74bd8c9324be2/src/language-js/utils/index.js
+https://cdn.jsdelivr.net/gh/jquery/jquery@3658caf129bcf02b39b849dd4040e4fbf53b5d50/src/css.js

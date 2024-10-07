@@ -2,8 +2,10 @@ mod diagnostics;
 mod errors;
 mod grit_analysis_ext;
 mod grit_binding;
+mod grit_built_in_functions;
 mod grit_code_snippet;
 mod grit_context;
+mod grit_definitions;
 mod grit_file;
 mod grit_js_parser;
 mod grit_node;
@@ -34,9 +36,10 @@ pub fn compile_pattern(
 ) -> Result<GritQuery, CompileError> {
     let parsed = parse_grit(source);
     if parsed.has_errors() {
-        return Err(CompileError::ParsePatternError(ParsePatternError {
-            diagnostics: parsed.into_diagnostics(),
-        }));
+        return Err(CompileError::ParsePatternError(
+            // TODO: We may want to preserve other diagnostics too.
+            parsed.into_diagnostics().remove(0),
+        ));
     }
 
     GritQuery::from_node(parsed.tree(), path, language)

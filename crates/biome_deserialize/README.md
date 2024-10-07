@@ -234,7 +234,7 @@ In this case, we'll need to inspect the type of the `DeserializableValue` to kno
 to use:
 
 ```rust
-use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, VisitableType};
+use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
 use biome_rowan::TextRange;
 
 #[derive(Debug, Eq, PartialEq)]
@@ -249,11 +249,11 @@ impl Deserializable for Union {
         name: &str,
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        if value.is_type(VisitableType::BOOL) {
-            biome_deserialize::Deserializable::deserialize(value, rule_name, diagnostics)
+        if value.visitable_type()? == DeserializableType::Bool {
+            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
                 .map(Self::Bool)
         } else {
-            biome_deserialize::Deserializable::deserialize(value, rule_name, diagnostics)
+            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)
                 .map(Self::Str)
         }
     }
@@ -286,7 +286,7 @@ methods of the type(s) you expect. Here we expect either a boolean or a string, 
 `visit_bool()` and `visit_str()`.
 
 We also have to set the associated type `Output` to be a union of the types we expect:
-`VisitableType::BOOL.union(VisitableType::STR)`.
+`DeserializableTypes::BOOL.union(DeserializableTypes::STR)`.
 
 The full example:
 
@@ -307,7 +307,7 @@ impl DeserializationVisitor for UnionVisitor {
     type Output = Union;
 
     // We expect a `bool` or a `str` as data type.
-    const EXPECTED_TYPE: VisitableType = VisitableType::BOOL.union(VisitableType::STR);
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::BOOL.union(DeserializableTypes::STR);
 
     // Because we expect a `bool` or a `str`, we have to implement the associated method `visit_bool`.
     fn visit_bool(
@@ -429,7 +429,7 @@ To do that, we create a zero-sized struct `PersonViistor` that implements `Deser
 A `DeserializationVisitor` provides several `visit_` methods.
 You must implement the `visit_` methods of the type you expect.
 Here we expect a map of key-value pairs.
-Thus, we implement `visit_map` and set the associated constant `EXPECTED_TYPE` to `VisitableType::MAP`.
+Thus, we implement `visit_map` and set the associated constant `EXPECTED_TYPE` to `DeserializableTypes::MAP`.
 We also set the associated type `Output` to the type that we want to produce: `Person`.
 
 The implementation of `Deserialziable` for `Person` simply delegates the deserialization of the visitor.
@@ -449,7 +449,7 @@ Note that if you use _Serde_ in tandem with `biome_deserialize`, you have to dis
 Thus, instead of using `String::deserialize` and `u8::deserialize`, you should use `Deserialize::deserialize`.
 
 ```rust
-use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, VisitableType};
+use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
 use biome_rowan::TextRange;
 
 #[derive(Debug, Default, Eq, PartialEq, Clone)]
@@ -473,7 +473,7 @@ impl DeserializationVisitor for PersonVisitor {
     type Output = Person;
 
     // We expect a `map` as data type.
-    const EXPECTED_TYPE: VisitableType = VisitableType::MAP;
+    const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
 
     // Because we expect a `map`, we have to implement the associated method `visit_map`.
     fn visit_map(

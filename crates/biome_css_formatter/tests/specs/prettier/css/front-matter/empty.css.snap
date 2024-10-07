@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/front-matter/empty.css
 ---
-
 # Input
 
 ```css
@@ -20,49 +19,19 @@ info: css/front-matter/empty.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,6 +1,5 @@
- ---
- ---
+@@ -1,6 +1,2 @@
+----
+----
 -
- /* comment */
- .something {
+-/* comment */
+-.something {
++--- --- /* comment */ .something {
  }
 ```
 
 # Output
 
 ```css
----
----
-/* comment */
-.something {
+--- --- /* comment */ .something {
 }
 ```
-
-# Errors
-```
-empty.css:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a qualified rule, or an at rule but instead found '---
-    ---'.
-  
-  > 1 │ ---
-      │ ^^^
-  > 2 │ ---
-      │ ^^^
-    3 │ /* comment */
-    4 │ .something
-  
-  i Expected a qualified rule, or an at rule here.
-  
-  > 1 │ ---
-      │ ^^^
-  > 2 │ ---
-      │ ^^^
-    3 │ /* comment */
-    4 │ .something
-  
-
-```
-
-

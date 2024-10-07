@@ -1,0 +1,147 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<span>foo<br>This text is inside br.</br>bar</span>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlBogusElement {
+            items: [
+                HtmlOpeningElement {
+                    l_angle_token: L_ANGLE@0..1 "<" [] [],
+                    name: HtmlName {
+                        value_token: HTML_LITERAL@1..5 "span" [] [],
+                    },
+                    attributes: HtmlAttributeList [],
+                    r_angle_token: R_ANGLE@5..6 ">" [] [],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@6..9 "foo" [] [],
+                    },
+                    HtmlSelfClosingElement {
+                        l_angle_token: L_ANGLE@9..10 "<" [] [],
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@10..12 "br" [] [],
+                        },
+                        attributes: HtmlAttributeList [],
+                        slash_token: missing (optional),
+                        r_angle_token: R_ANGLE@12..13 ">" [] [],
+                    },
+                    HtmlContent {
+                        value_token: HTML_LITERAL@13..36 "This text is inside br." [] [],
+                    },
+                ],
+                HtmlBogusElement {
+                    items: [
+                        L_ANGLE@36..37 "<" [] [],
+                        SLASH@37..38 "/" [] [],
+                        HtmlName {
+                            value_token: HTML_LITERAL@38..40 "br" [] [],
+                        },
+                        R_ANGLE@40..41 ">" [] [],
+                    ],
+                },
+                HtmlElementList [
+                    HtmlContent {
+                        value_token: HTML_LITERAL@41..44 "bar" [] [],
+                    },
+                ],
+                HtmlClosingElement {
+                    l_angle_token: L_ANGLE@44..45 "<" [] [],
+                    slash_token: SLASH@45..46 "/" [] [],
+                    name: HtmlName {
+                        value_token: HTML_LITERAL@46..50 "span" [] [],
+                    },
+                    r_angle_token: R_ANGLE@50..51 ">" [] [],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@51..52 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..52
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..51
+    0: HTML_BOGUS_ELEMENT@0..51
+      0: HTML_OPENING_ELEMENT@0..6
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..5
+          0: HTML_LITERAL@1..5 "span" [] []
+        2: HTML_ATTRIBUTE_LIST@5..5
+        3: R_ANGLE@5..6 ">" [] []
+      1: HTML_ELEMENT_LIST@6..36
+        0: HTML_CONTENT@6..9
+          0: HTML_LITERAL@6..9 "foo" [] []
+        1: HTML_SELF_CLOSING_ELEMENT@9..13
+          0: L_ANGLE@9..10 "<" [] []
+          1: HTML_NAME@10..12
+            0: HTML_LITERAL@10..12 "br" [] []
+          2: HTML_ATTRIBUTE_LIST@12..12
+          3: (empty)
+          4: R_ANGLE@12..13 ">" [] []
+        2: HTML_CONTENT@13..36
+          0: HTML_LITERAL@13..36 "This text is inside br." [] []
+      2: HTML_BOGUS_ELEMENT@36..41
+        0: L_ANGLE@36..37 "<" [] []
+        1: SLASH@37..38 "/" [] []
+        2: HTML_NAME@38..40
+          0: HTML_LITERAL@38..40 "br" [] []
+        3: R_ANGLE@40..41 ">" [] []
+      3: HTML_ELEMENT_LIST@41..44
+        0: HTML_CONTENT@41..44
+          0: HTML_LITERAL@41..44 "bar" [] []
+      4: HTML_CLOSING_ELEMENT@44..51
+        0: L_ANGLE@44..45 "<" [] []
+        1: SLASH@45..46 "/" [] []
+        2: HTML_NAME@46..50
+          0: HTML_LITERAL@46..50 "span" [] []
+        3: R_ANGLE@50..51 ">" [] []
+  3: EOF@51..52 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+br-with-end.html:1:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Void elements should not have a closing tag.
+  
+  > 1 │ <span>foo<br>This text is inside br.</br>bar</span>
+      │                                       ^^
+    2 │ 
+  
+br-with-end.html:1:37 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a matching closing tag but instead found '</br>'.
+  
+  > 1 │ <span>foo<br>This text is inside br.</br>bar</span>
+      │                                     ^^^^^
+    2 │ 
+  
+  i Expected a matching closing tag here.
+  
+  > 1 │ <span>foo<br>This text is inside br.</br>bar</span>
+      │                                     ^^^^^
+    2 │ 
+  
+```

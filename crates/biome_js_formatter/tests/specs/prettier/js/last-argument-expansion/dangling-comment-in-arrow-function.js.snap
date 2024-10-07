@@ -2,7 +2,6 @@
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: js/last-argument-expansion/dangling-comment-in-arrow-function.js
 ---
-
 # Input
 
 ```js
@@ -40,5 +39,3 @@ foo(
   ) => {},
 );
 ```
-
-

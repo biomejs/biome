@@ -184,7 +184,6 @@ impl FileSystem for MemoryFileSystem {
             version: 0,
         }))
     }
-
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>) {
         func(&MemoryTraversalScope { fs: self })
     }
@@ -290,7 +289,7 @@ pub struct MemoryTraversalScope<'scope> {
 }
 
 impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
-    fn spawn(&self, ctx: &'scope dyn TraversalContext, base: PathBuf) {
+    fn evaluate(&self, ctx: &'scope dyn TraversalContext, base: PathBuf) {
         // Traversal is implemented by iterating on all keys, and matching on
         // those that are prefixed with the provided `base` path
         {
@@ -311,7 +310,7 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
                     if !ctx.can_handle(&biome_path) {
                         continue;
                     }
-                    ctx.handle_file(path);
+                    ctx.store_path(biome_path);
                 }
             }
         }
@@ -336,10 +335,15 @@ impl<'scope> TraversalScope<'scope> for MemoryTraversalScope<'scope> {
             }
         }
     }
+
+    fn handle(&self, context: &'scope dyn TraversalContext, path: PathBuf) {
+        context.handle_path(BiomePath::new(path));
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::collections::BTreeSet;
     use std::{
         io,
         mem::swap,
@@ -514,7 +518,7 @@ mod tests {
 
         struct TestContext {
             interner: PathInterner,
-            visited: Mutex<Vec<PathBuf>>,
+            visited: Mutex<BTreeSet<BiomePath>>,
         }
 
         impl TraversalContext for TestContext {
@@ -530,8 +534,17 @@ mod tests {
                 true
             }
 
-            fn handle_file(&self, path: &Path) {
-                self.visited.lock().push(path.into())
+            fn handle_path(&self, path: BiomePath) {
+                self.visited.lock().insert(path.to_written());
+            }
+
+            fn store_path(&self, path: BiomePath) {
+                self.visited.lock().insert(path);
+            }
+
+            fn evaluated_paths(&self) -> BTreeSet<BiomePath> {
+                let lock = self.visited.lock();
+                lock.clone()
             }
         }
 
@@ -543,25 +556,25 @@ mod tests {
 
         // Traverse a directory
         fs.traversal(Box::new(|scope| {
-            scope.spawn(&ctx, PathBuf::from("dir1"));
+            scope.evaluate(&ctx, PathBuf::from("dir1"));
         }));
 
-        let mut visited = Vec::new();
+        let mut visited = BTreeSet::default();
         swap(&mut visited, ctx.visited.get_mut());
 
         assert_eq!(visited.len(), 2);
-        assert!(visited.contains(&PathBuf::from("dir1/file1")));
-        assert!(visited.contains(&PathBuf::from("dir1/file2")));
+        assert!(visited.contains(&BiomePath::new("dir1/file1")));
+        assert!(visited.contains(&BiomePath::new("dir1/file2")));
 
         // Traverse a single file
         fs.traversal(Box::new(|scope| {
-            scope.spawn(&ctx, PathBuf::from("dir2/file2"));
+            scope.evaluate(&ctx, PathBuf::from("dir2/file2"));
         }));
 
-        let mut visited = Vec::new();
+        let mut visited = BTreeSet::default();
         swap(&mut visited, ctx.visited.get_mut());
 
         assert_eq!(visited.len(), 1);
-        assert!(visited.contains(&PathBuf::from("dir2/file2")));
+        assert!(visited.contains(&BiomePath::new("dir2/file2")));
     }
 }

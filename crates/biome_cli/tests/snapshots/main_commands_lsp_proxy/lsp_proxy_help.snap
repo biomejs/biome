@@ -5,13 +5,18 @@ expression: content
 # Emitted Messages
 
 ```block
-Acts as a server for the Language Server Protocol over stdin/stdout
+Acts as a server for the Language Server Protocol over stdin/stdout.
 
 Usage: lsp-proxy [--config-path=PATH]
 
 Available options:
-        --config-path=PATH  Allows to set a custom file path to the configuration file, or a custom directory
-                            path to find `biome.json` or `biome.jsonc`
+        --log-prefix-name=STRING  Allows to change the prefix applied to the file name of the logs.
+                            [env:BIOME_LOG_PREFIX_NAME: N/A]
+                            [default: server.log]
+        --log-path=PATH     Allows to change the folder where logs are stored.
+                            [env:BIOME_LOG_PATH: N/A]
+        --config-path=PATH  Allows to set a custom file path to the configuration file, or a custom
+                            directory path to find `biome.json` or `biome.jsonc`
                             [env:BIOME_CONFIG_PATH: N/A]
     -h, --help              Prints help information
 

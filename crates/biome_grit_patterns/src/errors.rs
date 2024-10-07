@@ -7,43 +7,40 @@ use biome_parser::diagnostic::ParseDiagnostic;
 use biome_rowan::SyntaxError;
 use grit_util::ByteRange;
 
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "parse",
-    severity = Error,
-    message = "Error(s) parsing pattern",
-)]
-pub struct ParsePatternError {
-    pub diagnostics: Vec<ParseDiagnostic>,
-}
-
-#[derive(Debug, Diagnostic)]
-#[diagnostic(
-    category = "parse",
-    severity = Error,
-    message = "Error(s) parsing pattern snippet",
-)]
-pub struct ParseSnippetError {
-    diagnostics: Vec<ParseDiagnostic>,
-}
-
-// TODO: We definitely need to improve diagnostics.
 #[derive(Debug)]
 pub enum CompileError {
     /// Indicates the (top-level) pattern could not be parsed.
-    ParsePatternError(ParsePatternError),
-
-    /// Indicates one of the pattern's snippets could not be parsed.
-    ParseSnippetError(ParseSnippetError),
+    ParsePatternError(ParseDiagnostic),
 
     /// Used for missing syntax nodes.
     MissingSyntaxNode,
 
+    /// A built-in function call was discovered in an unexpected context.
+    UnexpectedBuiltinCall(String),
+
+    /// A metavariables was discovered in an unexpected context.
+    UnexpectedMetavariable,
+
+    /// If a function with the same name is defined multiple times.
+    DuplicateFunctionDefinition(String),
+
     /// If a function or bubble pattern has multiple parameters with the same name.
     DuplicateParameters,
 
+    /// If a function with the same name is defined multiple times.
+    DuplicatePatternDefinition(String),
+
+    /// If a function with the same name is defined multiple times.
+    DuplicatePredicateDefinition(String),
+
     /// A metavariable was expected at the given range.
     InvalidMetavariableRange(ByteRange),
+
+    /// Raw snippets are only allowed on the right-hand side of a rule.
+    InvalidRawSnippetPosition,
+
+    /// Regular expressions are not allowed on the right-hand side of a rule.
+    InvalidRegexPosition,
 
     /// Incorrect reference to a metavariable.
     MetavariableNotFound(String),
@@ -80,6 +77,9 @@ pub enum CompileError {
     /// Unknown function or predicate.
     UnknownFunctionOrPredicate(String),
 
+    /// Unknown target language.
+    UnknownTargetLanguage(String),
+
     /// Unknown variable.
     UnknownVariable(String),
 }
@@ -91,35 +91,40 @@ impl Diagnostic for CompileError {
 
     fn message(&self, fmt: &mut Formatter<'_>) -> std::io::Result<()> {
         match self {
-            CompileError::ParsePatternError(error) => {
-                fmt.write_markup(markup! { "Error parsing pattern" })?;
-                match error.diagnostics.first() {
-                    Some(diag) => {
-                        fmt.write_str(": ")?;
-                        diag.message(fmt)
-                    }
-                    None => Ok(()),
-                }
-            }
-            CompileError::ParseSnippetError(error) => {
-                fmt.write_markup(markup! { "Error parsing snippet" })?;
-                match error.diagnostics.first() {
-                    Some(diag) => {
-                        fmt.write_str(": ")?;
-                        diag.message(fmt)
-                    }
-                    None => Ok(()),
-                }
+            CompileError::ParsePatternError(diagnostic) => {
+                fmt.write_markup(markup! { "Error parsing pattern: " })?;
+                diagnostic.message(fmt)
             }
             CompileError::MissingSyntaxNode => {
                 fmt.write_markup(markup! { "A syntax node was missing" })
             }
+            CompileError::UnexpectedBuiltinCall(name) => {
+                fmt.write_markup(markup! { "Unexpected call to built-in: "{{name}}"()" })
+            }
+            CompileError::UnexpectedMetavariable => {
+                fmt.write_markup(markup! { "Unexpected metavariable" })
+            }
+            CompileError::DuplicateFunctionDefinition(name) => {
+                fmt.write_markup(markup! { "Duplicate function definition: "{{name}} })
+            }
             CompileError::DuplicateParameters => {
                 fmt.write_markup(markup! { "Duplicate parameters" })
+            }
+            CompileError::DuplicatePatternDefinition(name) => {
+                fmt.write_markup(markup! { "Duplicate pattern definition: "{{name}} })
+            }
+            CompileError::DuplicatePredicateDefinition(name) => {
+                fmt.write_markup(markup! { "Duplicate predicate definition: "{{name}} })
             }
             CompileError::InvalidMetavariableRange(_) => {
                 fmt.write_markup(markup! { "Invalid range for metavariable" })
             }
+            CompileError::InvalidRawSnippetPosition => {
+                fmt.write_markup(markup! { "Invalid range for metavariable" })
+            }
+            CompileError::InvalidRegexPosition => fmt.write_markup(
+                markup! { "Regular expressions are not allowed on the right-hand side of a rule" },
+            ),
             CompileError::MetavariableNotFound(var) => {
                 fmt.write_markup(markup! { "Metavariable not found: "{{var}} })
             }
@@ -151,6 +156,9 @@ impl Diagnostic for CompileError {
             CompileError::UnknownFunctionOrPredicate(name) => {
                 fmt.write_markup(markup! { "Unknown function or predicate: "{{name}} })
             }
+            CompileError::UnknownTargetLanguage(lang) => {
+                fmt.write_markup(markup! { "Unknown target language: "{{lang}} })
+            }
             CompileError::UnknownVariable(var) => {
                 fmt.write_markup(markup! { "Unknown variable: "{{var}} })
             }
@@ -159,25 +167,14 @@ impl Diagnostic for CompileError {
 
     fn location(&self) -> Location<'_> {
         match self {
-            CompileError::ParsePatternError(error) => error
-                .diagnostics
-                .first()
-                .map(Diagnostic::location)
-                .unwrap_or_default(),
+            CompileError::ParsePatternError(diagnostic) => diagnostic.location(),
             _ => Location::default(),
         }
     }
 
     fn description(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            CompileError::ParsePatternError(error) => match error.diagnostics.first() {
-                Some(diag) => diag.description(fmt),
-                None => Ok(()),
-            },
-            CompileError::ParseSnippetError(error) => match error.diagnostics.first() {
-                Some(diag) => diag.description(fmt),
-                None => Ok(()),
-            },
+            CompileError::ParsePatternError(diagnostic) => diagnostic.description(fmt),
             CompileError::FunctionArgument(error) => error.fmt(fmt),
             _ => Ok(()),
         }
@@ -185,6 +182,11 @@ impl Diagnostic for CompileError {
 
     fn advices(&self, visitor: &mut dyn biome_diagnostics::Visit) -> std::io::Result<()> {
         match self {
+            CompileError::UnexpectedBuiltinCall(name) => visitor.record_log(
+                LogCategory::Info,
+                &markup! { "Built-in "{{name}}" can only be used on the right-hand side of a rewrite" }
+                    .to_owned(),
+            ),
             CompileError::ReservedMetavariable(_) => visitor.record_log(
                 LogCategory::Info,
                 &markup! { "Try using a different variable name" }.to_owned(),
@@ -202,6 +204,7 @@ impl From<SyntaxError> for CompileError {
     fn from(error: SyntaxError) -> Self {
         match error {
             SyntaxError::MissingRequiredChild => Self::MissingSyntaxNode,
+            SyntaxError::UnexpectedMetavariable => Self::UnexpectedMetavariable,
         }
     }
 }

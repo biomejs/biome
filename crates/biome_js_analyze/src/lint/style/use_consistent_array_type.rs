@@ -49,9 +49,8 @@ declare_lint_rule! {
     /// ```
     ///
     /// ## Options
-    /// The rule provides two options that help to specify what type of array declarations to use.
     ///
-    /// Default: "shorthand"
+    /// Use the options to specify the syntax of array declarations to use.
     ///
     /// ```json
     /// {
@@ -61,10 +60,14 @@ declare_lint_rule! {
     ///     }
     /// }
     /// ```
-    /// ### Syntax
     ///
-    /// By default, all array declarations will be converted to `T[]` or `readonly T[]`, which it means `shorthand`,
-    /// or if the options is set to the "generic", that all will converted to `Array<T>` or `ReadonlyArray<T>`.
+    /// ### syntax
+    ///
+    /// The syntax to use:
+    /// - `generic`: array declarations will be converted to `Array<T>` or `ReadonlyArray<T>`
+    /// - `shorthand`: array declarations will be converted to `T[]` or `readonly T[]`
+    ///
+    /// Default: `shorthand`
     ///
     pub UseConsistentArrayType {
         version: "1.5.0",
@@ -283,7 +286,7 @@ fn get_array_type(array_types: Vec<AnyTsType>) -> Option<AnyTsType> {
         0 => None,
         1 => {
             // SAFETY: We know that `length` of `array_types` is 1, so unwrap the first element should be safe.
-            let first_type = array_types.into_iter().next().unwrap();
+            let first_type = array_types.into_iter().next()?;
             Some(first_type)
         }
         length => {
@@ -381,27 +384,31 @@ fn transform_array_element_type(param: AnyTsType, array_kind: TsArrayKind) -> Op
             generate_array_type(element_type, false)
         }
         TsArrayKind::Readonly => {
-            let element_type = if let AnyTsType::TsArrayType(array_type) = element_type {
-                array_type.element_type().ok().unwrap()
+            let element_type = if let AnyTsType::TsArrayType(array_type) = &element_type {
+                if let Ok(element_type) = array_type.element_type() {
+                    element_type
+                } else {
+                    element_type
+                }
             } else {
                 element_type
             };
 
             let element_type = if let AnyTsType::TsParenthesizedType(paren_type) = element_type {
-                let ty = paren_type.ty().ok().unwrap();
-                if let AnyTsType::TsTypeOperatorType(opt_ty) = ty {
-                    let ele_type =
-                        if let AnyTsType::TsArrayType(array_type) = opt_ty.ty().ok().unwrap() {
+                match paren_type.ty() {
+                    Ok(AnyTsType::TsTypeOperatorType(opt_ty)) => {
+                        let ele_type = if let Ok(AnyTsType::TsArrayType(array_type)) = opt_ty.ty() {
                             array_type.element_type().ok()
                         } else {
                             None
                         };
-                    Some(generate_array_type(ele_type, true))
-                } else if let AnyTsType::TsArrayType(array_type) = ty {
-                    let ele_type = array_type.element_type().ok();
-                    Some(generate_array_type(ele_type, false))
-                } else {
-                    None
+                        Some(generate_array_type(ele_type, true))
+                    }
+                    Ok(AnyTsType::TsArrayType(array_type)) => {
+                        let ele_type = array_type.element_type().ok();
+                        Some(generate_array_type(ele_type, false))
+                    }
+                    _ => None,
                 }
             } else {
                 Some(element_type)
@@ -473,7 +480,7 @@ where
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct ConsistentArrayTypeOptions {
     pub syntax: ConsistentArrayType,
 }

@@ -1,0 +1,115 @@
+---
+source: crates/biome_html_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```html
+<div
+	class="foo"
+	role="button"
+>
+	foo
+</div>
+
+```
+
+
+## AST
+
+```
+HtmlRoot {
+    bom_token: missing (optional),
+    directive: missing (optional),
+    html: HtmlElementList [
+        HtmlElement {
+            opening_element: HtmlOpeningElement {
+                l_angle_token: L_ANGLE@0..1 "<" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@1..4 "div" [] [],
+                },
+                attributes: HtmlAttributeList [
+                    HtmlAttribute {
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@4..11 "class" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@11..12 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@12..17 "\"foo\"" [] [],
+                            },
+                        },
+                    },
+                    HtmlAttribute {
+                        name: HtmlName {
+                            value_token: HTML_LITERAL@17..23 "role" [Newline("\n"), Whitespace("\t")] [],
+                        },
+                        initializer: HtmlAttributeInitializerClause {
+                            eq_token: EQ@23..24 "=" [] [],
+                            value: HtmlString {
+                                value_token: HTML_STRING_LITERAL@24..32 "\"button\"" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_angle_token: R_ANGLE@32..34 ">" [Newline("\n")] [],
+            },
+            children: HtmlElementList [
+                HtmlContent {
+                    value_token: HTML_LITERAL@34..39 "foo" [Newline("\n"), Whitespace("\t")] [],
+                },
+            ],
+            closing_element: HtmlClosingElement {
+                l_angle_token: L_ANGLE@39..41 "<" [Newline("\n")] [],
+                slash_token: SLASH@41..42 "/" [] [],
+                name: HtmlName {
+                    value_token: HTML_LITERAL@42..45 "div" [] [],
+                },
+                r_angle_token: R_ANGLE@45..46 ">" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: HTML_ROOT@0..47
+  0: (empty)
+  1: (empty)
+  2: HTML_ELEMENT_LIST@0..46
+    0: HTML_ELEMENT@0..46
+      0: HTML_OPENING_ELEMENT@0..34
+        0: L_ANGLE@0..1 "<" [] []
+        1: HTML_NAME@1..4
+          0: HTML_LITERAL@1..4 "div" [] []
+        2: HTML_ATTRIBUTE_LIST@4..32
+          0: HTML_ATTRIBUTE@4..17
+            0: HTML_NAME@4..11
+              0: HTML_LITERAL@4..11 "class" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@11..17
+              0: EQ@11..12 "=" [] []
+              1: HTML_STRING@12..17
+                0: HTML_STRING_LITERAL@12..17 "\"foo\"" [] []
+          1: HTML_ATTRIBUTE@17..32
+            0: HTML_NAME@17..23
+              0: HTML_LITERAL@17..23 "role" [Newline("\n"), Whitespace("\t")] []
+            1: HTML_ATTRIBUTE_INITIALIZER_CLAUSE@23..32
+              0: EQ@23..24 "=" [] []
+              1: HTML_STRING@24..32
+                0: HTML_STRING_LITERAL@24..32 "\"button\"" [] []
+        3: R_ANGLE@32..34 ">" [Newline("\n")] []
+      1: HTML_ELEMENT_LIST@34..39
+        0: HTML_CONTENT@34..39
+          0: HTML_LITERAL@34..39 "foo" [Newline("\n"), Whitespace("\t")] []
+      2: HTML_CLOSING_ELEMENT@39..46
+        0: L_ANGLE@39..41 "<" [Newline("\n")] []
+        1: SLASH@41..42 "/" [] []
+        2: HTML_NAME@42..45
+          0: HTML_LITERAL@42..45 "div" [] []
+        3: R_ANGLE@45..46 ">" [] []
+  3: EOF@46..47 "" [Newline("\n")] []
+
+```

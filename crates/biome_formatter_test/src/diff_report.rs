@@ -109,6 +109,14 @@ impl DiffReport {
             "js/v8_intrinsic",
             // Babel plugins (mostly experimental syntaxes)
             "js/babel-plugins/",
+            // Bogus nodes
+            "js/chain-expression/new-expression.js",
+            "js/chain-expression/tagged-template-literals.js",
+            "js/optional-chaining-assignment/valid-parenthesized.js",
+            "typescript/conformance/classes/constructorDeclarations/constructorParameters/readonlyReadonly.ts",
+            "typescript/conformance/parser/ecmascript5/Statements/parserES5ForOfStatement21.ts",
+            "typescript/chain-expression/new-expression.ts",
+            "typescript/chain-expression/tagged-template-literals.ts",
             // Experimental syntax: `do {}`
             "js/async-do-expressions/",
             "js/do/",
@@ -147,6 +155,8 @@ impl DiffReport {
             "js/deferred-import-evaluation/",
             // Experimental syntax: `import source`
             "js/source-phase-imports/",
+            "js/dynamic-import/import-phase.js",
+            "js/dynamic-import/template-literal.js",
             // Experimental syntax: `import module`
             "js/import-reflection/",
             // Experimental syntax: `throw` expressions

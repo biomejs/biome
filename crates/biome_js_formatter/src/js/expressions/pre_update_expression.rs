@@ -1,12 +1,9 @@
-use crate::parentheses::{unary_like_expression_needs_parentheses, NeedsParentheses};
 use crate::prelude::*;
 
 use biome_formatter::write;
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::JsPreUpdateExpression;
 use biome_js_syntax::JsPreUpdateExpressionFields;
-use biome_js_syntax::{
-    JsPreUpdateExpression, JsPreUpdateOperator, JsSyntaxNode, JsUnaryExpression, JsUnaryOperator,
-};
-use biome_rowan::match_ast;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatJsPreUpdateExpression;
@@ -23,27 +20,6 @@ impl FormatNodeRule<JsPreUpdateExpression> for FormatJsPreUpdateExpression {
 
     fn needs_parentheses(&self, item: &JsPreUpdateExpression) -> bool {
         item.needs_parentheses()
-    }
-}
-
-impl NeedsParentheses for JsPreUpdateExpression {
-    fn needs_parentheses_with_parent(&self, parent: &JsSyntaxNode) -> bool {
-        match_ast! {
-            match parent {
-                JsUnaryExpression(unary) => {
-                    let parent_operator = unary.operator();
-                    let operator = self.operator();
-
-                    (parent_operator == Ok(JsUnaryOperator::Plus)
-                        && operator == Ok(JsPreUpdateOperator::Increment))
-                        || (parent_operator == Ok(JsUnaryOperator::Minus)
-                            && operator == Ok(JsPreUpdateOperator::Decrement))
-                },
-                _ => {
-                    unary_like_expression_needs_parentheses(self.syntax(), parent)
-                }
-            }
-        }
     }
 }
 

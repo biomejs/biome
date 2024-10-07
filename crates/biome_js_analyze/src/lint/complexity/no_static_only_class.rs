@@ -149,12 +149,17 @@ impl Rule for NoStaticOnlyClass {
             return None;
         }
 
+        if class_declaration.extends_clause().is_some() {
+            return None;
+        }
+
         let all_members_static = class_declaration
             .members()
             .iter()
             .filter_map(|member| match member {
-                AnyJsClassMember::JsBogusMember(_) => None,
-                AnyJsClassMember::JsEmptyClassMember(_) => None,
+                AnyJsClassMember::JsBogusMember(_)
+                | AnyJsClassMember::JsMetavariable(_)
+                | AnyJsClassMember::JsEmptyClassMember(_) => None,
                 AnyJsClassMember::JsConstructorClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static
                 AnyJsClassMember::TsConstructorSignatureClassMember(_) => Some(false), // See GH#4482: Constructors are not regarded as static
                 AnyJsClassMember::JsGetterClassMember(m) => Some(m.has_static_modifier()),

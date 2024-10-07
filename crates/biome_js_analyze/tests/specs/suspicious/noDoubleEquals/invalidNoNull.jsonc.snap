@@ -1,0 +1,50 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalidNoNull.jsonc
+---
+# Input
+```cjs
+const isNull = a == null;
+```
+
+# Diagnostics
+```
+invalidNoNull.jsonc:1:18 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use === instead of ==
+  
+  > 1 │ const isNull = a == null;
+      │                  ^^
+  
+  i Using == may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use ===
+  
+    1 │ const·isNull·=·a·===·null;
+      │                    +      
+
+```
+
+# Input
+```cjs
+const isNonNull = a != null;
+```
+
+# Diagnostics
+```
+invalidNoNull.jsonc:1:21 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Use !== instead of !=
+  
+  > 1 │ const isNonNull = a != null;
+      │                     ^^
+  
+  i Using != may be unsafe if you are relying on type coercion
+  
+  i Unsafe fix: Use !==
+  
+    1 │ const·isNonNull·=·a·!==·null;
+      │                       +      
+
+```

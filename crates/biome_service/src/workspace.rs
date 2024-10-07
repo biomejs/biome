@@ -44,12 +44,12 @@
 //! [WorkspaceError] enum wrapping the underlying issue. Some common errors are:
 //!
 //! - [WorkspaceError::NotFound]: This error is returned when an operation is being
-//! run on a path that doesn't correspond to any open document: either the
-//! document has been closed or the client didn't open it in the first place
+//!     run on a path that doesn't correspond to any open document: either the
+//!     document has been closed or the client didn't open it in the first place
 //! - [WorkspaceError::SourceFileNotSupported]: This error is returned when an
-//! operation could not be completed because the language associated with the
-//! document does not implement the required capability: for instance trying to
-//! format a file with a language that does not have a formatter
+//!     operation could not be completed because the language associated with the
+//!     document does not implement the required capability: for instance trying to
+//!     format a file with a language that does not have a formatter
 
 pub use self::client::{TransportRequest, WorkspaceClient, WorkspaceTransport};
 use crate::file_handlers::Capabilities;
@@ -58,7 +58,7 @@ use crate::settings::Settings;
 use crate::{Deserialize, Serialize, WorkspaceError};
 use biome_analyze::ActionCategory;
 pub use biome_analyze::RuleCategories;
-use biome_configuration::linter::RuleSelector;
+use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::CodeSuggestion;
@@ -66,15 +66,16 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
+use core::str;
 use enumflags2::{bitflags, BitFlags};
 #[cfg(feature = "schema")]
 use schemars::{gen::SchemaGenerator, schema::Schema, JsonSchema};
 use slotmap::{new_key_type, DenseSlotMap};
+use smallvec::SmallVec;
 use std::collections::HashMap;
-use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
-use tracing::debug;
+use tracing::{debug, instrument};
 
 mod client;
 mod server;
@@ -101,30 +102,31 @@ pub struct FileFeaturesResult {
 impl FileFeaturesResult {
     /// Sorted array of files that should not be processed no matter the cases.
     /// These files are handled by other tools.
-    const PROTECTED_FILES: &'static [&'static str; 4] = &[
+    const PROTECTED_FILES: &'static [&'static [u8]] = &[
         // Composer
-        "composer.lock",
+        b"composer.lock",
         // NPM
-        "npm-shrinkwrap.json",
-        "package-lock.json",
+        b"npm-shrinkwrap.json",
+        b"package-lock.json",
         // Yarn
-        "yarn.lock",
+        b"yarn.lock",
     ];
 
     /// Checks whether this file is protected.
     /// A protected file is handled by a specific tool and should be ignored.
     pub(crate) fn is_protected_file(path: &Path) -> bool {
         path.file_name()
-            .and_then(OsStr::to_str)
-            .is_some_and(|file_name| FileFeaturesResult::PROTECTED_FILES.contains(&file_name))
+            .is_some_and(|filename| Self::PROTECTED_FILES.contains(&filename.as_encoded_bytes()))
     }
 
     /// By default, all features are not supported by a file.
-    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 4] = [
+    const WORKSPACE_FEATURES: [(FeatureKind, SupportKind); 6] = [
         (FeatureKind::Lint, SupportKind::FileNotSupported),
         (FeatureKind::Format, SupportKind::FileNotSupported),
         (FeatureKind::OrganizeImports, SupportKind::FileNotSupported),
         (FeatureKind::Search, SupportKind::FileNotSupported),
+        (FeatureKind::Assists, SupportKind::FileNotSupported),
+        (FeatureKind::Debug, SupportKind::FileNotSupported),
     ];
 
     pub fn new() -> Self {
@@ -146,14 +148,29 @@ impl FileFeaturesResult {
             self.features_supported
                 .insert(FeatureKind::OrganizeImports, SupportKind::Supported);
         }
+
+        if capabilities.analyzer.code_actions.is_some() {
+            self.features_supported
+                .insert(FeatureKind::Assists, SupportKind::Supported);
+        }
+
         if capabilities.search.search.is_some() {
             self.features_supported
                 .insert(FeatureKind::Search, SupportKind::Supported);
         }
 
+        if capabilities.debug.debug_syntax_tree.is_some()
+            || capabilities.debug.debug_formatter_ir.is_some()
+            || capabilities.debug.debug_control_flow.is_some()
+        {
+            self.features_supported
+                .insert(FeatureKind::Debug, SupportKind::Supported);
+        }
+
         self
     }
 
+    #[instrument(level = "debug", skip(self, settings))]
     pub(crate) fn with_settings_and_language(
         mut self,
         settings: &Settings,
@@ -207,8 +224,20 @@ impl FileFeaturesResult {
                 .insert(FeatureKind::OrganizeImports, SupportKind::FeatureNotEnabled);
         }
 
+        // assists
+        if let Some(disabled) = settings.override_settings.assists_disabled(path) {
+            if disabled {
+                self.features_supported
+                    .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+            }
+        } else if !settings.assists().enabled {
+            self.features_supported
+                .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+        }
+
         debug!(
-            "The file has the following feature sets: \n{:?}",
+            "The file {} has the following feature sets: \n{:?}",
+            path.display().to_string(),
             &self.features_supported
         );
 
@@ -238,8 +267,7 @@ impl FileFeaturesResult {
     fn supports_for(&self, feature: &FeatureKind) -> bool {
         self.features_supported
             .get(feature)
-            .map(|support_kind| matches!(support_kind, SupportKind::Supported))
-            .unwrap_or_default()
+            .is_some_and(|support_kind| matches!(support_kind, SupportKind::Supported))
     }
 
     pub fn supports_lint(&self) -> bool {
@@ -297,14 +325,14 @@ impl FileFeaturesResult {
             .all(|support_kind| support_kind.is_protected())
     }
 
-    /// The file is not supported if all the featured marked it as not supported
+    /// The file is not supported if all the features are unsupported
     pub fn is_not_supported(&self) -> bool {
         self.features_supported
             .values()
             .all(|support_kind| support_kind.is_not_supported())
     }
 
-    /// The file is not enabled if all the features marked it as not enabled
+    /// The file is not enabled if all the features aren't enabled
     pub fn is_not_enabled(&self) -> bool {
         self.features_supported
             .values()
@@ -386,9 +414,14 @@ pub enum FeatureKind {
     OrganizeImports,
     Search,
     Assists,
+    Debug,
 }
 
 #[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
+#[serde(
+    from = "smallvec::SmallVec<[FeatureKind; 6]>",
+    into = "smallvec::SmallVec<[FeatureKind; 6]>"
+)]
 pub struct FeatureName(BitFlags<FeatureKind>);
 
 impl FeatureName {
@@ -397,6 +430,27 @@ impl FeatureName {
     }
     pub fn empty() -> Self {
         Self(BitFlags::empty())
+    }
+
+    pub fn insert(&mut self, kind: FeatureKind) {
+        self.0.insert(kind);
+    }
+}
+
+impl From<SmallVec<[FeatureKind; 6]>> for FeatureName {
+    fn from(value: SmallVec<[FeatureKind; 6]>) -> Self {
+        value
+            .into_iter()
+            .fold(FeatureName::empty(), |mut acc, kind| {
+                acc.insert(kind);
+                acc
+            })
+    }
+}
+
+impl From<FeatureName> for SmallVec<[FeatureKind; 6]> {
+    fn from(value: FeatureName) -> Self {
+        value.iter().collect()
     }
 }
 
@@ -439,6 +493,11 @@ impl FeaturesBuilder {
         self
     }
 
+    pub fn with_assists(mut self) -> Self {
+        self.0.insert(FeatureKind::Assists);
+        self
+    }
+
     pub fn build(self) -> FeatureName {
         FeatureName(self.0)
     }
@@ -475,16 +534,20 @@ pub struct OpenFileParams {
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct OpenProjectParams {
-    pub path: BiomePath,
+pub struct SetManifestForProjectParams {
+    pub manifest_path: BiomePath,
     pub content: String,
     pub version: i32,
 }
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-pub struct UpdateProjectParams {
-    pub path: BiomePath,
+impl From<(BiomePath, String)> for SetManifestForProjectParams {
+    fn from((manifest_path, content): (BiomePath, String)) -> Self {
+        Self {
+            manifest_path,
+            content,
+            version: 0,
+        }
+    }
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -555,7 +618,9 @@ pub struct PullDiagnosticsResult {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PullActionsParams {
     pub path: BiomePath,
-    pub range: TextRange,
+    pub range: Option<TextRange>,
+    pub only: Vec<RuleSelector>,
+    pub skip: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -608,6 +673,9 @@ pub struct FixFileParams {
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
+    pub only: Vec<RuleSelector>,
+    pub skip: Vec<RuleSelector>,
+    pub rule_categories: RuleCategories,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -820,7 +888,10 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     fn open_file(&self, params: OpenFileParams) -> Result<(), WorkspaceError>;
 
     /// Add a new project to the workspace
-    fn open_project(&self, params: OpenProjectParams) -> Result<(), WorkspaceError>;
+    fn set_manifest_for_project(
+        &self,
+        params: SetManifestForProjectParams,
+    ) -> Result<(), WorkspaceError>;
 
     /// Register a possible workspace project folder. Returns the key of said project. Use this key when you want to switch to different projects.
     fn register_project_folder(
@@ -833,9 +904,6 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
         &self,
         params: UnregisterProjectFolderParams,
     ) -> Result<(), WorkspaceError>;
-
-    /// Sets the current project path
-    fn update_current_project(&self, params: UpdateProjectParams) -> Result<(), WorkspaceError>;
 
     // Return a textual, debug representation of the syntax tree for a given document
     fn get_syntax_tree(
@@ -992,10 +1060,17 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         })
     }
 
-    pub fn pull_actions(&self, range: TextRange) -> Result<PullActionsResult, WorkspaceError> {
+    pub fn pull_actions(
+        &self,
+        range: Option<TextRange>,
+        only: Vec<RuleSelector>,
+        skip: Vec<RuleSelector>,
+    ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
             range,
+            only,
+            skip,
         })
     }
 
@@ -1023,11 +1098,17 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         &self,
         fix_file_mode: FixFileMode,
         should_format: bool,
+        rule_categories: RuleCategories,
+        only: Vec<RuleSelector>,
+        skip: Vec<RuleSelector>,
     ) -> Result<FixFileResult, WorkspaceError> {
         self.workspace.fix_file(FixFileParams {
             path: self.path.clone(),
             fix_file_mode,
             should_format,
+            only,
+            skip,
+            rule_categories,
         })
     }
 
@@ -1061,7 +1142,12 @@ impl<'app, W: Workspace + ?Sized> Drop for FileGuard<'app, W> {
 #[test]
 fn test_order() {
     for items in FileFeaturesResult::PROTECTED_FILES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
+        assert!(
+            items[0] < items[1],
+            "{} < {}",
+            str::from_utf8(items[0]).unwrap(),
+            str::from_utf8(items[1]).unwrap()
+        );
     }
 }
 

@@ -133,6 +133,18 @@ pub fn generate_syntax_kinds(grammar: KindsSrc, language_kind: LanguageKind) -> 
                 }
             }
         }
+        LanguageKind::Markdown => {
+            quote! {
+                pub const fn to_string(&self) -> Option<&'static str> {
+                    let tok = match self {
+                        #(#punctuation => #punctuation_strings,)*
+                        #(#full_keywords => #all_keyword_to_strings,)*
+                        _ => return None,
+                    };
+                    Some(tok)
+                }
+            }
+        }
         LanguageKind::Grit => {
             quote! {
                 pub const fn to_string(&self) -> Option<&'static str> {

@@ -113,7 +113,7 @@ AnyJsStatement =
 	| TsExternalModuleDeclaration
 	| TsGlobalDeclaration
 	| TsImportEqualsDeclaration
-
+	| JsMetavariable
 
 JsBlockStatement =
 	'{'
@@ -325,6 +325,8 @@ AnyJsExpression =
 	| TsInstantiationExpression
 	// JSX
 	| JsxTagExpression
+	// Grit
+	| JsMetavariable
 
 JsTemplateExpression =
 	tag: AnyJsExpression?
@@ -518,6 +520,7 @@ JsPostUpdateExpression =
 AnyJsObjectMemberName =
 	JsLiteralMemberName
 	| JsComputedMemberName
+	| JsMetavariable
 
 JsObjectExpression =
 	'{'
@@ -630,6 +633,7 @@ AnyJsClassMemberName =
 	JsLiteralMemberName
 	| JsComputedMemberName
 	| JsPrivateClassMemberName
+	| JsMetavariable
 
 AnyJsClassMember =
 	JsConstructorClassMember
@@ -647,6 +651,7 @@ AnyJsClassMember =
 	| TsIndexSignatureClassMember
 	| JsEmptyClassMember
 	| JsBogusMember
+	| JsMetavariable
 
 JsStaticModifier = modifier: 'static'
 JsAccessorModifier = modifier: 'accessor'
@@ -1009,6 +1014,7 @@ JsObjectAssignmentPatternRest =
 AnyJsBinding =
 	JsIdentifierBinding
 	| JsBogusBinding
+	| JsMetavariable
 
 // Binds a value to an identifier.
 // let x = OR function(test) {}
@@ -1058,6 +1064,7 @@ AnyJsObjectBindingPatternMember =
 	JsObjectBindingPatternProperty
 	| JsObjectBindingPatternRest
 	| JsObjectBindingPatternShorthandProperty
+	| JsMetavariable
 	| JsBogusBinding
 
 // let { a: b.m } = {}
@@ -1229,7 +1236,7 @@ AnyJsImportClause =
 // import "abcd"
 // import "abcd" assert ...
 JsImportBareClause =
-	source: JsModuleSource
+	source: AnyJsModuleSource
 	assertion: JsImportAssertion?
 
 // import foo from "mod"
@@ -1238,7 +1245,7 @@ JsImportDefaultClause =
 	'type'?
 	default_specifier: JsDefaultImportSpecifier
 	'from'
-	source: JsModuleSource
+	source: AnyJsModuleSource
 	assertion: JsImportAssertion?
 
 // import * as foo from "mod";
@@ -1247,7 +1254,7 @@ JsImportNamespaceClause =
 	'type'?
 	namespace_specifier: JsNamespaceImportSpecifier
 	'from'
-	source: JsModuleSource
+	source: AnyJsModuleSource
 	assertion: JsImportAssertion?
 
 // import { a, b: c } from "d";
@@ -1260,7 +1267,7 @@ JsImportNamedClause =
     'type'?
 	named_specifiers: JsNamedImportSpecifiers
     'from'
-    source: JsModuleSource
+    source: AnyJsModuleSource
     assertion: JsImportAssertion?
 
 // import c, { b } from "c"
@@ -1274,7 +1281,7 @@ JsImportCombinedClause =
 	','
 	specifier: AnyJsCombinedSpecifier
 	'from'
-	source: JsModuleSource
+	source: AnyJsModuleSource
 	assertion: JsImportAssertion?
 
 AnyJsCombinedSpecifier = JsNamedImportSpecifiers | JsNamespaceImportSpecifier
@@ -1475,7 +1482,7 @@ JsExportFromClause =
 	'*'
 	export_as: JsExportAsClause?
 	'from'
-	source: JsModuleSource
+	source: AnyJsModuleSource
 	assertion: JsImportAssertion?
 	';'?
 
@@ -1489,9 +1496,13 @@ JsExportNamedFromClause =
 	specifiers: JsExportNamedFromSpecifierList
 	'}'
 	'from'
-	source: JsModuleSource
+	source: AnyJsModuleSource
 	assertion: JsImportAssertion?
 	';'?
+
+AnyJsModuleSource =
+	JsModuleSource
+	| JsMetavariable
 
 JsExportNamedFromSpecifierList = (JsExportNamedFromSpecifier (',' JsExportNamedFromSpecifier)* ','?)
 
@@ -1562,7 +1573,7 @@ JsPrivateName =
 AnyJsName =
 	JsName
 	| JsPrivateName
-
+	| JsMetavariable
 
 AnyJsFunction =
 	JsFunctionExpression
@@ -1592,6 +1603,7 @@ JsParameterList = (AnyJsParameter (',' AnyJsParameter)* ','?)
 AnyJsFormalParameter =
 	JsFormalParameter
 	| JsBogusParameter
+	| JsMetavariable
 
 AnyJsParameter =
 	AnyJsFormalParameter
@@ -1704,6 +1716,7 @@ AnyTsType =
 	| TsConstructorType
 	| TsConditionalType
 	| TsBogusType
+	| JsMetavariable
 
 // Predefined types
 TsAnyType = 'any'
@@ -1730,11 +1743,15 @@ TsReferenceType =
 
 TsTypeAliasDeclaration =
 	'type'
-	binding_identifier: TsIdentifierBinding
+	binding_identifier: AnyTsIdentifierBinding
 	type_parameters: TsTypeParameters?
 	'='
 	ty: AnyTsType
 	';'?
+
+AnyTsIdentifierBinding = 
+	TsIdentifierBinding
+	| JsMetavariable
 
 // Binds a type identifier
 TsIdentifierBinding = name: 'ident'
@@ -1775,7 +1792,7 @@ AnyTsModuleReference =
 TsExternalModuleReference =
 	'require'
 	'('
-	source: JsModuleSource
+	source: AnyJsModuleSource
 	')'
 
 
@@ -1826,7 +1843,7 @@ TsModuleBlock =
 	'}'
 
 AnyTsModuleName =
-	TsIdentifierBinding
+	AnyTsIdentifierBinding
 	| TsQualifiedModuleName
 
 // declare module a.b.c {}
@@ -1843,7 +1860,7 @@ TsQualifiedModuleName =
 //         ^^^^^^^^^^^^^^^^^^^^^
 TsExternalModuleDeclaration =
 	'module'
-	source: JsModuleSource
+	source: AnyJsModuleSource
 	body: AnyTsExternalModuleDeclarationBody?
 
 AnyTsExternalModuleDeclarationBody =
@@ -1983,7 +2000,7 @@ TsObjectType = '{' members: TsTypeMemberList '}'
 
 TsInterfaceDeclaration =
 	'interface'
-	id: TsIdentifierBinding
+	id: AnyTsIdentifierBinding
 	type_parameters: TsTypeParameters?
 	extends_clause: TsExtendsClause?
 	'{'
@@ -2390,3 +2407,6 @@ JsxSpreadChild =
 JsxText = value: 'jsx_text_literal'
 
 JsxString = value: 'jsx_string_literal'
+
+// https://github.com/getgrit/gritql/blob/main/resources/language-metavariables/tree-sitter-typescript/common/define-grammar.js
+JsMetavariable = value: 'grit_metavariable'

@@ -10,7 +10,7 @@ expression: content
     "enabled": true,
     "rules": {
       "all": false,
-      "nursery": {
+      "correctness": {
         "noUndeclaredDependencies": "error"
       }
     }
@@ -48,7 +48,7 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-fix.js:2:8 lint/nursery/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+fix.js:2:8 lint/correctness/noUndeclaredDependencies ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The current dependency isn't specified in your package.json.
   

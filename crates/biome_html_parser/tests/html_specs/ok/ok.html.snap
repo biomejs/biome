@@ -4,7 +4,7 @@ expression: snapshot
 ---
 ## Input
 
-```css
+```html
 <!doctype>
 ```
 
@@ -24,7 +24,7 @@ HtmlRoot {
         system_id_token: missing (optional),
         r_angle_token: R_ANGLE@9..10 ">" [] [],
     },
-    html: missing (optional),
+    html: HtmlElementList [],
     eof_token: EOF@10..10 "" [] [],
 }
 ```
@@ -43,7 +43,7 @@ HtmlRoot {
     5: (empty)
     6: (empty)
     7: R_ANGLE@9..10 ">" [] []
-  2: (empty)
+  2: HTML_ELEMENT_LIST@10..10
   3: EOF@10..10 "" [] []
 
 ```

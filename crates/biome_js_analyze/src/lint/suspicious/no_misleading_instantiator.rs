@@ -3,8 +3,9 @@ use biome_analyze::{
 };
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
-    AnyJsClassMember, AnyTsType, AnyTsTypeMember, JsClassDeclaration, JsSyntaxToken,
-    TsDeclareStatement, TsInterfaceDeclaration, TsReferenceType, TsTypeAliasDeclaration,
+    AnyJsClassMember, AnyTsType, AnyTsTypeMember, ClassMemberName, JsClassDeclaration,
+    JsSyntaxToken, TsDeclareStatement, TsInterfaceDeclaration, TsReferenceType,
+    TsTypeAliasDeclaration,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 
@@ -149,7 +150,12 @@ impl Rule for NoMisleadingInstantiator {
 
 /// Checks if the interface has a misleading constructor or new method.
 fn check_interface_methods(decl: &TsInterfaceDeclaration) -> Option<RuleState> {
-    let interface_ident = decl.id().ok()?.name_token().ok()?;
+    let interface_ident = decl
+        .id()
+        .ok()?
+        .as_ts_identifier_binding()?
+        .name_token()
+        .ok()?;
     for member in decl.members() {
         match member {
             AnyTsTypeMember::TsConstructSignatureTypeMember(construct)
@@ -189,27 +195,27 @@ fn check_class_methods(js_class_decl: &JsClassDeclaration) -> Option<RuleState> 
         .as_js_identifier_binding()?
         .name_token()
         .ok()?;
-
     for member in js_class_decl.members() {
-        match member {
-            AnyJsClassMember::TsMethodSignatureClassMember(method)
-                if method.name().ok()?.name()? == "new" =>
-            {
-                let return_type = method.return_type_annotation()?.ty().ok()?;
-                match return_type.as_any_ts_type()? {
-                    AnyTsType::TsReferenceType(ref_type) => {
-                        let return_type_ident = extract_return_type_ident(ref_type)?;
-                        if class_ident.text_trimmed() == return_type_ident.text_trimmed() {
+        if let AnyJsClassMember::TsMethodSignatureClassMember(method) = member {
+            if let Some(ClassMemberName::Public(name)) = method.name().ok()?.name() {
+                if name.text() == "new" {
+                    let return_type = method.return_type_annotation()?.ty().ok()?;
+                    match return_type.as_any_ts_type()? {
+                        AnyTsType::TsReferenceType(ref_type) => {
+                            let return_type_ident = extract_return_type_ident(ref_type)?;
+                            if class_ident.text_trimmed() == return_type_ident.text_trimmed() {
+                                return Some(RuleState::ClassMisleadingNew(method.range()));
+                            }
+                        }
+                        AnyTsType::TsThisType(this_type)
+                            if this_type.this_token().ok().is_some() =>
+                        {
                             return Some(RuleState::ClassMisleadingNew(method.range()));
                         }
+                        _ => continue,
                     }
-                    AnyTsType::TsThisType(this_type) if this_type.this_token().ok().is_some() => {
-                        return Some(RuleState::ClassMisleadingNew(method.range()));
-                    }
-                    _ => continue,
                 }
             }
-            _ => continue,
         }
     }
     None

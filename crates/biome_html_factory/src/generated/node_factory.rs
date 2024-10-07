@@ -61,6 +61,20 @@ pub fn html_closing_element(
         ],
     ))
 }
+pub fn html_comment(
+    comment_start_token: SyntaxToken,
+    content_token: SyntaxToken,
+    comment_end_token: SyntaxToken,
+) -> HtmlComment {
+    HtmlComment::unwrap_cast(SyntaxNode::new_detached(
+        HtmlSyntaxKind::HTML_COMMENT,
+        [
+            Some(SyntaxElement::Token(comment_start_token)),
+            Some(SyntaxElement::Token(content_token)),
+            Some(SyntaxElement::Token(comment_end_token)),
+        ],
+    ))
+}
 pub fn html_content(value_token: SyntaxToken) -> HtmlContent {
     HtmlContent::unwrap_cast(SyntaxNode::new_detached(
         HtmlSyntaxKind::HTML_CONTENT,
@@ -165,19 +179,19 @@ pub fn html_opening_element(
         ],
     ))
 }
-pub fn html_root(eof_token: SyntaxToken) -> HtmlRootBuilder {
+pub fn html_root(html: HtmlElementList, eof_token: SyntaxToken) -> HtmlRootBuilder {
     HtmlRootBuilder {
+        html,
         eof_token,
         bom_token: None,
         directive: None,
-        html: None,
     }
 }
 pub struct HtmlRootBuilder {
+    html: HtmlElementList,
     eof_token: SyntaxToken,
     bom_token: Option<SyntaxToken>,
     directive: Option<HtmlDirective>,
-    html: Option<AnyHtmlElement>,
 }
 impl HtmlRootBuilder {
     pub fn with_bom_token(mut self, bom_token: SyntaxToken) -> Self {
@@ -188,10 +202,6 @@ impl HtmlRootBuilder {
         self.directive = Some(directive);
         self
     }
-    pub fn with_html(mut self, html: AnyHtmlElement) -> Self {
-        self.html = Some(html);
-        self
-    }
     pub fn build(self) -> HtmlRoot {
         HtmlRoot::unwrap_cast(SyntaxNode::new_detached(
             HtmlSyntaxKind::HTML_ROOT,
@@ -199,8 +209,7 @@ impl HtmlRootBuilder {
                 self.bom_token.map(|token| SyntaxElement::Token(token)),
                 self.directive
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
-                self.html
-                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Node(self.html.into_syntax())),
                 Some(SyntaxElement::Token(self.eof_token)),
             ],
         ))
@@ -210,19 +219,40 @@ pub fn html_self_closing_element(
     l_angle_token: SyntaxToken,
     name: HtmlName,
     attributes: HtmlAttributeList,
-    slash_token: SyntaxToken,
     r_angle_token: SyntaxToken,
-) -> HtmlSelfClosingElement {
-    HtmlSelfClosingElement::unwrap_cast(SyntaxNode::new_detached(
-        HtmlSyntaxKind::HTML_SELF_CLOSING_ELEMENT,
-        [
-            Some(SyntaxElement::Token(l_angle_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Node(attributes.into_syntax())),
-            Some(SyntaxElement::Token(slash_token)),
-            Some(SyntaxElement::Token(r_angle_token)),
-        ],
-    ))
+) -> HtmlSelfClosingElementBuilder {
+    HtmlSelfClosingElementBuilder {
+        l_angle_token,
+        name,
+        attributes,
+        r_angle_token,
+        slash_token: None,
+    }
+}
+pub struct HtmlSelfClosingElementBuilder {
+    l_angle_token: SyntaxToken,
+    name: HtmlName,
+    attributes: HtmlAttributeList,
+    r_angle_token: SyntaxToken,
+    slash_token: Option<SyntaxToken>,
+}
+impl HtmlSelfClosingElementBuilder {
+    pub fn with_slash_token(mut self, slash_token: SyntaxToken) -> Self {
+        self.slash_token = Some(slash_token);
+        self
+    }
+    pub fn build(self) -> HtmlSelfClosingElement {
+        HtmlSelfClosingElement::unwrap_cast(SyntaxNode::new_detached(
+            HtmlSyntaxKind::HTML_SELF_CLOSING_ELEMENT,
+            [
+                Some(SyntaxElement::Token(self.l_angle_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Node(self.attributes.into_syntax())),
+                self.slash_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_angle_token)),
+            ],
+        ))
+    }
 }
 pub fn html_string(value_token: SyntaxToken) -> HtmlString {
     HtmlString::unwrap_cast(SyntaxNode::new_detached(
