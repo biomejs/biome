@@ -23,14 +23,42 @@ declare_lint_rule! {
     /// especially for those who may not be aware of the risks associated with
     /// sensitive data exposure.
     ///
+    /// ## Detected Secrets
+    ///
+    /// The following list contains the patterns we detect:
+    ///
+    /// - **JSON Web Token (JWT)**: Tokens in the format of `ey...`
+    /// - **Base64-encoded JWT**: Base64-encoded JWT tokens with various parameters (alg, aud, iss, etc.)
+    /// - **Slack Token**: Tokens such as `xox[baprs]-...`
+    /// - **Slack Webhook URL**: URLs like `https://hooks.slack.com/services/...`
+    /// - **GitHub Token**: GitHub tokens with lengths between 35-40 characters
+    /// - **Twitter OAuth Token**: Twitter OAuth tokens with lengths between 35-44 characters
+    /// - **Facebook OAuth Token**: Facebook OAuth tokens with possible lengths up to 42 characters
+    /// - **Google OAuth Token**: Google OAuth tokens in the format `ya29...`
+    /// - **AWS API Key**: Keys that begin with `AKIA` followed by 16 alphanumeric characters
+    /// - **Passwords in URLs**: Passwords included in URL credentials (`protocol://user:pass@...`)
+    /// - **Google Service Account**: JSON structure with the service-account identifier
+    /// - **Twilio API Key**: API keys starting with `SK...` followed by 32 characters
+    /// - **RSA Private Key**: Key blocks that start with `-----BEGIN RSA PRIVATE KEY-----`
+    /// - **OpenSSH Private Key**: Key blocks that start with `-----BEGIN OPENSSH PRIVATE KEY-----`
+    /// - **DSA Private Key**: Key blocks that start with `-----BEGIN DSA PRIVATE KEY-----`
+    /// - **EC Private Key**: Key blocks that start with `-----BEGIN EC PRIVATE KEY-----`
+    /// - **PGP Private Key Block**: Key blocks that start with `-----BEGIN PGP PRIVATE KEY BLOCK-----`
+    ///
+    /// ## Entropy Check
+    ///
+    /// In addition to detecting the above patterns, we also employ a **string entropy checker** to catch potential secrets based on their entropy (randomness). The entropy checker is configurable through the `Options`, allowing customization of thresholds for string entropy to fine-tune detection and minimize false positives.
+    ///
     /// ## Disclaimer
+    ///
     /// While this rule helps with most common cases, it is not intended to handle all of them.
     /// Therefore, always review your code carefully and consider implementing additional security
     /// measures, such as automated secret scanning in your CI/CD and git pipeline.
     ///
     /// ## Recommendations
+    ///
     /// Some recommended tools for more comprehensive secret detection include:
-    /// - [SonarQube](https://www.sonarsource.com/products/sonarqube/downloads/): Clean Code scanning solution which has a secret scanner (Community version).
+    /// - [SonarQube](https://www.sonarsource.com/products/sonarqube/downloads/): Clean Code scanning solution with a secret scanner (Community version).
     /// - [Gitleaks](https://github.com/gitleaks/gitleaks/): A mature secret scanning tool.
     /// - [Trufflehog](https://github.com/trufflesecurity/trufflehog): A tool for finding secrets in git history.
     /// - [Sensleak](https://github.com/crates-pro/sensleak-rs): A Rust-based solution for secret detection.
@@ -48,7 +76,6 @@ declare_lint_rule! {
     /// ```js
     /// const nonSecret = "hello world";
     /// ```
-    ///
     pub NoSecrets {
         version: "1.9.0",
         name: "noSecrets",
