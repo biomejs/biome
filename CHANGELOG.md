@@ -13,6 +13,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### Bug fixes
+
+- Improved the message for unused suppression comments. Contributed by @dyc3
+
 ### CLI
 
 ### Configuration

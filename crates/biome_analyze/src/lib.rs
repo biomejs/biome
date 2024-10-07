@@ -182,7 +182,7 @@ where
                 SuppressionDiagnostic::new(
                     category!("suppressions/unused"),
                     suppression.comment_span,
-                    "Suppression comment is not being used",
+                    "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
                 )
             });
 
