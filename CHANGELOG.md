@@ -62,6 +62,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noVoidTypeReturn](https://biomejs.dev/linter/rules/no-void-type-return/) now accept `void` expressions in return position ([#4173](https://github.com/biomejs/biome/issues/4173)).
+
+  The following code is now accepted:
+
+  ```ts
+  function f(): void {
+    return void 0;
+  }
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
 
 #### Bug Fixes
