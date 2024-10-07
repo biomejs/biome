@@ -28,6 +28,7 @@ use crate::commands::check::CheckCommandPayload;
 use crate::commands::ci::CiCommandPayload;
 use crate::commands::format::FormatCommandPayload;
 use crate::commands::lint::LintCommandPayload;
+use crate::commands::migrate::MigrateCommandPayload;
 use crate::commands::CommandRunner;
 pub use crate::commands::{biome_command, BiomeCommand};
 pub use crate::logging::{setup_cli_subscriber, LoggingLevel};
@@ -104,15 +105,15 @@ impl<'app> CliSession<'app> {
                 staged,
                 changed,
                 since,
-            } => commands::check::check(
+            } => run_command(
                 self,
+                &cli_options,
                 CheckCommandPayload {
                     apply_unsafe,
                     apply,
                     write,
                     fix,
                     unsafe_,
-                    cli_options,
                     configuration,
                     paths,
                     stdin_file_path,
@@ -146,15 +147,15 @@ impl<'app> CliSession<'app> {
                 javascript_linter,
                 json_linter,
                 graphql_linter,
-            } => commands::lint::lint(
+            } => run_command(
                 self,
+                &cli_options,
                 LintCommandPayload {
                     apply_unsafe,
                     apply,
                     write,
                     fix,
                     unsafe_,
-                    cli_options,
                     linter_configuration,
                     paths,
                     only,
@@ -181,8 +182,9 @@ impl<'app> CliSession<'app> {
                 cli_options,
                 changed,
                 since,
-            } => commands::ci::ci(
+            } => run_command(
                 self,
+                &cli_options,
                 CiCommandPayload {
                     linter_enabled,
                     formatter_enabled,
@@ -190,7 +192,6 @@ impl<'app> CliSession<'app> {
                     assists_enabled,
                     configuration,
                     paths,
-                    cli_options,
                     changed,
                     since,
                 },
@@ -244,7 +245,17 @@ impl<'app> CliSession<'app> {
                 write,
                 fix,
                 sub_command,
-            } => commands::migrate::migrate(self, cli_options, write, fix, sub_command),
+            } => run_command(
+                self,
+                &cli_options,
+                MigrateCommandPayload {
+                    write,
+                    fix,
+                    sub_command,
+                    configuration_directory_path: None,
+                    configuration_file_path: None,
+                },
+            ),
             BiomeCommand::Search {
                 cli_options,
                 files_configuration,
@@ -252,10 +263,10 @@ impl<'app> CliSession<'app> {
                 pattern,
                 stdin_file_path,
                 vcs_configuration,
-            } => commands::search::search(
+            } => run_command(
                 self,
+                &cli_options,
                 SearchCommandPayload {
-                    cli_options,
                     files_configuration,
                     paths,
                     pattern,

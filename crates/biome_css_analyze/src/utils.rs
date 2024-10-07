@@ -219,14 +219,14 @@ pub fn get_reset_to_initial_properties(shorthand_property: &str) -> &'static [&'
 }
 
 fn is_custom_element(prop: &str) -> bool {
-    prop.contains('-') && prop.eq(prop.to_lowercase().as_str())
+    prop.contains('-') && prop.eq(prop.to_lowercase_cow().as_ref())
 }
 
 /// Check if the input string is a known type selector.
 pub fn is_known_type_selector(prop: &str) -> bool {
-    let input = prop.to_lowercase();
-    HTML_TAGS.binary_search(&input.as_str()).is_ok()
+    let input = prop.to_lowercase_cow();
+    HTML_TAGS.binary_search(&input.as_ref()).is_ok()
         || SVG_TAGS.binary_search(&prop).is_ok()
-        || MATH_ML_TAGS.binary_search(&input.as_str()).is_ok()
+        || MATH_ML_TAGS.binary_search(&input.as_ref()).is_ok()
         || is_custom_element(prop)
 }

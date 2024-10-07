@@ -25,7 +25,7 @@ use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::{Diagnostic, PrintDiagnostic};
 use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
+    load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
 use biome_service::documentation::Doc;
 use biome_service::workspace::{FixFileMode, RegisterProjectFolderParams, UpdateSettingsParams};
@@ -612,7 +612,7 @@ impl BiomeCommand {
 
 /// It accepts a [LoadedPartialConfiguration] and it prints the diagnostics emitted during parsing and deserialization.
 ///
-/// If it contains errors, it return an error.
+/// If it contains [errors](Severity::Error) or higher, it returns an error.
 pub(crate) fn validate_configuration_diagnostics(
     loaded_configuration: &LoadedConfiguration,
     console: &mut dyn Console,
@@ -670,32 +670,7 @@ fn resolve_manifest(
     Ok(None)
 }
 
-/// Computes [Stdin] if the CLI has the necessary information.
-///
-/// ## Errors
-/// - If the user didn't provide anything via `stdin` but the option `--stdin-file-path` is passed.
-pub(crate) fn get_stdin(
-    stdin_file_path: Option<String>,
-    console: &mut dyn Console,
-    command_name: &str,
-) -> Result<Option<Stdin>, CliDiagnostic> {
-    let stdin = if let Some(stdin_file_path) = stdin_file_path {
-        let input_code = console.read();
-        if let Some(input_code) = input_code {
-            let path = PathBuf::from(stdin_file_path);
-            Some((path, input_code).into())
-        } else {
-            // we provided the argument without a piped stdin, we bail
-            return Err(CliDiagnostic::missing_argument("stdin", command_name));
-        }
-    } else {
-        None
-    };
-
-    Ok(stdin)
-}
-
-fn get_files_to_process(
+fn get_files_to_process_with_cli_options(
     since: Option<&str>,
     changed: bool,
     staged: bool,
@@ -850,7 +825,13 @@ pub(crate) trait CommandRunner: Sized {
     ) -> Result<(Execution, Vec<OsString>), CliDiagnostic> {
         let loaded_configuration =
             load_configuration(fs, cli_options.as_configuration_path_hint())?;
-        validate_configuration_diagnostics(&loaded_configuration, console, cli_options.verbose)?;
+        if self.should_validate_configuration_diagnostics() {
+            validate_configuration_diagnostics(
+                &loaded_configuration,
+                console,
+                cli_options.verbose,
+            )?;
+        }
         let configuration_path = loaded_configuration.directory_path.clone();
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
         let vcs_base_path = configuration_path.or(fs.working_directory());
@@ -874,7 +855,7 @@ pub(crate) trait CommandRunner: Sized {
             gitignore_matches,
         })?;
 
-        let execution = self.get_execution(cli_options, console)?;
+        let execution = self.get_execution(cli_options, console, workspace)?;
         Ok((execution, paths))
     }
 
@@ -919,7 +900,7 @@ pub(crate) trait CommandRunner: Sized {
     ) -> Result<Vec<OsString>, CliDiagnostic>;
 
     /// It returns the file path to use in `stdin` mode.
-    fn get_stdin_file_path(&self) -> Option<&String>;
+    fn get_stdin_file_path(&self) -> Option<&str>;
 
     /// Whether the command should write the files.
     fn should_write(&self) -> bool;
@@ -929,6 +910,7 @@ pub(crate) trait CommandRunner: Sized {
         &self,
         cli_options: &CliOptions,
         console: &mut dyn Console,
+        workspace: &dyn Workspace,
     ) -> Result<Execution, CliDiagnostic>;
 
     // Below, methods that consumers can implement
@@ -938,6 +920,42 @@ pub(crate) trait CommandRunner: Sized {
     /// The method is called before loading the configuration from disk.
     fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
         Ok(())
+    }
+
+    /// Checks whether the configuration has errors.
+    fn should_validate_configuration_diagnostics(&self) -> bool {
+        true
+    }
+}
+
+pub trait LoadEditorConfig: CommandRunner {
+    /// Whether this command should load the `.editorconfig` file.
+    fn should_load_editor_config(&self, fs_configuration: &PartialConfiguration) -> bool;
+
+    /// It loads the `.editorconfig` from the file system, parses it and deserialize it into a [PartialConfiguration]
+    fn load_editor_config(
+        &self,
+        configuration_path: Option<PathBuf>,
+        fs_configuration: &PartialConfiguration,
+        fs: &DynRef<'_, dyn FileSystem>,
+        console: &mut dyn Console,
+    ) -> Result<PartialConfiguration, WorkspaceError> {
+        Ok(if self.should_load_editor_config(fs_configuration) {
+            let (editorconfig, editorconfig_diagnostics) = {
+                let search_path = configuration_path
+                    .clone()
+                    .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
+                load_editorconfig(fs, search_path)?
+            };
+            for diagnostic in editorconfig_diagnostics {
+                console.error(markup! {
+                    {PrintDiagnostic::simple(&diagnostic)}
+                })
+            }
+            editorconfig.unwrap_or_default()
+        } else {
+            Default::default()
+        })
     }
 }
 
