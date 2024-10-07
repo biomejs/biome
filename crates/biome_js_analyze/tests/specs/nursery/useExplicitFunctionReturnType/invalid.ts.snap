@@ -96,6 +96,9 @@ function fn() {
       return str;
   };
 }
+
+const x = { prop: () => {} }
+const x = { bar: { prop: () => {} } }
 ```
 
 # Diagnostics
@@ -520,6 +523,40 @@ invalid.ts:85:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
        │ ^^^^^^^^^^^
     88 │   let str = "hey";
     89 │   return function (): string {
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:94:19 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    92 │ }
+    93 │ 
+  > 94 │ const x = { prop: () => {} }
+       │                   ^^^^^^^^^
+    95 │ const x = { bar: { prop: () => {} } }
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:95:26 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    94 │ const x = { prop: () => {} }
+  > 95 │ const x = { bar: { prop: () => {} } }
+       │                          ^^^^^^^^^
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
