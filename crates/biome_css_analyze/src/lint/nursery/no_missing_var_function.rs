@@ -222,7 +222,7 @@ fn is_wrapped_in_var(node: &CssDashedIdentifier) -> bool {
             // e.g `color: --custom-property;`
             //             ^^^^^^^^^^^^^^^^ CSS_GENERIC_COMPONENT_VALUE_LIST
             CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST => return false,
-            CssSyntaxKind::CSS_FUNCTION => return parent.text().starts_with("var"),
+            CssSyntaxKind::CSS_FUNCTION => return parent.text_trimmed().starts_with("var"),
             _ => {}
         }
         current_node = parent.parent();

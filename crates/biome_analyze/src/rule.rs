@@ -85,7 +85,7 @@ impl TryFrom<FixKind> for Applicability {
 }
 
 #[derive(Debug, Clone, Eq)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum RuleSource {
     /// Rules from [Rust Clippy](https://rust-lang.github.io/rust-clippy/master/index.html)
@@ -118,7 +118,7 @@ pub enum RuleSource {
     EslintTypeScript(&'static str),
     /// Rules from [Eslint Plugin Unicorn](https://github.com/sindresorhus/eslint-plugin-unicorn)
     EslintUnicorn(&'static str),
-    /// Rules from  [Eslint Plugin Unused Imports](https://github.com/sweepline/eslint-plugin-unused-imports)
+    /// Rules from [Eslint Plugin Unused Imports](https://github.com/sweepline/eslint-plugin-unused-imports)
     EslintUnusedImports(&'static str),
     /// Rules from [Eslint Plugin Mysticatea](https://github.com/mysticatea/eslint-plugin)
     EslintMysticatea(&'static str),
@@ -130,6 +130,8 @@ pub enum RuleSource {
     EslintNext(&'static str),
     /// Rules from [Stylelint](https://github.com/stylelint/stylelint)
     Stylelint(&'static str),
+    /// Rules from [Eslint Plugin No Secrets](https://github.com/nickdeis/eslint-plugin-no-secrets)
+    EslintNoSecrets(&'static str),
 }
 
 impl PartialEq for RuleSource {
@@ -162,6 +164,7 @@ impl std::fmt::Display for RuleSource {
             Self::EslintN(_) => write!(f, "eslint-plugin-n"),
             Self::EslintNext(_) => write!(f, "@next/eslint-plugin-next"),
             Self::Stylelint(_) => write!(f, "Stylelint"),
+            Self::EslintNoSecrets(_) => write!(f, "eslint-plugin-no-secrets"),
         }
     }
 }
@@ -211,6 +214,7 @@ impl RuleSource {
             | Self::EslintBarrelFiles(rule_name)
             | Self::EslintN(rule_name)
             | Self::EslintNext(rule_name)
+            | Self::EslintNoSecrets(rule_name)
             | Self::Stylelint(rule_name) => rule_name,
         }
     }
@@ -237,6 +241,7 @@ impl RuleSource {
             Self::EslintN(rule_name) => format!("n/{rule_name}"),
             Self::EslintNext(rule_name) => format!("@next/{rule_name}"),
             Self::Stylelint(rule_name) => format!("stylelint/{rule_name}"),
+            Self::EslintNoSecrets(rule_name) => format!("no-secrets/{rule_name}"),
         }
     }
 
@@ -263,6 +268,7 @@ impl RuleSource {
             Self::EslintN(rule_name) => format!("https://github.com/eslint-community/eslint-plugin-n/blob/master/docs/rules/{rule_name}.md"),
             Self::EslintNext(rule_name) => format!("https://nextjs.org/docs/messages/{rule_name}"),
             Self::Stylelint(rule_name) => format!("https://github.com/stylelint/stylelint/blob/main/lib/rules/{rule_name}/README.md"),
+            Self::EslintNoSecrets(_) => "https://github.com/nickdeis/eslint-plugin-no-secrets/blob/master/README.md".to_string(),
         }
     }
 
@@ -286,7 +292,7 @@ impl RuleSource {
 }
 
 #[derive(Debug, Default, Clone, Copy)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, schemars::JsonSchema))]
 #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
 pub enum RuleSourceKind {
     /// The rule implements the same logic of the source

@@ -90,3 +90,6 @@ function fn() {
       return str;
   };
 }
+
+const x = { prop: () => {} }
+const x = { bar: { prop: () => {} } }

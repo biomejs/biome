@@ -1255,6 +1255,10 @@ export interface Nursery {
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
 	/**
+	 * Prevent usage of \<img> element in a Next.js project.
+	 */
+	noImgElement?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
@@ -1285,7 +1289,7 @@ export interface Nursery {
 	/**
 	 * Disallow usage of sensitive data such as API keys and tokens.
 	 */
-	noSecrets?: RuleConfiguration_for_Null;
+	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
 	/**
 	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
@@ -1306,6 +1310,10 @@ export interface Nursery {
 	 * Disallow unknown pseudo-element selectors.
 	 */
 	noUnknownPseudoElement?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown type selectors.
+	 */
+	noUnknownTypeSelector?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
@@ -2008,6 +2016,9 @@ export type RuleConfiguration_for_RestrictedImportsOptions =
 export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
+export type RuleConfiguration_for_NoSecretsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoSecretsOptions;
 export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseComponentExportOnlyModulesOptions;
@@ -2168,6 +2179,16 @@ export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	 * Rule's options
 	 */
 	options: NoRestrictedTypesOptions;
+}
+export interface RuleWithOptions_for_NoSecretsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoSecretsOptions;
 }
 export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
 	/**
@@ -2364,6 +2385,12 @@ export interface RestrictedImportsOptions {
 }
 export interface NoRestrictedTypesOptions {
 	types?: {};
+}
+export interface NoSecretsOptions {
+	/**
+	 * Set entropy threshold (default is 41).
+	 */
+	entropyThreshold?: number;
 }
 export interface UseComponentExportOnlyModulesOptions {
 	/**
@@ -2862,6 +2889,7 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
@@ -2889,6 +2917,7 @@ export type Category =
 	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownPseudoElement"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
+	| "lint/nursery/noUnknownTypeSelector"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
