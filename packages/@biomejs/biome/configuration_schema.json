@@ -360,7 +360,6 @@
 		},
 		"AllowDomainOptions": {
 			"type": "object",
-			"required": ["allowDomains"],
 			"properties": {
 				"allowDomains": {
 					"description": "List of domains to allow `target=\"_blank\"` without `rel=\"noreferrer\"`",
@@ -643,10 +642,10 @@
 		"ComplexityOptions": {
 			"description": "Options for the rule `noExcessiveCognitiveComplexity`.",
 			"type": "object",
-			"required": ["maxAllowedComplexity"],
 			"properties": {
 				"maxAllowedComplexity": {
 					"description": "The maximum complexity score that we allow. Anything higher is considered excessive.",
+					"default": 15,
 					"type": "integer",
 					"format": "uint8",
 					"minimum": 1.0
@@ -676,9 +675,11 @@
 		},
 		"ConsistentArrayTypeOptions": {
 			"type": "object",
-			"required": ["syntax"],
 			"properties": {
-				"syntax": { "$ref": "#/definitions/ConsistentArrayType" }
+				"syntax": {
+					"default": "shorthand",
+					"allOf": [{ "$ref": "#/definitions/ConsistentArrayType" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -690,9 +691,11 @@
 		},
 		"ConsistentMemberAccessibilityOptions": {
 			"type": "object",
-			"required": ["accessibility"],
 			"properties": {
-				"accessibility": { "$ref": "#/definitions/Accessibility" }
+				"accessibility": {
+					"default": "noPublic",
+					"allOf": [{ "$ref": "#/definitions/Accessibility" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -1202,10 +1205,9 @@
 		},
 		"CustomRestrictedTypeOptions": {
 			"type": "object",
-			"required": ["message"],
 			"properties": {
-				"message": { "type": "string" },
-				"use": { "type": ["string", "null"] }
+				"message": { "default": "", "type": "string" },
+				"use": { "default": null, "type": ["string", "null"] }
 			},
 			"additionalProperties": false
 		},
@@ -1460,23 +1462,29 @@
 		},
 		"Hook": {
 			"type": "object",
-			"required": ["name"],
 			"properties": {
 				"closureIndex": {
 					"description": "The \"position\" of the closure function, starting from zero.\n\nFor example, for React's `useEffect()` hook, the closure index is 0.",
+					"default": null,
 					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				},
 				"dependenciesIndex": {
 					"description": "The \"position\" of the array of dependencies, starting from zero.\n\nFor example, for React's `useEffect()` hook, the dependencies index is 1.",
+					"default": null,
 					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				},
-				"name": { "description": "The name of the hook.", "type": "string" },
+				"name": {
+					"description": "The name of the hook.",
+					"default": "",
+					"type": "string"
+				},
 				"stableResult": {
 					"description": "Whether the result of the hook is stable.\n\nSet to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the \"positions\" in the return array as stable.\n\nFor example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`.",
+					"default": null,
 					"anyOf": [
 						{ "$ref": "#/definitions/StableHookResult" },
 						{ "type": "null" }
@@ -2040,13 +2048,31 @@
 		},
 		"NoRestrictedTypesOptions": {
 			"type": "object",
-			"required": ["types"],
 			"properties": {
 				"types": {
+					"default": {},
 					"type": "object",
 					"additionalProperties": {
 						"$ref": "#/definitions/CustomRestrictedType"
 					}
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoSecretsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoSecretsOptions" }
+			]
+		},
+		"NoSecretsOptions": {
+			"type": "object",
+			"properties": {
+				"entropyThreshold": {
+					"description": "Set entropy threshold (default is 41).",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"minimum": 0.0
 				}
 			},
 			"additionalProperties": false
@@ -2115,6 +2141,20 @@
 						{ "type": "null" }
 					]
 				},
+				"noHeadElement": {
+					"description": "Prevent usage of \\<head> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImgElement": {
+					"description": "Prevent usage of \\<img> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
@@ -2167,7 +2207,7 @@
 				"noSecrets": {
 					"description": "Disallow usage of sensitive data such as API keys and tokens.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoSecretsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2201,6 +2241,13 @@
 				},
 				"noUnknownPseudoElement": {
 					"description": "Disallow unknown pseudo-element selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownTypeSelector": {
+					"description": "Disallow unknown type selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2531,7 +2578,6 @@
 		"RestrictedGlobalsOptions": {
 			"description": "Options for the rule `noRestrictedGlobals`.",
 			"type": "object",
-			"required": ["deniedGlobals"],
 			"properties": {
 				"deniedGlobals": {
 					"description": "A list of names that should trigger the rule",
@@ -2550,7 +2596,6 @@
 		"RestrictedImportsOptions": {
 			"description": "Options for the rule `noRestrictedImports`.",
 			"type": "object",
-			"required": ["paths"],
 			"properties": {
 				"paths": {
 					"description": "A list of names that should trigger the rule",
@@ -2794,6 +2839,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoRestrictedTypesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoSecretsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoSecretsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3440,14 +3500,15 @@
 		},
 		"SuggestedExtensionMapping": {
 			"type": "object",
-			"required": ["component", "module"],
 			"properties": {
 				"component": {
 					"description": "Extension that should be used for component file imports",
+					"default": "",
 					"type": "string"
 				},
 				"module": {
 					"description": "Extension that should be used for module imports",
+					"default": "",
 					"type": "string"
 				}
 			},
@@ -4009,6 +4070,11 @@
 					"type": "array",
 					"items": { "$ref": "#/definitions/Hook" }
 				},
+				"reportMissingDependenciesArray": {
+					"description": "Whether to report an error when a hook has no dependencies array.",
+					"default": false,
+					"type": "boolean"
+				},
 				"reportUnnecessaryDependencies": {
 					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.",
 					"default": true,
@@ -4025,10 +4091,10 @@
 		},
 		"UseImportExtensionsOptions": {
 			"type": "object",
-			"required": ["suggestedExtensions"],
 			"properties": {
 				"suggestedExtensions": {
 					"description": "A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension",
+					"default": {},
 					"type": "object",
 					"additionalProperties": {
 						"$ref": "#/definitions/SuggestedExtensionMapping"
@@ -4045,10 +4111,10 @@
 		},
 		"UseValidAutocompleteOptions": {
 			"type": "object",
-			"required": ["inputComponents"],
 			"properties": {
 				"inputComponents": {
 					"description": "`input` like custom components that should be checked.",
+					"default": [],
 					"type": "array",
 					"items": { "type": "string" }
 				}
@@ -4066,6 +4132,7 @@
 			"properties": {
 				"attributes": {
 					"description": "Additional attributes that will be sorted.",
+					"default": ["class", "className"],
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
@@ -4085,10 +4152,13 @@
 		},
 		"ValidAriaRoleOptions": {
 			"type": "object",
-			"required": ["allowInvalidRoles", "ignoreNonDom"],
 			"properties": {
-				"allowInvalidRoles": { "type": "array", "items": { "type": "string" } },
-				"ignoreNonDom": { "type": "boolean" }
+				"allowInvalidRoles": {
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"ignoreNonDom": { "default": false, "type": "boolean" }
 			},
 			"additionalProperties": false
 		},

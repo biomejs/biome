@@ -9,9 +9,9 @@ declare_lint_rule! {
     /// Disallow template literal placeholder syntax in regular strings.
     ///
     /// ECMAScript 6 allows programmers to create strings containing variable or expressions using template literals,
-    /// instead of string concatenation, by writing expressions like ${variable} between two backtick quotes (`).
-    /// It can be easy to use the wrong quotes when wanting to use template literals, by writing "${variable}",
-    /// and end up with the literal value "${variable}" instead of a string containing the value of the injected expressions.
+    /// instead of string concatenation, by writing expressions like `${variable}` between two backtick quotes (\`).
+    /// It can be easy to use the wrong quotes when wanting to use template literals, by writing `"${variable}"`,
+    /// and end up with the literal value `"${variable}"` instead of a string containing the value of the injected expressions.
     ///
     /// ## Examples
     ///

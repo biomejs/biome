@@ -291,11 +291,15 @@ impl Default for HookConfigMaps {
 /// Options for the rule `useExhaustiveDependencies`
 #[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseExhaustiveDependenciesOptions {
     /// Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
     #[serde(default = "report_unnecessary_dependencies_default")]
     pub report_unnecessary_dependencies: bool,
+
+    /// Whether to report an error when a hook has no dependencies array.
+    #[serde(default)]
+    pub report_missing_dependencies_array: bool,
 
     /// List of hooks of which the dependencies should be validated.
     #[serde(default)]
@@ -307,6 +311,7 @@ impl Default for UseExhaustiveDependenciesOptions {
     fn default() -> Self {
         Self {
             report_unnecessary_dependencies: report_unnecessary_dependencies_default(),
+            report_missing_dependencies_array: false,
             hooks: vec![],
         }
     }
@@ -318,7 +323,7 @@ fn report_unnecessary_dependencies_default() -> bool {
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 #[deserializable(with_validator)]
 pub struct Hook {
     /// The name of the hook.
@@ -407,6 +412,8 @@ impl HookConfigMaps {
 
 /// Flags the possible fixes that were found
 pub enum Fix {
+    /// When the entire dependencies array is missing
+    MissingDependenciesArray { function_name_range: TextRange },
     /// When a dependency needs to be added.
     AddDependency {
         function_name_range: TextRange,
@@ -749,7 +756,13 @@ impl Rule for UseExhaustiveDependencies {
             };
 
             if result.dependencies_node.is_none() {
-                return vec![];
+                if options.report_missing_dependencies_array {
+                    return vec![Fix::MissingDependenciesArray {
+                        function_name_range: result.function_name_range,
+                    }];
+                } else {
+                    return vec![];
+                }
             }
 
             let component_function_range = component_function.text_range();
@@ -904,6 +917,9 @@ impl Rule for UseExhaustiveDependencies {
 
     fn instances_for_signal(signal: &Self::State) -> Vec<String> {
         match signal {
+            Fix::MissingDependenciesArray {
+                function_name_range: _,
+            } => vec![],
             Fix::AddDependency { captures, .. } => vec![captures.0.clone()],
             Fix::RemoveDependency { dependencies, .. } => dependencies
                 .iter()
@@ -920,6 +936,15 @@ impl Rule for UseExhaustiveDependencies {
 
     fn diagnostic(ctx: &RuleContext<Self>, dep: &Self::State) -> Option<RuleDiagnostic> {
         match dep {
+            Fix::MissingDependenciesArray {
+                function_name_range,
+            } => {
+                return Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    function_name_range,
+                    markup! {"This hook does not have a dependencies array"},
+                ))
+            }
             Fix::AddDependency {
                 function_name_range,
                 captures,

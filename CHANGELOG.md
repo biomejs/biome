@@ -9,6 +9,66 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+#### Bug fixes
+
+- Improved the message for unused suppression comments. Contributed by @dyc3
+
+### CLI
+
+### Configuration
+
+#### Bug fixes
+
+- Fix an issue where the JSON schema marked lint rules options as mandatory. Contributed by @ematipico
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+- Biome no longer crashes when it encounters a string that contain a multibyte character ([#4181](https://github.com/biomejs/biome/issues/4181)).
+
+  This fixes a regression introduced in Biome 1.9.3
+  The regression affected the following linter rules:
+
+  - nursery/useSortedClasses
+  - nursery/useTrimStartEnd
+  - style/useTemplate
+  - suspicious/noMisleadingCharacterClass
+
+  Contributed by @Conaclos
+
+- Fix [#4190](https://github.com/biomejs/biome/issues/4190), where the rule `noMissingVarFunction` wrongly reported a variable as missing when used inside a `var()`  function that was a newline. Contributed by @ematipico
+
+- Fix [#4041](https://github.com/biomejs/biome/issues/4041). Now the rule `useSortedClasses` won't be triggered if `className` is composed only by inlined variables. Contributed by @ematipico
+
+### Parser
+
+#### Bug Fixes
+
+- The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
+
+  Browsers accept more emoji than the standard allows.
+  Biome now accepts these additional emoji.
+
+  The following code is now correctly parsed:
+
+  ```css
+  p {
+    --✨-color: red;
+    color: var(--✨-color);
+  }
+  ```
+
+  Contributed by @Conaclos
+
 ## v1.9.3 (2024-10-01)
 
 ### CLI
@@ -85,6 +145,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [noTemplateCurlyInString](https://biomejs.dev/linter/rules/no-template-curly-in-string/). Contributed by @fireairforce
 
 - Add [noOctalEscape](https://biomejs.dev/linter/rules/no-octal-escape/). Contributed by @fireairforce
+
+#### Enhancements
+
+- Add an option `reportUnnecessaryDependencies` to [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/).
+
+  Defaults to true. When set to false, errors will be suppressed for React hooks that declare dependencies but do not use them.
+
+  Contributed by @simon-paris
+
+- Add an option `reportMissingDependenciesArray` to [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/). Contributed by @simon-paris
 
 #### Bug fixes
 

@@ -1251,6 +1251,14 @@ export interface Nursery {
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
 	/**
+	 * Prevent usage of \<head> element in a Next.js project.
+	 */
+	noHeadElement?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent usage of \<img> element in a Next.js project.
+	 */
+	noImgElement?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
@@ -1281,7 +1289,7 @@ export interface Nursery {
 	/**
 	 * Disallow usage of sensitive data such as API keys and tokens.
 	 */
-	noSecrets?: RuleConfiguration_for_Null;
+	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
 	/**
 	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
@@ -1302,6 +1310,10 @@ export interface Nursery {
 	 * Disallow unknown pseudo-element selectors.
 	 */
 	noUnknownPseudoElement?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow unknown type selectors.
+	 */
+	noUnknownTypeSelector?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
@@ -2000,6 +2012,9 @@ export type RuleConfiguration_for_RestrictedImportsOptions =
 export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
+export type RuleConfiguration_for_NoSecretsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoSecretsOptions;
 export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseComponentExportOnlyModulesOptions;
@@ -2161,6 +2176,16 @@ export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	 */
 	options: NoRestrictedTypesOptions;
 }
+export interface RuleWithOptions_for_NoSecretsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoSecretsOptions;
+}
 export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -2306,8 +2331,8 @@ export interface NoLabelWithoutControlOptions {
 	labelComponents?: string[];
 }
 export interface ValidAriaRoleOptions {
-	allowInvalidRoles: string[];
-	ignoreNonDom: boolean;
+	allowInvalidRoles?: string[];
+	ignoreNonDom?: boolean;
 }
 /**
  * Options for the rule `noExcessiveCognitiveComplexity`.
@@ -2316,7 +2341,7 @@ export interface ComplexityOptions {
 	/**
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
-	maxAllowedComplexity: number;
+	maxAllowedComplexity?: number;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`
@@ -2326,6 +2351,10 @@ export interface UseExhaustiveDependenciesOptions {
 	 * List of hooks of which the dependencies should be validated.
 	 */
 	hooks?: Hook[];
+	/**
+	 * Whether to report an error when a hook has no dependencies array.
+	 */
+	reportMissingDependenciesArray?: boolean;
 	/**
 	 * Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.
 	 */
@@ -2339,7 +2368,7 @@ export interface UseImportExtensionsOptions {
 	/**
 	 * A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension
 	 */
-	suggestedExtensions: {};
+	suggestedExtensions?: {};
 }
 /**
  * Options for the rule `noRestrictedImports`.
@@ -2351,7 +2380,13 @@ export interface RestrictedImportsOptions {
 	paths: {};
 }
 export interface NoRestrictedTypesOptions {
-	types: {};
+	types?: {};
+}
+export interface NoSecretsOptions {
+	/**
+	 * Set entropy threshold (default is 41).
+	 */
+	entropyThreshold?: number;
 }
 export interface UseComponentExportOnlyModulesOptions {
 	/**
@@ -2364,7 +2399,7 @@ export interface UseComponentExportOnlyModulesOptions {
 	allowExportNames: string[];
 }
 export interface ConsistentMemberAccessibilityOptions {
-	accessibility: Accessibility;
+	accessibility?: Accessibility;
 }
 export interface UtilityClassSortingOptions {
 	/**
@@ -2380,7 +2415,7 @@ export interface UseValidAutocompleteOptions {
 	/**
 	 * `input` like custom components that should be checked.
 	 */
-	inputComponents: string[];
+	inputComponents?: string[];
 }
 /**
  * Options for the rule `noRestrictedGlobals`.
@@ -2392,7 +2427,7 @@ export interface RestrictedGlobalsOptions {
 	deniedGlobals: string[];
 }
 export interface ConsistentArrayTypeOptions {
-	syntax: ConsistentArrayType;
+	syntax?: ConsistentArrayType;
 }
 /**
  * Rule's options.
@@ -2465,7 +2500,7 @@ For example, for React's `useEffect()` hook, the dependencies index is 1.
 	/**
 	 * The name of the hook.
 	 */
-	name: string;
+	name?: string;
 	/**
 	* Whether the result of the hook is stable.
 
@@ -2850,6 +2885,7 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
@@ -2858,6 +2894,7 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
+	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
@@ -2876,6 +2913,7 @@ export type Category =
 	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownPseudoElement"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
+	| "lint/nursery/noUnknownTypeSelector"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"

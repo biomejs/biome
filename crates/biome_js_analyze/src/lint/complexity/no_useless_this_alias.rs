@@ -53,7 +53,7 @@ declare_lint_rule! {
     pub NoUselessThisAlias {
         version: "1.0.0",
         name: "noUselessThisAlias",
-        language: "ts",
+        language: "js",
         sources: &[RuleSource::EslintTypeScript("no-this-alias")],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
