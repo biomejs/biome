@@ -3,8 +3,9 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_js_factory::make::{js_binary_expression, parenthesized, token};
-use biome_js_syntax::{AnyJsExpression, AnyJsStatement, JsIfStatement, JsLogicalOperator, T};
+use biome_js_factory::make::{js_logical_expression, parenthesized, token};
+use biome_js_syntax::parentheses::NeedsParentheses;
+use biome_js_syntax::{AnyJsStatement, JsIfStatement, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
 
 use crate::JsRuleAction;
@@ -160,11 +161,19 @@ impl Rule for UseCollapsedIf {
             return None;
         }
 
-        let binary_expression = js_binary_expression(
-            parenthesized_if_needed(&parent_test),
-            token(T![&&]),
-            parenthesized_if_needed(&child_test),
-        );
+        let mut expr =
+            js_logical_expression(parent_test.clone(), token(T![&&]), child_test.clone());
+
+        // Parenthesize arms of the `&&` expression if needed
+        let left = expr.left().unwrap();
+        if left.needs_parentheses() {
+            expr = expr.with_left(parenthesized(left).into());
+        }
+
+        let right = expr.right().unwrap();
+        if right.needs_parentheses() {
+            expr = expr.with_right(parenthesized(right).into());
+        }
 
         // If the inner `if` statement has no block and the statement does not end with semicolon,
         // it cannot be fixed automatically because that will break the ASI rule.
@@ -176,7 +185,7 @@ impl Rule for UseCollapsedIf {
         }
 
         let mut mutation = ctx.root().begin();
-        mutation.replace_node(parent_test, binary_expression.into());
+        mutation.replace_node(parent_test, expr.into());
         mutation.replace_node(parent_consequent, child_consequent);
 
         Some(JsRuleAction::new(
@@ -185,30 +194,5 @@ impl Rule for UseCollapsedIf {
             markup! { "Use collapsed "<Emphasis>"if"</Emphasis>" instead." }.to_owned(),
             mutation,
         ))
-    }
-}
-
-fn parenthesized_if_needed(expr: &AnyJsExpression) -> AnyJsExpression {
-    if needs_parenthesis(expr) {
-        parenthesized(expr.clone()).into()
-    } else {
-        expr.clone()
-    }
-}
-
-/// If the test expression has an operator that has lower precedence than `&&`,
-/// it needs to be wrapped with a parenthesis before concatenating expressions using `&&`.
-/// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#Table
-fn needs_parenthesis(expr: &AnyJsExpression) -> bool {
-    match expr {
-        AnyJsExpression::JsLogicalExpression(expr) => matches!(
-            expr.operator().ok(),
-            Some(JsLogicalOperator::LogicalOr | JsLogicalOperator::NullishCoalescing)
-        ),
-        AnyJsExpression::JsConditionalExpression(_)
-        | AnyJsExpression::JsAssignmentExpression(_)
-        | AnyJsExpression::JsYieldExpression(_)
-        | AnyJsExpression::JsSequenceExpression(_) => true,
-        _ => false,
     }
 }

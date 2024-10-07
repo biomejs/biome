@@ -701,7 +701,7 @@ invalid.js:65:8 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
      65     │ - → if·(a)
      66     │ - → → if·(await·a)
      67     │ - → → → if·(a.b)
-         65 │ + → if·(a&&await·a)
+         65 │ + → if·(a&&(await·a))
          66 │ + → → if·(a.b)
      68  67 │   				if (a && b);
      69  68 │   }
@@ -731,7 +731,7 @@ invalid.js:66:15 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━�
      66     │ - → → if·(await·a)
      67     │ - → → → if·(a.b)
      68     │ - → → → → if·(a·&&·b);
-         66 │ + → → if·(await·a&&a.b)
+         66 │ + → → if·((await·a)&&a.b)
          67 │ + → → → if·(a·&&·b);
      69  68 │   }
      70  69 │   
