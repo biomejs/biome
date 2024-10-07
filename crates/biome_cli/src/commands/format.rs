@@ -1,7 +1,6 @@
 use crate::cli_options::CliOptions;
-use crate::commands::{get_files_to_process, CommandRunner};
+use crate::commands::{get_files_to_process_with_cli_options, CommandRunner, LoadEditorConfig};
 use crate::diagnostics::DeprecatedArgument;
-use crate::execute::VcsTargeted;
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::vcs::PartialVcsConfiguration;
 use biome_configuration::{
@@ -13,8 +12,8 @@ use biome_console::{markup, Console, ConsoleExt};
 use biome_deserialize::Merge;
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::FileSystem;
-use biome_service::configuration::{load_editorconfig, LoadedConfiguration};
-use biome_service::{DynRef, WorkspaceError};
+use biome_service::configuration::LoadedConfiguration;
+use biome_service::{DynRef, Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct FormatCommandPayload {
@@ -34,6 +33,15 @@ pub(crate) struct FormatCommandPayload {
     pub(crate) since: Option<String>,
 }
 
+impl LoadEditorConfig for FormatCommandPayload {
+    fn should_load_editor_config(&self, fs_configuration: &PartialConfiguration) -> bool {
+        self.formatter_configuration
+            .as_ref()
+            .and_then(|c| c.use_editorconfig)
+            .unwrap_or(fs_configuration.use_editorconfig().unwrap_or_default())
+    }
+}
+
 impl CommandRunner for FormatCommandPayload {
     const COMMAND_NAME: &'static str = "format";
 
@@ -49,26 +57,8 @@ impl CommandRunner for FormatCommandPayload {
             ..
         } = loaded_configuration;
         let editorconfig_search_path = configuration_path.clone();
-        let should_use_editorconfig = self
-            .formatter_configuration
-            .as_ref()
-            .and_then(|c| c.use_editorconfig)
-            .unwrap_or(biome_configuration.use_editorconfig().unwrap_or_default());
-        let mut fs_configuration = if should_use_editorconfig {
-            let (editorconfig, editorconfig_diagnostics) = {
-                let search_path = editorconfig_search_path
-                    .unwrap_or_else(|| fs.working_directory().unwrap_or_default());
-                load_editorconfig(fs, search_path)?
-            };
-            for diagnostic in editorconfig_diagnostics {
-                console.error(markup! {
-                    {PrintDiagnostic::simple(&diagnostic)}
-                })
-            }
-            editorconfig.unwrap_or_default()
-        } else {
-            Default::default()
-        };
+        let mut fs_configuration =
+            self.load_editor_config(editorconfig_search_path, &biome_configuration, fs, console)?;
         // this makes biome configuration take precedence over editorconfig configuration
         fs_configuration.merge_with(biome_configuration);
         let mut configuration = fs_configuration;
@@ -180,21 +170,20 @@ impl CommandRunner for FormatCommandPayload {
         fs: &DynRef<'_, dyn FileSystem>,
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
-        if let Some(paths) = get_files_to_process(
+        let paths = get_files_to_process_with_cli_options(
             self.since.as_deref(),
             self.changed,
             self.staged,
             fs,
             configuration,
-        )? {
-            Ok(paths)
-        } else {
-            Ok(self.paths.clone())
-        }
+        )?
+        .unwrap_or(self.paths.clone());
+
+        Ok(paths)
     }
 
-    fn get_stdin_file_path(&self) -> Option<&String> {
-        self.stdin_file_path.as_ref()
+    fn get_stdin_file_path(&self) -> Option<&str> {
+        self.stdin_file_path.as_deref()
     }
 
     fn should_write(&self) -> bool {
@@ -205,15 +194,13 @@ impl CommandRunner for FormatCommandPayload {
         &self,
         cli_options: &CliOptions,
         console: &mut dyn Console,
+        _workspace: &dyn Workspace,
     ) -> Result<Execution, CliDiagnostic> {
         Ok(Execution::new(TraversalMode::Format {
             ignore_errors: cli_options.skip_errors,
             write: self.should_write(),
             stdin: self.get_stdin(console)?,
-            vcs_targeted: VcsTargeted {
-                staged: self.staged,
-                changed: self.changed,
-            },
+            vcs_targeted: (self.staged, self.changed).into(),
         })
         .set_report(cli_options))
     }
