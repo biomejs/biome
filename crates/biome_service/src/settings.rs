@@ -1377,9 +1377,6 @@ impl OverrideSettingPattern {
         if let Some(line_width) = grit_formatter.line_width.or(formatter.line_width) {
             options.set_line_width(line_width);
         }
-        if let Some(quote_style) = grit_formatter.quote_style {
-            options.set_quote_style(quote_style);
-        }
 
         if let Ok(mut writeonly_cache) = self.cached_grit_format_options.write() {
             let options = options.clone();

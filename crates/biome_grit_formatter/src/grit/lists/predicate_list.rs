@@ -9,12 +9,8 @@ impl FormatRule<GritPredicateList> for FormatGritPredicateList {
 
         // TODO: Add separator
         for predicate in node {
-            match predicate {
-                Ok(predicate) => {
-                    join.entry(predicate.syntax(), &format_or_verbatim(predicate.format()));
-                }
-                Err(_) => (),
-            }
+            let predicate = predicate?;
+            join.entry(predicate.syntax(), &format_or_verbatim(predicate.format()));
         }
 
         join.finish()

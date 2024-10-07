@@ -8,17 +8,13 @@ impl FormatRule<GritDefinitionList> for FormatGritDefinitionList {
         let mut join: JoinNodesBuilder<'_, '_, Line, GritFormatContext> =
             f.join_nodes_with_hardline();
 
-        // TODO: Add separator
         for definition in node {
-            match definition {
-                Ok(definition) => {
-                    join.entry(
-                        definition.syntax(),
-                        &format_or_verbatim(definition.format()),
-                    );
-                }
-                Err(_) => (),
-            }
+            let definition = definition?;
+
+            join.entry(
+                definition.syntax(),
+                &format_or_verbatim(definition.format()),
+            );
         }
 
         join.finish()

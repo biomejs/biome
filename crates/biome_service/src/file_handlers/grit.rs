@@ -3,7 +3,7 @@ use crate::{
     WorkspaceError,
 };
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
-use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed, QuoteStyle};
+use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};
 use biome_grit_parser::parse_grit_with_cache;
@@ -23,7 +23,6 @@ pub struct GritFormatterSettings {
     pub line_width: Option<LineWidth>,
     pub indent_width: Option<IndentWidth>,
     pub indent_style: Option<IndentStyle>,
-    pub quote_style: Option<QuoteStyle>,
     pub enabled: Option<bool>,
 }
 
@@ -35,7 +34,6 @@ impl Default for GritFormatterSettings {
             indent_width: Default::default(),
             line_ending: Default::default(),
             line_width: Default::default(),
-            quote_style: Default::default(),
         }
     }
 }
@@ -82,8 +80,7 @@ impl ServiceLanguage for GritLanguage {
             .with_indent_style(indent_style)
             .with_indent_width(indent_width)
             .with_line_width(line_width)
-            .with_line_ending(line_ending)
-            .with_quote_style(language.and_then(|l| l.quote_style).unwrap_or_default());
+            .with_line_ending(line_ending);
         if let Some(overrides) = overrides {
             overrides.to_override_grit_format_options(path, options)
         } else {

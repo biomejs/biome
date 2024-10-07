@@ -2,7 +2,7 @@ use crate::comments::{FormatGritLeadingComment, GritCommentStyle, GritComments};
 use biome_formatter::printer::PrinterOptions;
 use biome_formatter::{
     AttributePosition, BracketSpacing, CstFormatContext, FormatContext, FormatOptions, IndentStyle,
-    IndentWidth, LineEnding, LineWidth, QuoteStyle, TransformSourceMap,
+    IndentWidth, LineEnding, LineWidth, TransformSourceMap,
 };
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_grit_syntax::GritLanguage;
@@ -61,7 +61,6 @@ pub struct GritFormatOptions {
     indent_width: IndentWidth,
     line_ending: LineEnding,
     line_width: LineWidth,
-    quote_style: QuoteStyle,
     attribute_position: AttributePosition,
     _file_source: GritFileSource,
 }
@@ -74,7 +73,6 @@ impl GritFormatOptions {
             indent_width: IndentWidth::default(),
             line_ending: LineEnding::default(),
             line_width: LineWidth::default(),
-            quote_style: QuoteStyle::default(),
             attribute_position: AttributePosition::default(),
         }
     }
@@ -99,11 +97,6 @@ impl GritFormatOptions {
         self
     }
 
-    pub fn with_quote_style(mut self, quote_style: QuoteStyle) -> Self {
-        self.quote_style = quote_style;
-        self
-    }
-
     pub fn set_indent_style(&mut self, indent_style: IndentStyle) {
         self.indent_style = indent_style;
     }
@@ -118,14 +111,6 @@ impl GritFormatOptions {
 
     pub fn set_line_width(&mut self, line_width: LineWidth) {
         self.line_width = line_width;
-    }
-
-    pub fn set_quote_style(&mut self, quote_style: QuoteStyle) {
-        self.quote_style = quote_style;
-    }
-
-    pub fn quote_style(&self) -> QuoteStyle {
-        self.quote_style
     }
 
     pub fn attribute_position(&self) -> AttributePosition {
