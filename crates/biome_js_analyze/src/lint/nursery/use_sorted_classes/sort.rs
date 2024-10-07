@@ -207,7 +207,6 @@ pub fn sort_class_name(
         }
     }
 
-    dbg!(&result);
     result
 }
 
