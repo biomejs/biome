@@ -8,6 +8,7 @@ pub mod no_irregular_whitespace;
 pub mod no_missing_var_function;
 pub mod no_unknown_pseudo_class;
 pub mod no_unknown_pseudo_element;
+pub mod no_unknown_type_selector;
 pub mod no_value_at_rule;
 
 declare_lint_group! {
@@ -20,6 +21,7 @@ declare_lint_group! {
             self :: no_missing_var_function :: NoMissingVarFunction ,
             self :: no_unknown_pseudo_class :: NoUnknownPseudoClass ,
             self :: no_unknown_pseudo_element :: NoUnknownPseudoElement ,
+            self :: no_unknown_type_selector :: NoUnknownTypeSelector ,
             self :: no_value_at_rule :: NoValueAtRule ,
         ]
      }
