@@ -2099,6 +2099,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDocumentCookie": {
+					"description": "Disallow use `document.cookie` directly.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateCustomProperties": {
 					"description": "Disallow duplicate custom properties within declaration blocks.",
 					"anyOf": [

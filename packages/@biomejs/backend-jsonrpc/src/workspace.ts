@@ -1227,6 +1227,10 @@ export interface Nursery {
 	 */
 	noDescendingSpecificity?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow use `document.cookie` directly.
+	 */
+	noDocumentCookie?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate custom properties within declaration blocks.
 	 */
 	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
@@ -2877,6 +2881,7 @@ export type Category =
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDescendingSpecificity"
+	| "lint/nursery/noDocumentCookie"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
@@ -2885,6 +2890,7 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
@@ -2894,7 +2900,6 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
-	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
