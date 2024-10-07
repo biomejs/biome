@@ -115,6 +115,8 @@ pub type NoHeadElement =
     <lint::nursery::no_head_element::NoHeadElement as biome_analyze::Rule>::Options;
 pub type NoHeaderScope =
     <lint::a11y::no_header_scope::NoHeaderScope as biome_analyze::Rule>::Options;
+pub type NoImgElement =
+    <lint::nursery::no_img_element::NoImgElement as biome_analyze::Rule>::Options;
 pub type NoImplicitAnyLet =
     <lint::suspicious::no_implicit_any_let::NoImplicitAnyLet as biome_analyze::Rule>::Options;
 pub type NoImplicitBoolean =

@@ -1255,6 +1255,10 @@ export interface Nursery {
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
 	/**
+	 * Prevent usage of \<img> element in a Next.js project.
+	 */
+	noImgElement?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
 	noIrregularWhitespace?: RuleConfiguration_for_Null;
@@ -2858,6 +2862,7 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
