@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
 
       - name: Check version changes
-        uses: EndBug/version-check@d4be4219408b50d1bbbfd350a47cbcb126878692 # v2.1.4
+        uses: EndBug/version-check@36ff30f37c7deabe56a30caa043d127be658c425 # v2.1.5
         id: version
         with:
           diff-search: true
