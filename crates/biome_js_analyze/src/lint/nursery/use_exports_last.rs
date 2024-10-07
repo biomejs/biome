@@ -2,9 +2,8 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::{AnyJsModuleItem, JsModuleItemList, JsSyntaxNode};
-use biome_rowan::AstNode;
-use biome_rowan::AstNodeList;
+use biome_js_syntax::{AnyJsModuleItem, JsModuleItemList};
+use biome_rowan::{AstNode, AstNodeList, TextRange};
 
 declare_lint_rule! {
     /// Require that all exports are declared after all non-export statements.
@@ -45,7 +44,7 @@ declare_lint_rule! {
 
 impl Rule for UseExportsLast {
     type Query = Ast<JsModuleItemList>;
-    type State = JsSyntaxNode;
+    type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -55,7 +54,7 @@ impl Rule for UseExportsLast {
 
         for item in items.iter() {
             if matches!(item, AnyJsModuleItem::JsExport(_)) {
-                last_export = Some(item.syntax().clone());
+                last_export = Some(item.range());
             } else if last_export.is_some() {
                 return last_export;
             }
@@ -63,11 +62,11 @@ impl Rule for UseExportsLast {
         None
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                node.text_range(),
+                range,
                 markup! {
                     "Export statements should appear at the end of the file."
                 },

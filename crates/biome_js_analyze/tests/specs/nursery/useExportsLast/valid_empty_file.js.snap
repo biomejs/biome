@@ -1,9 +1,8 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: valid_named_export.js
+expression: valid_empty_file.js
 ---
 # Input
 ```jsx
-export const foo = 1;
 
 ```

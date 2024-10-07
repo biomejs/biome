@@ -5,3 +5,5 @@ export const foobar = () => foo + bar;
 
 export { foo, bar };
 export default (x) = x ** 2;
+
+const baz = 3;
