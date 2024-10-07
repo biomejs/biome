@@ -1227,7 +1227,7 @@ export interface Nursery {
 	 */
 	noDescendingSpecificity?: RuleConfiguration_for_Null;
 	/**
-	 * Disallow use `document.cookie` directly.
+	 * Disallow use document.cookie directly.
 	 */
 	noDocumentCookie?: RuleConfiguration_for_Null;
 	/**

@@ -1499,6 +1499,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_for_each.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "unicorn/no-document-cookie" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_document_cookie.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/no-for-loop" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_for_of.get_or_insert(Default::default());
