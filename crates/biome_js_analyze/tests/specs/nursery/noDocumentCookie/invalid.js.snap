@@ -1,0 +1,41 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+document.cookie = "foo=bar";
+document.cookie += ";foo=bar"
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Usingdocument.cookie directly is not recommended
+  
+  > 1 │ document.cookie = "foo=bar";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ document.cookie += ";foo=bar"
+    3 │ 
+  
+  i Consider using the `Cookie Store API` or a library instead
+  
+
+```
+
+```
+invalid.js:2:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Usingdocument.cookie directly is not recommended
+  
+    1 │ document.cookie = "foo=bar";
+  > 2 │ document.cookie += ";foo=bar"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i Consider using the `Cookie Store API` or a library instead
+  
+
+```

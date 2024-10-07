@@ -1,3 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.js
+---
+# Input
+```jsx
 document.cookie
 
 const foo = document.cookie;
@@ -11,3 +17,4 @@ cookieStore
     expires: Date.now() + 24 * 60 * 60,
     domain: "example.com",
 })
+```

@@ -1,3 +1,2 @@
-var a = 1;
-a = 2;
-a = 3;
+document.cookie = "foo=bar";
+document.cookie += ";foo=bar"
