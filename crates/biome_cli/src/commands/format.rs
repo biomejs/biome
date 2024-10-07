@@ -1,5 +1,5 @@
 use crate::cli_options::CliOptions;
-use crate::commands::{get_files_to_process, CommandRunner, LoadEditorConfig};
+use crate::commands::{get_files_to_process_with_cli_options, CommandRunner, LoadEditorConfig};
 use crate::diagnostics::DeprecatedArgument;
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::vcs::PartialVcsConfiguration;
@@ -170,17 +170,16 @@ impl CommandRunner for FormatCommandPayload {
         fs: &DynRef<'_, dyn FileSystem>,
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
-        if let Some(paths) = get_files_to_process(
+        let paths = get_files_to_process_with_cli_options(
             self.since.as_deref(),
             self.changed,
             self.staged,
             fs,
             configuration,
-        )? {
-            Ok(paths)
-        } else {
-            Ok(self.paths.clone())
-        }
+        )?
+        .unwrap_or(self.paths.clone());
+
+        Ok(paths)
     }
 
     fn get_stdin_file_path(&self) -> Option<&str> {

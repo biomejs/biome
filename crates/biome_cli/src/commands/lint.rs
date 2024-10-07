@@ -1,6 +1,6 @@
 use super::{determine_fix_file_mode, FixFileModeOptions};
 use crate::cli_options::CliOptions;
-use crate::commands::{get_files_to_process, CommandRunner};
+use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
 use crate::{CliDiagnostic, Execution, TraversalMode};
 use biome_configuration::analyzer::RuleSelector;
 use biome_configuration::css::PartialCssLinter;
@@ -103,17 +103,16 @@ impl CommandRunner for LintCommandPayload {
         fs: &DynRef<'_, dyn FileSystem>,
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
-        if let Some(paths) = get_files_to_process(
+        let paths = get_files_to_process_with_cli_options(
             self.since.as_deref(),
             self.changed,
             self.staged,
             fs,
             configuration,
-        )? {
-            Ok(paths)
-        } else {
-            Ok(self.paths.clone())
-        }
+        )?
+        .unwrap_or(self.paths.clone());
+
+        Ok(paths)
     }
 
     fn get_stdin_file_path(&self) -> Option<&str> {

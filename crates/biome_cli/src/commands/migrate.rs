@@ -86,4 +86,8 @@ impl CommandRunner for MigrateCommandPayload {
             unsafe_: false,
         })
     }
+
+    fn should_validate_configuration_diagnostics(&self) -> bool {
+        false
+    }
 }

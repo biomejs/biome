@@ -612,7 +612,7 @@ impl BiomeCommand {
 
 /// It accepts a [LoadedPartialConfiguration] and it prints the diagnostics emitted during parsing and deserialization.
 ///
-/// If it contains errors, it return an error.
+/// If it contains [errors](Severity::Error) or higher, it returns an error.
 pub(crate) fn validate_configuration_diagnostics(
     loaded_configuration: &LoadedConfiguration,
     console: &mut dyn Console,
@@ -670,7 +670,7 @@ fn resolve_manifest(
     Ok(None)
 }
 
-fn get_files_to_process(
+fn get_files_to_process_with_cli_options(
     since: Option<&str>,
     changed: bool,
     staged: bool,
@@ -825,7 +825,13 @@ pub(crate) trait CommandRunner: Sized {
     ) -> Result<(Execution, Vec<OsString>), CliDiagnostic> {
         let loaded_configuration =
             load_configuration(fs, cli_options.as_configuration_path_hint())?;
-        validate_configuration_diagnostics(&loaded_configuration, console, cli_options.verbose)?;
+        if self.should_validate_configuration_diagnostics() {
+            validate_configuration_diagnostics(
+                &loaded_configuration,
+                console,
+                cli_options.verbose,
+            )?;
+        }
         let configuration_path = loaded_configuration.directory_path.clone();
         let configuration = self.merge_configuration(loaded_configuration, fs, console)?;
         let vcs_base_path = configuration_path.or(fs.working_directory());
@@ -915,10 +921,18 @@ pub(crate) trait CommandRunner: Sized {
     fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
         Ok(())
     }
+
+    /// Checks whether the configuration has errors.
+    fn should_validate_configuration_diagnostics(&self) -> bool {
+        true
+    }
 }
 
 pub trait LoadEditorConfig: CommandRunner {
+    /// Whether this command should load the `.editorconfig` file.
     fn should_load_editor_config(&self, fs_configuration: &PartialConfiguration) -> bool;
+
+    /// It loads the `.editorconfig` from the file system, parses it and deserialize it into a [PartialConfiguration]
     fn load_editor_config(
         &self,
         configuration_path: Option<PathBuf>,

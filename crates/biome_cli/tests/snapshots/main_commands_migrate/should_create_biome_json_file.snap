@@ -17,13 +17,5 @@ expression: content
 # Emitted Messages
 
 ```block
-rome.json internalError/fs ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The configuration file rome.json is deprecated. Use biome.json instead.
-  
-
-```
-
-```block
 The configuration rome.json has been successfully migrated.
 ```
