@@ -7,12 +7,12 @@ use biome_rowan::AstNode;
 use std::path::MAIN_SEPARATOR;
 
 declare_lint_rule! {
-    /// Prevent usage of `next/head` in `pages/_document.js` on Next.js projects.
+    /// Prevent using the `next/head` module in `pages/_document.js` on Next.js projects.
     ///
     /// Importing `next/head` within the custom `pages/_document.js` file can cause
     /// unexpected behavior in your application. The `next/head` component is designed
-    /// to be used at the page-level, and when used in the custom document it can interfere
-    /// with the global document structure and lead to issues with rendering and SEO.
+    /// to be used at the page level, and when used in the custom document it can interfere
+    /// with the global document structure, which leads to issues with rendering and SEO.
     ///
     /// To modify `<head>` elements across all pages, you should use the `<Head />`
     /// component from the `next/document` module.
@@ -59,11 +59,15 @@ impl Rule for NoHeadImportInDocument {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        if !ctx.source_type::<JsFileSource>().is_jsx() {
+            return None;
+        }
+
         let import = ctx.query();
         let import_source = import.import_clause().ok()?.source().ok()?;
         let module_name = import_source.inner_string_text().ok()?;
 
-        if !ctx.source_type::<JsFileSource>().is_jsx() || module_name != "next/head" {
+        if module_name != "next/head" {
             return None;
         }
 
@@ -71,7 +75,8 @@ impl Rule for NoHeadImportInDocument {
 
         if !path
             .ancestors()
-            .any(|a| a.file_name().map_or(false, |f| f == "pages"))
+            .filter_map(|a| a.file_name())
+            .any(|f| f == "pages")
         {
             return None;
         }
@@ -95,14 +100,18 @@ impl Rule for NoHeadImportInDocument {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let path = ctx.file_path().to_str()?.split("pages").nth(1)?;
-        let normalized_path = path.replace(MAIN_SEPARATOR, "/");
+        let path = if cfg!(debug_assertions) {
+            path.replace(MAIN_SEPARATOR, "/")
+        } else {
+            path.to_string()
+        };
 
         return Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 ctx.query().range(),
                 markup! {
-                    "Don't use "<Emphasis>"next/head"</Emphasis>" in pages"{normalized_path}""
+                    "Don't use "<Emphasis>"next/head"</Emphasis>" in pages"{path}""
                 },
             )
             .note(markup! {

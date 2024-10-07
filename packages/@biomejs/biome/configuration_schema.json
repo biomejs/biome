@@ -2131,7 +2131,7 @@
 					]
 				},
 				"noHeadImportInDocument": {
-					"description": "Prevent usage of next/head in pages/_document.js on Next.js projects.",
+					"description": "Prevent using the next/head module in pages/_document.js on Next.js projects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

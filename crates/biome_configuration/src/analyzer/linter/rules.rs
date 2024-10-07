@@ -3304,7 +3304,7 @@ pub struct Nursery {
     #[doc = "Prevent usage of \\<head> element in a Next.js project."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_head_element: Option<RuleConfiguration<biome_js_analyze::options::NoHeadElement>>,
-    #[doc = "Prevent usage of next/head in pages/_document.js on Next.js projects."]
+    #[doc = "Prevent using the next/head module in pages/_document.js on Next.js projects."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_head_import_in_document:
         Option<RuleConfiguration<biome_js_analyze::options::NoHeadImportInDocument>>,

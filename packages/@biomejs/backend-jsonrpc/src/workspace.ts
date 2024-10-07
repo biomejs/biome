@@ -1255,7 +1255,7 @@ export interface Nursery {
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
 	/**
-	 * Prevent usage of next/head in pages/_document.js on Next.js projects.
+	 * Prevent using the next/head module in pages/_document.js on Next.js projects.
 	 */
 	noHeadImportInDocument?: RuleConfiguration_for_Null;
 	/**
