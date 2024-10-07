@@ -1,0 +1,61 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/multiparser/markdown/html-with-markdown-script.html
+---
+# Input
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="text/markdown">
+        # hello
+        + **foo**
+        + __bar__
+    </script>
+</head>
+<body></body>
+</html>
+
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,12 +1,8 @@
+-<!doctype html>
++<!DOCTYPE html>
+ <html lang="en">
+-  <head>
++<head>
+     <script type="text/markdown">
+-      # hello
+-
+-      - **foo**
+-      - **bar**
+-    </script>
+-  </head>
+-  <body></body>
+-</html>
++        # hello
++        + **foo**
++        + __bar__
++    </script></head><body></body></html>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script type="text/markdown">
+        # hello
+        + **foo**
+        + __bar__
+    </script></head><body></body></html>```
