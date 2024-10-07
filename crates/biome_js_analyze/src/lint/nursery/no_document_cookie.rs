@@ -1,4 +1,4 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{
     global_identifier, AnyJsAssignment, AnyJsAssignmentPattern, JsAssignmentExpression,
@@ -10,10 +10,8 @@ use crate::services::semantic::Semantic;
 declare_lint_rule! {
     /// Disallow use `document.cookie` directly.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// It's not recommended to use document.cookie directly as it's easy to get the string wrong.
+    /// Instead, you should use the [Cookie Store API](https://developer.mozilla.org/en-US/docs/Web/API/CookieStore) or a [cookie library](https://www.npmjs.com/search?q=cookie).
     ///
     /// ## Examples
     ///
@@ -23,10 +21,29 @@ declare_lint_rule! {
     /// document.cookie = "foo=bar";
     /// ```
     ///
+    /// ```js,expect_diagnostic
+    /// document.cookie += "; foo=bar";
+    /// ```
+    ///
     /// ### Valid
     ///
     /// ```js
+    /// await cookieStore
+    ///   .set({
+    ///     name: "foo",
+    ///     value: "bar",
+    ///     expires: Date.now() + 24 * 60 * 60,
+    ///     domain: "example.com",
+    /// })
+    /// ```
+    ///
+    /// ```js
     /// const array = document.cookie.split("; ");
+    /// ```
+    /// ```js
+    /// import Cookies from 'js-cookie';
+    ///
+    /// Cookies.set('foo', 'bar');
     /// ```
     ///
     pub NoDocumentCookie {
@@ -34,6 +51,7 @@ declare_lint_rule! {
         name: "noDocumentCookie",
         language: "js",
         recommended: false,
+        sources: &[RuleSource::EslintUnicorn("no-document-cookie")],
     }
 }
 
