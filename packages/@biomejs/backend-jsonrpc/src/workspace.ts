@@ -1311,6 +1311,10 @@ export interface Nursery {
 	 */
 	noUnknownPseudoElement?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown type selectors.
+	 */
+	noUnknownTypeSelector?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
@@ -2890,6 +2894,7 @@ export type Category =
 	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownPseudoElement"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
+	| "lint/nursery/noUnknownTypeSelector"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"

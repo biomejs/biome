@@ -2228,6 +2228,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownTypeSelector": {
+					"description": "Disallow unknown type selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessEscapeInRegex": {
 					"description": "Disallow unnecessary escape sequence in regular expression literals.",
 					"anyOf": [
