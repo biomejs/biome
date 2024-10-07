@@ -7,6 +7,8 @@ expression: invalid.js
 document.cookie = "foo=bar";
 document.cookie += ";foo=bar"
 
+window.document.cookie = "foo=bar";
+globalThis.window.document.cookie = "foo=bar";
 ```
 
 # Diagnostics
@@ -20,7 +22,7 @@ invalid.js:1:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
     2 │ document.cookie += ";foo=bar"
     3 │ 
   
-  i Consider using the `Cookie Store API` or a library instead
+  i Consider using the Cookie Store API or a cookie library instead
   
 
 ```
@@ -34,8 +36,39 @@ invalid.js:2:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
   > 2 │ document.cookie += ";foo=bar"
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 
+    4 │ window.document.cookie = "foo=bar";
   
-  i Consider using the `Cookie Store API` or a library instead
+  i Consider using the Cookie Store API or a cookie library instead
+  
+
+```
+
+```
+invalid.js:4:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Usingdocument.cookie directly is not recommended
+  
+    2 │ document.cookie += ";foo=bar"
+    3 │ 
+  > 4 │ window.document.cookie = "foo=bar";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ globalThis.window.document.cookie = "foo=bar";
+  
+  i Consider using the Cookie Store API or a cookie library instead
+  
+
+```
+
+```
+invalid.js:5:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Usingdocument.cookie directly is not recommended
+  
+    4 │ window.document.cookie = "foo=bar";
+  > 5 │ globalThis.window.document.cookie = "foo=bar";
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+  i Consider using the Cookie Store API or a cookie library instead
   
 
 ```
