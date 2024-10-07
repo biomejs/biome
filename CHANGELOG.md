@@ -29,6 +29,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+- Biome no longer crashes when it encounters a string that contain a multibyte character ([#4181](https://github.com/biomejs/biome/issues/4181)).
+
+  This fixes a regression introduced in Biome 1.9.3
+  The regression affected the following linter rules:
+
+  - nursery/useSortedClasses
+  - nursery/useTrimStartEnd
+  - style/useTemplate
+  - suspicious/noMisleadingCharacterClass
+
+  Contributed by @Conaclos
+
+- Fix [#4190](https://github.com/biomejs/biome/issues/4190), where the rule `noMissingVarFunction` wrongly reported a variable as missing when used inside a `var()`  function that was a newline. Contributed by @ematipico
+
+### Parser
+
 #### Bug Fixes
 
 - The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
@@ -45,19 +61,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   }
   ```
 
-- Biome no longer crashes when it encounters a string that contain a multibyte character ([#4181](https://github.com/biomejs/biome/issues/4181)).
-
-  This fixes a regression introduced in Biome 1.9.3
-  The regression affected the following linter rules:
-
-  - nursery/useSortedClasses
-  - nursery/useTrimStartEnd
-  - style/useTemplate
-  - suspicious/noMisleadingCharacterClass
-
   Contributed by @Conaclos
-
-### Parser
 
 ## v1.9.3 (2024-10-01)
 
