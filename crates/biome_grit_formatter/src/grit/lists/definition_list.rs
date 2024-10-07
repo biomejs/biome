@@ -5,7 +5,7 @@ pub(crate) struct FormatGritDefinitionList;
 impl FormatRule<GritDefinitionList> for FormatGritDefinitionList {
     type Context = GritFormatContext;
     fn fmt(&self, node: &GritDefinitionList, f: &mut GritFormatter) -> FormatResult<()> {
-        let mut join: JoinNodesBuilder<'_, '_, Line, GritFormatContext> =
+        let mut join =
             f.join_nodes_with_hardline();
 
         for definition in node {
