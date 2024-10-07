@@ -13,9 +13,8 @@ use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 // use this test check if your snippet produces the diagnostics you wish, without using a snapshot
 #[ignore]
 #[test]
-fn run_test() {
-    let input_file =
-        Path::new("tests/specs/correctness/useExhaustiveDependencies/ignoredDependencies.js");
+fn quick_test() {
+    let input_file = Path::new("tests/specs/nursery/useSortedClasses/issue.jsx");
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
 
     let (group, rule) = parse_test_path(input_file);
@@ -73,6 +72,7 @@ fn analyze(
     let options = create_analyzer_options(input_file, &mut diagnostics);
     let manifest = load_manifest(input_file, &mut diagnostics);
 
+    dbg!("eree4");
     let (_, errors) =
         biome_js_analyze::analyze(&root, filter, &options, source_type, manifest, |event| {
             if let Some(mut diag) = event.diagnostic() {

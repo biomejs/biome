@@ -43,6 +43,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#4190](https://github.com/biomejs/biome/issues/4190), where the rule `noMissingVarFunction` wrongly reported a variable as missing when used inside a `var()`  function that was a newline. Contributed by @ematipico
 
+- Fix [#4041](https://github.com/biomejs/biome/issues/4041). Now the rule `useSortedClasses` won't be triggered if `className` is composed only by inlined variables. Contributed by @ematipico
+
 ### Parser
 
 #### Bug Fixes

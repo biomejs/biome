@@ -166,6 +166,7 @@ pub fn sort_class_name(
             }
         }
     }
+    dbg!(&sorted_classes, &classes_info);
 
     // TODO: make this the last step of compare instead?
 
@@ -207,6 +208,7 @@ pub fn sort_class_name(
         }
     }
 
+    dbg!(&result);
     result
 }
 
