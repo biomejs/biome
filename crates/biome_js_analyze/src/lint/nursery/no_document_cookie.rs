@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// ```js
     /// const array = document.cookie.split("; ");
     /// ```
-    /// 
+    ///
     /// ```js
     /// import Cookies from 'js-cookie';
     ///
