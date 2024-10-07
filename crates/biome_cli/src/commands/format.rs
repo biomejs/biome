@@ -69,6 +69,7 @@ pub(crate) fn format(
         apply: false,
         apply_unsafe: false,
         write,
+        suppress: false,
         fix,
         unsafe_: false,
     })?;

@@ -73,6 +73,7 @@ pub(crate) fn check(
             apply,
             apply_unsafe,
             write,
+            suppress: false,
             fix,
             unsafe_,
         },
