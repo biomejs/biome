@@ -74,6 +74,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) Fragments containing HTML escapes (e.g. &nbsp;) inside expression escapes `{ ... }` should not be considered useless.
+The following code is no longer reported:
+
+```jsx
+function Component() {
+  return (
+    <div key={index}>{line || <>&nbsp;</>}</div>
+  )
+}
+```
+
+Contributed by @fireairforce
+
 ### Parser
 
 #### Bug Fixes
@@ -251,19 +264,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([#3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
 
 - [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) don't create invaild JSX code when Fragments children contains JSX Expression and in a LogicalExpression. Contributed by @fireairforce
-
-- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) Fragments containing HTML escapes (e.g. &nbsp;) inside expression escapes `{ ... }` should not be considered useless.
-The following code is no longer reported:
-
-```jsx
-function Component() {
-  return (
-    <div key={index}>{line || <>&nbsp;</>}</div>
-  )
-}
-```
-
-Contributed by @fireairforce
 
 ### Parser
 
