@@ -67,11 +67,13 @@ declare_lint_rule! {
 impl Rule for NoDynamicNamespaceImportAccess {
     type Query = Semantic<JsImportNamespaceClause>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        find_dynamic_namespace_import_accesses(ctx).map_or(vec![], |range| range)
+        find_dynamic_namespace_import_accesses(ctx)
+            .map_or(Vec::new(), |x| x)
+            .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {

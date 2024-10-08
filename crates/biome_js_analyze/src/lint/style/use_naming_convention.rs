@@ -946,7 +946,7 @@ fn renamable(
 pub struct NamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
-    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
+    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
@@ -954,8 +954,8 @@ pub struct NamingConventionOptions {
     pub require_ascii: bool,
 
     /// Custom conventions.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub conventions: Vec<Convention>,
+    #[serde(default, skip_serializing_if = "<[_]>::is_empty")]
+    pub conventions: Box<[Convention]>,
 
     /// Allowed cases for _TypeScript_ `enum` member names.
     #[serde(default, skip_serializing_if = "is_default")]
@@ -966,7 +966,7 @@ impl Default for NamingConventionOptions {
         Self {
             strict_case: true,
             require_ascii: false,
-            conventions: Vec::new(),
+            conventions: Vec::new().into_boxed_slice(),
             enum_member_case: Format::default(),
         }
     }
@@ -974,9 +974,6 @@ impl Default for NamingConventionOptions {
 
 const fn enabled() -> bool {
     true
-}
-const fn is_enabled(value: &bool) -> bool {
-    *value
 }
 fn is_default<T: Default + Eq>(value: &T) -> bool {
     value == &T::default()

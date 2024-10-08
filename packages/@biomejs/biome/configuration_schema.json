@@ -4132,7 +4132,6 @@
 			"properties": {
 				"attributes": {
 					"description": "Additional attributes that will be sorted.",
-					"default": ["class", "className"],
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},
