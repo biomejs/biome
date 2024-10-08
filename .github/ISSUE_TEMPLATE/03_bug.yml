@@ -1,7 +1,7 @@
 name: 🐛 Bug Report
 description: Report a possible bug or regression
 title: "🐛 <TITLE>"
-labels: [ "S-To triage" ]
+labels: [ "S-Needs triage" ]
 body:
   - type: markdown
     attributes:
