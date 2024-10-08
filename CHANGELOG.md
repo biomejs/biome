@@ -74,7 +74,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) Fragments containing HTML escapes (e.g. &nbsp;) inside expression escapes `{ ... }` should not be considered useless.
+- Fixes [#4059](https://github.com/biomejs/biome/issues/4059), the rule [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now correctly handles fragments containing HTML escapes (e.g. `&nbsp;`) inside expression escapes `{ ... }`.
 The following code is no longer reported:
 
 ```jsx
