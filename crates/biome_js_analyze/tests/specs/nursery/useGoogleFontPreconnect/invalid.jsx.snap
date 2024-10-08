@@ -8,6 +8,13 @@ expression: invalid.jsx
 <>
 	<link href="https://fonts.gstatic.com"/>
 	<link rel="preload" href="https://fonts.gstatic.com"/>
+	<link
+		rel="preload"
+		href="https://fonts.gstatic.com"
+	/>
+	<link
+		href="https://fonts.gstatic.com"
+	/>
 </>
 ```
 
@@ -21,7 +28,7 @@ invalid.jsx:2:2 lint/nursery/useGoogleFontPreconnect  FIXABLE  ━━━━━�
   > 2 │ 	<link href="https://fonts.gstatic.com"/>
       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
-    4 │ </>
+    4 │ 	<link
   
   i Safe fix: Add rel="preconnect" attribute.
   
@@ -39,7 +46,54 @@ invalid.jsx:3:2 lint/nursery/useGoogleFontPreconnect ━━━━━━━━━
     2 │ 	<link href="https://fonts.gstatic.com"/>
   > 3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ </>
+    4 │ 	<link
+    5 │ 		rel="preload"
+  
+
+```
+
+```
+invalid.jsx:4:2 lint/nursery/useGoogleFontPreconnect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! rel="preconnect" is missing from Google Font.
+  
+    2 │ 	<link href="https://fonts.gstatic.com"/>
+    3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
+  > 4 │ 	<link
+      │ 	^^^^^
+  > 5 │ 		rel="preload"
+  > 6 │ 		href="https://fonts.gstatic.com"
+  > 7 │ 	/>
+      │ 	^^
+    8 │ 	<link
+    9 │ 		href="https://fonts.gstatic.com"
+  
+
+```
+
+```
+invalid.jsx:8:2 lint/nursery/useGoogleFontPreconnect  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! rel="preconnect" is missing from Google Font.
+  
+     6 │ 		href="https://fonts.gstatic.com"
+     7 │ 	/>
+   > 8 │ 	<link
+       │ 	^^^^^
+   > 9 │ 		href="https://fonts.gstatic.com"
+  > 10 │ 	/>
+       │ 	^^
+    11 │ </>
+  
+  i Safe fix: Add rel="preconnect" attribute.
+  
+     7  7 │   	/>
+     8  8 │   	<link
+     9    │ - → → href="https://fonts.gstatic.com"
+        9 │ + → → href="https://fonts.gstatic.com"
+       10 │ + → → rel="preconnect"
+    10 11 │   	/>
+    11 12 │   </>
   
 
 ```

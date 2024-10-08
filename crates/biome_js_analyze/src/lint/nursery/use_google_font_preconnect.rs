@@ -7,7 +7,7 @@ use biome_js_factory::make;
 use biome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, T,
 };
-use biome_rowan::{AstNode, BatchMutationExt, TextRange, TriviaPieceKind};
+use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange, TriviaPieceKind};
 
 use crate::JsRuleAction;
 
@@ -69,12 +69,10 @@ impl Rule for UseGoogleFontPreconnect {
             return None;
         }
 
-        if node
-            .get_attribute_inner_string_text("href")
-            .map_or(false, |href| href.starts_with("https://fonts.gstatic.com"))
-            && node
-                .get_attribute_inner_string_text("rel")
-                .map_or(true, |rel| rel != "preconnect")
+        let href = node.get_attribute_inner_string_text("href")?;
+        let rel = node.get_attribute_inner_string_text("rel");
+
+        if href.starts_with("https://fonts.gstatic.com") && (rel.is_none() || rel? != "preconnect")
         {
             return Some(node.syntax().text_range());
         }
@@ -98,19 +96,29 @@ impl Rule for UseGoogleFontPreconnect {
         }
 
         let mut mutation = ctx.root().begin();
-        let mut attributes: Vec<_> = node.attributes().into_iter().collect();
+        let mut attributes: Vec<_> = node.attributes().iter().collect();
+
+        let last_attr_token = match attributes.last()? {
+            AnyJsxAttribute::JsxAttribute(a) => a.name_value_token()?,
+            AnyJsxAttribute::JsxSpreadAttribute(a) => a.l_curly_token().ok()?,
+        };
+
+        let rel = if last_attr_token.has_leading_whitespace_or_newline() {
+            let pieces = last_attr_token.leading_trivia().pieces();
+            make::jsx_ident("rel").with_leading_trivia_pieces(pieces)
+        } else {
+            make::jsx_ident("rel").with_leading_trivia([(TriviaPieceKind::Whitespace, " ")])
+        };
 
         let new_attribute = AnyJsxAttribute::from(
-            make::jsx_attribute(AnyJsxAttributeName::JsxName(make::jsx_name(
-                make::jsx_ident("rel").with_leading_trivia([(TriviaPieceKind::Whitespace, " ")]),
-            )))
-            .with_initializer(make::jsx_attribute_initializer_clause(
-                make::token(T![=]),
-                AnyJsxAttributeValue::JsxString(make::jsx_string(make::jsx_string_literal(
-                    "preconnect",
-                ))),
-            ))
-            .build(),
+            make::jsx_attribute(AnyJsxAttributeName::JsxName(make::jsx_name(rel)))
+                .with_initializer(make::jsx_attribute_initializer_clause(
+                    make::token(T![=]),
+                    AnyJsxAttributeValue::JsxString(make::jsx_string(make::jsx_string_literal(
+                        "preconnect",
+                    ))),
+                ))
+                .build(),
         );
 
         attributes.push(new_attribute);
