@@ -13,9 +13,7 @@ use biome_js_syntax::{
     JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
     JsxExpressionChild, JsxFragment, JsxTagExpression, JsxText, T,
 };
-use biome_rowan::{
-    declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt, SyntaxNodeText,
-};
+use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
 declare_lint_rule! {
     /// Disallow unnecessary fragments
