@@ -213,14 +213,14 @@ impl DefinedProperty {
 impl Rule for NoDuplicateObjectKeys {
     type Query = Ast<JsObjectExpression>;
     type State = PropertyConflict;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
         let mut defined_properties = FxHashMap::default();
-        let mut signals: Self::Signals = Vec::new();
+        let mut signals = Vec::new();
 
         for member_definition in node
             .members()
@@ -251,7 +251,7 @@ impl Rule for NoDuplicateObjectKeys {
             }
         }
 
-        signals
+        signals.into_boxed_slice()
     }
 
     fn diagnostic(

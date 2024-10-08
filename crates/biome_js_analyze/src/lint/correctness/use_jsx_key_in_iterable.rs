@@ -56,19 +56,19 @@ declare_node_union! {
 impl Rule for UseJsxKeyInIterable {
     type Query = Semantic<UseJsxKeyInIterableQuery>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-
         match node {
             UseJsxKeyInIterableQuery::JsArrayExpression(node) => handle_collections(node, model),
             UseJsxKeyInIterableQuery::JsCallExpression(node) => {
                 handle_iterators(node, model).unwrap_or_default()
             }
         }
+        .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

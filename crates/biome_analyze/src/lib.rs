@@ -424,7 +424,7 @@ where
                     suppression
                         .suppressed_instances
                         .iter()
-                        .any(|(filter, v)| *filter == entry.rule && v == value)
+                        .any(|(filter, v)| *filter == entry.rule && v == value.as_ref())
                 })
             });
 
