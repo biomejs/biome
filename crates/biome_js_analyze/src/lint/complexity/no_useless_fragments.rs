@@ -194,11 +194,11 @@ impl Rule for NoUselessFragments {
                                 }
                             }
                             JsSyntaxKind::JSX_TEXT => {
-                                let child_text =
-                                    child.syntax().text().to_string().trim().to_string();
+                                let original_text = child.syntax().text().to_string();
+                                let child_text = original_text.trim();
 
                                 if (in_jsx_expr || in_js_logical_expr)
-                                    && contains_html_character_references(&child_text)
+                                    && contains_html_character_references(child_text)
                                 {
                                     children_where_fragments_must_preserved = true;
                                     break;
