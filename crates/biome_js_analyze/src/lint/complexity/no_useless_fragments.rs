@@ -13,7 +13,9 @@ use biome_js_syntax::{
     JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
     JsxExpressionChild, JsxFragment, JsxTagExpression, JsxText, T,
 };
-use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
+use biome_rowan::{
+    declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt, SyntaxNodeText,
+};
 
 declare_lint_rule! {
     /// Disallow unnecessary fragments
@@ -194,7 +196,9 @@ impl Rule for NoUselessFragments {
                                 }
                             }
                             JsSyntaxKind::JSX_TEXT => {
-                                let original_text = child.syntax().text().to_string();
+                                // We need to whitespaces and newlines from the original string.
+                                // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
+                                let original_text = child.text();
                                 let child_text = original_text.trim();
 
                                 if (in_jsx_expr || in_js_logical_expr)
