@@ -603,6 +603,7 @@ declare_lint_rule! {
     /// - Alternations `|`
     /// - Capturing groups `()`
     /// - Non-capturing groups `(?:)`
+    /// - Case-insensitive groups `(?i:)` and case-sensitive groups `(?-i:)`
     /// - A limited set of escaped characters including all special characters
     ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`
     ///
