@@ -74,6 +74,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- Fixes [#4059](https://github.com/biomejs/biome/issues/4059), the rule [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now correctly handles fragments containing HTML escapes (e.g. `&nbsp;`) inside expression escapes `{ ... }`.
+The following code is no longer reported:
+
+```jsx
+function Component() {
+  return (
+    <div key={index}>{line || <>&nbsp;</>}</div>
+  )
+}
+```
+
+Contributed by @fireairforce
+
 ### Parser
 
 #### Bug Fixes
