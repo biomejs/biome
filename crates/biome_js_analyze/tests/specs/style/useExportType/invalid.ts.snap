@@ -74,7 +74,7 @@ invalid.ts:2:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━
   
   i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Add inline type keywords.
+  i Safe fix: Add inline type modifiers.
   
     2 │ export·{·type·T1,·V1·};
       │          +++++         
@@ -159,7 +159,7 @@ invalid.ts:12:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
   
   i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Add inline type keywords.
+  i Safe fix: Add inline type modifiers.
   
     12 12 │   export {
     13 13 │       // leading comment
@@ -225,7 +225,7 @@ invalid.ts:27:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
   
   i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Add inline type keywords.
+  i Safe fix: Add inline type modifiers.
   
     27 │ export·{·type·Interface,·type·TypeAlias,·Enum,·func·as·f,·Class·};
        │          +++++           +++++                                    

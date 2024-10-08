@@ -17,7 +17,7 @@ use biome_rowan::{
 declare_lint_rule! {
     /// Promotes the use of `export type` for types.
     ///
-    /// _TypeScript_ allows adding the `type` keyword on an `export` to indicate that the `export` doesn't exist at runtime.
+    /// _TypeScript_ allows adding the `type` modifier on an `export` to indicate that the `export` doesn't exist at runtime.
     /// This allows compilers to safely drop exports of types without looking for their definition.
     ///
     /// The rule ensures that types are exported using a type-only `export`.
@@ -188,14 +188,14 @@ impl Rule for UseExportType {
                     rule_category!(),
                     named_export_clause.type_token()?.text_trimmed_range(),
                     markup! {
-                        "This "<Emphasis>"type"</Emphasis>" keyword makes all inline "<Emphasis>"type"</Emphasis>" keywords useless."
+                        "This "<Emphasis>"type"</Emphasis>" modifier makes all inline "<Emphasis>"type"</Emphasis>" modifiers useless."
                     },
                 );
                 for type_token in type_tokens {
                     diagnostic = diagnostic.detail(
                         type_token.text_trimmed_range(),
                         markup! {
-                            "This inline "<Emphasis>"type"</Emphasis>" keyword is useless."
+                            "This inline "<Emphasis>"type"</Emphasis>" modifier is useless."
                         },
                     )
                 }
@@ -314,7 +314,7 @@ impl Rule for UseExportType {
                 JsRuleAction::new(
                     ActionCategory::QuickFix,
                     ctx.metadata().applicability(),
-                    markup! { "Add inline "<Emphasis>"type"</Emphasis>" keywords." }.to_owned(),
+                    markup! { "Add inline "<Emphasis>"type"</Emphasis>" modifiers." }.to_owned(),
                     mutation,
                 )
             }
@@ -325,7 +325,7 @@ impl Rule for UseExportType {
                 JsRuleAction::new(
                     ActionCategory::QuickFix,
                     ctx.metadata().applicability(),
-                    markup! { "Remove useless inline "<Emphasis>"type"</Emphasis>" keywords." }
+                    markup! { "Remove useless inline "<Emphasis>"type"</Emphasis>" modifiers." }
                         .to_owned(),
                     mutation,
                 )
