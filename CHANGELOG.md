@@ -51,18 +51,32 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#4041](https://github.com/biomejs/biome/issues/4041). Now the rule `useSortedClasses` won't be triggered if `className` is composed only by inlined variables. Contributed by @ematipico
 
-- [useImportType](https://biomejs.dev/linter/rules/use-import-type/) now reports useless inline type qualifiers ([#4178](https://github.com/biomejs/biome/issues/4178)).
+- [useImportType](https://biomejs.dev/linter/rules/use-import-type/) and [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now report useless inline type qualifiers ([#4178](https://github.com/biomejs/biome/issues/4178)).
 
   The following fix is now proposed:
 
   ```diff
   - import type { type A, B } from "";
   + import type { A, B } from "";
+
+  - export type { type C, D };
+  + export type { C, D };
   ```
 
   Contributed by @Conaclos
 
-- [noVoidTypeReturn](https://biomejs.dev/linter/rules/no-void-type-return/) now accept `void` expressions in return position ([#4173](https://github.com/biomejs/biome/issues/4173)).
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now reports ungrouped `export from`.
+
+  The following fix is now proposed:
+
+  ```diff
+  - export { type A, type B } from "";
+  + export type { A, B } from "";
+  ```
+
+  Contributed by @Conaclos
+
+- [noVoidTypeReturn](https://biomejs.dev/linter/rules/no-void-type-return/) now accepts `void` expressions in return position ([#4173](https://github.com/biomejs/biome/issues/4173)).
 
   The following code is now accepted:
 
