@@ -246,7 +246,7 @@ invalid-combined.ts:27:8 lint/style/useImportType  FIXABLE  ━━━━━━�
   
   i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
-  i Safe fix: Add inline type modifiers.
+  i Safe fix: Add inline type keywords.
   
     27 │ import·T,·{·type·U·}·from·"";
        │             +++++            

@@ -65,7 +65,7 @@ invalid-named-imports.ts:1:8 lint/style/useImportType  FIXABLE  ━━━━━�
   
   i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
-  i Safe fix: Add inline type modifiers.
+  i Safe fix: Add inline type keywords.
   
     1 │ import·{·type·A,·type·B,·type·C,·D,·E·}·from·"";
       │          +++++   +++++   +++++                  
@@ -95,7 +95,7 @@ invalid-named-imports.ts:8:8 lint/style/useImportType  FIXABLE  ━━━━━�
   
   i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
-  i Safe fix: Add inline type modifiers.
+  i Safe fix: Add inline type keywords.
   
     8 │ import·{·type·X,·Y·}·from·"";
       │          +++++               
@@ -131,7 +131,7 @@ invalid-named-imports.ts:12:8 lint/style/useImportType  FIXABLE  ━━━━━
 ```
 invalid-named-imports.ts:15:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This type modifier makes all inline type modifiers useless.
+  ! This type keyword makes all inline type keywords useless.
   
     13 │ export type { H, I, J };
     14 │ 
@@ -140,7 +140,7 @@ invalid-named-imports.ts:15:8 lint/style/useImportType  FIXABLE  ━━━━━
     16 │ 
     17 │ // multiline
   
-  i This inline type modifier is useless.
+  i This inline type keyword is useless.
   
     13 │ export type { H, I, J };
     14 │ 
@@ -149,7 +149,7 @@ invalid-named-imports.ts:15:8 lint/style/useImportType  FIXABLE  ━━━━━
     16 │ 
     17 │ // multiline
   
-  i This inline type modifier is useless.
+  i This inline type keyword is useless.
   
     13 │ export type { H, I, J };
     14 │ 
@@ -158,7 +158,7 @@ invalid-named-imports.ts:15:8 lint/style/useImportType  FIXABLE  ━━━━━
     16 │ 
     17 │ // multiline
   
-  i Safe fix: Remove useless inline type modifiers.
+  i Safe fix: Remove useless inline type keywords.
   
     15 │ import·type·{·type·M,·N,·type·O·}·from·"";
        │               -----      -----            
@@ -202,7 +202,7 @@ invalid-named-imports.ts:18:8 lint/style/useImportType  FIXABLE  ━━━━━
   
   i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
-  i Safe fix: Add inline type modifiers.
+  i Safe fix: Add inline type keywords.
   
     18 18 │   import {
     19 19 │       U,

@@ -35,7 +35,7 @@ valid-unused-react-combined.tsx:1:8 lint/style/useImportType  FIXABLE  ━━━
   
   i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
-  i Safe fix: Add inline type modifiers.
+  i Safe fix: Add inline type keywords.
   
     1 │ import·React,·{·type·MouseEvent·}·from·'react';
       │                 +++++                          

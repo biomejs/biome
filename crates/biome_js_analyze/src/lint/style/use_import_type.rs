@@ -26,7 +26,7 @@ use rustc_hash::FxHashSet;
 declare_lint_rule! {
     /// Promotes the use of `import type` for types.
     ///
-    /// _TypeScript_ allows specifying a `type` modifier on an `import` to indicate that the `import` doesn't exist at runtime.
+    /// _TypeScript_ allows specifying a `type` keyword on an `import` to indicate that the `import` doesn't exist at runtime.
     /// This allows compilers to safely drop imports of types without looking for their definition.
     /// This also ensures that some modules are not loaded at runtime.
     ///
@@ -37,7 +37,7 @@ declare_lint_rule! {
     /// then you can disable this rule, as TSC can remove imports only used as types.
     /// However, for consistency and compatibility with other compilers, you may want to enable this rule.
     /// In that case we recommend to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
-    /// This configuration ensures that TSC preserves imports not marked with the `type` modifier.
+    /// This configuration ensures that TSC preserves imports not marked with the `type` keyword.
     ///
     /// You may also want to enable the editor setting [`typescript.preferences.preferTypeOnlyAutoImports`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-3-rc/#settings-to-prefer-type-auto-imports) from the TypeScript LSP.
     /// This setting is available in Visual Studio Code.
@@ -164,7 +164,7 @@ impl Rule for UseImportType {
                                     // when the default import is not only used as a type.
                                     None
                                 } else {
-                                    // Prefer adding type modifier instead of
+                                    // Prefer adding type keyword instead of
                                     // splitting the import statement into two import statements
                                     Some(ImportTypeFix::AddInlineTypeQualifiers(specifiers))
                                 }
@@ -320,14 +320,14 @@ impl Rule for UseImportType {
                     rule_category!(),
                     import_clause.type_token()?.text_trimmed_range(),
                     markup! {
-                        "This "<Emphasis>"type"</Emphasis>" modifier makes all inline "<Emphasis>"type"</Emphasis>" modifiers useless."
+                        "This "<Emphasis>"type"</Emphasis>" keyword makes all inline "<Emphasis>"type"</Emphasis>" keywords useless."
                     },
                 );
                 for type_token in type_tokens {
                     diagnostic = diagnostic.detail(
                         type_token.text_trimmed_range(),
                         markup! {
-                            "This inline "<Emphasis>"type"</Emphasis>" modifier is useless."
+                            "This inline "<Emphasis>"type"</Emphasis>" keyword is useless."
                         },
                     )
                 }
@@ -562,7 +562,7 @@ impl Rule for UseImportType {
                 return Some(JsRuleAction::new(
                     ActionCategory::QuickFix,
                     ctx.metadata().applicability(),
-                    markup! { "Add inline "<Emphasis>"type"</Emphasis>" modifiers." }.to_owned(),
+                    markup! { "Add inline "<Emphasis>"type"</Emphasis>" keywords." }.to_owned(),
                     mutation,
                 ));
             }
@@ -573,7 +573,7 @@ impl Rule for UseImportType {
                 return Some(JsRuleAction::new(
                     ActionCategory::QuickFix,
                     ctx.metadata().applicability(),
-                    markup! { "Remove useless inline "<Emphasis>"type"</Emphasis>" modifiers." }
+                    markup! { "Remove useless inline "<Emphasis>"type"</Emphasis>" keywords." }
                         .to_owned(),
                     mutation,
                 ));
