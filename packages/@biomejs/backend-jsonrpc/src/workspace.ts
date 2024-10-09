@@ -1335,6 +1335,10 @@ export interface Nursery {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
+	 * Enforce using single if instead of nested if clauses.
+	 */
+	useCollapsedIf?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */
 	useComponentExportOnlyModules?: RuleConfiguration_for_UseComponentExportOnlyModulesOptions;
@@ -2922,6 +2926,7 @@ export type Category =
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useCollapsedIf"
 	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
