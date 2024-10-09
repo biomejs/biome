@@ -15,14 +15,14 @@ globalThis.window.document.cookie = "foo=bar";
 ```
 invalid.js:1:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usingdocument.cookie directly is not recommended
+  ! Direct assigning to document.cookie is not recommended.
   
   > 1 │ document.cookie = "foo=bar";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ document.cookie += ";foo=bar"
     3 │ 
   
-  i Consider using the Cookie Store API or a cookie library instead
+  i Consider using the Cookie Store API.
   
 
 ```
@@ -30,7 +30,7 @@ invalid.js:1:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:2:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usingdocument.cookie directly is not recommended
+  ! Direct assigning to document.cookie is not recommended.
   
     1 │ document.cookie = "foo=bar";
   > 2 │ document.cookie += ";foo=bar"
@@ -38,7 +38,7 @@ invalid.js:2:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
     3 │ 
     4 │ window.document.cookie = "foo=bar";
   
-  i Consider using the Cookie Store API or a cookie library instead
+  i Consider using the Cookie Store API.
   
 
 ```
@@ -46,7 +46,7 @@ invalid.js:2:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:4:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usingdocument.cookie directly is not recommended
+  ! Direct assigning to document.cookie is not recommended.
   
     2 │ document.cookie += ";foo=bar"
     3 │ 
@@ -54,7 +54,7 @@ invalid.js:4:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ globalThis.window.document.cookie = "foo=bar";
   
-  i Consider using the Cookie Store API or a cookie library instead
+  i Consider using the Cookie Store API.
   
 
 ```
@@ -62,13 +62,13 @@ invalid.js:4:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
 ```
 invalid.js:5:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Usingdocument.cookie directly is not recommended
+  ! Direct assigning to document.cookie is not recommended.
   
     4 │ window.document.cookie = "foo=bar";
   > 5 │ globalThis.window.document.cookie = "foo=bar";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Consider using the Cookie Store API or a cookie library instead
+  i Consider using the Cookie Store API.
   
 
 ```

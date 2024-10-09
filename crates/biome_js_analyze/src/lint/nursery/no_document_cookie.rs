@@ -100,7 +100,7 @@ impl Rule for NoDocumentCookie {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Direct assigning to" <Emphasis>"document.cookie"</Emphasis>" is not recommended"
+                    "Direct assigning to "<Emphasis>"document.cookie"</Emphasis>" is not recommended."
                 },
             )
             .note(markup! {
