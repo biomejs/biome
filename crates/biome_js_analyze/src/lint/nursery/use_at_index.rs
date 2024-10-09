@@ -149,12 +149,12 @@ impl Rule for UseAtIndex {
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
-                markup! {
-                    "Replace index references with "<Emphasis>".at()"</Emphasis>"."
-                }
+                state.error_type.get_error_message()
                 .to_owned(),
             )
-            .note(state.error_type.get_error_message()),
+            .note(markup! {
+                    "Using "<Emphasis>".at()"</Emphasis>" is more convenient and is easier to read."
+                }),
         )
     }
 
