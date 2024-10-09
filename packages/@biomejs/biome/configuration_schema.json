@@ -2292,6 +2292,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAtIndex": {
+					"description": "Use at() instead of integer index access.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useComponentExportOnlyModules": {
 					"description": "Enforce declaring components only within modules that export React Components exclusively.",
 					"anyOf": [
