@@ -70,7 +70,7 @@ impl Rule for NoConsole {
                 .options()
                 .allow
                 .iter()
-                .any(|allowed| allowed == member_name)
+                .any(|allowed| allowed.as_ref() == member_name)
             {
                 return None;
             }
@@ -122,5 +122,5 @@ impl Rule for NoConsole {
 #[serde(deny_unknown_fields)]
 pub struct NoConsoleOptions {
     /// Allowed calls on the console object.
-    pub allow: Vec<String>,
+    pub allow: Box<[Box<str>]>,
 }

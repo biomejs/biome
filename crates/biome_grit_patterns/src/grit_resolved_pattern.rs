@@ -16,15 +16,14 @@ use grit_pattern_matcher::pattern::{
     ResolvedPattern, ResolvedSnippet, State,
 };
 use grit_util::{AnalysisLogs, Ast, CodeRange, Range};
-use im::{vector, Vector};
 use std::borrow::Cow;
 use std::collections::{BTreeMap, HashMap};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum GritResolvedPattern<'a> {
-    Binding(Vector<GritBinding<'a>>),
-    Snippets(Vector<ResolvedSnippet<'a, GritQueryContext>>),
-    List(Vector<GritResolvedPattern<'a>>),
+    Binding(Vec<GritBinding<'a>>),
+    Snippets(Vec<ResolvedSnippet<'a, GritQueryContext>>),
+    List(Vec<GritResolvedPattern<'a>>),
     Map(BTreeMap<String, GritResolvedPattern<'a>>),
     File(GritFile<'a>),
     Files(Box<GritResolvedPattern<'a>>),
@@ -40,10 +39,10 @@ impl<'a> GritResolvedPattern<'a> {
         Self::from_binding(GritBinding::from_node(tree.root_node()))
     }
 
-    fn to_snippets(&self) -> Result<Vector<ResolvedSnippet<'a, GritQueryContext>>> {
+    fn to_snippets(&self) -> Result<Vec<ResolvedSnippet<'a, GritQueryContext>>> {
         match self {
             Self::Snippets(snippets) => Ok(snippets.clone()),
-            Self::Binding(bindings) => Ok(vector![ResolvedSnippet::from_binding(
+            Self::Binding(bindings) => Ok(vec![ResolvedSnippet::from_binding(
                 bindings
                     .last()
                     .ok_or_else(|| {
@@ -59,7 +58,7 @@ impl<'a> GritResolvedPattern<'a> {
                     snippets.push(ResolvedSnippet::Text(" ".into()));
                 }
                 snippets.pop();
-                Ok(snippets.into())
+                Ok(snippets)
             }
             Self::Map(map) => {
                 let mut snippets = Vec::new();
@@ -71,7 +70,7 @@ impl<'a> GritResolvedPattern<'a> {
                 }
                 snippets.pop();
                 snippets.push(ResolvedSnippet::Text("}".into()));
-                Ok(snippets.into())
+                Ok(snippets)
             }
             Self::File(_) => Err(anyhow::anyhow!(
                 "cannot convert ResolvedPattern::File to ResolvedSnippet"
@@ -80,7 +79,7 @@ impl<'a> GritResolvedPattern<'a> {
                 "cannot convert ResolvedPattern::Files to ResolvedSnippet"
             )),
             Self::Constant(constant) => {
-                Ok(vector![ResolvedSnippet::Text(constant.to_string().into())])
+                Ok(vec![ResolvedSnippet::Text(constant.to_string().into())])
             }
         }
     }
@@ -88,7 +87,7 @@ impl<'a> GritResolvedPattern<'a> {
 
 impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
     fn from_binding(binding: GritBinding<'a>) -> Self {
-        Self::Binding(vector![binding])
+        Self::Binding(vec![binding])
     }
 
     fn from_constant(constant: Constant) -> Self {
@@ -108,11 +107,11 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
     }
 
     fn from_string(string: String) -> Self {
-        Self::Snippets(vector![ResolvedSnippet::Text(string.into())])
+        Self::Snippets(vec![ResolvedSnippet::Text(string.into())])
     }
 
     fn from_resolved_snippet(snippet: ResolvedSnippet<'a, GritQueryContext>) -> Self {
-        Self::Snippets(vector![snippet])
+        Self::Snippets(vec![snippet])
     }
 
     fn from_dynamic_snippet(
@@ -145,7 +144,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
                 }
             }
         }
-        Ok(Self::Snippets(parts.into()))
+        Ok(Self::Snippets(parts))
     }
 
     fn from_dynamic_pattern(
@@ -176,7 +175,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
                 for element in &list.elements {
                     elements.push(Self::from_dynamic_pattern(element, state, context, logs)?);
                 }
-                Ok(Self::List(elements.into()))
+                Ok(Self::List(elements))
             }
             DynamicPattern::Snippet(snippet) => {
                 Self::from_dynamic_snippet(snippet, state, context, logs)
@@ -234,7 +233,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
             Pattern::CallBuiltIn(built_in) => built_in.call(state, context, logs),
             Pattern::CallFunction(func) => func.call(state, context, logs),
             Pattern::CallForeignFunction(_) => unimplemented!(),
-            Pattern::StringConstant(string) => Ok(Self::Snippets(vector![ResolvedSnippet::Text(
+            Pattern::StringConstant(string) => Ok(Self::Snippets(vec![ResolvedSnippet::Text(
                 (&string.text).into(),
             )])),
             Pattern::IntConstant(int) => Ok(Self::Constant(Constant::Integer(int.value))),
@@ -256,7 +255,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
                 .patterns
                 .iter()
                 .map(|pattern| Self::from_pattern(pattern, state, context, logs))
-                .collect::<Result<Vector<_>>>()
+                .collect::<Result<Vec<_>>>()
                 .map(Self::List),
             Pattern::ListIndex(index) => Self::from_list_index(index, state, context, logs),
             Pattern::Map(map) => map
@@ -331,7 +330,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
     fn extend(
         &mut self,
         _with: Self,
-        _effects: &mut Vector<Effect<'a, GritQueryContext>>,
+        _effects: &mut im::Vector<Effect<'a, GritQueryContext>>,
         _language: &<GritQueryContext as QueryContext>::Language<'a>,
     ) -> anyhow::Result<()> {
         bail!("Not implemented") // TODO: Implement rewriting
@@ -558,7 +557,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
             bail!("can only push to bindings");
         };
 
-        bindings.push_back(binding);
+        bindings.push(binding);
         Ok(())
     }
 

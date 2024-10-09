@@ -115,6 +115,7 @@ pub type NoGlobalIsNan =
 pub type NoGlobalObjectCalls = < lint :: correctness :: no_global_object_calls :: NoGlobalObjectCalls as biome_analyze :: Rule > :: Options ;
 pub type NoHeadElement =
     <lint::nursery::no_head_element::NoHeadElement as biome_analyze::Rule>::Options;
+pub type NoHeadImportInDocument = < lint :: nursery :: no_head_import_in_document :: NoHeadImportInDocument as biome_analyze :: Rule > :: Options ;
 pub type NoHeaderScope =
     <lint::a11y::no_header_scope::NoHeaderScope as biome_analyze::Rule>::Options;
 pub type NoImgElement =

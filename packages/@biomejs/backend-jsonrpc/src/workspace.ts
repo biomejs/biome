@@ -1259,6 +1259,10 @@ export interface Nursery {
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
 	/**
+	 * Prevent using the next/head module in pages/_document.js on Next.js projects.
+	 */
+	noHeadImportInDocument?: RuleConfiguration_for_Null;
+	/**
 	 * Prevent usage of \<img> element in a Next.js project.
 	 */
 	noImgElement?: RuleConfiguration_for_Null;
@@ -2891,6 +2895,7 @@ export type Category =
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
 	| "lint/nursery/noHeadElement"
+	| "lint/nursery/noHeadImportInDocument"
 	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"

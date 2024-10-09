@@ -2155,6 +2155,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noHeadImportInDocument": {
+					"description": "Prevent using the next/head module in pages/_document.js on Next.js projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noImgElement": {
 					"description": "Prevent usage of \\<img> element in a Next.js project.",
 					"anyOf": [
@@ -4139,7 +4146,6 @@
 			"properties": {
 				"attributes": {
 					"description": "Additional attributes that will be sorted.",
-					"default": ["class", "className"],
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},

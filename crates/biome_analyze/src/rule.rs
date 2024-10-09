@@ -800,8 +800,8 @@ pub trait Rule: RuleMeta + Sized {
     /// *Note: For `noUnusedVariables` the above may not seem very useful (and
     /// indeed it's not implemented), but for rules such as
     /// `useExhaustiveDependencies` this is actually desirable.*
-    fn instances_for_signal(_signal: &Self::State) -> Vec<String> {
-        Vec::new()
+    fn instances_for_signal(_signal: &Self::State) -> Box<[Box<str>]> {
+        Vec::new().into_boxed_slice()
     }
 
     /// Used by the analyzer to associate a range of source text to a signal in

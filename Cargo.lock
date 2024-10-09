@@ -602,6 +602,7 @@ dependencies = [
  "biome_configuration",
  "biome_formatter",
  "biome_formatter_test",
+ "biome_fs",
  "biome_grit_factory",
  "biome_grit_parser",
  "biome_grit_syntax",

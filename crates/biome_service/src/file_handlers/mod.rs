@@ -317,6 +317,13 @@ impl DocumentFileSource {
         }
     }
 
+    pub fn to_grit_file_source(&self) -> Option<GritFileSource> {
+        match self {
+            DocumentFileSource::Grit(grit) => Some(*grit),
+            _ => None,
+        }
+    }
+
     pub fn to_css_file_source(&self) -> Option<CssFileSource> {
         match self {
             DocumentFileSource::Css(css) => Some(*css),

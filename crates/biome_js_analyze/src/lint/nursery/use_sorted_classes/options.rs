@@ -10,32 +10,23 @@ use serde::{Deserialize, Serialize};
 /// Attributes that are always targets.
 const CLASS_ATTRIBUTES: [&str; 2] = ["class", "className"];
 
-#[derive(Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
+#[derive(Default, Deserialize, Serialize, Eq, PartialEq, Debug, Clone)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UtilityClassSortingOptions {
     /// Additional attributes that will be sorted.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub attributes: Option<Vec<String>>,
+    pub attributes: Option<Box<[Box<str>]>>,
     /// Names of the functions or tagged templates that will be sorted.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub functions: Option<Vec<String>>,
-}
-
-impl Default for UtilityClassSortingOptions {
-    fn default() -> Self {
-        UtilityClassSortingOptions {
-            attributes: Some(CLASS_ATTRIBUTES.iter().map(|&s| s.to_string()).collect()),
-            functions: None,
-        }
-    }
+    pub functions: Option<Vec<Box<str>>>,
 }
 
 impl UtilityClassSortingOptions {
     pub(crate) fn has_function(&self, name: &str) -> bool {
         let iter = self.functions.iter().flatten();
         for v in iter {
-            if v.as_str() == name {
+            if v.as_ref() == name {
                 return true;
             }
         }
@@ -43,13 +34,8 @@ impl UtilityClassSortingOptions {
     }
 
     pub(crate) fn has_attribute(&self, name: &str) -> bool {
-        let iter = self.attributes.iter().flatten();
-        for v in iter {
-            if v.as_str() == name {
-                return true;
-            }
-        }
-        false
+        CLASS_ATTRIBUTES.contains(&name)
+            || self.attributes.iter().flatten().any(|v| v.as_ref() == name)
     }
 }
 
@@ -80,6 +66,7 @@ impl DeserializationVisitor for UtilityClassSortingOptionsVisitor {
     ) -> Option<Self::Output> {
         let mut result = UtilityClassSortingOptions::default();
 
+        let mut attributes = Vec::new();
         for (key, value) in members.flatten() {
             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
                 continue;
@@ -89,10 +76,7 @@ impl DeserializationVisitor for UtilityClassSortingOptionsVisitor {
                     if let Some(attributes_option) =
                         Deserializable::deserialize(&value, &key_text, diagnostics)
                     {
-                        result
-                            .attributes
-                            .get_or_insert_with(Vec::new)
-                            .extend::<Vec<String>>(attributes_option);
+                        attributes.extend::<Vec<Box<str>>>(attributes_option);
                     }
                 }
                 "functions" => {
@@ -105,7 +89,11 @@ impl DeserializationVisitor for UtilityClassSortingOptionsVisitor {
                 )),
             }
         }
-
+        result.attributes = if attributes.is_empty() {
+            None
+        } else {
+            Some(attributes.into_boxed_slice())
+        };
         Some(result)
     }
 }
