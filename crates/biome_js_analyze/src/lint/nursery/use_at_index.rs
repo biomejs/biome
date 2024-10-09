@@ -15,7 +15,12 @@ use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationEx
 declare_lint_rule! {
     /// Use `at()` instead of integer index access.
     ///
-    /// When extracting elements from an array, especially when retrieving from the end, `.at` is convenient. Replace the previously used syntax with `.at()`.
+    /// Accessing an element at the end of an array or a string is inconvenient because you have to subtract the length of the array or the string from the backward 1-based index of the element to access.
+    /// For example, to access the last element of an array or a string, you would have to write `array[array.length - 1]`.
+    /// A more convenient way to achieve the same thing is to use the `at()` method with a negative index.
+    /// To access the last element of an array or a string just write `array.at(-1)`.
+    ///
+    /// This rule enforces the usage of `at()` over index access, `chatAt()`, and `slice()[0]` when `at()` is more convenient.
     ///
     ///
     /// ## Examples
