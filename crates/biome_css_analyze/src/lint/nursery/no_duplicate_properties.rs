@@ -44,16 +44,15 @@ declare_lint_rule! {
 impl Rule for NoDuplicateProperties {
     type Query = Semantic<CssDeclarationOrRuleList>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Option<Self::State>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let model = ctx.model();
 
         let rule = model.get_rule_by_range(node.range()).unwrap();
 
-        let mut duplicates = Vec::new();
         let mut seen = FxHashSet::default();
 
         for declaration in rule.declarations.iter() {
@@ -62,11 +61,11 @@ impl Rule for NoDuplicateProperties {
             let is_custom_propety = prop_name.starts_with("--");
 
             if !is_custom_propety && !seen.insert(prop_name) {
-                duplicates.push(property.range);
+                return Some(property.range);
             }
         }
 
-        duplicates
+        None
     }
 
     fn diagnostic(_: &RuleContext<Self>, span: &Self::State) -> Option<RuleDiagnostic> {
@@ -75,11 +74,11 @@ impl Rule for NoDuplicateProperties {
                 rule_category!(),
                 span,
                 markup! {
-                    "Duplicate property detected in the declaration block."
+                    "Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally."
                 },
             )
             .note(markup! {
-                    "Duplicate properties can lead to unexpected behavior."
+                    "Remove or rename the duplicate property to ensure styling."
             }),
         )
     }
