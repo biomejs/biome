@@ -126,7 +126,7 @@ impl Rule for NoRestrictedTypes {
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoRestrictedTypesOptions {
-    types: FxHashMap<String, CustomRestrictedType>,
+    types: FxHashMap<Box<str>, CustomRestrictedType>,
 }
 
 #[derive(

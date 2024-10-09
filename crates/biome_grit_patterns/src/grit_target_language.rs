@@ -187,19 +187,32 @@ impl GritTargetLanguage {
 
     pub fn parse_snippet_contexts(&self, source: &str) -> Vec<SnippetTree<GritTargetTree>> {
         let source = self.substitute_metavariable_prefix(source);
-        self.snippet_context_strings()
-            .iter()
-            .map(|(pre, post)| self.get_parser().parse_snippet(pre, &source, post))
-            .filter(|result| {
-                result
-                    .tree
+
+        let mut snippet_trees: Vec<SnippetTree<GritTargetTree>> = Vec::new();
+        for (pre, post) in self.snippet_context_strings() {
+            let parse_result = self.get_parser().parse_snippet(pre, &source, post);
+
+            let has_errors = parse_result
+                .tree
+                .root_node()
+                .descendants()
+                .map_or(false, |mut descendants| {
+                    descendants.any(|descendant| descendant.kind().is_bogus())
+                });
+            if has_errors {
+                continue;
+            }
+
+            if !snippet_trees.iter().any(|tree| {
+                tree.tree
                     .root_node()
-                    .descendants()
-                    .map_or(false, |mut descendants| {
-                        !descendants.any(|descendant| descendant.kind().is_bogus())
-                    })
-            })
-            .collect()
+                    .matches_kinds_recursively_with(&parse_result.tree.root_node())
+            }) {
+                snippet_trees.push(parse_result);
+            }
+        }
+
+        snippet_trees
     }
 }
 

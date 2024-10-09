@@ -47,6 +47,8 @@ node.addEventListener('click', function () {});
 const foo = arr.map(i => i * i);
 fn(() => {});
 fn(function () {});
+new Promise(resolve => {});
+new Foo(1, () => {});
 [function () {}, () => {}];
 (function () {
   console.log("This is an IIFE");
@@ -63,3 +65,41 @@ const arrowFn = () => function(): void {}
 const arrowFn = () => {
   return (): void => { };
 }
+
+
+// type assertion
+const asTyped = (() => '') as () => string;
+const castTyped = <() => string>(() => '');
+
+// variable declarator with a type annotation 
+type FuncType = () => string;
+const arrowFn: FuncType = () => 'test';
+const funcExpr: FuncType = function () {
+  return 'test';
+};
+
+// default parameter with a type annotation
+type CallBack = () => void;
+const f = (gotcha: CallBack = () => { }): void => { };
+function f(gotcha: CallBack = () => {}): void {}
+
+// class property with a type annotation
+type MethodType = () => void;
+class App {
+    private method: MethodType = () => { };
+}
+
+// function as a property or a nested property of a typed object
+const x: Foo = { prop: () => {} }
+const x = { prop: () => {} } as Foo
+const x = <Foo>{ prop: () => {} }
+
+const x: Foo = { bar: { prop: () => {} } }
+
+class Accumulator {
+  private count: number = 0;
+  public accumulate(fn: () => number): void {
+      this.count += fn();
+  }
+}
+new Accumulator().accumulate(() => 1);

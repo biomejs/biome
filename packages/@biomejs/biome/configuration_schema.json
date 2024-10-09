@@ -2059,6 +2059,24 @@
 			},
 			"additionalProperties": false
 		},
+		"NoSecretsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoSecretsOptions" }
+			]
+		},
+		"NoSecretsOptions": {
+			"type": "object",
+			"properties": {
+				"entropyThreshold": {
+					"description": "Set entropy threshold (default is 41).",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"minimum": 0.0
+				}
+			},
+			"additionalProperties": false
+		},
 		"Nursery": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -2123,6 +2141,27 @@
 						{ "type": "null" }
 					]
 				},
+				"noHeadElement": {
+					"description": "Prevent usage of \\<head> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noHeadImportInDocument": {
+					"description": "Prevent using the next/head module in pages/_document.js on Next.js projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImgElement": {
+					"description": "Prevent usage of \\<img> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noIrregularWhitespace": {
 					"description": "Disallows the use of irregular whitespace characters.",
 					"anyOf": [
@@ -2175,7 +2214,7 @@
 				"noSecrets": {
 					"description": "Disallow usage of sensitive data such as API keys and tokens.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoSecretsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2209,6 +2248,13 @@
 				},
 				"noUnknownPseudoElement": {
 					"description": "Disallow unknown pseudo-element selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUnknownTypeSelector": {
+					"description": "Disallow unknown type selectors.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2807,6 +2853,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoRestrictedTypesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoSecretsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoSecretsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4085,7 +4146,6 @@
 			"properties": {
 				"attributes": {
 					"description": "Additional attributes that will be sorted.",
-					"default": ["class", "className"],
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},

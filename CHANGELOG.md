@@ -13,7 +13,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### Bug fixes
+
+- Improved the message for unused suppression comments. Contributed by @dyc3
+
 ### CLI
+
+#### Enhancements
+
+- The `--summary` reporter now reports parsing diagnostics too. Contributed by @ematipico
 
 ### Configuration
 
@@ -29,7 +37,93 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Linter
 
+#### Bug Fixes
+
+- Biome no longer crashes when it encounters a string that contain a multibyte character ([#4181](https://github.com/biomejs/biome/issues/4181)).
+
+  This fixes a regression introduced in Biome 1.9.3
+  The regression affected the following linter rules:
+
+  - nursery/useSortedClasses
+  - nursery/useTrimStartEnd
+  - style/useTemplate
+  - suspicious/noMisleadingCharacterClass
+
+  Contributed by @Conaclos
+
+- Fix [#4190](https://github.com/biomejs/biome/issues/4190), where the rule `noMissingVarFunction` wrongly reported a variable as missing when used inside a `var()`  function that was a newline. Contributed by @ematipico
+
+- Fix [#4041](https://github.com/biomejs/biome/issues/4041). Now the rule `useSortedClasses` won't be triggered if `className` is composed only by inlined variables. Contributed by @ematipico
+
+- [useImportType](https://biomejs.dev/linter/rules/use-import-type/) and [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now report useless inline type qualifiers ([#4178](https://github.com/biomejs/biome/issues/4178)).
+
+  The following fix is now proposed:
+
+  ```diff
+  - import type { type A, B } from "";
+  + import type { A, B } from "";
+
+  - export type { type C, D };
+  + export type { C, D };
+  ```
+
+  Contributed by @Conaclos
+
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now reports ungrouped `export from`.
+
+  The following fix is now proposed:
+
+  ```diff
+  - export { type A, type B } from "";
+  + export type { A, B } from "";
+  ```
+
+  Contributed by @Conaclos
+
+- [noVoidTypeReturn](https://biomejs.dev/linter/rules/no-void-type-return/) now accepts `void` expressions in return position ([#4173](https://github.com/biomejs/biome/issues/4173)).
+
+  The following code is now accepted:
+
+  ```ts
+  function f(): void {
+    return void 0;
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- Fixes [#4059](https://github.com/biomejs/biome/issues/4059), the rule [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now correctly handles fragments containing HTML escapes (e.g. `&nbsp;`) inside expression escapes `{ ... }`.
+The following code is no longer reported:
+
+```jsx
+function Component() {
+  return (
+    <div key={index}>{line || <>&nbsp;</>}</div>
+  )
+}
+```
+
+Contributed by @fireairforce
+
 ### Parser
+
+#### Bug Fixes
+
+- The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
+
+  Browsers accept more emoji than the standard allows.
+  Biome now accepts these additional emoji.
+
+  The following code is now correctly parsed:
+
+  ```css
+  p {
+    --✨-color: red;
+    color: var(--✨-color);
+  }
+  ```
+
+  Contributed by @Conaclos
 
 ## v1.9.3 (2024-10-01)
 

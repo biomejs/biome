@@ -145,6 +145,9 @@ define_categories! {
     "lint/nursery/noDynamicNamespaceImportAccess": "https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access",
     "lint/nursery/noEnum": "https://biomejs.dev/linter/rules/no-enum",
     "lint/nursery/noExportedImports": "https://biomejs.dev/linter/rules/no-exported-imports",
+    "lint/nursery/noHeadElement": "https://biomejs.dev/linter/rules/no-head-element",
+    "lint/nursery/noHeadImportInDocument": "https://biomejs.dev/linter/rules/no-head-import-in-document",
+    "lint/nursery/noImgElement": "https://biomejs.dev/linter/rules/no-img-element",
     "lint/nursery/noImportantInKeyframe": "https://biomejs.dev/linter/rules/no-important-in-keyframe",
     "lint/nursery/noInvalidDirectionInLinearGradient": "https://biomejs.dev/linter/rules/no-invalid-direction-in-linear-gradient",
     "lint/nursery/noInvalidGridAreas": "https://biomejs.dev/linter/rules/use-consistent-grid-areas",
@@ -171,6 +174,7 @@ define_categories! {
     "lint/nursery/noUnknownPseudoClassSelector": "https://biomejs.dev/linter/rules/no-unknown-pseudo-class-selector",
     "lint/nursery/noUnknownPseudoElement": "https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element",
     "lint/nursery/noUnknownSelectorPseudoElement": "https://biomejs.dev/linter/rules/no-unknown-selector-pseudo-element",
+    "lint/nursery/noUnknownTypeSelector": "https://biomejs.dev/linter/rules/no-unknown-type-selector",
     "lint/nursery/noUnknownUnit": "https://biomejs.dev/linter/rules/no-unknown-unit",
     "lint/nursery/noUnmatchableAnbSelector": "https://biomejs.dev/linter/rules/no-unmatchable-anb-selector",
     "lint/nursery/noUnusedFunctionParameters": "https://biomejs.dev/linter/rules/no-unused-function-parameters",
@@ -343,6 +347,10 @@ define_categories! {
     "internalError/io",
     "internalError/fs",
     "internalError/panic",
+    "reporter/parse",
+    "reporter/format",
+    "reporter/analyzer",
+    "reporter/organizeImports",
     // parse categories
     "parse",
 

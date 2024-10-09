@@ -14,6 +14,32 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_this_in_static.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@next/no-head-element" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_head_element.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@next/no-head-import-in-document" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_head_import_in_document
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@next/no-img-element" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_img_element.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@stylistic/jsx-self-closing-comp" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group

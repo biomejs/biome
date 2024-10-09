@@ -58,7 +58,6 @@ declare_lint_rule! {
 impl Rule for NoDuplicateElseIf {
     type Query = Ast<JsIfStatement>;
     type State = TextRange;
-
     type Signals = Option<Self::State>;
     type Options = ();
 

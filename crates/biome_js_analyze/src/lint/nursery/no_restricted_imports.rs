@@ -43,7 +43,7 @@ declare_lint_rule! {
 pub struct RestrictedImportsOptions {
     /// A list of names that should trigger the rule
     #[serde(skip_serializing_if = "FxHashMap::is_empty")]
-    paths: FxHashMap<String, String>,
+    paths: FxHashMap<Box<str>, Box<str>>,
 }
 
 impl Rule for NoRestrictedImports {

@@ -51,12 +51,12 @@ declare_lint_rule! {
 impl Rule for NoIrregularWhitespace {
     type Query = Ast<AnyCssRule>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        get_irregular_whitespace(node)
+        get_irregular_whitespace(node).into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {

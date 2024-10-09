@@ -4,14 +4,16 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
-    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsFileSource,
-    JsStatementList, JsSyntaxKind,
+    AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsCallExpression,
+    JsFileSource, JsFormalParameter, JsInitializerClause, JsLanguage, JsObjectExpression,
+    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsStatementList,
+    JsSyntaxKind, JsVariableDeclarator,
 };
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
     JsMethodObjectMember,
 };
-use biome_rowan::{declare_node_union, AstNode, SyntaxNodeOptionExt, TextRange};
+use biome_rowan::{declare_node_union, AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange};
 
 declare_lint_rule! {
     /// Require explicit return types on functions and class methods.
@@ -168,6 +170,38 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// The following patterns are considered correct for type annotations on variables in function expressions:
+    ///
+    /// ```ts
+    /// // A function with a type assertion using `as`
+    /// const asTyped = (() => '') as () => string;
+    /// ```
+    ///
+    /// ```ts
+    /// // A function with a type assertion using `<>`
+    /// const castTyped = <() => string>(() => '');
+    /// ```
+    ///
+    /// ```ts
+    /// // A variable declarator with a type annotation.
+    /// type FuncType = () => string;
+    /// const arrowFn: FuncType = () => 'test';
+    /// ```
+    ///
+    /// ```ts
+    /// // A function is a default parameter with a type annotation
+    /// type CallBack = () => void;
+    /// const f = (gotcha: CallBack = () => { }): void => { };
+    /// ```
+    ///
+    /// ```ts
+    /// // A class property with a type annotation
+    /// type MethodType = () => void;
+    /// class App {
+    ///     private method: MethodType = () => { };
+    /// }
+    /// ```
+    ///
     pub UseExplicitFunctionReturnType {
         version: "1.9.3",
         name: "useExplicitFunctionReturnType",
@@ -204,11 +238,19 @@ impl Rule for UseExplicitFunctionReturnType {
                     return None;
                 }
 
-                if is_function_used_in_argument_or_expression_list(func) {
+                if is_iife(func) {
+                    return None;
+                }
+
+                if is_function_used_in_argument_or_array(func) {
                     return None;
                 }
 
                 if is_higher_order_function(func) {
+                    return None;
+                }
+
+                if is_typed_function_expressions(func) {
                     return None;
                 }
 
@@ -313,20 +355,25 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
 /// JS_ARRAY_ELEMENT_LIST:
 /// - `[function () {}, () => {}];`
 ///
-/// JS_PARENTHESIZED_EXPRESSION:
-/// - `(function () {});`
-/// - `(() => {})();`
-fn is_function_used_in_argument_or_expression_list(func: &AnyJsFunction) -> bool {
+fn is_function_used_in_argument_or_array(func: &AnyJsFunction) -> bool {
     matches!(
         func.syntax().parent().kind(),
-        Some(
-            JsSyntaxKind::JS_CALL_ARGUMENT_LIST
-                | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST
-                // We include JS_PARENTHESIZED_EXPRESSION for IIFE (Immediately Invoked Function Expressions).
-                // We also assume that the parent of the parent is a call expression.
-                | JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION
-        )
+        Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST)
     )
+}
+
+/// Checks if a function is an IIFE (Immediately Invoked Function Expressions)
+///
+/// # Examples
+///
+/// ```typescript
+/// (function () {});
+/// (() => {})();
+/// ```
+fn is_iife(func: &AnyJsFunction) -> bool {
+    func.parent::<JsParenthesizedExpression>()
+        .and_then(|expr| expr.parent::<JsCallExpression>())
+        .is_some()
 }
 
 /// Checks whether the given function is a higher-order function, i.e., a function
@@ -384,11 +431,122 @@ fn is_first_statement_function_return(statements: JsStatementList) -> bool {
                 None
             }
         })
-        .map_or(false, |args| {
+        .is_some_and(|args| {
             matches!(
                 args,
                 AnyJsExpression::JsFunctionExpression(_)
                     | AnyJsExpression::JsArrowFunctionExpression(_)
             )
         })
+}
+
+/// Checks if a given function expression has a type annotation.
+fn is_typed_function_expressions(func: &AnyJsFunction) -> bool {
+    let syntax = func.syntax();
+    is_type_assertion(syntax)
+        || is_variable_declarator_with_type_annotation(syntax)
+        || is_default_function_parameter_with_type_annotation(syntax)
+        || is_class_property_with_type_annotation(syntax)
+        || is_property_of_object_with_type(syntax)
+}
+
+/// Checks if a function is a variable declarator with a type annotation.
+///
+/// # Examples
+///
+/// ```typescript
+/// type FuncType = () => string;
+/// const arrowFn: FuncType = () => 'test';
+/// ```
+fn is_variable_declarator_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    syntax
+        .parent()
+        .and_then(JsInitializerClause::cast)
+        .and_then(|init| init.parent::<JsVariableDeclarator>())
+        .is_some_and(|decl| decl.variable_annotation().is_some())
+}
+
+/// Checks if a function is a default parameter with a type annotation.
+///
+/// # Examples
+///
+/// ```typescript
+/// type CallBack = () => void;
+/// const f = (gotcha: CallBack = () => { }): void => { };
+/// ```
+fn is_default_function_parameter_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    syntax
+        .parent()
+        .and_then(JsInitializerClause::cast)
+        .and_then(|init| init.parent::<JsFormalParameter>())
+        .is_some_and(|param| param.type_annotation().is_some())
+}
+
+/// Checks if a function is a class property with a type annotation.
+///
+/// # Examples
+///
+/// ```typescript
+/// type MethodType = () => void;
+/// class App {
+///     private method: MethodType = () => { };
+/// }
+/// ```
+fn is_class_property_with_type_annotation(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    syntax
+        .parent()
+        .and_then(JsInitializerClause::cast)
+        .and_then(|init| init.parent::<JsPropertyClassMember>())
+        .is_some_and(|prop| prop.property_annotation().is_some())
+}
+
+/// Checks if a function is a property or a nested property of a typed object.
+///
+/// # Examples
+///
+/// ```typescript
+/// const x: Foo = { prop: () => {} }
+/// const x = { prop: () => {} } as Foo
+/// const x = <Foo>{ prop: () => {} }
+/// const x: Foo = { bar: { prop: () => {} } }
+/// ```
+fn is_property_of_object_with_type(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    syntax
+        .parent()
+        .and_then(JsPropertyObjectMember::cast)
+        .and_then(|prop| prop.syntax().grand_parent())
+        .and_then(JsObjectExpression::cast)
+        .is_some_and(|obj_expression| {
+            let obj_syntax = obj_expression.syntax();
+            is_type_assertion(obj_syntax)
+                || is_variable_declarator_with_type_annotation(obj_syntax)
+                || is_property_of_object_with_type(obj_syntax)
+        })
+}
+
+/// Checks if a function has a type assertion.
+///
+/// # Examples
+///
+/// ```typescript
+/// const asTyped = (() => '') as () => string;
+/// const castTyped = <() => string>(() => '');
+/// ```
+fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
+    fn is_assertion_kind(kind: JsSyntaxKind) -> bool {
+        matches!(
+            kind,
+            JsSyntaxKind::TS_AS_EXPRESSION | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
+        )
+    }
+
+    syntax.parent().map_or(false, |parent| {
+        if parent.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+            parent
+                .parent()
+                .is_some_and(|grandparent| is_assertion_kind(grandparent.kind()))
+        } else {
+            is_assertion_kind(parent.kind())
+        }
+    })
 }

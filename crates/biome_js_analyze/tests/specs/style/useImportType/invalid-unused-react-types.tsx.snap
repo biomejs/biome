@@ -16,16 +16,16 @@ function Component() {
 
 # Diagnostics
 ```
-invalid-unused-react-types.tsx:1:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-unused-react-types.tsx:1:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All these imports are only used as types.
   
   > 1 │ import * as ReactTypes from "react";
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
     3 │ function Component() {
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
   i Safe fix: Use import type.
   

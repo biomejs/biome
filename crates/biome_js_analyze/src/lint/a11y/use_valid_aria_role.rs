@@ -78,7 +78,7 @@ declare_lint_rule! {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct ValidAriaRoleOptions {
-    pub allow_invalid_roles: Vec<String>,
+    pub allow_invalid_roles: Box<[Box<str>]>,
     pub ignore_non_dom: bool,
 }
 
@@ -107,7 +107,10 @@ impl Rule for UseValidAriaRole {
 
         let is_valid = role_attribute_value.all(|val| {
             let role_data = aria_roles.get_role(val);
-            allowed_invalid_roles.contains(&val.to_string()) || role_data.is_some()
+            allowed_invalid_roles
+                .iter()
+                .any(|role| role.as_ref() == val)
+                || role_data.is_some()
         });
 
         if is_valid {

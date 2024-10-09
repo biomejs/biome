@@ -38,3 +38,8 @@ export {
 
 import type * as Ns from ""
 export { Ns }
+
+import { type T9, type T10 } from "./mod.ts";
+export { type T9, type T10 };
+
+export { type T11, type T12 } from "./mod.ts";
