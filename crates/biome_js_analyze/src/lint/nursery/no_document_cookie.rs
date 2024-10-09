@@ -11,7 +11,7 @@ declare_lint_rule! {
     /// Disallow direct assignments to `document.cookie`.
     ///
     /// It's not recommended to use document.cookie directly as it's easy to get the string wrong.
-    /// Instead, you should use the [Cookie Store API](https://developer.mozilla.org/en-US/docs/Web/API/CookieStore) or a [cookie library](https://www.npmjs.com/search?q=cookie).
+    /// Instead, you should use the [Cookie Store API](https://developer.mozilla.org/en-US/docs/Web/API/CookieStore).
     ///
     /// ## Examples
     ///
@@ -104,7 +104,7 @@ impl Rule for NoDocumentCookie {
                 },
             )
             .note(markup! {
-                "Consider using the "<Hyperlink href = "https://developer.mozilla.org/en-US/docs/Web/API/CookieStore">"Cookie Store API"</Hyperlink>" or a "<Hyperlink href="https://www.npmjs.com/search?q=cookie">"cookie library"</Hyperlink> " instead"
+                "Consider using the "<Hyperlink href = "https://developer.mozilla.org/en-US/docs/Web/API/CookieStore">"Cookie Store API"</Hyperlink>"."
             }),
         )
     }
