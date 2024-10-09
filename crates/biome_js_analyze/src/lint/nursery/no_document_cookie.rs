@@ -1,7 +1,8 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsAssignment, AnyJsAssignmentPattern, JsAssignmentExpression,
+    global_identifier, AnyJsAssignment, AnyJsExpression, JsAssignmentExpression,
 };
 use biome_rowan::AstNode;
 
@@ -56,6 +57,51 @@ declare_lint_rule! {
     }
 }
 
+/// Check `expr` is `document`
+fn is_global_document(expr: &AnyJsExpression, model: &SemanticModel) -> Option<()> {
+    let (reference, name) = global_identifier(expr)?;
+
+    // Check identifier is `document`
+    if name.text() != "document" {
+        return None;
+    };
+
+    // TODO: Verify that the variable is assigned the global `document` to be closer to the original rule.
+    model.binding(&reference).is_none().then_some(())
+}
+
+/// Check member is `cookie`
+fn is_cookie(assignment: &AnyJsAssignment) -> Option<()> {
+    const COOKIE: &str = "cookie";
+    match assignment {
+        // `document.cookie`
+        AnyJsAssignment::JsStaticMemberAssignment(static_assignment) => {
+            let property = static_assignment.member().ok()?;
+
+            if property.text() != COOKIE {
+                return None;
+            };
+        }
+        // `document["cookie"]`
+        AnyJsAssignment::JsComputedMemberAssignment(computed_assignment) => {
+            let any_expr = computed_assignment.member().ok()?;
+            let string_literal = any_expr
+                .as_any_js_literal_expression()?
+                .as_js_string_literal_expression()?;
+            let inner_string = string_literal.inner_string_text().ok()?;
+
+            if inner_string.text() != COOKIE {
+                return None;
+            }
+        }
+        _ => {
+            return None;
+        }
+    }
+
+    Some(())
+}
+
 impl Rule for NoDocumentCookie {
     type Query = Semantic<JsAssignmentExpression>;
     type State = ();
@@ -66,31 +112,21 @@ impl Rule for NoDocumentCookie {
         let node = ctx.query();
         let left = node.left().ok()?;
 
-        let static_assignment = match &left {
-            AnyJsAssignmentPattern::AnyJsAssignment(AnyJsAssignment::JsStaticMemberAssignment(
-                static_assignment,
-            )) => static_assignment,
+        let any_assignment = left.as_any_js_assignment()?;
+
+        let expr = match any_assignment {
+            AnyJsAssignment::JsStaticMemberAssignment(assignment) => assignment.object().ok()?,
+            AnyJsAssignment::JsComputedMemberAssignment(assignment) => assignment.object().ok()?,
             _ => {
                 return None;
             }
         };
 
-        // Check `document` is global
-        let expr = static_assignment.object().ok()?;
-        let (reference, name) = global_identifier(&expr)?;
+        is_global_document(&expr, ctx.model())?;
 
-        if name.text() != "document" {
-            return None;
-        }
+        is_cookie(any_assignment)?;
 
-        let property = static_assignment.member().ok()?;
-
-        if property.text() != "cookie" {
-            return None;
-        }
-
-        let model = ctx.model();
-        model.binding(&reference).is_none().then_some(())
+        Some(())
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {

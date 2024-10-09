@@ -9,6 +9,8 @@ document.cookie += ";foo=bar"
 
 window.document.cookie = "foo=bar";
 globalThis.window.document.cookie = "foo=bar";
+
+document["cookie"] = "foo=bar"
 ```
 
 # Diagnostics
@@ -53,6 +55,7 @@ invalid.js:4:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
   > 4 │ window.document.cookie = "foo=bar";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ globalThis.window.document.cookie = "foo=bar";
+    6 │ 
   
   i Consider using the Cookie Store API.
   
@@ -67,6 +70,23 @@ invalid.js:5:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━�
     4 │ window.document.cookie = "foo=bar";
   > 5 │ globalThis.window.document.cookie = "foo=bar";
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ document["cookie"] = "foo=bar"
+  
+  i Consider using the Cookie Store API.
+  
+
+```
+
+```
+invalid.js:7:1 lint/nursery/noDocumentCookie ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Direct assigning to document.cookie is not recommended.
+  
+    5 │ globalThis.window.document.cookie = "foo=bar";
+    6 │ 
+  > 7 │ document["cookie"] = "foo=bar"
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
   i Consider using the Cookie Store API.
   
