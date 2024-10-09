@@ -348,9 +348,8 @@ fn get_length_node(node: &AnyJsExpression) -> Option<AnyJsExpression> {
     let member_name = member_name
         .as_js_name()?
         .value_token()
-        .ok()?
-        .token_text_trimmed();
-    if member_name.text() != "length" {
+        .ok()?;
+    if member_name.text_trimmed() != "length" {
         return None;
     }
     node.object().ok()
