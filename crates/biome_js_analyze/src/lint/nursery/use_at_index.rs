@@ -149,12 +149,11 @@ impl Rule for UseAtIndex {
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
-                state.error_type.get_error_message()
-                .to_owned(),
+                state.error_type.get_error_message(),
             )
             .note(markup! {
-                    "Using "<Emphasis>".at()"</Emphasis>" is more convenient and is easier to read."
-                }),
+                "Using "<Emphasis>".at()"</Emphasis>" is more convenient and is easier to read."
+            }),
         )
     }
 
@@ -350,10 +349,7 @@ fn get_length_node(node: &AnyJsExpression) -> Option<AnyJsExpression> {
         return None;
     };
     let member_name = node.member().ok()?;
-    let member_name = member_name
-        .as_js_name()?
-        .value_token()
-        .ok()?;
+    let member_name = member_name.as_js_name()?.value_token().ok()?;
     if member_name.text_trimmed() != "length" {
         return None;
     }
@@ -429,7 +425,7 @@ fn extract_negative_index_expression(
     member: AnyJsExpression,
     object: AnyJsExpression,
 ) -> Option<AnyJsExpression> {
-    let (left, right_list) = split_minus_binary_expressions(member.clone())?;
+    let (left, right_list) = split_minus_binary_expressions(member)?;
     if right_list.is_empty() {
         return None;
     }
@@ -613,7 +609,7 @@ fn check_binary_expression_member(
 ) -> Option<UseAtIndexState> {
     let member = AnyJsExpression::JsBinaryExpression(member);
     let negative_index_exp =
-        extract_negative_index_expression(&member, object.clone().omit_parentheses());
+        extract_negative_index_expression(member, object.clone().omit_parentheses());
     let negative_index = negative_index_exp?;
 
     Some(UseAtIndexState {
@@ -666,7 +662,7 @@ fn check_call_expression_char_at(
     match arg0.clone() {
         // foo.charAt(foo.length - 1)
         AnyJsExpression::JsBinaryExpression(_) => {
-            let at_number_exp = extract_negative_index_expression(&arg0, char_at_parent.clone());
+            let at_number_exp = extract_negative_index_expression(arg0, char_at_parent.clone());
             at_number_exp.map(|at_number_exp| UseAtIndexState {
                 at_number_exp,
                 error_type: ErrorType::StringCharAt { is_negative: true },
