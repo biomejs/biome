@@ -28,6 +28,10 @@ declare_lint_rule! {
     /// ### Valid
     ///
     /// ```js
+    /// const array = document.cookie.split("; ");
+    /// ```
+    ///
+    /// ```js
     /// await cookieStore
     ///   .set({
     ///     name: "foo",
@@ -35,10 +39,6 @@ declare_lint_rule! {
     ///     expires: Date.now() + 24 * 60 * 60,
     ///     domain: "example.com",
     /// })
-    /// ```
-    ///
-    /// ```js
-    /// const array = document.cookie.split("; ");
     /// ```
     ///
     /// ```js
