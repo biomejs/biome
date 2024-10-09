@@ -426,7 +426,7 @@ fn make_plus_binary_expression(list: Vec<AnyJsExpression>) -> Option<AnyJsExpres
 ///     foo[bar.length - 2] // => None
 /// ```
 fn extract_negative_index_expression(
-    member: &AnyJsExpression,
+    member: AnyJsExpression,
     object: AnyJsExpression,
 ) -> Option<AnyJsExpression> {
     let (left, right_list) = split_minus_binary_expressions(member.clone())?;
