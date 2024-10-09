@@ -8,7 +8,7 @@ use biome_rowan::AstNode;
 use crate::services::semantic::Semantic;
 
 declare_lint_rule! {
-    /// Disallow use `document.cookie` directly.
+    /// Disallow direct assignments to `document.cookie`.
     ///
     /// It's not recommended to use document.cookie directly as it's easy to get the string wrong.
     /// Instead, you should use the [Cookie Store API](https://developer.mozilla.org/en-US/docs/Web/API/CookieStore) or a [cookie library](https://www.npmjs.com/search?q=cookie).
@@ -100,7 +100,7 @@ impl Rule for NoDocumentCookie {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Using" <Emphasis>"document.cookie"</Emphasis>" directly is not recommended"
+                    "Direct assigning to" <Emphasis>"document.cookie"</Emphasis>" is not recommended"
                 },
             )
             .note(markup! {
