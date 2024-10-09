@@ -12,14 +12,14 @@ array[array.length - 1];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length - 1];
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-·1];
   + array.at(-1);
@@ -36,14 +36,14 @@ array[array.length -1];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length -1];
       │ ^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-1];
   + array.at(-1);
@@ -60,14 +60,14 @@ array[array.length - /* comment */ 1];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length - /* comment */ 1];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-·/*·comment·*/·1];
   + array.at(-1);
@@ -84,14 +84,14 @@ array[array.length - 1.];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length - 1.];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-·1.];
   + array.at(-1.);
@@ -108,14 +108,14 @@ array[array.length - 0b1];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length - 0b1];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-·0b1];
   + array.at(-0b1);
@@ -132,14 +132,14 @@ array[array.length - 9];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length - 9];
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-·9];
   + array.at(-9);
@@ -156,14 +156,14 @@ array[0][array[0].length - 1];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[0][array[0].length - 1];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[0][array[0].length·-·1];
   + array[0].at(-1);
@@ -180,14 +180,14 @@ array[(( array.length )) - 1];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[(( array.length )) - 1];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[((·array.length·))·-·1];
   + array.at(-1);
@@ -204,14 +204,14 @@ array[array.length - (( 1 ))];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length - (( 1 ))];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-·((·1·))];
   + array.at(-((·1·)));
@@ -228,14 +228,14 @@ array[(( array.length - 1 ))];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[(( array.length - 1 ))];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[((·array.length·-·1·))];
   + array.at(-1);
@@ -252,14 +252,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ (( array ))[array.length - 1];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·array·))[array.length·-·1];
   + ((·array·)).at(-1);
@@ -276,14 +276,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:4 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ (( array[array.length - 1] ));
       │    ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·array[array.length·-·1]·));
   + ((·array.at(-1)·));
@@ -300,14 +300,14 @@ array[array.length - 1].pop().shift()[0];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length - 1].pop().shift()[0];
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-·1].pop().shift()[0];
   + array.at(-1).pop().shift()[0];
@@ -324,14 +324,14 @@ a = array[array.length - 1]
 ```
 invalid.jsonc:1:5 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ a = array[array.length - 1]
       │     ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - a·=·array[array.length·-·1]
   + a·=·array.at(-1)
@@ -348,14 +348,14 @@ const a = array[array.length - 1]
 ```
 invalid.jsonc:1:11 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ const a = array[array.length - 1]
       │           ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - const·a·=·array[array.length·-·1]
   + const·a·=·array.at(-1)
@@ -372,14 +372,14 @@ const {a = array[array.length - 1]} = {}
 ```
 invalid.jsonc:1:12 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ const {a = array[array.length - 1]} = {}
       │            ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - const·{a·=·array[array.length·-·1]}·=·{}
   + const·{a·=·array.at(-1)}·=·{}
@@ -396,14 +396,14 @@ typeof array[array.length - 1]
 ```
 invalid.jsonc:1:8 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ typeof array[array.length - 1]
       │        ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - typeof·array[array.length·-·1]
   + typeof·array.at(-1)
@@ -420,14 +420,14 @@ function foo() {return arguments[arguments.length - 1]}
 ```
 invalid.jsonc:1:24 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ function foo() {return arguments[arguments.length - 1]}
       │                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - function·foo()·{return·arguments[arguments.length·-·1]}
   + function·foo()·{return·arguments.at(-1)}
@@ -444,14 +444,14 @@ class Foo {bar; baz() {return this.bar[this.bar.length - 1]}}
 ```
 invalid.jsonc:1:31 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ class Foo {bar; baz() {return this.bar[this.bar.length - 1]}}
       │                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - class·Foo·{bar;·baz()·{return·this.bar[this.bar.length·-·1]}}
   + class·Foo·{bar;·baz()·{return·this.bar.at(-1)}}
@@ -468,14 +468,14 @@ class Foo {#bar; baz() {return this.#bar[this.#bar.length - 1]}}
 ```
 invalid.jsonc:1:32 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ class Foo {#bar; baz() {return this.#bar[this.#bar.length - 1]}}
       │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - class·Foo·{#bar;·baz()·{return·this.#bar[this.#bar.length·-·1]}}
   + class·Foo·{#bar;·baz()·{return·this.#bar.at(-1)}}
@@ -492,14 +492,14 @@ array[array.length - unknown - 1]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length - unknown - 1]
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-·unknown·-·1]
   + array.at(unknown·+1)
@@ -516,14 +516,14 @@ array[array.length - (unknown + 1)]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X[X.length - Y].
   
   > 1 │ array[array.length - (unknown + 1)]
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X[X.length - Y].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array[array.length·-·(unknown·+·1)]
   + array.at(-(unknown·+·1))
@@ -540,14 +540,14 @@ string.charAt(string.length - 1);
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ string.charAt(string.length - 1);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - string.charAt(string.length·-·1);
   + string.at(-1);
@@ -564,14 +564,14 @@ string.charAt(string.length - 0o11);
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ string.charAt(string.length - 0o11);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - string.charAt(string.length·-·0o11);
   + string.at(-0o11);
@@ -588,14 +588,14 @@ some.string.charAt(some.string.length - 1);
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ some.string.charAt(some.string.length - 1);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - some.string.charAt(some.string.length·-·1);
   + some.string.at(-1);
@@ -612,14 +612,14 @@ string.charAt((( string.length )) - 0xFF);
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ string.charAt((( string.length )) - 0xFF);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - string.charAt(((·string.length·))·-·0xFF);
   + string.at(-0xFF);
@@ -636,14 +636,14 @@ string.charAt(string.length - (( 1 )));
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ string.charAt(string.length - (( 1 )));
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - string.charAt(string.length·-·((·1·)));
   + string.at(-((·1·)));
@@ -660,14 +660,14 @@ string.charAt((( string.length - 1 )));
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ string.charAt((( string.length - 1 )));
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - string.charAt(((·string.length·-·1·)));
   + string.at(-1);
@@ -684,14 +684,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ (( string )).charAt(string.length - 1);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·string·)).charAt(string.length·-·1);
   + string.at(-1);
@@ -708,14 +708,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ (( string.charAt ))(string.length - 1);
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·string.charAt·))(string.length·-·1);
   + string.at(-1);
@@ -732,14 +732,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:4 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ (( string.charAt(string.length - 1) ));
       │    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·string.charAt(string.length·-·1)·));
   + ((·string.at(-1)·));
@@ -756,14 +756,14 @@ string.charAt(string.length - unknown - 1 );
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ string.charAt(string.length - unknown - 1 );
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - string.charAt(string.length·-·unknown·-·1·);
   + string.at(unknown·+1);
@@ -780,14 +780,14 @@ string.charAt(string.length - (unknown + 1));
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-Y) over X.charAt(X.length - Y).
   
   > 1 │ string.charAt(string.length - (unknown + 1));
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-Y) over X.charAt(X.length - Y).
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - string.charAt(string.length·-·(unknown·+·1));
   + string.at(-(unknown·+·1));
@@ -804,14 +804,14 @@ array.slice(0)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(0)[0]
       │ ^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(0)[0]
   + array.at(0)
@@ -828,14 +828,14 @@ array.slice(-0)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(-0)[0]
       │ ^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-0)[0]
   + array.at(-0)
@@ -852,14 +852,14 @@ array.slice(-1)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(-1)[0]
       │ ^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-1)[0]
   + array.at(-1)
@@ -876,14 +876,14 @@ array.slice(-1).pop()
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-1) over X.slice(-a).pop().
   
   > 1 │ array.slice(-1).pop()
       │ ^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-1) over X.slice(-a).pop().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-1).pop()
   + array.at(-1)
@@ -900,14 +900,14 @@ array.slice(-1.0).shift()
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y).shift().
   
   > 1 │ array.slice(-1.0).shift()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y).shift().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-1.0).shift()
   + array.at(-1.0)
@@ -924,14 +924,14 @@ array.slice(-9)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(-9)[0]
       │ ^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-9)[0]
   + array.at(-9)
@@ -948,14 +948,14 @@ array.slice(-9).pop()
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-1) over X.slice(-a).pop().
   
   > 1 │ array.slice(-9).pop()
       │ ^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-1) over X.slice(-a).pop().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-9).pop()
   + array.at(-1)
@@ -972,14 +972,14 @@ array.slice(-1.1)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(-1.1)[0]
       │ ^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-1.1)[0]
   + array.at(-1.1)
@@ -996,14 +996,14 @@ array.slice(-0xA)[0b000]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(-0xA)[0b000]
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-0xA)[0b000]
   + array.at(-0xA)
@@ -1020,14 +1020,14 @@ array.slice(-9).shift()
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y).shift().
   
   > 1 │ array.slice(-9).shift()
       │ ^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y).shift().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-9).shift()
   + array.at(-9)
@@ -1044,14 +1044,14 @@ array.slice(-1)[(( 0 ))];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(-1)[(( 0 ))];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-1)[((·0·))];
   + array.at(-1);
@@ -1068,14 +1068,14 @@ array.slice(-(( 1 )))[0];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(-(( 1 )))[0];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-((·1·)))[0];
   + array.at(-((·1·)));
@@ -1092,14 +1092,14 @@ array.slice((( -1 )))[0];
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice((( -1 )))[0];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(((·-1·)))[0];
   + array.at(-1);
@@ -1116,14 +1116,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ (( array.slice(-1) ))[0];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·array.slice(-1)·))[0];
   + array.at(-1);
@@ -1140,14 +1140,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ (( array )).slice(-1)[0];
       │ ^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·array·)).slice(-1)[0];
   + ((·array·)).at(-1);
@@ -1164,14 +1164,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:4 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ (( array.slice(-1)[0] ));
       │    ^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·array.slice(-1)[0]·));
   + ((·array.at(-1)·));
@@ -1188,14 +1188,14 @@ invalid.jsonc:1:4 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-1) over X.slice(-a).pop().
   
   > 1 │ (( array.slice(-1) )).pop();
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-1) over X.slice(-a).pop().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·array.slice(-1)·)).pop();
   + array.at(-1);
@@ -1212,14 +1212,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-1) over X.slice(-a).pop().
   
   > 1 │ (( array.slice(-1).pop ))();
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-1) over X.slice(-a).pop().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·array.slice(-1).pop·))();
   + array.at(-1);
@@ -1236,14 +1236,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:4 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(-1) over X.slice(-a).pop().
   
   > 1 │ (( array.slice(-1).pop() ));
       │    ^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(-1) over X.slice(-a).pop().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·array.slice(-1).pop()·));
   + ((·array.at(-1)·));
@@ -1260,14 +1260,14 @@ array.slice(-1)[0].pop().shift().slice(-1)
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(-1)[0].pop().shift().slice(-1)
       │ ^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-1)[0].pop().shift().slice(-1)
   + array.at(-1).pop().shift().slice(-1)
@@ -1284,14 +1284,14 @@ array.slice(-9, -8)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y, a)[0].
   
   > 1 │ array.slice(-9, -8)[0]
       │ ^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y, a)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-9,·-8)[0]
   + array.at(-9)
@@ -1308,14 +1308,14 @@ array.slice(-9, -0o10)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y, a)[0].
   
   > 1 │ array.slice(-9, -0o10)[0]
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y, a)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-9,·-0o10)[0]
   + array.at(-9)
@@ -1332,14 +1332,14 @@ array.slice(-9, -8).pop()
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y - 1) over X.slice(a, Y).pop().
   
   > 1 │ array.slice(-9, -8).pop()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y - 1) over X.slice(a, Y).pop().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-9,·-8).pop()
   + array.at(-9)
@@ -1356,14 +1356,14 @@ array.slice(-9, -8).shift()
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y, a).shift().
   
   > 1 │ array.slice(-9, -8).shift()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y, a).shift().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-9,·-8).shift()
   + array.at(-9)
@@ -1380,14 +1380,14 @@ array.slice((( -9 )), (( -8 )), ).shift()
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y, a).shift().
   
   > 1 │ array.slice((( -9 )), (( -8 )), ).shift()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y, a).shift().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(((·-9·)),·((·-8·)),·).shift()
   + array.at(-9)
@@ -1404,14 +1404,14 @@ invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━�
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y, a).shift().
   
   > 1 │ (( array.slice(-9, -8).shift ))()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y, a).shift().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - ((·array.slice(-9,·-8).shift·))()
   + array.at(-9)
@@ -1428,14 +1428,14 @@ array.slice(-0o11, -7)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y, a)[0].
   
   > 1 │ array.slice(-0o11, -7)[0]
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y, a)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-0o11,·-7)[0]
   + array.at(-0o11)
@@ -1452,14 +1452,14 @@ array.slice(-9, 0)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y, a)[0].
   
   > 1 │ array.slice(-9, 0)[0]
       │ ^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y, a)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(-9,·0)[0]
   + array.at(-9)
@@ -1476,14 +1476,14 @@ array.slice(hoge)[0]
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y)[0].
   
   > 1 │ array.slice(hoge)[0]
       │ ^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y)[0].
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(hoge)[0]
   + array.at(hoge)
@@ -1500,14 +1500,14 @@ array.slice(hoge).shift()
 ```
 invalid.jsonc:1:1 lint/nursery/useAtIndex  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Replace index references with .at().
+  ! Prefer X.at(Y) over X.slice(Y).shift().
   
   > 1 │ array.slice(hoge).shift()
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
   
-  i Prefer X.at(Y) over X.slice(Y).shift().
+  i Using .at() is more convenient and is easier to read.
   
-  i Unsafe fix: Replace index references with .at().
+  i Unsafe fix: Use .at().
   
   - array.slice(hoge).shift()
   + array.at(hoge)
