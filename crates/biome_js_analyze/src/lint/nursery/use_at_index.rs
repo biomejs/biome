@@ -417,8 +417,8 @@ fn make_plus_binary_expression(list: Vec<AnyJsExpression>) -> Option<AnyJsExpres
 /// If the node is a negative index, it returns the negative index.
 /// # Examples
 /// ```js
-///     foo[bar.length - 0] // => None
-///     foo[bar.length - 1] // => Some(-1)
+///     foo[foo.length - 0] // => None
+///     foo[foo.length - 1] // => Some(-1)
 ///     foo[bar.length - 2] // => None
 /// ```
 fn extract_negative_index_expression(
