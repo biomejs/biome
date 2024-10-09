@@ -2100,7 +2100,7 @@
 					]
 				},
 				"noDocumentCookie": {
-					"description": "Disallow use document.cookie directly.",
+					"description": "Disallow direct assignments to document.cookie.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

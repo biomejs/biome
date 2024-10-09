@@ -3278,7 +3278,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_descending_specificity:
         Option<RuleConfiguration<biome_css_analyze::options::NoDescendingSpecificity>>,
-    #[doc = "Disallow use document.cookie directly."]
+    #[doc = "Disallow direct assignments to document.cookie."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_document_cookie: Option<RuleConfiguration<biome_js_analyze::options::NoDocumentCookie>>,
     #[doc = "Disallow duplicate custom properties within declaration blocks."]
