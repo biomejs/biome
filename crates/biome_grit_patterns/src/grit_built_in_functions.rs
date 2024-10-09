@@ -14,7 +14,6 @@ use grit_pattern_matcher::{
     },
 };
 use grit_util::AnalysisLogs;
-use im::Vector;
 use path_absolutize::Absolutize;
 use rand::{seq::SliceRandom, Rng};
 use std::borrow::Cow;
@@ -135,10 +134,10 @@ fn distinct_fn<'a>(
 
     match arg1 {
         GritResolvedPattern::List(list) => {
-            let mut unique_list = Vector::new();
+            let mut unique_list = Vec::new();
             for item in list {
                 if !unique_list.contains(&item) {
-                    unique_list.push_back(item);
+                    unique_list.push(item);
                 }
             }
             Ok(GritResolvedPattern::List(unique_list))
@@ -149,11 +148,11 @@ fn distinct_fn<'a>(
                     bail!("distinct() requires a list as the first argument");
                 };
 
-                let mut unique_list = Vector::new();
+                let mut unique_list = Vec::new();
                 for item in list_items {
                     let resolved = ResolvedPattern::from_node_binding(item);
                     if !unique_list.contains(&resolved) {
-                        unique_list.push_back(resolved);
+                        unique_list.push(resolved);
                     }
                 }
                 Ok(GritResolvedPattern::List(unique_list))

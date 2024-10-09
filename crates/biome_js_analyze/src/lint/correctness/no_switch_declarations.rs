@@ -83,7 +83,7 @@ declare_lint_rule! {
 impl Rule for NoSwitchDeclarations {
     type Query = Ast<AnyJsSwitchClause>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -101,7 +101,8 @@ impl Rule for NoSwitchDeclarations {
                     None
                 }
             })
-            .collect()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, decl_range: &Self::State) -> Option<RuleDiagnostic> {

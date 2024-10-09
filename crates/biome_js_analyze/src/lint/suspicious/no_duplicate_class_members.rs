@@ -179,7 +179,7 @@ struct MemberState {
 impl Rule for NoDuplicateClassMembers {
     type Query = Ast<JsClassMemberList>;
     type State = AnyClassMemberDefinition;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -215,7 +215,8 @@ impl Rule for NoDuplicateClassMembers {
 
                 None
             })
-            .collect()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

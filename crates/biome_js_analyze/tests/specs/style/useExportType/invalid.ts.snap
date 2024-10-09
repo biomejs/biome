@@ -45,13 +45,26 @@ export {
 import type * as Ns from ""
 export { Ns }
 
+import { type T9, type T10 } from "./mod.ts";
+export { type T9, type T10 };
+
+export { type T11, type T12 } from "./mod.ts";
+
 ```
 
 # Diagnostics
 ```
-invalid.ts:2:10 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:2:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Several exports are only types and should thus use export type.
+  ! Some exports are only types.
+  
+    1 │ import { type T1, V1 } from "./mod.ts";
+  > 2 │ export { T1, V1 };
+      │        ^^^^^^^^^^^
+    3 │ 
+    4 │ import type { T2, T3 } from "./mod.ts";
+  
+  i This export is a type.
   
     1 │ import { type T1, V1 } from "./mod.ts";
   > 2 │ export { T1, V1 };
@@ -59,9 +72,9 @@ invalid.ts:2:10 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
     3 │ 
     4 │ import type { T2, T3 } from "./mod.ts";
   
-  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Use inline type exports.
+  i Safe fix: Add inline type keywords.
   
     2 │ export·{·type·T1,·V1·};
       │          +++++         
@@ -71,7 +84,7 @@ invalid.ts:2:10 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
 ```
 invalid.ts:5:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports are only types and should thus use export type.
+  ! All exports are only types.
   
     4 │ import type { T2, T3 } from "./mod.ts";
   > 5 │ export { T2, T3 };
@@ -79,9 +92,9 @@ invalid.ts:5:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━
     6 │ 
     7 │ import type T4 from "./mod.ts";
   
-  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Use a grouped export type.
+  i Safe fix: Use export type.
   
     5 │ export·type·{·T2,·T3·};
       │        +++++           
@@ -91,7 +104,7 @@ invalid.ts:5:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━
 ```
 invalid.ts:8:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports are only types and should thus use export type.
+  ! All exports are only types.
   
      7 │ import type T4 from "./mod.ts";
    > 8 │ export { T4 };
@@ -99,9 +112,9 @@ invalid.ts:8:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━
      9 │ 
     10 │ // multiline
   
-  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Use a grouped export type.
+  i Safe fix: Use export type.
   
     8 │ export·type·{·T4·};
       │        +++++       
@@ -109,22 +122,44 @@ invalid.ts:8:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━
 ```
 
 ```
-invalid.ts:14:5 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:12:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Several exports are only types and should thus use export type.
+  ! Some exports are only types.
+  
+    10 │ // multiline
+    11 │ import { type T5, type T6, V2 } from "./mod.ts";
+  > 12 │ export {
+       │        ^
+  > 13 │     // leading comment
+  > 14 │     T5,
+  > 15 │     T6,
+  > 16 │     V2,
+  > 17 │ };
+       │ ^^
+    18 │ 
+    19 │ import type * as ns from "./mod.ts";
+  
+  i This export is a type.
   
     12 │ export {
     13 │     // leading comment
   > 14 │     T5,
-       │     ^^^
+       │     ^^
+    15 │     T6,
+    16 │     V2,
+  
+  i This export is a type.
+  
+    13 │     // leading comment
+    14 │     T5,
   > 15 │     T6,
        │     ^^
     16 │     V2,
     17 │ };
   
-  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Use inline type exports.
+  i Safe fix: Add inline type keywords.
   
     12 12 │   export {
     13 13 │       // leading comment
@@ -141,7 +176,7 @@ invalid.ts:14:5 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
 ```
 invalid.ts:20:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports are only types and should thus use export type.
+  ! All exports are only types.
   
     19 │ import type * as ns from "./mod.ts";
   > 20 │ export { ns };
@@ -149,9 +184,9 @@ invalid.ts:20:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
     21 │ 
     22 │ interface Interface {}
   
-  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Use a grouped export type.
+  i Safe fix: Use export type.
   
     20 │ export·type·{·ns·};
        │        +++++       
@@ -159,20 +194,38 @@ invalid.ts:20:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
 ```
 
 ```
-invalid.ts:27:10 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:27:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Several exports are only types and should thus use export type.
+  ! Some exports are only types.
   
     25 │ function func() {}
     26 │ class Class {}
   > 27 │ export { Interface, TypeAlias, Enum, func as f, Class };
-       │          ^^^^^^^^^^^^^^^^^^^^
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     28 │ 
     29 │ export /*0*/ { /*1*/ type /*2*/ func /*3*/, /*4*/ type Class as C /*5*/ } /*6*/;
   
-  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  i This export is a type.
   
-  i Safe fix: Use inline type exports.
+    25 │ function func() {}
+    26 │ class Class {}
+  > 27 │ export { Interface, TypeAlias, Enum, func as f, Class };
+       │          ^^^^^^^^^
+    28 │ 
+    29 │ export /*0*/ { /*1*/ type /*2*/ func /*3*/, /*4*/ type Class as C /*5*/ } /*6*/;
+  
+  i This export is a type.
+  
+    25 │ function func() {}
+    26 │ class Class {}
+  > 27 │ export { Interface, TypeAlias, Enum, func as f, Class };
+       │                     ^^^^^^^^^
+    28 │ 
+    29 │ export /*0*/ { /*1*/ type /*2*/ func /*3*/, /*4*/ type Class as C /*5*/ } /*6*/;
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Add inline type keywords.
   
     27 │ export·{·type·Interface,·type·TypeAlias,·Enum,·func·as·f,·Class·};
        │          +++++           +++++                                    
@@ -182,7 +235,7 @@ invalid.ts:27:10 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
 ```
 invalid.ts:29:14 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports are only types and should thus use export type.
+  ! All exports are only types.
   
     27 │ export { Interface, TypeAlias, Enum, func as f, Class };
     28 │ 
@@ -191,9 +244,9 @@ invalid.ts:29:14 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
     30 │ 
     31 │ import { type T7, type T8 } from "./mod.ts";
   
-  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Use a grouped export type.
+  i Safe fix: Use export type.
   
     27 27 │   export { Interface, TypeAlias, Enum, func as f, Class };
     28 28 │   
@@ -208,7 +261,7 @@ invalid.ts:29:14 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
 ```
 invalid.ts:32:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports are only types and should thus use export type.
+  ! All exports are only types.
   
     31 │ import { type T7, type T8 } from "./mod.ts";
   > 32 │ export {
@@ -222,9 +275,9 @@ invalid.ts:32:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
     38 │ 
     39 │ import type * as Ns from ""
   
-  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Use a grouped export type.
+  i Safe fix: Use export type.
   
     30 30 │   
     31 31 │   import { type T7, type T8 } from "./mod.ts";
@@ -245,18 +298,68 @@ invalid.ts:32:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━�
 ```
 invalid.ts:40:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports are only types and should thus use export type.
+  ! All exports are only types.
   
     39 │ import type * as Ns from ""
   > 40 │ export { Ns }
        │        ^^^^^^
     41 │ 
+    42 │ import { type T9, type T10 } from "./mod.ts";
   
-  i Using export type allows transpilers to safely drop exports of types without looking for their definition.
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
   
-  i Safe fix: Use a grouped export type.
+  i Safe fix: Use export type.
   
     40 │ export·type·{·Ns·}
        │        +++++      
+
+```
+
+```
+invalid.ts:43:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All exports are only types.
+  
+    42 │ import { type T9, type T10 } from "./mod.ts";
+  > 43 │ export { type T9, type T10 };
+       │        ^^^^^^^^^^^^^^^^^^^^^^
+    44 │ 
+    45 │ export { type T11, type T12 } from "./mod.ts";
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use export type.
+  
+    41 41 │   
+    42 42 │   import { type T9, type T10 } from "./mod.ts";
+    43    │ - export·{·type·T9,·type·T10·};
+       43 │ + export·type·{·T9,·T10·};
+    44 44 │   
+    45 45 │   export { type T11, type T12 } from "./mod.ts";
+  
+
+```
+
+```
+invalid.ts:45:8 lint/style/useExportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All exports are only types.
+  
+    43 │ export { type T9, type T10 };
+    44 │ 
+  > 45 │ export { type T11, type T12 } from "./mod.ts";
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    46 │ 
+  
+  i Using export type allows compilers to safely drop exports of types without looking for their definition.
+  
+  i Safe fix: Use export type.
+  
+    43 43 │   export { type T9, type T10 };
+    44 44 │   
+    45    │ - export·{·type·T11,·type·T12·}·from·"./mod.ts";
+       45 │ + export·type·{·T11,·T12·}·from·"./mod.ts";
+    46 46 │   
+  
 
 ```

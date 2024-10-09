@@ -90,7 +90,7 @@ fn collect_control_characters(
     flags: &str,
     is_pattern_in_str: bool,
 ) -> Option<Vec<TextRange>> {
-    let mut control_chars: Vec<TextRange> = Vec::new();
+    let mut control_chars = Vec::new();
     let is_unicode_flag_set = flags.contains('u') || flags.contains('v');
     let bytes = pattern.as_bytes();
     let mut iter = pattern.bytes().enumerate();
@@ -196,7 +196,7 @@ fn collect_control_characters_from_expression(
 impl Rule for NoControlCharactersInRegex {
     type Query = Ast<AnyRegexExpression>;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -223,6 +223,7 @@ impl Rule for NoControlCharactersInRegex {
                     .unwrap_or_default()
             }
         }
+        .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
