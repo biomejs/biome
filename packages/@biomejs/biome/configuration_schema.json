@@ -2324,6 +2324,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGoogleFontPreconnect": {
+					"description": "Ensure preconnect is used with Google Fonts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
 					"anyOf": [

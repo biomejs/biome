@@ -1355,6 +1355,10 @@ export interface Nursery {
 	 */
 	useExplicitFunctionReturnType?: RuleConfiguration_for_Null;
 	/**
+	 * Ensure preconnect is used with Google Fonts.
+	 */
+	useGoogleFontPreconnect?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
@@ -2885,6 +2889,7 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
@@ -2894,7 +2899,6 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
-	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
@@ -2927,6 +2931,7 @@ export type Category =
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useSortedClasses"
