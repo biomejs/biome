@@ -187,7 +187,7 @@ impl Rule for UseAtIndex {
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
-            markup! { "Replace index references with "<Emphasis>".at()"</Emphasis>"." }.to_owned(),
+            markup! { "Use "<Emphasis>".at()"</Emphasis>"." }.to_owned(),
             mutation,
         ))
     }
