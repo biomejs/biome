@@ -346,6 +346,10 @@ define_categories! {
     "internalError/io",
     "internalError/fs",
     "internalError/panic",
+    "reporter/parse",
+    "reporter/format",
+    "reporter/analyzer",
+    "reporter/organizeImports",
     // parse categories
     "parse",
 
