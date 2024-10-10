@@ -103,18 +103,33 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
-- Fixes [#4059](https://github.com/biomejs/biome/issues/4059), the rule [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now correctly handles fragments containing HTML escapes (e.g. `&nbsp;`) inside expression escapes `{ ... }`.
-The following code is no longer reported:
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now correctly handles fragments containing HTML escapes (e.g. `&nbsp;`) inside expression escapes `{ ... }` ([#4059](https://github.com/biomejs/biome/issues/4059)).
 
-```jsx
-function Component() {
-  return (
-    <div key={index}>{line || <>&nbsp;</>}</div>
-  )
-}
-```
+  The following code is no longer reported:
 
-Contributed by @fireairforce
+  ```jsx
+  function Component() {
+    return (
+      <div key={index}>{line || <>&nbsp;</>}</div>
+    )
+  }
+  ```
+
+  Contributed by @fireairforce
+
+- [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) and [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer reports a parameter as unused when another parameter has a constructor type with the same parameter name ([#4227](https://github.com/biomejs/biome/issues/4227)).
+
+  In the following code, the `name` parameter is no longer reported as unused.
+
+  ```ts
+  export class Foo {
+    bar(name: string, _class: new (name: string) => any) {
+      return name
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
 
 ### Parser
 

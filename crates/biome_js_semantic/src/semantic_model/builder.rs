@@ -100,6 +100,7 @@ impl SemanticModelBuilder {
             | JS_FOR_IN_STATEMENT
             | JS_SWITCH_STATEMENT
             | JS_CATCH_CLAUSE
+            | TS_CONSTRUCTOR_TYPE
             | TS_FUNCTION_TYPE
             | TS_MAPPED_TYPE => {
                 self.scope_node_by_range
