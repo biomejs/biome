@@ -7,7 +7,6 @@ use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
-use anyhow::{anyhow, bail, Result};
 use biome_parser::AnyParse;
 use grit_pattern_matcher::constants::{GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX};
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
@@ -16,8 +15,8 @@ use grit_pattern_matcher::pattern::{
     CallBuiltIn, File, FilePtr, GritFunctionDefinition, Matcher, Pattern, PatternDefinition,
     PredicateDefinition, ResolvedPattern, State,
 };
-use grit_util::{AnalysisLogs, FileOrigin, InputRanges, MatchRanges};
-use im::vector;
+use grit_util::error::GritPatternError;
+use grit_util::{error::GritResult, AnalysisLogs, FileOrigin, InputRanges, MatchRanges};
 use path_absolutize::Absolutize;
 use std::path::PathBuf;
 
@@ -75,8 +74,23 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
         context: &'a Self,
         state: &mut State<'a, GritQueryContext>,
         logs: &mut AnalysisLogs,
-    ) -> Result<GritResolvedPattern<'a>> {
-        self.built_ins.call(call, context, state, logs)
+    ) -> GritResult<GritResolvedPattern<'a>> {
+        self.built_ins
+            .call(call, context, state, logs)
+            .map_err(|e| GritPatternError::new(e.to_string()))
+    }
+
+    fn call_callback<'b>(
+        &self,
+        call: &'a grit_pattern_matcher::pattern::CallbackPattern,
+        context: &'a Self,
+        binding: &'b <GritQueryContext as QueryContext>::ResolvedPattern<'a>,
+        state: &mut State<'a, GritQueryContext>,
+        logs: &mut AnalysisLogs,
+    ) -> GritResult<bool> {
+        self.built_ins
+            .call_callback(call, context, binding, state, logs)
+            .map_err(|e| GritPatternError::new(e.to_string()))
     }
 
     fn files(&self) -> &FileOwners<GritTargetTree> {
@@ -93,7 +107,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
         binding: &GritResolvedPattern,
         state: &mut State<'a, GritQueryContext>,
         logs: &mut AnalysisLogs,
-    ) -> Result<bool> {
+    ) -> GritResult<bool> {
         let mut files = if let Some(files) = binding.get_file_pointers() {
             files
                 .iter()
@@ -139,8 +153,9 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
             // TODO: Implement effect application
         }
 
-        let new_files_binding =
-            &mut state.bindings[GLOBAL_VARS_SCOPE_INDEX].back_mut().unwrap()[NEW_FILES_INDEX];
+        let new_files_binding = &mut state.bindings[GLOBAL_VARS_SCOPE_INDEX as usize]
+            .last_mut()
+            .unwrap()[NEW_FILES_INDEX];
         if new_files_binding.value.is_none() {
             new_files_binding.value = Some(GritResolvedPattern::from_list_parts([].into_iter()));
         }
@@ -150,12 +165,12 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
             .as_ref()
             .and_then(ResolvedPattern::get_list_items)
         else {
-            bail!("Expected a list of files")
+            return Err(GritPatternError::new("Expected a list of files"));
         };
 
         for f in new_files {
             let Some(file) = f.get_file() else {
-                bail!("Expected a list of files")
+                return Err(GritPatternError::new("Expected a list of files"));
             };
 
             let name: PathBuf = file
@@ -166,17 +181,17 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
             let body = file.body(&state.files).text(&state.files, &self.lang)?;
             let owned_file =
                 new_file_owner(name.clone(), &body, &self.lang, logs)?.ok_or_else(|| {
-                    anyhow!(
+                    GritPatternError::Builder(format!(
                         "failed to construct new file for file {}",
                         name.to_string_lossy()
-                    )
+                    ))
                 })?;
             self.files().push(owned_file);
             // SAFETY: We just pushed to the list of files, so there must be one.
             let _ = state.files.push_new_file(self.files().last().unwrap());
         }
 
-        state.effects = vector![];
+        state.effects = vec![];
         new_files_binding.value = Some(ResolvedPattern::from_list_parts([].into_iter()));
         Ok(true)
     }
@@ -190,7 +205,7 @@ impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {
         file: &GritFile<'a>,
         state: &mut State<'a, GritQueryContext>,
         logs: &mut AnalysisLogs,
-    ) -> Result<bool> {
+    ) -> GritResult<bool> {
         match file {
             GritFile::Resolved(_) => {
                 // Assume the file is already loaded
@@ -230,7 +245,7 @@ fn file_owner_from_matches(
     old_tree: FileOrigin<'_, GritTargetTree>,
     language: &GritTargetLanguage,
     logs: &mut AnalysisLogs,
-) -> Result<Option<FileOwner<GritTargetTree>>> {
+) -> GritResult<Option<FileOwner<GritTargetTree>>> {
     let name = name.into();
     let new = !old_tree.is_fresh();
 
@@ -256,7 +271,7 @@ fn new_file_owner(
     source: &str,
     language: &GritTargetLanguage,
     logs: &mut AnalysisLogs,
-) -> Result<Option<FileOwner<GritTargetTree>>> {
+) -> GritResult<Option<FileOwner<GritTargetTree>>> {
     let name = name.into();
 
     let Some(tree) = language

@@ -1,12 +1,12 @@
 use crate::grit_context::{GritExecContext, GritQueryContext};
 use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_node::GritTargetSyntaxKind;
-use anyhow::Result;
 use grit_pattern_matcher::binding::Binding;
 use grit_pattern_matcher::context::ExecContext;
 use grit_pattern_matcher::pattern::{
     CodeSnippet, DynamicPattern, Matcher, Pattern, PatternName, ResolvedPattern, State,
 };
+use grit_util::error::GritResult;
 use grit_util::AnalysisLogs;
 
 #[derive(Clone, Debug)]
@@ -33,7 +33,7 @@ impl Matcher<GritQueryContext> for GritCodeSnippet {
         state: &mut State<'a, GritQueryContext>,
         context: &'a GritExecContext,
         logs: &mut AnalysisLogs,
-    ) -> Result<bool> {
+    ) -> GritResult<bool> {
         let Some(binding) = resolved.get_last_binding() else {
             return Ok(resolved.text(&state.files, context.language())?.trim() == self.source);
         };

@@ -12,7 +12,6 @@ repository.workspace = true
 version              = "0.0.1"
 
 [dependencies]
-anyhow               = { workspace = true }
 biome_console        = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_grit_parser    = { workspace = true }
@@ -22,9 +21,8 @@ biome_js_syntax      = { workspace = true }
 biome_parser         = { workspace = true }
 biome_rowan          = { workspace = true }
 biome_string_case    = { workspace = true }
-grit-pattern-matcher = { version = "0.3" }
-grit-util            = { version = "0.3" }
-im                   = { version = "15.1.0" }
+grit-pattern-matcher = { version = "0.4" }
+grit-util            = { version = "0.4" }
 path-absolutize      = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
 rand                 = { version = "0.8.5" }
 regex                = { workspace = true }

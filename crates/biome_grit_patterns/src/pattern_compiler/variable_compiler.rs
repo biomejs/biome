@@ -3,7 +3,7 @@ use crate::util::TextRangeGritExt;
 use biome_grit_syntax::GritVariable;
 use biome_rowan::AstNode;
 use grit_pattern_matcher::constants::GLOBAL_VARS_SCOPE_INDEX;
-use grit_pattern_matcher::pattern::{Variable, VariableSourceLocations};
+use grit_pattern_matcher::pattern::{Variable, VariableSource};
 use grit_util::ByteRange;
 use std::collections::BTreeSet;
 use std::path::Path;
@@ -61,7 +61,11 @@ impl<'a> NodeCompilationContext<'a> {
 
         if let Some(i) = vars.get(&name) {
             if let Some(FileLocation { range, .. }) = location {
-                vars_array[*scope_index][*i].locations.insert(range);
+                if let VariableSource::Compiled { locations, .. } =
+                    &mut vars_array[*scope_index][*i]
+                {
+                    locations.insert(range);
+                }
             }
             return Variable::new(*scope_index, *i);
         }
@@ -69,15 +73,17 @@ impl<'a> NodeCompilationContext<'a> {
         if let Some(i) = global_vars.get(&name) {
             if let Some(FileLocation { path, range }) = location {
                 if path.is_none() {
-                    vars_array[GLOBAL_VARS_SCOPE_INDEX][*i]
-                        .locations
-                        .insert(range);
+                    if let VariableSource::Compiled { locations, .. } =
+                        &mut vars_array[GLOBAL_VARS_SCOPE_INDEX as usize][*i]
+                    {
+                        locations.insert(range);
+                    }
                 }
             }
-            return Variable::new(GLOBAL_VARS_SCOPE_INDEX, *i);
+            return Variable::new(GLOBAL_VARS_SCOPE_INDEX.into(), *i);
         }
         let (name_map, scope_index) = if name.starts_with("$GLOBAL_") {
-            (global_vars, GLOBAL_VARS_SCOPE_INDEX)
+            (global_vars, GLOBAL_VARS_SCOPE_INDEX.into())
         } else {
             (vars, *scope_index)
         };
@@ -93,7 +99,7 @@ impl<'a> NodeCompilationContext<'a> {
             (BTreeSet::new(), None)
         };
 
-        scope.push(VariableSourceLocations {
+        scope.push(VariableSource::Compiled {
             name,
             file: path
                 .map(|p| p.to_string_lossy().to_string())
