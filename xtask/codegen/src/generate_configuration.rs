@@ -440,7 +440,6 @@ fn generate_for_groups(
         quote! {
             #use_rule_configuration
             use biome_console::markup;
-            use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
             use biome_deserialize_macros::{Deserializable, Merge};
             use biome_diagnostics::{Category, Severity};
             use biome_rowan::TextRange;
@@ -492,16 +491,16 @@ fn generate_for_groups(
                 )*
             }
 
-            impl DeserializableValidator for Rules {
+            impl biome_deserialize::DeserializableValidator for Rules {
                 fn validate(
                     &mut self,
+                    ctx: &mut impl biome_deserialize::DeserializableContext,
                     _name: &str,
                     range: TextRange,
-                    diagnostics: &mut Vec<DeserializationDiagnostic>,
                 ) -> bool {
                     if self.recommended == Some(true) && self.all == Some(true) {
-                        diagnostics
-                            .push(DeserializationDiagnostic::new(markup!(
+                        ctx
+                            .report(biome_deserialize::DeserializationDiagnostic::new(markup!(
                                 <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
                             ))
                             .with_range(range)
@@ -866,16 +865,16 @@ fn generate_group_struct(
                 #( #schema_lines_rules ),*
             }
 
-            impl DeserializableValidator for #group_pascal_ident {
+            impl biome_deserialize::DeserializableValidator for #group_pascal_ident {
                 fn validate(
                     &mut self,
+                    ctx: &mut impl biome_deserialize::DeserializableContext,
                     _name: &str,
                     range: TextRange,
-                    diagnostics: &mut Vec<DeserializationDiagnostic>,
                 ) -> bool {
                     if self.recommended == Some(true) && self.all == Some(true) {
-                        diagnostics
-                            .push(DeserializationDiagnostic::new(markup!(
+                        ctx
+                            .push(biome_deserialize::DeserializationDiagnostic::new(markup!(
                                 <Emphasis>"'recommended'"</Emphasis>" and "<Emphasis>"'all'"</Emphasis>" can't be both "<Emphasis>"'true'"</Emphasis>". You should choose only one of them."
                             ))
                             .with_range(range)

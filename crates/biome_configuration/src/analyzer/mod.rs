@@ -4,8 +4,9 @@ pub mod linter;
 pub use crate::analyzer::linter::*;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, RuleFilter};
-use biome_deserialize::{Deserializable, DeserializableType};
-use biome_deserialize::{DeserializableValue, DeserializationDiagnostic, Merge};
+use biome_deserialize::{
+    Deserializable, DeserializableContext, DeserializableType, DeserializableValue, Merge,
+};
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 #[cfg(feature = "schema")]
@@ -23,15 +24,14 @@ pub enum RuleConfiguration<T: Default> {
 
 impl<T: Default + Deserializable> Deserializable for RuleConfiguration<T> {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         rule_name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Str {
-            Deserializable::deserialize(value, rule_name, diagnostics).map(Self::Plain)
+            Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
-            Deserializable::deserialize(value, rule_name, diagnostics)
-                .map(|rule| Self::WithOptions(rule))
+            Deserializable::deserialize(ctx, value, rule_name).map(|rule| Self::WithOptions(rule))
         }
     }
 }
@@ -106,15 +106,14 @@ impl<T: Default> Default for RuleFixConfiguration<T> {
 
 impl<T: Default + Deserializable> Deserializable for RuleFixConfiguration<T> {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         rule_name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Str {
-            Deserializable::deserialize(value, rule_name, diagnostics).map(Self::Plain)
+            Deserializable::deserialize(ctx, value, rule_name).map(Self::Plain)
         } else {
-            Deserializable::deserialize(value, rule_name, diagnostics)
-                .map(|rule| Self::WithOptions(rule))
+            Deserializable::deserialize(ctx, value, rule_name).map(|rule| Self::WithOptions(rule))
         }
     }
 }

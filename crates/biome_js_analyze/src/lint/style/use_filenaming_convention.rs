@@ -10,7 +10,7 @@ use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
 use std::{hash::Hash, str::FromStr};
 
-use biome_deserialize::{DeserializableValue, DeserializationDiagnostic};
+use biome_deserialize::{DeserializableContext, DeserializableValue, DeserializationDiagnostic};
 #[cfg(feature = "schemars")]
 use schemars::JsonSchema;
 use smallvec::SmallVec;
@@ -415,14 +415,13 @@ impl Default for FilenameCases {
 
 impl biome_deserialize::Deserializable for FilenameCases {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let cases: FxHashSet<_> =
-            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)?;
+        let cases: FxHashSet<_> = biome_deserialize::Deserializable::deserialize(ctx, value, name)?;
         if cases.is_empty() {
-            diagnostics.push(
+            ctx.report(
                 DeserializationDiagnostic::new(markup! {
                     ""<Emphasis>{name}</Emphasis>" cannot be an empty array."
                 })

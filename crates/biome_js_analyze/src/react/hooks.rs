@@ -2,7 +2,8 @@ use crate::react::{is_react_call_api, ReactLibrary};
 
 use biome_console::markup;
 use biome_deserialize::{
-    DeserializableTypes, DeserializableValue, DeserializationDiagnostic, DeserializationVisitor,
+    DeserializableContext, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    DeserializationVisitor,
 };
 use biome_diagnostics::Severity;
 use biome_js_semantic::{Capture, Closure, ClosureExtensions, SemanticModel};
@@ -319,11 +320,11 @@ impl JsonSchema for StableHookResult {
 
 impl biome_deserialize::Deserializable for StableHookResult {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(StableResultVisitor, name, diagnostics)
+        value.deserialize(ctx, StableResultVisitor, name)
     }
 }
 
@@ -337,14 +338,14 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_array(
         self,
+        ctx: &mut impl DeserializableContext,
         items: impl Iterator<Item = Option<impl DeserializableValue>>,
         _range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         let indices: Vec<u8> = items
             .filter_map(|value| {
-                DeserializableValue::deserialize(&value?, StableResultIndexVisitor, "", diagnostics)
+                DeserializableValue::deserialize(&value?, ctx, StableResultIndexVisitor, "")
             })
             .collect();
 
@@ -357,15 +358,15 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_bool(
         self,
+        ctx: &mut impl DeserializableContext,
         value: bool,
         range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         match value {
             true => Some(StableHookResult::Identity),
             false => {
-                diagnostics.push(
+                ctx.report(
                     DeserializationDiagnostic::new(
                         markup! { "This hook is configured to not have a stable result" },
                     )
@@ -379,19 +380,13 @@ impl DeserializationVisitor for StableResultVisitor {
 
     fn visit_number(
         self,
+        ctx: &mut impl DeserializableContext,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
-        StableResultIndexVisitor::visit_number(
-            StableResultIndexVisitor,
-            value,
-            range,
-            name,
-            diagnostics,
-        )
-        .map(|index| StableHookResult::Indices(vec![index]))
+        StableResultIndexVisitor::visit_number(StableResultIndexVisitor, ctx, value, range, name)
+            .map(|index| StableHookResult::Indices(vec![index]))
     }
 }
 
@@ -403,15 +398,15 @@ impl DeserializationVisitor for StableResultIndexVisitor {
 
     fn visit_number(
         self,
+        ctx: &mut impl DeserializableContext,
         value: biome_deserialize::TextNumber,
         range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         match value.parse::<u8>() {
             Ok(index) => Some(index),
             Err(_) => {
-                diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+                ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
                     0, 255, range,
                 ));
                 None

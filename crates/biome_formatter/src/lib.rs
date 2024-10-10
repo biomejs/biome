@@ -58,7 +58,8 @@ use crate::trivia::{format_skipped_token_trivia, format_trimmed_token};
 pub use arguments::{Argument, Arguments};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableValue, DeserializationDiagnostic, TextNumber,
+    Deserializable, DeserializableContext, DeserializableValue, DeserializationDiagnostic,
+    TextNumber,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_deserialize_macros::Merge;
@@ -225,15 +226,15 @@ impl Default for IndentWidth {
 
 impl Deserializable for IndentWidth {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),
@@ -326,15 +327,15 @@ impl Default for LineWidth {
 
 impl Deserializable for LineWidth {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value_text = TextNumber::deserialize(value, name, diagnostics)?;
+        let value_text = TextNumber::deserialize(ctx, value, name)?;
         if let Ok(value) = value_text.parse::<Self>() {
             return Some(value);
         }
-        diagnostics.push(DeserializationDiagnostic::new_out_of_bound_integer(
+        ctx.report(DeserializationDiagnostic::new_out_of_bound_integer(
             Self::MIN,
             Self::MAX,
             value.range(),

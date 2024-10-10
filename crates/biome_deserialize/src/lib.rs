@@ -78,13 +78,50 @@ pub use validator::*;
 /// ```
 pub trait Deserializable: Sized {
     /// Returns the deserialized form of `value`, or `None` if it failed.
-    /// Any diagnostics emitted during deserialization are appended to `diagnostics`.
+    /// Any diagnostics emitted during deserialization are reported via `ctx`.
     /// `name` corresponds to the name used in a diagnostic to designate the deserialized value.
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self>;
+}
+
+/// Context used during deserialization.
+///
+/// We provide a default implementation [DefaultDeserializableContext].
+/// Creating a own context implementation allows you to cistomize how diagnostics are reported.
+pub trait DeserializableContext {
+    fn id(&self) -> Option<&str>;
+    fn report(&mut self, diagnostc: DeserializationDiagnostic);
+}
+
+/// Default implementation for [DeserializableContext].
+///
+/// This implementation stores all reporetd diagnostics inside a vector.
+#[derive(Debug, Default)]
+struct DefaultDeserializableContext<'a> {
+    pub diagnostics: Vec<Error>,
+    pub id: Option<&'a str>,
+}
+impl<'a> DefaultDeserializableContext<'a> {
+    fn new(id: &'a str) -> Self {
+        Self {
+            diagnostics: Default::default(),
+            id: Some(id),
+        }
+    }
+}
+impl<'a> DeserializableContext for DefaultDeserializableContext<'a> {
+    // Identifier of the deserialized root value.
+    fn id(&self) -> Option<&str> {
+        self.id
+    }
+
+    /// Report `diagnostc` to the user.
+    fn report(&mut self, diagnostc: DeserializationDiagnostic) {
+        self.diagnostics.push(Error::from(diagnostc));
+    }
 }
 
 /// Implemented by data structure that can be deserialized.
@@ -100,9 +137,9 @@ pub trait DeserializableValue: Sized {
     /// `name` corresponds to the name used in a diagnostic to designate the value.
     fn deserialize<V: DeserializationVisitor>(
         &self,
+        ctx: &mut impl DeserializableContext,
         visitor: V,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<V::Output>;
 
     /// Returns the type of this value.
@@ -129,7 +166,7 @@ pub trait DeserializableValue: Sized {
 /// ## Examples
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
+/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableContext, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
 /// use biome_rowan::TextRange;
 ///
 /// #[derive(Debug, Eq, PartialEq)]
@@ -139,11 +176,11 @@ pub trait DeserializableValue: Sized {
 ///
 /// impl Deserializable for Person {
 ///     fn deserialize(
+///         ctx: &mut impl DeserializableContext,
 ///         value: &impl DeserializableValue,
 ///         name: &str,
-///         diagnostics: &mut Vec<DeserializationDiagnostic>,
 ///     ) -> Option<Self> {
-///         value.deserialize(PersonVisitor, name, diagnostics)
+///         value.deserialize(ctx, PersonVisitor, name)
 ///     }
 /// }
 ///
@@ -154,23 +191,23 @@ pub trait DeserializableValue: Sized {
 ///
 ///     fn visit_map(
 ///         self,
+///         ctx: &mut impl DeserializableContext,
 ///         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
 ///         range: TextRange,
 ///         _name: &str,
-///         diagnostics: &mut Vec<DeserializationDiagnostic>,
 ///     ) -> Option<Self::Output> {
 ///         let mut name = None;
 ///         for (key, value) in members.flatten() {
-///             let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+///             let Some(key_text) = Text::deserialize(ctx, &key, "") else {
 ///                 continue;
 ///             };
 ///             match key_text.text() {
 ///                 "name" => {
-///                     name = Deserializable::deserialize(&value, &key_text, diagnostics);
+///                     name = Deserializable::deserialize(ctx, &value, &key_text);
 ///                 },
 ///                 unknown_key => {
 ///                     const ALLOWED_KEYS: &[&str] = &["name"];
-///                     diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+///                     ctx.report(DeserializationDiagnostic::new_unknown_key(
 ///                         unknown_key,
 ///                         key.range(),
 ///                         ALLOWED_KEYS,
@@ -192,7 +229,7 @@ pub trait DeserializableValue: Sized {
 /// ```
 ///
 /// ```
-/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
+/// use biome_deserialize::{DeserializationDiagnostic, Deserializable, DeserializableContext, DeserializableValue, DeserializationVisitor, Text, DeserializableTypes};
 /// use biome_rowan::TextRange;
 ///
 /// #[derive(Debug, Eq, PartialEq)]
@@ -203,11 +240,11 @@ pub trait DeserializableValue: Sized {
 ///
 /// impl Deserializable for Union {
 ///     fn deserialize(
+///         ctx: &mut impl DeserializableContext,
 ///         value: &impl DeserializableValue,
 ///         name: &str,
-///         diagnostics: &mut Vec<DeserializationDiagnostic>,
 ///     ) -> Option<Self> {
-///         value.deserialize(UnionVisitor, name, diagnostics)
+///         value.deserialize(ctx, UnionVisitor, name)
 ///     }
 /// }
 ///
@@ -218,20 +255,20 @@ pub trait DeserializableValue: Sized {
 ///
 ///     fn visit_bool(
 ///         self,
+///         ctx: &mut impl DeserializableContext,
 ///         value: bool,
 ///         range: TextRange,
 ///         _name: &str,
-///         diagnostics: &mut Vec<DeserializationDiagnostic>,
 ///     ) -> Option<Self::Output> {
 ///         Some(Union::Bool(value))
 ///     }
 ///
 ///     fn visit_str(
 ///         self,
+///         ctx: &mut impl DeserializableContext,
 ///         value: Text,
 ///         range: TextRange,
 ///         _name: &str,
-///         diagnostics: &mut Vec<DeserializationDiagnostic>,
 ///     ) -> Option<Self::Output> {
 ///         Some(Union::Str(value.text().to_string()))
 ///     }
@@ -263,15 +300,15 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_null(
         self,
+        ctx: &mut impl DeserializableContext,
         range: TextRange,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
             !Self::EXPECTED_TYPE.contains(DeserializableTypes::NULL),
             "This method should be implemented because the expected type is null."
         );
-        diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
+        ctx.report(DeserializationDiagnostic::new_incorrect_type_with_name(
             DeserializableType::Null,
             Self::EXPECTED_TYPE,
             name,
@@ -286,16 +323,16 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_bool(
         self,
+        ctx: &mut impl DeserializableContext,
         _value: bool,
         range: TextRange,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
             !Self::EXPECTED_TYPE.contains(DeserializableTypes::BOOL),
             "This method should be implemented because the expected type is bool."
         );
-        diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
+        ctx.report(DeserializationDiagnostic::new_incorrect_type_with_name(
             DeserializableType::Bool,
             Self::EXPECTED_TYPE,
             name,
@@ -311,16 +348,16 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_number(
         self,
+        ctx: &mut impl DeserializableContext,
         _value: TextNumber,
         range: TextRange,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
             !Self::EXPECTED_TYPE.contains(DeserializableTypes::NUMBER),
             "This method should be implemented because the expected type is number."
         );
-        diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
+        ctx.report(DeserializationDiagnostic::new_incorrect_type_with_name(
             DeserializableType::Number,
             Self::EXPECTED_TYPE,
             name,
@@ -335,16 +372,16 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_str(
         self,
+        ctx: &mut impl DeserializableContext,
         _value: Text,
         range: TextRange,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
             !Self::EXPECTED_TYPE.contains(DeserializableTypes::STR),
             "This method should be implemented because the expected type is str."
         );
-        diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
+        ctx.report(DeserializationDiagnostic::new_incorrect_type_with_name(
             DeserializableType::Str,
             Self::EXPECTED_TYPE,
             name,
@@ -359,16 +396,16 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_array(
         self,
+        ctx: &mut impl DeserializableContext,
         _items: impl Iterator<Item = Option<impl DeserializableValue>>,
         range: TextRange,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
             !Self::EXPECTED_TYPE.contains(DeserializableTypes::ARRAY),
             "This method should be implemented because the expected type is array."
         );
-        diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
+        ctx.report(DeserializationDiagnostic::new_incorrect_type_with_name(
             DeserializableType::Array,
             Self::EXPECTED_TYPE,
             name,
@@ -383,16 +420,16 @@ pub trait DeserializationVisitor: Sized {
     /// The expected type is retrieved from [Self::EXPECTED_TYPE].
     fn visit_map(
         self,
+        ctx: &mut impl DeserializableContext,
         _members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         range: TextRange,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         debug_assert!(
             !Self::EXPECTED_TYPE.contains(DeserializableTypes::MAP),
             "This method should be implemented because the expected type is map."
         );
-        diagnostics.push(DeserializationDiagnostic::new_incorrect_type_with_name(
+        ctx.report(DeserializationDiagnostic::new_incorrect_type_with_name(
             DeserializableType::Map,
             Self::EXPECTED_TYPE,
             name,
