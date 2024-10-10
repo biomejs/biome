@@ -23,6 +23,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - The `--summary` reporter now reports parsing diagnostics too. Contributed by @ematipico
 
+- Improved performance of GritQL queries by roughly 25-30%. Contributed by @arendjr
+
 ### Configuration
 
 #### Bug fixes

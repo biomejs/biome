@@ -2,29 +2,40 @@ use crate::{
     grit_context::{GritExecContext, GritQueryContext},
     grit_resolved_pattern::GritResolvedPattern,
 };
-use anyhow::{anyhow, bail, Result};
 use biome_string_case::StrOnlyExtension;
 use grit_pattern_matcher::{
     binding::Binding,
     constant::Constant,
     context::ExecContext,
     pattern::{
-        get_absolute_file_name, CallBuiltIn, JoinFn, LazyBuiltIn, Pattern, ResolvedPattern,
-        ResolvedSnippet, State,
+        get_absolute_file_name, CallBuiltIn, CallbackPattern, JoinFn, LazyBuiltIn, Pattern,
+        ResolvedPattern, ResolvedSnippet, State,
     },
 };
-use grit_util::AnalysisLogs;
+use grit_util::{
+    error::{GritPatternError, GritResult},
+    AnalysisLogs,
+};
 use path_absolutize::Absolutize;
 use rand::{seq::SliceRandom, Rng};
-use std::borrow::Cow;
 use std::path::Path;
+use std::{borrow::Cow, fmt::Debug, num::TryFromIntError};
 
 pub type CallableFn = dyn for<'a> Fn(
         &'a [Option<Pattern<GritQueryContext>>],
         &'a GritExecContext<'a>,
         &mut State<'a, GritQueryContext>,
         &mut AnalysisLogs,
-    ) -> Result<GritResolvedPattern<'a>>
+    ) -> GritResult<GritResolvedPattern<'a>>
+    + Send
+    + Sync;
+
+pub type CallbackFn = dyn for<'a, 'b> Fn(
+        &'b GritResolvedPattern<'a>,
+        &'a GritExecContext<'a>,
+        &mut State<'a, GritQueryContext>,
+        &mut AnalysisLogs,
+    ) -> GritResult<bool>
     + Send
     + Sync;
 
@@ -41,7 +52,7 @@ impl BuiltInFunction {
         context: &'a GritExecContext<'a>,
         state: &mut State<'a, GritQueryContext>,
         logs: &mut AnalysisLogs,
-    ) -> Result<GritResolvedPattern<'a>> {
+    ) -> GritResult<GritResolvedPattern<'a>> {
         (self.func)(args, context, state, logs)
     }
 
@@ -59,8 +70,19 @@ impl std::fmt::Debug for BuiltInFunction {
     }
 }
 
-#[derive(Debug)]
-pub struct BuiltIns(Vec<BuiltInFunction>);
+pub struct BuiltIns {
+    built_ins: Vec<BuiltInFunction>,
+    callbacks: Vec<Box<CallbackFn>>,
+}
+
+impl Debug for BuiltIns {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!(
+            "BuiltIns {{ built_ins: {:?} }}",
+            self.built_ins
+        ))
+    }
+}
 
 impl Default for BuiltIns {
     fn default() -> Self {
@@ -89,18 +111,40 @@ impl BuiltIns {
         context: &'a GritExecContext<'a>,
         state: &mut State<'a, GritQueryContext>,
         logs: &mut AnalysisLogs,
-    ) -> Result<GritResolvedPattern<'a>> {
-        self.0[call.index].call(&call.args, context, state, logs)
+    ) -> GritResult<GritResolvedPattern<'a>> {
+        self.built_ins[call.index].call(&call.args, context, state, logs)
+    }
+
+    pub(crate) fn call_callback<'a>(
+        &self,
+        call: &'a CallbackPattern,
+        context: &'a GritExecContext<'a>,
+        binding: &GritResolvedPattern<'a>,
+        state: &mut State<'a, GritQueryContext>,
+        logs: &mut AnalysisLogs,
+    ) -> GritResult<bool> {
+        (self.callbacks[call.callback_index])(binding, context, state, logs)
+    }
+
+    /// Add an anonymous built-in, used for callbacks
+    /// Returns a pattern that can be used to call the callback
+    pub fn add_callback(&mut self, func: Box<CallbackFn>) -> Pattern<GritQueryContext> {
+        self.callbacks.push(func);
+        let index = self.callbacks.len() - 1;
+        Pattern::CallbackPattern(Box::new(CallbackPattern::new(index)))
     }
 
     pub(crate) fn get_built_ins(&self) -> &[BuiltInFunction] {
-        &self.0
+        &self.built_ins
     }
 }
 
 impl From<Vec<BuiltInFunction>> for BuiltIns {
     fn from(built_ins: Vec<BuiltInFunction>) -> Self {
-        Self(built_ins)
+        Self {
+            built_ins,
+            callbacks: Vec::new(),
+        }
     }
 }
 
@@ -109,10 +153,12 @@ fn capitalize_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let Some(Some(arg1)) = args.into_iter().next() else {
-        bail!("capitalize() takes 1 argument: string");
+        return Err(GritPatternError::new(
+            "capitalize() takes 1 argument: string",
+        ));
     };
 
     let string = arg1.text(&state.files, context.language())?;
@@ -126,10 +172,10 @@ fn distinct_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let Some(Some(arg1)) = args.into_iter().next() else {
-        bail!("distinct() takes 1 argument: list");
+        return Err(GritPatternError::new("distinct() takes 1 argument: list"));
     };
 
     match arg1 {
@@ -145,7 +191,9 @@ fn distinct_fn<'a>(
         GritResolvedPattern::Binding(binding) => match binding.last() {
             Some(binding) => {
                 let Some(list_items) = binding.list_items() else {
-                    bail!("distinct() requires a list as the first argument");
+                    return Err(GritPatternError::new(
+                        "distinct() requires a list as the first argument",
+                    ));
                 };
 
                 let mut unique_list = Vec::new();
@@ -159,7 +207,9 @@ fn distinct_fn<'a>(
             }
             None => Ok(GritResolvedPattern::Binding(binding)),
         },
-        _ => bail!("distinct() requires a list as the first argument"),
+        _ => Err(GritPatternError::new(
+            "distinct() requires a list as the first argument",
+        )),
     }
 }
 
@@ -168,11 +218,13 @@ fn join_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let mut args = args.into_iter();
     let (Some(Some(arg1)), Some(Some(arg2))) = (args.next(), args.next()) else {
-        bail!("join() takes 2 arguments: list and separator");
+        return Err(GritPatternError::new(
+            "join() takes 2 arguments: list and separator",
+        ));
     };
 
     let separator = arg2.text(&state.files, context.language())?;
@@ -181,7 +233,9 @@ fn join_fn<'a>(
     } else if let Some(items) = arg1.get_list_binding_items() {
         JoinFn::from_patterns(items, separator.to_string())
     } else {
-        bail!("join() requires a list as the first argument");
+        return Err(GritPatternError::new(
+            "join() requires a list as the first argument",
+        ));
     };
 
     let snippet = ResolvedSnippet::LazyFn(Box::new(LazyBuiltIn::Join(join)));
@@ -193,33 +247,51 @@ fn length_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let Some(Some(arg1)) = args.into_iter().next() else {
-        bail!("length() takes 1 argument: list or string");
+        return Err(GritPatternError::new(
+            "length() takes 1 argument: list or string",
+        ));
     };
 
     Ok(match arg1 {
-        GritResolvedPattern::List(list) => {
-            ResolvedPattern::from_constant(Constant::Integer(list.len().try_into()?))
-        }
-        GritResolvedPattern::Binding(binding) => match binding.last() {
-            Some(resolved_pattern) => {
-                let length = if let Some(list_items) = resolved_pattern.list_items() {
-                    list_items.count()
-                } else {
-                    resolved_pattern.text(context.language())?.len()
-                };
-                ResolvedPattern::from_constant(Constant::Integer(length.try_into()?))
+        GritResolvedPattern::List(list) => ResolvedPattern::from_constant(Constant::Integer(
+            list.len()
+                .try_into()
+                .map_err(|error: TryFromIntError| GritPatternError::new(error.to_string()))?,
+        )),
+        GritResolvedPattern::Binding(binding) => {
+            match binding.last() {
+                Some(resolved_pattern) => {
+                    let length = if let Some(list_items) = resolved_pattern.list_items() {
+                        list_items.count()
+                    } else {
+                        resolved_pattern.text(context.language())?.len()
+                    };
+                    ResolvedPattern::from_constant(Constant::Integer(length.try_into().map_err(
+                        |error: TryFromIntError| GritPatternError::new(error.to_string()),
+                    )?))
+                }
+                None => {
+                    return Err(GritPatternError::new(
+                        "length() requires a list or string as the first argument",
+                    ))
+                }
             }
-            None => bail!("length() requires a list or string as the first argument"),
-        },
+        }
         resolved_pattern => {
             let Ok(text) = resolved_pattern.text(&state.files, context.language()) else {
-                bail!("length() requires a list or string as the first argument");
+                return Err(GritPatternError::new(
+                    "length() requires a list or string as the first argument",
+                ));
             };
 
-            ResolvedPattern::from_constant(Constant::Integer(text.len().try_into()?))
+            ResolvedPattern::from_constant(Constant::Integer(
+                text.len()
+                    .try_into()
+                    .map_err(|error: TryFromIntError| GritPatternError::new(error.to_string()))?,
+            ))
         }
     })
 }
@@ -229,10 +301,12 @@ fn lowercase_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let Some(Some(arg1)) = args.into_iter().next() else {
-        bail!("lowercase() takes 1 argument: string");
+        return Err(GritPatternError::new(
+            "lowercase() takes 1 argument: string",
+        ));
     };
 
     let string = arg1.text(&state.files, context.language())?;
@@ -246,7 +320,7 @@ fn random_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
 
     match args.as_slice() {
@@ -263,7 +337,9 @@ fn random_fn<'a>(
             let value = state.get_rng().gen::<f64>();
             Ok(ResolvedPattern::from_constant(Constant::Float(value)))
         }
-        _ => bail!("random() takes 0 or 2 arguments: an optional start and end"),
+        _ => Err(GritPatternError::new(
+            "random() takes 0 or 2 arguments: an optional start and end",
+        )),
     }
 }
 
@@ -273,10 +349,10 @@ fn resolve_path_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let Some(Some(arg1)) = args.into_iter().next() else {
-        bail!("resolve() takes 1 argument: path");
+        return Err(GritPatternError::new("resolve() takes 1 argument: path"));
     };
 
     let current_file = get_absolute_file_name(state, context.language())?;
@@ -292,10 +368,10 @@ fn shuffle_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let Some(Some(arg1)) = args.into_iter().next() else {
-        bail!("shuffle() takes 1 argument: list");
+        return Err(GritPatternError::new("shuffle() takes 1 argument: list"));
     };
 
     let mut list: Vec<_> = if let Some(items) = arg1.get_list_items() {
@@ -303,7 +379,9 @@ fn shuffle_fn<'a>(
     } else if let Some(items) = arg1.get_list_binding_items() {
         items.collect()
     } else {
-        bail!("shuffle() requires a list as the first argument");
+        return Err(GritPatternError::new(
+            "shuffle() requires a list as the first argument",
+        ));
     };
 
     list.shuffle(state.get_rng());
@@ -315,11 +393,13 @@ fn split_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let mut args = args.into_iter();
     let (Some(Some(arg1)), Some(Some(arg2))) = (args.next(), args.next()) else {
-        bail!("split() takes 2 arguments: string and separator");
+        return Err(GritPatternError::new(
+            "split() takes 2 arguments: string and separator",
+        ));
     };
 
     let separator = arg2.text(&state.files, context.language())?;
@@ -337,10 +417,10 @@ fn text_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let Some(Some(arg1)) = args.into_iter().next() else {
-        bail!("text() takes 1 argument: string");
+        return Err(GritPatternError::new("text() takes 1 argument: string"));
     };
 
     let string = arg1.text(&state.files, context.language())?;
@@ -352,11 +432,13 @@ fn trim_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let mut args = args.into_iter();
     let (Some(Some(arg1)), Some(Some(arg2))) = (args.next(), args.next()) else {
-        bail!("trim() takes 2 arguments: string and trim_chars");
+        return Err(GritPatternError::new(
+            "trim() takes 2 arguments: string and trim_chars",
+        ));
     };
 
     let trim_chars = arg2.text(&state.files, context.language())?;
@@ -373,10 +455,12 @@ fn uppercase_fn<'a>(
     context: &'a GritExecContext<'a>,
     state: &mut State<'a, GritQueryContext>,
     logs: &mut AnalysisLogs,
-) -> Result<GritResolvedPattern<'a>> {
+) -> GritResult<GritResolvedPattern<'a>> {
     let args = GritResolvedPattern::from_patterns(args, state, context, logs)?;
     let Some(Some(arg1)) = args.into_iter().next() else {
-        bail!("uppercase() takes 1 argument: string");
+        return Err(GritPatternError::new(
+            "uppercase() takes 1 argument: string",
+        ));
     };
 
     let string = arg1.text(&state.files, context.language())?;
@@ -393,14 +477,19 @@ fn capitalize(s: &str) -> Cow<str> {
     Cow::Borrowed(s)
 }
 
-fn resolve<'a>(target_path: Cow<'a, str>, from_file: Cow<'a, str>) -> Result<String> {
+fn resolve<'a>(target_path: Cow<'a, str>, from_file: Cow<'a, str>) -> GritResult<String> {
     let Some(source_path) = Path::new(from_file.as_ref()).parent() else {
-        bail!("could not get parent directory of file name {}", &from_file);
+        return Err(GritPatternError::new(format!(
+            "could not get parent directory of file name {}",
+            &from_file,
+        )));
     };
     let our_path = Path::new(target_path.as_ref());
     let absolutized = our_path.absolutize_from(source_path)?;
     Ok(absolutized
         .to_str()
-        .ok_or_else(|| anyhow!("could not build absolute path from file name {target_path}"))?
+        .ok_or_else(|| {
+            GritPatternError::new("could not build absolute path from file name {target_path}")
+        })?
         .to_owned())
 }
