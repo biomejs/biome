@@ -1450,12 +1450,13 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                 // test js import_call
                 // import("foo")
                 // import("foo", { assert: { type: 'json' } })
+                // import("foo", { with: { 'resolution-mode': 'import' } })
 
                 // test_err js import_invalid_args
                 // import()
                 // import(...["foo"])
                 // import("foo", { assert: { type: 'json' } }, "bar")
-
+                // import("foo", { with: { type: 'json' } }, "bar")
                 let args = p.start();
                 p.bump(T!['(']);
                 let args_list = p.start();
