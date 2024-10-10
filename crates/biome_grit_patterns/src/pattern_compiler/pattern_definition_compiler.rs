@@ -32,13 +32,7 @@ impl PatternDefinitionCompiler {
             &mut context,
         )?));
 
-        let pattern_def = PatternDefinition::new(
-            name.to_owned(),
-            scope_index,
-            params,
-            local_vars.values().copied().collect(),
-            body,
-        );
+        let pattern_def = PatternDefinition::new(name.to_owned(), scope_index, params, body);
         Ok(pattern_def)
     }
 }

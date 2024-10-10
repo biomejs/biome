@@ -248,7 +248,7 @@ declare_lint_rule! {
     ///
     /// Note that some declarations are always ignored.
     /// You cannot apply a convention to them.
-    /// This is the cas eof:
+    /// This is the case of:
     ///
     /// - Member names that are not identifiers
     ///
