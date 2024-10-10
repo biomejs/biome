@@ -28,7 +28,6 @@ Attribute Position: Auto
 
 ```grit
 `$method('$message')` where {
-
 }
 ```
 
@@ -37,4 +36,3 @@ Attribute Position: Auto
 ## Unimplemented nodes/tokens
 
 "`$method('$message')`" => 0..21
-" {\n\n" => 27..31
