@@ -2,7 +2,7 @@ use super::*;
 use biome_js_syntax::{AnyJsFunction, AnyJsRoot};
 
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
-pub(crate) struct BindingId(u32);
+pub struct BindingId(u32);
 
 impl BindingId {
     pub(crate) fn new(index: usize) -> Self {
