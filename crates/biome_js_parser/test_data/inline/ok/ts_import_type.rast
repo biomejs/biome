@@ -270,3 +270,51 @@ JsModule {
           2: R_ANGLE@166..167 ">" [] []
       5: SEMICOLON@167..168 ";" [] []
   4: EOF@168..169 "" [Newline("\n")] []
+
+
+0: JS_MODULE@0..75
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..74
+    0: TS_TYPE_ALIAS_DECLARATION@0..23
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "F" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_BOGUS_TYPE@9..23
+        0: TYPEOF_KW@9..16 "typeof" [] [Whitespace(" ")]
+        1: IMPORT_KW@16..22 "import" [] []
+        2: L_PAREN@22..23 "(" [] []
+        3: JS_CALL_ARGUMENT_LIST@23..23
+      5: (empty)
+    1: JS_EXPRESSION_STATEMENT@23..72
+      0: JS_SEQUENCE_EXPRESSION@23..72
+        0: JS_STRING_LITERAL_EXPRESSION@23..29
+          0: JS_STRING_LITERAL@23..29 "\"test\"" [] []
+        1: COMMA@29..31 "," [] [Whitespace(" ")]
+        2: JS_OBJECT_EXPRESSION@31..72
+          0: L_CURLY@31..33 "{" [] [Whitespace(" ")]
+          1: JS_OBJECT_MEMBER_LIST@33..71
+            0: JS_PROPERTY_OBJECT_MEMBER@33..71
+              0: JS_LITERAL_MEMBER_NAME@33..37
+                0: IDENT@33..37 "with" [] []
+              1: COLON@37..39 ":" [] [Whitespace(" ")]
+              2: JS_OBJECT_EXPRESSION@39..71
+                0: L_CURLY@39..41 "{" [] [Whitespace(" ")]
+                1: JS_OBJECT_MEMBER_LIST@41..69
+                  0: JS_PROPERTY_OBJECT_MEMBER@41..69
+                    0: JS_LITERAL_MEMBER_NAME@41..58
+                      0: JS_STRING_LITERAL@41..58 "'resolution-mode'" [] []
+                    1: COLON@58..60 ":" [] [Whitespace(" ")]
+                    2: JS_STRING_LITERAL_EXPRESSION@60..69
+                      0: JS_STRING_LITERAL@60..69 "'import'" [] [Whitespace(" ")]
+                2: R_CURLY@69..71 "}" [] [Whitespace(" ")]
+          2: R_CURLY@71..72 "}" [] []
+      1: (empty)
+    2: JS_BOGUS_STATEMENT@72..73
+      0: R_PAREN@72..73 ")" [] []
+    3: JS_EMPTY_STATEMENT@73..74
+      0: SEMICOLON@73..74 ";" [] []
+  4: EOF@74..75 "" [Newline("\n")] []
