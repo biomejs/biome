@@ -1222,6 +1222,24 @@
 			"type": "object",
 			"additionalProperties": false
 		},
+		"ExplicitFunctionReturnTypeConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithExplicitFunctionReturnTypeOptions" }
+			]
+		},
+		"ExplicitFunctionReturnTypeOptions": {
+			"description": "Rule's options.",
+			"type": "object",
+			"properties": {
+				"allowArrowFunctions": {
+					"description": "If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].",
+					"default": false,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"FilenameCase": {
 			"description": "Supported cases for file names.",
 			"oneOf": [
@@ -2341,7 +2359,7 @@
 				"useExplicitFunctionReturnType": {
 					"description": "Require explicit return types on functions and class methods.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/ExplicitFunctionReturnTypeConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2735,6 +2753,23 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/DeprecatedHooksOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithExplicitFunctionReturnTypeOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/ExplicitFunctionReturnTypeOptions" }
+					]
 				}
 			},
 			"additionalProperties": false

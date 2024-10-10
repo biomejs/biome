@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsCallExpression,
@@ -14,6 +15,9 @@ use biome_js_syntax::{
     JsMethodObjectMember,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange};
+
+#[cfg(feature = "schemars")]
+use schemars::JsonSchema;
 
 declare_lint_rule! {
     /// Require explicit return types on functions and class methods.
@@ -202,12 +206,52 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// ## Options
+    ///
+    /// The rule provides few options that are detailed in the following subsections.
+    ///
+    /// ```json
+    /// {
+    ///     "//": "...",
+    ///     "options": {
+    ///         "allowArrowFunctions": false
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ### allowArrowFunctions
+    ///
+    /// When this option is set to `true`, it allows arrow functions to not have return type explicitly mentioned.
+    ///
+    /// Default: `false`
+    ///
     pub UseExplicitFunctionReturnType {
         version: "1.9.3",
         name: "useExplicitFunctionReturnType",
         language: "ts",
         recommended: false,
         sources: &[RuleSource::EslintTypeScript("explicit-function-return-type")],
+    }
+}
+
+/// Rule's options.
+#[derive(Debug, Clone, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ExplicitFunctionReturnTypeOptions {
+    #[serde(default = "disabled", skip_serializing_if = "bool::clone")]
+    pub allow_arrow_functions: bool,
+}
+
+const fn disabled() -> bool {
+    false
+}
+
+impl Default for ExplicitFunctionReturnTypeOptions {
+    fn default() -> Self {
+        Self {
+            allow_arrow_functions: false,
+        }
     }
 }
 
@@ -219,7 +263,7 @@ impl Rule for UseExplicitFunctionReturnType {
     type Query = Ast<AnyJsFunctionWithReturnType>;
     type State = TextRange;
     type Signals = Option<Self::State>;
-    type Options = ();
+    type Options = ExplicitFunctionReturnTypeOptions;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>().language();
@@ -230,6 +274,10 @@ impl Rule for UseExplicitFunctionReturnType {
         let node = ctx.query();
         match node {
             AnyJsFunctionWithReturnType::AnyJsFunction(func) => {
+                if func.as_js_arrow_function_expression().is_some() && ctx.options().allow_arrow_functions {
+                    return None;
+                }
+
                 if func.return_type_annotation().is_some() {
                     return None;
                 }
