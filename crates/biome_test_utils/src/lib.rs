@@ -1,5 +1,5 @@
 use biome_analyze::options::{JsxRuntime, PreferredQuote};
-use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
+use biome_analyze::{AnalyzerAction, AnalyzerConfiguration, AnalyzerOptions};
 use biome_configuration::PartialConfiguration;
 use biome_console::fmt::{Formatter, Termcolor};
 use biome_console::markup;
@@ -39,10 +39,9 @@ pub fn create_analyzer_options(
     // file with the same name as the test but with extension ".options.json"
     // that configures that specific rule.
     let mut analyzer_configuration = AnalyzerConfiguration {
-        rules: AnalyzerRules::default(),
-        globals: vec![],
         preferred_quote: PreferredQuote::Double,
         jsx_runtime: Some(JsxRuntime::Transparent),
+        ..Default::default()
     };
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {
