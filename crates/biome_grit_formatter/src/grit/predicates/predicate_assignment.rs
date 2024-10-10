@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritPredicateAssignment;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritPredicateAssignment, GritPredicateAssignmentFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPredicateAssignment;
 impl FormatNodeRule<GritPredicateAssignment> for FormatGritPredicateAssignment {
@@ -9,6 +10,21 @@ impl FormatNodeRule<GritPredicateAssignment> for FormatGritPredicateAssignment {
         node: &GritPredicateAssignment,
         f: &mut GritFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritPredicateAssignmentFields {
+            container,
+            eq_token,
+            pattern,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                container.format(),
+                space(),
+                eq_token.format(),
+                space(),
+                pattern.format()
+            ]
+        )
     }
 }
