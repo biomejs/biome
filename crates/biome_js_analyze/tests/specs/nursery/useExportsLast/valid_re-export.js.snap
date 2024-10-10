@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid_re-export.js
+---
+# Input
+```jsx
+export * from './foo';
+
+```

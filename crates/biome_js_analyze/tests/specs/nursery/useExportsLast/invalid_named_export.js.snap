@@ -1,0 +1,27 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid_named_export.js
+---
+# Input
+```jsx
+export const foo = 1;
+
+const bar = 2;
+
+```
+
+# Diagnostics
+```
+invalid_named_export.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Export statements should appear at the end of the file.
+  
+  > 1 │ export const foo = 1;
+      │ ^^^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ const bar = 2;
+  
+  i Move this export to the end of the file.
+  
+
+```
