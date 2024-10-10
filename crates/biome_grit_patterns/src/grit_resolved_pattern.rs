@@ -135,7 +135,7 @@ impl<'a> ResolvedPattern<'a, GritQueryContext> for GritResolvedPattern<'a> {
                     let name = &content.name;
                     // feels weird not sure if clone is correct
                     let value = if let Some(value) = &content.value {
-                        value.clone().into()
+                        value.clone()
                     } else if let Some(pattern) = content.pattern {
                         Self::from_pattern(pattern, state, context, logs)?
                     } else {

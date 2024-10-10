@@ -194,7 +194,7 @@ pub enum GritQueryResult {
 }
 
 impl GritQueryResult {
-    pub fn from_file(file: &Vec<&FileOwner<GritTargetTree>>) -> GritResult<Option<Self>> {
+    pub fn from_file(file: &[&FileOwner<GritTargetTree>]) -> GritResult<Option<Self>> {
         if file.is_empty() {
             return Err(GritPatternError::new("cannot have file with no versions"));
         }

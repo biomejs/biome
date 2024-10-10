@@ -207,11 +207,9 @@ fn distinct_fn<'a>(
             }
             None => Ok(GritResolvedPattern::Binding(binding)),
         },
-        _ => {
-            return Err(GritPatternError::new(
-                "distinct() requires a list as the first argument",
-            ))
-        }
+        _ => Err(GritPatternError::new(
+            "distinct() requires a list as the first argument",
+        )),
     }
 }
 
@@ -339,11 +337,9 @@ fn random_fn<'a>(
             let value = state.get_rng().gen::<f64>();
             Ok(ResolvedPattern::from_constant(Constant::Float(value)))
         }
-        _ => {
-            return Err(GritPatternError::new(
-                "random() takes 0 or 2 arguments: an optional start and end",
-            ))
-        }
+        _ => Err(GritPatternError::new(
+            "random() takes 0 or 2 arguments: an optional start and end",
+        )),
     }
 }
 
