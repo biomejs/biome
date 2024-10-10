@@ -8,7 +8,7 @@ use crate::utils::{into_lsp_error, panic_to_lsp_error};
 use crate::{handlers, requests};
 use biome_console::markup;
 use biome_diagnostics::panic::PanicError;
-use biome_fs::{ConfigName, FileSystem, OsFileSystem, ROME_JSON};
+use biome_fs::{ConfigName, FileSystem, OsFileSystem};
 use biome_service::workspace::{
     RageEntry, RageParams, RageResult, RegisterProjectFolderParams, UnregisterProjectFolderParams,
 };
@@ -153,14 +153,6 @@ impl LSPServer {
                         FileSystemWatcher {
                             glob_pattern: GlobPattern::String(format!(
                                 "{}/.editorconfig",
-                                base_path.display()
-                            )),
-                            kind: Some(WatchKind::all()),
-                        },
-                        // TODO: Biome 2.0 remove it
-                        FileSystemWatcher {
-                            glob_pattern: GlobPattern::String(format!(
-                                "{}/rome.json",
                                 base_path.display()
                             )),
                             kind: Some(WatchKind::all()),
@@ -333,9 +325,8 @@ impl LanguageServer for LSPServer {
                     if let Some(base_path) = base_path {
                         let possible_rome_json = file_path.strip_prefix(&base_path);
                         if let Ok(watched_file) = possible_rome_json {
-                            if watched_file.display().to_string() == ROME_JSON
-                                || ConfigName::file_names()
-                                    .contains(&&*watched_file.display().to_string())
+                            if ConfigName::file_names()
+                                .contains(&&*watched_file.display().to_string())
                                 || watched_file.ends_with(".editorconfig")
                             {
                                 self.session.load_workspace_settings().await;

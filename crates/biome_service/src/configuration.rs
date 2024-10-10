@@ -217,30 +217,11 @@ fn load_config(
     };
 
     // We first search for `biome.json` or `biome.jsonc` files
-    if let Some(auto_search_result) = match file_system.auto_search(
+    if let Some(auto_search_result) = file_system.auto_search(
         &configuration_directory,
         ConfigName::file_names().as_slice(),
         should_error,
-    ) {
-        Ok(Some(auto_search_result)) => Some(auto_search_result),
-        // We then search for the deprecated `rome.json` file
-        // if neither `biome.json` nor `biome.jsonc` is found
-        // TODO: The following arms should be removed in v2.0.0
-        Ok(None) => file_system.auto_search(
-            &configuration_directory,
-            [file_system.deprecated_config_name()].as_slice(),
-            should_error,
-        )?,
-        Err(error) => file_system
-            .auto_search(
-                &configuration_directory,
-                [file_system.deprecated_config_name()].as_slice(),
-                should_error,
-            )
-            // Map the error so users won't see error messages
-            // that contains `rome.json`
-            .map_err(|_| error)?,
-    } {
+    )? {
         let AutoSearchResult { content, file_path } = auto_search_result;
 
         let parser_options = match file_path.extension().map(OsStr::as_encoded_bytes) {

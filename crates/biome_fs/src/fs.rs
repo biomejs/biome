@@ -16,8 +16,6 @@ use tracing::{error, info};
 mod memory;
 mod os;
 
-pub const ROME_JSON: &str = "rome.json";
-
 pub struct ConfigName;
 
 impl ConfigName {
@@ -47,12 +45,6 @@ pub trait FileSystem: Send + Sync + RefUnwindSafe {
     /// This method creates a new "traversal scope" that can be used to
     /// efficiently batch many filesystem read operations
     fn traversal<'scope>(&'scope self, func: BoxedTraversal<'_, 'scope>);
-
-    // TODO: remove once we remove `rome.json` support [2.0]
-    /// Returns the temporary configuration files that are supported
-    fn deprecated_config_name(&self) -> &str {
-        ROME_JSON
-    }
 
     /// Return the path to the working directory
     fn working_directory(&self) -> Option<PathBuf>;
