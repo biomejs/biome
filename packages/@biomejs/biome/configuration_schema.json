@@ -2345,6 +2345,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGuardForIn": {
+					"description": "Require for-in loops to include an if statement.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useImportRestrictions": {
 					"description": "Disallows package private imports.",
 					"anyOf": [

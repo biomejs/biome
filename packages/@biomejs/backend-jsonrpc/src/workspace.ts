@@ -1367,6 +1367,10 @@ export interface Nursery {
 	 */
 	useExplicitFunctionReturnType?: RuleConfiguration_for_Null;
 	/**
+	 * Require for-in loops to include an if statement.
+	 */
+	useGuardForIn?: RuleConfiguration_for_Null;
+	/**
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
@@ -2942,6 +2946,7 @@ export type Category =
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useSortedClasses"
