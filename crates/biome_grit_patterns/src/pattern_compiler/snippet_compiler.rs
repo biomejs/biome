@@ -11,7 +11,7 @@ use grit_pattern_matcher::{
     constants::GLOBAL_VARS_SCOPE_INDEX,
     pattern::{
         is_reserved_metavariable, DynamicPattern, DynamicSnippet, DynamicSnippetPart, List,
-        Pattern, RegexLike, RegexPattern, Variable,
+        Pattern, RegexLike, RegexPattern, Variable, VariableSource,
     },
 };
 use grit_util::{traverse, Ast, AstNode, ByteRange, GritMetaValue, Language, Order, SnippetTree};
@@ -108,16 +108,18 @@ pub(crate) fn dynamic_snippet_from_source(
             source_range.start + byte_range.start + var.len(),
         );
         if let Some(var) = context.vars.get(var.as_ref()) {
-            context.vars_array[context.scope_index][*var]
-                .locations
-                .insert(range);
+            if let VariableSource::Compiled { locations, .. } =
+                &mut context.vars_array[context.scope_index][*var]
+            {
+                locations.insert(range);
+            }
             parts.push(DynamicSnippetPart::Variable(Variable::new(
                 context.scope_index,
                 *var,
             )));
         } else if let Some(var) = context.global_vars.get(var.as_ref()) {
             parts.push(DynamicSnippetPart::Variable(Variable::new(
-                GLOBAL_VARS_SCOPE_INDEX,
+                GLOBAL_VARS_SCOPE_INDEX.into(),
                 *var,
             )));
         } else if var.starts_with("$GLOBAL_") {
@@ -812,8 +814,12 @@ mod tests {
                                         slot_index: 0,
                                         pattern: Variable(
                                             Variable {
-                                                scope: 0,
-                                                index: 0,
+                                                internal: Static(
+                                                    VariableScope {
+                                                        scope: 0,
+                                                        index: 0,
+                                                    },
+                                                ),
                                             },
                                         ),
                                     },
@@ -877,8 +883,12 @@ mod tests {
                                                                         slot_index: 0,
                                                                         pattern: Variable(
                                                                             Variable {
-                                                                                scope: 0,
-                                                                                index: 0,
+                                                                                internal: Static(
+                                                                                    VariableScope {
+                                                                                        scope: 0,
+                                                                                        index: 0,
+                                                                                    },
+                                                                                ),
                                                                             },
                                                                         ),
                                                                     },
@@ -980,8 +990,12 @@ mod tests {
                                         slot_index: 0,
                                         pattern: Variable(
                                             Variable {
-                                                scope: 0,
-                                                index: 0,
+                                                internal: Static(
+                                                    VariableScope {
+                                                        scope: 0,
+                                                        index: 0,
+                                                    },
+                                                ),
                                             },
                                         ),
                                     },
@@ -1009,8 +1023,12 @@ mod tests {
                                                         slot_index: 0,
                                                         pattern: Variable(
                                                             Variable {
-                                                                scope: 0,
-                                                                index: 0,
+                                                                internal: Static(
+                                                                    VariableScope {
+                                                                        scope: 0,
+                                                                        index: 0,
+                                                                    },
+                                                                ),
                                                             },
                                                         ),
                                                     },
@@ -1134,8 +1152,12 @@ mod tests {
                                         slot_index: 0,
                                         pattern: Variable(
                                             Variable {
-                                                scope: 0,
-                                                index: 0,
+                                                internal: Static(
+                                                    VariableScope {
+                                                        scope: 0,
+                                                        index: 0,
+                                                    },
+                                                ),
                                             },
                                         ),
                                     },
@@ -1199,8 +1221,12 @@ mod tests {
                                                                         slot_index: 0,
                                                                         pattern: Variable(
                                                                             Variable {
-                                                                                scope: 0,
-                                                                                index: 0,
+                                                                                internal: Static(
+                                                                                    VariableScope {
+                                                                                        scope: 0,
+                                                                                        index: 0,
+                                                                                    },
+                                                                                ),
                                                                             },
                                                                         ),
                                                                     },
