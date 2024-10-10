@@ -68,12 +68,31 @@ pub trait AriaRoleDefinition: Debug {
     }
 }
 
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#button
-    ButtonRole {
-        PROPS: [("aria-expanded", false), ("aria-expanded", false)],
-        ROLES: ["roletype", "widget", "command"],
-        CONCEPTS: &[("button", &[]), ("input", &[("type", "button")])],
+#[derive(Debug)]
+/// https://www.w3.org/TR/wai-aria-1.1/#switch
+struct ButtonRole;
+
+impl ButtonRole {
+    const PROPS: &'static [(&'static str, bool)] =
+        &[("aria-expanded", false), ("aria-expanded", false)];
+    const ROLES: &'static [&'static str] = &["roletype", "widget", "command"];
+    const CONCEPTS: &'static [(&'static str, &'static [(&'static str, &'static str)])] =
+        &[("button", &[]), ("input", &[("type", "button")])];
+}
+
+impl AriaRoleDefinition for ButtonRole {
+    fn properties(&self) -> Iter<(&str, bool)> {
+        Self::PROPS.iter()
+    }
+
+    fn roles(&self) -> Iter<&str> {
+        Self::ROLES.iter()
+    }
+}
+
+impl AriaRoleDefinitionWithConcepts for ButtonRole {
+    fn concepts_by_role<'a>(&self) -> ElementsAndAttributes<'a> {
+        Some(Self::CONCEPTS.iter())
     }
 }
 
@@ -93,20 +112,50 @@ define_role! {
         CONCEPTS: &[("input", &[("type", "radio")])],
     }
 }
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#switch
-    SwitchRole {
-        PROPS: [("aria-checked", true)],
-        ROLES: ["checkbox", "widget"],
+
+#[derive(Debug)]
+/// https://www.w3.org/TR/wai-aria-1.1/#switch
+struct SwitchRole;
+
+impl SwitchRole {
+    const PROPS: &'static [(&'static str, bool)] = &[("aria-checked", true)];
+    const ROLES: &'static [&'static str] = &["checkbox", "widget"];
+}
+
+impl AriaRoleDefinition for SwitchRole {
+    fn properties(&self) -> Iter<(&str, bool)> {
+        Self::PROPS.iter()
+    }
+
+    fn roles(&self) -> Iter<&str> {
+        Self::ROLES.iter()
     }
 }
 
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#option
-    OptionRole {
-        PROPS: [("aria-selected", true)],
-        ROLES: ["treeitem", "widget"],
-        CONCEPTS: &[("option", &[])],
+#[derive(Debug)]
+/// https://www.w3.org/TR/wai-aria-1.1/#option
+struct OptionRole;
+
+impl OptionRole {
+    const PROPS: &'static [(&'static str, bool)] = &[("aria-selected", true)];
+    const ROLES: &'static [&'static str] = &["treeitem", "widget"];
+    const CONCEPTS: &'static [(&'static str, &'static [(&'static str, &'static str)])] =
+        &[("option", &[])];
+}
+
+impl AriaRoleDefinition for OptionRole {
+    fn properties(&self) -> Iter<(&str, bool)> {
+        Self::PROPS.iter()
+    }
+
+    fn roles(&self) -> Iter<&str> {
+        Self::ROLES.iter()
+    }
+}
+
+impl AriaRoleDefinitionWithConcepts for OptionRole {
+    fn concepts_by_role<'a>(&self) -> ElementsAndAttributes<'a> {
+        Some(Self::CONCEPTS.iter())
     }
 }
 
@@ -1362,7 +1411,14 @@ impl<'a> AriaRoles {
 type ElementsAndAttributes<'a> = Option<Iter<'a, (&'a str, &'a [(&'a str, &'a str)])>>;
 
 pub trait AriaRoleDefinitionWithConcepts: AriaRoleDefinition {
-    fn concepts_by_element_name<'a>(&self, _element_name: &str) -> ElementsAndAttributes<'a> {
+    fn concepts_by_element_name<'a>(&self, element_name: &str) -> ElementsAndAttributes<'a> {
+        if let Some(iter) = self.concepts_by_role() {
+            for (concept_name, _attributes) in iter {
+                if *concept_name == element_name {
+                    return self.concepts_by_role();
+                }
+            }
+        }
         None
     }
 
