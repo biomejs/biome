@@ -1283,7 +1283,9 @@ impl<'a, 'print> FitsMeasurer<'a, 'print> {
             let char_width = match c {
                 '\t' => self.options().indent_width.value() as usize,
                 '\n' => {
-                    return if self.must_be_flat {
+                    return if self.must_be_flat
+                        || self.state.line_width > self.options().print_width.into()
+                    {
                         Fits::No
                     } else {
                         Fits::Yes
@@ -1779,6 +1781,30 @@ two lines`,
 Group with id-1 does not fit on the line because it exceeds the line width of 80 characters by
 Group 2 fits
 Group 1 breaks"#
+        );
+    }
+
+    #[test]
+    fn break_group_if_partial_string_exceeds_print_width() {
+        let options = PrinterOptions {
+            print_width: PrintWidth::new(10),
+            ..PrinterOptions::default()
+        };
+
+        let result = format_with_options(
+            &format_args![group(&format_args!(
+                text("("),
+                soft_line_break(),
+                text("This is a string\n containing a newline"),
+                soft_line_break(),
+                text(")")
+            ))],
+            options,
+        );
+
+        assert_eq!(
+            "(\nThis is a string\n containing a newline\n)",
+            result.as_code()
         );
     }
 

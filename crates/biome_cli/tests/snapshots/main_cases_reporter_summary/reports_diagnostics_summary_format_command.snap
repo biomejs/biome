@@ -2,6 +2,20 @@
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
 ---
+## `index.css`
+
+```css
+
+
+.brokenStyle { color: f( }
+
+.style {
+                color: 
+                fakeFunction()
+}
+
+```
+
 ## `index.ts`
 
 ```ts
@@ -13,10 +27,10 @@ a ==b
 a ==b
 a ==b
 
-debugger 
-debugger 
-debugger 
-debugger 
+debugger
+debugger
+debugger
+debugger
 
 let f;
 let f;
@@ -37,10 +51,10 @@ a ==b
 a ==b
 a ==b
 
-debugger 
-debugger 
-debugger 
-debugger 
+debugger
+debugger
+debugger
+debugger
 
 let f;
 let f;
@@ -64,16 +78,24 @@ format ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-Formatter ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-The following files needs to be formatted:
-index.ts
-main.ts
+reporter/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  i The following files have parsing errors.
+  
+  - index.css
+  
+reporter/format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  i The following files needs to be formatted.
+  
+  - index.css
+  - index.ts
+  - main.ts
+  
 
 ```
 
 ```block
-Checked 2 files in <TIME>. No fixes applied.
-Found 2 errors.
+Checked 3 files in <TIME>. No fixes applied.
+Found 3 errors.
 ```

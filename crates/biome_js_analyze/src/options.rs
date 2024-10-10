@@ -113,6 +113,7 @@ pub type NoGlobalIsNan =
 pub type NoGlobalObjectCalls = < lint :: correctness :: no_global_object_calls :: NoGlobalObjectCalls as biome_analyze :: Rule > :: Options ;
 pub type NoHeadElement =
     <lint::nursery::no_head_element::NoHeadElement as biome_analyze::Rule>::Options;
+pub type NoHeadImportInDocument = < lint :: nursery :: no_head_import_in_document :: NoHeadImportInDocument as biome_analyze :: Rule > :: Options ;
 pub type NoHeaderScope =
     <lint::a11y::no_header_scope::NoHeaderScope as biome_analyze::Rule>::Options;
 pub type NoImgElement =
@@ -288,6 +289,7 @@ pub type UseArrowFunction =
     <lint::complexity::use_arrow_function::UseArrowFunction as biome_analyze::Rule>::Options;
 pub type UseAsConstAssertion =
     <lint::style::use_as_const_assertion::UseAsConstAssertion as biome_analyze::Rule>::Options;
+pub type UseAtIndex = <lint::nursery::use_at_index::UseAtIndex as biome_analyze::Rule>::Options;
 pub type UseAwait = <lint::suspicious::use_await::UseAwait as biome_analyze::Rule>::Options;
 pub type UseBlockStatements =
     <lint::style::use_block_statements::UseBlockStatements as biome_analyze::Rule>::Options;

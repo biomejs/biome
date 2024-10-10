@@ -2,8 +2,8 @@ use crate::grit_tree::GritTargetTree;
 use crate::util::TextRangeGritExt;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::{NodeOrToken, SyntaxKind, SyntaxSlot, TextRange};
-use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
-use std::{borrow::Cow, fmt::Debug, ops::Deref, str::Utf8Error};
+use grit_util::{error::GritResult, AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
+use std::{borrow::Cow, fmt::Debug, ops::Deref};
 
 use NodeOrToken::*;
 
@@ -384,7 +384,7 @@ impl<'a> GritAstNode for GritTargetNode<'a> {
         }
     }
 
-    fn text(&self) -> Result<Cow<str>, Utf8Error> {
+    fn text(&self) -> GritResult<Cow<str>> {
         Ok(Cow::Borrowed(self.text()))
     }
 

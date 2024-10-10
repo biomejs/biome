@@ -1,0 +1,78 @@
+[
+  // ========================================================================
+  // Index access
+  // ========================================================================
+  "array[array.length - 1];",
+  "array[array.length -1];",
+  "array[array.length - /* comment */ 1];",
+  "array[array.length - 1.];",
+  "array[array.length - 0b1];",
+  "array[array.length - 9];",
+  "array[0][array[0].length - 1];",
+  "array[(( array.length )) - 1];",
+  "array[array.length - (( 1 ))];",
+  "array[(( array.length - 1 ))];",
+  "(( array ))[array.length - 1];",
+  "(( array[array.length - 1] ));",
+  "array[array.length - 1].pop().shift()[0];",
+  "a = array[array.length - 1]",
+  "const a = array[array.length - 1]",
+  "const {a = array[array.length - 1]} = {}",
+  "typeof array[array.length - 1]",
+  "function foo() {return arguments[arguments.length - 1]}",
+  "class Foo {bar; baz() {return this.bar[this.bar.length - 1]}}",
+  "class Foo {#bar; baz() {return this.#bar[this.#bar.length - 1]}}",
+  // Support some polynomials as well.
+  "array[array.length - unknown - 1]",
+  "array[array.length - (unknown + 1)]",
+  // ========================================================================
+  // `String#charAt`
+  // ========================================================================
+  "string.charAt(string.length - 1);",
+  "string.charAt(string.length - 0o11);",
+  "some.string.charAt(some.string.length - 1);",
+  "string.charAt((( string.length )) - 0xFF);",
+  "string.charAt(string.length - (( 1 )));",
+  "string.charAt((( string.length - 1 )));",
+  "(( string )).charAt(string.length - 1);",
+  "(( string.charAt ))(string.length - 1);",
+  "(( string.charAt(string.length - 1) ));",
+  "string.charAt(string.length - unknown - 1 );",
+  "string.charAt(string.length - (unknown + 1));",
+  // ========================================================================
+  // `.slice(x)`
+  // ========================================================================
+  "array.slice(0)[0]",
+  "array.slice(-0)[0]",
+  "array.slice(-1)[0]",
+  "array.slice(-1).pop()",
+  "array.slice(-1.0).shift()",
+  "array.slice(-9)[0]",
+  "array.slice(-9).pop()",
+  "array.slice(-1.1)[0]",
+  "array.slice(-0xA)[0b000]",
+  "array.slice(-9).shift()",
+  "array.slice(-1)[(( 0 ))];",
+  "array.slice(-(( 1 )))[0];",
+  "array.slice((( -1 )))[0];",
+  "(( array.slice(-1) ))[0];",
+  "(( array )).slice(-1)[0];",
+  "(( array.slice(-1)[0] ));",
+  "(( array.slice(-1) )).pop();",
+  "(( array.slice(-1).pop ))();",
+  "(( array.slice(-1).pop() ));",
+  "array.slice(-1)[0].pop().shift().slice(-1)",
+  // ========================================================================
+  // `.slice(x, y)`
+  // ========================================================================
+  "array.slice(-9, -8)[0]",
+  "array.slice(-9, -0o10)[0]",
+  "array.slice(-9, -8).pop()",
+  "array.slice(-9, -8).shift()",
+  "array.slice((( -9 )), (( -8 )), ).shift()",
+  "(( array.slice(-9, -8).shift ))()",
+  "array.slice(-0o11, -7)[0]",
+  "array.slice(-9, 0)[0]",
+  "array.slice(hoge)[0]",
+  "array.slice(hoge).shift()"
+]

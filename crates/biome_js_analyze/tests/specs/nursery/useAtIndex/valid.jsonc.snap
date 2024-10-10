@@ -1,0 +1,344 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: valid.jsonc
+---
+# Input
+```cjs
+array.at(-1)
+```
+
+# Input
+```cjs
+array[array.length - 0];
+```
+
+# Input
+```cjs
+array[array.length + 1]
+```
+
+# Input
+```cjs
+array[array.length + -1]
+```
+
+# Input
+```cjs
+foo[bar.length - 1]
+```
+
+# Input
+```cjs
+array?.[array.length - 1];
+```
+
+# Input
+```cjs
+array[array.length - 1] = 1
+```
+
+# Input
+```cjs
+array[array.length - 1] %= 1
+```
+
+# Input
+```cjs
+++ array[array.length - 1]
+```
+
+# Input
+```cjs
+array[array.length - 1] --
+```
+
+# Input
+```cjs
+delete array[array.length - 1]
+```
+
+# Input
+```cjs
+class Foo {bar; #bar; baz() {return this.#bar[this.bar.length - 1]}}
+```
+
+# Input
+```cjs
+([array[array.length - 1]] = [])
+```
+
+# Input
+```cjs
+({foo: array[array.length - 1] = 9} = {})
+```
+
+# Input
+```cjs
+string.charAt(string.length - 0);
+```
+
+# Input
+```cjs
+string.charAt(string.length + 1)
+```
+
+# Input
+```cjs
+string.charAt(string.length + -1)
+```
+
+# Input
+```cjs
+foo.charAt(bar.length - 1)
+```
+
+# Input
+```cjs
+string?.charAt?.(string.length - 1);
+```
+
+# Input
+```cjs
+string?.charAt(string.length - 1);
+```
+
+# Input
+```cjs
+string.charAt(9);
+```
+
+# Input
+```cjs
+string1.charAt(string2.length - 1);
+```
+
+# Input
+```cjs
+string.charAt(hoge.string.length - 1)
+```
+
+# Input
+```cjs
+string.charAt(string.length - 1 + 1)
+```
+
+# Input
+```cjs
+string.charAt(string.length + 1 - 1)
+```
+
+# Input
+```cjs
+array.slice(-1)
+```
+
+# Input
+```cjs
+new array.slice(-1)
+```
+
+# Input
+```cjs
+array.slice(-1)?.[0]
+```
+
+# Input
+```cjs
+array.slice?.(-1)[0]
+```
+
+# Input
+```cjs
+array?.slice(-1)[0]
+```
+
+# Input
+```cjs
+array.notSlice(-1)[0]
+```
+
+# Input
+```cjs
+array.slice()[0]
+```
+
+# Input
+```cjs
+array.slice(...[-1])[0]
+```
+
+# Input
+```cjs
+array.slice(-1).shift?.()
+```
+
+# Input
+```cjs
+array.slice(-1)?.shift()
+```
+
+# Input
+```cjs
+array.slice(-1).shift(...[])
+```
+
+# Input
+```cjs
+new array.slice(-1).shift()
+```
+
+# Input
+```cjs
+array.slice(-1)[0] += 1
+```
+
+# Input
+```cjs
+++ array.slice(-1)[0]
+```
+
+# Input
+```cjs
+array.slice(-1)[0] --
+```
+
+# Input
+```cjs
+delete array.slice(-1)[0]
+```
+
+# Input
+```cjs
+array.slice(-9.1, -8.1)[0]
+```
+
+# Input
+```cjs
+array.slice(-unknown, -unknown2)[0]
+```
+
+# Input
+```cjs
+array.slice(-9.1, unknown)[0]
+```
+
+# Input
+```cjs
+array.slice(-9, unknown).pop()
+```
+
+# Input
+```cjs
+array.slice(-9, ...unknown)[0]
+```
+
+# Input
+```cjs
+array.slice(...[-9], unknown)[0]
+```
+
+# Input
+```cjs
+array.slice(-9, unknown)[0]
+```
+
+# Input
+```cjs
+array.slice(-9, unknown).shift()
+```
+
+# Input
+```cjs
+const KNOWN = -8; array.slice(-9, KNOWN).shift()
+```
+
+# Input
+```cjs
+(( (( array.slice( ((-9)), ((unknown)), ).shift ))() ));
+```
+
+# Input
+```cjs
+array.slice(-9, (a, really, _really, complicated, second) => argument)[0]
+```
+
+# Input
+```cjs
+_.last(array)
+```
+
+# Input
+```cjs
+lodash.last(array)
+```
+
+# Input
+```cjs
+underscore.last(array)
+```
+
+# Input
+```cjs
+_.last(new Array)
+```
+
+# Input
+```cjs
+const foo = []; _.last([bar])
+```
+
+# Input
+```cjs
+const foo = []; _.last(new Array)
+```
+
+# Input
+```cjs
+const foo = []; _.last(((new Array)))
+```
+
+# Input
+```cjs
+if (foo) _.last([bar])
+```
+
+# Input
+```cjs
+function foo() {return _.last(arguments)}
+```
+
+# Input
+```cjs
+new _.last(array)
+```
+
+# Input
+```cjs
+_.last(array, 2)
+```
+
+# Input
+```cjs
+_.last(...array)
+```
+
+# Input
+```cjs
+_.last()
+```
+
+# Input
+```cjs
+other._.last(array)
+```
+
+# Input
+```cjs
+other.underscore.last(array)
+```
+
+# Input
+```cjs
+other.lodash.last(array)
+```

@@ -19,6 +19,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Enhancements
+
+- The `--summary` reporter now reports parsing diagnostics too. Contributed by @ematipico
+
+- Improved performance of GritQL queries by roughly 25-30%. Contributed by @arendjr
+
 ### Configuration
 
 #### Bug fixes
@@ -28,6 +34,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Editors
 
 ### Formatter
+
+#### Bug fixes
+
+- Fix [#4121](https://github.com/biomejs/biome/issues/4121). Respect line width when printing multiline strings. Contributed by @ah-yu
 
 ### JavaScript APIs
 

@@ -1255,6 +1255,10 @@ export interface Nursery {
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
 	/**
+	 * Prevent using the next/head module in pages/_document.js on Next.js projects.
+	 */
+	noHeadImportInDocument?: RuleConfiguration_for_Null;
+	/**
 	 * Prevent usage of \<img> element in a Next.js project.
 	 */
 	noImgElement?: RuleConfiguration_for_Null;
@@ -1334,6 +1338,10 @@ export interface Nursery {
 	 * Enforce that ARIA properties are valid for the roles that are supported by the element.
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
+	/**
+	 * Use at() instead of integer index access.
+	 */
+	useAtIndex?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */
@@ -2907,6 +2915,8 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noHeadElement"
+	| "lint/nursery/noHeadImportInDocument"
 	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
@@ -2916,7 +2926,6 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
-	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
@@ -2943,6 +2952,7 @@ export type Category =
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
+	| "lint/nursery/useAtIndex"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentCurlyBraces"
@@ -3100,6 +3110,10 @@ export type Category =
 	| "internalError/io"
 	| "internalError/fs"
 	| "internalError/panic"
+	| "reporter/parse"
+	| "reporter/format"
+	| "reporter/analyzer"
+	| "reporter/organizeImports"
 	| "parse"
 	| "lint"
 	| "lint/a11y"

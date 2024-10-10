@@ -2,13 +2,15 @@ use crate::{
     grit_context::GritQueryContext, grit_target_language::GritTargetLanguage,
     grit_target_node::GritTargetNode, source_location_ext::SourceFileExt, util::TextRangeGritExt,
 };
-use anyhow::bail;
 use biome_diagnostics::{display::SourceFile, SourceCode};
 use biome_rowan::TextRange;
 use grit_pattern_matcher::{
     binding::Binding, constant::Constant, effects::Effect, pattern::FileRegistry,
 };
-use grit_util::{AnalysisLogBuilder, AnalysisLogs, AstNode, ByteRange, CodeRange, Range};
+use grit_util::{
+    error::{GritPatternError, GritResult},
+    AnalysisLogBuilder, AnalysisLogs, AstNode, ByteRange, CodeRange, Range,
+};
 use std::{borrow::Cow, collections::HashMap, path::Path};
 
 #[derive(Clone, Debug, PartialEq)]
@@ -161,11 +163,11 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         _memo: &mut HashMap<grit_util::CodeRange, Option<String>>,
         _distributed_indent: Option<usize>,
         _logs: &mut AnalysisLogs,
-    ) -> anyhow::Result<Cow<'a, str>> {
-        bail!("Not implemented") // TODO: Implement rewriting
+    ) -> GritResult<Cow<'a, str>> {
+        Err(GritPatternError::new("Not implemented")) // TODO: Implement rewriting
     }
 
-    fn text(&self, _language: &GritTargetLanguage) -> anyhow::Result<Cow<'a, str>> {
+    fn text(&self, _language: &GritTargetLanguage) -> GritResult<Cow<'a, str>> {
         match self {
             Self::File(path) => Ok(path.to_string_lossy()),
             Self::Node(node) => Ok(node.text().into()),
@@ -249,9 +251,9 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
         &self,
         _language: &GritTargetLanguage,
         logs: &mut grit_util::AnalysisLogs,
-    ) -> anyhow::Result<()> {
+    ) -> GritResult<()> {
         if let Self::Empty(node, slot) = self {
-            let range = Range::from_byte_range(node.source(), node.byte_range());
+            let range = Range::from_byte_range(node.source(), &node.byte_range());
             let log = AnalysisLogBuilder::default()
                 .level(441_u16)
                 .source(node.source())
@@ -261,7 +263,8 @@ impl<'a> Binding<'a, GritQueryContext> for GritBinding<'a> {
                     "Error: failed to rewrite binding, cannot derive range of empty slot {slot} of node with kind {:?}",
                     node.kind()
                 ))
-                .build()?;
+                .build()
+                .map_err(|error| GritPatternError::Builder(error.to_string()))?;
             logs.push(log);
         }
 

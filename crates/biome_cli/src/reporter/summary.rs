@@ -1,8 +1,11 @@
 use crate::reporter::terminal::ConsoleTraversalSummary;
 use crate::{DiagnosticsPayload, Execution, Reporter, ReporterVisitor, TraversalSummary};
 use biome_console::fmt::{Display, Formatter};
-use biome_console::{markup, Console, ConsoleExt, HorizontalLine, Padding, SOFT_LINE};
-use biome_diagnostics::{Resource, Severity};
+use biome_console::{markup, Console, ConsoleExt};
+use biome_diagnostics::{
+    category, Advices, Category, Diagnostic, MessageAndDescription, PrintDiagnostic, Resource,
+    Severity, Visit,
+};
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Debug;
@@ -84,6 +87,12 @@ impl<'a> ReporterVisitor for SummaryReporterVisitor<'a> {
                     }
                 }
 
+                if let Some(category) = category {
+                    if category.name() == "parse" {
+                        files_to_diagnostics.insert_parse(location);
+                    }
+                }
+
                 if execution.is_check() || execution.is_lint() || execution.is_ci() {
                     if let Some(category) = category {
                         if category.name().starts_with("lint/")
@@ -123,6 +132,7 @@ struct FileToDiagnostics {
     formats: BTreeSet<String>,
     organize_imports: BTreeSet<String>,
     lints: LintsByCategory,
+    parse: BTreeSet<String>,
 }
 
 impl FileToDiagnostics {
@@ -138,55 +148,106 @@ impl FileToDiagnostics {
     fn insert_organize_imports(&mut self, location: &str) {
         self.organize_imports.insert(location.into());
     }
+
+    fn insert_parse(&mut self, location: &str) {
+        self.parse.insert(location.into());
+    }
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    severity = Information
+)]
+struct SummaryListDiagnostic<'a> {
+    #[category]
+    category: &'static Category,
+
+    #[message]
+    message: MessageAndDescription,
+
+    #[advice]
+    list: SummaryListAdvice<'a>,
+}
+
+#[derive(Debug, Diagnostic)]
+#[diagnostic(
+    severity = Information,
+    category = "reporter/analyzer",
+    message = "Some analyzer rules were triggered"
+)]
+struct SummaryTableDiagnostic<'a> {
+    #[advice]
+    tables: &'a LintsByCategory,
+}
+
+#[derive(Debug)]
+struct SummaryListAdvice<'a>(&'a BTreeSet<String>);
+
+impl<'a> Advices for SummaryListAdvice<'a> {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        let list: Vec<_> = self.0.iter().map(|s| s as &dyn Display).collect();
+        visitor.record_list(&list)
+    }
 }
 
 impl Display for FileToDiagnostics {
     fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        if !self.parse.is_empty() {
+            let diagnostic = SummaryListDiagnostic {
+                message: MessageAndDescription::from(
+                    markup! {
+                        <Warn>"The following files have parsing errors."</Warn>
+                    }
+                    .to_owned(),
+                ),
+                list: SummaryListAdvice(&self.parse),
+                category: category!("reporter/parse"),
+            };
+            fmt.write_markup(markup! {
+                {PrintDiagnostic::simple(&diagnostic)}
+            })?;
+        }
+
         if !self.formats.is_empty() {
-            let header = "Formatter ";
-            let horizontal_line = HorizontalLine::new(100usize.saturating_sub(header.len()));
+            let diagnostic = SummaryListDiagnostic {
+                message: MessageAndDescription::from(
+                    markup! {
+                        <Warn>"The following files needs to be formatted."</Warn>
+                    }
+                    .to_owned(),
+                ),
+                list: SummaryListAdvice(&self.formats),
+                category: category!("reporter/format"),
+            };
             fmt.write_markup(markup! {
-                <Emphasis>{header}</Emphasis>{horizontal_line}
+                {PrintDiagnostic::simple(&diagnostic)}
             })?;
-            SOFT_LINE.fmt(fmt)?;
-
-            fmt.write_markup(markup! {
-                <Warn>"The following files needs to be formatted:\n"</Warn>
-            })?;
-
-            for file_name in &self.formats {
-                fmt.write_markup(markup! {
-                    <Emphasis>{file_name}</Emphasis>{SOFT_LINE}
-                })?;
-            }
-            SOFT_LINE.fmt(fmt)?;
         }
 
         if !self.organize_imports.is_empty() {
-            let header = "Organize Imports ";
-            let horizontal_line = HorizontalLine::new(100usize.saturating_sub(header.len()));
+            let diagnostic = SummaryListDiagnostic {
+                message: MessageAndDescription::from(
+                    markup! {
+                        <Warn>"The following files needs to have their imports sorted."</Warn>
+                    }
+                    .to_owned(),
+                ),
+                list: SummaryListAdvice(&self.organize_imports),
+                category: category!("reporter/organizeImports"),
+            };
             fmt.write_markup(markup! {
-                <Emphasis>{header}</Emphasis>{horizontal_line}
+                {PrintDiagnostic::simple(&diagnostic)}
             })?;
-            SOFT_LINE.fmt(fmt)?;
-
-            fmt.write_markup(markup! {
-                <Warn>"The following files needs to have their imports sorted:\n"</Warn>
-            })?;
-
-            for file_name in &self.organize_imports {
-                fmt.write_markup(markup! {
-                    <Emphasis>{file_name}</Emphasis>{SOFT_LINE}
-                })?;
-            }
-            SOFT_LINE.fmt(fmt)?;
         }
 
-        fmt.write_markup(markup! {
-            {self.lints}
-        })?;
-        SOFT_LINE.fmt(fmt)?;
-
+        if !self.lints.0.is_empty() {
+            let diagnostic = SummaryTableDiagnostic {
+                tables: &self.lints,
+            };
+            fmt.write_markup(markup! {
+                {PrintDiagnostic::simple(&diagnostic)}
+            })?;
+        }
         Ok(())
     }
 }
@@ -206,62 +267,25 @@ impl LintsByCategory {
     }
 }
 
-impl Display for LintsByCategory {
-    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
-        let rule_name_str = "Rule Name";
-        let diagnostics_str = "Diagnostics";
-        let padding = 15usize;
-
-        if !self.0.is_empty() {
-            let header = "Analyzer ";
-            let horizontal_line = HorizontalLine::new(100usize.saturating_sub(header.len()));
-            fmt.write_markup(markup! {
-                <Emphasis>{header}</Emphasis>{horizontal_line}
-            })?;
-            SOFT_LINE.fmt(fmt)?;
-            fmt.write_markup(markup!(
-                <Warn>"Some analyzer rules were triggered"</Warn>
-            ))?;
-            fmt.write_str("\n\n")?;
-            let mut iter = self.0.iter().rev();
-            // SAFETY: it isn't empty
-            let (first_name, first_count) = iter.next().unwrap();
-            let longest_rule_name = first_name.name_len();
-
-            fmt.write_markup(markup!(
-                <Info><Underline>{rule_name_str}</Underline></Info>
-            ))?;
-            fmt.write_markup(markup! {{Padding::new(longest_rule_name + padding)}})?;
-            fmt.write_markup(markup!(
-                <Info><Underline>{diagnostics_str}</Underline></Info>
-            ))?;
-            fmt.write_str("\n")?;
-
-            fmt.write_markup(markup! {
-                <Emphasis>{first_name}</Emphasis>{Padding::new(padding + rule_name_str.len())}{first_count}
-            })?;
-
-            fmt.write_str("\n")?;
-
-            for (name, num) in iter {
-                let current_name_len = name.name_len();
-                let extra_padding = longest_rule_name.saturating_sub(current_name_len);
-                fmt.write_markup(markup! {
-                    <Emphasis>{name}</Emphasis>
-                })?;
-
-                fmt.write_markup(markup! {
-                    {Padding::new(extra_padding + padding + rule_name_str.len())}
-                })?;
-
-                fmt.write_markup(markup! {
-                    {num}
-                })?;
-                fmt.write_str("\n")?;
-            }
-        }
-
-        Ok(())
+impl<'a> Advices for &'a LintsByCategory {
+    fn record(&self, visitor: &mut dyn Visit) -> io::Result<()> {
+        let headers = &[
+            markup!("Rule Name").to_owned(),
+            markup!("Diagnostics").to_owned(),
+        ];
+        let (first, second): (Vec<_>, Vec<_>) = self
+            .0
+            .iter()
+            .rev()
+            .map(|(rule_name, diagnostic)| {
+                (
+                    markup! {{rule_name}}.to_owned(),
+                    markup! {{diagnostic}}.to_owned(),
+                )
+            })
+            .unzip();
+        let array = [first.as_slice(), second.as_slice()];
+        visitor.record_table(15usize, headers, &array)
     }
 }
 
@@ -271,12 +295,6 @@ struct RuleName(&'static str);
 impl AsRef<str> for RuleName {
     fn as_ref(&self) -> &'static str {
         self.0
-    }
-}
-
-impl RuleName {
-    fn name_len(&self) -> usize {
-        self.0.len()
     }
 }
 

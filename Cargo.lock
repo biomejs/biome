@@ -641,7 +641,6 @@ dependencies = [
 name = "biome_grit_patterns"
 version = "0.0.1"
 dependencies = [
- "anyhow",
  "biome_console",
  "biome_diagnostics",
  "biome_grit_parser",
@@ -654,7 +653,6 @@ dependencies = [
  "biome_test_utils",
  "grit-pattern-matcher",
  "grit-util",
- "im",
  "insta",
  "path-absolutize",
  "rand 0.8.5",
@@ -1268,15 +1266,6 @@ name = "bitflags"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
-
-[[package]]
-name = "bitmaps"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "031043d04099746d8db04daf1fa424b2bc8bd69d92b25962dcde24da39ab64a2"
-dependencies = [
- "typenum",
-]
 
 [[package]]
 name = "bitvec"
@@ -2094,14 +2083,12 @@ dependencies = [
 
 [[package]]
 name = "grit-pattern-matcher"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb91ad25bb8557f3be40899becf5db27e8431e359d69d5b67104f1d1a12c8d9a"
+checksum = "8430b130e086a1764789402b34685336f2e3f6ec37cd188535bede892f88e65b"
 dependencies = [
- "anyhow",
  "elsa",
  "grit-util",
- "im",
  "itertools",
  "rand 0.8.5",
  "regex",
@@ -2109,14 +2096,15 @@ dependencies = [
 
 [[package]]
 name = "grit-util"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4d302f12945a38d464183a6ffe49b8b778876f82ab753174324cd7aae74b24a"
+checksum = "99b005c4c15ce0c47022554c41a01fe2441d3622e586a82614a6fe681833d5d4"
 dependencies = [
  "derive_builder",
  "once_cell",
  "regex",
  "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -2201,20 +2189,6 @@ dependencies = [
  "same-file",
  "walkdir",
  "winapi-util",
-]
-
-[[package]]
-name = "im"
-version = "15.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0acd33ff0285af998aaf9b57342af478078f53492322fafc47450e09397e0e9"
-dependencies = [
- "bitmaps",
- "rand_core 0.6.4",
- "rand_xoshiro",
- "sized-chunks",
- "typenum",
- "version_check",
 ]
 
 [[package]]
@@ -3015,15 +2989,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rand_xoshiro"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f97cdb2a36ed4183de61b2f824cc45c9f1037f28afe0a322e9fff4c108b5aaa"
-dependencies = [
- "rand_core 0.6.4",
-]
-
-[[package]]
 name = "rayon"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3442,16 +3407,6 @@ checksum = "cfe85670573cd6f0fa97940f26e7e6601213c3b0555246c24234131f88c5709e"
 dependencies = [
  "console",
  "similar",
-]
-
-[[package]]
-name = "sized-chunks"
-version = "0.6.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16d69225bde7a69b235da73377861095455d298f2b970996eec25ddbb42b3d1e"
-dependencies = [
- "bitmaps",
- "typenum",
 ]
 
 [[package]]
@@ -3950,12 +3905,6 @@ dependencies = [
  "termcolor",
  "toml",
 ]
-
-[[package]]
-name = "typenum"
-version = "1.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "unicase"
