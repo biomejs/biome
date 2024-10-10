@@ -1091,7 +1091,7 @@ fn fs_files_ignore_symlink() {
         check_windows_symlink!(symlink_dir(&testcase2_path, symlink_testcase2_path));
     }
 
-    let config_path = root_path.join("rome.json");
+    let config_path = root_path.join("biome.json");
     let mut config_file = File::create(config_path).unwrap();
     config_file
         .write_all(CONFIG_IGNORE_SYMLINK.as_bytes())
