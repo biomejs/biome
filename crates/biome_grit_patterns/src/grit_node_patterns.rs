@@ -3,13 +3,13 @@ use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::LeafEquivalenceClass;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use crate::{CompileError, GritTargetLanguage};
-use anyhow::Result;
 use grit_pattern_matcher::binding::Binding;
-use grit_pattern_matcher::context::ExecContext;
+use grit_pattern_matcher::context::{ExecContext, StaticDefinitions};
 use grit_pattern_matcher::pattern::{
     AstLeafNodePattern, AstNodePattern, Matcher, Pattern, PatternName, PatternOrPredicate,
     ResolvedPattern, State,
 };
+use grit_util::error::GritResult;
 use grit_util::{AnalysisLogs, Language};
 
 #[derive(Clone, Debug)]
@@ -21,7 +21,10 @@ pub struct GritNodePattern {
 impl AstNodePattern<GritQueryContext> for GritNodePattern {
     const INCLUDES_TRIVIA: bool = true;
 
-    fn children(&self) -> Vec<PatternOrPredicate<GritQueryContext>> {
+    fn children(
+        &self,
+        _definitions: &StaticDefinitions<GritQueryContext>,
+    ) -> Vec<PatternOrPredicate<GritQueryContext>> {
         self.args
             .iter()
             .map(|arg| PatternOrPredicate::Pattern(&arg.pattern))
@@ -40,7 +43,7 @@ impl Matcher<GritQueryContext> for GritNodePattern {
         init_state: &mut State<'a, GritQueryContext>,
         context: &'a GritExecContext,
         logs: &mut AnalysisLogs,
-    ) -> Result<bool> {
+    ) -> GritResult<bool> {
         let Some(binding) = binding.get_last_binding() else {
             return Ok(false);
         };
@@ -161,7 +164,7 @@ impl Matcher<GritQueryContext> for GritLeafNodePattern {
         _state: &mut State<'a, GritQueryContext>,
         _context: &'a GritExecContext,
         _logs: &mut AnalysisLogs,
-    ) -> Result<bool> {
+    ) -> GritResult<bool> {
         let Some(node) = binding.get_last_binding().and_then(Binding::singleton) else {
             return Ok(false);
         };

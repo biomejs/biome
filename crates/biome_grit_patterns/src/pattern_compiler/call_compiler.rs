@@ -67,7 +67,7 @@ pub(super) fn call_pattern_from_node_with_name(
 
         let params = &built_in.params;
         Ok(Pattern::CallBuiltIn(Box::new(call_built_in_from_args(
-            args, params, index, lang,
+            args, params, index, lang, &name,
         )?)))
     } else if let Some(info) = context.compilation.function_definition_info.get(&name) {
         let args = match_args_to_params(&name, args, &collect_params(&info.parameters), lang)?;
@@ -87,15 +87,13 @@ fn call_built_in_from_args(
     params: &[&str],
     index: usize,
     lang: &impl Language,
+    name: &str,
 ) -> Result<CallBuiltIn<GritQueryContext>, CompileError> {
     let mut pattern_params = Vec::with_capacity(args.len());
     for param in params.iter() {
-        match args.remove(&(lang.metavariable_prefix().to_owned() + param)) {
-            Some(p) => pattern_params.push(Some(p)),
-            None => pattern_params.push(None),
-        }
+        pattern_params.push(args.remove(&(lang.metavariable_prefix().to_owned() + param)));
     }
-    Ok(CallBuiltIn::new(index, pattern_params))
+    Ok(CallBuiltIn::new(index, name, pattern_params))
 }
 
 pub(super) fn collect_params(parameters: &[(String, ByteRange)]) -> Vec<String> {

@@ -7,7 +7,7 @@ use grit_pattern_matcher::{
     constant::Constant,
     pattern::{File, FilePtr, FileRegistry, ResolvedFile, ResolvedPattern},
 };
-use grit_util::Ast;
+use grit_util::{error::GritResult, Ast};
 use path_absolutize::Absolutize;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -28,7 +28,7 @@ impl<'a> File<'a, GritQueryContext> for GritFile<'a> {
         &self,
         files: &FileRegistry<'a, GritQueryContext>,
         language: &GritTargetLanguage,
-    ) -> anyhow::Result<GritResolvedPattern<'a>> {
+    ) -> GritResult<GritResolvedPattern<'a>> {
         match self {
             Self::Resolved(resolved) => {
                 let name = resolved.name.text(files, language)?;

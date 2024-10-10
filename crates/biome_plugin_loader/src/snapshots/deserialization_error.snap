@@ -1,0 +1,10 @@
+---
+source: crates/biome_plugin_loader/src/diagnostics.rs
+expression: content
+---
+deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The key `version` is missing.
+  
+  > 1 │ {}
+      │ ^^
