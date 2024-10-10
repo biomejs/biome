@@ -14,7 +14,7 @@ use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
 
-mod assists;
+pub mod assists;
 mod ast_utils;
 pub mod globals;
 pub mod lint;
