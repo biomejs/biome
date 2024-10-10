@@ -922,9 +922,7 @@ async fn pull_quick_fixes() -> Result<()> {
 
     let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Replace -0 with 0"),
-        kind: Some(lsp::CodeActionKind::new(
-            "quickfix.biome.suspicious.noCompareNegZero",
-        )),
+        kind: Some(lsp::CodeActionKind::new("quickfix.biome")),
         diagnostics: Some(vec![fixable_diagnostic(0)?]),
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(changes),
@@ -959,9 +957,7 @@ async fn pull_quick_fixes() -> Result<()> {
 
     let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Suppress rule lint/suspicious/noCompareNegZero"),
-        kind: Some(lsp::CodeActionKind::new(
-            "quickfix.suppressRule.biome.suspicious.noCompareNegZero",
-        )),
+        kind: Some(lsp::CodeActionKind::new("quickfix.suppressRule.biome")),
         diagnostics: Some(vec![fixable_diagnostic(0)?]),
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(suppression_changes),
@@ -1135,9 +1131,7 @@ async fn pull_biome_quick_fixes() -> Result<()> {
 
     let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Replace -0 with 0"),
-        kind: Some(lsp::CodeActionKind::new(
-            "quickfix.biome.suspicious.noCompareNegZero",
-        )),
+        kind: Some(lsp::CodeActionKind::new("quickfix.biome")),
         diagnostics: Some(vec![fixable_diagnostic(0)?]),
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(changes),
@@ -1252,9 +1246,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
 
     let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Use ==="),
-        kind: Some(lsp::CodeActionKind::new(
-            "quickfix.biome.suspicious.noDoubleEquals",
-        )),
+        kind: Some(lsp::CodeActionKind::new("quickfix.biome")),
         diagnostics: Some(vec![unsafe_fixable.clone()]),
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(changes),
@@ -1289,9 +1281,7 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
 
     let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Suppress rule lint/suspicious/noDoubleEquals"),
-        kind: Some(lsp::CodeActionKind::new(
-            "quickfix.suppressRule.biome.suspicious.noDoubleEquals",
-        )),
+        kind: Some(lsp::CodeActionKind::new("quickfix.suppressRule.biome")),
         diagnostics: Some(vec![unsafe_fixable]),
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(suppression_changes),
@@ -1922,9 +1912,7 @@ async fn pull_refactors() -> Result<()> {
 
     let _expected_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Inline variable"),
-        kind: Some(lsp::CodeActionKind::new(
-            "refactor.inline.biome.correctness.inlineVariable",
-        )),
+        kind: Some(lsp::CodeActionKind::new("refactor.inline.biome")),
         diagnostics: None,
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(changes),
