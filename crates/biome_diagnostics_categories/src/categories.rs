@@ -137,6 +137,7 @@ define_categories! {
     "lint/nursery/noCommonJs": "https://biomejs.dev/linter/rules/no-common-js",
     "lint/nursery/noConsole": "https://biomejs.dev/linter/rules/no-console",
     "lint/nursery/noDescendingSpecificity": "https://biomejs.dev/linter/rules/no-descending-specificity",
+    "lint/nursery/noDocumentCookie": "https://biomejs.dev/linter/rules/no-document-cookie",
     "lint/nursery/noDoneCallback": "https://biomejs.dev/linter/rules/no-done-callback",
     "lint/nursery/noDuplicateAtImportRules": "https://biomejs.dev/linter/rules/no-duplicate-at-import-rules",
     "lint/nursery/noDuplicateCustomProperties": "https://biomejs.dev/linter/rules/no-duplicate-custom-properties",
