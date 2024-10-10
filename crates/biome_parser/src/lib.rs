@@ -657,6 +657,15 @@ pub struct AnyParse {
     pub(crate) diagnostics: Vec<ParseDiagnostic>,
 }
 
+impl From<SendNode> for AnyParse {
+    fn from(root: SendNode) -> Self {
+        Self {
+            root,
+            diagnostics: Vec::new(),
+        }
+    }
+}
+
 impl AnyParse {
     pub fn new(root: SendNode, diagnostics: Vec<ParseDiagnostic>) -> AnyParse {
         AnyParse { root, diagnostics }

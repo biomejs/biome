@@ -60,6 +60,9 @@
   "organizeImports": {
     "enabled": true
   },
+  "plugins": [
+    "./plugins/example-plugin"
+  ],
   "vcs": {
     "clientKind": "git",
     "enabled": true,
