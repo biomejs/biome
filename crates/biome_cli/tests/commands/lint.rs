@@ -1564,7 +1564,7 @@ fn deprecated_suppression_comment() {
     let file_path = Path::new("file.js");
     fs.insert(
         file_path.into(),
-        *b"// rome-ignore lint(suspicious/noDoubleEquals): test
+        *b"// biome-ignore lint(suspicious/noDoubleEquals): test
 a == b;",
     );
 
@@ -1678,7 +1678,7 @@ fn suppression_syntax_error() {
     let mut console = BufferConsole::default();
 
     let file_path = Path::new("check.js");
-    fs.insert(file_path.into(), *b"// rome-ignore(:\n");
+    fs.insert(file_path.into(), *b"// biome-ignore(:\n");
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),

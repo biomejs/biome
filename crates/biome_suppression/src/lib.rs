@@ -299,7 +299,7 @@ mod tests {
     #[test]
     fn parse_simple_suppression() {
         assert_eq!(
-            parse_suppression_comment("// rome-ignore parse: explanation1").collect::<Vec<_>>(),
+            parse_suppression_comment("// biome-ignore parse: explanation1").collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![(category!("parse"), None)],
                 reason: "explanation1",
@@ -308,7 +308,8 @@ mod tests {
         );
 
         assert_eq!(
-            parse_suppression_comment("/** rome-ignore parse: explanation2 */").collect::<Vec<_>>(),
+            parse_suppression_comment("/** biome-ignore parse: explanation2 */")
+                .collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![(category!("parse"), None)],
                 reason: "explanation2",
@@ -319,7 +320,7 @@ mod tests {
         assert_eq!(
             parse_suppression_comment(
                 "/**
-                  * rome-ignore parse: explanation3
+                  * biome-ignore parse: explanation3
                   */"
             )
             .collect::<Vec<_>>(),
@@ -334,7 +335,7 @@ mod tests {
             parse_suppression_comment(
                 "/**
                   * hello
-                  * rome-ignore parse: explanation4
+                  * biome-ignore parse: explanation4
                   */"
             )
             .collect::<Vec<_>>(),
@@ -348,7 +349,7 @@ mod tests {
     #[test]
     fn parse_unclosed_block_comment_suppressions() {
         assert_eq!(
-            parse_suppression_comment("/* rome-ignore format: explanation").collect::<Vec<_>>(),
+            parse_suppression_comment("/* biome-ignore format: explanation").collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![(category!("format"), None)],
                 reason: "explanation",
@@ -357,7 +358,7 @@ mod tests {
         );
 
         assert_eq!(
-            parse_suppression_comment("/* rome-ignore format: explanation *").collect::<Vec<_>>(),
+            parse_suppression_comment("/* biome-ignore format: explanation *").collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![(category!("format"), None)],
                 reason: "explanation",
@@ -366,7 +367,7 @@ mod tests {
         );
 
         assert_eq!(
-            parse_suppression_comment("/* rome-ignore format: explanation /").collect::<Vec<_>>(),
+            parse_suppression_comment("/* biome-ignore format: explanation /").collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![(category!("format"), None)],
                 reason: "explanation",
@@ -378,7 +379,7 @@ mod tests {
     #[test]
     fn parse_multiple_suppression() {
         assert_eq!(
-            parse_suppression_comment("// rome-ignore parse(foo) parse(dog): explanation")
+            parse_suppression_comment("// biome-ignore parse(foo) parse(dog): explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![
@@ -391,7 +392,7 @@ mod tests {
         );
 
         assert_eq!(
-            parse_suppression_comment("/** rome-ignore parse(bar) parse(cat): explanation */")
+            parse_suppression_comment("/** biome-ignore parse(bar) parse(cat): explanation */")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![
@@ -406,7 +407,7 @@ mod tests {
         assert_eq!(
             parse_suppression_comment(
                 "/**
-                  * rome-ignore parse(yes) parse(frog): explanation
+                  * biome-ignore parse(yes) parse(frog): explanation
                   */"
             )
             .collect::<Vec<_>>(),
@@ -424,7 +425,7 @@ mod tests {
             parse_suppression_comment(
                 "/**
                   * hello
-                  * rome-ignore parse(wow) parse(fish): explanation
+                  * biome-ignore parse(wow) parse(fish): explanation
                   */"
             )
             .collect::<Vec<_>>(),
@@ -442,7 +443,7 @@ mod tests {
     #[test]
     fn parse_multiple_suppression_categories() {
         assert_eq!(
-            parse_suppression_comment("// rome-ignore format lint: explanation")
+            parse_suppression_comment("// biome-ignore format lint: explanation")
                 .collect::<Vec<_>>(),
             vec![Ok(Suppression {
                 categories: vec![(category!("format"), None), (category!("lint"), None)],
@@ -468,7 +469,7 @@ mod tests {
     #[test]
     fn diagnostic_missing_colon() {
         assert_eq!(
-            parse_suppression_comment("// rome-ignore format explanation").collect::<Vec<_>>(),
+            parse_suppression_comment("// biome-ignore format explanation").collect::<Vec<_>>(),
             vec![Err(SuppressionDiagnostic {
                 message: SuppressionDiagnosticKind::MissingColon,
                 span: TextRange::new(TextSize::from(22), TextSize::from(33))
@@ -479,7 +480,7 @@ mod tests {
     #[test]
     fn diagnostic_missing_paren() {
         assert_eq!(
-            parse_suppression_comment("// rome-ignore format(:").collect::<Vec<_>>(),
+            parse_suppression_comment("// biome-ignore format(:").collect::<Vec<_>>(),
             vec![Err(SuppressionDiagnostic {
                 message: SuppressionDiagnosticKind::MissingParen,
                 span: TextRange::new(TextSize::from(22), TextSize::from(23))
@@ -490,7 +491,7 @@ mod tests {
     #[test]
     fn diagnostic_missing_category() {
         assert_eq!(
-            parse_suppression_comment("// rome-ignore (value): explanation").collect::<Vec<_>>(),
+            parse_suppression_comment("// biome-ignore (value): explanation").collect::<Vec<_>>(),
             vec![Err(SuppressionDiagnostic {
                 message: SuppressionDiagnosticKind::MissingCategory,
                 span: TextRange::new(TextSize::from(15), TextSize::from(16))
@@ -501,7 +502,7 @@ mod tests {
     #[test]
     fn diagnostic_unknown_category() {
         assert_eq!(
-            parse_suppression_comment("// rome-ignore unknown: explanation").collect::<Vec<_>>(),
+            parse_suppression_comment("// biome-ignore unknown: explanation").collect::<Vec<_>>(),
             vec![Err(SuppressionDiagnostic {
                 message: SuppressionDiagnosticKind::ParseCategory(String::from("unknown")),
                 span: TextRange::new(TextSize::from(15), TextSize::from(22))

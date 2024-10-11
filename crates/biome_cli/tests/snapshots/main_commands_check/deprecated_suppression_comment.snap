@@ -5,7 +5,7 @@ expression: content
 ## `file.js`
 
 ```js
-// rome-ignore lint(suspicious/noDoubleEquals): test
+// biome-ignore lint(suspicious/noDoubleEquals): test
 a == b;
 ```
 
@@ -15,7 +15,7 @@ a == b;
 check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some errors were emitted while running checks.
-  
+
 
 
 ```
@@ -25,18 +25,18 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 ```block
 file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  i // rome-ignore is deprecated, use // biome-ignore instead
-  
-  > 1 │ // rome-ignore lint(suspicious/noDoubleEquals): test
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ! Suppression is using a deprecated syntax
+
+  > 1 │ // biome-ignore lint(suspicious/noDoubleEquals): test
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ a == b;
-  
-  i Unsafe fix: Use // biome-ignore instead
-  
-    1   │ - //·rome-ignore·lint(suspicious/noDoubleEquals):·test
-      1 │ + //·biome-ignore·lint(suspicious/noDoubleEquals):·test
+
+  i Safe fix: Rewrite suppression to use the newer syntax
+
+    1   │ - //·biome-ignore·lint(suspicious/noDoubleEquals):·test
+      1 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·test
     2 2 │   a == b;
-  
+
 
 ```
 
@@ -44,29 +44,41 @@ file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━
 file.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Import statements could be sorted:
-  
-    1   │ - //·rome-ignore·lint(suspicious/noDoubleEquals):·test
-      1 │ + //·biome-ignore·lint(suspicious/noDoubleEquals):·test
+
+    1   │ - //·biome-ignore·lint(suspicious/noDoubleEquals):·test
+      1 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·test
     2 2 │   a == b;
-  
+
+
+```
+
+```block
+file.js assists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Not all assists were applied:
+
+    1   │ - //·biome-ignore·lint(suspicious/noDoubleEquals):·test
+      1 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·test
+    2 2 │   a == b;
+
 
 ```
 
 ```block
 file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━
 
-  i // rome-ignore is deprecated, use // biome-ignore instead
-  
-  > 1 │ // rome-ignore lint(suspicious/noDoubleEquals): test
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ! Suppression is using a deprecated syntax
+
+  > 1 │ // biome-ignore lint(suspicious/noDoubleEquals): test
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ a == b;
-  
-  i Unsafe fix: Use // biome-ignore instead
-  
-    1   │ - //·rome-ignore·lint(suspicious/noDoubleEquals):·test
-      1 │ + //·biome-ignore·lint(suspicious/noDoubleEquals):·test
+
+  i Safe fix: Rewrite suppression to use the newer syntax
+
+    1   │ - //·biome-ignore·lint(suspicious/noDoubleEquals):·test
+      1 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·test
     2 2 │   a == b;
-  
+
 
 ```
 
@@ -74,22 +86,17 @@ file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━
 file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:
-  
-    1 1 │   // rome-ignore lint(suspicious/noDoubleEquals): test
+
+    1 1 │   // biome-ignore lint(suspicious/noDoubleEquals): test
     2   │ - a·==·b;
       2 │ + a·==·b;
-      3 │ + 
-  
+      3 │ +
 
-```
-
-```block
-Skipped 1 suggested fixes.
-If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
 
 ```
 
 ```block
 Checked 1 file in <TIME>. No fixes applied.
-Found 2 errors.
+Found 3 errors.
+Found 2 warnings.
 ```
