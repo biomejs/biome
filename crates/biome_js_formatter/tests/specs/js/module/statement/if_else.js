@@ -63,7 +63,7 @@ if (true) that(); else;
 
 if (true) {}
 else     if (
-	// rome-ignore format: Test suppression comments
+	// biome-ignore format: Test suppression comments
 
 true &&  false
 ) {}
