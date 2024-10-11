@@ -5,7 +5,7 @@ expression: content
 ## `check.js`
 
 ```js
-// rome-ignore(:
+// biome-ignore(:
 
 ```
 
@@ -23,12 +23,12 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 # Emitted Messages
 
 ```block
-check.js:1:15 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js:1:16 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected token, expected one of ':' or whitespace
   
-  > 1 │ // rome-ignore(:
-      │               ^
+  > 1 │ // biome-ignore(:
+      │                ^
     2 │ 
   
 
