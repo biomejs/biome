@@ -4,7 +4,10 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
-use biome_rowan::TextRange;
+use biome_js_syntax::{
+    binding_ext::AnyJsIdentifierBinding, AnyJsIdentifierUsage, JsExportNamedSpecifier,
+};
+use biome_rowan::{AstNode, TextRange};
 use biome_string_case::{Case, Cases};
 use rustc_hash::FxHashSet;
 use serde::{Deserialize, Serialize};
@@ -210,13 +213,20 @@ impl Rule for UseFilenamingConvention {
         }
         if options.filename_cases.0.contains(&FilenameCase::Export) {
             // If no exported binding has the file name, then reports the filename
-            let model = ctx.model();
-            model
-                .all_bindings()
-                .map(|binding| binding.tree())
-                .filter(|binding| model.is_exported(binding))
-                .filter_map(|exported_binding| exported_binding.name_token().ok())
-                .all(|exported_name_token| exported_name_token.text_trimmed() != name)
+            ctx.model()
+                .all_exported_bindings()
+                .all(|exported_binding| {
+                    exported_binding
+                        .exports()
+                        .filter_map(|export| match AnyJsIdentifierBinding::try_cast(export) {
+                            Ok(id) => id.name_token().ok(),
+                            Err(export) => match JsExportNamedSpecifier::cast(export.parent()?) {
+                                Some(specifier) => specifier.exported_name().ok()?.value().ok(),
+                                None => AnyJsIdentifierUsage::cast(export)?.value_token().ok(),
+                            },
+                        })
+                        .all(|exported_name_token| exported_name_token.text_trimmed() != name)
+                })
                 .then_some(FileNamingConventionState::Filename)
         } else {
             Some(FileNamingConventionState::Filename)

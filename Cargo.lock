@@ -836,6 +836,7 @@ dependencies = [
  "biome_rowan",
  "rust-lapper",
  "rustc-hash 1.1.0",
+ "smallvec",
 ]
 
 [[package]]

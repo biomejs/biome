@@ -131,6 +131,27 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now correctly handles renamed exports ([#4254](https://github.com/biomejs/biome/issues/4254)).
+
+  The rule allows the filename to be named as one of the exports of the module.
+  For instance, the file containing the following export can be named `Button`.
+
+  ```js
+  class Button {}
+  export { Button }
+  ```
+
+  The rule now correctly handles the renaming of an export.
+  For example, the file containing the following export can only be named `Button`.
+  Previously the rule expected the file to be named `A`.
+
+  ```js
+  class A {}
+  export { A as Button }
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
 
 #### Bug Fixes
