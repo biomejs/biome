@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - next
 
 env:
   RUST_LOG: info
