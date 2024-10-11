@@ -2,7 +2,8 @@ use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsAssignment, AnyJsExpression, JsAssignmentExpression,
+    binding_ext::AnyJsBindingDeclaration, global_identifier, static_value::StaticValue,
+    AnyJsAssignment, AnyJsExpression, JsAssignmentExpression, JsReferenceIdentifier,
 };
 use biome_rowan::AstNode;
 
@@ -57,17 +58,37 @@ declare_lint_rule! {
     }
 }
 
+fn identifier_is_global_document(
+    reference: &JsReferenceIdentifier,
+    name: &StaticValue,
+    model: &SemanticModel,
+) -> bool {
+    //  Check identifier is `document` and global
+    name.text() == "document" && model.binding(reference).is_none()
+}
+
 /// Check `expr` is `document`
 fn is_global_document(expr: &AnyJsExpression, model: &SemanticModel) -> Option<()> {
     let (reference, name) = global_identifier(expr)?;
 
-    // Check identifier is `document`
-    if name.text() != "document" {
-        return None;
-    };
-
-    // TODO: Verify that the variable is assigned the global `document` to be closer to the original rule.
-    model.binding(&reference).is_none().then_some(())
+    // `expr` is global document
+    if identifier_is_global_document(&reference, &name, model) {
+        Some(())
+    } else {
+        // Check binding declaration recursively
+        let bind = model.binding(&reference)?;
+        let decl = bind.tree().declaration()?;
+        let decl = decl.parent_binding_pattern_declaration().unwrap_or(decl);
+        match decl {
+            // const foo = documnet;
+            AnyJsBindingDeclaration::JsVariableDeclarator(declarator) => {
+                let initializer = declarator.initializer()?;
+                let right_expr = initializer.expression().ok()?;
+                is_global_document(&right_expr, model)
+            }
+            _ => None,
+        }
+    }
 }
 
 /// Check member is `cookie`
@@ -110,6 +131,7 @@ impl Rule for NoDocumentCookie {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+
         let left = node.left().ok()?;
 
         let any_assignment = left.as_any_js_assignment()?;
