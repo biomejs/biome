@@ -1179,6 +1179,7 @@ dependencies = [
  "biome_console",
  "biome_diagnostics",
  "biome_rowan",
+ "log",
 ]
 
 [[package]]
@@ -1230,7 +1231,7 @@ version = "0.5.7"
 
 [[package]]
 name = "biome_wasm"
-version = "1.7.3"
+version = "1.9.3"
 dependencies = [
  "biome_console",
  "biome_diagnostics",

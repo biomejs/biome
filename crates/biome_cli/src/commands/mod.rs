@@ -1,6 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
-use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
+use crate::diagnostics::DeprecatedArgument;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -22,7 +22,7 @@ use biome_configuration::{
 };
 use biome_configuration::{BiomeDiagnostic, PartialConfiguration};
 use biome_console::{markup, Console, ConsoleExt};
-use biome_diagnostics::{Diagnostic, PrintDiagnostic};
+use biome_diagnostics::PrintDiagnostic;
 use biome_fs::{BiomePath, FileSystem};
 use biome_service::configuration::{
     load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
@@ -626,21 +626,6 @@ pub(crate) fn validate_configuration_diagnostics(
     console: &mut dyn Console,
     verbose: bool,
 ) -> Result<(), CliDiagnostic> {
-    if let Some(file_path) = loaded_configuration
-        .file_path
-        .as_ref()
-        .and_then(|f| f.file_name())
-        .and_then(|f| f.to_str())
-    {
-        if file_path == "rome.json" {
-            let diagnostic = DeprecatedConfigurationFile::new(file_path);
-            if diagnostic.tags().is_verbose() && verbose {
-                console.error(markup! {{PrintDiagnostic::verbose(&diagnostic)}})
-            } else {
-                console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}})
-            }
-        }
-    }
     let diagnostics = loaded_configuration.as_diagnostics_iter();
     for diagnostic in diagnostics {
         if diagnostic.tags().is_verbose() && verbose {

@@ -64,12 +64,7 @@ where
 
         for comment in parse_suppression_comment(text) {
             let categories = match comment {
-                Ok(comment) => {
-                    if comment.is_legacy {
-                        result.push(Ok(SuppressionKind::Deprecated));
-                    }
-                    comment.categories
-                }
+                Ok(comment) => comment.categories,
                 Err(err) => {
                     result.push(Err(err));
                     continue;
@@ -260,14 +255,14 @@ mod tests {
 
             function checkSuppressions3(a, b) {
                 a == b;
-                // rome-ignore lint/suspicious: whole group
+                // biome-ignore lint/suspicious: whole group
                 a == b;
-                // rome-ignore lint/suspicious/noDoubleEquals: single rule
+                // biome-ignore lint/suspicious/noDoubleEquals: single rule
                 a == b;
-                /* rome-ignore lint/style/useWhile: multiple block comments */ /* rome-ignore lint(suspicious/noDoubleEquals): multiple block comments */
+                /* biome-ignore lint/style/useWhile: multiple block comments */ /* biome-ignore lint(suspicious/noDoubleEquals): multiple block comments */
                 a == b;
-                // rome-ignore lint/style/useWhile: multiple line comments
-                // rome-ignore lint/suspicious/noDoubleEquals: multiple line comments
+                // biome-ignore lint/style/useWhile: multiple line comments
+                // biome-ignore lint/suspicious/noDoubleEquals: multiple line comments
                 a == b;
                 a == b;
             }
@@ -334,31 +329,26 @@ mod tests {
                 TextRange::new(TextSize::from(641), TextSize::from(643)),
                 TextRange::new(TextSize::from(835), TextSize::from(837)),
                 TextRange::new(TextSize::from(922), TextSize::from(924)),
-                TextRange::new(TextSize::from(1492), TextSize::from(1494)),
-                TextRange::new(TextSize::from(1687), TextSize::from(1689)),
+                TextRange::new(TextSize::from(1498), TextSize::from(1500)),
+                TextRange::new(TextSize::from(1693), TextSize::from(1695)),
             ]
         );
 
         assert_eq!(
             parse_ranges.as_slice(),
             &[
-                TextRange::new(TextSize::from(1791), TextSize::from(1802)),
-                TextRange::new(TextSize::from(1842), TextSize::from(1843)),
-                TextRange::new(TextSize::from(1876), TextSize::from(1877)),
-                TextRange::new(TextSize::from(1929), TextSize::from(1936)),
+                TextRange::new(TextSize::from(1797), TextSize::from(1808)),
+                TextRange::new(TextSize::from(1848), TextSize::from(1849)),
+                TextRange::new(TextSize::from(1882), TextSize::from(1883)),
+                TextRange::new(TextSize::from(1935), TextSize::from(1942)),
             ]
         );
 
         assert_eq!(
             warn_ranges.as_slice(),
             &[
-                TextRange::new(TextSize::from(944), TextSize::from(987)),
-                TextRange::new(TextSize::from(1028), TextSize::from(1086)),
-                TextRange::new(TextSize::from(1127), TextSize::from(1189)),
-                TextRange::new(TextSize::from(1190), TextSize::from(1264)),
-                TextRange::new(TextSize::from(1305), TextSize::from(1363)),
-                TextRange::new(TextSize::from(1380), TextSize::from(1449)),
-                TextRange::new(TextSize::from(1525), TextSize::from(1620)),
+                TextRange::new(TextSize::from(1193), TextSize::from(1268)),
+                TextRange::new(TextSize::from(1531), TextSize::from(1626)),
             ]
         );
     }

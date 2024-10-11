@@ -46,16 +46,13 @@ pub use crate::signals::{
 };
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
-pub use suppression_action::{ApplySuppression, SuppressionAction};
-
 use biome_console::markup;
-use biome_diagnostics::{
-    category, Applicability, Diagnostic, DiagnosticExt, DiagnosticTags, Severity,
-};
+use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, DiagnosticTags};
 use biome_rowan::{
-    AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextLen, TextRange,
-    TextSize, TokenAtOffset, TriviaPiece, TriviaPieceKind, WalkEvent,
+    AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextRange, TextSize,
+    TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
+pub use suppression_action::{ApplySuppression, SuppressionAction};
 
 /// The analyzer is the main entry point into the `biome_analyze` infrastructure.
 /// Its role is to run a collection of [Visitor]s over a syntax tree, with each
@@ -475,27 +472,11 @@ where
                 }
             };
 
-            if matches!(kind, SuppressionKind::Deprecated) {
-                let signal = DiagnosticSignal::new(move || {
-                    SuppressionDiagnostic::new(
-                        category!("suppressions/deprecatedSuppressionComment"),
-                        range,
-                        "// rome-ignore is deprecated, use // biome-ignore instead",
-                    )
-                    .with_tags(DiagnosticTags::DEPRECATED_CODE)
-                    .with_severity(Severity::Information)
-                })
-                .with_action(move || create_suppression_comment_action(token));
-
-                (self.emit_signal)(&signal)?;
-            }
-
             let (rule, instance) = match kind {
                 SuppressionKind::Everything => (None, None),
                 SuppressionKind::Rule(rule) => (Some(rule), None),
                 SuppressionKind::RuleInstance(rule, instance) => (Some(rule), Some(instance)),
                 SuppressionKind::MaybeLegacy(rule) => (Some(rule), None),
-                SuppressionKind::Deprecated => (None, None),
             };
 
             if let Some(rule) = rule {
@@ -718,8 +699,6 @@ pub enum SuppressionKind<'a> {
     RuleInstance(&'a str, &'a str),
     /// A suppression using the legacy syntax to disable a specific rule eg. `// biome-ignore lint(style/useWhile)`
     MaybeLegacy(&'a str),
-    /// `rome-ignore` is legacy
-    Deprecated,
 }
 
 fn update_suppression<L: Language>(
@@ -783,7 +762,7 @@ pub struct SuppressionCommentEmitterPayload<'a, L: Language> {
     pub token_offset: TokenAtOffset<SyntaxToken<L>>,
     /// A [BatchMutation] where the consumer can apply the suppression comment
     pub mutation: &'a mut BatchMutation<L>,
-    /// A string equals to "rome-ignore: lint(<RULE_GROUP>/<RULE_NAME>)"
+    /// A string equals to "biome-ignore: lint(<RULE_GROUP>/<RULE_NAME>)"
     pub suppression_text: &'a str,
     /// The original range of the diagnostic where the rule was triggered
     pub diagnostic_text_range: &'a TextRange,
