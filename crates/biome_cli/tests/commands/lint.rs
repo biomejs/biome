@@ -1118,7 +1118,7 @@ fn fs_files_ignore_symlink() {
         check_windows_symlink!(symlink_dir(&testcase2_path, symlink_testcase2_path));
     }
 
-    let config_path = root_path.join("rome.json");
+    let config_path = root_path.join("biome.json");
     let mut config_file = File::create(config_path).unwrap();
     config_file
         .write_all(CONFIG_IGNORE_SYMLINK.as_bytes())
@@ -1564,7 +1564,7 @@ fn deprecated_suppression_comment() {
     let file_path = Path::new("file.js");
     fs.insert(
         file_path.into(),
-        *b"// rome-ignore lint(suspicious/noDoubleEquals): test
+        *b"// biome-ignore lint(suspicious/noDoubleEquals): test
 a == b;",
     );
 
@@ -1678,7 +1678,7 @@ fn suppression_syntax_error() {
     let mut console = BufferConsole::default();
 
     let file_path = Path::new("check.js");
-    fs.insert(file_path.into(), *b"// rome-ignore(:\n");
+    fs.insert(file_path.into(), *b"// biome-ignore(:\n");
 
     let result = run_cli(
         DynRef::Borrowed(&mut fs),

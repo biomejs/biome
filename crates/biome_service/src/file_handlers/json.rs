@@ -29,7 +29,7 @@ use biome_configuration::PartialConfiguration;
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
-use biome_fs::{BiomePath, ConfigName, ROME_JSON};
+use biome_fs::{BiomePath, ConfigName};
 use biome_json_analyze::analyze;
 use biome_json_formatter::context::{JsonFormatOptions, TrailingCommas};
 use biome_json_formatter::format_node;
@@ -348,8 +348,7 @@ fn lint(params: LintParams) -> LintResults {
             let mut diagnostics = params.parse.into_diagnostics();
             // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
             // malformed configuration
-            if params.path.ends_with(ROME_JSON)
-                || params.path.ends_with(ConfigName::biome_json())
+            if params.path.ends_with(ConfigName::biome_json())
                 || params.path.ends_with(ConfigName::biome_jsonc())
             {
                 let deserialized = deserialize_from_json_ast::<PartialConfiguration>(&root, "");
