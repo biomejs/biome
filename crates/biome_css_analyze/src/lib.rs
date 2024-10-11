@@ -65,12 +65,7 @@ where
 
         for comment in parse_suppression_comment(text) {
             let categories = match comment {
-                Ok(comment) => {
-                    if comment.is_legacy {
-                        result.push(Ok(SuppressionKind::Deprecated));
-                    }
-                    comment.categories
-                }
+                Ok(comment) => comment.categories,
                 Err(err) => {
                     result.push(Err(err));
                     continue;
