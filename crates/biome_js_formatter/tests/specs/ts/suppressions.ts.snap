@@ -7,11 +7,12 @@ info: ts/suppressions.ts
 ```ts
 
 interface Suppressions {
-    // rome-ignore format: test
+    // biome-ignore format: test
     a: void
 
     b: void
 }
+
 ```
 
 
@@ -39,7 +40,7 @@ Attribute Position: Auto
 
 ```ts
 interface Suppressions {
-	// rome-ignore format: test
+	// biome-ignore format: test
 	a: void
 
 	b: void;
