@@ -1365,7 +1365,7 @@ export interface Nursery {
 	/**
 	 * Require explicit return types on functions and class methods.
 	 */
-	useExplicitFunctionReturnType?: RuleConfiguration_for_Null;
+	useExplicitFunctionReturnType?: RuleConfiguration_for_ExplicitFunctionReturnTypeOptions;
 	/**
 	 * Require for-in loops to include an if statement.
 	 */
@@ -2037,6 +2037,9 @@ export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
+export type RuleConfiguration_for_ExplicitFunctionReturnTypeOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_ExplicitFunctionReturnTypeOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -2221,6 +2224,16 @@ export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	 * Rule's options
 	 */
 	options: ConsistentMemberAccessibilityOptions;
+}
+export interface RuleWithOptions_for_ExplicitFunctionReturnTypeOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: ExplicitFunctionReturnTypeOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -2416,6 +2429,15 @@ export interface UseComponentExportOnlyModulesOptions {
 }
 export interface ConsistentMemberAccessibilityOptions {
 	accessibility?: Accessibility;
+}
+/**
+ * Rule's options.
+ */
+export interface ExplicitFunctionReturnTypeOptions {
+	/**
+	 * If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases. This does not affect other [Case].
+	 */
+	allowArrowFunctions?: boolean;
 }
 export interface UtilityClassSortingOptions {
 	/**
