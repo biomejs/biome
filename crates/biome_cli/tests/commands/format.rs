@@ -395,7 +395,7 @@ fn custom_config_file_path() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let config_path = Path::new("/test/rome.json");
+    let config_path = Path::new("/test/biome.json");
     fs.insert(config_path.into(), CONFIG_FORMAT.as_bytes());
 
     let file_path = Path::new("file.js");
