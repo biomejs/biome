@@ -15,7 +15,7 @@ a == b;
 check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some errors were emitted while running checks.
-
+  
 
 
 ```
@@ -26,17 +26,17 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Suppression is using a deprecated syntax
-
+  
   > 1 │ // biome-ignore lint(suspicious/noDoubleEquals): test
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ a == b;
-
+  
   i Safe fix: Rewrite suppression to use the newer syntax
-
+  
     1   │ - //·biome-ignore·lint(suspicious/noDoubleEquals):·test
       1 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·test
     2 2 │   a == b;
-
+  
 
 ```
 
@@ -44,11 +44,11 @@ file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━
 file.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Import statements could be sorted:
-
+  
     1   │ - //·biome-ignore·lint(suspicious/noDoubleEquals):·test
       1 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·test
     2 2 │   a == b;
-
+  
 
 ```
 
@@ -56,11 +56,11 @@ file.js organizeImports ━━━━━━━━━━━━━━━━━━�
 file.js assists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Not all assists were applied:
-
+  
     1   │ - //·biome-ignore·lint(suspicious/noDoubleEquals):·test
       1 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·test
     2 2 │   a == b;
-
+  
 
 ```
 
@@ -68,17 +68,17 @@ file.js assists ━━━━━━━━━━━━━━━━━━━━━�
 file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Suppression is using a deprecated syntax
-
+  
   > 1 │ // biome-ignore lint(suspicious/noDoubleEquals): test
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ a == b;
-
+  
   i Safe fix: Rewrite suppression to use the newer syntax
-
+  
     1   │ - //·biome-ignore·lint(suspicious/noDoubleEquals):·test
       1 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·test
     2 2 │   a == b;
-
+  
 
 ```
 
@@ -86,12 +86,12 @@ file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━
 file.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Formatter would have printed the following content:
-
+  
     1 1 │   // biome-ignore lint(suspicious/noDoubleEquals): test
     2   │ - a·==·b;
       2 │ + a·==·b;
-      3 │ +
-
+      3 │ + 
+  
 
 ```
 

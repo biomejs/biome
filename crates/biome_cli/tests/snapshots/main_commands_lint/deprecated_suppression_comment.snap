@@ -15,17 +15,17 @@ a == b;
 file.js:1:1 suppressions/deprecatedSuppressionComment  FIXABLE   DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Suppression is using a deprecated syntax
-
+  
   > 1 │ // biome-ignore lint(suspicious/noDoubleEquals): test
       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     2 │ a == b;
-
+  
   i Safe fix: Rewrite suppression to use the newer syntax
-
+  
     1   │ - //·biome-ignore·lint(suspicious/noDoubleEquals):·test
       1 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·test
     2 2 │   a == b;
-
+  
 
 ```
 

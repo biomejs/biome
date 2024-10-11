@@ -15,7 +15,7 @@ expression: content
 lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Some errors were emitted while running checks.
-
+  
 
 
 ```
@@ -26,11 +26,11 @@ lint ━━━━━━━━━━━━━━━━━━━━━━━━━
 check.js:1:16 suppressions/parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × unexpected token, expected one of ':' or whitespace
-
+  
   > 1 │ // biome-ignore(:
       │                ^
-    2 │
-
+    2 │ 
+  
 
 ```
 
