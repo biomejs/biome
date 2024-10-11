@@ -95,7 +95,6 @@ pub fn parse_suppression_comment(
 
         let line = line.trim_start();
 
-        dbg!(&line);
         Some(
             parse_suppression_line(line).map_err(|err| SuppressionDiagnostic {
                 message: err.message,
