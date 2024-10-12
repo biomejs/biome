@@ -104,9 +104,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group
-                .use_explicit_function_return_type
-                .get_or_insert(Default::default());
+            let rule = group.use_explicit_type.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@typescript-eslint/explicit-member-accessibility" => {

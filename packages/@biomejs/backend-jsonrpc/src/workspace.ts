@@ -1365,7 +1365,7 @@ export interface Nursery {
 	/**
 	 * Require explicit return types on functions and class methods.
 	 */
-	useExplicitFunctionReturnType?: RuleConfiguration_for_Null;
+	useExplicitType?: RuleConfiguration_for_Null;
 	/**
 	 * Require for-in loops to include an if statement.
 	 */
@@ -2945,7 +2945,7 @@ export type Category =
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
-	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"

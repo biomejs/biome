@@ -3401,8 +3401,7 @@ pub struct Nursery {
         Option<RuleConfiguration<biome_graphql_analyze::options::UseDeprecatedReason>>,
     #[doc = "Require explicit return types on functions and class methods."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_explicit_function_return_type:
-        Option<RuleConfiguration<biome_js_analyze::options::UseExplicitFunctionReturnType>>,
+    pub use_explicit_type: Option<RuleConfiguration<biome_js_analyze::options::UseExplicitType>>,
     #[doc = "Require for-in loops to include an if statement."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_guard_for_in: Option<RuleConfiguration<biome_js_analyze::options::UseGuardForIn>>,
@@ -3478,7 +3477,7 @@ impl Nursery {
         "useConsistentCurlyBraces",
         "useConsistentMemberAccessibility",
         "useDeprecatedReason",
-        "useExplicitFunctionReturnType",
+        "useExplicitType",
         "useGuardForIn",
         "useImportRestrictions",
         "useSortedClasses",
@@ -3750,7 +3749,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_explicit_function_return_type.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
@@ -3964,7 +3963,7 @@ impl Nursery {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[34]));
             }
         }
-        if let Some(rule) = self.use_explicit_function_return_type.as_ref() {
+        if let Some(rule) = self.use_explicit_type.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[35]));
             }
@@ -4175,8 +4174,8 @@ impl Nursery {
                 .use_deprecated_reason
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
-            "useExplicitFunctionReturnType" => self
-                .use_explicit_function_return_type
+            "useExplicitType" => self
+                .use_explicit_type
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useGuardForIn" => self
