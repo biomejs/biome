@@ -17,13 +17,19 @@ impl LogCompiler {
             &context.compilation.lang,
             &Some(vec!["message".to_owned(), "variable".to_owned()]),
         )?;
+
+        let var_name = named_args
+            .iter()
+            .find(|(name, _)| name == "variable")
+            .map(|(_, node)| node.to_string());
+
         let mut args = named_args_to_map(named_args, context)?;
         let message = args.remove("$message");
         let variable = args.remove("$variable");
+
         let variable = variable.and_then(|pattern| match pattern {
             Pattern::Variable(variable) => {
-                let source_location = &context.vars_array[variable.scope][variable.index];
-                Some(VariableInfo::new(source_location.name.clone(), variable))
+                Some(VariableInfo::new(var_name.unwrap_or_default(), variable))
             }
             _ => None,
         });

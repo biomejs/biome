@@ -99,7 +99,7 @@ declare_lint_rule! {
 
 impl Rule for UseAdjacentOverloadSignatures {
     type Query = Ast<DeclarationOrModuleNode>;
-    type State = Vec<(TokenText, TextRange)>;
+    type State = Box<[(TokenText, TextRange)]>;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -136,7 +136,7 @@ impl Rule for UseAdjacentOverloadSignatures {
         };
 
         if !methods.is_empty() {
-            Some(methods)
+            Some(methods.into_boxed_slice())
         } else {
             None
         }

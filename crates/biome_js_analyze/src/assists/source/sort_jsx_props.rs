@@ -52,7 +52,7 @@ declare_source_rule! {
 impl Rule for SortJsxProps {
     type Query = Ast<JsxAttributeList>;
     type State = PropGroup;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -72,7 +72,7 @@ impl Rule for SortJsxProps {
             }
         }
         prop_groups.push(current_prop_group);
-        prop_groups
+        prop_groups.into_boxed_slice()
     }
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {

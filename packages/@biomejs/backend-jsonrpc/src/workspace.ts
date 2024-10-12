@@ -1227,6 +1227,10 @@ export interface Nursery {
 	 */
 	noDescendingSpecificity?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow direct assignments to document.cookie.
+	 */
+	noDocumentCookie?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate custom properties within declaration blocks.
 	 */
 	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
@@ -1254,6 +1258,10 @@ export interface Nursery {
 	 * Prevent usage of \<head> element in a Next.js project.
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent using the next/head module in pages/_document.js on Next.js projects.
+	 */
+	noHeadImportInDocument?: RuleConfiguration_for_Null;
 	/**
 	 * Prevent usage of \<img> element in a Next.js project.
 	 */
@@ -1335,6 +1343,10 @@ export interface Nursery {
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
 	/**
+	 * Use at() instead of integer index access.
+	 */
+	useAtIndex?: RuleFixConfiguration_for_Null;
+	/**
 	 * Enforce using single if instead of nested if clauses.
 	 */
 	useCollapsedIf?: RuleFixConfiguration_for_Null;
@@ -1357,7 +1369,11 @@ export interface Nursery {
 	/**
 	 * Require explicit return types on functions and class methods.
 	 */
-	useExplicitFunctionReturnType?: RuleConfiguration_for_Null;
+	useExplicitType?: RuleConfiguration_for_Null;
+	/**
+	 * Require for-in loops to include an if statement.
+	 */
+	useGuardForIn?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -2881,6 +2897,7 @@ export type Category =
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDescendingSpecificity"
+	| "lint/nursery/noDocumentCookie"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
@@ -2889,6 +2906,8 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noHeadElement"
+	| "lint/nursery/noHeadImportInDocument"
 	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
@@ -2898,7 +2917,6 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
-	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
@@ -2925,13 +2943,15 @@ export type Category =
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
+	| "lint/nursery/useAtIndex"
 	| "lint/nursery/useBiomeSuppressionComment"
 	| "lint/nursery/useCollapsedIf"
 	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
-	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useSortedClasses"
@@ -3083,6 +3103,10 @@ export type Category =
 	| "internalError/io"
 	| "internalError/fs"
 	| "internalError/panic"
+	| "reporter/parse"
+	| "reporter/format"
+	| "reporter/analyzer"
+	| "reporter/organizeImports"
 	| "parse"
 	| "lint"
 	| "lint/a11y"

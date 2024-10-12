@@ -58,6 +58,8 @@ pub type NoDefaultExport =
 pub type NoDelete = <lint::performance::no_delete::NoDelete as biome_analyze::Rule>::Options;
 pub type NoDistractingElements =
     <lint::a11y::no_distracting_elements::NoDistractingElements as biome_analyze::Rule>::Options;
+pub type NoDocumentCookie =
+    <lint::nursery::no_document_cookie::NoDocumentCookie as biome_analyze::Rule>::Options;
 pub type NoDoneCallback =
     <lint::style::no_done_callback::NoDoneCallback as biome_analyze::Rule>::Options;
 pub type NoDoubleEquals =
@@ -113,6 +115,7 @@ pub type NoGlobalIsNan =
 pub type NoGlobalObjectCalls = < lint :: correctness :: no_global_object_calls :: NoGlobalObjectCalls as biome_analyze :: Rule > :: Options ;
 pub type NoHeadElement =
     <lint::nursery::no_head_element::NoHeadElement as biome_analyze::Rule>::Options;
+pub type NoHeadImportInDocument = < lint :: nursery :: no_head_import_in_document :: NoHeadImportInDocument as biome_analyze :: Rule > :: Options ;
 pub type NoHeaderScope =
     <lint::a11y::no_header_scope::NoHeaderScope as biome_analyze::Rule>::Options;
 pub type NoImgElement =
@@ -288,6 +291,7 @@ pub type UseArrowFunction =
     <lint::complexity::use_arrow_function::UseArrowFunction as biome_analyze::Rule>::Options;
 pub type UseAsConstAssertion =
     <lint::style::use_as_const_assertion::UseAsConstAssertion as biome_analyze::Rule>::Options;
+pub type UseAtIndex = <lint::nursery::use_at_index::UseAtIndex as biome_analyze::Rule>::Options;
 pub type UseAwait = <lint::suspicious::use_await::UseAwait as biome_analyze::Rule>::Options;
 pub type UseBlockStatements =
     <lint::style::use_block_statements::UseBlockStatements as biome_analyze::Rule>::Options;
@@ -312,8 +316,9 @@ pub type UseEnumInitializers =
 pub type UseErrorMessage =
     <lint::suspicious::use_error_message::UseErrorMessage as biome_analyze::Rule>::Options;
 pub type UseExhaustiveDependencies = < lint :: correctness :: use_exhaustive_dependencies :: UseExhaustiveDependencies as biome_analyze :: Rule > :: Options ;
-pub type UseExplicitFunctionReturnType = < lint :: nursery :: use_explicit_function_return_type :: UseExplicitFunctionReturnType as biome_analyze :: Rule > :: Options ;
 pub type UseExplicitLengthCheck = < lint :: style :: use_explicit_length_check :: UseExplicitLengthCheck as biome_analyze :: Rule > :: Options ;
+pub type UseExplicitType =
+    <lint::nursery::use_explicit_type::UseExplicitType as biome_analyze::Rule>::Options;
 pub type UseExponentiationOperator = < lint :: style :: use_exponentiation_operator :: UseExponentiationOperator as biome_analyze :: Rule > :: Options ;
 pub type UseExportType =
     <lint::style::use_export_type::UseExportType as biome_analyze::Rule>::Options;
@@ -325,6 +330,8 @@ pub type UseFragmentSyntax =
     <lint::style::use_fragment_syntax::UseFragmentSyntax as biome_analyze::Rule>::Options;
 pub type UseGetterReturn =
     <lint::suspicious::use_getter_return::UseGetterReturn as biome_analyze::Rule>::Options;
+pub type UseGuardForIn =
+    <lint::nursery::use_guard_for_in::UseGuardForIn as biome_analyze::Rule>::Options;
 pub type UseHeadingContent =
     <lint::a11y::use_heading_content::UseHeadingContent as biome_analyze::Rule>::Options;
 pub type UseHookAtTopLevel =

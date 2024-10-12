@@ -13,3 +13,7 @@ class B {
 function f(): void {
 	return;
 }
+
+function g(): void {
+	return void 0;
+}

@@ -2099,6 +2099,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDocumentCookie": {
+					"description": "Disallow direct assignments to document.cookie.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateCustomProperties": {
 					"description": "Disallow duplicate custom properties within declaration blocks.",
 					"anyOf": [
@@ -2143,6 +2150,13 @@
 				},
 				"noHeadElement": {
 					"description": "Prevent usage of \\<head> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noHeadImportInDocument": {
+					"description": "Prevent using the next/head module in pages/_document.js on Next.js projects.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2285,6 +2299,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useAtIndex": {
+					"description": "Use at() instead of integer index access.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useCollapsedIf": {
 					"description": "Enforce using single if instead of nested if clauses.",
 					"anyOf": [
@@ -2324,8 +2345,15 @@
 						{ "type": "null" }
 					]
 				},
-				"useExplicitFunctionReturnType": {
+				"useExplicitType": {
 					"description": "Require explicit return types on functions and class methods.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGuardForIn": {
+					"description": "Require for-in loops to include an if statement.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -4139,7 +4167,6 @@
 			"properties": {
 				"attributes": {
 					"description": "Additional attributes that will be sorted.",
-					"default": ["class", "className"],
 					"type": ["array", "null"],
 					"items": { "type": "string" }
 				},

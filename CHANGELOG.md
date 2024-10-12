@@ -19,6 +19,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Enhancements
+
+- The `--summary` reporter now reports parsing diagnostics too. Contributed by @ematipico
+
+- Improved performance of GritQL queries by roughly 25-30%. Contributed by @arendjr
+
 ### Configuration
 
 #### Bug fixes
@@ -29,9 +35,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+#### Bug fixes
+
+- Fix [#4121](https://github.com/biomejs/biome/issues/4121). Respect line width when printing multiline strings. Contributed by @ah-yu
+
 ### JavaScript APIs
 
 ### Linter
+
+#### New features
+
+- Add [noDocumentCookie](https://biomejs.dev/linter/rules/no-document-cookie/). Contributed by @tunamaguro
+- Add [guardForIn](https://biomejs.dev/linter/rules/guard-for-in/). Contributed by @fireairforce
+
+#### Bug Fixes
 
 - Biome no longer crashes when it encounters a string that contain a multibyte character ([#4181](https://github.com/biomejs/biome/issues/4181)).
 
@@ -48,6 +65,92 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#4190](https://github.com/biomejs/biome/issues/4190), where the rule `noMissingVarFunction` wrongly reported a variable as missing when used inside a `var()`  function that was a newline. Contributed by @ematipico
 
 - Fix [#4041](https://github.com/biomejs/biome/issues/4041). Now the rule `useSortedClasses` won't be triggered if `className` is composed only by inlined variables. Contributed by @ematipico
+
+- [useImportType](https://biomejs.dev/linter/rules/use-import-type/) and [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now report useless inline type qualifiers ([#4178](https://github.com/biomejs/biome/issues/4178)).
+
+  The following fix is now proposed:
+
+  ```diff
+  - import type { type A, B } from "";
+  + import type { A, B } from "";
+
+  - export type { type C, D };
+  + export type { C, D };
+  ```
+
+  Contributed by @Conaclos
+
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now reports ungrouped `export from`.
+
+  The following fix is now proposed:
+
+  ```diff
+  - export { type A, type B } from "";
+  + export type { A, B } from "";
+  ```
+
+  Contributed by @Conaclos
+
+- [noVoidTypeReturn](https://biomejs.dev/linter/rules/no-void-type-return/) now accepts `void` expressions in return position ([#4173](https://github.com/biomejs/biome/issues/4173)).
+
+  The following code is now accepted:
+
+  ```ts
+  function f(): void {
+    return void 0;
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now correctly handles fragments containing HTML escapes (e.g. `&nbsp;`) inside expression escapes `{ ... }` ([#4059](https://github.com/biomejs/biome/issues/4059)).
+
+  The following code is no longer reported:
+
+  ```jsx
+  function Component() {
+    return (
+      <div key={index}>{line || <>&nbsp;</>}</div>
+    )
+  }
+  ```
+
+  Contributed by @fireairforce
+
+- [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) and [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer reports a parameter as unused when another parameter has a constructor type with the same parameter name ([#4227](https://github.com/biomejs/biome/issues/4227)).
+
+  In the following code, the `name` parameter is no longer reported as unused.
+
+  ```ts
+  export class Foo {
+    bar(name: string, _class: new (name: string) => any) {
+      return name
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now correctly handles renamed exports ([#4254](https://github.com/biomejs/biome/issues/4254)).
+
+  The rule allows the filename to be named as one of the exports of the module.
+  For instance, the file containing the following export can be named `Button`.
+
+  ```js
+  class Button {}
+  export { Button }
+  ```
+
+  The rule now correctly handles the renaming of an export.
+  For example, the file containing the following export can only be named `Button`.
+  Previously the rule expected the file to be named `A`.
+
+  ```js
+  class A {}
+  export { A as Button }
+  ```
+
+  Contributed by @Conaclos
 
 ### Parser
 

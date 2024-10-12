@@ -6,6 +6,8 @@ use biome_js_syntax::{binding_ext::AnyJsIdentifierBinding, TextRange, TsTypePara
 pub(crate) struct SemanticModelBindingData {
     pub(crate) range: TextRange,
     pub(crate) references: Vec<SemanticModelReference>,
+    // We use a SmallVec because most of the time a binding is expected once.
+    pub(crate) export_by_start: smallvec::SmallVec<[TextSize; 4]>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -115,6 +117,17 @@ impl Binding {
                 id: ReferenceId::new(self.id, index),
             });
         std::iter::successors(first, Reference::find_next_write)
+    }
+
+    /// Returns all exports of the binding.
+    /// The node kind is either an identifier binding (tehd eclaration is self exported)
+    /// or an identifier usage.
+    pub fn exports(&self) -> impl Iterator<Item = JsSyntaxNode> + '_ {
+        let binding = self.data.binding(self.id);
+        binding
+            .export_by_start
+            .iter()
+            .map(|export_start| self.data.binding_node_by_start[export_start].clone())
     }
 
     pub fn is_imported(&self) -> bool {
