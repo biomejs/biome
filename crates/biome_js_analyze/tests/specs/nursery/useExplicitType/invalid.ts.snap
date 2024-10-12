@@ -103,7 +103,7 @@ const x = { bar: { prop: () => {} } }
 
 # Diagnostics
 ```
-invalid.ts:1:1 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:1:1 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -120,7 +120,7 @@ invalid.ts:1:1 lint/nursery/useExplicitFunctionReturnType ━━━━━━━�
 ```
 
 ```
-invalid.ts:3:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:3:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -142,7 +142,7 @@ invalid.ts:3:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━�
 ```
 
 ```
-invalid.ts:9:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:9:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -164,7 +164,7 @@ invalid.ts:9:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
 ```
 
 ```
-invalid.ts:13:15 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:13:15 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -183,7 +183,7 @@ invalid.ts:13:15 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:17:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:17:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -205,7 +205,7 @@ invalid.ts:17:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
 ```
 
 ```
-invalid.ts:21:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:21:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -227,7 +227,7 @@ invalid.ts:21:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
 ```
 
 ```
-invalid.ts:24:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:24:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -246,7 +246,7 @@ invalid.ts:24:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:25:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:25:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -268,7 +268,7 @@ invalid.ts:25:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
 ```
 
 ```
-invalid.ts:31:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:31:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -289,7 +289,7 @@ invalid.ts:31:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
 ```
 
 ```
-invalid.ts:37:3 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:37:3 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -310,7 +310,7 @@ invalid.ts:37:3 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
 ```
 
 ```
-invalid.ts:42:14 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:42:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -329,7 +329,7 @@ invalid.ts:42:14 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:43:14 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:43:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -347,7 +347,7 @@ invalid.ts:43:14 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:45:16 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:45:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -366,7 +366,7 @@ invalid.ts:45:16 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:46:16 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:46:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -384,7 +384,7 @@ invalid.ts:46:16 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:49:23 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:49:23 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -402,7 +402,7 @@ invalid.ts:49:23 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:50:23 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:50:23 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -421,7 +421,7 @@ invalid.ts:50:23 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:52:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:52:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -440,7 +440,7 @@ invalid.ts:52:10 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:57:17 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:57:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -464,7 +464,7 @@ invalid.ts:57:17 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:66:17 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:66:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -488,7 +488,7 @@ invalid.ts:66:17 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:78:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:78:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -510,7 +510,7 @@ invalid.ts:78:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
 ```
 
 ```
-invalid.ts:85:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:85:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -532,7 +532,7 @@ invalid.ts:85:2 lint/nursery/useExplicitFunctionReturnType ━━━━━━━
 ```
 
 ```
-invalid.ts:94:19 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:94:19 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
@@ -550,7 +550,7 @@ invalid.ts:94:19 lint/nursery/useExplicitFunctionReturnType ━━━━━━�
 ```
 
 ```
-invalid.ts:95:26 lint/nursery/useExplicitFunctionReturnType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:95:26 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   

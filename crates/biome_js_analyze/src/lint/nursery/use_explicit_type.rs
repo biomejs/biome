@@ -202,9 +202,9 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub UseExplicitFunctionReturnType {
+    pub UseExplicitType {
         version: "1.9.3",
-        name: "useExplicitFunctionReturnType",
+        name: "useExplicitType",
         language: "ts",
         recommended: false,
         sources: &[RuleSource::EslintTypeScript("explicit-function-return-type")],
@@ -215,7 +215,7 @@ declare_node_union! {
     pub AnyJsFunctionWithReturnType = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember | JsGetterClassMember | JsGetterObjectMember
 }
 
-impl Rule for UseExplicitFunctionReturnType {
+impl Rule for UseExplicitType {
     type Query = Ast<AnyJsFunctionWithReturnType>;
     type State = TextRange;
     type Signals = Option<Self::State>;

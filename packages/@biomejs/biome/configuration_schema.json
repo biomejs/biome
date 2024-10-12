@@ -2338,7 +2338,7 @@
 						{ "type": "null" }
 					]
 				},
-				"useExplicitFunctionReturnType": {
+				"useExplicitType": {
 					"description": "Require explicit return types on functions and class methods.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
