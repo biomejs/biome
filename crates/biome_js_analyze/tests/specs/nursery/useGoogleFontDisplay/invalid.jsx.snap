@@ -1,0 +1,81 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: invalid.jsx
+---
+# Input
+```jsx
+<>
+	<link href="https://fonts.googleapis.com/css2?family=Krona+One" />
+	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=fallback" />
+</>
+```
+
+# Diagnostics
+```
+invalid.jsx:2:13 lint/nursery/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link is missing the font-display parameter.
+  
+    1 │ <>
+  > 2 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One" />
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+    4 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+  
+  i Add &display=optional to prevent invisible text and layout shifts. If font swapping is important, use &display=swap.
+  
+
+```
+
+```
+invalid.jsx:3:13 lint/nursery/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended font-display value.
+  
+    1 │ <>
+    2 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One" />
+  > 3 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    4 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+    5 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=fallback" />
+  
+  i Use &display=optional to improve performance and prevent layout shifts, or &display=swap if font swapping is necessary after loading.
+  
+
+```
+
+```
+invalid.jsx:4:13 lint/nursery/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended font-display value.
+  
+    2 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One" />
+    3 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+  > 4 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=fallback" />
+    6 │ </>
+  
+  i Use &display=optional to improve performance and prevent layout shifts, or &display=swap if font swapping is necessary after loading.
+  
+
+```
+
+```
+invalid.jsx:5:13 lint/nursery/useGoogleFontDisplay ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The Google Font link has a non-recommended font-display value.
+  
+    3 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=auto" />
+    4 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=block" />
+  > 5 │ 	<link href="https://fonts.googleapis.com/css2?family=Krona+One&display=fallback" />
+      │ 	           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ </>
+  
+  i Use &display=optional to improve performance and prevent layout shifts, or &display=swap if font swapping is necessary after loading.
+  
+
+```
