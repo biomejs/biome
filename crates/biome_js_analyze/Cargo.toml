@@ -35,6 +35,7 @@ rustc-hash               = { workspace = true }
 schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
+url                      = "2.5.2"
 
 [dev-dependencies]
 biome_js_parser  = { path = "../biome_js_parser", features = ["tests"] }

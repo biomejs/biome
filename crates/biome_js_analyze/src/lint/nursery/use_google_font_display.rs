@@ -2,7 +2,8 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxString};
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_rowan::TextRange;
 
 declare_lint_rule! {
     /// Enforces the use of a recommended `font-display` strategy with Google Fonts.
@@ -59,7 +60,7 @@ declare_lint_rule! {
 
 impl Rule for UseGoogleFontDisplay {
     type Query = Ast<AnyJsxElement>;
-    type State = JsxString;
+    type State = (String, TextRange);
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -77,23 +78,18 @@ impl Rule for UseGoogleFontDisplay {
         let is_google_font = href_text.starts_with("https://fonts.googleapis.com/css");
 
         if is_google_font {
-            return Some(jsx_string?.to_owned());
+            return Some((
+                href_text.text().to_string(),
+                jsx_string?.value_token().ok()?.text_trimmed_range(),
+            ));
         }
 
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, jsx_string: &Self::State) -> Option<RuleDiagnostic> {
-        let text = jsx_string.inner_string_text().ok()?;
-        let display_param = text
-            .text()
-            .split('?')
-            .last()?
-            .split('&')
-            .find(|p| p.starts_with("display="));
-        let range = jsx_string.value_token().ok()?.text_trimmed_range();
-
-        if display_param.is_none() {
+    fn diagnostic(_: &RuleContext<Self>, (href, range): &Self::State) -> Option<RuleDiagnostic> {
+        let url = url::Url::parse(href).ok()?;
+        let Some((_, display)) = url.query_pairs().find(|(key, _)| key == "display") else {
             return Some(
                 RuleDiagnostic::new(
                     rule_category!(),
@@ -106,9 +102,7 @@ impl Rule for UseGoogleFontDisplay {
                     "Add "<Emphasis>"&display=optional"</Emphasis>" to prevent invisible text and layout shifts. If font swapping is important, use "<Emphasis>"&display=swap"</Emphasis>"."
                 })
             );
-        }
-
-        let display = display_param.unwrap().replace("display=", "");
+        };
 
         if matches!(&*display, "auto" | "block" | "fallback") {
             return Some(
