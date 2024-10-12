@@ -85,7 +85,7 @@ function foo() {return undefined;}
 
 # Diagnostics
 ```
-invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -94,6 +94,10 @@ invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function·foo()·{return·undefined;}
+      │                        ---------  
 
 ```
 
@@ -104,7 +108,7 @@ const foo = () => undefined;
 
 # Diagnostics
 ```
-invalid.json:1:19 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:19 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -112,6 +116,11 @@ invalid.json:1:19 lint/nursery/noUselessUndefined ━━━━━━━━━━
       │                   ^^^^^^^^^
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Unsafe fix: Remove the undefined.
+  
+  - const·foo·=·()·=>·undefined;
+  + const·foo·=·()·=>·{};
   
 
 ```
@@ -123,7 +132,7 @@ const foo = () => {return undefined;};
 
 # Diagnostics
 ```
-invalid.json:1:27 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:27 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -132,6 +141,10 @@ invalid.json:1:27 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ const·foo·=·()·=>·{return·undefined;};
+      │                           ---------   
 
 ```
 
@@ -142,7 +155,7 @@ function foo() {return undefined;}
 
 # Diagnostics
 ```
-invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -151,6 +164,10 @@ invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function·foo()·{return·undefined;}
+      │                        ---------  
 
 ```
 
@@ -161,7 +178,7 @@ function foo() {return /* comment */ undefined;}
 
 # Diagnostics
 ```
-invalid.json:1:38 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:38 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -170,6 +187,10 @@ invalid.json:1:38 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function·foo()·{return·/*·comment·*/·undefined;}
+      │                                      ---------  
 
 ```
 
@@ -180,7 +201,7 @@ function* foo() {yield undefined;}
 
 # Diagnostics
 ```
-invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -189,6 +210,10 @@ invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function*·foo()·{yield·undefined;}
+      │                        ---------  
 
 ```
 
@@ -199,7 +224,7 @@ function* foo() {yield undefined;}
 
 # Diagnostics
 ```
-invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:24 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -208,12 +233,34 @@ invalid.json:1:24 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function*·foo()·{yield·undefined;}
+      │                        ---------  
 
 ```
 
 # Input
 ```cjs
 foo(undefined);
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ foo(undefined);
+      │     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined);
+      │     ---------  
+
 ```
 
 # Input
@@ -223,7 +270,24 @@ foo(undefined, undefined);
 
 # Diagnostics
 ```
-invalid.json:1:16 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:5 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ foo(undefined, undefined);
+      │     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·undefined);
+      │     --------------------  
+
+```
+
+```
+invalid.json:1:16 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -232,12 +296,34 @@ invalid.json:1:16 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·undefined);
+      │     --------------------  
 
 ```
 
 # Input
 ```cjs
 foo(undefined,);
+```
+
+# Diagnostics
+```
+invalid.json:1:5 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ foo(undefined,);
+      │     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,);
+      │     ----------  
+
 ```
 
 # Input
@@ -247,7 +333,24 @@ foo(undefined, undefined,);
 
 # Diagnostics
 ```
-invalid.json:1:16 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:5 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use unnecessary undefined.
+  
+  > 1 │ foo(undefined, undefined,);
+      │     ^^^^^^^^^
+  
+  i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+  
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·undefined,);
+      │     ---------------------  
+
+```
+
+```
+invalid.json:1:16 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -256,6 +359,10 @@ invalid.json:1:16 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·undefined,);
+      │     ---------------------  
 
 ```
 
@@ -266,7 +373,7 @@ foo(bar, undefined);
 
 # Diagnostics
 ```
-invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:10 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -275,6 +382,10 @@ invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(bar,·undefined);
+      │         ----------  
 
 ```
 
@@ -285,7 +396,7 @@ foo(bar, undefined, undefined);
 
 # Diagnostics
 ```
-invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:10 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -294,11 +405,15 @@ invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(bar,·undefined,·undefined);
+      │         ---------------------  
 
 ```
 
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -307,6 +422,10 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(bar,·undefined,·undefined);
+      │         ---------------------  
 
 ```
 
@@ -317,7 +436,7 @@ foo(undefined, bar, undefined);
 
 # Diagnostics
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -326,6 +445,10 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·bar,·undefined);
+      │                   -----------  
 
 ```
 
@@ -336,7 +459,7 @@ foo(bar, undefined,);
 
 # Diagnostics
 ```
-invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:10 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -345,6 +468,10 @@ invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(bar,·undefined,);
+      │         -----------  
 
 ```
 
@@ -355,7 +482,7 @@ foo(undefined, bar, undefined,);
 
 # Diagnostics
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -364,6 +491,10 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·bar,·undefined,);
+      │                   ------------  
 
 ```
 
@@ -374,7 +505,7 @@ foo(bar, undefined, undefined,);
 
 # Diagnostics
 ```
-invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:10 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -383,11 +514,15 @@ invalid.json:1:10 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(bar,·undefined,·undefined,);
+      │         ----------------------  
 
 ```
 
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -396,6 +531,10 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(bar,·undefined,·undefined,);
+      │         ----------------------  
 
 ```
 
@@ -406,7 +545,7 @@ foo(undefined, bar, undefined, undefined,);
 
 # Diagnostics
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -415,11 +554,15 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·bar,·undefined,·undefined,);
+      │                   -----------------------  
 
 ```
 
 ```
-invalid.json:1:32 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:32 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -428,6 +571,10 @@ invalid.json:1:32 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·bar,·undefined,·undefined,);
+      │                   -----------------------  
 
 ```
 
@@ -438,7 +585,7 @@ foo(undefined, bar, undefined, undefined, undefined, undefined,)
 
 # Diagnostics
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -447,11 +594,15 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·bar,·undefined,·undefined,·undefined,·undefined,)
+      │                   --------------------------------------------- 
 
 ```
 
 ```
-invalid.json:1:32 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:32 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -460,11 +611,15 @@ invalid.json:1:32 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·bar,·undefined,·undefined,·undefined,·undefined,)
+      │                   --------------------------------------------- 
 
 ```
 
 ```
-invalid.json:1:43 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:43 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -473,11 +628,15 @@ invalid.json:1:43 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·bar,·undefined,·undefined,·undefined,·undefined,)
+      │                   --------------------------------------------- 
 
 ```
 
 ```
-invalid.json:1:54 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:54 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -486,6 +645,10 @@ invalid.json:1:54 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ foo(undefined,·bar,·undefined,·undefined,·undefined,·undefined,)
+      │                   --------------------------------------------- 
 
 ```
 
@@ -496,7 +659,7 @@ const {foo = undefined} = {};
 
 # Diagnostics
 ```
-invalid.json:1:14 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:14 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -505,6 +668,10 @@ invalid.json:1:14 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ const·{foo·=·undefined}·=·{};
+      │            -----------       
 
 ```
 
@@ -515,7 +682,7 @@ const [foo = undefined] = [];
 
 # Diagnostics
 ```
-invalid.json:1:14 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:14 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -524,6 +691,10 @@ invalid.json:1:14 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ const·[foo·=·undefined]·=·[];
+      │            -----------       
 
 ```
 
@@ -534,7 +705,7 @@ function foo(bar = undefined) {}
 
 # Diagnostics
 ```
-invalid.json:1:20 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:20 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -543,6 +714,10 @@ invalid.json:1:20 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function·foo(bar·=·undefined)·{}
+      │                  -----------    
 
 ```
 
@@ -553,7 +728,7 @@ function foo({bar = undefined}) {}
 
 # Diagnostics
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -562,6 +737,10 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function·foo({bar·=·undefined})·{}
+      │                   -----------     
 
 ```
 
@@ -572,7 +751,7 @@ function foo({bar = undefined} = {}) {}
 
 # Diagnostics
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -581,6 +760,10 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function·foo({bar·=·undefined}·=·{})·{}
+      │                   -----------          
 
 ```
 
@@ -591,7 +774,7 @@ function foo([bar = undefined]) {}
 
 # Diagnostics
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -600,6 +783,10 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function·foo([bar·=·undefined])·{}
+      │                   -----------     
 
 ```
 
@@ -610,7 +797,7 @@ function foo([bar = undefined] = []) {}
 
 # Diagnostics
 ```
-invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.json:1:21 lint/nursery/noUselessUndefined  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use unnecessary undefined.
   
@@ -619,5 +806,9 @@ invalid.json:1:21 lint/nursery/noUselessUndefined ━━━━━━━━━━
   
   i undefined is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
   
+  i Unsafe fix: Remove the undefined.
+  
+    1 │ function·foo([bar·=·undefined]·=·[])·{}
+      │                   -----------          
 
 ```

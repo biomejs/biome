@@ -1,12 +1,19 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, Rule, RuleDiagnostic, RuleSource,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
 };
 use biome_console::markup;
+use biome_js_factory::make::{self, js_function_body, js_variable_declarator_list};
 use biome_js_syntax::{
-    JsArrayBindingPatternElement, JsArrowFunctionExpression, JsCallExpression, JsFormalParameter,
-    JsObjectBindingPattern, JsReturnStatement, JsVariableStatement, JsYieldArgument,
+    AnyJsExpression, AnyJsFunctionBody, JsArrayBindingPatternElement, JsArrowFunctionExpression,
+    JsCallExpression, JsFormalParameter, JsLanguage, JsObjectBindingPatternShorthandProperty,
+    JsReturnStatement, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement, JsYieldArgument,
+    T,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{
+    chain_trivia_pieces, declare_node_union, AstNode, AstSeparatedList, BatchMutationExt,
+    SyntaxTriviaPiece, TextRange, TriviaPieceKind,
+};
 
 use crate::JsRuleAction;
 
@@ -75,6 +82,7 @@ declare_lint_rule! {
         version: "next",
         name: "noUselessUndefined",
         language: "js",
+        fix_kind: FixKind::Unsafe,
         sources: &[RuleSource::EslintUnicorn("no-useless-undefined")],
         recommended: false,
     }
@@ -82,7 +90,8 @@ declare_lint_rule! {
 
 declare_node_union! {
     pub RuleQuery = JsVariableStatement
-        | JsObjectBindingPattern
+        // | JsObjectBindingPattern
+        | JsObjectBindingPatternShorthandProperty
         | JsYieldArgument
         | JsReturnStatement
         | JsArrayBindingPatternElement
@@ -132,10 +141,28 @@ static FUNCTION_NAMES: &'static [&'static str; 28] = &[
     "ref",
 ];
 
-fn should_ignore(name: &str) -> bool {
-    FUNCTION_NAMES.contains(&name) ||
+fn should_ignore_function(expr: &AnyJsExpression) -> bool {
+    let name = match expr {
+        AnyJsExpression::JsIdentifierExpression(ident) => ident.text(),
+        AnyJsExpression::JsStaticMemberExpression(member_expr) => {
+            let member = member_expr.member().ok().unwrap();
+            member.text()
+        }
+        _ => return false,
+    };
+
+    FUNCTION_NAMES.contains(&name.as_str()) ||
     // setState(undefined), setXXX(undefined)
     name.starts_with("set")
+}
+
+fn is_undefined(expr: Option<&AnyJsExpression>) -> Option<(String, TextRange)> {
+    let ident = expr?.as_js_reference_identifier()?;
+    if ident.is_undefined() {
+        Some((ident.text().to_string(), ident.range()))
+    } else {
+        None
+    }
 }
 
 impl Rule for NoUselessUndefined {
@@ -154,7 +181,6 @@ impl Rule for NoUselessUndefined {
                 let Ok(node) = statement.declaration() else {
                     return signals;
                 };
-
                 let let_or_var = node.is_let() || node.is_var();
                 if !let_or_var {
                     return signals;
@@ -163,83 +189,55 @@ impl Rule for NoUselessUndefined {
                 for declarator in node.declarators() {
                     let Ok(decl) = declarator else { continue };
                     if let Some(initializer) = decl.initializer() {
-                        let js_reference_identifier = initializer
-                            .expression()
-                            .ok()
-                            .and_then(|expression| expression.as_js_reference_identifier());
-                        if let Some(keyword) = js_reference_identifier {
-                            if keyword.is_undefined() {
-                                signals.push((keyword.text().to_string(), keyword.range()));
-                            }
+                        let expr = initializer.expression().ok();
+                        if let Some(state) = is_undefined(expr.as_ref()) {
+                            signals.push(state);
                         }
                     }
                 }
             }
             // foo(bar, undefined, undefined);
             RuleQuery::JsCallExpression(js_call_expr) => {
-                // check if it's a bind call: foo.bind(bar, undefined)
                 if let Ok(callee) = js_call_expr.callee() {
-                    if let Some(member_expr) = callee.as_js_static_member_expression() {
-                        if let Ok(member) = member_expr.member() {
-                            if should_ignore(member.text().as_str()) {
-                                return signals;
-                            }
-                        }
+                    if should_ignore_function(&callee) {
+                        return signals;
                     }
                 };
 
                 let Some(js_call_argument_list) = js_call_expr.arguments().ok() else {
                     return signals;
                 };
-
-                for (idx, argument) in js_call_argument_list.args().into_iter().enumerate() {
-                    if idx == 0 {
-                        continue;
+                let call_argument_list = js_call_argument_list.args();
+                let mut non_undefined_found = false;
+                for argument in call_argument_list.iter().rev().flatten() {
+                    if non_undefined_found {
+                        return signals;
                     }
-                    if let Ok(argument) = argument {
-                        if let Some(expr) = argument.as_any_js_expression() {
-                            if let Some(keyword) = expr.as_js_reference_identifier() {
-                                if keyword.is_undefined() {
-                                    signals.push((keyword.text().to_string(), keyword.range()));
-                                }
-                            }
-                        }
+                    let expr = argument.as_any_js_expression();
+                    if let Some((name, range)) = is_undefined(expr) {
+                        signals.push((name, range));
+                    } else {
+                        non_undefined_found = true;
                     }
                 }
             }
             // { a: undefined }
-            RuleQuery::JsObjectBindingPattern(js_object_binding_pattern) => {
-                for property in js_object_binding_pattern.properties() {
-                    if let Ok(property) = property {
-                        if let Some(prop) =
-                            property.as_js_object_binding_pattern_shorthand_property()
-                        {
-                            if let Some(init) = prop.init() {
-                                if let Ok(expr) = init.expression() {
-                                    if let Some(keyword) = expr.as_js_reference_identifier() {
-                                        if keyword.is_undefined() {
-                                            signals.push((
-                                                keyword.text().to_string(),
-                                                keyword.range(),
-                                            ));
-                                        }
-                                    }
-                                }
-                            }
-                        }
+            RuleQuery::JsObjectBindingPatternShorthandProperty(
+                js_object_binding_pattern_shorthand_property,
+            ) => {
+                if let Some(init) = js_object_binding_pattern_shorthand_property.init() {
+                    let expr = init.expression().ok();
+                    if let Some((name, range)) = is_undefined(expr.as_ref()) {
+                        signals.push((name, range));
                     }
                 }
-                return signals;
             }
             // function foo([bar = undefined]) {}
             RuleQuery::JsArrayBindingPatternElement(js_array_binding_pattern_element) => {
                 if let Some(init) = js_array_binding_pattern_element.init() {
-                    if let Ok(expr) = init.expression() {
-                        if let Some(keyword) = expr.as_js_reference_identifier() {
-                            if keyword.is_undefined() {
-                                signals.push((keyword.text().to_string(), keyword.range()));
-                            }
-                        }
+                    let expr = init.expression().ok();
+                    if let Some((name, range)) = is_undefined(expr.as_ref()) {
+                        signals.push((name, range));
                     }
                 }
             }
@@ -248,46 +246,33 @@ impl Rule for NoUselessUndefined {
                 if yield_argument.star_token().is_some() {
                     return signals;
                 }
-
-                if let Ok(expression) = yield_argument.expression() {
-                    if let Some(keyword) = expression.as_js_reference_identifier() {
-                        if keyword.is_undefined() {
-                            signals.push((keyword.text().to_string(), keyword.range()));
-                        }
-                    }
+                let expr = yield_argument.expression().ok();
+                if let Some((name, range)) = is_undefined(expr.as_ref()) {
+                    signals.push((name, range));
                 }
             }
             // return undefined
             RuleQuery::JsReturnStatement(js_return_statement) => {
-                if let Some(argument) = js_return_statement.argument() {
-                    if let Some(keyword) = argument.as_js_reference_identifier() {
-                        if keyword.is_undefined() {
-                            signals.push((keyword.text().to_string(), keyword.range()));
-                        }
-                    }
+                let expr = js_return_statement.argument();
+                if let Some((name, range)) = is_undefined(expr.as_ref()) {
+                    signals.push((name, range));
                 }
             }
             // const noop = () => undefined
             RuleQuery::JsArrowFunctionExpression(js_arrow_function_expression) => {
                 if let Ok(body) = js_arrow_function_expression.body() {
-                    if let Some(expr) = body.as_any_js_expression() {
-                        if let Some(keyword) = expr.as_js_reference_identifier() {
-                            if keyword.is_undefined() {
-                                signals.push((keyword.text().to_string(), keyword.range()));
-                            }
-                        }
+                    let expr = body.as_any_js_expression();
+                    if let Some((name, range)) = is_undefined(expr) {
+                        signals.push((name, range));
                     }
                 }
             }
             // function foo(bar = undefined) {}
             RuleQuery::JsFormalParameter(js_formal_parameter) => {
                 if let Some(init) = js_formal_parameter.initializer() {
-                    if let Ok(expr) = init.expression() {
-                        if let Some(keyword) = expr.as_js_reference_identifier() {
-                            if keyword.is_undefined() {
-                                signals.push((keyword.text().to_string(), keyword.range()));
-                            }
-                        }
+                    let expr = init.expression().ok();
+                    if let Some((name, range)) = is_undefined(expr.as_ref()) {
+                        signals.push((name, range));
                     }
                 }
             }
@@ -311,19 +296,145 @@ impl Rule for NoUselessUndefined {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
         match node {
-            RuleQuery::JsVariableStatement(js_variable_statement) => {}
-            RuleQuery::JsObjectBindingPattern(js_object_binding_pattern) => {}
-            RuleQuery::JsYieldArgument(js_yield_argument) => {}
-            RuleQuery::JsReturnStatement(js_return_statement) => {}
-            RuleQuery::JsArrayBindingPatternElement(js_array_binding_pattern_element) => {}
-            RuleQuery::JsCallExpression(js_call_expression) => {}
-            RuleQuery::JsArrowFunctionExpression(js_arrow_function_expression) => {}
-            RuleQuery::JsFormalParameter(js_formal_parameter) => {}
+            RuleQuery::JsVariableStatement(js_variable_statement) => {
+                let assignment_statement = js_variable_statement.clone();
+                let current_declaration_statement = js_variable_statement.declaration().ok()?;
+                let declarators = current_declaration_statement.declarators();
+
+                let current_declaration = declarators
+                    .clone()
+                    .into_iter()
+                    .filter_map(|declarator| declarator.ok())
+                    .find(|decl| decl.id().is_ok_and(|id| id.text() == state.0))?;
+
+                let current_initializer = current_declaration.initializer()?;
+
+                let eq_token_trivia = current_initializer
+                    .eq_token()
+                    .map(|token| token.trailing_trivia())
+                    .ok()?
+                    .pieces();
+
+                let expression_trivia = current_initializer
+                    .expression()
+                    .ok()?
+                    .as_js_reference_identifier()
+                    .map(|reference| reference.value_token())?
+                    .ok()?
+                    .trailing_trivia()
+                    .pieces();
+
+                // Save the separators too
+                let separators_syntax = declarators.clone().into_syntax();
+                let separators: Vec<JsSyntaxToken> = separators_syntax.tokens().collect();
+
+                let new_declaration = current_declaration.clone().with_initializer(None);
+                let new_declarators: Vec<JsVariableDeclarator> = declarators
+                    .clone()
+                    .into_iter()
+                    .filter_map(|decl| decl.ok())
+                    .map(|decl| {
+                        if decl == current_declaration {
+                            new_declaration.clone()
+                        } else {
+                            decl
+                        }
+                    })
+                    .collect();
+
+                // Recreate the declaration statement with updated declarators
+                let new_declaration_statement = current_declaration_statement
+                    .with_declarators(js_variable_declarator_list(new_declarators, separators));
+
+                let chained_comments: Vec<SyntaxTriviaPiece<JsLanguage>> =
+                    chain_trivia_pieces(eq_token_trivia, expression_trivia)
+                        .filter(|trivia| trivia.is_comments())
+                        .collect();
+
+                // Create the whole statement using updated subtree and append comments to the statement
+                let new_node = assignment_statement
+                    .clone()
+                    .with_declaration(new_declaration_statement)
+                    .append_trivia_pieces(chained_comments)?;
+
+                mutation.replace_node_discard_trivia(assignment_statement, new_node);
+
+                return Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "Remove the undefined."}.to_owned(),
+                    mutation,
+                ));
+            }
+            RuleQuery::JsObjectBindingPatternShorthandProperty(property) => {
+                mutation.remove_node(property.init()?);
+            }
+            RuleQuery::JsYieldArgument(yield_argument) => {
+                mutation.remove_node(yield_argument.expression().ok()?);
+            }
+            RuleQuery::JsReturnStatement(return_statement) => {
+                mutation.remove_node(return_statement.argument()?);
+            }
+            RuleQuery::JsArrayBindingPatternElement(pattern_element) => {
+                let init = pattern_element.init()?;
+                mutation.remove_node(init)
+            }
+            RuleQuery::JsCallExpression(js_call_expression) => {
+                let arguments = js_call_expression.arguments().ok()?;
+                let argument_list = arguments.args();
+
+                let mut non_undefined_index = None;
+                for (idx, arg) in argument_list.iter().rev().enumerate() {
+                    let expr = arg.ok()?;
+                    let expr = expr.as_any_js_expression();
+                    if !is_undefined(expr).is_some() {
+                        non_undefined_index = Some(idx);
+                        break;
+                    }
+                }
+
+                match non_undefined_index {
+                    Some(idx) => {
+                        let new_arguments = argument_list
+                            .iter()
+                            .take(argument_list.len() - idx)
+                            .filter_map(Result::ok)
+                            .collect::<Vec<_>>();
+
+                        let separators = make::token(T![,])
+                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
+                        let last_token = argument_list.syntax().last_token()?;
+
+                        let new_argument_list =
+                            make::js_call_argument_list(new_arguments, Some(separators))
+                                .with_leading_trivia_pieces(last_token.leading_trivia().pieces())?;
+                        mutation.replace_node(argument_list, new_argument_list);
+                    }
+                    None => mutation.remove_node(argument_list),
+                };
+            }
+            RuleQuery::JsArrowFunctionExpression(js_arrow_function_expression) => {
+                let undefined_body = js_arrow_function_expression.body().ok()?;
+                let next_node = js_function_body(
+                    make::token(T!['{']),
+                    make::js_directive_list(None),
+                    make::js_statement_list(None),
+                    make::token(T!['}']),
+                );
+                mutation.replace_node_discard_trivia(
+                    undefined_body,
+                    AnyJsFunctionBody::JsFunctionBody(next_node),
+                );
+            }
+            RuleQuery::JsFormalParameter(js_formal_parameter) => {
+                let init = js_formal_parameter.initializer()?;
+                mutation.remove_node(init);
+            }
         };
 
         Some(JsRuleAction::new(
