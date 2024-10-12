@@ -4,6 +4,7 @@ use biome_analyze::declare_lint_group;
 
 pub mod no_common_js;
 pub mod no_document_cookie;
+pub mod no_document_import_in_page;
 pub mod no_duplicate_else_if;
 pub mod no_dynamic_namespace_import_access;
 pub mod no_enum;
@@ -42,6 +43,7 @@ declare_lint_group! {
         rules : [
             self :: no_common_js :: NoCommonJs ,
             self :: no_document_cookie :: NoDocumentCookie ,
+            self :: no_document_import_in_page :: NoDocumentImportInPage ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
             self :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccess ,
             self :: no_enum :: NoEnum ,
