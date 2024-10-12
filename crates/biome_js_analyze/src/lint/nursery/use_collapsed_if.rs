@@ -165,12 +165,12 @@ impl Rule for UseCollapsedIf {
             js_logical_expression(parent_test.clone(), token(T![&&]), child_test.clone());
 
         // Parenthesize arms of the `&&` expression if needed
-        let left = expr.left().unwrap();
+        let left = expr.left().ok()?;
         if left.needs_parentheses() {
             expr = expr.with_left(parenthesized(left).into());
         }
 
-        let right = expr.right().unwrap();
+        let right = expr.right().ok()?;
         if right.needs_parentheses() {
             expr = expr.with_right(parenthesized(right).into());
         }
