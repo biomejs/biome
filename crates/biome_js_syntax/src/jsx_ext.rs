@@ -408,6 +408,65 @@ impl AnyJsxElement {
         }
     }
 
+    /// Returns the attribute value of JsxString attributes
+    ///
+    /// ```
+    /// use biome_js_syntax::jsx_ext::AnyJsxElement;
+    /// use biome_js_factory::make::{ident, js_boolean_literal_expression, jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_expression_attribute_value, jsx_name, jsx_self_closing_element, jsx_string, jsx_string_literal, token};
+    /// use biome_js_syntax::{AnyJsExpression, AnyJsLiteralExpression, AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, AnyJsxElementName, T};
+    ///
+    /// let string_attr = AnyJsxAttribute::JsxAttribute(
+    ///     jsx_attribute(AnyJsxAttributeName::JsxName(jsx_name(ident("type"))))
+    ///         .with_initializer(jsx_attribute_initializer_clause(
+    ///             token(T![=]),
+    ///             AnyJsxAttributeValue::JsxString(jsx_string(jsx_string_literal("button"))),
+    ///         ))
+    ///         .build()
+    /// );
+    ///
+    /// let boolean_attr = AnyJsxAttribute::JsxAttribute(
+    ///     jsx_attribute(AnyJsxAttributeName::JsxName(jsx_name(ident("disabled"))))
+    ///         .with_initializer(jsx_attribute_initializer_clause(
+    ///             token(T![=]),
+    ///             AnyJsxAttributeValue::JsxExpressionAttributeValue(
+    ///                 jsx_expression_attribute_value(
+    ///                     token(T!['{']),
+    ///                     AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsBooleanLiteralExpression(js_boolean_literal_expression(token(T![true])))),
+    ///                     token(T!['}']),
+    ///                 )
+    ///             ))
+    ///         )
+    ///         .build()
+    /// );
+    ///
+    /// let attributes = jsx_attribute_list(vec![boolean_attr, string_attr]);
+    ///
+    /// let jsx_element = AnyJsxElement::JsxSelfClosingElement(
+    ///   jsx_self_closing_element(
+    ///       token(T![<]),
+    ///       AnyJsxElementName::JsxName(
+    ///           jsx_name(ident("button"))
+    ///       ),
+    ///       attributes,
+    ///       token(T![/]),
+    ///       token(T![>]),
+    ///   ).build()
+    /// );
+    ///
+    /// assert_eq!(jsx_element.get_attribute_inner_string_text("unknown").is_none(), true);
+    /// assert_eq!(jsx_element.get_attribute_inner_string_text("disabled").is_none(), true);
+    /// assert_eq!(jsx_element.get_attribute_inner_string_text("type").unwrap(), "button");
+    ///```
+    ///
+    pub fn get_attribute_inner_string_text(&self, name_to_lookup: &str) -> Option<String> {
+        if let Some(attr) = self.find_attribute_by_name(name_to_lookup) {
+            let initializer = attr.initializer()?.value().ok()?;
+            let binding = initializer.as_jsx_string()?.inner_string_text().ok()?;
+            return Some(binding.to_string());
+        };
+        None
+    }
+
     pub fn has_truthy_attribute(&self, name_to_lookup: &str) -> bool {
         self.find_attribute_by_name(name_to_lookup)
             .map_or(false, |attribute| {
