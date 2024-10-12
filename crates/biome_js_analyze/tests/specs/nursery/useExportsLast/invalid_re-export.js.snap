@@ -14,14 +14,12 @@ const foo = 1;
 ```
 invalid_re-export.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Export statements should appear at the end of the file.
+  ! All exports should be at the end of the file.
   
   > 1 │ export * from "./foo";
       │ ^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
     3 │ const foo = 1;
-  
-  i Move this export to the end of the file.
   
 
 ```

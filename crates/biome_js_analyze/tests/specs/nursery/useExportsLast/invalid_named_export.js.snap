@@ -14,14 +14,12 @@ const bar = 2;
 ```
 invalid_named_export.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Export statements should appear at the end of the file.
+  ! All exports should be at the end of the file.
   
   > 1 │ export const foo = 1;
       │ ^^^^^^^^^^^^^^^^^^^^^
     2 │ 
     3 │ const bar = 2;
-  
-  i Move this export to the end of the file.
   
 
 ```

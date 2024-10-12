@@ -67,12 +67,9 @@ impl Rule for UseExportsLast {
                 rule_category!(),
                 range,
                 markup! {
-                    "Export statements should appear at the end of the file."
+                    "All exports should be at the end of the file."
                 },
-            )
-            .note(markup! {
-                "Move this export to the end of the file."
-            }),
+            ),
         )
     }
 }
