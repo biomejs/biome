@@ -175,7 +175,8 @@ impl SemanticModelBuilder {
                 let binding_id = BindingId::new(self.bindings.len());
                 self.bindings.push(SemanticModelBindingData {
                     range,
-                    references: vec![],
+                    references: Vec::new(),
+                    export_by_start: smallvec::SmallVec::new(),
                 });
                 self.bindings_by_start.insert(range.start(), binding_id);
 
@@ -308,8 +309,15 @@ impl SemanticModelBuilder {
                         .push(SemanticModelUnresolvedReference { range }),
                 }
             }
-            Export { declaration_at, .. } => {
+            Export {
+                declaration_at,
+                range,
+            } => {
                 self.exported.insert(declaration_at);
+
+                let binding_id = self.bindings_by_start[&declaration_at];
+                let binding = &mut self.bindings[binding_id.index()];
+                binding.export_by_start.push(range.start());
             }
         }
     }
