@@ -81,11 +81,18 @@ impl Rule for UseGoogleFontPreconnect {
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        return Some(RuleDiagnostic::new(
-            rule_category!(),
-            range,
-            markup! { ""<Emphasis>"rel=\"preconnect\""</Emphasis>" is missing from Google Font." },
-        ));
+        return Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                range,
+                markup! {
+                    "Attribute "<Emphasis>"rel=\"preconnect\""</Emphasis>" is missing from Google Font link."
+                },
+            )
+            .note(markup!{
+                "Not using "<Emphasis>"preconnect"</Emphasis>" can cause slower font loading and increase latency."
+            })
+        );
     }
 
     fn action(ctx: &RuleContext<Self>, _: &Self::State) -> Option<JsRuleAction> {

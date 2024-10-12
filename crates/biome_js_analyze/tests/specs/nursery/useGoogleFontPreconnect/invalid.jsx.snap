@@ -22,13 +22,15 @@ expression: invalid.jsx
 ```
 invalid.jsx:2:2 lint/nursery/useGoogleFontPreconnect  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! rel="preconnect" is missing from Google Font.
+  ! Attribute rel="preconnect" is missing from Google Font link.
   
     1 │ <>
   > 2 │ 	<link href="https://fonts.gstatic.com"/>
       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
     4 │ 	<link
+  
+  i Not using preconnect can cause slower font loading and increase latency.
   
   i Safe fix: Add rel="preconnect" attribute.
   
@@ -40,7 +42,7 @@ invalid.jsx:2:2 lint/nursery/useGoogleFontPreconnect  FIXABLE  ━━━━━�
 ```
 invalid.jsx:3:2 lint/nursery/useGoogleFontPreconnect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! rel="preconnect" is missing from Google Font.
+  ! Attribute rel="preconnect" is missing from Google Font link.
   
     1 │ <>
     2 │ 	<link href="https://fonts.gstatic.com"/>
@@ -49,13 +51,15 @@ invalid.jsx:3:2 lint/nursery/useGoogleFontPreconnect ━━━━━━━━━
     4 │ 	<link
     5 │ 		rel="preload"
   
+  i Not using preconnect can cause slower font loading and increase latency.
+  
 
 ```
 
 ```
 invalid.jsx:4:2 lint/nursery/useGoogleFontPreconnect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! rel="preconnect" is missing from Google Font.
+  ! Attribute rel="preconnect" is missing from Google Font link.
   
     2 │ 	<link href="https://fonts.gstatic.com"/>
     3 │ 	<link rel="preload" href="https://fonts.gstatic.com"/>
@@ -68,13 +72,15 @@ invalid.jsx:4:2 lint/nursery/useGoogleFontPreconnect ━━━━━━━━━
     8 │ 	<link
     9 │ 		href="https://fonts.gstatic.com"
   
+  i Not using preconnect can cause slower font loading and increase latency.
+  
 
 ```
 
 ```
 invalid.jsx:8:2 lint/nursery/useGoogleFontPreconnect  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! rel="preconnect" is missing from Google Font.
+  ! Attribute rel="preconnect" is missing from Google Font link.
   
      6 │ 		href="https://fonts.gstatic.com"
      7 │ 	/>
@@ -84,6 +90,8 @@ invalid.jsx:8:2 lint/nursery/useGoogleFontPreconnect  FIXABLE  ━━━━━�
   > 10 │ 	/>
        │ 	^^
     11 │ </>
+  
+  i Not using preconnect can cause slower font loading and increase latency.
   
   i Safe fix: Add rel="preconnect" attribute.
   
