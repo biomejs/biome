@@ -10,7 +10,6 @@ declare_lint_rule! {
     ///
     /// Enforces that export statements are placed at the end of the module, after all other statements.
     ///
-    /// Source: https://github.com/import-js/eslint-plugin-import/blob/main/docs/rules/exports-last.md
     ///
     /// ## Examples
     ///
