@@ -1,0 +1,25 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalid.js
+---
+# Input
+```jsx
+export const a = 1;
+
+const b = 2;
+
+```
+
+# Diagnostics
+```
+invalid.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! All exports should be at the end of the file.
+  
+  > 1 │ export const a = 1;
+      │ ^^^^^^^^^^^^^^^^^^^
+    2 │ 
+    3 │ const b = 2;
+  
+
+```

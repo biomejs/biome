@@ -47,6 +47,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [noDocumentCookie](https://biomejs.dev/linter/rules/no-document-cookie/). Contributed by @tunamaguro
 - Add [guardForIn](https://biomejs.dev/linter/rules/guard-for-in/). Contributed by @fireairforce
+- Add [useExportsLast](https://biomejs.dev/linter/rules/use-exports-last/). Contributed by @tommymorgan
 
 #### Bug Fixes
 

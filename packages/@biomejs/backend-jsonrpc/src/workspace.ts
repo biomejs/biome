@@ -1367,6 +1367,10 @@ export interface Nursery {
 	 */
 	useExplicitFunctionReturnType?: RuleConfiguration_for_Null;
 	/**
+	 * Require that all exports are declared after all non-export statements.
+	 */
+	useExportsLast?: RuleConfiguration_for_Null;
+	/**
 	 * Require for-in loops to include an if statement.
 	 */
 	useGuardForIn?: RuleConfiguration_for_Null;
@@ -2946,6 +2950,7 @@ export type Category =
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
 	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
