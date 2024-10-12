@@ -2288,6 +2288,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessStringRaw": {
+					"description": "Disallow unnecessary String.raw function in template string literals without any escape sequence.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noValueAtRule": {
 					"description": "Disallow use of @value rule in css modules.",
 					"anyOf": [
