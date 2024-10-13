@@ -27,6 +27,7 @@ declare_lint_rule! {
     ///     )
     ///   }
     /// }
+    /// ```
     ///
     pub NoDocumentImportInPage {
         version: "next",
