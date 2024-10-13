@@ -5,22 +5,13 @@ expression: content
 ## `fix.js`
 
 ```js
-let a = 4;
-debugger;
+const a = 4;
 console.log(a);
 
 ```
 
-# Termination Message
+# Emitted Messages
 
 ```block
-flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Failed to parse CLI arguments.
-    
-    Caused by:
-      `--write --unsafe` is not expected in this context
-  
-
-
+Checked 1 file in <TIME>. Fixed 1 file.
 ```
