@@ -4,6 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssPseudoElement, CssPseudoElementSelector};
 use biome_rowan::AstNode;
+use biome_string_case::StrOnlyExtension;
 
 use crate::utils::{is_pseudo_elements, vender_prefix};
 
@@ -79,7 +80,7 @@ impl Rule for NoUnknownPseudoElement {
         };
 
         if !vender_prefix(pseudo_element_name.as_str()).is_empty()
-            || is_pseudo_elements(pseudo_element_name.to_lowercase().as_str())
+            || is_pseudo_elements(pseudo_element_name.to_lowercase_cow().as_ref())
         {
             return None;
         }

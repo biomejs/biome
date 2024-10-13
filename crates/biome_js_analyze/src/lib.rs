@@ -164,8 +164,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use biome_analyze::options::RuleOptions;
-    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter, RuleKey};
+    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{markup, Markup};
     use biome_diagnostics::category;
@@ -176,7 +175,6 @@ mod tests {
     use biome_project::{Dependencies, PackageJson};
     use std::slice;
 
-    use crate::lint::correctness::use_exhaustive_dependencies::{Hook, HooksOptions};
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
     #[ignore]
@@ -196,19 +194,8 @@ mod tests {
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
 
         let mut error_ranges: Vec<TextRange> = Vec::new();
-        let mut options = AnalyzerOptions::default();
-        let hook = Hook {
-            name: "myEffect".to_string(),
-            closure_index: Some(0),
-            dependencies_index: Some(1),
-            stable_result: None,
-        };
+        let options = AnalyzerOptions::default();
         let rule_filter = RuleFilter::Rule("style", "useNodejsImportProtocol");
-
-        options.configuration.rules.push_rule(
-            RuleKey::new("nursery", "useHookAtTopLevel"),
-            RuleOptions::new(HooksOptions { hooks: vec![hook] }, None),
-        );
 
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");

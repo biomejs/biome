@@ -38,7 +38,7 @@ use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
-use biome_string_case::StrExtension;
+use biome_string_case::StrLikeExtension;
 
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
@@ -313,6 +313,13 @@ impl DocumentFileSource {
     pub fn to_graphql_file_source(&self) -> Option<GraphqlFileSource> {
         match self {
             DocumentFileSource::Graphql(graphql) => Some(*graphql),
+            _ => None,
+        }
+    }
+
+    pub fn to_grit_file_source(&self) -> Option<GritFileSource> {
+        match self {
+            DocumentFileSource::Grit(grit) => Some(*grit),
             _ => None,
         }
     }

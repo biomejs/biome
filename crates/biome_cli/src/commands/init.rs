@@ -40,7 +40,7 @@ Welcome to Biome! Let's get you started...
 
   "<Dim>"5."</Dim>" "<Emphasis>"Get involved with the community"</Emphasis>"
      Ask questions and contribute on GitHub: "<Hyperlink href="https://github.com/biomejs/biome">"https://github.com/biomejs/biome"</Hyperlink>"
-     Seek for help on Discord: "<Hyperlink href="https://discord.gg/BypW39g6Yc">"https://discord.gg/BypW39g6Yc"</Hyperlink>"
+     Seek for help on Discord: "<Hyperlink href="https://biomejs.dev/chat">"https://biomejs.dev/chat"</Hyperlink>"
 "
     });
     Ok(())

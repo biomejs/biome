@@ -1,5 +1,6 @@
 pub mod builder;
 pub mod model;
+pub mod specificity;
 
 use biome_css_syntax::CssRoot;
 use biome_rowan::AstNode;

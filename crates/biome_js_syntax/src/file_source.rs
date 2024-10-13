@@ -1,5 +1,5 @@
 use biome_rowan::FileSourceError;
-use biome_string_case::StrExtension;
+use biome_string_case::StrLikeExtension;
 use std::{borrow::Cow, ffi::OsStr, path::Path};
 
 /// Enum of the different ECMAScript standard versions.

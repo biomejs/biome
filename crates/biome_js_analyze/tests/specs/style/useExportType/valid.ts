@@ -41,3 +41,12 @@ declare class AmbientFunction {}
 export { AmbientClass, AmbientEnum, AmbientFunction }
 
 export {}
+
+function f3() {}
+class Class3 {}
+export { type Class3, f3 }
+
+function f4() {}
+export { f4 }
+
+export { type T1, V1 } from "./mod.ts";

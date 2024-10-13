@@ -15,6 +15,7 @@ biome_js_syntax = { workspace = true }
 biome_rowan     = { workspace = true }
 rust-lapper     = "1.1.0"
 rustc-hash      = { workspace = true }
+smallvec        = { workspace = true }
 
 [dev-dependencies]
 biome_console     = { path = "../biome_console" }

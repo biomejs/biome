@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{CssFunction, CssParameter};
 use biome_rowan::AstNode;
 use biome_rowan::AstSeparatedList;
+use biome_string_case::StrOnlyExtension;
 use regex::Regex;
 use std::sync::LazyLock;
 
@@ -82,7 +83,7 @@ impl Rule for NoInvalidDirectionInLinearGradient {
             "-o-linear-gradient",
             "-ms-linear-gradient",
         ];
-        if !linear_gradient_property.contains(&node_name.to_lowercase().as_str()) {
+        if !linear_gradient_property.contains(&node_name.to_lowercase_cow().as_ref()) {
             return None;
         }
         let css_parameter = node.items();
@@ -101,10 +102,11 @@ impl Rule for NoInvalidDirectionInLinearGradient {
             }
         }
         let direction_property = ["top", "left", "bottom", "right"];
-        if !direction_property
-            .iter()
-            .any(|&keyword| first_css_parameter_text.to_lowercase().contains(keyword))
-        {
+        if !direction_property.iter().any(|&keyword| {
+            first_css_parameter_text
+                .to_lowercase_cow()
+                .contains(keyword)
+        }) {
             return None;
         }
         let has_prefix = vendor_prefixed(&node_name);

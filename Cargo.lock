@@ -181,7 +181,7 @@ dependencies = [
  "crossbeam",
  "dashmap 6.1.0",
  "hdrhistogram",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "insta",
  "libc",
  "mimalloc",
@@ -226,7 +226,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "bpaf",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "insta",
  "oxc_resolver",
  "rustc-hash 1.1.0",
@@ -271,6 +271,7 @@ dependencies = [
  "biome_deserialize_macros",
  "biome_diagnostics",
  "biome_rowan",
+ "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
  "insta",
@@ -365,7 +366,7 @@ dependencies = [
  "biome_json_syntax",
  "biome_rowan",
  "enumflags2",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "schemars",
  "serde",
  "serde_json",
@@ -448,7 +449,7 @@ dependencies = [
  "cfg-if",
  "countme",
  "drop_bomb",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "insta",
  "rustc-hash 1.1.0",
  "schemars",
@@ -485,7 +486,7 @@ dependencies = [
  "crossbeam",
  "directories",
  "enumflags2",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "oxc_resolver",
  "parking_lot",
  "rayon",
@@ -509,6 +510,7 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_rowan",
+ "biome_string_case",
  "biome_suppression",
  "biome_test_utils",
  "insta",
@@ -600,6 +602,7 @@ dependencies = [
  "biome_configuration",
  "biome_formatter",
  "biome_formatter_test",
+ "biome_fs",
  "biome_grit_factory",
  "biome_grit_parser",
  "biome_grit_syntax",
@@ -638,7 +641,6 @@ dependencies = [
 name = "biome_grit_patterns"
 version = "0.0.1"
 dependencies = [
- "anyhow",
  "biome_console",
  "biome_diagnostics",
  "biome_grit_parser",
@@ -647,10 +649,10 @@ dependencies = [
  "biome_js_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_string_case",
  "biome_test_utils",
  "grit-pattern-matcher",
  "grit-util",
- "im",
  "insta",
  "path-absolutize",
  "rand 0.8.5",
@@ -811,7 +813,7 @@ dependencies = [
  "drop_bomb",
  "enumflags2",
  "expect-test",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "quickcheck",
  "quickcheck_macros",
  "rustc-hash 1.1.0",
@@ -834,6 +836,7 @@ dependencies = [
  "biome_rowan",
  "rust-lapper",
  "rustc-hash 1.1.0",
+ "smallvec",
 ]
 
 [[package]]
@@ -1129,7 +1132,7 @@ dependencies = [
  "enumflags2",
  "getrandom 0.2.15",
  "ignore",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "insta",
  "oxc_resolver",
  "regex",
@@ -1266,15 +1269,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
 
 [[package]]
-name = "bitmaps"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "031043d04099746d8db04daf1fa424b2bc8bd69d92b25962dcde24da39ab64a2"
-dependencies = [
- "typenum",
-]
-
-[[package]]
 name = "bitvec"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1315,7 +1309,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "542f33a8835a0884b006a0c3df3dadd99c0c3f296ed26c2fdc8028e01ad6230c"
 dependencies = [
  "memchr",
- "regex-automata 0.4.5",
+ "regex-automata 0.4.8",
  "serde",
 ]
 
@@ -2073,8 +2067,8 @@ dependencies = [
  "aho-corasick",
  "bstr",
  "log",
- "regex-automata 0.4.5",
- "regex-syntax 0.8.2",
+ "regex-automata 0.4.8",
+ "regex-syntax 0.8.5",
 ]
 
 [[package]]
@@ -2090,14 +2084,12 @@ dependencies = [
 
 [[package]]
 name = "grit-pattern-matcher"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb91ad25bb8557f3be40899becf5db27e8431e359d69d5b67104f1d1a12c8d9a"
+checksum = "8430b130e086a1764789402b34685336f2e3f6ec37cd188535bede892f88e65b"
 dependencies = [
- "anyhow",
  "elsa",
  "grit-util",
- "im",
  "itertools",
  "rand 0.8.5",
  "regex",
@@ -2105,14 +2097,15 @@ dependencies = [
 
 [[package]]
 name = "grit-util"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4d302f12945a38d464183a6ffe49b8b778876f82ab753174324cd7aae74b24a"
+checksum = "99b005c4c15ce0c47022554c41a01fe2441d3622e586a82614a6fe681833d5d4"
 dependencies = [
  "derive_builder",
  "once_cell",
  "regex",
  "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -2132,6 +2125,12 @@ name = "hashbrown"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
+
+[[package]]
+name = "hashbrown"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e087f84d4f86bf4b218b927129862374b72199ae7d8657835f1e89000eea4fb"
 
 [[package]]
 name = "hdrhistogram"
@@ -2187,24 +2186,10 @@ dependencies = [
  "globset",
  "log",
  "memchr",
- "regex-automata 0.4.5",
+ "regex-automata 0.4.8",
  "same-file",
  "walkdir",
  "winapi-util",
-]
-
-[[package]]
-name = "im"
-version = "15.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0acd33ff0285af998aaf9b57342af478078f53492322fafc47450e09397e0e9"
-dependencies = [
- "bitmaps",
- "rand_core 0.6.4",
- "rand_xoshiro",
- "sized-chunks",
- "typenum",
- "version_check",
 ]
 
 [[package]]
@@ -2220,12 +2205,12 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "2.5.0"
+version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68b900aa2f7301e21c36462b170ee99994de34dff39a4a6a528e80e7376d07e5"
+checksum = "707907fe3c25f5424cce2cb7e1cbcafee6bdbe735ca90ef77c29e84591e5b9da"
 dependencies = [
  "equivalent",
- "hashbrown 0.14.5",
+ "hashbrown 0.15.0",
  "serde",
 ]
 
@@ -2347,9 +2332,9 @@ checksum = "bbd2bcb4c963f2ddae06a2efc7e9f3591312473c50c6685e1f298068316e66fe"
 
 [[package]]
 name = "libc"
-version = "0.2.158"
+version = "0.2.159"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d8adc4bb1803a324070e64a98ae98f38934d91957a99cfb3a43dcbc01bc56439"
+checksum = "561d97a539a36e26a9a5fad1ea11a3039a67714694aaa379433e580854bc3dc5"
 
 [[package]]
 name = "libgit2-sys"
@@ -2645,14 +2630,14 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "oxc_resolver"
-version = "1.11.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7fe4d07afdfcf6b1d7fb952e6691d82692a54b71964a377cf49f3e47dac283d"
+checksum = "6c20bb345f290c46058ba650fef7ca2b579612cf2786b927ebad7b8bec0845a7"
 dependencies = [
  "cfg-if",
  "dashmap 6.1.0",
  "dunce",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "json-strip-comments",
  "once_cell",
  "rustc-hash 2.0.0",
@@ -2879,7 +2864,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "62ffd2f9a162cfae131bed6d9d1ed60adced33be340a94f96952897d7cb0c240"
 dependencies = [
  "chrono",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "newtype-uuid",
  "quick-xml",
  "strip-ansi-escapes",
@@ -3005,15 +2990,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rand_xoshiro"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f97cdb2a36ed4183de61b2f824cc45c9f1037f28afe0a322e9fff4c108b5aaa"
-dependencies = [
- "rand_core 0.6.4",
-]
-
-[[package]]
 name = "rayon"
 version = "1.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3055,14 +3031,14 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.10.6"
+version = "1.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4219d74c6b67a3654a9fbebc4b419e22126d13d2f3c4a07ee0cb61ff79a79619"
+checksum = "38200e5ee88914975b69f657f0801b6f6dccafd44fd9326302a4aaeecfacb1d8"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-automata 0.4.5",
- "regex-syntax 0.8.2",
+ "regex-automata 0.4.8",
+ "regex-syntax 0.8.5",
 ]
 
 [[package]]
@@ -3076,13 +3052,13 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.5"
+version = "0.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5bb987efffd3c6d0d8f5f89510bb458559eab11e4f869acb20bf845e016259cd"
+checksum = "368758f23274712b504848e9d5a6f010445cc8b87a7cdb4d7cbee666c1288da3"
 dependencies = [
  "aho-corasick",
  "memchr",
- "regex-syntax 0.8.2",
+ "regex-syntax 0.8.5",
 ]
 
 [[package]]
@@ -3093,9 +3069,9 @@ checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
 
 [[package]]
 name = "regex-syntax"
-version = "0.8.2"
+version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c08c74e62047bb2de4ff487b251e4a92e24f48745648451635cec7d591162d9f"
+checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 
 [[package]]
 name = "result"
@@ -3257,7 +3233,7 @@ checksum = "09c024468a378b7e36765cd36702b7a90cc3cba11654f6685c8f233408e89e92"
 dependencies = [
  "dyn-clone",
  "indexmap 1.9.3",
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "schemars_derive",
  "serde",
  "serde_json",
@@ -3341,7 +3317,7 @@ version = "1.0.128"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ff5456707a1de34e7e37f2a6fd3d3f808c318259cbd01ab6377795054b483d8"
 dependencies = [
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "itoa",
  "memchr",
  "ryu",
@@ -3383,7 +3359,7 @@ version = "0.9.34+deprecated"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
 dependencies = [
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "itoa",
  "ryu",
  "serde",
@@ -3432,16 +3408,6 @@ checksum = "cfe85670573cd6f0fa97940f26e7e6601213c3b0555246c24234131f88c5709e"
 dependencies = [
  "console",
  "similar",
-]
-
-[[package]]
-name = "sized-chunks"
-version = "0.6.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16d69225bde7a69b235da73377861095455d298f2b970996eec25ddbb42b3d1e"
-dependencies = [
- "bitmaps",
- "typenum",
 ]
 
 [[package]]
@@ -3759,7 +3725,7 @@ version = "0.22.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d3328d4f68a705b2a4498da1d580585d39a6510f98318a2cec3018a7ec61ddef"
 dependencies = [
- "indexmap 2.5.0",
+ "indexmap 2.6.0",
  "serde",
  "serde_spanned",
  "toml_datetime",
@@ -3940,12 +3906,6 @@ dependencies = [
  "termcolor",
  "toml",
 ]
-
-[[package]]
-name = "typenum"
-version = "1.17.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42ff0bf0c66b8238c6f3b578df37d0b7848e55df8577b3f74f92a69acceeb825"
 
 [[package]]
 name = "unicase"
@@ -4497,6 +4457,7 @@ dependencies = [
  "biome_graphql_formatter",
  "biome_graphql_parser",
  "biome_graphql_syntax",
+ "biome_grit_patterns",
  "biome_js_analyze",
  "biome_js_formatter",
  "biome_js_parser",
@@ -4567,6 +4528,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_string_case",
  "colored",
  "indicatif",
  "once_cell",

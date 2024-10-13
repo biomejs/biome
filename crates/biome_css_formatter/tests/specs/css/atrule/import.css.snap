@@ -218,11 +218,10 @@ Quote style: Double Quotes
 @import url("test.css");
 @import url(test.css);
 @import url(test.css);
-@import url(test.css );
 @import url(test.css);
-@import url(test.css );
-@import url(test.css
-);
+@import url(test.css);
+@import url(test.css);
+@import url(test.css);
 @import url();
 @import url("");
 @import url("");
@@ -287,7 +286,7 @@ st.css");
 @import url("./t\65st%20test.css");
 @import "./t\65st%20test.css";
 @import "./t\65st%20test.css";
-@import url(test.css                      );
+@import url(test.css);
 @import "\
 \
 \
@@ -304,7 +303,7 @@ st.css");
 
 @import "   ./test.css   ";
 @import url("   ./test.css   ");
-@import url(./test.css   );
+@import url(./test.css);
 
 @import "./my.scss";
 
@@ -378,7 +377,7 @@ st.css");
 
 # Lines exceeding max width of 80 characters
 ```
-  103: @import url("!!../../helpers/string-loader.js?esModule=false!~package/tilde.css");
-  121: @import url("   !!../../helpers/string-loader.js?esModule=false!~package/tilde.css   ");
-  122: @import url(data:text/css;charset=utf-8,a%20%7B%0D%0A%20%20color%3A%20red%3B%0D%0A%7D);
+  102: @import url("!!../../helpers/string-loader.js?esModule=false!~package/tilde.css");
+  120: @import url("   !!../../helpers/string-loader.js?esModule=false!~package/tilde.css   ");
+  121: @import url(data:text/css;charset=utf-8,a%20%7B%0D%0A%20%20color%3A%20red%3B%0D%0A%7D);
 ```

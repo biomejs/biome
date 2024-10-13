@@ -188,7 +188,10 @@ pub(crate) fn run<'a>(
                 console.append(markup! {
                     {original_content}
                 });
-                return Err(CliDiagnostic::stdin());
+
+                if !mode.is_write() {
+                    return Err(CliDiagnostic::stdin());
+                }
             }
             Cow::Owned(ref new_content) => {
                 console.append(markup! {

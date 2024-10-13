@@ -1,0 +1,58 @@
+---
+source: crates/biome_css_analyze/tests/spec_tests.rs
+expression: valid.css
+---
+# Input
+```css
+a {
+    color: red;
+}
+
+b a {
+    color: red;
+}
+
+d {
+    color: red;
+}
+
+c {
+    &>d {
+        color: red;
+    }
+}
+
+e:hover {
+    color: red;
+}
+
+e {
+    color: red;
+}
+
+:is(a, b, c, d) f {
+    color: red;
+}
+
+:is(#a, a) f {
+    color: red;
+}
+
+:where(#fake#fake#fake#fake#fake#fake, *) g {
+    color: red;
+}
+
+:where(*) g {
+    color: red;
+}
+
+
+#h h {
+    color: red;
+}
+
+/* This selector is overwritten by the one above it, but this is not an error because the rule only evaluates it as a compound selector */
+:where(#h) :is(h) {
+    color: red;
+}
+```

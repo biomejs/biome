@@ -14,6 +14,32 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_this_in_static.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@next/no-head-element" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_head_element.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@next/no-head-import-in-document" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_head_import_in_document
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "@next/no-img-element" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_img_element.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@stylistic/jsx-self-closing-comp" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group
@@ -78,9 +104,7 @@ pub(crate) fn migrate_eslint_any_rule(
                 return false;
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
-            let rule = group
-                .use_explicit_function_return_type
-                .get_or_insert(Default::default());
+            let rule = group.use_explicit_type.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "@typescript-eslint/explicit-member-accessibility" => {
@@ -404,6 +428,14 @@ pub(crate) fn migrate_eslint_any_rule(
         "getter-return" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.use_getter_return.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "guard-for-in" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_guard_for_in.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "import-access/eslint-plugin-import-access" => {
@@ -1483,6 +1515,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_for_each.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "unicorn/no-document-cookie" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.no_document_cookie.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/no-for-loop" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.use_for_of.get_or_insert(Default::default());
@@ -1521,6 +1561,18 @@ pub(crate) fn migrate_eslint_any_rule(
         "unicorn/prefer-array-flat-map" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_flat_map.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "unicorn/prefer-at" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_at_index.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "unicorn/prefer-date-now" => {

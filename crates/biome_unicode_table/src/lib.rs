@@ -13,7 +13,14 @@ pub fn is_html_id_start(c: char) -> bool {
 }
 
 /// Is `c` a CSS non-ascii character.
-/// See https://drafts.csswg.org/css-syntax-3/#ident-token-diagram
+/// See <https://drafts.csswg.org/css-syntax-3/#ident-token-diagram>
+/// See <https://drafts.csswg.org/css-syntax-3/#non-ascii-ident-code-point>
+///
+/// In contrast to the standard we also accept all characters from:
+/// - the Miscellaneous Symbols Unicode block
+/// - the Dingbats Unicode block
+///
+/// We also accept some characters of the Miscellaneous Technical Unicode block.
 #[inline]
 pub fn is_css_non_ascii(c: char) -> bool {
     matches!(
@@ -28,6 +35,13 @@ pub fn is_css_non_ascii(c: char) -> bool {
         | 0x203F
         | 0x2040
         | 0x2070..=0x218F
+        // https://en.wikipedia.org/wiki/List_of_Unicode_characters#Miscellaneous_Technical
+        | 0x2318 | 0x231A | 0x231B | 0x2328 | 0x2399
+        | 0x23E9..=0x23F3
+        | 0x23F9..=0x23FE
+        // https://en.wikipedia.org/wiki/List_of_Unicode_characters#Miscellaneous_Symbols
+        // https://en.wikipedia.org/wiki/Dingbats_(Unicode_block)
+        | 0x2600..=0x27BF
         | 0x2C00..=0x2FEF
         | 0x3001..=0xD7FF
         | 0xF900..=0xFDCF

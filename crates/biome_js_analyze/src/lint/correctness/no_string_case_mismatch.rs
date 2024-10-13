@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
     declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
@@ -6,6 +8,7 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::*;
 use biome_rowan::{declare_node_union, AstNode, AstSeparatedList, BatchMutationExt};
+use biome_string_case::StrOnlyExtension;
 
 use crate::JsRuleAction;
 
@@ -45,10 +48,10 @@ declare_lint_rule! {
 impl Rule for NoStringCaseMismatch {
     type Query = Ast<QueryCandidate>;
     type State = CaseMismatchInfo;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let query = ctx.query();
         match query {
             QueryCandidate::JsBinaryExpression(expr) => CaseMismatchInfo::from_binary_expr(expr)
@@ -56,6 +59,7 @@ impl Rule for NoStringCaseMismatch {
                 .collect(),
             QueryCandidate::JsSwitchStatement(stmt) => CaseMismatchInfo::from_switch_stmt(stmt),
         }
+        .into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -91,9 +95,9 @@ impl Rule for NoStringCaseMismatch {
 
     fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        let expected_value = state
-            .expected_case
-            .convert(state.literal.as_static_value()?.text());
+        let static_value = state.literal.as_static_value()?;
+
+        let expected_value = state.expected_case.convert(static_value.text());
         mutation.replace_node(
             state.literal.clone(),
             AnyJsExpression::AnyJsLiteralExpression(
@@ -196,10 +200,10 @@ impl StringCase {
         None
     }
 
-    fn convert(&self, s: &str) -> String {
+    fn convert<'a>(&self, s: &'a str) -> Cow<'a, str> {
         match self {
-            StringCase::Upper => s.to_uppercase(),
-            StringCase::Lower => s.to_lowercase(),
+            StringCase::Upper => Cow::Owned(s.to_uppercase()),
+            StringCase::Lower => s.to_lowercase_cow(),
         }
     }
 
