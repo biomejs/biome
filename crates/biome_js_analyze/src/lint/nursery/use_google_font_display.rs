@@ -60,7 +60,7 @@ declare_lint_rule! {
 
 impl Rule for UseGoogleFontDisplay {
     type Query = Ast<AnyJsxElement>;
-    type State = (String, TextRange);
+    type State = (bool, TextRange);
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -75,21 +75,38 @@ impl Rule for UseGoogleFontDisplay {
         let initializer = href?.initializer()?.value().ok()?;
         let jsx_string = initializer.as_jsx_string();
         let href_text = jsx_string?.inner_string_text().ok()?;
-        let is_google_font = href_text.starts_with("https://fonts.googleapis.com/css");
 
-        if is_google_font {
-            return Some((
-                href_text.text().to_string(),
-                jsx_string?.value_token().ok()?.text_trimmed_range(),
-            ));
+        if !href_text.starts_with("https://fonts.googleapis.com/css") {
+            return None;
+        }
+
+        let display_param = href_text
+            .text()
+            .split('?')
+            .last()?
+            .split('&')
+            .find(|p| p.starts_with("display="));
+        let range = jsx_string?.value_token().ok()?.text_trimmed_range();
+
+        if let Some(display_param) = display_param {
+            if matches!(
+                &*display_param.replace("display=", ""),
+                "auto" | "block" | "fallback"
+            ) {
+                return Some((false, range));
+            }
+        } else {
+            return Some((true, range));
         }
 
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, (href, range): &Self::State) -> Option<RuleDiagnostic> {
-        let url = url::Url::parse(href).ok()?;
-        let Some((_, display)) = url.query_pairs().find(|(key, _)| key == "display") else {
+    fn diagnostic(
+        _: &RuleContext<Self>,
+        (is_missing_param, range): &Self::State,
+    ) -> Option<RuleDiagnostic> {
+        if *is_missing_param {
             return Some(
                 RuleDiagnostic::new(
                     rule_category!(),
@@ -104,21 +121,17 @@ impl Rule for UseGoogleFontDisplay {
             );
         };
 
-        if matches!(&*display, "auto" | "block" | "fallback") {
-            return Some(
-                RuleDiagnostic::new(
-                    rule_category!(),
-                    range,
-                    markup! {
-                        "The Google Font link has a non-recommended "<Emphasis>"font-display"</Emphasis>" value."
-                    },
-                )
-                .note(markup!{
-                    "Use "<Emphasis>"&display=optional"</Emphasis>" to improve performance and prevent layout shifts, or "<Emphasis>"&display=swap"</Emphasis>" if font swapping is necessary after loading."
-                })
-            );
-        }
-
-        None
+        return Some(
+            RuleDiagnostic::new(
+                rule_category!(),
+                range,
+                markup! {
+                    "The Google Font link has a non-recommended "<Emphasis>"font-display"</Emphasis>" value."
+                },
+            )
+            .note(markup!{
+                "Use "<Emphasis>"&display=optional"</Emphasis>" to improve performance and prevent layout shifts, or "<Emphasis>"&display=swap"</Emphasis>" if font swapping is necessary after loading."
+            })
+        );
     }
 }

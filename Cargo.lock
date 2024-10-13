@@ -759,7 +759,6 @@ dependencies = [
  "serde",
  "smallvec",
  "tests_macros",
- "url",
 ]
 
 [[package]]
