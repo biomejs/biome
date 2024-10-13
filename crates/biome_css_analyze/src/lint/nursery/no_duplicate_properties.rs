@@ -58,8 +58,10 @@ impl Rule for NoDuplicateProperties {
         let mut seen: FxHashMap<Cow<'_, str>, TextRange> = FxHashMap::default();
 
         for declaration in rule.declarations.iter() {
-            let property = &declaration.property;
-            let prop_name = property.name.to_lowercase_cow();
+            let prop = &declaration.property;
+            let prop_name = prop.name.to_lowercase_cow();
+            let prop_range = prop.range;
+
             let is_custom_property = prop_name.starts_with("--");
 
             if is_custom_property {
@@ -68,10 +70,10 @@ impl Rule for NoDuplicateProperties {
 
             match seen.entry(prop_name.clone()) {
                 Entry::Occupied(entry) => {
-                    return Some((*entry.get(), (property.range, prop_name.to_string())));
+                    return Some((*entry.get(), (prop_range, prop_name.to_string())));
                 }
                 Entry::Vacant(_) => {
-                    seen.insert(prop_name, property.range);
+                    seen.insert(prop_name, prop_range);
                 }
             }
         }
@@ -80,19 +82,20 @@ impl Rule for NoDuplicateProperties {
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        let (first_defined_range, duplicate) = state;
+        let (first_occurrence_range, (duplicate_range, duplicate_property_name)) = state;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                duplicate.0,
+                duplicate_range,
                 markup! {
                     "Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally."
                 },
-            ).detail(first_defined_range, markup! {
-                <Emphasis>{duplicate.1}</Emphasis> " is already defined here."
+            )
+            .detail(first_occurrence_range, markup! {
+                <Emphasis>{duplicate_property_name}</Emphasis> " is already defined here."
             })
             .note(markup! {
-                    "Remove or rename the duplicate property to ensure styling."
+                "Remove or rename the duplicate property to ensure consistent styling."
             }),
         )
     }

@@ -72,7 +72,7 @@ invalid.css:3:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
     3 │     color: orange;
     4 │ }
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -97,7 +97,7 @@ invalid.css:8:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
     8 │     color: pink;
     9 │     color: pink;
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -122,7 +122,7 @@ invalid.css:14:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
     14 │     color: pink;
     15 │     color: orange;
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -147,7 +147,7 @@ invalid.css:21:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
     20 │     background: orange;
     21 │     color: orange;
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -173,7 +173,7 @@ invalid.css:27:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
     27 │     background: pink;
     28 │ }
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -199,7 +199,7 @@ invalid.css:30:45 lint/nursery/noDuplicateProperties ━━━━━━━━━
     31 │ 
     32 │ a { color: pink; @media { color: orange; color: black; } }
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -225,7 +225,7 @@ invalid.css:32:42 lint/nursery/noDuplicateProperties ━━━━━━━━━
     33 │ 
     34 │ @media { color: orange; .foo { color: black; color: white; } }
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -251,7 +251,7 @@ invalid.css:34:46 lint/nursery/noDuplicateProperties ━━━━━━━━━
     35 │ 
     36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -277,7 +277,7 @@ invalid.css:36:68 lint/nursery/noDuplicateProperties ━━━━━━━━━
     37 │ 
     38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -303,7 +303,7 @@ invalid.css:38:63 lint/nursery/noDuplicateProperties ━━━━━━━━━
     39 │ 
     40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -329,7 +329,7 @@ invalid.css:40:34 lint/nursery/noDuplicateProperties ━━━━━━━━━
     41 │ 
     42 │ a { color: red !important; color: blue; }
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -355,7 +355,7 @@ invalid.css:42:28 lint/nursery/noDuplicateProperties ━━━━━━━━━
     43 │ 
     44 │ a { color: red !important; color: blue !important; }
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
@@ -379,7 +379,7 @@ invalid.css:44:28 lint/nursery/noDuplicateProperties ━━━━━━━━━
        │     ^^^^^
     45 │ 
   
-  i Remove or rename the duplicate property to ensure styling.
+  i Remove or rename the duplicate property to ensure consistent styling.
   
 
 ```
