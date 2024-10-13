@@ -19,14 +19,6 @@ import * as something from "../something";
 # Emitted Messages
 
 ```block
-internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The argument --apply-unsafe is deprecated, it will be removed in the next major release. Use --write --unsafe instead.
-  
-
-```
-
-```block
 Skipped 1 suggested fixes.
 If you wish to apply the suggested (unsafe) fixes, use the command biome check --fix --unsafe
 
