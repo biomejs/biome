@@ -392,7 +392,7 @@ impl Rule for NoUselessUndefined {
                 for (idx, arg) in argument_list.iter().rev().enumerate() {
                     let expr = arg.ok()?;
                     let expr = expr.as_any_js_expression();
-                    if !is_undefined(expr).is_some() {
+                    if is_undefined(expr).is_none() {
                         non_undefined_index = Some(idx);
                         break;
                     }
