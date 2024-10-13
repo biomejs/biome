@@ -100,7 +100,7 @@ declare_node_union! {
         | JsFormalParameter
 }
 
-static FUNCTION_NAMES: &'static [&'static str; 28] = &[
+static FUNCTION_NAMES: [&str; 28] = [
     // Function#bind()
     "bind",
     // Compare function names
