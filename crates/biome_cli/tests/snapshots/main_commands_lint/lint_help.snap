@@ -81,9 +81,6 @@ Available options:
         --suppress            Fix diagnostics with suppression comments if the language supports it.
         --unsafe              Allow to do unsafe fixes, should be used with `--write` or `--fix`
         --fix                 Alias for `--write`, writes safe fixes
-        --apply               Alias for `--write`, writes safe fixes (deprecated, use `--write`)
-        --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes
-                              (deprecated, use `--write --unsafe`)
         --only=<GROUP|RULE>   Run only the given rule or group of rules. If the severity level of a
                               rule is `off`, then the severity level of the rule is set to `error`
                               if it is a recommended rule or `warn` otherwise.

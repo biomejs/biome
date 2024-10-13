@@ -190,7 +190,7 @@ fn does_not_handle_included_files_if_overridden_by_ignore_linter() {
         Args::from(
             [
                 ("lint"),
-                ("--apply"),
+                ("--write"),
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -241,7 +241,7 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
