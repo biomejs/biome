@@ -1329,7 +1329,7 @@ export interface Nursery {
 	/**
 	 * Disallow useless undefined.
 	 */
-	noUselessUndefined?: RuleConfiguration_for_Null;
+	noUselessUndefined?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow use of @value rule in css modules.
 	 */
