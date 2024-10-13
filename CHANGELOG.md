@@ -248,8 +248,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [noTemplateCurlyInString](https://biomejs.dev/linter/rules/no-template-curly-in-string/). Contributed by @fireairforce
 
-- Add [NoOctalEscape](https://biomejs.dev/linter/rules/no-octal-escape/). Contributed by @fireairforce
-
 - Add [noOctalEscape](https://biomejs.dev/linter/rules/no-octal-escape/). Contributed by @fireairforce
 
 #### Enhancements
