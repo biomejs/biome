@@ -19,8 +19,6 @@ use biome_service::{DynRef, Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {
-    pub(crate) apply: bool,
-    pub(crate) apply_unsafe: bool,
     pub(crate) write: bool,
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
@@ -129,16 +127,11 @@ impl CommandRunner for LintCommandPayload {
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
     ) -> Result<Execution, CliDiagnostic> {
-        let fix_file_mode = determine_fix_file_mode(
-            FixFileModeOptions {
-                apply: self.apply,
-                apply_unsafe: self.apply_unsafe,
-                write: self.write,
-                fix: self.fix,
-                unsafe_: self.unsafe_,
-            },
-            console,
-        )?;
+        let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
+            write: self.write,
+            fix: self.fix,
+            unsafe_: self.unsafe_,
+        })?;
         Ok(Execution::new(TraversalMode::Lint {
             fix_file_mode,
             stdin: self.get_stdin(console)?,

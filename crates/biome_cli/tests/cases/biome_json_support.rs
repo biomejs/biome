@@ -91,7 +91,7 @@ fn linter_biome_json() {
         Args::from(
             [
                 ("lint"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -147,7 +147,7 @@ fn check_biome_json() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),

@@ -41,7 +41,7 @@ fn does_handle_included_file_and_disable_organize_imports() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 test.as_os_str().to_str().unwrap(),

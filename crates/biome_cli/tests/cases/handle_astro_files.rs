@@ -271,7 +271,8 @@ fn lint_and_fix_astro_files() {
         Args::from(
             [
                 ("lint"),
-                "--apply-unsafe",
+                "--write",
+                "--unsafe",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -342,7 +343,7 @@ fn sorts_imports_write() {
                 ("check"),
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
-                "--apply",
+                "--write",
                 astro_file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
