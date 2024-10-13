@@ -1,9 +1,11 @@
+use std::{borrow::Cow, collections::hash_map::Entry};
+
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::StrOnlyExtension;
-use rustc_hash::FxHashSet;
+use rustc_hash::FxHashMap;
 
 use crate::services::semantic::Semantic;
 
@@ -43,7 +45,7 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateProperties {
     type Query = Semantic<CssDeclarationOrRuleList>;
-    type State = TextRange;
+    type State = (TextRange, (TextRange, String));
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -53,30 +55,42 @@ impl Rule for NoDuplicateProperties {
 
         let rule = model.get_rule_by_range(node.range()).unwrap();
 
-        let mut seen = FxHashSet::default();
+        let mut seen: FxHashMap<Cow<'_, str>, TextRange> = FxHashMap::default();
 
         for declaration in rule.declarations.iter() {
             let property = &declaration.property;
             let prop_name = property.name.to_lowercase_cow();
-            let is_custom_propety = prop_name.starts_with("--");
+            let is_custom_property = prop_name.starts_with("--");
 
-            if !is_custom_propety && !seen.insert(prop_name) {
-                return Some(property.range);
+            if is_custom_property {
+                continue;
+            }
+
+            match seen.entry(prop_name.clone()) {
+                Entry::Occupied(entry) => {
+                    return Some((*entry.get(), (property.range, prop_name.to_string())));
+                }
+                Entry::Vacant(_) => {
+                    seen.insert(prop_name, property.range);
+                }
             }
         }
 
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, span: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let (first_defined_range, duplicate) = state;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                span,
+                duplicate.0,
                 markup! {
                     "Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally."
                 },
-            )
+            ).detail(first_defined_range, markup! {
+                <Emphasis>{duplicate.1}</Emphasis> " is already defined here."
+            })
             .note(markup! {
                     "Remove or rename the duplicate property to ensure styling."
             }),

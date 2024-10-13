@@ -64,6 +64,14 @@ invalid.css:3:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
     4 │ }
     5 │ 
   
+  i color is already defined here.
+  
+    1 │ a {
+  > 2 │     color: pink;
+      │     ^^^^^
+    3 │     color: orange;
+    4 │ }
+  
   i Remove or rename the duplicate property to ensure styling.
   
 
@@ -80,6 +88,14 @@ invalid.css:8:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
        │     ^^^^^
      9 │     color: pink;
     10 │ }
+  
+  i color is already defined here.
+  
+    6 │ a {
+  > 7 │     color: pink;
+      │     ^^^^^
+    8 │     color: pink;
+    9 │     color: pink;
   
   i Remove or rename the duplicate property to ensure styling.
   
@@ -98,6 +114,14 @@ invalid.css:14:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
     15 │     color: orange;
     16 │ }
   
+  i color is already defined here.
+  
+    12 │ a {
+  > 13 │     color: pink;
+       │     ^^^^^
+    14 │     color: pink;
+    15 │     color: orange;
+  
   i Remove or rename the duplicate property to ensure styling.
   
 
@@ -114,6 +138,14 @@ invalid.css:21:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
        │     ^^^^^
     22 │ }
     23 │ 
+  
+  i color is already defined here.
+  
+    18 │ a {
+  > 19 │     color: pink;
+       │     ^^^^^
+    20 │     background: orange;
+    21 │     color: orange;
   
   i Remove or rename the duplicate property to ensure styling.
   
@@ -132,6 +164,15 @@ invalid.css:27:5 lint/nursery/noDuplicateProperties ━━━━━━━━━�
     28 │ }
     29 │ 
   
+  i background is already defined here.
+  
+    24 │ a {
+    25 │     color: pink;
+  > 26 │     background: orange;
+       │     ^^^^^^^^^^
+    27 │     background: pink;
+    28 │ }
+  
   i Remove or rename the duplicate property to ensure styling.
   
 
@@ -146,6 +187,15 @@ invalid.css:30:45 lint/nursery/noDuplicateProperties ━━━━━━━━━
     29 │ 
   > 30 │ a { color: pink; { &:hover { color: orange; color: black; } } }
        │                                             ^^^^^
+    31 │ 
+    32 │ a { color: pink; @media { color: orange; color: black; } }
+  
+  i color is already defined here.
+  
+    28 │ }
+    29 │ 
+  > 30 │ a { color: pink; { &:hover { color: orange; color: black; } } }
+       │                              ^^^^^
     31 │ 
     32 │ a { color: pink; @media { color: orange; color: black; } }
   
@@ -166,6 +216,15 @@ invalid.css:32:42 lint/nursery/noDuplicateProperties ━━━━━━━━━
     33 │ 
     34 │ @media { color: orange; .foo { color: black; color: white; } }
   
+  i color is already defined here.
+  
+    30 │ a { color: pink; { &:hover { color: orange; color: black; } } }
+    31 │ 
+  > 32 │ a { color: pink; @media { color: orange; color: black; } }
+       │                           ^^^^^
+    33 │ 
+    34 │ @media { color: orange; .foo { color: black; color: white; } }
+  
   i Remove or rename the duplicate property to ensure styling.
   
 
@@ -180,6 +239,15 @@ invalid.css:34:46 lint/nursery/noDuplicateProperties ━━━━━━━━━
     33 │ 
   > 34 │ @media { color: orange; .foo { color: black; color: white; } }
        │                                              ^^^^^
+    35 │ 
+    36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+  
+  i color is already defined here.
+  
+    32 │ a { color: pink; @media { color: orange; color: black; } }
+    33 │ 
+  > 34 │ @media { color: orange; .foo { color: black; color: white; } }
+       │                                ^^^^^
     35 │ 
     36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
   
@@ -200,6 +268,15 @@ invalid.css:36:68 lint/nursery/noDuplicateProperties ━━━━━━━━━
     37 │ 
     38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
   
+  i color is already defined here.
+  
+    34 │ @media { color: orange; .foo { color: black; color: white; } }
+    35 │ 
+  > 36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+       │                                                      ^^^^^
+    37 │ 
+    38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+  
   i Remove or rename the duplicate property to ensure styling.
   
 
@@ -214,6 +291,15 @@ invalid.css:38:63 lint/nursery/noDuplicateProperties ━━━━━━━━━
     37 │ 
   > 38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
        │                                                               ^^^^^
+    39 │ 
+    40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+  
+  i color is already defined here.
+  
+    36 │ a { color: pink; @media { color: orange; &::before { color: black; color: white; } } }
+    37 │ 
+  > 38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+       │                                                 ^^^^^
     39 │ 
     40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
   
@@ -234,6 +320,15 @@ invalid.css:40:34 lint/nursery/noDuplicateProperties ━━━━━━━━━
     41 │ 
     42 │ a { color: red !important; color: blue; }
   
+  i -webkit-border-radius is already defined here.
+  
+    38 │ a { color: pink; @media { color: orange; .foo { color: black; color: white; } } }
+    39 │ 
+  > 40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+       │     ^^^^^^^^^^^^^^^^^^^^^
+    41 │ 
+    42 │ a { color: red !important; color: blue; }
+  
   i Remove or rename the duplicate property to ensure styling.
   
 
@@ -251,6 +346,15 @@ invalid.css:42:28 lint/nursery/noDuplicateProperties ━━━━━━━━━
     43 │ 
     44 │ a { color: red !important; color: blue !important; }
   
+  i color is already defined here.
+  
+    40 │ a { -webkit-border-radius: 12px; -webkit-border-radius: 10px; }
+    41 │ 
+  > 42 │ a { color: red !important; color: blue; }
+       │     ^^^^^
+    43 │ 
+    44 │ a { color: red !important; color: blue !important; }
+  
   i Remove or rename the duplicate property to ensure styling.
   
 
@@ -265,6 +369,14 @@ invalid.css:44:28 lint/nursery/noDuplicateProperties ━━━━━━━━━
     43 │ 
   > 44 │ a { color: red !important; color: blue !important; }
        │                            ^^^^^
+    45 │ 
+  
+  i color is already defined here.
+  
+    42 │ a { color: red !important; color: blue; }
+    43 │ 
+  > 44 │ a { color: red !important; color: blue !important; }
+       │     ^^^^^
     45 │ 
   
   i Remove or rename the duplicate property to ensure styling.
