@@ -133,7 +133,7 @@ fn sorts_imports_write() {
                 ("check"),
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
-                "--apply",
+                "--write",
                 svelte_file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
