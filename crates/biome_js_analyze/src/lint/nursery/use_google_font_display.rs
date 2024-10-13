@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// <link rel="stylesheet" />
     /// ```
     pub UseGoogleFontDisplay {
-        version: "1.0.0",
+        version: "next",
         name: "useGoogleFontDisplay",
         language: "jsx",
         sources: &[RuleSource::EslintNext("google-font-display")],
