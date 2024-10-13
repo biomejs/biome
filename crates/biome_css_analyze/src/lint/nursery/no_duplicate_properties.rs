@@ -53,7 +53,7 @@ impl Rule for NoDuplicateProperties {
         let node = ctx.query();
         let model = ctx.model();
 
-        let rule = model.get_rule_by_range(node.range()).unwrap();
+        let rule = model.get_rule_by_range(node.range())?;
 
         let mut seen: FxHashMap<Cow<'_, str>, TextRange> = FxHashMap::default();
 
