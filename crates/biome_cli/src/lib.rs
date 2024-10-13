@@ -89,8 +89,6 @@ impl<'app> CliSession<'app> {
             } => commands::daemon::start(self, config_path, Some(log_path), Some(log_prefix_name)),
             BiomeCommand::Stop => commands::daemon::stop(self),
             BiomeCommand::Check {
-                apply,
-                apply_unsafe,
                 write,
                 fix,
                 unsafe_,
@@ -109,8 +107,6 @@ impl<'app> CliSession<'app> {
                 self,
                 &cli_options,
                 CheckCommandPayload {
-                    apply_unsafe,
-                    apply,
                     write,
                     fix,
                     unsafe_,
@@ -127,8 +123,6 @@ impl<'app> CliSession<'app> {
                 },
             ),
             BiomeCommand::Lint {
-                apply,
-                apply_unsafe,
                 write,
                 suppress,
                 suppression_reason,
@@ -153,8 +147,6 @@ impl<'app> CliSession<'app> {
                 self,
                 &cli_options,
                 LintCommandPayload {
-                    apply_unsafe,
-                    apply,
                     write,
                     suppress,
                     suppression_reason,

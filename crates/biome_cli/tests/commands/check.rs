@@ -219,7 +219,7 @@ fn apply_ok() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -259,7 +259,7 @@ fn apply_noop() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -291,15 +291,15 @@ fn apply_suggested_error() {
         Args::from(
             [
                 ("check"),
-                ("--apply-unsafe"),
-                ("--apply"),
+                ("--unsafe"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
         ),
     );
 
-    assert!(result.is_err(), "run_cli returned {result:?}");
+    assert!(result.is_ok(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
@@ -324,7 +324,8 @@ fn apply_suggested() {
         Args::from(
             [
                 ("check"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -379,7 +380,8 @@ function f() {\n\targuments;\n}
         Args::from(
             [
                 ("check"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 test1.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -418,7 +420,7 @@ fn no_lint_if_linter_is_disabled_when_run_apply() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -461,7 +463,7 @@ fn no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -540,7 +542,7 @@ fn should_disable_a_rule() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -586,7 +588,7 @@ fn should_disable_a_rule_group() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -720,7 +722,7 @@ fn no_lint_when_file_is_ignored() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -778,7 +780,7 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path_test1.as_os_str().to_str().unwrap(),
                 file_path_test2.as_os_str().to_str().unwrap(),
             ]
@@ -972,7 +974,7 @@ fn fs_error_read_only() {
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -1117,7 +1119,8 @@ fn fs_files_ignore_symlink() {
                 ("check"),
                 ("--config-path"),
                 (root_path.display().to_string().as_str()),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 (src_path.display().to_string().as_str()),
             ]
             .as_slice(),
@@ -1621,7 +1624,7 @@ import * as something from "../something";
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(["check", "--apply", file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1687,7 +1690,7 @@ import * as something from "../something";
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -1729,7 +1732,8 @@ import * as something from "../something";
         Args::from(
             [
                 ("check"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -1770,7 +1774,7 @@ import * as something from "../something";
         Args::from(
             [
                 ("check"),
-                ("--apply"),
+                ("--write"),
                 ("--formatter-enabled=false"),
                 ("--linter-enabled=false"),
                 ("--organize-imports-enabled=true"),
@@ -2054,7 +2058,8 @@ ignored/**
                 ("--vcs-client-kind=git"),
                 ("--vcs-use-ignore-file=true"),
                 ("--vcs-root=."),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 file_path1.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
             ]
@@ -2597,7 +2602,8 @@ fn apply_bogus_argument() {
             [
                 ("check"),
                 file_path.as_os_str().to_str().unwrap(),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
             ]
             .as_slice(),
         ),
@@ -2751,7 +2757,8 @@ A = 0;
         Args::from(
             [
                 ("check"),
-                "--apply-unsafe",
+                "--write",
+                "--unsafe",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -2807,7 +2814,8 @@ A = 0;
         Args::from(
             [
                 ("check"),
-                "--apply-unsafe",
+                "--write",
+                "--unsafe",
                 "--error-on-warnings",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -2845,7 +2853,8 @@ fn use_literal_keys_should_emit_correct_ast_issue_266() {
         Args::from(
             [
                 ("check"),
-                "--apply-unsafe",
+                "--write",
+                "--unsafe",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -2926,7 +2935,8 @@ fn print_json() {
         Args::from(
             [
                 ("check"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 "--reporter=json",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -2959,7 +2969,8 @@ fn print_json_pretty() {
         Args::from(
             [
                 ("check"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 "--reporter=json-pretty",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3122,7 +3133,7 @@ fn fix_suggested_error() {
             [
                 ("check"),
                 ("--fix"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -3306,7 +3317,7 @@ fn write_suggested_error() {
             [
                 ("check"),
                 ("--write"),
-                ("--apply"),
+                ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),

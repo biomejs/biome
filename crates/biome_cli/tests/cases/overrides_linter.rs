@@ -45,7 +45,7 @@ fn does_handle_included_file_and_disable_linter() {
         Args::from(
             [
                 ("lint"),
-                ("--apply"),
+                ("--write"),
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -96,7 +96,8 @@ fn does_include_file_with_different_rules() {
         Args::from(
             [
                 ("lint"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -170,7 +171,8 @@ fn does_include_file_with_different_linting_and_applies_all_of_them() {
         Args::from(
             [
                 ("lint"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -244,7 +246,8 @@ fn does_include_file_with_different_overrides() {
         Args::from(
             [
                 ("lint"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -306,7 +309,8 @@ fn does_override_the_rules() {
         Args::from(
             [
                 ("lint"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -364,7 +368,8 @@ fn does_not_change_linting_settings() {
         Args::from(
             [
                 ("lint"),
-                ("--apply-unsafe"),
+                "--write",
+                "--unsafe",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -422,7 +427,7 @@ fn does_override_recommended() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -478,7 +483,7 @@ fn does_override_groupe_recommended() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -532,7 +537,7 @@ fn does_preserve_group_recommended_when_override_global_recommened() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -586,7 +591,7 @@ fn does_preserve_individually_diabled_rules_in_overrides() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from(["lint", "--apply-unsafe", "."].as_slice()),
+        Args::from(["lint", "--write", "--unsafe", "."].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
