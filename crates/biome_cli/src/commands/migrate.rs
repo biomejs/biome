@@ -79,8 +79,6 @@ impl CommandRunner for MigrateCommandPayload {
 
     fn check_incompatible_arguments(&self) -> Result<(), CliDiagnostic> {
         check_fix_incompatible_arguments(FixFileModeOptions {
-            apply: false,
-            apply_unsafe: false,
             write: self.write,
             fix: self.fix,
             unsafe_: false,

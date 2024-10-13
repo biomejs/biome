@@ -1,6 +1,5 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
-use crate::diagnostics::DeprecatedArgument;
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -117,14 +116,6 @@ pub enum BiomeCommand {
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
 
-        /// Alias for `--write`, writes safe fixes, formatting and import sorting (deprecated, use `--write`)
-        #[bpaf(long("apply"), switch, hide_usage)]
-        apply: bool,
-
-        /// Alias for `--write --unsafe`, writes safe and unsafe fixes, formatting and import sorting (deprecated, use `--write --unsafe`)
-        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
-        apply_unsafe: bool,
-
         /// Allow to enable or disable the formatter check.
         #[bpaf(
             long("formatter-enabled"),
@@ -198,14 +189,6 @@ pub enum BiomeCommand {
         /// Alias for `--write`, writes safe fixes
         #[bpaf(long("fix"), switch, hide_usage)]
         fix: bool,
-
-        /// Alias for `--write`, writes safe fixes (deprecated, use `--write`)
-        #[bpaf(long("apply"), switch, hide_usage)]
-        apply: bool,
-
-        /// Alias for `--write --unsafe`, writes safe and unsafe fixes (deprecated, use `--write --unsafe`)
-        #[bpaf(long("apply-unsafe"), switch, hide_usage)]
-        apply_unsafe: bool,
 
         #[bpaf(external(partial_linter_configuration), hide_usage, optional)]
         linter_configuration: Option<PartialLinterConfiguration>,
@@ -689,8 +672,6 @@ fn get_files_to_process_with_cli_options(
 
 /// Holds the options to determine the fix file mode.
 pub(crate) struct FixFileModeOptions {
-    apply: bool,
-    apply_unsafe: bool,
     write: bool,
     suppress: bool,
     fix: bool,
@@ -702,33 +683,18 @@ pub(crate) struct FixFileModeOptions {
 /// - [FixFileMode]: if safe or unsafe fixes are requested
 pub(crate) fn determine_fix_file_mode(
     options: FixFileModeOptions,
-    console: &mut dyn Console,
 ) -> Result<Option<FixFileMode>, CliDiagnostic> {
     let FixFileModeOptions {
-        apply,
-        apply_unsafe,
         write,
         fix,
         suppress,
         unsafe_,
     } = options;
 
-    if apply || apply_unsafe {
-        let (deprecated, alternative) = if apply {
-            ("--apply", "--write")
-        } else {
-            ("--apply-unsafe", "--write --unsafe")
-        };
-        let diagnostic = DeprecatedArgument::new(markup! {
-            "The argument "<Emphasis>{deprecated}</Emphasis>" is deprecated, it will be removed in the next major release. Use "<Emphasis>{alternative}</Emphasis>" instead."
-        });
-        console.error(markup! {{PrintDiagnostic::simple(&diagnostic)}});
-    }
-
     check_fix_incompatible_arguments(options)?;
 
-    let safe_fixes = apply || write || fix;
-    let unsafe_fixes = apply_unsafe || ((write || safe_fixes) && unsafe_);
+    let safe_fixes = write || fix;
+    let unsafe_fixes = (write || safe_fixes) && unsafe_;
 
     if unsafe_fixes {
         Ok(Some(FixFileMode::SafeAndUnsafeFixes))
@@ -743,35 +709,8 @@ pub(crate) fn determine_fix_file_mode(
 
 /// Checks if the fix file options are incompatible.
 fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), CliDiagnostic> {
-    let FixFileModeOptions {
-        apply,
-        apply_unsafe,
-        write,
-        suppress,
-        fix,
-        unsafe_,
-    } = options;
-    if apply && apply_unsafe {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply",
-            "--apply-unsafe",
-        ));
-    } else if apply_unsafe && unsafe_ {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply-unsafe",
-            "--unsafe",
-        ));
-    } else if apply && (fix || write) {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply",
-            if fix { "--fix" } else { "--write" },
-        ));
-    } else if apply_unsafe && (fix || write) {
-        return Err(CliDiagnostic::incompatible_arguments(
-            "--apply-unsafe",
-            if fix { "--fix" } else { "--write" },
-        ));
-    } else if write && fix {
+    let FixFileModeOptions { write,suppress, fix, .. } = options;
+    if write && fix {
         return Err(CliDiagnostic::incompatible_arguments("--write", "--fix"));
     } else if suppress && write {
         return Err(CliDiagnostic::incompatible_arguments(
@@ -962,54 +901,30 @@ pub trait LoadEditorConfig: CommandRunner {
 
 #[cfg(test)]
 mod tests {
-    use biome_console::BufferConsole;
-
     use super::*;
 
     #[test]
     fn incompatible_arguments() {
-        for (apply, apply_unsafe, write, suppress, fix, unsafe_) in [
-            (true, true, false, false, false, false), // --apply --apply-unsafe
-            (true, false, true, false, false, false), // --apply --write
-            (true, false, false, false, true, false), // --apply --fix
-            (false, true, false, false, false, true), // --apply-unsafe --unsafe
-            (false, true, true, false, false, false), // --apply-unsafe --write
-            (false, true, false, false, true, false), // --apply-unsafe --fix
-            (false, false, true, false, true, false), // --write --fix
-        ] {
-            assert!(check_fix_incompatible_arguments(FixFileModeOptions {
-                apply,
-                apply_unsafe,
-                write,
-                suppress,
-                fix,
-                unsafe_
-            })
-            .is_err());
-        }
+        assert!(check_fix_incompatible_arguments(FixFileModeOptions {
+            write: true,
+            fix: true,
+            unsafe_: false
+        })
+        .is_err());
     }
 
     #[test]
     fn safe_fixes() {
-        let mut console = BufferConsole::default();
-
-        for (apply, apply_unsafe, write, suppress, fix, unsafe_) in [
-            (true, false, false, false, false, false), // --apply
-            (false, false, true, false, false, false), // --write
-            (false, false, false, false, true, false), // --fix
+        for (write, fix, unsafe_) in [
+            (true, false, false), // --write
+            (false, true, false), // --fix
         ] {
             assert_eq!(
-                determine_fix_file_mode(
-                    FixFileModeOptions {
-                        apply,
-                        apply_unsafe,
-                        write,
-                        suppress,
-                        fix,
-                        unsafe_
-                    },
-                    &mut console
-                )
+                determine_fix_file_mode(FixFileModeOptions {
+                    write,
+                    suppress,fix,
+                    unsafe_
+                },)
                 .unwrap(),
                 Some(FixFileMode::SafeFixes)
             );
@@ -1018,25 +933,16 @@ mod tests {
 
     #[test]
     fn safe_and_unsafe_fixes() {
-        let mut console = BufferConsole::default();
-
-        for (apply, apply_unsafe, write, suppress, fix, unsafe_) in [
-            (false, true, false, false, false, false), // --apply-unsafe
-            (false, false, true, false, false, true),  // --write --unsafe
-            (false, false, false, false, true, true),  // --fix --unsafe
+        for (write, fix, unsafe_) in [
+            (true, false, true), // --write --unsafe
+            (false, true, true), // --fix --unsafe
         ] {
             assert_eq!(
-                determine_fix_file_mode(
-                    FixFileModeOptions {
-                        apply,
-                        apply_unsafe,
-                        write,
-                        suppress,
-                        fix,
-                        unsafe_
-                    },
-                    &mut console
-                )
+                determine_fix_file_mode(FixFileModeOptions {
+                    write,
+                    suppress,fix,
+                    unsafe_
+                },)
                 .unwrap(),
                 Some(FixFileMode::SafeAndUnsafeFixes)
             );
@@ -1045,22 +951,14 @@ mod tests {
 
     #[test]
     fn no_fix() {
-        let mut console = BufferConsole::default();
-
-        let (apply, apply_unsafe, write, suppress, fix, unsafe_) =
-            (false, false, false, false, false, false);
+        let (write, suppress, fix, unsafe_) =
+            (false, false, false, false);
         assert_eq!(
-            determine_fix_file_mode(
-                FixFileModeOptions {
-                    apply,
-                    apply_unsafe,
-                    write,
-                    suppress,
-                    fix,
-                    unsafe_
-                },
-                &mut console
-            )
+            determine_fix_file_mode(FixFileModeOptions {
+                write,
+                suppress,fix,
+                unsafe_
+            },)
             .unwrap(),
             None
         );

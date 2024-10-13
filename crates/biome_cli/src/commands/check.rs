@@ -14,8 +14,6 @@ use biome_service::{configuration::LoadedConfiguration, DynRef, Workspace, Works
 use std::ffi::OsString;
 
 pub(crate) struct CheckCommandPayload {
-    pub(crate) apply: bool,
-    pub(crate) apply_unsafe: bool,
     pub(crate) write: bool,
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
@@ -136,17 +134,11 @@ impl CommandRunner for CheckCommandPayload {
         console: &mut dyn Console,
         _workspace: &dyn Workspace,
     ) -> Result<Execution, CliDiagnostic> {
-        let fix_file_mode = determine_fix_file_mode(
-            FixFileModeOptions {
-                apply: self.apply,
-                apply_unsafe: self.apply_unsafe,
-                write: self.write,
-                suppress: false,
-                fix: self.fix,
-                unsafe_: self.unsafe_,
-            },
-            console,
-        )?;
+        let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
+            write: self.write,
+            suppress: false,fix: self.fix,
+            unsafe_: self.unsafe_,
+        })?;
 
         Ok(Execution::new(TraversalMode::Check {
             fix_file_mode,
