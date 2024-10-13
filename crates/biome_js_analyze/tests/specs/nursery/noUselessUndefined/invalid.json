@@ -14,18 +14,18 @@
 	"function* foo() {yield undefined;}",
 	"function* foo() {yield undefined;}",
 
-	"foo(undefined);", // foo()
-	"foo(undefined, undefined);", // foo()
-	"foo(undefined,);", // foo()
-	"foo(undefined, undefined,);",// foo()
-	"foo(bar, undefined);", // foo(bar)
-	"foo(bar, undefined, undefined);", // foo(bar)
-	"foo(undefined, bar, undefined);", // foo(undefined, bar)
-	"foo(bar, undefined,);", // foo(bar,)
-	"foo(undefined, bar, undefined,);", // foo(undefined, bar,)
-	"foo(bar, undefined, undefined,);", // foo(bar,)
-	"foo(undefined, bar, undefined, undefined,);", // foo(undefined, bar,)
-	"foo(undefined, bar, undefined, undefined, undefined, undefined,)", // foo(undefined, bar,)
+	"foo(undefined);",
+	"foo(undefined, undefined);",
+	"foo(undefined,);",
+	"foo(undefined, undefined,);",
+	"foo(bar, undefined);",
+	"foo(bar, undefined, undefined);",
+	"foo(undefined, bar, undefined);",
+	"foo(bar, undefined,);",
+	"foo(undefined, bar, undefined,);",
+	"foo(bar, undefined, undefined,);",
+	"foo(undefined, bar, undefined, undefined,);",
+	"foo(undefined, bar, undefined, undefined, undefined, undefined,)",
 
 	"const {foo = undefined} = {};",
 	"const [foo = undefined] = [];",
