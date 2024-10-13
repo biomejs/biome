@@ -53,13 +53,12 @@ a { color: red !important; color: blue !important; }
 
 # Diagnostics
 ```
-invalid.css:2:17 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:3:5 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
     1 │ a {
-  > 2 │     color: pink;
-      │                 
+    2 │     color: pink;
   > 3 │     color: orange;
       │     ^^^^^
     4 │ }
@@ -71,13 +70,12 @@ invalid.css:2:17 lint/nursery/noDuplicateProperties ━━━━━━━━━�
 ```
 
 ```
-invalid.css:7:17 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:8:5 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
      6 │ a {
-   > 7 │     color: pink;
-       │                 
+     7 │     color: pink;
    > 8 │     color: pink;
        │     ^^^^^
      9 │     color: pink;
@@ -89,13 +87,12 @@ invalid.css:7:17 lint/nursery/noDuplicateProperties ━━━━━━━━━�
 ```
 
 ```
-invalid.css:13:17 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:14:5 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
     12 │ a {
-  > 13 │     color: pink;
-       │                 
+    13 │     color: pink;
   > 14 │     color: pink;
        │     ^^^^^
     15 │     color: orange;
@@ -107,14 +104,12 @@ invalid.css:13:17 lint/nursery/noDuplicateProperties ━━━━━━━━━
 ```
 
 ```
-invalid.css:20:24 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:21:5 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
-    18 │ a {
     19 │     color: pink;
-  > 20 │     background: orange;
-       │                        
+    20 │     background: orange;
   > 21 │     color: orange;
        │     ^^^^^
     22 │ }
@@ -126,14 +121,12 @@ invalid.css:20:24 lint/nursery/noDuplicateProperties ━━━━━━━━━
 ```
 
 ```
-invalid.css:26:24 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.css:27:5 lint/nursery/noDuplicateProperties ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Duplicate properties can lead to unexpected behavior and may override previous declarations unintentionally.
   
-    24 │ a {
     25 │     color: pink;
-  > 26 │     background: orange;
-       │                        
+    26 │     background: orange;
   > 27 │     background: pink;
        │     ^^^^^^^^^^
     28 │ }
