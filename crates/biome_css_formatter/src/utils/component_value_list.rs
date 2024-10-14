@@ -178,7 +178,10 @@ where
     let is_grid_property = list
         .parent::<CssGenericProperty>()
         .and_then(|parent| parent.name().ok())
-        .and_then(|name| name.as_css_identifier().map(|name| name.text()))
+        .and_then(|name| {
+            name.as_css_identifier()
+                .map(|name| name.to_trimmed_string())
+        })
         .map_or(false, |name| {
             let name = name.to_lowercase_cow();
 

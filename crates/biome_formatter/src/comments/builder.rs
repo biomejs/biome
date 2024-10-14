@@ -442,7 +442,7 @@ impl<L: Language> CommentsBuilder<L> {
                                 // a /* comment */ b;   //  Comment is a trailing comment
                                 // a, /* comment */ b;  // Comment should be a leading comment
                                 // ```
-                                if preceding.text_range().end()
+                                if preceding.text_range_with_trivia().end()
                                     == comment.piece().as_piece().token().text_range().end()
                                 {
                                     self.push_trailing_comment(&preceding, comment);

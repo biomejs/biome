@@ -293,10 +293,10 @@ impl ImportGroup {
         let Some(import_node) = iter.next() else {
             return true;
         };
-        let mut previous_start = import_node.node.syntax().text_range().end();
+        let mut previous_start = import_node.node.syntax().text_range_with_trivia().end();
         import_node.is_sorted()
             && iter.all(|import_node| {
-                let start = import_node.node.syntax().text_range().end();
+                let start = import_node.node.syntax().text_range_with_trivia().end();
                 let is_sorted = previous_start < start && import_node.is_sorted();
                 previous_start = start;
                 is_sorted
@@ -354,7 +354,7 @@ impl ImportNode {
         let mut iter = self
             .specifiers
             .values()
-            .map(|(node, _)| node.syntax().text_range().start());
+            .map(|(node, _)| node.syntax().text_range_with_trivia().start());
         let mut previous_start = iter.next().unwrap_or_default();
         iter.all(|start| {
             let is_sorted = previous_start < start;

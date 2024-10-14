@@ -130,7 +130,7 @@ impl Rule for UseNumberNamespace {
         let node = ctx.query();
         let (old_node, new_node) = match node {
             AnyJsExpression::JsIdentifierExpression(expression) => {
-                let name = expression.name().ok()?.text();
+                let name = expression.name().ok()?.to_trimmed_string();
                 if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
                     return None;
                 }
@@ -167,7 +167,7 @@ impl Rule for UseNumberNamespace {
                 )
             }
             AnyJsExpression::JsStaticMemberExpression(expression) => {
-                let name = expression.member().ok()?.text();
+                let name = expression.member().ok()?.to_trimmed_string();
 
                 if !GLOBAL_NUMBER_PROPERTIES.contains(&name.as_str()) {
                     return None;

@@ -110,7 +110,7 @@ macro_rules! generate_target_node {
 
             pub fn owned_text(&self) -> Cow<str> {
                 match self {
-                    $(Self::$lang(Node(node)) => Cow::Owned(node.text().to_string())),+,
+                    $(Self::$lang(Node(node)) => Cow::Owned(node.text_with_trivia().to_string())),+,
                     $(Self::$lang(Token(token)) => Cow::Borrowed(token.text())),+
                 }
             }
@@ -140,9 +140,9 @@ macro_rules! generate_target_node {
                 }
             }
 
-            pub fn text_range(&self) -> TextRange {
+            pub fn text_range_with_trivia(&self) -> TextRange {
                 match self {
-                    $(Self::$lang(Node(node)) => node.text_range()),+,
+                    $(Self::$lang(Node(node)) => node.text_range_with_trivia()),+,
                     $(Self::$lang(Token(token)) => token.text_range()),+
                 }
             }

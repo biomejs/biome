@@ -358,7 +358,7 @@ fn extract_string_value(expression: &Option<AnyJsExpression>) -> Option<String> 
                     String::new(),
                     |acc, element| {
                         if let Some(chunk) = element.as_js_template_chunk_element() {
-                            return acc + chunk.text().as_str();
+                            return acc + chunk.to_trimmed_string().as_str();
                         }
                         acc
                     },

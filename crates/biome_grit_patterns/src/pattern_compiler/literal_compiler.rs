@@ -33,7 +33,7 @@ impl LiteralCompiler {
                 }
                 AnyGritCodeSnippetSource::GritLanguageSpecificSnippet(node) => {
                     let lang_node = node.language()?;
-                    let lang_name = lang_node.text();
+                    let lang_name = lang_node.to_trimmed_string();
                     if GritTargetLanguage::from_extension(&lang_name).is_none() {
                         return Err(CompileError::UnknownTargetLanguage(lang_name));
                     }

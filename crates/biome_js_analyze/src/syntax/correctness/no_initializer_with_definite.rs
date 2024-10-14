@@ -27,7 +27,7 @@ impl Rule for NoInitializerWithDefinite {
         let node = ctx.query();
         node.parent::<JsVariableDeclarator>()
             .and_then(|var_declarator| var_declarator.initializer())
-            .map(|init| init.into_syntax().text_range())
+            .map(|init| init.into_syntax().text_range_with_trivia())
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

@@ -24,14 +24,14 @@ mod test {
             .syntax()
             .descendants()
             .filter_map(|x| x.cast::<JsReferenceIdentifier>())
-            .find(|x| x.text() == "arguments")
+            .find(|x| x.to_trimmed_string() == "arguments")
             .unwrap();
 
         let b_from_b_equals_2 = r
             .syntax()
             .descendants()
             .filter_map(|x| x.cast::<JsIdentifierAssignment>())
-            .find(|x| x.text() == "b")
+            .find(|x| x.to_trimmed_string() == "b")
             .unwrap();
 
         // Scope hierarchy  navigation
@@ -90,7 +90,7 @@ mod test {
             .syntax()
             .descendants()
             .filter_map(|x| x.cast::<JsReferenceIdentifier>())
-            .find(|x| x.text() == "a")
+            .find(|x| x.to_trimmed_string() == "a")
             .unwrap();
 
         let a_declaration = a_from_a_plus_1.binding(&model).unwrap();
@@ -128,14 +128,14 @@ mod test {
             .syntax()
             .descendants()
             .filter_map(|x| x.cast::<JsIdentifierBinding>())
-            .find(|x| x.text() == "f")
+            .find(|x| x.to_trimmed_string() == "f")
             .unwrap();
 
         let function_g = r
             .syntax()
             .descendants()
             .filter_map(|x| x.cast::<JsIdentifierBinding>())
-            .find(|x| x.text() == "g")
+            .find(|x| x.to_trimmed_string() == "g")
             .unwrap();
 
         // "f" and "g" tokens are not in the same scope, because
