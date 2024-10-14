@@ -40,7 +40,7 @@ fn formatter_biome_json() {
                 ("10"),
                 ("--indent-style"),
                 ("space"),
-                ("--indent-size"),
+                ("--indent-width"),
                 ("8"),
                 ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
