@@ -32,10 +32,10 @@ const Component4 = () => {
 
 const Component5 = () => {
   return (
-      <div>
+      <>
         <Component>
           <div />
         </Component>;
-      </div>
+      </>
   );
 }

@@ -38,11 +38,11 @@ const Component4 = () => {
 
 const Component5 = () => {
   return (
-      <div>
+      <>
         <Component>
           <div />
         </Component>;
-      </div>
+      </>
   );
 }
 
@@ -142,7 +142,7 @@ invalid.jsx:38:21 lint/suspicious/noSuspiciousSemicolonInJsx ━━━━━━�
     37 │           <div />
   > 38 │         </Component>;
        │                     ^
-  > 39 │       </div>
+  > 39 │       </>
        │       
     40 │   );
     41 │ }
