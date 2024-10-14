@@ -1,10 +1,9 @@
-use std::{borrow::Cow, collections::hash_map::Entry};
+use std::collections::hash_map::Entry;
 
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::CssDeclarationOrRuleList;
 use biome_rowan::{AstNode, TextRange};
-use biome_string_case::StrOnlyExtension;
 use rustc_hash::FxHashMap;
 
 use crate::services::semantic::Semantic;
@@ -57,11 +56,11 @@ impl Rule for NoDuplicateCustomProperties {
 
         let rule = model.get_rule_by_range(node.range())?;
 
-        let mut seen: FxHashMap<Cow<'_, str>, TextRange> = FxHashMap::default();
+        let mut seen: FxHashMap<String, TextRange> = FxHashMap::default();
 
         for declaration in rule.declarations.iter() {
             let prop = &declaration.property;
-            let prop_name = prop.name.to_lowercase_cow();
+            let prop_name = prop.name.clone();
             let prop_range = prop.range;
 
             let is_custom_property = prop_name.starts_with("--");
@@ -72,7 +71,7 @@ impl Rule for NoDuplicateCustomProperties {
 
             match seen.entry(prop_name.clone()) {
                 Entry::Occupied(entry) => {
-                    return Some((*entry.get(), (prop_range, prop_name.to_string())));
+                    return Some((*entry.get(), (prop_range, prop_name)));
                 }
                 Entry::Vacant(_) => {
                     seen.insert(prop_name, prop_range);

@@ -6,3 +6,4 @@ a { --custom-property: pink; @media { --custom-property: orange; } }
 a { --custom-property: pink; @media { --custom-property: orange; &::before { --custom-property: black; } } }
 a { --custom-property: pink; { &:hover { --custom-property: orange; --cUstOm-prOpErtY: black; } } }
 a { --cUstOm-prOpErtY: pink; { &:hover { --custom-property: orange; --cUstOm-prOpErtY: black; } } }
+a { color: red; color: pink;}
