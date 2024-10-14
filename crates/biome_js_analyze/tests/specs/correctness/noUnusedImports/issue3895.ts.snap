@@ -1,0 +1,42 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue3895.ts
+---
+# Input
+```ts
+// See https://github.com/biomejs/biome/issues/3895
+declare module "eslint-plugin-jsx-a11y" {
+    import type { Linter } from "eslint";
+ 
+   export const flatConfigs: {
+     readonly recommended: { readonly rules: Readonly<Linter.RulesRecord> };
+     readonly strict: { readonly rules: Readonly<Linter.RulesRecord> };
+   };
+ }
+```
+
+# Diagnostics
+```
+issue3895.ts:3:19 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ // See https://github.com/biomejs/biome/issues/3895
+    2 │ declare module "eslint-plugin-jsx-a11y" {
+  > 3 │     import type { Linter } from "eslint";
+      │                   ^^^^^^
+    4 │  
+    5 │    export const flatConfigs: {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Safe fix: Remove the unused import.
+  
+    1 1 │   // See https://github.com/biomejs/biome/issues/3895
+    2 2 │   declare module "eslint-plugin-jsx-a11y" {
+    3   │ - ····import·type·{·Linter·}·from·"eslint";
+    4 3 │    
+    5 4 │      export const flatConfigs: {
+  
+
+```
