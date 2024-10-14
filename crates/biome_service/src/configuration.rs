@@ -514,9 +514,7 @@ impl PartialConfigurationExt for PartialConfiguration {
 
     /// Checks for the presence of deprecated fields and updates the
     /// configuration to apply them to the new schema.
-    fn migrate_deprecated_fields(&mut self) {
-
-    }
+    fn migrate_deprecated_fields(&mut self) {}
 
     /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
     /// VCS root directory and the `.gitignore` file.
