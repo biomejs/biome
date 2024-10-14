@@ -1620,8 +1620,7 @@ fn to_javascript_language_settings(
     language_setting.formatter.quote_style = formatter.quote_style;
     language_setting.formatter.jsx_quote_style = formatter.jsx_quote_style;
     language_setting.formatter.quote_properties = formatter.quote_properties;
-    language_setting.formatter.trailing_commas =
-        formatter.trailing_commas.or(formatter.trailing_comma);
+    language_setting.formatter.trailing_commas = formatter.trailing_commas;
     language_setting.formatter.semicolons = formatter.semicolons;
     language_setting.formatter.arrow_parentheses = formatter.arrow_parentheses;
     language_setting.formatter.bracket_spacing = formatter.bracket_spacing;
