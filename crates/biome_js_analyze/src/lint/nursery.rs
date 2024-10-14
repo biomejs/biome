@@ -32,6 +32,7 @@ pub mod use_consistent_member_accessibility;
 pub mod use_explicit_type;
 pub mod use_guard_for_in;
 pub mod use_import_restrictions;
+pub mod use_perfer_for;
 pub mod use_sorted_classes;
 pub mod use_strict_mode;
 pub mod use_trim_start_end;
@@ -71,6 +72,7 @@ declare_lint_group! {
             self :: use_explicit_type :: UseExplicitType ,
             self :: use_guard_for_in :: UseGuardForIn ,
             self :: use_import_restrictions :: UseImportRestrictions ,
+            self :: use_perfer_for :: UsePerferFor ,
             self :: use_sorted_classes :: UseSortedClasses ,
             self :: use_strict_mode :: UseStrictMode ,
             self :: use_trim_start_end :: UseTrimStartEnd ,
