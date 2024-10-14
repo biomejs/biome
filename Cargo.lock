@@ -1282,9 +1282,9 @@ dependencies = [
 
 [[package]]
 name = "bpaf"
-version = "0.9.14"
+version = "0.9.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8d4e5ca9929037866947af4b8b7418124f2ec7c411a8b9ee24e46ad2b8470497"
+checksum = "50fd5174866dc2fa2ddc96e8fb800852d37f064f32a45c7b7c2f8fa2c64c77fa"
 dependencies = [
  "bpaf_derive",
  "owo-colors",
