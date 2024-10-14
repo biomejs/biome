@@ -1,0 +1,62 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: valid.js
+---
+# Input
+```jsx
+if (condition && anotherCondition) {
+	// ...
+}
+
+if (condition) {
+  if (anotherCondition) {
+		// ...
+  }
+  doSomething();
+}
+
+if (condition) {
+	if (anotherCondition) {
+		// ...
+	} else {
+		// ...
+	}
+}
+
+if (import.meta.webpackHot) {
+  if (import.meta.webpackHot)
+    import.meta.webpackHot.accept('./components/main.js', init)
+}
+
+```
+
+# Diagnostics
+```
+valid.js:20:30 lint/nursery/useCollapsedIf  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This if statement can be collapsed into another if statement.
+  
+    18 │ }
+    19 │ 
+  > 20 │ if (import.meta.webpackHot) {
+       │                              
+  > 21 │   if (import.meta.webpackHot)
+  > 22 │     import.meta.webpackHot.accept('./components/main.js', init)
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    23 │ }
+    24 │ 
+  
+  i Safe fix: Use collapsed if instead.
+  
+    18 18 │   }
+    19 19 │   
+    20    │ - if·(import.meta.webpackHot)·{
+    21    │ - ··if·(import.meta.webpackHot)
+    22    │ - ····import.meta.webpackHot.accept('./components/main.js',·init)
+    23    │ - }
+       20 │ + if·(import.meta.webpackHot&&import.meta.webpackHot)·import.meta.webpackHot.accept('./components/main.js',·init)
+    24 21 │   
+  
+
+```

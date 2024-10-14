@@ -2127,6 +2127,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateProperties": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicatedFields": {
 					"description": "No duplicated fields in GraphQL operations.",
 					"anyOf": [
