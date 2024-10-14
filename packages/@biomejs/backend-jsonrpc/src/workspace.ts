@@ -524,10 +524,6 @@ export interface PartialJavascriptFormatter {
 	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
 	 */
-	trailingComma?: TrailingCommas;
-	/**
-	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
-	 */
 	trailingCommas?: TrailingCommas;
 }
 /**

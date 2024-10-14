@@ -247,8 +247,6 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             arrow_parentheses: Some(value.arrow_parens.into()),
             semicolons: Some(semicolons),
             trailing_commas: Some(value.trailing_comma.into()),
-            // deprecated
-            trailing_comma: None,
             quote_style: Some(quote_style),
             quote_properties: Some(value.quote_props.into()),
             bracket_spacing: Some(value.bracket_spacing.into()),
