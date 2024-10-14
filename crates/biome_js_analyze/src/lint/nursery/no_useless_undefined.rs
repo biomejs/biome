@@ -145,7 +145,7 @@ fn should_ignore_function(expr: &AnyJsExpression) -> bool {
     let name = match expr {
         AnyJsExpression::JsIdentifierExpression(ident) => ident.text(),
         AnyJsExpression::JsStaticMemberExpression(member_expr) => {
-            let member = member_expr.member().ok().unwrap();
+            let Ok(member) = member_expr.member() else { return false; };
             member.text()
         }
         _ => return false,
