@@ -30,8 +30,8 @@ impl Ord for MemberKey {
     fn cmp(&self, other: &Self) -> Ordering {
         // Sort keys using natural ordering
         natord::compare(
-            &self.node.name().unwrap().text(),
-            &other.node.name().unwrap().text(),
+            &self.node.name().unwrap().to_trimmed_string(),
+            &other.node.name().unwrap().to_trimmed_string(),
         )
     }
 }
@@ -53,7 +53,7 @@ impl Members {
         let mut iter = self
             .0
             .iter()
-            .map(|node| node.node.syntax().text_range().start());
+            .map(|node| node.node.syntax().text_range_with_trivia().start());
         let mut previous_start = iter.next().unwrap_or_default();
         iter.all(|start| {
             let is_sorted = previous_start < start;

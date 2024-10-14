@@ -254,11 +254,11 @@ impl Rule for UseExplicitFunctionReturnType {
                     return None;
                 }
 
-                let func_range = func.syntax().text_range();
+                let func_range = func.syntax().text_range_with_trivia();
                 if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
                     return Some(TextRange::new(
                         func_range.start(),
-                        id.syntax().text_range().end(),
+                        id.syntax().text_range_with_trivia().end(),
                     ));
                 }
 
@@ -339,7 +339,7 @@ fn is_direct_const_assertion_in_arrow_functions(func: &AnyJsFunction) -> bool {
         return false;
     };
 
-    ts_ref.text() == "const"
+    ts_ref.to_trimmed_string() == "const"
 }
 
 /// Checks if a function is allowed within specific expression contexts.

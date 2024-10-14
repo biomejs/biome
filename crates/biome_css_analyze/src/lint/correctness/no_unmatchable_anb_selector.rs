@@ -103,12 +103,12 @@ fn is_unmatchable(nth: &AnyCssPseudoClassNth) -> bool {
             let constant = nth.offset().and_then(|offset| offset.value().ok());
 
             match (coefficient, constant) {
-                (Some(a), Some(b)) => a.text() == "0" && b.text() == "0",
-                (Some(a), None) => a.text() == "0",
+                (Some(a), Some(b)) => a.to_trimmed_string() == "0" && b.to_trimmed_string() == "0",
+                (Some(a), None) => a.to_trimmed_string() == "0",
                 _ => false,
             }
         }
-        AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth.text() == "0",
+        AnyCssPseudoClassNth::CssPseudoClassNthNumber(nth) => nth.to_trimmed_string() == "0",
     }
 }
 

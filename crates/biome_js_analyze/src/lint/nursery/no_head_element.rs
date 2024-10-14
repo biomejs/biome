@@ -70,7 +70,7 @@ impl Rule for NoHeadElement {
                 .any(|a| a.file_name().map_or(false, |f| f == "app" && a.is_dir()));
 
             if !is_in_app_dir {
-                return Some(element.syntax().text_range());
+                return Some(element.syntax().text_range_with_trivia());
             }
         }
 

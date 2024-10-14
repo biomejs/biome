@@ -293,7 +293,7 @@ where
         let new_node_slot = prev_element.index();
         let parent = prev_element.parent();
         let parent_range: Option<(u32, u32)> = parent.as_ref().map(|p| {
-            let range = p.text_range();
+            let range = p.text_range_with_trivia();
             (range.start().into(), range.end().into())
         });
         let parent_depth = parent.as_ref().map(|p| p.ancestors().count()).unwrap_or(0);
@@ -383,7 +383,7 @@ where
                 // because we need nodes that are still valid in the old tree
                 let curr_grand_parent = curr_parent.parent();
                 let curr_grand_parent_range = curr_grand_parent.as_ref().map(|g| {
-                    let range = g.text_range();
+                    let range = g.text_range_with_trivia();
                     (range.start().into(), range.end().into())
                 });
                 let curr_parent_slot = curr_parent.index();
@@ -426,7 +426,7 @@ where
                             continue;
                         }
                         let deleted_text_range = match curr_parent.slots().nth(*new_node_slot) {
-                            Some(SyntaxSlot::Node(node)) => node.text_range(),
+                            Some(SyntaxSlot::Node(node)) => node.text_range_with_trivia(),
                             Some(SyntaxSlot::Token(token)) => token.text_range(),
                             Some(SyntaxSlot::Empty { index }) => {
                                 TextRange::new(index.into(), index.into())
@@ -485,7 +485,7 @@ where
 
                     if curr_is_from_action {
                         text_mutation_list = vec![(
-                            document_root.text_range(),
+                            document_root.text_range_with_trivia(),
                             Some(
                                 curr_new_node
                                     .as_ref()

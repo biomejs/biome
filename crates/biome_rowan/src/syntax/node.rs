@@ -88,9 +88,9 @@ impl<L: Language> SyntaxNode<L> {
     ///         &[TriviaPiece::whitespace(3)],
     ///     );
     /// });
-    /// assert_eq!("\n\t let \t\ta; \t\t", node.text());
+    /// assert_eq!("\n\t let \t\ta; \t\t", node.text_with_trivia());
     /// ```
-    pub fn text(&self) -> SyntaxNodeText {
+    pub fn text_with_trivia(&self) -> SyntaxNodeText {
         self.raw.text()
     }
 
@@ -142,11 +142,11 @@ impl<L: Language> SyntaxNode<L> {
     ///         &[TriviaPiece::whitespace(3)],
     ///     );
     /// });
-    /// let range = node.text_range();
+    /// let range = node.text_range_with_trivia();
     /// assert_eq!(0u32, u32::from(range.start()));
     /// assert_eq!(14u32, u32::from(range.end()));
     /// ```
-    pub fn text_range(&self) -> TextRange {
+    pub fn text_range_with_trivia(&self) -> TextRange {
         self.raw.text_range()
     }
 
@@ -250,7 +250,7 @@ impl<L: Language> SyntaxNode<L> {
         self.raw.parent().map(Self::from)
     }
 
-    /// Returns the grand parent.
+    /// Returns the grandparent.
     pub fn grand_parent(&self) -> Option<SyntaxNode<L>> {
         self.parent().and_then(|parent| parent.parent())
     }
@@ -781,7 +781,7 @@ impl<L: Language> fmt::Debug for SyntaxNode<L> {
             assert_eq!(level, 0);
             Ok(())
         } else {
-            write!(f, "{:?}@{:?}", self.kind(), self.text_range())
+            write!(f, "{:?}@{:?}", self.kind(), self.text_range_with_trivia())
         }
     }
 }

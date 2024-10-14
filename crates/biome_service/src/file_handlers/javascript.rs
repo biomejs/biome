@@ -790,7 +790,7 @@ pub(crate) fn format_on_type(
 
     let tree = parse.syntax();
 
-    let range = tree.text_range();
+    let range = tree.text_range_with_trivia();
     if offset < range.start() || offset > range.end() {
         return Err(WorkspaceError::FormatError(FormatError::RangeError {
             input: TextRange::at(offset, TextSize::from(0)),
@@ -832,7 +832,7 @@ fn rename(
         .and_then(|token| token.parent())
     {
         let original_name = node.text_trimmed();
-        let range = node.text_range();
+        let range = node.text_range_with_trivia();
         match node.try_into() {
             Ok(node) => {
                 let mut batch = root.begin();

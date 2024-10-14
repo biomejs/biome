@@ -127,7 +127,7 @@ impl Rule for UseCollapsedElseIf {
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(RuleDiagnostic::new(
             rule_category!(),
-            state.if_statement.syntax().text_range(),
+            state.if_statement.syntax().text_range_with_trivia(),
             markup! {
                 "This "<Emphasis>"if"</Emphasis>" statement can be collapsed into an "<Emphasis>"else if"</Emphasis>" statement."
             },

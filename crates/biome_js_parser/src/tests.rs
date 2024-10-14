@@ -216,7 +216,7 @@ pub fn jsroot_display_text_and_trimmed() {
 
     assert_eq!(format!("{syntax}"), code);
 
-    let syntax_text = syntax.text();
+    let syntax_text = syntax.text_with_trivia();
     assert_eq!(format!("{syntax_text}"), code);
 
     let syntax_text = syntax.text_trimmed();
@@ -264,7 +264,7 @@ pub fn node_range_must_be_correct() {
         .find(|x| x.kind() == JsSyntaxKind::JS_VARIABLE_STATEMENT)
         .unwrap();
 
-    let range = var_decl.text_range();
+    let range = var_decl.text_range_with_trivia();
     assert_eq!(18usize, usize::from(range.start()));
     assert_eq!(29usize, usize::from(range.end()));
 
@@ -280,7 +280,7 @@ pub fn last_trivia_must_be_appended_to_eof() {
     let root = parse_module(text, JsParserOptions::default());
     let syntax = root.syntax();
 
-    let range = syntax.text_range();
+    let range = syntax.text_range_with_trivia();
     let start = range.start();
     let end = range.end();
 
@@ -295,7 +295,7 @@ pub fn just_trivia_must_be_appended_to_eof() {
     let root = parse_module(text, JsParserOptions::default());
     let syntax = root.syntax();
 
-    let range = syntax.text_range();
+    let range = syntax.text_range_with_trivia();
     let start = range.start();
     let end = range.end();
 

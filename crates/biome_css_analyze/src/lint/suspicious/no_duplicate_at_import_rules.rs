@@ -71,7 +71,7 @@ impl Rule for NoDuplicateAtImportRules {
                         let import_url = import_rule
                             .url()
                             .ok()?
-                            .text()
+                            .to_trimmed_string()
                             .to_lowercase_cow()
                             .replace("url(", "")
                             .replace(')', "")
@@ -79,16 +79,18 @@ impl Rule for NoDuplicateAtImportRules {
                         if let Some(media_query_set) = import_url_map.get_mut(&import_url) {
                             // if the current import_rule has no media queries or there are no queries saved in the
                             // media_query_set, this is always a duplicate
-                            if import_rule.media().text().is_empty() || media_query_set.is_empty() {
+                            if import_rule.media().to_trimmed_string().is_empty()
+                                || media_query_set.is_empty()
+                            {
                                 return Some(import_rule);
                             }
 
                             for media in import_rule.media() {
                                 match media {
                                     Ok(media) => {
-                                        if !media_query_set
-                                            .insert(media.text().to_lowercase_cow().into())
-                                        {
+                                        if !media_query_set.insert(
+                                            media.to_trimmed_string().to_lowercase_cow().into(),
+                                        ) {
                                             return Some(import_rule);
                                         }
                                     }
@@ -100,7 +102,9 @@ impl Rule for NoDuplicateAtImportRules {
                             for media in import_rule.media() {
                                 match media {
                                     Ok(media) => {
-                                        media_set.insert(media.text().to_lowercase_cow().into());
+                                        media_set.insert(
+                                            media.to_trimmed_string().to_lowercase_cow().into(),
+                                        );
                                     }
                                     _ => return None,
                                 }

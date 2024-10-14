@@ -67,7 +67,7 @@ impl SemanticEventExtractor {
                 || kind == CSS_NESTED_QUALIFIED_RULE
                 || kind == CSS_MEDIA_AT_RULE =>
             {
-                let range = node.text_range();
+                let range = node.text_range_with_trivia();
                 self.stash.push_back(SemanticEvent::RuleStart(range));
                 self.current_rule_stack.push(range);
             }
@@ -100,13 +100,13 @@ impl SemanticEventExtractor {
                         self.stash.push_back(SemanticEvent::PropertyDeclaration {
                             property: CssProperty {
                                 name: property_name.text_trimmed().to_string(),
-                                range: property_name.text_range(),
+                                range: property_name.text_range_with_trivia(),
                             },
                             value: CssValue {
                                 text: value.text_trimmed().to_string(),
-                                range: value.text_range(),
+                                range: value.text_range_with_trivia(),
                             },
-                            range: node.text_range(),
+                            range: node.text_range_with_trivia(),
                         });
                     }
                 }
@@ -124,7 +124,7 @@ impl SemanticEventExtractor {
             AnyCssSelector::CssComplexSelector(s) => {
                 let specificity = evaluate_complex_selector(&s);
                 self.add_selector_event(
-                    Cow::Borrowed(&s.text()),
+                    Cow::Borrowed(&s.to_trimmed_string()),
                     s.range(),
                     AnyCssSelector::CssComplexSelector(s),
                     specificity,
@@ -132,7 +132,7 @@ impl SemanticEventExtractor {
             }
 
             AnyCssSelector::CssCompoundSelector(selector) => {
-                let selector_text = selector.text();
+                let selector_text = selector.to_trimmed_string();
                 if selector_text == ROOT_SELECTOR {
                     self.stash.push_back(SemanticEvent::RootSelectorStart);
                     self.is_in_root_selector = true;
@@ -189,18 +189,18 @@ impl SemanticEventExtractor {
                 declaration.property()
             {
                 if let Ok(prop_name) = prop.name() {
-                    match prop_name.text().as_str() {
+                    match prop_name.to_trimmed_string().as_str() {
                         "initial-value" => {
                             initial_value = Some(CssValue {
-                                text: prop.value().text().to_string(),
+                                text: prop.value().to_trimmed_string().to_string(),
                                 range: prop.value().range(),
                             });
                         }
                         "syntax" => {
-                            syntax = Some(prop.value().text().to_string());
+                            syntax = Some(prop.value().to_trimmed_string().to_string());
                         }
                         "inherits" => {
-                            inherits = Some(prop.value().text() == "true");
+                            inherits = Some(prop.value().to_trimmed_string() == "true");
                         }
                         _ => {}
                     }
@@ -211,12 +211,12 @@ impl SemanticEventExtractor {
         self.stash.push_back(SemanticEvent::AtProperty {
             property: CssProperty {
                 name: property_name.text_trimmed().to_string(),
-                range: property_name.text_range(),
+                range: property_name.text_range_with_trivia(),
             },
             initial_value,
             syntax,
             inherits,
-            range: node.text_range(),
+            range: node.text_range_with_trivia(),
         });
     }
 

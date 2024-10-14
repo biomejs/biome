@@ -213,7 +213,7 @@ impl SemanticModel {
     ///     .syntax()
     ///     .descendants()
     ///     .filter_map(|x| x.cast::<JsReferenceIdentifier>())
-    ///     .find(|x| x.text() == "arguments")
+    ///     .find(|x| x.to_trimmed_string() == "arguments")
     ///     .unwrap();
     ///
     /// let block_scope = model.scope(&arguments_reference.syntax());
@@ -267,7 +267,7 @@ impl SemanticModel {
     ///     .syntax()
     ///     .descendants()
     ///     .filter_map(|x| x.cast::<JsReferenceIdentifier>())
-    ///     .find(|x| x.text() == "arguments")
+    ///     .find(|x| x.to_trimmed_string() == "arguments")
     ///     .unwrap();
     ///
     /// let arguments_binding = model.binding(&arguments_reference);

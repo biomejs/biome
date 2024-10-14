@@ -27,7 +27,7 @@ impl NotCompiler {
         }) {
             context.log(CompilerDiagnostic::new_warning(
                 "Rewrites inside of a not will never be applied",
-                node.syntax().text_range(),
+                node.syntax().text_range_with_trivia(),
             ));
         }
 
@@ -52,7 +52,7 @@ impl PrNotCompiler {
         }) {
             context.log(CompilerDiagnostic::new_warning(
                 "Rewrites inside of a not will never be applied",
-                node.syntax().text_range(),
+                node.syntax().text_range_with_trivia(),
             ));
         }
 
