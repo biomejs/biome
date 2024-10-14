@@ -535,10 +535,6 @@ impl PartialConfigurationExt for PartialConfiguration {
             if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
                 formatter.indent_width = formatter.indent_size;
             }
-
-            if formatter.trailing_comma.is_some() && formatter.trailing_commas.is_none() {
-                formatter.trailing_commas = formatter.trailing_comma;
-            }
         }
 
         // TODO: remove in biome 2.0
