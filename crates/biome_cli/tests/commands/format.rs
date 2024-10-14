@@ -491,7 +491,7 @@ fn applies_custom_configuration() {
                 ("10"),
                 ("--indent-style"),
                 ("space"),
-                ("--indent-size"),
+                ("--indent-width"),
                 ("8"),
                 ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
@@ -534,7 +534,7 @@ fn applies_custom_configuration_over_config_file() {
                 ("10"),
                 ("--indent-style"),
                 ("space"),
-                ("--indent-size"),
+                ("--indent-width"),
                 ("8"),
                 ("--write"),
                 file_path.as_os_str().to_str().unwrap(),
@@ -1042,7 +1042,7 @@ fn indent_size_parse_errors_negative() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), ("--indent-size=-1"), ("file.js")].as_slice()),
+        Args::from([("format"), ("--indent-width=-1"), ("file.js")].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1064,7 +1064,7 @@ fn indent_size_parse_errors_overflow() {
     let result = run_cli(
         DynRef::Borrowed(&mut fs),
         &mut console,
-        Args::from([("format"), ("--indent-size=257"), ("file.js")].as_slice()),
+        Args::from([("format"), ("--indent-width=257"), ("file.js")].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2557,13 +2557,13 @@ fn should_apply_different_formatting() {
         "javascript": {
             "formatter": {
                 "lineWidth": 320,
-                "indentSize": 8
+                "indentWidth": 8
             }
         },
         "json": {
             "formatter": {
                 "lineWidth": 80,
-                "indentSize": 2
+                "indentWidth": 2
             }
         },
         "css": {
@@ -2663,9 +2663,9 @@ const a = {
                 ("format"),
                 "--write",
                 "--javascript-formatter-line-width=320",
-                "--javascript-formatter-indent-size=8",
+                "--javascript-formatter-indent-width=8",
                 "--json-formatter-line-width=20",
-                "--json-formatter-indent-size=2",
+                "--json-formatter-indent-width=2",
                 "--css-formatter-line-width=40",
                 "--css-formatter-indent-width=6",
                 "--css-formatter-enabled=true",
@@ -2703,7 +2703,7 @@ fn should_not_format_json_files_if_disabled() {
         "javascript": {
             "formatter": {
                 "lineWidth": 80,
-                "indentSize": 4
+                "indentWidth": 4
             }
         },
         "json": {
@@ -2777,7 +2777,7 @@ fn should_not_format_js_files_if_disabled() {
         "json": {
             "formatter": {
                 "lineWidth": 80,
-                "indentSize": 2
+                "indentWidth": 2
             }
         }
     }"#,
@@ -2841,7 +2841,7 @@ fn should_not_format_css_files_if_disabled() {
         "javascript": {
             "formatter": {
                 "lineWidth": 80,
-                "indentSize": 4
+                "indentWidth": 4
             }
         },
         "css": {
@@ -2909,14 +2909,14 @@ fn should_apply_different_indent_style() {
         "javascript": {
             "formatter": {
                 "lineWidth": 320,
-                "indentSize": 8,
+                "indentWidth": 8,
                 "indentStyle": "tab"
             }
         },
         "json": {
             "formatter": {
                 "lineWidth": 80,
-                "indentSize": 2,
+                "indentWidth": 2,
                 "indentStyle": "tab"
             }
         }

@@ -59,11 +59,6 @@ pub struct JsonFormatter {
     #[partial(bpaf(long("json-formatter-indent-width"), argument("NUMBER"), optional))]
     pub indent_width: Option<IndentWidth>,
 
-    /// The size of the indentation applied to JSON (and its super languages) files. Default to 2.
-    #[partial(bpaf(long("json-formatter-indent-size"), argument("NUMBER"), optional))]
-    #[partial(deserializable(deprecated(use_instead = "json.formatter.indentWidth")))]
-    pub indent_size: Option<IndentWidth>,
-
     /// The type of line ending applied to JSON (and its super languages) files.
     #[partial(bpaf(long("json-formatter-line-ending"), argument("lf|crlf|cr"), optional))]
     pub line_ending: Option<LineEnding>,
@@ -83,7 +78,6 @@ impl PartialJsonFormatter {
             enabled: self.enabled.unwrap_or_default(),
             indent_style: self.indent_style,
             indent_width: self.indent_width,
-            indent_size: self.indent_size,
             line_ending: self.line_ending,
             line_width: self.line_width,
             trailing_commas: self.trailing_commas,
@@ -97,7 +91,6 @@ impl Default for JsonFormatter {
             enabled: true,
             indent_style: Default::default(),
             indent_width: Default::default(),
-            indent_size: Default::default(),
             line_ending: Default::default(),
             line_width: Default::default(),
             trailing_commas: Default::default(),

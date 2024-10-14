@@ -1631,10 +1631,7 @@ fn to_javascript_language_settings(
     language_setting.formatter.enabled = formatter.enabled;
     language_setting.formatter.line_width = formatter.line_width;
     language_setting.formatter.line_ending = formatter.line_ending;
-    language_setting.formatter.indent_width = formatter
-        .indent_width
-        .map(Into::into)
-        .or(formatter.indent_size.map(Into::into));
+    language_setting.formatter.indent_width = formatter.indent_width.map(Into::into);
     language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
 
     let parser = conf.parser.take().unwrap_or_default();
@@ -1665,10 +1662,7 @@ fn to_json_language_settings(
     language_setting.formatter.enabled = formatter.enabled;
     language_setting.formatter.line_width = formatter.line_width;
     language_setting.formatter.line_ending = formatter.line_ending;
-    language_setting.formatter.indent_width = formatter
-        .indent_width
-        .map(Into::into)
-        .or(formatter.indent_size.map(Into::into));
+    language_setting.formatter.indent_width = formatter.indent_width;
     language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
     language_setting.formatter.trailing_commas = formatter.trailing_commas;
 
@@ -1755,11 +1749,7 @@ impl TryFrom<OverrideFormatterConfiguration> for FormatSettings {
             Some(IndentStyle::Space) => IndentStyle::Space,
             None => IndentStyle::default(),
         };
-        let indent_width = conf
-            .indent_width
-            .map(Into::into)
-            .or(conf.indent_size.map(Into::into))
-            .unwrap_or_default();
+        let indent_width = conf.indent_width.map(Into::into).unwrap_or_default();
 
         Ok(Self {
             enabled: conf.enabled.unwrap_or_default(),
