@@ -100,44 +100,46 @@ declare_node_union! {
 }
 
 static FUNCTION_NAMES: [&str; 28] = [
+    // `set.add(undefined)`
+    "add",
     // Function#bind()
     "bind",
+    // `React.createContext(undefined)`
+    "createContext",
+    // Compare function names
+    "equal",
+    // `set.has(undefined)`
+    "has",
+    // `array.includes(undefined)`
+    "include",
+    // `array.includes(undefined)`
+    "includes",
     // Compare function names
     "is",
-    "equal",
-    "notEqual",
-    "strictEqual",
-    "notStrictEqual",
-    "propertyVal",
-    "notPropertyVal",
     "not",
-    "include",
+    "notEqual",
+    "notPropertyVal",
+    "notSame",
+    "notStrictEqual",
     "property",
+    "propertyVal",
+    // `array.push(undefined)`
+    "push",
+    // https://vuejs.org/api/reactivity-core.html#ref
+    "ref",
+    "same",
+    // `map.set(foo, undefined)`
+    "set",
+    "strictEqual",
+    "strictNotSame",
+    "strictSame",
     "toBe",
-    "toHaveBeenCalledWith",
     "toContain",
     "toContainEqual",
     "toEqual",
-    "same",
-    "notSame",
-    "strictSame",
-    "strictNotSame",
-    // `array.push(undefined)`
-    "push",
+    "toHaveBeenCalledWith",
     // `array.unshift(undefined)`
     "unshift",
-    // `array.includes(undefined)`
-    "includes",
-    // `set.add(undefined)`
-    "add",
-    // `set.has(undefined)`
-    "has",
-    // `map.set(foo, undefined)`
-    "set",
-    // `React.createContext(undefined)`
-    "createContext",
-    // https://vuejs.org/api/reactivity-core.html#ref
-    "ref",
 ];
 
 fn should_ignore_function(expr: &AnyJsExpression) -> bool {
@@ -153,7 +155,7 @@ fn should_ignore_function(expr: &AnyJsExpression) -> bool {
         _ => return false,
     };
 
-    FUNCTION_NAMES.contains(&name.as_str()) ||
+    FUNCTION_NAMES.binary_search(&name.as_str()).is_ok() ||
     // setState(undefined), setXXX(undefined)
     name.starts_with("set")
 }
@@ -445,5 +447,12 @@ impl Rule for NoUselessUndefined {
             markup! { "Remove the undefined."}.to_owned(),
             mutation,
         ))
+    }
+}
+
+#[test]
+fn test_order() {
+    for items in FUNCTION_NAMES.windows(2) {
+        assert!(items[0] < items[1]);
     }
 }
