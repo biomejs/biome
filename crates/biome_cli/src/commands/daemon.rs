@@ -232,11 +232,7 @@ fn setup_tracing_subscriber(log_path: Option<PathBuf>, log_file_name_prefix: Opt
 pub fn default_biome_log_path() -> PathBuf {
     match env::var_os("BIOME_LOG_PATH") {
         Some(directory) => PathBuf::from(directory),
-        // TODO: Remove in Biome v2, and use the None part as fallback.
-        None => match env::var_os("BIOME_LOG_DIR") {
-            Some(directory) => PathBuf::from(directory),
-            None => biome_fs::ensure_cache_dir().join("biome-logs"),
-        },
+        None => biome_fs::ensure_cache_dir().join("biome-logs"),
     }
 }
 
