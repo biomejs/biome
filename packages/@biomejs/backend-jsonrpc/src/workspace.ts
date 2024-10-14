@@ -1243,6 +1243,10 @@ export interface Nursery {
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate properties within declaration blocks.
+	 */
+	noDuplicateProperties?: RuleConfiguration_for_Null;
+	/**
 	 * No duplicated fields in GraphQL operations.
 	 */
 	noDuplicatedFields?: RuleConfiguration_for_Null;
@@ -2903,6 +2907,7 @@ export type Category =
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"

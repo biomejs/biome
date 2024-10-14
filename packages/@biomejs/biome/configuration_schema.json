@@ -2127,6 +2127,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDuplicateProperties": {
+					"description": "Disallow duplicate properties within declaration blocks.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicatedFields": {
 					"description": "No duplicated fields in GraphQL operations.",
 					"anyOf": [
