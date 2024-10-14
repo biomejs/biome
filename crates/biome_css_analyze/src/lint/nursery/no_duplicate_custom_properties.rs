@@ -56,11 +56,11 @@ impl Rule for NoDuplicateCustomProperties {
 
         let rule = model.get_rule_by_range(node.range())?;
 
-        let mut seen: FxHashMap<String, TextRange> = FxHashMap::default();
+        let mut seen: FxHashMap<&str, TextRange> = FxHashMap::default();
 
         for declaration in rule.declarations.iter() {
             let prop = &declaration.property;
-            let prop_name = prop.name.clone();
+            let prop_name = prop.name.as_str();
             let prop_range = prop.range;
 
             let is_custom_property = prop_name.starts_with("--");
@@ -69,9 +69,9 @@ impl Rule for NoDuplicateCustomProperties {
                 continue;
             }
 
-            match seen.entry(prop_name.clone()) {
+            match seen.entry(prop_name) {
                 Entry::Occupied(entry) => {
-                    return Some((*entry.get(), (prop_range, prop_name)));
+                    return Some((*entry.get(), (prop_range, prop_name.to_string())));
                 }
                 Entry::Vacant(_) => {
                     seen.insert(prop_name, prop_range);
