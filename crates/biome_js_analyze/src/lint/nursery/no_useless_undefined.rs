@@ -89,8 +89,7 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub RuleQuery = JsVariableStatement
-        // | JsObjectBindingPattern
+    pub AnyUndefinedNode = JsVariableStatement
         | JsObjectBindingPatternShorthandProperty
         | JsYieldArgument
         | JsReturnStatement
@@ -145,8 +144,11 @@ fn should_ignore_function(expr: &AnyJsExpression) -> bool {
     let name = match expr {
         AnyJsExpression::JsIdentifierExpression(ident) => ident.text(),
         AnyJsExpression::JsStaticMemberExpression(member_expr) => {
-            let member = member_expr.member().ok().unwrap();
-            member.text()
+            if let Ok(member) = member_expr.member() {
+                member.text()
+            } else {
+                return false;
+            }
         }
         _ => return false,
     };
@@ -166,7 +168,7 @@ fn is_undefined(expr: Option<&AnyJsExpression>) -> Option<(String, TextRange)> {
 }
 
 impl Rule for NoUselessUndefined {
-    type Query = Ast<RuleQuery>;
+    type Query = Ast<AnyUndefinedNode>;
     type State = (String, TextRange);
     type Signals = Vec<Self::State>;
     type Options = ();
@@ -177,7 +179,7 @@ impl Rule for NoUselessUndefined {
 
         match node {
             // let foo = undefined;
-            RuleQuery::JsVariableStatement(statement) => {
+            AnyUndefinedNode::JsVariableStatement(statement) => {
                 let Ok(node) = statement.declaration() else {
                     return signals;
                 };
@@ -197,7 +199,7 @@ impl Rule for NoUselessUndefined {
                 }
             }
             // foo(bar, undefined, undefined);
-            RuleQuery::JsCallExpression(js_call_expr) => {
+            AnyUndefinedNode::JsCallExpression(js_call_expr) => {
                 if let Ok(callee) = js_call_expr.callee() {
                     if should_ignore_function(&callee) {
                         return signals;
@@ -222,7 +224,7 @@ impl Rule for NoUselessUndefined {
                 }
             }
             // { a: undefined }
-            RuleQuery::JsObjectBindingPatternShorthandProperty(
+            AnyUndefinedNode::JsObjectBindingPatternShorthandProperty(
                 js_object_binding_pattern_shorthand_property,
             ) => {
                 if let Some(init) = js_object_binding_pattern_shorthand_property.init() {
@@ -233,7 +235,7 @@ impl Rule for NoUselessUndefined {
                 }
             }
             // function foo([bar = undefined]) {}
-            RuleQuery::JsArrayBindingPatternElement(js_array_binding_pattern_element) => {
+            AnyUndefinedNode::JsArrayBindingPatternElement(js_array_binding_pattern_element) => {
                 if let Some(init) = js_array_binding_pattern_element.init() {
                     let expr = init.expression().ok();
                     if let Some((name, range)) = is_undefined(expr.as_ref()) {
@@ -242,7 +244,7 @@ impl Rule for NoUselessUndefined {
                 }
             }
             // yield undefined
-            RuleQuery::JsYieldArgument(yield_argument) => {
+            AnyUndefinedNode::JsYieldArgument(yield_argument) => {
                 if yield_argument.star_token().is_some() {
                     return signals;
                 }
@@ -252,14 +254,14 @@ impl Rule for NoUselessUndefined {
                 }
             }
             // return undefined
-            RuleQuery::JsReturnStatement(js_return_statement) => {
+            AnyUndefinedNode::JsReturnStatement(js_return_statement) => {
                 let expr = js_return_statement.argument();
                 if let Some((name, range)) = is_undefined(expr.as_ref()) {
                     signals.push((name, range));
                 }
             }
             // const noop = () => undefined
-            RuleQuery::JsArrowFunctionExpression(js_arrow_function_expression) => {
+            AnyUndefinedNode::JsArrowFunctionExpression(js_arrow_function_expression) => {
                 if let Ok(body) = js_arrow_function_expression.body() {
                     let expr = body.as_any_js_expression();
                     if let Some((name, range)) = is_undefined(expr) {
@@ -268,7 +270,7 @@ impl Rule for NoUselessUndefined {
                 }
             }
             // function foo(bar = undefined) {}
-            RuleQuery::JsFormalParameter(js_formal_parameter) => {
+            AnyUndefinedNode::JsFormalParameter(js_formal_parameter) => {
                 if let Some(init) = js_formal_parameter.initializer() {
                     let expr = init.expression().ok();
                     if let Some((name, range)) = is_undefined(expr.as_ref()) {
@@ -301,7 +303,7 @@ impl Rule for NoUselessUndefined {
         let mut mutation = ctx.root().begin();
 
         match node {
-            RuleQuery::JsVariableStatement(js_variable_statement) => {
+            AnyUndefinedNode::JsVariableStatement(js_variable_statement) => {
                 let assignment_statement = js_variable_statement.clone();
                 let current_declaration_statement = js_variable_statement.declaration().ok()?;
                 let declarators = current_declaration_statement.declarators();
@@ -371,20 +373,20 @@ impl Rule for NoUselessUndefined {
                     mutation,
                 ));
             }
-            RuleQuery::JsObjectBindingPatternShorthandProperty(property) => {
+            AnyUndefinedNode::JsObjectBindingPatternShorthandProperty(property) => {
                 mutation.remove_node(property.init()?);
             }
-            RuleQuery::JsYieldArgument(yield_argument) => {
+            AnyUndefinedNode::JsYieldArgument(yield_argument) => {
                 mutation.remove_node(yield_argument.expression().ok()?);
             }
-            RuleQuery::JsReturnStatement(return_statement) => {
+            AnyUndefinedNode::JsReturnStatement(return_statement) => {
                 mutation.remove_node(return_statement.argument()?);
             }
-            RuleQuery::JsArrayBindingPatternElement(pattern_element) => {
+            AnyUndefinedNode::JsArrayBindingPatternElement(pattern_element) => {
                 let init = pattern_element.init()?;
                 mutation.remove_node(init)
             }
-            RuleQuery::JsCallExpression(js_call_expression) => {
+            AnyUndefinedNode::JsCallExpression(js_call_expression) => {
                 let arguments = js_call_expression.arguments().ok()?;
                 let argument_list = arguments.args();
 
@@ -418,7 +420,7 @@ impl Rule for NoUselessUndefined {
                     None => mutation.remove_node(argument_list),
                 };
             }
-            RuleQuery::JsArrowFunctionExpression(js_arrow_function_expression) => {
+            AnyUndefinedNode::JsArrowFunctionExpression(js_arrow_function_expression) => {
                 let undefined_body = js_arrow_function_expression.body().ok()?;
                 let next_node = js_function_body(
                     make::token(T!['{']),
@@ -431,7 +433,7 @@ impl Rule for NoUselessUndefined {
                     AnyJsFunctionBody::JsFunctionBody(next_node),
                 );
             }
-            RuleQuery::JsFormalParameter(js_formal_parameter) => {
+            AnyUndefinedNode::JsFormalParameter(js_formal_parameter) => {
                 let init = js_formal_parameter.initializer()?;
                 mutation.remove_node(init);
             }
