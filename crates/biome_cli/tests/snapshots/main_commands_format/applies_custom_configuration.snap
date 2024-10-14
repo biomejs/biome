@@ -17,13 +17,5 @@ function f() {
 # Emitted Messages
 
 ```block
-internalError/fs  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The argument --indent-size is deprecated, it will be removed in the next major release. Use --indent-width instead.
-  
-
-```
-
-```block
 Formatted 1 file in <TIME>. Fixed 1 file.
 ```
