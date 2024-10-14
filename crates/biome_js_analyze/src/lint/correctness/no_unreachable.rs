@@ -712,7 +712,7 @@ impl UnreachableRanges {
                     if statements.text_trimmed_range().is_empty() {
                         vec![]
                     } else {
-                        vec![statements.text_range()]
+                        vec![statements.text_range_with_trivia()]
                     }
                 }
 
@@ -723,7 +723,9 @@ impl UnreachableRanges {
                         .into_iter()
                         .filter_map(|declarator| match declarator {
                             Ok(declarator) => match declarator.initializer()?.expression() {
-                                Ok(expression) => Some(Ok(expression.syntax().text_range())),
+                                Ok(expression) => {
+                                    Some(Ok(expression.syntax().text_range_with_trivia()))
+                                }
                                 Err(err) => Some(Err(err)),
                             },
                             Err(err) => Some(Err(err)),
@@ -732,69 +734,80 @@ impl UnreachableRanges {
                         .ok()?
                 }
                 JsControlFlowNode::JsLabeledStatement(stmt) => {
-                    vec![stmt.body().ok()?.syntax().text_range()]
+                    vec![stmt.body().ok()?.syntax().text_range_with_trivia()]
                 }
                 JsControlFlowNode::JsDoWhileStatement(stmt) => vec![
-                    stmt.body().ok()?.syntax().text_range(),
-                    stmt.test().ok()?.syntax().text_range(),
+                    stmt.body().ok()?.syntax().text_range_with_trivia(),
+                    stmt.test().ok()?.syntax().text_range_with_trivia(),
                 ],
                 JsControlFlowNode::JsForInStatement(stmt) => vec![
-                    stmt.initializer().ok()?.syntax().text_range(),
-                    stmt.body().ok()?.syntax().text_range(),
+                    stmt.initializer().ok()?.syntax().text_range_with_trivia(),
+                    stmt.body().ok()?.syntax().text_range_with_trivia(),
                 ],
                 JsControlFlowNode::JsForOfStatement(stmt) => vec![
-                    stmt.initializer().ok()?.syntax().text_range(),
-                    stmt.body().ok()?.syntax().text_range(),
+                    stmt.initializer().ok()?.syntax().text_range_with_trivia(),
+                    stmt.body().ok()?.syntax().text_range_with_trivia(),
                 ],
                 JsControlFlowNode::JsForStatement(stmt) => {
                     let mut res = Vec::new();
 
                     if let Some(initializer) = stmt.initializer() {
-                        res.push(initializer.syntax().text_range());
+                        res.push(initializer.syntax().text_range_with_trivia());
                     }
 
                     if let Some(test) = stmt.test() {
-                        res.push(test.syntax().text_range());
+                        res.push(test.syntax().text_range_with_trivia());
                     }
 
                     if let Some(update) = stmt.update() {
-                        res.push(update.syntax().text_range());
+                        res.push(update.syntax().text_range_with_trivia());
                     }
 
-                    res.push(stmt.body().ok()?.syntax().text_range());
+                    res.push(stmt.body().ok()?.syntax().text_range_with_trivia());
                     res
                 }
                 JsControlFlowNode::JsIfStatement(stmt) => {
                     let mut res = vec![
-                        stmt.test().ok()?.syntax().text_range(),
-                        stmt.consequent().ok()?.syntax().text_range(),
+                        stmt.test().ok()?.syntax().text_range_with_trivia(),
+                        stmt.consequent().ok()?.syntax().text_range_with_trivia(),
                     ];
 
                     if let Some(else_clause) = stmt.else_clause() {
-                        res.push(else_clause.alternate().ok()?.syntax().text_range());
+                        res.push(
+                            else_clause
+                                .alternate()
+                                .ok()?
+                                .syntax()
+                                .text_range_with_trivia(),
+                        );
                     }
 
                     res
                 }
                 JsControlFlowNode::JsSwitchStatement(stmt) => {
-                    let mut res = vec![stmt.discriminant().ok()?.syntax().text_range()];
+                    let mut res = vec![stmt.discriminant().ok()?.syntax().text_range_with_trivia()];
 
                     let cases = stmt.cases().into_syntax();
                     if !cases.text_trimmed_range().is_empty() {
-                        res.push(cases.text_range());
+                        res.push(cases.text_range_with_trivia());
                     }
 
                     res
                 }
                 JsControlFlowNode::JsTryStatement(stmt) => vec![
-                    stmt.body().ok()?.syntax().text_range(),
-                    stmt.catch_clause().ok()?.body().ok()?.syntax().text_range(),
+                    stmt.body().ok()?.syntax().text_range_with_trivia(),
+                    stmt.catch_clause()
+                        .ok()?
+                        .body()
+                        .ok()?
+                        .syntax()
+                        .text_range_with_trivia(),
                 ],
                 JsControlFlowNode::JsTryFinallyStatement(stmt) => {
-                    let mut res = vec![stmt.body().ok()?.syntax().text_range()];
+                    let mut res = vec![stmt.body().ok()?.syntax().text_range_with_trivia()];
 
                     if let Some(catch_clause) = stmt.catch_clause() {
-                        res.push(catch_clause.body().ok()?.syntax().text_range());
+                        res.push(catch_clause.body().ok()?.syntax().text_range_with_trivia());
                     }
 
                     res.push(
@@ -803,21 +816,21 @@ impl UnreachableRanges {
                             .body()
                             .ok()?
                             .syntax()
-                            .text_range(),
+                            .text_range_with_trivia(),
                     );
 
                     res
                 }
                 JsControlFlowNode::JsWhileStatement(stmt) => vec![
-                    stmt.test().ok()?.syntax().text_range(),
-                    stmt.body().ok()?.syntax().text_range(),
+                    stmt.test().ok()?.syntax().text_range_with_trivia(),
+                    stmt.body().ok()?.syntax().text_range_with_trivia(),
                 ],
                 JsControlFlowNode::JsCaseClause(stmt) => {
-                    let mut res = vec![stmt.test().ok()?.syntax().text_range()];
+                    let mut res = vec![stmt.test().ok()?.syntax().text_range_with_trivia()];
 
                     let consequent = stmt.consequent().into_syntax();
                     if !consequent.text_trimmed_range().is_empty() {
-                        res.push(consequent.text_range());
+                        res.push(consequent.text_range_with_trivia());
                     }
 
                     res
@@ -827,7 +840,7 @@ impl UnreachableRanges {
 
                     let consequent = stmt.consequent().into_syntax();
                     if !consequent.text_trimmed_range().is_empty() {
-                        res.push(consequent.text_range());
+                        res.push(consequent.text_range_with_trivia());
                     }
 
                     res
@@ -838,7 +851,9 @@ impl UnreachableRanges {
 
             // Extend the range at the specific index to cover the whole parent node
             let entry = &mut self.ranges[next_index];
-            entry.text_range = entry.text_range.cover(parent.syntax().text_range());
+            entry.text_range = entry
+                .text_range
+                .cover(parent.syntax().text_range_with_trivia());
             entry.text_trimmed_range = entry
                 .text_trimmed_range
                 .cover(parent.syntax().text_trimmed_range());

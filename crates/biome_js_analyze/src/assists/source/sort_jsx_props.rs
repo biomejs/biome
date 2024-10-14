@@ -106,7 +106,10 @@ impl Ord for PropElement {
         let (Ok(self_name), Ok(other_name)) = (self.prop.name(), other.prop.name()) else {
             return Ordering::Equal;
         };
-        let (a_name, b_name) = (self_name.text(), other_name.text());
+        let (a_name, b_name) = (
+            self_name.to_trimmed_string(),
+            other_name.to_trimmed_string(),
+        );
 
         a_name.cmp(&b_name)
     }

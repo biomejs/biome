@@ -71,7 +71,7 @@ impl Rule for UseFocusableInteractive {
                 if attribute_has_interactive_role(&role_attribute_value, aria_roles)?
                     && tabindex_attribute.is_none()
                 {
-                    return Some(role_attribute_value.text());
+                    return Some(role_attribute_value.to_trimmed_string());
                 }
             }
         }

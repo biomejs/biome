@@ -12,7 +12,7 @@ impl PredicateDefinitionCompiler {
         node: GritPredicateDefinition,
         context: &mut NodeCompilationContext,
     ) -> Result<PredicateDefinition<GritQueryContext>, CompileError> {
-        let name = node.name()?.text();
+        let name = node.name()?.to_trimmed_string();
         let name = name.trim();
         let mut local_vars = BTreeMap::new();
         let (scope_index, mut context) = create_scope!(context, local_vars);

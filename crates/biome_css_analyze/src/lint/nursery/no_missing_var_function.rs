@@ -154,7 +154,7 @@ impl Rule for NoMissingVarFunction {
         }
 
         let property_name = get_property_name(node)?;
-        let custom_variable_name = node.text();
+        let custom_variable_name = node.to_trimmed_string();
 
         if IGNORED_PROPERTIES.contains(&property_name.as_str()) {
             return None;
@@ -196,7 +196,7 @@ impl Rule for NoMissingVarFunction {
 
     fn diagnostic(_: &RuleContext<Self>, node: &Self::State) -> Option<RuleDiagnostic> {
         let span = node.range();
-        let custom_variable_name = node.text();
+        let custom_variable_name = node.to_trimmed_string();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -237,8 +237,12 @@ fn get_property_name(node: &CssDashedIdentifier) -> Option<String> {
             let prop = node.property().ok()?;
             return match prop {
                 AnyCssProperty::CssBogusProperty(_) => None,
-                AnyCssProperty::CssComposesProperty(prop) => Some(prop.name().ok()?.text()),
-                AnyCssProperty::CssGenericProperty(prop) => Some(prop.name().ok()?.text()),
+                AnyCssProperty::CssComposesProperty(prop) => {
+                    Some(prop.name().ok()?.to_trimmed_string())
+                }
+                AnyCssProperty::CssGenericProperty(prop) => {
+                    Some(prop.name().ok()?.to_trimmed_string())
+                }
             };
         }
         current_node = parent.parent();

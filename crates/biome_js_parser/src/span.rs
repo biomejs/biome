@@ -35,7 +35,7 @@ where
 
 impl<T: Language> Span for SyntaxNode<T> {
     fn as_range(&self) -> TextRange {
-        self.text_range()
+        self.text_range_with_trivia()
     }
 }
 
@@ -48,7 +48,7 @@ impl<T: Language> Span for SyntaxToken<T> {
 impl<T: Language> Span for SyntaxElement<T> {
     fn as_range(&self) -> TextRange {
         match self {
-            SyntaxElement::Node(n) => n.text_range(),
+            SyntaxElement::Node(n) => n.text_range_with_trivia(),
             SyntaxElement::Token(t) => t.text_range(),
         }
     }

@@ -671,7 +671,7 @@ impl JsTemplateExpression {
             .find(|tok| tok.kind() == JsSyntaxKind::BACKTICK)?;
         Some(TextRange::new(
             start.text_range().start(),
-            self.syntax().text_range().end(),
+            self.syntax().text_range_with_trivia().end(),
         ))
     }
 
@@ -2370,7 +2370,7 @@ impl AnyNumberLikeExpression {
             }
             AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
                 if unary_expression.is_signed_numeric_literal().ok()? {
-                    return Some(unary_expression.text());
+                    return Some(unary_expression.to_trimmed_string());
                 }
             }
         }

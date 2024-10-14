@@ -107,7 +107,7 @@ impl Rule for NoUselessCatch {
             .argument()
             .ok()?
             .as_js_identifier_expression()?
-            .text();
+            .to_trimmed_string();
 
         if throw_ident.eq(catch_err_name) {
             Some(js_throw_statement.syntax().text_trimmed_range())

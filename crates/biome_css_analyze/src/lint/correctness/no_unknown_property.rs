@@ -73,7 +73,7 @@ impl Rule for NoUnknownProperty {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let property_name = node.name().ok()?.text();
+        let property_name = node.name().ok()?.to_trimmed_string();
         let property_name_lower = property_name.to_lowercase_cow();
         if !property_name_lower.starts_with("--")
             // Ignore `composes` property.

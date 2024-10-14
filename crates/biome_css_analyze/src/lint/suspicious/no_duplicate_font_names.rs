@@ -65,7 +65,7 @@ impl Rule for NoDuplicateFontNames {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let property_name = node.name().ok()?.text();
+        let property_name = node.name().ok()?.to_trimmed_string();
         let property_name = property_name.to_lowercase_cow();
 
         let is_font_family = property_name == "font-family";
@@ -94,7 +94,7 @@ impl Rule for NoDuplicateFontNames {
             match css_value {
                 // A generic family name like `sans-serif` or unquoted font name.
                 AnyCssValue::CssIdentifier(val) => {
-                    let font_name = val.text();
+                    let font_name = val.to_trimmed_string();
 
                     // check the case: "Arial", Arial
                     // we ignore the case of the font name is a keyword(context: https://github.com/stylelint/stylelint/issues/1284)
@@ -119,7 +119,7 @@ impl Rule for NoDuplicateFontNames {
                 AnyCssValue::CssString(val) => {
                     // FIXME: avoid String allocation
                     let normalized_font_name: String = val
-                        .text()
+                        .to_trimmed_string()
                         .chars()
                         .filter(|&c| c != '\'' && c != '\"' && !c.is_whitespace())
                         .collect();

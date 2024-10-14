@@ -73,12 +73,12 @@ impl Rule for NoFlatMapIdentity {
                 AnyJsExpression::JsArrowFunctionExpression(arg) => {
                     let parameter: String = match arg.parameters().ok()? {
                         biome_js_syntax::AnyJsArrowFunctionParameters::AnyJsBinding(p) => {
-                            p.text().trim_matches(&['(', ')']).to_owned()
+                            p.to_trimmed_string().trim_matches(&['(', ')']).to_owned()
                         }
                         biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(p) => {
                             if p.items().len() == 1 {
                                 if let Some(param) = p.items().into_iter().next() {
-                                    param.ok()?.text()
+                                    param.ok()?.to_trimmed_string()
                                 } else {
                                     return None;
                                 }
@@ -89,7 +89,9 @@ impl Rule for NoFlatMapIdentity {
                     };
 
                     let function_body: String = match arg.body().ok()? {
-                        AnyJsFunctionBody::AnyJsExpression(body) => body.omit_parentheses().text(),
+                        AnyJsFunctionBody::AnyJsExpression(body) => {
+                            body.omit_parentheses().to_trimmed_string()
+                        }
                         AnyJsFunctionBody::JsFunctionBody(body) => {
                             let mut statement = body.statements().into_iter();
                             match statement.next() {
@@ -100,7 +102,7 @@ impl Rule for NoFlatMapIdentity {
                                     else {
                                         return None;
                                     };
-                                    return_statement.name().ok()?.text()
+                                    return_statement.name().ok()?.to_trimmed_string()
                                 }
                                 _ => return None,
                             }
@@ -109,7 +111,7 @@ impl Rule for NoFlatMapIdentity {
                     (parameter, function_body)
                 }
                 AnyJsExpression::JsFunctionExpression(arg) => {
-                    let function_parameter = arg.parameters().ok()?.text();
+                    let function_parameter = arg.parameters().ok()?.to_trimmed_string();
                     let function_parameter =
                         function_parameter.trim_matches(&['(', ')']).to_owned();
 
@@ -120,7 +122,10 @@ impl Rule for NoFlatMapIdentity {
                         else {
                             return None;
                         };
-                        (function_parameter, return_statement.name().ok()?.text())
+                        (
+                            function_parameter,
+                            return_statement.name().ok()?.to_trimmed_string(),
+                        )
                     } else {
                         return None;
                     }

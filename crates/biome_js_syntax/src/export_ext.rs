@@ -216,7 +216,7 @@ impl JsExport {
                             }),
                             AnyJsExportNamedSpecifier::JsExportNamedSpecifier(specifier) => {
                                 specifier.exported_name().ok().map(|exported_name| {
-                                    if exported_name.text() == "default" {
+                                    if exported_name.to_trimmed_string() == "default" {
                                         return ExportedItem {
                                             identifier: specifier.local_name().ok().map(
                                                 |local_name| {
