@@ -20,7 +20,7 @@ use crate::JsRuleAction;
 declare_lint_rule! {
     /// Disallow useless `undefined`.
     ///
-    /// `undefined` is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference.
+    /// `undefined` is the default value for new variables, parameters, return statements, etc., so specifying it doesn't make any difference.
     ///
     /// ## Examples
     ///
