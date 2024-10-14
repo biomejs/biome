@@ -80,7 +80,7 @@ impl<L: Language + 'static> Visitor for SyntaxVisitor<L> {
         }
 
         if let Some(range) = ctx.range {
-            if node.text_range().ordering(range).is_ne() {
+            if node.text_range_with_trivia().ordering(range).is_ne() {
                 self.skip_subtree = Some(node.clone());
                 return;
             }

@@ -18,7 +18,7 @@ impl NodeLikeCompiler {
         is_rhs: bool,
     ) -> Result<Pattern<GritQueryContext>, CompileError> {
         let name = node.name()?;
-        let name = name.text();
+        let name = name.to_trimmed_string();
 
         let lang = &context.compilation.lang;
         if let Some(kind) = lang.kind_by_name(&name) {

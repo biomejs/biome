@@ -105,9 +105,10 @@ impl Rule for UseHeadingContent {
 
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let range = match ctx.query() {
-            AnyJsxElement::JsxOpeningElement(node) => {
-                node.parent::<JsxElement>()?.syntax().text_range()
-            }
+            AnyJsxElement::JsxOpeningElement(node) => node
+                .parent::<JsxElement>()?
+                .syntax()
+                .text_range_with_trivia(),
             AnyJsxElement::JsxSelfClosingElement(node) => node.syntax().text_trimmed_range(),
         };
         Some(RuleDiagnostic::new(
