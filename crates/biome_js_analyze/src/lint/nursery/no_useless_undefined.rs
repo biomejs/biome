@@ -159,10 +159,10 @@ fn should_ignore_function(expr: &AnyJsExpression) -> bool {
     name.starts_with("set")
 }
 
-fn is_undefined(expr: Option<&AnyJsExpression>) -> Option<(String, TextRange)> {
+fn find_undefined_range(expr: Option<&AnyJsExpression>) -> Option<TextRange> {
     let ident = expr?.as_js_reference_identifier()?;
     if ident.is_undefined() {
-        Some((ident.text().to_string(), ident.range()))
+        Some(ident.range())
     } else {
         None
     }
@@ -170,7 +170,7 @@ fn is_undefined(expr: Option<&AnyJsExpression>) -> Option<(String, TextRange)> {
 
 impl Rule for NoUselessUndefined {
     type Query = Ast<AnyUndefinedNode>;
-    type State = (String, TextRange);
+    type State = TextRange;
     type Signals = Vec<Self::State>;
     type Options = ();
 
@@ -193,7 +193,7 @@ impl Rule for NoUselessUndefined {
                     let Ok(decl) = declarator else { continue };
                     if let Some(initializer) = decl.initializer() {
                         let expr = initializer.expression().ok();
-                        if let Some(state) = is_undefined(expr.as_ref()) {
+                        if let Some(state) = find_undefined_range(expr.as_ref()) {
                             signals.push(state);
                         }
                     }
@@ -217,8 +217,8 @@ impl Rule for NoUselessUndefined {
                         return signals;
                     }
                     let expr = argument.as_any_js_expression();
-                    if let Some((name, range)) = is_undefined(expr) {
-                        signals.push((name, range));
+                    if let Some(range) = find_undefined_range(expr) {
+                        signals.push(range);
                     } else {
                         non_undefined_found = true;
                     }
@@ -230,8 +230,8 @@ impl Rule for NoUselessUndefined {
             ) => {
                 if let Some(init) = js_object_binding_pattern_shorthand_property.init() {
                     let expr = init.expression().ok();
-                    if let Some((name, range)) = is_undefined(expr.as_ref()) {
-                        signals.push((name, range));
+                    if let Some(range) = find_undefined_range(expr.as_ref()) {
+                        signals.push(range);
                     }
                 }
             }
@@ -239,8 +239,8 @@ impl Rule for NoUselessUndefined {
             AnyUndefinedNode::JsArrayBindingPatternElement(js_array_binding_pattern_element) => {
                 if let Some(init) = js_array_binding_pattern_element.init() {
                     let expr = init.expression().ok();
-                    if let Some((name, range)) = is_undefined(expr.as_ref()) {
-                        signals.push((name, range));
+                    if let Some(range) = find_undefined_range(expr.as_ref()) {
+                        signals.push(range);
                     }
                 }
             }
@@ -250,23 +250,23 @@ impl Rule for NoUselessUndefined {
                     return signals;
                 }
                 let expr = yield_argument.expression().ok();
-                if let Some((name, range)) = is_undefined(expr.as_ref()) {
-                    signals.push((name, range));
+                if let Some(range) = find_undefined_range(expr.as_ref()) {
+                    signals.push(range);
                 }
             }
             // return undefined
             AnyUndefinedNode::JsReturnStatement(js_return_statement) => {
                 let expr = js_return_statement.argument();
-                if let Some((name, range)) = is_undefined(expr.as_ref()) {
-                    signals.push((name, range));
+                if let Some(range) = find_undefined_range(expr.as_ref()) {
+                    signals.push(range);
                 }
             }
             // const noop = () => undefined
             AnyUndefinedNode::JsArrowFunctionExpression(js_arrow_function_expression) => {
                 if let Ok(body) = js_arrow_function_expression.body() {
                     let expr = body.as_any_js_expression();
-                    if let Some((name, range)) = is_undefined(expr) {
-                        signals.push((name, range));
+                    if let Some(range) = find_undefined_range(expr) {
+                        signals.push(range);
                     }
                 }
             }
@@ -274,8 +274,8 @@ impl Rule for NoUselessUndefined {
             AnyUndefinedNode::JsFormalParameter(js_formal_parameter) => {
                 if let Some(init) = js_formal_parameter.initializer() {
                     let expr = init.expression().ok();
-                    if let Some((name, range)) = is_undefined(expr.as_ref()) {
-                        signals.push((name, range));
+                    if let Some(range) = find_undefined_range(expr.as_ref()) {
+                        signals.push(range);
                     }
                 }
             }
@@ -288,7 +288,7 @@ impl Rule for NoUselessUndefined {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                state.1,
+                state,
                 markup! {
                     "Don't use unnecessary "<Emphasis>"undefined"</Emphasis>"."
                 },
@@ -299,7 +299,7 @@ impl Rule for NoUselessUndefined {
         )
     }
 
-    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
         let node = ctx.query();
         let mut mutation = ctx.root().begin();
 
@@ -313,7 +313,7 @@ impl Rule for NoUselessUndefined {
                     .clone()
                     .into_iter()
                     .filter_map(|declarator| declarator.ok())
-                    .find(|decl| decl.id().is_ok_and(|id| id.text() == state.0))?;
+                    .find(|decl| decl.id().is_ok_and(|id| id.text() == "undefined"))?;
 
                 let current_initializer = current_declaration.initializer()?;
 
@@ -395,7 +395,7 @@ impl Rule for NoUselessUndefined {
                 for (idx, arg) in argument_list.iter().rev().enumerate() {
                     let expr = arg.ok()?;
                     let expr = expr.as_any_js_expression();
-                    if is_undefined(expr).is_none() {
+                    if find_undefined_range(expr).is_none() {
                         non_undefined_index = Some(idx);
                         break;
                     }
