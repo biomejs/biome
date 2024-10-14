@@ -526,8 +526,8 @@ impl FromStr for QuoteStyle {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "double" | "Double" => Ok(Self::Double),
-            "single" | "Single" => Ok(Self::Single),
+            "double" => Ok(Self::Double),
+            "single" => Ok(Self::Single),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for QuoteStyle"),
         }
@@ -626,8 +626,8 @@ impl FromStr for AttributePosition {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "multiline" | "Multiline" => Ok(Self::Multiline),
-            "auto" | "Auto" => Ok(Self::Auto),
+            "multiline" => Ok(Self::Multiline),
+            "auto" => Ok(Self::Auto),
             _ => Err("Value not supported for attribute_position. Supported values are 'auto' and 'multiline'."),
         }
     }

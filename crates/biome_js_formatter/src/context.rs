@@ -420,8 +420,8 @@ impl FromStr for QuoteProperties {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "as-needed" | "AsNeeded" => Ok(Self::AsNeeded),
-            "preserve" | "Preserve" => Ok(Self::Preserve),
+            "as-needed" => Ok(Self::AsNeeded),
+            "preserve" => Ok(Self::Preserve),
             // TODO: replace this error with a diagnostic
             _ => Err("Value not supported for QuoteProperties"),
         }
@@ -464,8 +464,8 @@ impl FromStr for Semicolons {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "as-needed" | "AsNeeded" => Ok(Self::AsNeeded),
-            "always" | "Always" => Ok(Self::Always),
+            "as-needed" => Ok(Self::AsNeeded),
+            "always" => Ok(Self::Always),
             _ => Err("Value not supported for Semicolons. Supported values are 'as-needed' and 'always'."),
         }
     }
@@ -508,8 +508,8 @@ impl FromStr for ArrowParentheses {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "as-needed" | "AsNeeded" => Ok(Self::AsNeeded),
-            "always" | "Always" => Ok(Self::Always),
+            "as-needed"  => Ok(Self::AsNeeded),
+            "always"  => Ok(Self::Always),
             _ => Err("Value not supported for Arrow parentheses. Supported values are 'as-needed' and 'always'."),
         }
     }
