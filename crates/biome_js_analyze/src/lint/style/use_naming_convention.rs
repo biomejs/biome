@@ -21,8 +21,8 @@ use biome_js_syntax::{
     AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource, JsIdentifierBinding,
     JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList, JsPrivateClassMemberName,
     JsPropertyModifierList, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind,
-    Modifier, TsIdentifierBinding, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
-    TsPropertySignatureModifierList, TsTypeParameterName,
+    Modifier, TsIdentifierBinding, TsIndexSignatureModifierList, TsLiteralEnumMemberName,
+    TsMethodSignatureModifierList, TsPropertySignatureModifierList, TsTypeParameterName,
 };
 use biome_rowan::{
     declare_node_union, AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize,
@@ -1092,7 +1092,10 @@ impl Selector {
             }
         }
         if self.modifiers.contains(Modifier::Readonly)
-            && !matches!(self.kind, Kind::ClassProperty | Kind::TypeProperty)
+            && !matches!(
+                self.kind,
+                Kind::ClassProperty | Kind::IndexParameter | Kind::TypeProperty
+            )
         {
             return Err(InvalidSelector::UnsupportedModifiers(
                 self.kind,
@@ -1236,7 +1239,9 @@ impl Selector {
             | AnyJsClassMember::TsConstructorSignatureClassMember(_)
             | AnyJsClassMember::JsEmptyClassMember(_)
             | AnyJsClassMember::JsStaticInitializationBlockClassMember(_) => return None,
-            AnyJsClassMember::TsIndexSignatureClassMember(_) => Kind::IndexParameter.into(),
+            AnyJsClassMember::TsIndexSignatureClassMember(getter) => {
+                Selector::with_modifiers(Kind::IndexParameter, getter.modifiers())
+            }
             AnyJsClassMember::JsGetterClassMember(getter) => {
                 Selector::with_modifiers(Kind::ClassGetter, getter.modifiers())
             }
@@ -1290,7 +1295,17 @@ impl Selector {
             | AnyJsBindingDeclaration::JsRestParameter(_) => Some(Kind::FunctionParameter.into()),
             AnyJsBindingDeclaration::JsCatchDeclaration(_) => Some(Kind::CatchParameter.into()),
             AnyJsBindingDeclaration::TsPropertyParameter(_) => Some(Kind::ClassProperty.into()),
-            AnyJsBindingDeclaration::TsIndexSignatureParameter(_) => Some(Kind::IndexParameter.into()),
+            AnyJsBindingDeclaration::TsIndexSignatureParameter(member_name) => {
+                if let Some(member) = member_name.parent::<>() {
+                    Selector::from_class_member(&member)
+                } else if let Some(member) = member_name.parent::<AnyTsTypeMember>() {
+                    Selector::from_type_member(&member)
+                } else if let Some(member) = member_name.parent::<AnyJsObjectMember>() {
+                    Selector::from_object_member(&member)
+                } else {
+                    Some(Kind::IndexParameter.into())
+                }
+            },
             AnyJsBindingDeclaration::JsNamespaceImportSpecifier(_) => Some(Selector::with_scope(Kind::ImportNamespace, Scope::Global)),
             AnyJsBindingDeclaration::JsFunctionDeclaration(_)
             | AnyJsBindingDeclaration::JsFunctionExpression(_)
@@ -1384,7 +1399,13 @@ impl Selector {
             AnyTsTypeMember::JsBogusMember(_)
             | AnyTsTypeMember::TsCallSignatureTypeMember(_)
             | AnyTsTypeMember::TsConstructSignatureTypeMember(_) => None,
-            AnyTsTypeMember::TsIndexSignatureTypeMember(_) => Some(Kind::IndexParameter.into()),
+            AnyTsTypeMember::TsIndexSignatureTypeMember(property) => {
+                Some(if property.readonly_token().is_some() {
+                    Selector::with_modifiers(Kind::IndexParameter, Modifier::Readonly)
+                } else {
+                    Kind::IndexParameter.into()
+                })
+            }
             AnyTsTypeMember::TsGetterSignatureTypeMember(_) => Some(Kind::TypeGetter.into()),
             AnyTsTypeMember::TsMethodSignatureTypeMember(_) => Some(Kind::TypeMethod.into()),
             AnyTsTypeMember::TsPropertySignatureTypeMember(property) => {
@@ -1775,6 +1796,11 @@ impl From<JsMethodModifierList> for Modifiers {
 }
 impl From<JsPropertyModifierList> for Modifiers {
     fn from(value: JsPropertyModifierList) -> Self {
+        Modifiers((&value).into())
+    }
+}
+impl From<TsIndexSignatureModifierList> for Modifiers {
+    fn from(value: TsIndexSignatureModifierList) -> Self {
         Modifiers((&value).into())
     }
 }

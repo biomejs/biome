@@ -166,6 +166,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
  Contributed by @fireairforce
 
+ - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
+
+  Contributed by @sepruko
+
 - [noDuplicateCustomProperties](https://biomejs.dev/linter/rules/no-duplicate-custom-properties/) now correctly handles custom properties and ignores non-custom properties.
   Previously, the rule incorrectly reported duplicates for all properties, including non-custom ones. Contributed by @togami2864
 
