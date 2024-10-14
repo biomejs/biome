@@ -90,12 +90,15 @@ impl AnyJsFunctionOrMethod {
 
     fn name(&self) -> Option<String> {
         match self {
-            AnyJsFunctionOrMethod::AnyJsFunction(function) => {
-                function.binding().as_ref().map(AnyJsBinding::text)
-            }
-            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => {
-                method.name().ok().as_ref().map(AnyJsObjectMemberName::text)
-            }
+            AnyJsFunctionOrMethod::AnyJsFunction(function) => function
+                .binding()
+                .as_ref()
+                .map(AnyJsBinding::to_trimmed_string),
+            AnyJsFunctionOrMethod::JsMethodObjectMember(method) => method
+                .name()
+                .ok()
+                .as_ref()
+                .map(AnyJsObjectMemberName::to_trimmed_string),
         }
     }
 }
@@ -291,7 +294,7 @@ impl Visitor for EarlyReturnDetectionVisitor {
 
                 if let Some(entry) = self.stack.last_mut() {
                     if JsReturnStatement::can_cast(node.kind()) {
-                        entry.early_return = Some(node.text_range());
+                        entry.early_return = Some(node.text_range_with_trivia());
                     } else if let Some(call) = JsCallExpression::cast_ref(node) {
                         if let Some(early_return) = entry.early_return {
                             self.early_returns.insert(call.clone(), early_return);
@@ -428,7 +431,7 @@ impl Rule for UseHookAtTopLevel {
         let mut calls = vec![root];
 
         while let Some(CallPath { call, path }) = calls.pop() {
-            let range = call.syntax().text_range();
+            let range = call.syntax().text_range_with_trivia();
 
             let mut path = path.clone();
             path.push(range);

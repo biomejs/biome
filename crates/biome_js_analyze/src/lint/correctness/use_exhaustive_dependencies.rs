@@ -508,7 +508,7 @@ fn capture_needs_to_be_in_the_dependency_list(
         | AnyJsBindingDeclaration::TsEnumMember(_) => false,
         // Function declarations are stable if ...
         AnyJsBindingDeclaration::JsFunctionDeclaration(declaration) => {
-            let declaration_range = declaration.syntax().text_range();
+            let declaration_range = declaration.syntax().text_range_with_trivia();
 
             // ... they are declared outside of the component function
             if component_function_range
@@ -544,7 +544,7 @@ fn capture_needs_to_be_in_the_dependency_list(
             else {
                 return false;
             };
-            let declaration_range = declaration.syntax().text_range();
+            let declaration_range = declaration.syntax().text_range_with_trivia();
 
             // ... they are declared outside of the component function
             if component_function_range
@@ -766,7 +766,7 @@ impl Rule for UseExhaustiveDependencies {
                 }
             }
 
-            let component_function_range = component_function.text_range();
+            let component_function_range = component_function.text_range_with_trivia();
 
             let captures: Vec<_> = result
                 .all_captures(model)

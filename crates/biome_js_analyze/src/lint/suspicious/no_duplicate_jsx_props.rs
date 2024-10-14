@@ -53,7 +53,7 @@ impl Rule for NoDuplicateJsxProps {
             if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
                 if let Ok(name) = attr.name() {
                     defined_attributes
-                        .entry(name.text())
+                        .entry(name.to_trimmed_string())
                         .or_default()
                         .push(attr);
                 }

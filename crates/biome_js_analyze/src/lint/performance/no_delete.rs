@@ -95,7 +95,7 @@ impl Rule for NoDelete {
                 {
                     let name = static_expression.member().ok()?;
                     let name = name.as_js_name()?;
-                    if name.text() == "dataset" {
+                    if name.to_trimmed_string() == "dataset" {
                         return None;
                     }
                 }

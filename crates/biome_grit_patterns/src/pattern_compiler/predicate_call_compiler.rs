@@ -15,7 +15,7 @@ impl PrCallCompiler {
         context: &mut NodeCompilationContext,
     ) -> Result<Predicate<GritQueryContext>, CompileError> {
         let name = node.name()?;
-        let name = name.text();
+        let name = name.to_trimmed_string();
 
         if name == "log" {
             return LogCompiler::from_named_args(node.named_args(), context).map(Predicate::Log);

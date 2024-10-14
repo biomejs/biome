@@ -108,7 +108,7 @@ impl AnyNumberLikeExpression {
             }
             AnyNumberLikeExpression::JsUnaryExpression(unary_expression) => {
                 if unary_expression.is_signed_numeric_literal().ok()? {
-                    return Some(unary_expression.text());
+                    return Some(unary_expression.to_trimmed_string());
                 }
             }
         }

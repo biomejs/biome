@@ -61,7 +61,7 @@ impl Rule for NoDuplicateSelectorsKeyframeBlock {
                     let keyframe_selector = item.selectors().into_iter().next()?.ok()?;
                     if !selector_list.insert(
                         keyframe_selector
-                            .text()
+                            .to_trimmed_string()
                             .to_ascii_lowercase_cow()
                             .to_string(),
                     ) {

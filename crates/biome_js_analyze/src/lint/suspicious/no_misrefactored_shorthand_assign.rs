@@ -95,7 +95,7 @@ impl Rule for NoMisrefactoredShorthandAssign {
 
         let left = node.left().ok()?;
         let left = left.as_any_js_assignment()?;
-        let left_text = left.text();
+        let left_text = left.to_trimmed_string();
 
         let variable_position_in_expression =
             find_variable_position(&binary_expression, &left_text)?;

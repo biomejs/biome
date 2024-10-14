@@ -104,7 +104,7 @@ impl Visitor for NoDeclarationBlockShorthandPropertyOverridesVisitor {
                     if let Some(prop_node) = CssGenericProperty::cast_ref(node)
                         .and_then(|property_node| property_node.name().ok())
                     {
-                        let prop = prop_node.text();
+                        let prop = prop_node.to_trimmed_string();
                         #[allow(clippy::disallowed_methods)]
                         let prop_lowercase = prop.to_lowercase();
 
@@ -190,7 +190,7 @@ impl Rule for NoShorthandPropertyOverrides {
         let query = ctx.query();
 
         Some(NoDeclarationBlockShorthandPropertyOverridesState {
-            target_property: query.property_node.text(),
+            target_property: query.property_node.to_trimmed_string(),
             override_property: query.override_property.clone(),
             span: query.text_range(),
         })
