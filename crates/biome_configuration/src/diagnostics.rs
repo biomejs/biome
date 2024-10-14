@@ -184,8 +184,8 @@ pub struct InvalidIgnorePattern {
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
-	category = "configuration",
-	severity = Error,
+    category = "configuration",
+    severity = Error,
 )]
 pub struct CantLoadExtendFile {
     #[location(resource)]
@@ -217,8 +217,8 @@ impl CantLoadExtendFile {
 
 #[derive(Debug, Serialize, Deserialize, Diagnostic)]
 #[diagnostic(
-	category = "configuration",
-	severity = Error,
+    category = "configuration",
+    severity = Error,
 )]
 pub struct InvalidConfiguration {
     #[message]
