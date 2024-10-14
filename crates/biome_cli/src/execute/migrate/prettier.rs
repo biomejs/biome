@@ -212,8 +212,6 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             // editorconfig support is intentionally set to true, because prettier always reads the editorconfig file
             // see: https://github.com/prettier/prettier/issues/15255
             use_editorconfig: Some(true),
-            // deprecated
-            indent_size: None,
             bracket_spacing: Some(BracketSpacing::default()),
         };
         result.formatter = Some(formatter);
@@ -239,9 +237,6 @@ impl TryFrom<PrettierConfiguration> for biome_configuration::PartialConfiguratio
             indent_style: None,
             line_ending: None,
             enabled: None,
-            // deprecated
-            indent_size: None,
-
             // js ones
             bracket_same_line: Some(value.bracket_line),
             arrow_parentheses: Some(value.arrow_parens.into()),
