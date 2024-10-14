@@ -193,7 +193,7 @@ pub(super) fn node_to_args_pairs(
                     })?,
                 };
 
-                let name = var.text();
+                let name = var.to_trimmed_string();
                 let name = name
                     .strip_prefix(lang.metavariable_prefix())
                     .filter(|stripped| {
@@ -226,7 +226,7 @@ pub(super) fn node_to_args_pairs(
             Ok(AnyGritMaybeNamedArg::GritNamedArg(named_arg)) => {
                 let name = named_arg.name()?;
                 let pattern = named_arg.pattern()?;
-                Ok((name.text(), pattern))
+                Ok((name.to_trimmed_string(), pattern))
             }
             Ok(AnyGritMaybeNamedArg::GritBogusNamedArg(_)) => Err(CompileError::UnexpectedKind(
                 GritSyntaxKind::GRIT_BOGUS_NAMED_ARG.into(),

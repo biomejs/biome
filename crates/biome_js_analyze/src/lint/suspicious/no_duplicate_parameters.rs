@@ -179,7 +179,7 @@ fn track_binding(
     id_binding: &JsIdentifierBinding,
     tracked_bindings: &mut FxHashSet<String>,
 ) -> bool {
-    let binding_text = id_binding.text();
+    let binding_text = id_binding.to_trimmed_string();
     if tracked_bindings.contains(&binding_text) {
         true
     } else {
