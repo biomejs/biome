@@ -69,13 +69,15 @@ impl Rule for NoUnknownPseudoElement {
         let pseudo_element = node.element().ok()?;
 
         let pseudo_element_name = match &pseudo_element {
-            AnyCssPseudoElement::CssBogusPseudoElement(element) => element.text(),
+            AnyCssPseudoElement::CssBogusPseudoElement(element) => element.to_trimmed_string(),
             AnyCssPseudoElement::CssPseudoElementFunctionIdentifier(ident) => {
                 ident.name().ok()?.text().to_string()
             }
-            AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => selector.text(),
+            AnyCssPseudoElement::CssPseudoElementFunctionSelector(selector) => {
+                selector.to_trimmed_string()
+            }
             AnyCssPseudoElement::CssPseudoElementIdentifier(ident) => {
-                ident.name().ok()?.text().to_string()
+                ident.name().ok()?.to_trimmed_string().to_string()
             }
         };
 
@@ -95,7 +97,7 @@ impl Rule for NoUnknownPseudoElement {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected unknown pseudo-elements: "<Emphasis>{ element.text() }</Emphasis>
+                    "Unexpected unknown pseudo-elements: "<Emphasis>{ element.to_trimmed_string() }</Emphasis>
                 },
             )
             .note(markup! {

@@ -98,7 +98,7 @@ impl Rule for UseArrayLiterals {
 }
 
 fn validate(callee: &AnyJsExpression, arguments: &JsCallArguments) -> Option<()> {
-    if callee.text() != "Array" {
+    if callee.to_trimmed_string() != "Array" {
         return None;
     }
     let mut args_iter = arguments.args().into_iter();

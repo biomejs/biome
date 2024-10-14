@@ -16,7 +16,7 @@ impl<L: Language> SyntaxElement<L> {
 
     pub fn text_range(&self) -> TextRange {
         match self {
-            NodeOrToken::Node(it) => it.text_range(),
+            NodeOrToken::Node(it) => it.text_range_with_trivia(),
             NodeOrToken::Token(it) => it.text_range(),
         }
     }

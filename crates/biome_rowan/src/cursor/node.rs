@@ -927,7 +927,7 @@ mod tests {
         assert_eq!(
             iter.next()
                 .and_then(|slot| slot.into_node())
-                .map(|node| node.text().to_string())
+                .map(|node| node.text_with_trivia().to_string())
                 .as_deref(),
             Some("1")
         );
@@ -937,7 +937,7 @@ mod tests {
         assert_eq!(
             iter.next_back()
                 .and_then(|slot| slot.into_node())
-                .map(|node| node.text().to_string())
+                .map(|node| node.text_with_trivia().to_string())
                 .as_deref(),
             Some("4")
         );
@@ -947,7 +947,7 @@ mod tests {
         assert_eq!(
             iter.last()
                 .and_then(|slot| slot.into_node())
-                .map(|node| node.text().to_string())
+                .map(|node| node.text_with_trivia().to_string())
                 .as_deref(),
             Some("3")
         );

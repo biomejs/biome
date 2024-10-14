@@ -539,7 +539,7 @@ fn make_suggestion(
         Some(f) => match f {
             AnyJsCallArgument::AnyJsExpression(expr) => match expr {
                 AnyJsExpression::AnyJsLiteralExpression(e) => {
-                    let text = e.text();
+                    let text = e.to_trimmed_string();
                     if text.starts_with('\'') {
                         Some(AnyJsCallArgument::AnyJsExpression(
                             AnyJsExpression::AnyJsLiteralExpression(

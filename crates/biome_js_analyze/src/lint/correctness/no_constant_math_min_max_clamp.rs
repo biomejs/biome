@@ -95,7 +95,7 @@ impl Rule for NoConstantMathMinMaxClamp {
             ).detail(
                 state.0.range(),
                 markup! {
-                    "It always evaluates to "<Emphasis>{state.0.text()}</Emphasis>"."
+                    "It always evaluates to "<Emphasis>{state.0.to_trimmed_string()}</Emphasis>"."
                 }
             )
         )
@@ -110,7 +110,7 @@ impl Rule for NoConstantMathMinMaxClamp {
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
-            markup! {"Swap "<Emphasis>{state.0.text()}</Emphasis>" with "<Emphasis>{state.1.text()}</Emphasis>"."}
+            markup! {"Swap "<Emphasis>{state.0.to_trimmed_string()}</Emphasis>" with "<Emphasis>{state.1.to_trimmed_string()}</Emphasis>"."}
             .to_owned(),
             mutation,
         ))

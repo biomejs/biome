@@ -196,7 +196,7 @@ impl Rule for NoUselessFragments {
                             JsSyntaxKind::JSX_TEXT => {
                                 // We need to whitespaces and newlines from the original string.
                                 // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
-                                let original_text = child.text();
+                                let original_text = child.to_trimmed_string();
                                 let child_text = original_text.trim();
 
                                 if (in_jsx_expr || in_js_logical_expr)
@@ -330,7 +330,12 @@ impl Rule for NoUselessFragments {
                     | JsSyntaxKind::JSX_ELEMENT
                     | JsSyntaxKind::JSX_EXPRESSION_CHILD
                     | JsSyntaxKind::JSX_FRAGMENT => true,
-                    JsSyntaxKind::JSX_TEXT => !child.syntax().text().to_string().trim().is_empty(),
+                    JsSyntaxKind::JSX_TEXT => !child
+                        .syntax()
+                        .text_with_trivia()
+                        .to_string()
+                        .trim()
+                        .is_empty(),
                     _ => false,
                 });
 

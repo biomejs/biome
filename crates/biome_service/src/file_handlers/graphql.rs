@@ -262,7 +262,7 @@ fn format_on_type(
 
     let tree = parse.syntax();
 
-    let range = tree.text_range();
+    let range = tree.text_range_with_trivia();
     if offset < range.start() || offset > range.end() {
         return Err(WorkspaceError::FormatError(FormatError::RangeError {
             input: TextRange::at(offset, TextSize::from(0)),

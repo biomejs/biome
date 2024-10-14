@@ -97,24 +97,33 @@ impl Rule for UseAltText {
                             if !opening_element.has_accessible_child() {
                                 return Some((
                                     ValidatedElement::Object,
-                                    element.syntax().text_range(),
+                                    element.syntax().text_range_with_trivia(),
                                 ));
                             }
                         }
                         AnyJsxElement::JsxSelfClosingElement(_) => {
-                            return Some((ValidatedElement::Object, element.syntax().text_range()));
+                            return Some((
+                                ValidatedElement::Object,
+                                element.syntax().text_range_with_trivia(),
+                            ));
                         }
                     }
                 }
             }
             "img" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
-                    return Some((ValidatedElement::Img, element.syntax().text_range()));
+                    return Some((
+                        ValidatedElement::Img,
+                        element.syntax().text_range_with_trivia(),
+                    ));
                 }
             }
             "area" => {
                 if !has_alt && !has_aria_label && !has_aria_labelledby && !aria_hidden {
-                    return Some((ValidatedElement::Area, element.syntax().text_range()));
+                    return Some((
+                        ValidatedElement::Area,
+                        element.syntax().text_range_with_trivia(),
+                    ));
                 }
             }
             "input" => {
@@ -124,7 +133,10 @@ impl Rule for UseAltText {
                     && !has_aria_labelledby
                     && !aria_hidden
                 {
-                    return Some((ValidatedElement::Input, element.syntax().text_range()));
+                    return Some((
+                        ValidatedElement::Input,
+                        element.syntax().text_range_with_trivia(),
+                    ));
                 }
             }
             _ => {}
