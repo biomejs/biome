@@ -330,7 +330,12 @@ impl Rule for NoUselessFragments {
                     | JsSyntaxKind::JSX_ELEMENT
                     | JsSyntaxKind::JSX_EXPRESSION_CHILD
                     | JsSyntaxKind::JSX_FRAGMENT => true,
-                    JsSyntaxKind::JSX_TEXT => !child.syntax().text_with_trivia().to_string().trim().is_empty(),
+                    JsSyntaxKind::JSX_TEXT => !child
+                        .syntax()
+                        .text_with_trivia()
+                        .to_string()
+                        .trim()
+                        .is_empty(),
                     _ => false,
                 });
 

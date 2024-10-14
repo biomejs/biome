@@ -1596,7 +1596,9 @@ pub fn format_range<Language: FormatLanguage>(
 
         let result_end_node = end_node
             .ancestors()
-            .take_while(|end_parent| end_parent.text_range_with_trivia().start() >= start_node_start)
+            .take_while(|end_parent| {
+                end_parent.text_range_with_trivia().start() >= start_node_start
+            })
             .last()
             .unwrap_or(end_node);
 
@@ -1708,7 +1710,10 @@ pub fn format_range<Language: FormatLanguage>(
     // the start/end marker default to the start/end of the input
     let (start_source, start_dest) = match range_start {
         Some(start_marker) => (start_marker.source, start_marker.dest),
-        None => (common_root.text_range_with_trivia().start(), TextSize::from(0)),
+        None => (
+            common_root.text_range_with_trivia().start(),
+            TextSize::from(0),
+        ),
     };
     let (end_source, end_dest) = match range_end {
         Some(end_marker) => (end_marker.source, end_marker.dest),

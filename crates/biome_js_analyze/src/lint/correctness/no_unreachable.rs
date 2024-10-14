@@ -723,7 +723,9 @@ impl UnreachableRanges {
                         .into_iter()
                         .filter_map(|declarator| match declarator {
                             Ok(declarator) => match declarator.initializer()?.expression() {
-                                Ok(expression) => Some(Ok(expression.syntax().text_range_with_trivia())),
+                                Ok(expression) => {
+                                    Some(Ok(expression.syntax().text_range_with_trivia()))
+                                }
                                 Err(err) => Some(Err(err)),
                             },
                             Err(err) => Some(Err(err)),
@@ -771,7 +773,13 @@ impl UnreachableRanges {
                     ];
 
                     if let Some(else_clause) = stmt.else_clause() {
-                        res.push(else_clause.alternate().ok()?.syntax().text_range_with_trivia());
+                        res.push(
+                            else_clause
+                                .alternate()
+                                .ok()?
+                                .syntax()
+                                .text_range_with_trivia(),
+                        );
                     }
 
                     res
@@ -788,7 +796,12 @@ impl UnreachableRanges {
                 }
                 JsControlFlowNode::JsTryStatement(stmt) => vec![
                     stmt.body().ok()?.syntax().text_range_with_trivia(),
-                    stmt.catch_clause().ok()?.body().ok()?.syntax().text_range_with_trivia(),
+                    stmt.catch_clause()
+                        .ok()?
+                        .body()
+                        .ok()?
+                        .syntax()
+                        .text_range_with_trivia(),
                 ],
                 JsControlFlowNode::JsTryFinallyStatement(stmt) => {
                     let mut res = vec![stmt.body().ok()?.syntax().text_range_with_trivia()];
@@ -838,7 +851,9 @@ impl UnreachableRanges {
 
             // Extend the range at the specific index to cover the whole parent node
             let entry = &mut self.ranges[next_index];
-            entry.text_range = entry.text_range.cover(parent.syntax().text_range_with_trivia());
+            entry.text_range = entry
+                .text_range
+                .cover(parent.syntax().text_range_with_trivia());
             entry.text_trimmed_range = entry
                 .text_trimmed_range
                 .cover(parent.syntax().text_trimmed_range());

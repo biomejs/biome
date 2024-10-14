@@ -257,7 +257,9 @@ mod tests {
         let first = root.children().next().unwrap();
         assert_eq!(first.text_with_trivia().to_string(), "a");
         assert_eq!(
-            first.next_sibling().map(|e| e.text_with_trivia().to_string()),
+            first
+                .next_sibling()
+                .map(|e| e.text_with_trivia().to_string()),
             Some(String::from("b"))
         );
 
@@ -266,12 +268,16 @@ mod tests {
 
         // Skips the missing element
         assert_eq!(
-            second.next_sibling().map(|e| e.text_with_trivia().to_string()),
+            second
+                .next_sibling()
+                .map(|e| e.text_with_trivia().to_string()),
             Some(String::from("c"))
         );
 
         assert_eq!(
-            second.prev_sibling().map(|e| e.text_with_trivia().to_string()),
+            second
+                .prev_sibling()
+                .map(|e| e.text_with_trivia().to_string()),
             Some(String::from("a"))
         );
 
@@ -279,7 +285,8 @@ mod tests {
         assert_eq!(last.text_with_trivia(), "c");
         assert_eq!(last.next_sibling(), None);
         assert_eq!(
-            last.prev_sibling().map(|e| e.text_with_trivia().to_string()),
+            last.prev_sibling()
+                .map(|e| e.text_with_trivia().to_string()),
             Some(String::from("b"))
         );
 
@@ -410,7 +417,10 @@ mod tests {
 
         // Node Ranges
 
-        assert_eq!(TextRange::new(0.into(), 18.into()), node.text_range_with_trivia());
+        assert_eq!(
+            TextRange::new(0.into(), 18.into()),
+            node.text_range_with_trivia()
+        );
         assert_eq!(
             TextRange::new(3.into(), 16.into()),
             node.text_trimmed_range()

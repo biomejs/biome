@@ -266,7 +266,9 @@ fn process_js_assignment_expr(node: &JsAssignmentExpression) -> Option<RuleState
     match node.left().ok()? {
         AnyJsAssignmentPattern::AnyJsAssignment(assignment) => match assignment {
             AnyJsAssignment::JsComputedMemberAssignment(c) => {
-                if c.member().ok()?.to_trimmed_string() == "\"then\"" || c.member().ok()?.to_trimmed_string() == "`then`" {
+                if c.member().ok()?.to_trimmed_string() == "\"then\""
+                    || c.member().ok()?.to_trimmed_string() == "`then`"
+                {
                     return Some(RuleState {
                         range: node.left().ok()?.range(),
                         message: NoThenPropertyMessage::Object,
@@ -320,7 +322,9 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
                                     AnyJsExpression::JsArrayExpression(arg),
                                 ) => {
                                     let key = arg.elements().first()?.ok()?;
-                                    if key.to_trimmed_string() == "\"then\"" || key.to_trimmed_string() == "`then`" {
+                                    if key.to_trimmed_string() == "\"then\""
+                                        || key.to_trimmed_string() == "`then`"
+                                    {
                                         return Some(RuleState {
                                             range: key.range(),
                                             message: NoThenPropertyMessage::Object,
@@ -345,7 +349,9 @@ fn process_js_call_expr(node: &JsCallExpression) -> Option<RuleState> {
                     return None;
                 }
                 let second = args.iter().nth(1)?.ok()?;
-                if second.to_trimmed_string() == "\"then\"" || second.to_trimmed_string() == "`then`" {
+                if second.to_trimmed_string() == "\"then\""
+                    || second.to_trimmed_string() == "`then`"
+                {
                     return Some(RuleState {
                         range: second.range(),
                         message: NoThenPropertyMessage::Object,

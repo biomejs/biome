@@ -700,7 +700,10 @@ mod tests {
         let (transformed, _) = source_map_test("a;(\n\n/* comment */\n a + b);");
 
         // Keeps at least one new line before a leading comment.
-        assert_eq!(&transformed.text_with_trivia(), "a;\n/* comment */\n a + b;");
+        assert_eq!(
+            &transformed.text_with_trivia(),
+            "a;\n/* comment */\n a + b;"
+        );
     }
 
     #[test]

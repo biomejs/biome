@@ -81,7 +81,9 @@ impl Rule for UseShorthandAssign {
         let right = node.right().ok()?;
 
         let left_var_name = match left.as_any_js_assignment()? {
-            AnyJsAssignment::JsComputedMemberAssignment(assignment) => assignment.to_trimmed_string(),
+            AnyJsAssignment::JsComputedMemberAssignment(assignment) => {
+                assignment.to_trimmed_string()
+            }
             AnyJsAssignment::JsIdentifierAssignment(assignment) => assignment.to_trimmed_string(),
             AnyJsAssignment::JsStaticMemberAssignment(assignment) => assignment.to_trimmed_string(),
             _ => return None,
