@@ -1382,10 +1382,6 @@
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
 					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
 				},
-				"indentSize": {
-					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
-				},
 				"indentStyle": {
 					"description": "The indent style.",
 					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
@@ -1617,10 +1613,6 @@
 					"description": "Control the formatter for JavaScript (and its super languages) files.",
 					"type": ["boolean", "null"]
 				},
-				"indentSize": {
-					"description": "The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
-				},
 				"indentStyle": {
 					"description": "The indent style applied to JavaScript (and its super languages) files.",
 					"anyOf": [{ "$ref": "#/definitions/IndentStyle" }, { "type": "null" }]
@@ -1739,10 +1731,6 @@
 				"enabled": {
 					"description": "Control the formatter for JSON (and its super languages) files.",
 					"type": ["boolean", "null"]
-				},
-				"indentSize": {
-					"description": "The size of the indentation applied to JSON (and its super languages) files. Default to 2.",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style applied to JSON (and its super languages) files.",
@@ -2546,10 +2534,6 @@
 				"formatWithErrors": {
 					"description": "Stores whether formatting should be allowed to proceed if a given file has syntax errors",
 					"type": ["boolean", "null"]
-				},
-				"indentSize": {
-					"description": "The size of the indentation, 2 by default (deprecated, use `indent-width`)",
-					"anyOf": [{ "$ref": "#/definitions/IndentWidth" }, { "type": "null" }]
 				},
 				"indentStyle": {
 					"description": "The indent style.",

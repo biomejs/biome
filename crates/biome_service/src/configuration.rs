@@ -518,32 +518,7 @@ impl PartialConfigurationExt for PartialConfiguration {
 
     /// Checks for the presence of deprecated fields and updates the
     /// configuration to apply them to the new schema.
-    fn migrate_deprecated_fields(&mut self) {
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = self.formatter.as_mut() {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-        }
-
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = self
-            .javascript
-            .as_mut()
-            .and_then(|js| js.formatter.as_mut())
-        {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-        }
-
-        // TODO: remove in biome 2.0
-        if let Some(formatter) = self.json.as_mut().and_then(|json| json.formatter.as_mut()) {
-            if formatter.indent_size.is_some() && formatter.indent_width.is_none() {
-                formatter.indent_width = formatter.indent_size;
-            }
-        }
-    }
+    fn migrate_deprecated_fields(&mut self) {}
 
     /// This function checks if the VCS integration is enabled, and if so, it will attempts to resolve the
     /// VCS root directory and the `.gitignore` file.

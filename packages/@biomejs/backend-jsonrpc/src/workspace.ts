@@ -189,10 +189,6 @@ export interface PartialFormatterConfiguration {
 	 */
 	include?: StringSet;
 	/**
-	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
-	 */
-	indentSize?: IndentWidth;
-	/**
 	 * The indent style.
 	 */
 	indentStyle?: IndentStyle;
@@ -401,8 +397,8 @@ export interface PartialCssParser {
 }
 export type AttributePosition = "auto" | "multiline";
 export type BracketSpacing = boolean;
-export type IndentWidth = number;
 export type IndentStyle = "tab" | "space";
+export type IndentWidth = number;
 export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
@@ -486,10 +482,6 @@ export interface PartialJavascriptFormatter {
 	 */
 	enabled?: boolean;
 	/**
-	 * The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
-	 */
-	indentSize?: IndentWidth;
-	/**
 	 * The indent style applied to JavaScript (and its super languages) files.
 	 */
 	indentStyle?: IndentStyle;
@@ -569,10 +561,6 @@ export interface PartialJsonFormatter {
 	 * Control the formatter for JSON (and its super languages) files.
 	 */
 	enabled?: boolean;
-	/**
-	 * The size of the indentation applied to JSON (and its super languages) files. Default to 2.
-	 */
-	indentSize?: IndentWidth;
 	/**
 	 * The indent style applied to JSON (and its super languages) files.
 	 */
@@ -1993,10 +1981,6 @@ export interface OverrideFormatterConfiguration {
 	 * Stores whether formatting should be allowed to proceed if a given file has syntax errors
 	 */
 	formatWithErrors?: boolean;
-	/**
-	 * The size of the indentation, 2 by default (deprecated, use `indent-width`)
-	 */
-	indentSize?: IndentWidth;
 	/**
 	 * The indent style.
 	 */

@@ -50,12 +50,6 @@ pub struct JavascriptFormatter {
     ))]
     pub indent_style: Option<IndentStyle>,
 
-    // TODO: Remove in 2.0.0
-    /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
-    #[partial(deserializable(deprecated(use_instead = "javascript.formatter.indentWidth")))]
-    #[partial(bpaf(long("javascript-formatter-indent-size"), argument("NUMBER"), optional))]
-    pub indent_size: Option<IndentWidth>,
-
     /// The size of the indentation applied to JavaScript (and its super languages) files. Default to 2.
     #[partial(bpaf(
         long("javascript-formatter-indent-width"),
@@ -109,7 +103,6 @@ impl PartialJavascriptFormatter {
             bracket_spacing: self.bracket_spacing,
             bracket_same_line: self.bracket_same_line.unwrap_or_default(),
             indent_style: self.indent_style,
-            indent_size: self.indent_size,
             indent_width: self.indent_width,
             line_ending: self.line_ending,
             line_width: self.line_width,
@@ -131,7 +124,6 @@ impl Default for JavascriptFormatter {
             bracket_spacing: Default::default(),
             bracket_same_line: Default::default(),
             indent_style: Default::default(),
-            indent_size: Default::default(),
             indent_width: Default::default(),
             line_ending: Default::default(),
             line_width: Default::default(),
