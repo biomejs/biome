@@ -12,7 +12,7 @@ expression: content
   "javascript": {
     "formatter": {
       "lineWidth": 80,
-      "indentSize": 4
+      "indentWidth": 4
     }
   },
   "json": {
@@ -51,21 +51,6 @@ const a = {
 ```
 
 # Emitted Messages
-
-```block
-biome.json:8:17 deserialize  DEPRECATED  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The property indentSize is deprecated. Use javascript.formatter.indentWidth instead.
-  
-     6 │             "formatter": {
-     7 │                 "lineWidth": 80,
-   > 8 │                 "indentSize": 4
-       │                 ^^^^^^^^^^^^
-     9 │             }
-    10 │         },
-  
-
-```
 
 ```block
 Formatted 1 file in <TIME>. Fixed 1 file.
