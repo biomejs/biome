@@ -86,7 +86,7 @@ impl TestFormatLanguage for JsTestFormatLanguage {
                 .parser
                 .allow_wrong_line_comments
                 .unwrap_or_default(),
-            grit_metavariable: true,
+            grit_metavariables: true,
         };
         let css_format_options = CssFormatOptions::default().with_quote_style(
             settings

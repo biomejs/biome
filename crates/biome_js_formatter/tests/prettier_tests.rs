@@ -20,7 +20,7 @@ impl JsForeignLanguageFormatter for MultiLanguageFormatter {
     fn format(&self, language: JsForeignLanguage, source: &str) -> FormatResult<Document> {
         match language {
             JsForeignLanguage::Css => {
-                let parse_options = CssParserOptions::default().allow_grit_metavariables();
+                let parse_options = CssParserOptions::default().allow_metavariables();
                 let format_options = CssFormatOptions::default();
                 let parse = biome_css_parser::parse_css(source, parse_options);
                 if parse.has_errors() {

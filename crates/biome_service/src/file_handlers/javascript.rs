@@ -440,14 +440,13 @@ fn debug_formatter_ir(
         .map(|settings| CssParserOptions {
             css_modules: settings.css_modules.unwrap_or_default(),
             allow_wrong_line_comments: settings.allow_wrong_line_comments.unwrap_or_default(),
-            grit_metavariable: true,
+            grit_metavariables: true,
         })
         .unwrap_or_default();
     let css_format_options = settings.format_options::<CssLanguage>(path, document_file_source);
     let format_with_errors = settings
         .settings()
-        .map(|settings| settings.formatter.format_with_errors)
-        .unwrap_or_default();
+        .is_some_and(|settings| settings.formatter.format_with_errors);
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
@@ -764,7 +763,8 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
             }
             None => {
-                let css_parse_options = workspace
+                let css_parse_options = params
+                    .workspace
                     .settings()
                     .map(|settings| settings.languages.css.parser.clone())
                     .map(|settings| CssParserOptions {
@@ -772,15 +772,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                         allow_wrong_line_comments: settings
                             .allow_wrong_line_comments
                             .unwrap_or_default(),
-                        grit_metavariable: true,
+                        grit_metavariables: true,
                     })
                     .unwrap_or_default();
-                let css_format_options =
-                    workspace.format_options::<CssLanguage>(biome_path, &document_file_source);
-                let format_with_errors = workspace
+                let css_format_options = params
+                    .workspace
+                    .format_options::<CssLanguage>(params.biome_path, &params.document_file_source);
+                let format_with_errors = params
+                    .workspace
                     .settings()
-                    .map(|settings| settings.formatter.format_with_errors)
-                    .unwrap_or_default();
+                    .is_some_and(|settings| settings.formatter.format_with_errors);
                 let multi_language_formatter = MultiLanguageFormatter {
                     css_parse_options,
                     css_format_options,
@@ -830,15 +831,14 @@ pub(crate) fn format(
         .map(|settings| CssParserOptions {
             css_modules: settings.css_modules.unwrap_or_default(),
             allow_wrong_line_comments: settings.allow_wrong_line_comments.unwrap_or_default(),
-            grit_metavariable: true,
+            grit_metavariables: true,
         })
         .unwrap_or_default();
     let css_format_options =
         settings.format_options::<CssLanguage>(biome_path, document_file_source);
     let format_with_errors = settings
         .settings()
-        .map(|settings| settings.formatter.format_with_errors)
-        .unwrap_or_default();
+        .is_some_and(|settings| settings.formatter.format_with_errors);
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
@@ -871,15 +871,14 @@ pub(crate) fn format_range(
         .map(|settings| CssParserOptions {
             css_modules: settings.css_modules.unwrap_or_default(),
             allow_wrong_line_comments: settings.allow_wrong_line_comments.unwrap_or_default(),
-            grit_metavariable: true,
+            grit_metavariables: true,
         })
         .unwrap_or_default();
     let css_format_options =
         settings.format_options::<CssLanguage>(biome_path, document_file_source);
     let format_with_errors = settings
         .settings()
-        .map(|settings| settings.formatter.format_with_errors)
-        .unwrap_or_default();
+        .is_some_and(|settings| settings.formatter.format_with_errors);
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,
@@ -930,14 +929,13 @@ pub(crate) fn format_on_type(
         .map(|settings| CssParserOptions {
             css_modules: settings.css_modules.unwrap_or_default(),
             allow_wrong_line_comments: settings.allow_wrong_line_comments.unwrap_or_default(),
-            grit_metavariable: true,
+            grit_metavariables: true,
         })
         .unwrap_or_default();
     let css_format_options = settings.format_options::<CssLanguage>(path, document_file_source);
     let format_with_errors = settings
         .settings()
-        .map(|settings| settings.formatter.format_with_errors)
-        .unwrap_or_default();
+        .is_some_and(|settings| settings.formatter.format_with_errors);
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
         css_format_options,

@@ -21,7 +21,7 @@ impl JsForeignLanguageFormatter for MultiLanguageFormatter {
         language: biome_js_formatter::JsForeignLanguage,
         source: &str,
     ) -> biome_formatter::FormatResult<biome_formatter::prelude::Document> {
-        let css_parse_options = CssParserOptions::default().allow_grit_metavariables();
+        let css_parse_options = CssParserOptions::default().allow_metavariables();
         let css_format_options = CssFormatOptions::default();
         match language {
             JsForeignLanguage::Css => {

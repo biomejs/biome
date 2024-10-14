@@ -134,10 +134,7 @@ impl JsForeignLanguageFormatter for MultiLanguageFormatter {
     fn format(&self, language: JsForeignLanguage, source: &str) -> FormatResult<Document> {
         match language {
             JsForeignLanguage::Css => {
-                let parse = parse_css(
-                    source,
-                    CssParserOptions::default().allow_grit_metavariables(),
-                );
+                let parse = parse_css(source, CssParserOptions::default().allow_metavariables());
                 if parse.has_errors() {
                     return Err(FormatError::SyntaxError);
                 }

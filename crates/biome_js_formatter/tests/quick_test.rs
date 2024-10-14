@@ -69,7 +69,7 @@ function outerFunctionToForceIndent() {
         .with_arrow_parentheses(ArrowParentheses::AsNeeded)
         .with_attribute_position(AttributePosition::Multiline);
 
-    let css_parse_options = CssParserOptions::default().allow_grit_metavariables();
+    let css_parse_options = CssParserOptions::default().allow_metavariables();
     let css_format_options = CssFormatOptions::default();
     let multi_language_formatter = MultiLanguageFormatter {
         css_parse_options,
