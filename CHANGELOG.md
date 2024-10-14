@@ -156,6 +156,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function/) correctly handles `calc-size` function ([#4212](https://github.com/biomejs/biome/issues/4212)).
+
+ The following code `calc-size` is no longer reported as unknown:
+
+ ```css
+ .a { height: calc-size(0px); }
+ ```
+
+ Contributed by @fireairforce
+
 ### Parser
 
 #### Bug Fixes
