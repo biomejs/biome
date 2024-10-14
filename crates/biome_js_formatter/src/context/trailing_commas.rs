@@ -96,9 +96,9 @@ impl FromStr for TrailingCommas {
 impl fmt::Display for TrailingCommas {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TrailingCommas::Es5 => std::write!(f, "es5"),
-            TrailingCommas::All => std::write!(f, "all"),
-            TrailingCommas::None => std::write!(f, "non"),
+            TrailingCommas::Es5 => std::write!(f, "ES5"),
+            TrailingCommas::All => std::write!(f, "All"),
+            TrailingCommas::None => std::write!(f, "None"),
         }
     }
 }
