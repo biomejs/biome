@@ -156,6 +156,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useConsistentMemberAccessibility](https://biomejs.dev/linter/rules/use-consistent-member-accessibility/) now ignore private class members such as `#property` ([#4276](https://github.com/biomejs/biome/issues/4276)). Contributed by @Conaclos
+
 - [noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function/) correctly handles `calc-size` function ([#4212](https://github.com/biomejs/biome/issues/4212)).
 
  The following code `calc-size` is no longer reported as unknown:
