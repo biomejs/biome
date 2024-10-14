@@ -1,4 +1,3 @@
-use biome_console::fmt::Display;
 use biome_console::markup;
 use biome_diagnostics::adapters::{BpafError, IoError, SerdeJsonError};
 use biome_diagnostics::{
@@ -256,14 +255,6 @@ pub struct MigrationDiagnostic {
 pub struct DeprecatedArgument {
     #[message]
     pub message: MessageAndDescription,
-}
-
-impl DeprecatedArgument {
-    pub fn new(message: impl Display) -> Self {
-        Self {
-            message: MessageAndDescription::from(markup! {{message}}.to_owned()),
-        }
-    }
 }
 
 #[derive(Debug, Diagnostic)]
