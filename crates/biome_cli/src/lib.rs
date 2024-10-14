@@ -6,7 +6,7 @@
 //! to parse commands and arguments, redirect the execution of the commands and
 //! execute the traversal of directory and files, based on the command that were passed.
 
-use biome_console::{markup, ColorMode, Console, ConsoleExt};
+use biome_console::{ColorMode, Console};
 use biome_fs::OsFileSystem;
 use biome_service::{App, DynRef, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
@@ -68,12 +68,6 @@ impl<'app> CliSession<'app> {
         let has_metrics = command.has_metrics();
         if has_metrics {
             crate::metrics::init_metrics();
-        }
-        // TODO: remove in Biome v2
-        if env::var_os("BIOME_LOG_DIR").is_some() {
-            self.app.console.log(markup! {
-                <Warn>"The use of BIOME_LOG_DIR is deprecated. Use BIOME_LOG_PATH instead."</Warn>
-            });
         }
 
         let result = match command {
