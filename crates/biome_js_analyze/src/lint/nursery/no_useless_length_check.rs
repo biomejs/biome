@@ -154,6 +154,7 @@ fn get_comparing_length_exp(
 
 pub type Replacer = (JsLogicalExpression, AnyJsExpression, TextRange);
 
+/// Search for logical expressions and list expressions that compare to 0 and Array APIs (`.some()`, `.every()`).
 fn search_logical_exp(
     any_exp: &AnyJsExpression,
     replacer: Option<Replacer>,
