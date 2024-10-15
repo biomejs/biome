@@ -294,6 +294,28 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
         p.eat(T![type]);
     }
 
+    // test js import_defer_clause
+    // import defer * as yNamespace from "y";
+    let is_defer = 'is_defer: {
+        if !p.at(T![defer]) {
+            break 'is_defer false;
+        }
+
+        if matches!(p.nth(1), T![*] | T!['{']) {
+            break 'is_defer true;
+        }
+
+        if !is_nth_at_identifier_binding(p, 1) {
+            break 'is_defer false;
+        }
+
+        !p.nth_at(1, T![from]) || p.nth_at(2, T![from])
+    };
+
+    if is_defer {
+        p.eat(T![defer]);
+    }
+
     let clause = match p.cur() {
         T![*] => parse_import_namespace_clause_rest(p, m),
         T!['{'] => parse_import_named_clause_rest(p, m),

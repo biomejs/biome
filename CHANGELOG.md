@@ -178,6 +178,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+#### New features
+
+- JS Parser support defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
+  
+   ```js
+   import defer * as myModule from "my-module";
+   ```
+
+  Contributed by @fireairforce
+
 #### Bug Fixes
 
 - The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
