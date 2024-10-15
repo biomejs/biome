@@ -85,7 +85,7 @@ pub enum ErrorType {
     UselessLengthCheckWithEvery,
 }
 
-// Whether the node is a descendant of a logical expression.
+/// Whether the node is a descendant of a logical expression.
 fn is_logical_exp_descendant(node: &AnyJsExpression, operator: JsSyntaxKind) -> bool {
     let Some(parent) = node.syntax().parent() else {
         return false;
