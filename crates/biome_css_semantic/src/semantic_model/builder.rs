@@ -1,16 +1,17 @@
-use biome_css_syntax::{CssRoot, CssSyntaxKind, CssSyntaxNode};
+use std::collections::BTreeMap;
+
+use biome_css_syntax::CssRoot;
 use biome_rowan::TextRange;
 use rustc_hash::FxHashMap;
 
 use super::model::{
     CssDeclaration, CssGlobalCustomVariable, Rule, RuleId, Selector, SemanticModel,
-    SemanticModelData,
+    SemanticModelData, Specificity,
 };
 use crate::events::SemanticEvent;
 
 pub struct SemanticModelBuilder {
     root: CssRoot,
-    node_by_range: FxHashMap<TextRange, CssSyntaxNode>,
     /// List of all top-level rules in the CSS file
     rules: Vec<Rule>,
     global_custom_variables: FxHashMap<String, CssGlobalCustomVariable>,
@@ -18,7 +19,7 @@ pub struct SemanticModelBuilder {
     current_rule_stack: Vec<RuleId>,
     next_rule_id: RuleId,
     /// Map to get the rule containing the given range of CST nodes
-    range_to_rule: FxHashMap<TextRange, Rule>,
+    range_to_rule: BTreeMap<TextRange, Rule>,
     rules_by_id: FxHashMap<RuleId, Rule>,
     /// Indicates if the current node is within a `:root` selector
     is_in_root_selector: bool,
@@ -28,11 +29,10 @@ impl SemanticModelBuilder {
     pub fn new(root: CssRoot) -> Self {
         Self {
             root,
-            node_by_range: FxHashMap::default(),
             rules: Vec::new(),
             current_rule_stack: Vec::new(),
             global_custom_variables: FxHashMap::default(),
-            range_to_rule: FxHashMap::default(),
+            range_to_rule: BTreeMap::default(),
             is_in_root_selector: false,
             next_rule_id: RuleId::default(),
             rules_by_id: FxHashMap::default(),
@@ -42,24 +42,12 @@ impl SemanticModelBuilder {
     pub fn build(self) -> SemanticModel {
         let data = SemanticModelData {
             root: self.root,
-            node_by_range: self.node_by_range,
             rules: self.rules,
             global_custom_variables: self.global_custom_variables,
             range_to_rule: self.range_to_rule,
             rules_by_id: self.rules_by_id,
         };
         SemanticModel::new(data)
-    }
-
-    #[inline]
-    pub fn push_node(&mut self, node: &CssSyntaxNode) {
-        use CssSyntaxKind::*;
-        if matches!(
-            node.kind(),
-            CSS_SELECTOR_LIST | CSS_DECLARATION | CSS_DECLARATION_OR_RULE_LIST | CSS_QUALIFIED_RULE
-        ) {
-            self.node_by_range.insert(node.text_range(), node.clone());
-        }
     }
 
     #[inline]
@@ -78,6 +66,7 @@ impl SemanticModelBuilder {
                     range,
                     parent_id,
                     child_ids: Vec::new(),
+                    specificity: Specificity::default(),
                 };
 
                 if let Some(&parent_id) = self.current_rule_stack.last() {
@@ -107,15 +96,28 @@ impl SemanticModelBuilder {
             SemanticEvent::SelectorDeclaration {
                 name,
                 range,
+                original,
                 specificity,
             } => {
-                if let Some(current_rule) = self.current_rule_stack.last_mut() {
+                let parent_specificity = self
+                    .current_rule_stack
+                    .last()
+                    .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                    .and_then(|rule| rule.parent_id)
+                    .and_then(|parent_id| self.rules_by_id.get(&parent_id))
+                    .map(|parent| parent.specificity.clone())
+                    .unwrap_or_default();
+
+                if let Some(current_rule) = self.current_rule_stack.last() {
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
                     current_rule.selectors.push(Selector {
                         name,
                         range,
-                        specificity,
+                        original,
+                        specificity: parent_specificity + specificity.clone(),
                     });
+
+                    current_rule.specificity += specificity;
                 }
             }
             SemanticEvent::PropertyDeclaration {

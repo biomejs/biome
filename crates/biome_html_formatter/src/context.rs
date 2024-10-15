@@ -4,7 +4,7 @@ use biome_formatter::{
     printer::PrinterOptions, AttributePosition, BracketSpacing, CstFormatContext, FormatContext,
     FormatOptions, IndentStyle, IndentWidth, LineEnding, LineWidth, TransformSourceMap,
 };
-use biome_html_syntax::HtmlLanguage;
+use biome_html_syntax::{HtmlFileSource, HtmlLanguage};
 
 use crate::comments::{FormatHtmlLeadingComment, HtmlCommentStyle, HtmlComments};
 
@@ -27,7 +27,7 @@ pub struct HtmlFormatOptions {
 }
 
 impl HtmlFormatOptions {
-    pub fn new() -> Self {
+    pub fn new(_file_source: HtmlFileSource) -> Self {
         Self {
             ..Default::default()
         }

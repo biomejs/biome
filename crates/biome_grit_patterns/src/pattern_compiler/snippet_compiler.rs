@@ -11,7 +11,7 @@ use grit_pattern_matcher::{
     constants::GLOBAL_VARS_SCOPE_INDEX,
     pattern::{
         is_reserved_metavariable, DynamicPattern, DynamicSnippet, DynamicSnippetPart, List,
-        Pattern, RegexLike, RegexPattern, Variable,
+        Pattern, RegexLike, RegexPattern, Variable, VariableSource,
     },
 };
 use grit_util::{traverse, Ast, AstNode, ByteRange, GritMetaValue, Language, Order, SnippetTree};
@@ -108,16 +108,18 @@ pub(crate) fn dynamic_snippet_from_source(
             source_range.start + byte_range.start + var.len(),
         );
         if let Some(var) = context.vars.get(var.as_ref()) {
-            context.vars_array[context.scope_index][*var]
-                .locations
-                .insert(range);
+            if let VariableSource::Compiled { locations, .. } =
+                &mut context.vars_array[context.scope_index][*var]
+            {
+                locations.insert(range);
+            }
             parts.push(DynamicSnippetPart::Variable(Variable::new(
                 context.scope_index,
                 *var,
             )));
         } else if let Some(var) = context.global_vars.get(var.as_ref()) {
             parts.push(DynamicSnippetPart::Variable(Variable::new(
-                GLOBAL_VARS_SCOPE_INDEX,
+                GLOBAL_VARS_SCOPE_INDEX.into(),
                 *var,
             )));
         } else if var.starts_with("$GLOBAL_") {
@@ -213,7 +215,7 @@ fn pattern_from_node(
         return Ok(metavariable);
     }
 
-    if node.slots().is_none() {
+    let Some(slots) = node.slots() else {
         let content = node.text();
         let lang = &context.compilation.lang;
         let pattern = if let Some(regex_pattern) = lang
@@ -227,22 +229,19 @@ fn pattern_from_node(
         };
 
         return Ok(pattern);
-    }
+    };
 
     let kind = node.kind();
-    let args = node
-        .slots()
-        .map(|slots| {
-            // TODO: Implement filtering for disregarded snippet fields.
-            // Implementing this will make it more convenient to match
-            // CST nodes without needing to match all the trivia in the
-            // snippet (if I understand correctly).
-            slots
-                .map(|slot| pattern_arg_from_slot(slot, context_range, range_map, context, is_rhs))
-                .collect::<Result<Vec<GritNodePatternArg>, CompileError>>()
+    let args = slots
+        .filter(|slot| {
+            !context.compilation.lang.is_disregarded_snippet_field(
+                kind,
+                slot.index(),
+                node.child_by_slot_index(slot.index()),
+            )
         })
-        .transpose()?
-        .unwrap_or_default();
+        .map(|slot| pattern_arg_from_slot(slot, context_range, range_map, context, is_rhs))
+        .collect::<Result<Vec<GritNodePatternArg>, CompileError>>()?;
 
     Ok(Pattern::AstNode(Box::new(GritNodePattern { kind, args })))
 }
@@ -815,8 +814,12 @@ mod tests {
                                         slot_index: 0,
                                         pattern: Variable(
                                             Variable {
-                                                scope: 0,
-                                                index: 0,
+                                                internal: Static(
+                                                    VariableScope {
+                                                        scope: 0,
+                                                        index: 0,
+                                                    },
+                                                ),
                                             },
                                         ),
                                     },
@@ -880,8 +883,12 @@ mod tests {
                                                                         slot_index: 0,
                                                                         pattern: Variable(
                                                                             Variable {
-                                                                                scope: 0,
-                                                                                index: 0,
+                                                                                internal: Static(
+                                                                                    VariableScope {
+                                                                                        scope: 0,
+                                                                                        index: 0,
+                                                                                    },
+                                                                                ),
                                                                             },
                                                                         ),
                                                                     },
@@ -983,8 +990,12 @@ mod tests {
                                         slot_index: 0,
                                         pattern: Variable(
                                             Variable {
-                                                scope: 0,
-                                                index: 0,
+                                                internal: Static(
+                                                    VariableScope {
+                                                        scope: 0,
+                                                        index: 0,
+                                                    },
+                                                ),
                                             },
                                         ),
                                     },
@@ -1012,8 +1023,12 @@ mod tests {
                                                         slot_index: 0,
                                                         pattern: Variable(
                                                             Variable {
-                                                                scope: 0,
-                                                                index: 0,
+                                                                internal: Static(
+                                                                    VariableScope {
+                                                                        scope: 0,
+                                                                        index: 0,
+                                                                    },
+                                                                ),
                                                             },
                                                         ),
                                                     },
@@ -1137,8 +1152,12 @@ mod tests {
                                         slot_index: 0,
                                         pattern: Variable(
                                             Variable {
-                                                scope: 0,
-                                                index: 0,
+                                                internal: Static(
+                                                    VariableScope {
+                                                        scope: 0,
+                                                        index: 0,
+                                                    },
+                                                ),
                                             },
                                         ),
                                     },
@@ -1202,8 +1221,12 @@ mod tests {
                                                                         slot_index: 0,
                                                                         pattern: Variable(
                                                                             Variable {
-                                                                                scope: 0,
-                                                                                index: 0,
+                                                                                internal: Static(
+                                                                                    VariableScope {
+                                                                                        scope: 0,
+                                                                                        index: 0,
+                                                                                    },
+                                                                                ),
                                                                             },
                                                                         ),
                                                                     },

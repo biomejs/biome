@@ -9,6 +9,7 @@ use biome_graphql_syntax::{
     GraphqlVariableDefinitions,
 };
 use biome_rowan::{AstNode, TextRange};
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// No duplicated fields in GraphQL operations.
@@ -48,10 +49,10 @@ declare_lint_rule! {
 impl Rule for NoDuplicatedFields {
     type Query = Ast<AnyGraphqlOperationDefinition>;
     type State = DuplicatedField;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let operation = ctx.query();
         let mut duplicated_fields = vec![];
         match operation {
@@ -67,8 +68,7 @@ impl Rule for NoDuplicatedFields {
                 duplicated_fields.extend(check_duplicated_selection_fields(selection_set))
             }
         };
-
-        duplicated_fields
+        duplicated_fields.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -78,7 +78,7 @@ impl Rule for NoDuplicatedFields {
             name,
         } = state;
         let field_type = field_type.as_str();
-        let lowercased_field_type = field_type.to_lowercase();
+        let lowercased_field_type = field_type.to_lowercase_cow();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),

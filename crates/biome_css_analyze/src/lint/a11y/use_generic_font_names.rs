@@ -7,6 +7,7 @@ use biome_css_syntax::{
     CssGenericComponentValueList, CssGenericProperty, CssSyntaxKind,
 };
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
+use biome_string_case::StrOnlyExtension;
 
 use crate::utils::{
     find_font_family, is_css_variable, is_font_family_keyword, is_system_family_name_keyword,
@@ -76,7 +77,8 @@ impl Rule for UseGenericFontNames {
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
-        let property_name = node.name().ok()?.text().to_lowercase();
+        let property_name = node.name().ok()?.text();
+        let property_name = property_name.to_lowercase_cow();
 
         // Ignore `@font-face`. See more detail: https://drafts.csswg.org/css-fonts/#font-face-rule
         if is_in_font_face_at_rule(node) {

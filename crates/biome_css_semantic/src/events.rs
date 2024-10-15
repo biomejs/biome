@@ -1,14 +1,17 @@
-use std::collections::VecDeque;
+use std::{borrow::Cow, collections::VecDeque};
 
 use biome_css_syntax::{
     AnyCssSelector, CssDeclarationBlock, CssRelativeSelector, CssSyntaxKind::*,
 };
-use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
+use biome_rowan::{AstNode, SyntaxNodeCast, SyntaxNodeOptionExt, TextRange};
 
 use crate::{
     model::{CssProperty, CssValue},
     semantic_model::model::Specificity,
+    specificity::{evaluate_complex_selector, evaluate_compound_selector},
 };
+
+const ROOT_SELECTOR: &str = ":root";
 
 #[derive(Debug)]
 pub enum SemanticEvent {
@@ -17,6 +20,7 @@ pub enum SemanticEvent {
     SelectorDeclaration {
         name: String,
         range: TextRange,
+        original: AnyCssSelector,
         specificity: Specificity,
     },
     PropertyDeclaration {
@@ -68,11 +72,23 @@ impl SemanticEventExtractor {
                 self.current_rule_stack.push(range);
             }
             CSS_SELECTOR_LIST => {
+                if !matches!(
+                    node.parent().kind(),
+                    Some(CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE)
+                ) {
+                    return;
+                };
                 node.children()
                     .filter_map(AnyCssSelector::cast)
                     .for_each(|s| self.process_selector(s));
             }
             CSS_RELATIVE_SELECTOR_LIST => {
+                if !matches!(
+                    node.parent().kind(),
+                    Some(CSS_QUALIFIED_RULE | CSS_NESTED_QUALIFIED_RULE)
+                ) {
+                    return;
+                };
                 node.children()
                     .filter_map(CssRelativeSelector::cast)
                     .filter_map(|s| s.selector().ok())
@@ -84,11 +100,11 @@ impl SemanticEventExtractor {
                         self.stash.push_back(SemanticEvent::PropertyDeclaration {
                             property: CssProperty {
                                 name: property_name.text_trimmed().to_string(),
-                                range: property_name.text_range(),
+                                range: property_name.text_trimmed_range(),
                             },
                             value: CssValue {
                                 text: value.text_trimmed().to_string(),
-                                range: value.text_range(),
+                                range: value.text_trimmed_range(),
                             },
                             range: node.text_range(),
                         });
@@ -102,22 +118,32 @@ impl SemanticEventExtractor {
         }
     }
 
+    #[inline]
     fn process_selector(&mut self, selector: AnyCssSelector) {
         match selector {
             AnyCssSelector::CssComplexSelector(s) => {
-                if let Ok(l) = s.left() {
-                    self.add_selector_event(l.text(), l.range());
-                }
-                if let Ok(r) = s.right() {
-                    self.add_selector_event(r.text(), r.range());
-                }
+                let specificity = evaluate_complex_selector(&s);
+                self.add_selector_event(
+                    Cow::Borrowed(&s.text()),
+                    s.range(),
+                    AnyCssSelector::CssComplexSelector(s),
+                    specificity,
+                );
             }
+
             AnyCssSelector::CssCompoundSelector(selector) => {
-                if selector.text() == ":root" {
+                let selector_text = selector.text();
+                if selector_text == ROOT_SELECTOR {
                     self.stash.push_back(SemanticEvent::RootSelectorStart);
                     self.is_in_root_selector = true;
                 }
-                self.add_selector_event(selector.text().to_string(), selector.range())
+                let specificity = evaluate_compound_selector(&selector);
+                self.add_selector_event(
+                    Cow::Borrowed(&selector_text),
+                    selector.range(),
+                    AnyCssSelector::CssCompoundSelector(selector),
+                    specificity,
+                )
             }
             _ => {}
         }
@@ -194,11 +220,18 @@ impl SemanticEventExtractor {
         });
     }
 
-    fn add_selector_event(&mut self, name: String, range: TextRange) {
+    fn add_selector_event(
+        &mut self,
+        name: Cow<str>,
+        range: TextRange,
+        original: AnyCssSelector,
+        specificity: Specificity,
+    ) {
         self.stash.push_back(SemanticEvent::SelectorDeclaration {
-            name,
+            name: name.into_owned(),
             range,
-            specificity: Specificity(0, 0, 0), // TODO: Implement this
+            original,
+            specificity,
         });
     }
 

@@ -91,3 +91,8 @@ L-HTML:
 - changed-files:
   - any-glob-to-any-file:
     - crates/biome_html_*/**
+
+L-Grit:
+- changed-files:
+  - any-glob-to-any-file:
+    - crates/biome_grit_*/**

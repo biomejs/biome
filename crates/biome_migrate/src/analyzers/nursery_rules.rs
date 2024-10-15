@@ -135,12 +135,12 @@ const RULES_TO_MIGRATE: &[(&str, (&str, &str))] = &[
 impl Rule for NurseryRules {
     type Query = Ast<JsonRoot>;
     type State = MigrateRuleState;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let mut rules_to_migrate = vec![];
+        let mut rules_to_migrate = Vec::new();
 
         if let Some(nursery_group) = find_group_by_name(node, "nursery") {
             let mut rules_should_be_migrated = FxHashMap::default();
@@ -153,7 +153,7 @@ impl Rule for NurseryRules {
                 .ok()
                 .and_then(|node| node.as_json_object_value().cloned())
             else {
-                return rules_to_migrate;
+                return rules_to_migrate.into_boxed_slice();
             };
 
             let mut separator_iterator = nursery_group_object
@@ -195,7 +195,7 @@ impl Rule for NurseryRules {
             }
         }
 
-        rules_to_migrate
+        rules_to_migrate.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

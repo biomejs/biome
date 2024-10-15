@@ -65,17 +65,7 @@ info: css/inline-url/inline_url.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -7,7 +7,8 @@
- }
- 
- .validUnquotedUrls {
--  background: url(whitespace-around-string);
-+  background: url(whitespace-around-string
-+  );
-   background-image: url(/images/product/simple_product_manager/breadcrumb/chevron_right.png);
-   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO4/B8AAqgB0yr7dJgAAAAASUVORK5CYII=);
-   background-image: url(data:application/font-woff;charset=utf-8;base64,ThisIsNormalBut/+0ThisIsLowerCased);
-@@ -42,7 +43,7 @@
+@@ -42,7 +42,7 @@
    background-image: url(http://123.com);
    background: url(path/to/123.jpg);
    background: url(#123.foo);
@@ -100,8 +90,7 @@ info: css/inline-url/inline_url.css
 }
 
 .validUnquotedUrls {
-  background: url(whitespace-around-string
-  );
+  background: url(whitespace-around-string);
   background-image: url(/images/product/simple_product_manager/breadcrumb/chevron_right.png);
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO4/B8AAqgB0yr7dJgAAAAASUVORK5CYII=);
   background-image: url(data:application/font-woff;charset=utf-8;base64,ThisIsNormalBut/+0ThisIsLowerCased);
@@ -164,10 +153,10 @@ inline_url.css:29:19 parse ━━━━━━━━━━━━━━━━━�
 
 # Lines exceeding max width of 80 characters
 ```
-   12:   background-image: url(/images/product/simple_product_manager/breadcrumb/chevron_right.png);
-   13:   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO4/B8AAqgB0yr7dJgAAAAASUVORK5CYII=);
-   14:   background-image: url(data:application/font-woff;charset=utf-8;base64,ThisIsNormalBut/+0ThisIsLowerCased);
-   15:   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO4/B8AAqgB0yr7dJgAAAAASUVORK5CYII=)
-   17:   background: url(data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%229%22%20height=%229%22%3E%3Cpath%20d=%22M0%203h3%22%20stroke=%22red%22/%3E%3C/svg%3E);
-   24: @import url(https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&display=swap);
+   11:   background-image: url(/images/product/simple_product_manager/breadcrumb/chevron_right.png);
+   12:   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO4/B8AAqgB0yr7dJgAAAAASUVORK5CYII=);
+   13:   background-image: url(data:application/font-woff;charset=utf-8;base64,ThisIsNormalBut/+0ThisIsLowerCased);
+   14:   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mO4/B8AAqgB0yr7dJgAAAAASUVORK5CYII=)
+   16:   background: url(data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%229%22%20height=%229%22%3E%3Cpath%20d=%22M0%203h3%22%20stroke=%22red%22/%3E%3C/svg%3E);
+   23: @import url(https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900&display=swap);
 ```

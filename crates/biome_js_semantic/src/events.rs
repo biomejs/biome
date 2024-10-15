@@ -439,7 +439,9 @@ impl SemanticEventExtractor {
         let node = node.syntax();
         if matches!(
             node.kind(),
-            JsSyntaxKind::TS_FUNCTION_TYPE | JsSyntaxKind::TS_MAPPED_TYPE
+            JsSyntaxKind::TS_CONSTRUCTOR_TYPE
+                | JsSyntaxKind::TS_FUNCTION_TYPE
+                | JsSyntaxKind::TS_MAPPED_TYPE
         ) {
             self.push_scope(
                 node.text_trimmed_range(),
@@ -811,7 +813,9 @@ impl SemanticEventExtractor {
         let node = node.syntax();
         if matches!(
             node.kind(),
-            JsSyntaxKind::TS_FUNCTION_TYPE | JsSyntaxKind::TS_MAPPED_TYPE
+            JsSyntaxKind::TS_CONSTRUCTOR_TYPE
+                | JsSyntaxKind::TS_FUNCTION_TYPE
+                | JsSyntaxKind::TS_MAPPED_TYPE
         ) {
             self.pop_scope(node.text_trimmed_range());
         }

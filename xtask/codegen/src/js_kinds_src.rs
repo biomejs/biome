@@ -155,6 +155,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "of",
         "out",
         "using",
+        "defer",
     ],
     literals: &[
         "JS_NUMBER_LITERAL",
@@ -688,6 +689,8 @@ impl Field {
                     ("~=", _) => "whitespace_like",
                     (",", _) => "comma",
                     ("---", LanguageKind::Yaml) => "dashdashdash",
+                    ("<!--", LanguageKind::Html) => "comment_start",
+                    ("-->", LanguageKind::Html) => "comment_end",
                     _ => name,
                 };
 

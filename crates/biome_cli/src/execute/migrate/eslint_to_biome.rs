@@ -224,13 +224,16 @@ fn migrate_eslint_rule(
         eslint_eslint::Rule::NoRestrictedGlobals(conf) => {
             if migrate_eslint_any_rule(rules, &name, conf.severity(), opts, results) {
                 let severity = conf.severity();
-                let globals = conf.into_vec().into_iter().map(|g| g.into_name());
+                let globals = conf
+                    .into_vec()
+                    .into_iter()
+                    .map(|g| g.into_name().into_boxed_str());
                 let group = rules.style.get_or_insert_with(Default::default);
                 group.no_restricted_globals = Some(biome_config::RuleConfiguration::WithOptions(
                     biome_config::RuleWithOptions {
                         level: severity.into(),
                         options: Box::new(no_restricted_globals::RestrictedGlobalsOptions {
-                            denied_globals: globals.collect(),
+                            denied_globals: globals.collect::<Vec<_>>().into_boxed_slice(),
                         }),
                     },
                 ));

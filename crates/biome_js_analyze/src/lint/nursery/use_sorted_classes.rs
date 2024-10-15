@@ -165,6 +165,9 @@ impl Rule for UseSortedClasses {
                 let ignore_postfix = should_ignore_postfix(node);
                 let sorted_value =
                     sort_class_name(&value, &SORT_CONFIG, ignore_prefix, ignore_postfix);
+                if sorted_value.is_empty() {
+                    return None;
+                }
                 if value.text() != sorted_value {
                     return Some(sorted_value);
                 }

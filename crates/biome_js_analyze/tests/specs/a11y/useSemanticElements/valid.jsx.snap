@@ -19,44 +19,16 @@ export const Component2 = () => (
     </div>
 );
 
-export const C = <svg role="img" aria-label="Description of your SVG image">
-</svg>;
+<>
+    <svg role="img" aria-label="Description of your SVG image"></svg>
+    <div role="img" aria-label="Description of the overall image">
+    <img src="graphic1.png" alt="" />
+    <img src="graphic2.png" />
+    </div>
+</>;
 
 <>
     <div role="alert"></div>
     <div role="alertdialog"></div>
-</>
-```
-
-# Diagnostics
-```
-valid.jsx:20:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The element with this role can be changed to a DOM element that already this role.
-  
-    19 │ <>
-  > 20 │     <div role="alert"></div>
-       │          ^^^^^^^^^^^^
-    21 │     <div role="alertdialog"></div>
-    22 │ </>
-  
-  i For examples and more information, see WAI-ARIA Roles
-  
-
-```
-
-```
-valid.jsx:21:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The element with this role can be changed to a DOM element that already this role.
-  
-    19 │ <>
-    20 │     <div role="alert"></div>
-  > 21 │     <div role="alertdialog"></div>
-       │          ^^^^^^^^^^^^^^^^^^
-    22 │ </>
-  
-  i For examples and more information, see WAI-ARIA Roles
-  
-
+</>;
 ```

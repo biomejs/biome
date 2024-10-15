@@ -52,20 +52,19 @@ declare_lint_rule! {
 impl Rule for NoEmptyCharacterClassInRegex {
     type Query = Ast<JsRegexLiteralExpression>;
     type State = Range<usize>;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let mut empty_classes = vec![];
         let regex = ctx.query();
         let Ok((pattern, flags)) = regex.decompose() else {
-            return empty_classes;
+            return empty_classes.into_boxed_slice();
         };
         let has_v_flag = flags.text().contains('v');
         let trimmed_text = pattern.text();
         let mut class_start_index = None;
         let mut is_negated_class = false;
-        // We use `char_indices` to get the byte index of every character
         let mut enumerated_char_iter = trimmed_text.bytes().enumerate();
         while let Some((i, ch)) = enumerated_char_iter.next() {
             match ch {
@@ -96,7 +95,7 @@ impl Rule for NoEmptyCharacterClassInRegex {
                 _ => {}
             }
         }
-        empty_classes
+        empty_classes.into_boxed_slice()
     }
 
     fn diagnostic(

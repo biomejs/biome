@@ -13,9 +13,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### Bug fixes
+
+- Improved the message for unused suppression comments. Contributed by @dyc3
+
 ### CLI
 
+#### Enhancements
+
+- The `--summary` reporter now reports parsing diagnostics too. Contributed by @ematipico
+
+- Improved performance of GritQL queries by roughly 25-30%. Contributed by @arendjr
+
 ### Configuration
+
+#### Bug fixes
+
+- Fix an issue where the JSON schema marked lint rules options as mandatory. Contributed by @ematipico
 
 ### Editors
 
@@ -23,13 +37,338 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Fix [#3924](https://github.com/biomejs/biome/issues/3924) where GraphQL formatter panics in block comments with empty line. Contributed by @vohoanglong0107
+- Fix [#4121](https://github.com/biomejs/biome/issues/4121). Respect line width when printing multiline strings. Contributed by @ah-yu
 
-### JavaScript API
+### JavaScript APIs
 
 ### Linter
 
+#### New features
+
+- Add [noDocumentCookie](https://biomejs.dev/linter/rules/no-document-cookie/). Contributed by @tunamaguro
+- Add [noDocumentImportInPage](https://biomejs.dev/linter/rules/no-document-import-in-page/). Contributed by @kaioduarte
+- Add [noHeadElement](https://biomejs.dev/linter/rules/no-head-element/). Contributed by @kaioduarte
+- Add [noHeadImportInDocument](https://biomejs.dev/linter/rules/no-head-import-in-document/). Contributed by @kaioduarte
+- Add [noImgElement](https://biomejs.dev/linter/rules/no-img-element/). Contributed by @kaioduarte
+- Add [guardForIn](https://biomejs.dev/linter/rules/guard-for-in/). Contributed by @fireairforce
+- Add [noUselessStringRaw](https://github.com/biomejs/biome/pull/4263). Contributed by @fireairforce
+
+#### Bug Fixes
+
+- Biome no longer crashes when it encounters a string that contain a multibyte character ([#4181](https://github.com/biomejs/biome/issues/4181)).
+
+  This fixes a regression introduced in Biome 1.9.3
+  The regression affected the following linter rules:
+
+  - nursery/useSortedClasses
+  - nursery/useTrimStartEnd
+  - style/useTemplate
+  - suspicious/noMisleadingCharacterClass
+
+  Contributed by @Conaclos
+
+- Fix [#4190](https://github.com/biomejs/biome/issues/4190), where the rule `noMissingVarFunction` wrongly reported a variable as missing when used inside a `var()`  function that was a newline. Contributed by @ematipico
+
+- Fix [#4041](https://github.com/biomejs/biome/issues/4041). Now the rule `useSortedClasses` won't be triggered if `className` is composed only by inlined variables. Contributed by @ematipico
+
+- [useImportType](https://biomejs.dev/linter/rules/use-import-type/) and [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now report useless inline type qualifiers ([#4178](https://github.com/biomejs/biome/issues/4178)).
+
+  The following fix is now proposed:
+
+  ```diff
+  - import type { type A, B } from "";
+  + import type { A, B } from "";
+
+  - export type { type C, D };
+  + export type { C, D };
+  ```
+
+  Contributed by @Conaclos
+
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now reports ungrouped `export from`.
+
+  The following fix is now proposed:
+
+  ```diff
+  - export { type A, type B } from "";
+  + export type { A, B } from "";
+  ```
+
+  Contributed by @Conaclos
+
+- [noVoidTypeReturn](https://biomejs.dev/linter/rules/no-void-type-return/) now accepts `void` expressions in return position ([#4173](https://github.com/biomejs/biome/issues/4173)).
+
+  The following code is now accepted:
+
+  ```ts
+  function f(): void {
+    return void 0;
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now correctly handles fragments containing HTML escapes (e.g. `&nbsp;`) inside expression escapes `{ ... }` ([#4059](https://github.com/biomejs/biome/issues/4059)).
+
+  The following code is no longer reported:
+
+  ```jsx
+  function Component() {
+    return (
+      <div key={index}>{line || <>&nbsp;</>}</div>
+    )
+  }
+  ```
+
+  Contributed by @fireairforce
+
+- [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) and [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer reports a parameter as unused when another parameter has a constructor type with the same parameter name ([#4227](https://github.com/biomejs/biome/issues/4227)).
+
+  In the following code, the `name` parameter is no longer reported as unused.
+
+  ```ts
+  export class Foo {
+    bar(name: string, _class: new (name: string) => any) {
+      return name
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now correctly handles renamed exports ([#4254](https://github.com/biomejs/biome/issues/4254)).
+
+  The rule allows the filename to be named as one of the exports of the module.
+  For instance, the file containing the following export can be named `Button`.
+
+  ```js
+  class Button {}
+  export { Button }
+  ```
+
+  The rule now correctly handles the renaming of an export.
+  For example, the file containing the following export can only be named `Button`.
+  Previously the rule expected the file to be named `A`.
+
+  ```js
+  class A {}
+  export { A as Button }
+  ```
+
+  Contributed by @Conaclos
+
+- [useConsistentMemberAccessibility](https://biomejs.dev/linter/rules/use-consistent-member-accessibility/) now ignore private class members such as `#property` ([#4276](https://github.com/biomejs/biome/issues/4276)). Contributed by @Conaclos
+
+- [noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function/) correctly handles `calc-size` function ([#4212](https://github.com/biomejs/biome/issues/4212)).
+
+ The following code `calc-size` is no longer reported as unknown:
+
+ ```css
+ .a { height: calc-size(0px); }
+ ```
+
+ Contributed by @fireairforce
+
+ - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
+
+  Contributed by @sepruko
+
+- [noDuplicateCustomProperties](https://biomejs.dev/linter/rules/no-duplicate-custom-properties/) now correctly handles custom properties and ignores non-custom properties.
+  Previously, the rule incorrectly reported duplicates for all properties, including non-custom ones. Contributed by @togami2864
+
 ### Parser
+
+#### New features
+
+- JS Parser support defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
+  
+   ```js
+   import defer * as myModule from "my-module";
+   ```
+
+  Contributed by @fireairforce
+
+#### Bug Fixes
+
+- The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
+
+  Browsers accept more emoji than the standard allows.
+  Biome now accepts these additional emoji.
+
+  The following code is now correctly parsed:
+
+  ```css
+  p {
+    --✨-color: red;
+    color: var(--✨-color);
+  }
+  ```
+
+  Contributed by @Conaclos
+
+## v1.9.3 (2024-10-01)
+
+### CLI
+
+#### New features
+
+- GritQL queries that match functions or methods will now match async functions or methods as well.
+
+  If this is not what you want, you can capture the `async` keyword (or its absence) in a metavariable and assert its emptiness:
+
+  ```grit
+  $async function foo() {} where $async <: .
+  ```
+
+  Contributed by @arendjr
+
+#### Bug fixes
+
+- Fix [#4077](https://github.com/biomejs/biome/issues/4077): Grit queries no longer need to match the statement's trailing semicolon. Contributed by @arendjr
+
+- Fix [#4102](https://github.com/biomejs/biome/issues/4102). Now the CLI command `lint` doesn't exit with an error code when using `--write`/`--fix`. Contributed by @ematipico
+
+### Configuration
+
+#### Bug fixes
+- Fix [#4125](https://github.com/biomejs/biome/issues/4125), where `noLabelWithoutControl` options where incorrectly marked as mandatory. Contributed by @ematipico
+
+### Editors
+
+- Fix a case where CSS files weren't correctly linted using the default configuration. Contributed by @ematipico
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [#3924](https://github.com/biomejs/biome/issues/3924) where GraphQL formatter panics in block comments with empty line. Contributed by @vohoanglong0107
+
+- Fix a case where raw values inside `url()` functions weren't properly trimmed.
+  ```diff
+  .value {
+  -  background: url(
+  -   whitespace-around-string
+  -  );
+  + background: url(whitespace-around-string);
+  }
+  ```
+  Contributed by @ematipico
+
+- Fixed [#4076](https://github.com/biomejs/biome/issues/4076), where a media query wasn't correctly formatted:
+  ```diff
+  .class {
+  -  @media (1024px <= width <=1280px) {
+  +  @media (1024px <= width <= 1280px) {
+     color: red;
+     }
+  }
+  ```
+  Contributed by @blaze-d83
+
+### JavaScript API
+
+#### Bug fixes
+
+- Fix [#3881](https://github.com/biomejs/biome/issues/3881), by updating the APIs to use the latest WASM changes. Contributed by @ematipico
+
+### Linter
+
+#### New features
+
+- Add [noDescendingSpecificity](https://biomejs.dev/linter/rules/no-descending-specificity/). Contributed by @tunamaguro
+
+- Add [noNestedTernary](https://biomejs.dev/linter/rules/no-nested-ternary/). Contributed by @kaykdm
+
+- Add [noTemplateCurlyInString](https://biomejs.dev/linter/rules/no-template-curly-in-string/). Contributed by @fireairforce
+
+- Add [noOctalEscape](https://biomejs.dev/linter/rules/no-octal-escape/). Contributed by @fireairforce
+
+#### Enhancements
+
+- Add an option `reportUnnecessaryDependencies` to [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/).
+
+  Defaults to true. When set to false, errors will be suppressed for React hooks that declare dependencies but do not use them.
+
+  Contributed by @simon-paris
+
+- Add an option `reportMissingDependenciesArray` to [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/). Contributed by @simon-paris
+
+#### Bug fixes
+
+- [noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) no longer panics on regexes with incomplete escape sequences. Contributed by @Conaclos
+
+- [noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class/) no longer reports issues outside of character classes.
+
+  The following code is no longer reported:
+
+  ```js
+  /[a-z]👍/;
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) no longer reports Node.js builtin modules as undeclared dependencies.
+
+  The rule no longer reports the following code:
+
+  ```js
+  import * as fs from "fs";
+  ```
+
+  Contributed by @Conaclos
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer panics when suggesting the renaming of a variable at the start of a file ([#4114](https://github.com/biomejs/biome/issues/4114)). Contributed by @Conaclos
+
+- [noUselessEscapeInRegex](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/) no longer panics on regexes that start with an empty character class. Contributed by @Conaclos
+
+- [noUselessStringConcat](https://biomejs.dev/linter/rules/no-useless-string-concat/) no longer panics when it encounters malformed code. Contributed by @Conaclos
+
+- [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) no longer reports unused parameters inside an object pattern with a rest parameter.
+
+  In the following code, the rule no longer reports `a` as unused.
+
+  ```js
+  function f({ a, ...rest }) {
+    return rest;
+  }
+  ```
+
+  This matches the behavior of [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/).
+
+  Contributed by @Conaclos
+
+- [useButtonType](https://biomejs.dev/linter/rules/use-button-type/) no longer reports dynamically created button with a valid type ([#4072](https://github.com/biomejs/biome/issues/4072)).
+
+  The following code is no longer reported:
+
+  ```js
+  React.createElement("button", { type: "button" }, "foo")
+  ```
+
+  Contributed by @Conaclos
+
+- [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores elements with the `img` role ([#3994](https://github.com/biomejs/biome/issues/3994)).
+
+  [MDN recommends](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role) using `role="img"` for grouping images or creating an image from other elements.
+  The following code is no longer reported:
+
+  ```jsx
+  <div role="img" aria-label="That cat is so cute">
+    <p>&#x1F408; &#x1F602;</p>
+  </div>
+  ```
+
+  Contributed by @Conaclos
+
+- [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([#3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
+
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) don't create invaild JSX code when Fragments children contains JSX Expression and in a LogicalExpression. Contributed by @fireairforce
+
+### Parser
+
+#### Bug fixes
+
+- Forbid undefined as type name for typescript parser. Contributed by @fireairforce
 
 ## v1.9.2 (2024-09-19)
 
@@ -69,7 +408,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add [nursery/noMissingVarFunction](https://biomejs.dev/linter/rules/no-missing-var-function). Contributed by @michellocana
-- Add [nursery/useComponentExportOnlyModules]((https://biomejs.dev/linter/rules/use-component-export-only-modules). Use this rule in React projects to enforce a code styling that fits React Refresh. Contributed by @GunseiKPaseri
+- Add [nursery/useComponentExportOnlyModules](https://biomejs.dev/linter/rules/use-component-export-only-modules). Use this rule in React projects to enforce a code styling that fits React Refresh. Contributed by @GunseiKPaseri
 
 #### Bug fixes
 
@@ -114,8 +453,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [nursery/noProcessEnv](https://biomejs.dev/linter/rules/no-process-env/). Contributed by @unvalley
 
 #### Bug fixes
-
-- [useSemanticElements](https://biomejs.dev/linter/rules/use-semantic-elements/) now ignores `alert` and `alertdialog` roles ([3858](https://github.com/biomejs/biome/issues/3858)). Contributed by @Conaclos
 
 - [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now ignores `@/` imports and recognizes type imports from Definitely Typed and `bun` imports. Contributed by @Conaclos
 

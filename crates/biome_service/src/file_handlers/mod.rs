@@ -28,6 +28,7 @@ use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
 use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
+use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::HtmlFileSource;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{
@@ -37,7 +38,9 @@ use biome_json_syntax::{JsonFileSource, JsonLanguage};
 use biome_parser::AnyParse;
 use biome_project::PackageJson;
 use biome_rowan::{FileSourceError, NodeCache};
-use biome_string_case::StrExtension;
+use biome_string_case::StrLikeExtension;
+
+use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
 use std::borrow::Cow;
@@ -48,6 +51,7 @@ use tracing::instrument;
 mod astro;
 mod css;
 mod graphql;
+mod grit;
 mod html;
 mod javascript;
 mod json;
@@ -65,6 +69,7 @@ pub enum DocumentFileSource {
     Css(CssFileSource),
     Graphql(GraphqlFileSource),
     Html(HtmlFileSource),
+    Grit(GritFileSource),
     #[default]
     Unknown,
 }
@@ -96,6 +101,12 @@ impl From<GraphqlFileSource> for DocumentFileSource {
 impl From<HtmlFileSource> for DocumentFileSource {
     fn from(value: HtmlFileSource) -> Self {
         Self::Html(value)
+    }
+}
+
+impl From<GritFileSource> for DocumentFileSource {
+    fn from(value: GritFileSource) -> Self {
+        Self::Grit(value)
     }
 }
 
@@ -148,6 +159,11 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
+
+        #[cfg(feature = "experimental-grit")]
+        if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
+            return Ok(file_source.into());
+        }
         Err(FileSourceError::UnknownExtension)
     }
 
@@ -173,6 +189,10 @@ impl DocumentFileSource {
         }
         #[cfg(feature = "experimental-html")]
         if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
+            return Ok(file_source.into());
+        }
+        #[cfg(feature = "experimental-grit")]
+        if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
         Err(FileSourceError::UnknownLanguageId)
@@ -297,9 +317,23 @@ impl DocumentFileSource {
         }
     }
 
+    pub fn to_grit_file_source(&self) -> Option<GritFileSource> {
+        match self {
+            DocumentFileSource::Grit(grit) => Some(*grit),
+            _ => None,
+        }
+    }
+
     pub fn to_css_file_source(&self) -> Option<CssFileSource> {
         match self {
             DocumentFileSource::Css(css) => Some(*css),
+            _ => None,
+        }
+    }
+
+    pub fn to_html_file_source(&self) -> Option<HtmlFileSource> {
+        match self {
+            DocumentFileSource::Html(html) => Some(*html),
             _ => None,
         }
     }
@@ -317,6 +351,7 @@ impl DocumentFileSource {
             | DocumentFileSource::Graphql(_)
             | DocumentFileSource::Json(_) => true,
             DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
+            DocumentFileSource::Grit(_) => cfg!(feature = "experimental-grit"),
             DocumentFileSource::Unknown => false,
         }
     }
@@ -349,6 +384,7 @@ impl biome_console::fmt::Display for DocumentFileSource {
             DocumentFileSource::Css(_) => fmt.write_markup(markup! { "CSS" }),
             DocumentFileSource::Graphql(_) => fmt.write_markup(markup! { "GraphQL" }),
             DocumentFileSource::Html(_) => fmt.write_markup(markup! { "HTML" }),
+            DocumentFileSource::Grit(_) => fmt.write_markup(markup! { "Grit" }),
             DocumentFileSource::Unknown => fmt.write_markup(markup! { "Unknown" }),
         }
     }
@@ -527,6 +563,7 @@ pub(crate) struct Features {
     unknown: UnknownFileHandler,
     graphql: GraphqlFileHandler,
     html: HtmlFileHandler,
+    grit: GritFileHandler,
 }
 
 impl Features {
@@ -540,6 +577,7 @@ impl Features {
             svelte: SvelteFileHandler {},
             graphql: GraphqlFileHandler {},
             html: HtmlFileHandler {},
+            grit: GritFileHandler {},
             unknown: UnknownFileHandler::default(),
         }
     }
@@ -561,6 +599,7 @@ impl Features {
             DocumentFileSource::Css(_) => self.css.capabilities(),
             DocumentFileSource::Graphql(_) => self.graphql.capabilities(),
             DocumentFileSource::Html(_) => self.html.capabilities(),
+            DocumentFileSource::Grit(_) => self.grit.capabilities(),
             DocumentFileSource::Unknown => self.unknown.capabilities(),
         }
     }

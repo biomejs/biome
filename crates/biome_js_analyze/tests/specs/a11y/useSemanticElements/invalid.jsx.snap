@@ -24,7 +24,6 @@ expression: invalid.jsx
     <div role="grid" ></div>
     <div role="gridcell" ></div>
     <div role="group" ></div>
-    <div role="img" ></div>
     <div role="link" ></div>
     <div role="list" ></div>
     <div role="listbox" ></div>
@@ -400,7 +399,7 @@ invalid.jsx:19:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
   > 19 │     <div role="gridcell" ></div>
        │          ^^^^^^^^^^^^^^^
     20 │     <div role="group" ></div>
-    21 │     <div role="img" ></div>
+    21 │     <div role="link" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -418,8 +417,8 @@ invalid.jsx:20:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
     19 │     <div role="gridcell" ></div>
   > 20 │     <div role="group" ></div>
        │          ^^^^^^^^^^^^
-    21 │     <div role="img" ></div>
-    22 │     <div role="link" ></div>
+    21 │     <div role="link" ></div>
+    22 │     <div role="list" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -430,15 +429,16 @@ invalid.jsx:20:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:21:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <img>
+    <a>
+    <link>
   
   
     19 │     <div role="gridcell" ></div>
     20 │     <div role="group" ></div>
-  > 21 │     <div role="img" ></div>
-       │          ^^^^^^^^^^
-    22 │     <div role="link" ></div>
-    23 │     <div role="list" ></div>
+  > 21 │     <div role="link" ></div>
+       │          ^^^^^^^^^^^
+    22 │     <div role="list" ></div>
+    23 │     <div role="listbox" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -449,16 +449,16 @@ invalid.jsx:21:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:22:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <a>
-    <link>
+    <ol>
+    <ul>
   
   
     20 │     <div role="group" ></div>
-    21 │     <div role="img" ></div>
-  > 22 │     <div role="link" ></div>
+    21 │     <div role="link" ></div>
+  > 22 │     <div role="list" ></div>
        │          ^^^^^^^^^^^
-    23 │     <div role="list" ></div>
-    24 │     <div role="listbox" ></div>
+    23 │     <div role="listbox" ></div>
+    24 │     <div role="listitem" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -469,16 +469,15 @@ invalid.jsx:22:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:23:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <ol>
-    <ul>
+    <select>
   
   
-    21 │     <div role="img" ></div>
-    22 │     <div role="link" ></div>
-  > 23 │     <div role="list" ></div>
-       │          ^^^^^^^^^^^
-    24 │     <div role="listbox" ></div>
-    25 │     <div role="listitem" ></div>
+    21 │     <div role="link" ></div>
+    22 │     <div role="list" ></div>
+  > 23 │     <div role="listbox" ></div>
+       │          ^^^^^^^^^^^^^^
+    24 │     <div role="listitem" ></div>
+    25 │     <div role="navigation" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -489,15 +488,15 @@ invalid.jsx:23:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:24:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <select>
+    <li>
   
   
-    22 │     <div role="link" ></div>
-    23 │     <div role="list" ></div>
-  > 24 │     <div role="listbox" ></div>
-       │          ^^^^^^^^^^^^^^
-    25 │     <div role="listitem" ></div>
-    26 │     <div role="navigation" ></div>
+    22 │     <div role="list" ></div>
+    23 │     <div role="listbox" ></div>
+  > 24 │     <div role="listitem" ></div>
+       │          ^^^^^^^^^^^^^^^
+    25 │     <div role="navigation" ></div>
+    26 │     <div role="row" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -508,15 +507,15 @@ invalid.jsx:24:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:25:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <li>
+    <nav>
   
   
-    23 │     <div role="list" ></div>
-    24 │     <div role="listbox" ></div>
-  > 25 │     <div role="listitem" ></div>
-       │          ^^^^^^^^^^^^^^^
-    26 │     <div role="navigation" ></div>
-    27 │     <div role="row" ></div>
+    23 │     <div role="listbox" ></div>
+    24 │     <div role="listitem" ></div>
+  > 25 │     <div role="navigation" ></div>
+       │          ^^^^^^^^^^^^^^^^^
+    26 │     <div role="row" ></div>
+    27 │     <div role="rowgroup" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -527,15 +526,15 @@ invalid.jsx:25:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:26:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <nav>
+    <tr>
   
   
-    24 │     <div role="listbox" ></div>
-    25 │     <div role="listitem" ></div>
-  > 26 │     <div role="navigation" ></div>
-       │          ^^^^^^^^^^^^^^^^^
-    27 │     <div role="row" ></div>
-    28 │     <div role="rowgroup" ></div>
+    24 │     <div role="listitem" ></div>
+    25 │     <div role="navigation" ></div>
+  > 26 │     <div role="row" ></div>
+       │          ^^^^^^^^^^
+    27 │     <div role="rowgroup" ></div>
+    28 │     <div role="rowheader" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -546,15 +545,17 @@ invalid.jsx:26:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:27:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <tr>
+    <tbody>
+    <tfoot>
+    <thead>
   
   
-    25 │     <div role="listitem" ></div>
-    26 │     <div role="navigation" ></div>
-  > 27 │     <div role="row" ></div>
-       │          ^^^^^^^^^^
-    28 │     <div role="rowgroup" ></div>
-    29 │     <div role="rowheader" ></div>
+    25 │     <div role="navigation" ></div>
+    26 │     <div role="row" ></div>
+  > 27 │     <div role="rowgroup" ></div>
+       │          ^^^^^^^^^^^^^^^
+    28 │     <div role="rowheader" ></div>
+    29 │     <div role="search" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -565,17 +566,15 @@ invalid.jsx:27:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:28:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <tbody>
-    <tfoot>
-    <thead>
+    <th scope="row">
   
   
-    26 │     <div role="navigation" ></div>
-    27 │     <div role="row" ></div>
-  > 28 │     <div role="rowgroup" ></div>
-       │          ^^^^^^^^^^^^^^^
-    29 │     <div role="rowheader" ></div>
-    30 │     <div role="search" ></div>
+    26 │     <div role="row" ></div>
+    27 │     <div role="rowgroup" ></div>
+  > 28 │     <div role="rowheader" ></div>
+       │          ^^^^^^^^^^^^^^^^
+    29 │     <div role="search" ></div>
+    30 │     <div role="searchbox" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -586,15 +585,15 @@ invalid.jsx:28:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:29:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <th scope="row">
+    <input type="search">
   
   
-    27 │     <div role="row" ></div>
-    28 │     <div role="rowgroup" ></div>
-  > 29 │     <div role="rowheader" ></div>
-       │          ^^^^^^^^^^^^^^^^
-    30 │     <div role="search" ></div>
-    31 │     <div role="searchbox" ></div>
+    27 │     <div role="rowgroup" ></div>
+    28 │     <div role="rowheader" ></div>
+  > 29 │     <div role="search" ></div>
+       │          ^^^^^^^^^^^^^
+    30 │     <div role="searchbox" ></div>
+    31 │     <div role="table" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -608,12 +607,12 @@ invalid.jsx:30:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
     <input type="search">
   
   
-    28 │     <div role="rowgroup" ></div>
-    29 │     <div role="rowheader" ></div>
-  > 30 │     <div role="search" ></div>
-       │          ^^^^^^^^^^^^^
-    31 │     <div role="searchbox" ></div>
-    32 │     <div role="table" ></div>
+    28 │     <div role="rowheader" ></div>
+    29 │     <div role="search" ></div>
+  > 30 │     <div role="searchbox" ></div>
+       │          ^^^^^^^^^^^^^^^^
+    31 │     <div role="table" ></div>
+    32 │     <div role="term" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -624,15 +623,15 @@ invalid.jsx:30:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:31:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <input type="search">
+    <table>
   
   
-    29 │     <div role="rowheader" ></div>
-    30 │     <div role="search" ></div>
-  > 31 │     <div role="searchbox" ></div>
-       │          ^^^^^^^^^^^^^^^^
-    32 │     <div role="table" ></div>
-    33 │     <div role="term" ></div>
+    29 │     <div role="search" ></div>
+    30 │     <div role="searchbox" ></div>
+  > 31 │     <div role="table" ></div>
+       │          ^^^^^^^^^^^^
+    32 │     <div role="term" ></div>
+    33 │     <div role="textbox" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -643,15 +642,15 @@ invalid.jsx:31:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:32:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <table>
+    <dt>
   
   
-    30 │     <div role="search" ></div>
-    31 │     <div role="searchbox" ></div>
-  > 32 │     <div role="table" ></div>
-       │          ^^^^^^^^^^^^
-    33 │     <div role="term" ></div>
-    34 │     <div role="textbox" ></div>
+    30 │     <div role="searchbox" ></div>
+    31 │     <div role="table" ></div>
+  > 32 │     <div role="term" ></div>
+       │          ^^^^^^^^^^^
+    33 │     <div role="textbox" ></div>
+    34 │     <div role="generic" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -662,15 +661,16 @@ invalid.jsx:32:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:33:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <dt>
+    <textarea>
+    <input type="search">
   
   
-    31 │     <div role="searchbox" ></div>
-    32 │     <div role="table" ></div>
-  > 33 │     <div role="term" ></div>
-       │          ^^^^^^^^^^^
-    34 │     <div role="textbox" ></div>
-    35 │     <div role="generic" ></div>
+    31 │     <div role="table" ></div>
+    32 │     <div role="term" ></div>
+  > 33 │     <div role="textbox" ></div>
+       │          ^^^^^^^^^^^^^^
+    34 │     <div role="generic" ></div>
+    35 │     <div role="caption" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -681,16 +681,16 @@ invalid.jsx:33:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:34:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <textarea>
-    <input type="search">
+    <div>
+    <span>
   
   
-    32 │     <div role="table" ></div>
-    33 │     <div role="term" ></div>
-  > 34 │     <div role="textbox" ></div>
+    32 │     <div role="term" ></div>
+    33 │     <div role="textbox" ></div>
+  > 34 │     <div role="generic" ></div>
        │          ^^^^^^^^^^^^^^
-    35 │     <div role="generic" ></div>
-    36 │     <div role="caption" ></div>
+    35 │     <div role="caption" ></div>
+    36 │     <div role="main" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -701,16 +701,17 @@ invalid.jsx:34:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:35:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <div>
-    <span>
+    <caption>
+    <figcaption>
+    <legend>
   
   
-    33 │     <div role="term" ></div>
-    34 │     <div role="textbox" ></div>
-  > 35 │     <div role="generic" ></div>
+    33 │     <div role="textbox" ></div>
+    34 │     <div role="generic" ></div>
+  > 35 │     <div role="caption" ></div>
        │          ^^^^^^^^^^^^^^
-    36 │     <div role="caption" ></div>
-    37 │     <div role="main" ></div>
+    36 │     <div role="main" ></div>
+    37 │     <div role="time" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -721,17 +722,15 @@ invalid.jsx:35:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:36:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <caption>
-    <figcaption>
-    <legend>
+    <main>
   
   
-    34 │     <div role="textbox" ></div>
-    35 │     <div role="generic" ></div>
-  > 36 │     <div role="caption" ></div>
-       │          ^^^^^^^^^^^^^^
-    37 │     <div role="main" ></div>
-    38 │     <div role="time" ></div>
+    34 │     <div role="generic" ></div>
+    35 │     <div role="caption" ></div>
+  > 36 │     <div role="main" ></div>
+       │          ^^^^^^^^^^^
+    37 │     <div role="time" ></div>
+    38 │     <div role="p" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -742,15 +741,15 @@ invalid.jsx:36:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:37:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <main>
+    <time>
   
   
-    35 │     <div role="generic" ></div>
-    36 │     <div role="caption" ></div>
-  > 37 │     <div role="main" ></div>
+    35 │     <div role="caption" ></div>
+    36 │     <div role="main" ></div>
+  > 37 │     <div role="time" ></div>
        │          ^^^^^^^^^^^
-    38 │     <div role="time" ></div>
-    39 │     <div role="p" ></div>
+    38 │     <div role="p" ></div>
+    39 │     <div role="aside" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -761,15 +760,15 @@ invalid.jsx:37:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:38:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <time>
+    <p>
   
   
-    36 │     <div role="caption" ></div>
-    37 │     <div role="main" ></div>
-  > 38 │     <div role="time" ></div>
-       │          ^^^^^^^^^^^
-    39 │     <div role="p" ></div>
-    40 │     <div role="aside" ></div>
+    36 │     <div role="main" ></div>
+    37 │     <div role="time" ></div>
+  > 38 │     <div role="p" ></div>
+       │          ^^^^^^^^
+    39 │     <div role="aside" ></div>
+    40 │     <div role="blockquote" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -780,15 +779,15 @@ invalid.jsx:38:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:39:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <p>
+    <aside>
   
   
-    37 │     <div role="main" ></div>
-    38 │     <div role="time" ></div>
-  > 39 │     <div role="p" ></div>
-       │          ^^^^^^^^
-    40 │     <div role="aside" ></div>
-    41 │     <div role="blockquote" ></div>
+    37 │     <div role="time" ></div>
+    38 │     <div role="p" ></div>
+  > 39 │     <div role="aside" ></div>
+       │          ^^^^^^^^^^^^
+    40 │     <div role="blockquote" ></div>
+    41 │     <div role="associationlist" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -799,15 +798,15 @@ invalid.jsx:39:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:40:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <aside>
+    <blockquote>
   
   
-    38 │     <div role="time" ></div>
-    39 │     <div role="p" ></div>
-  > 40 │     <div role="aside" ></div>
-       │          ^^^^^^^^^^^^
-    41 │     <div role="blockquote" ></div>
-    42 │     <div role="associationlist" ></div>
+    38 │     <div role="p" ></div>
+    39 │     <div role="aside" ></div>
+  > 40 │     <div role="blockquote" ></div>
+       │          ^^^^^^^^^^^^^^^^^
+    41 │     <div role="associationlist" ></div>
+    42 │     <div role="status" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -818,15 +817,15 @@ invalid.jsx:40:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:41:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <blockquote>
+    <dl>
   
   
-    39 │     <div role="p" ></div>
-    40 │     <div role="aside" ></div>
-  > 41 │     <div role="blockquote" ></div>
-       │          ^^^^^^^^^^^^^^^^^
-    42 │     <div role="associationlist" ></div>
-    43 │     <div role="status" ></div>
+    39 │     <div role="aside" ></div>
+    40 │     <div role="blockquote" ></div>
+  > 41 │     <div role="associationlist" ></div>
+       │          ^^^^^^^^^^^^^^^^^^^^^^
+    42 │     <div role="status" ></div>
+    43 │     <div role="contentinfo" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -837,15 +836,15 @@ invalid.jsx:41:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:42:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <dl>
+    <output>
   
   
-    40 │     <div role="aside" ></div>
-    41 │     <div role="blockquote" ></div>
-  > 42 │     <div role="associationlist" ></div>
-       │          ^^^^^^^^^^^^^^^^^^^^^^
-    43 │     <div role="status" ></div>
-    44 │     <div role="contentinfo" ></div>
+    40 │     <div role="blockquote" ></div>
+    41 │     <div role="associationlist" ></div>
+  > 42 │     <div role="status" ></div>
+       │          ^^^^^^^^^^^^^
+    43 │     <div role="contentinfo" ></div>
+    44 │     <div role="region" ></div>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -856,15 +855,15 @@ invalid.jsx:42:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:43:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <output>
+    <footer>
   
   
-    41 │     <div role="blockquote" ></div>
-    42 │     <div role="associationlist" ></div>
-  > 43 │     <div role="status" ></div>
-       │          ^^^^^^^^^^^^^
-    44 │     <div role="contentinfo" ></div>
-    45 │     <div role="region" ></div>
+    41 │     <div role="associationlist" ></div>
+    42 │     <div role="status" ></div>
+  > 43 │     <div role="contentinfo" ></div>
+       │          ^^^^^^^^^^^^^^^^^^
+    44 │     <div role="region" ></div>
+    45 │ </>
   
   i For examples and more information, see WAI-ARIA Roles
   
@@ -875,34 +874,15 @@ invalid.jsx:43:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:44:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <footer>
-  
-  
-    42 │     <div role="associationlist" ></div>
-    43 │     <div role="status" ></div>
-  > 44 │     <div role="contentinfo" ></div>
-       │          ^^^^^^^^^^^^^^^^^^
-    45 │     <div role="region" ></div>
-    46 │ </>
-  
-  i For examples and more information, see WAI-ARIA Roles
-  
-
-```
-
-```
-invalid.jsx:45:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The elements with the following roles can be changed to the following elements:
     <section>
   
   
-    43 │     <div role="status" ></div>
-    44 │     <div role="contentinfo" ></div>
-  > 45 │     <div role="region" ></div>
+    42 │     <div role="status" ></div>
+    43 │     <div role="contentinfo" ></div>
+  > 44 │     <div role="region" ></div>
        │          ^^^^^^^^^^^^^
-    46 │ </>
-    47 │ 
+    45 │ </>
+    46 │ 
   
   i For examples and more information, see WAI-ARIA Roles
   

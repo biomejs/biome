@@ -118,6 +118,46 @@ impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlClosingElement {
         )
     }
 }
+impl FormatRule<biome_html_syntax::HtmlComment>
+    for crate::html::auxiliary::comment::FormatHtmlComment
+{
+    type Context = HtmlFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_html_syntax::HtmlComment,
+        f: &mut HtmlFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_html_syntax::HtmlComment>::fmt(self, node, f)
+    }
+}
+impl AsFormat<HtmlFormatContext> for biome_html_syntax::HtmlComment {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_html_syntax::HtmlComment,
+        crate::html::auxiliary::comment::FormatHtmlComment,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::html::auxiliary::comment::FormatHtmlComment::default(),
+        )
+    }
+}
+impl IntoFormat<HtmlFormatContext> for biome_html_syntax::HtmlComment {
+    type Format = FormatOwnedWithRule<
+        biome_html_syntax::HtmlComment,
+        crate::html::auxiliary::comment::FormatHtmlComment,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::html::auxiliary::comment::FormatHtmlComment::default(),
+        )
+    }
+}
 impl FormatRule<biome_html_syntax::HtmlContent>
     for crate::html::auxiliary::content::FormatHtmlContent
 {

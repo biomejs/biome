@@ -391,7 +391,7 @@ impl Rule for NoUnusedVariables {
     fn diagnostic(ctx: &RuleContext<Self>, _: &Self::State) -> Option<RuleDiagnostic> {
         let binding = ctx.query();
 
-        let symbol_type = match binding.syntax().parent().unwrap().kind() {
+        let symbol_type = match binding.syntax().parent()?.kind() {
             JsSyntaxKind::JS_FORMAL_PARAMETER => "parameter",
             JsSyntaxKind::JS_FUNCTION_DECLARATION => "function",
             JsSyntaxKind::JS_CLASS_DECLARATION => "class",
