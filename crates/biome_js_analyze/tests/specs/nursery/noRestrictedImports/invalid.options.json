@@ -10,7 +10,11 @@
 						"paths": {
 							"eslint": "Importing Eslint is forbidden",
 							"lodash": "It's not recommended to use lodash"
-						}
+						},
+						"patterns": [{
+							"group": ["lodash/*", "!lodash/get"],
+							"message": "It's not recommended to use specific lodash functions"
+						}]
 					}
 				}
 			}

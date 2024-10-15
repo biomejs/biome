@@ -2650,7 +2650,20 @@
 					"description": "A list of names that should trigger the rule",
 					"type": "object",
 					"additionalProperties": { "type": "string" }
+				},
+				"patterns": {
+					"description": "A list of gitignore-style patterns that should trigger the rule",
+					"type": "array",
+					"items": { "$ref": "#/definitions/RestrictedImportsPattern" }
 				}
+			},
+			"additionalProperties": false
+		},
+		"RestrictedImportsPattern": {
+			"type": "object",
+			"properties": {
+				"group": { "type": "array", "items": { "type": "string" } },
+				"message": { "default": "", "type": "string" }
 			},
 			"additionalProperties": false
 		},

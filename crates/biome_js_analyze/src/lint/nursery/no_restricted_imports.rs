@@ -4,6 +4,7 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{inner_string_text, AnyJsImportLike};
 use biome_rowan::TextRange;
+use ignore::gitignore::GitignoreBuilder;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
@@ -19,7 +20,11 @@ declare_lint_rule! {
     ///             "paths": {
     ///                 "lodash": "Using lodash is not encouraged",
     ///                 "underscore": "Using underscore is not encouraged"
-    ///             }
+    ///             },
+    ///             "patterns": [{
+    ///                 "group": ["lodash/*", "!lodash/get"],
+    ///                 "message": "Using specific lodash modules is not encouraged"
+    ///             }]
     ///         }
     ///     }
     /// }
@@ -44,6 +49,20 @@ pub struct RestrictedImportsOptions {
     /// A list of names that should trigger the rule
     #[serde(skip_serializing_if = "FxHashMap::is_empty")]
     paths: FxHashMap<Box<str>, Box<str>>,
+
+    /// A list of gitignore-style patterns that should trigger the rule
+    #[serde(skip_serializing_if = "<[_]>::is_empty")]
+    patterns: Box<[RestrictedImportsPattern]>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct RestrictedImportsPattern {
+    #[serde(skip_serializing_if = "<[_]>::is_empty")]
+    group: Box<[Box<str>]>,
+
+    message: String,
 }
 
 impl Rule for NoRestrictedImports {
@@ -60,10 +79,24 @@ impl Rule for NoRestrictedImports {
         let module_name = node.module_name_token()?;
         let inner_text = inner_string_text(&module_name);
 
-        ctx.options()
-            .paths
-            .get(inner_text.text())
-            .map(|message| (module_name.text_trimmed_range(), message.to_string()))
+        // Check against exact paths
+        if let Some(message) = ctx.options().paths.get(inner_text.text()) {
+            return Some((module_name.text_trimmed_range(), message.to_string()));
+        }
+
+        // Check against gitignore-style patterns
+        for pattern in ctx.options().patterns.iter() {
+            let mut builder = GitignoreBuilder::new("");
+            for path in pattern.group.iter() {
+                builder.add_line(None, path).unwrap();
+            }
+            let gitignore = builder.build().unwrap();
+            if gitignore.matched(inner_text.text(), false).is_ignore() {
+                return Some((module_name.text_trimmed_range(), pattern.message.clone()));
+            }
+        }
+
+        None
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, (span, text): &Self::State) -> Option<RuleDiagnostic> {

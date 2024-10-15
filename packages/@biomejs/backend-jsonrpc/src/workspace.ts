@@ -2406,6 +2406,10 @@ export interface RestrictedImportsOptions {
 	 * A list of names that should trigger the rule
 	 */
 	paths: {};
+	/**
+	 * A list of gitignore-style patterns that should trigger the rule
+	 */
+	patterns: RestrictedImportsPattern[];
 }
 export interface NoRestrictedTypesOptions {
 	types?: {};
@@ -2537,6 +2541,10 @@ Set to `true` to mark the identity of the hook's return value as stable, or use 
 For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
 	 */
 	stableResult?: StableHookResult;
+}
+export interface RestrictedImportsPattern {
+	group: string[];
+	message?: string;
 }
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";

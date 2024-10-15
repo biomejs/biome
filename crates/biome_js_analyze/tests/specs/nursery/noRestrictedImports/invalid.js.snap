@@ -6,6 +6,7 @@ expression: invalid.js
 ```jsx
 import eslint from 'eslint';
 const l = require('lodash');
+const s = require('lodash/sortBy');
 
 ```
 
@@ -18,7 +19,7 @@ invalid.js:1:20 lint/nursery/noRestrictedImports ━━━━━━━━━━�
   > 1 │ import eslint from 'eslint';
       │                    ^^^^^^^^
     2 │ const l = require('lodash');
-    3 │ 
+    3 │ const s = require('lodash/sortBy');
   
 
 ```
@@ -31,9 +32,22 @@ invalid.js:2:19 lint/nursery/noRestrictedImports ━━━━━━━━━━�
     1 │ import eslint from 'eslint';
   > 2 │ const l = require('lodash');
       │                   ^^^^^^^^
-    3 │ 
+    3 │ const s = require('lodash/sortBy');
+    4 │ 
   
 
 ```
 
+```
+invalid.js:3:19 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+  ! It's not recommended to use specific lodash functions
+  
+    1 │ import eslint from 'eslint';
+    2 │ const l = require('lodash');
+  > 3 │ const s = require('lodash/sortBy');
+      │                   ^^^^^^^^^^^^^^^
+    4 │ 
+  
+
+```
