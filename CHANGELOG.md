@@ -17,6 +17,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Improved the message for unused suppression comments. Contributed by @dyc3
 
+- Catch suspicious semicolon in react fragment in `noSuspiciousSemicolonInJsx`. Contributed by @vasucp1207
+
 ### CLI
 
 #### Enhancements
