@@ -296,6 +296,9 @@ fn parse_import_clause(p: &mut JsParser) -> ParsedSyntax {
 
     // test js import_defer_clause
     // import defer * as yNamespace from "y";
+    //
+    // test_err js import_defer_clause
+    // import type defer * as yNamespace from "y";
     if p.at(T![defer]) && p.nth_at(1, T![*]) {
         p.eat(T![defer]);
     }
