@@ -105,7 +105,7 @@ fn is_logical_exp_descendant(node: &AnyJsExpression, operator: JsSyntaxKind) -> 
         .unwrap_or(false)
 }
 
-// Extract the expressions that perform length comparisons corresponding to the errors you want to check.
+/// Extract the expressions that perform length comparisons corresponding to the errors you want to check.
 fn get_comparing_length_exp(
     binary_exp: &JsBinaryExpression,
     expect_error: &ErrorType,
