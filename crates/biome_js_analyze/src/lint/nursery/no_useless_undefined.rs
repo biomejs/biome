@@ -78,7 +78,7 @@ declare_lint_rule! {
         version: "next",
         name: "noUselessUndefined",
         language: "js",
-        fix_kind: FixKind::Unsafe,
+        fix_kind: FixKind::Safe,
         sources: &[RuleSource::EslintUnicorn("no-useless-undefined")],
         recommended: false,
     }
