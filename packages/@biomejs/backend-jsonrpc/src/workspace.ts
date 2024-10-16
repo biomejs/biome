@@ -1383,7 +1383,7 @@ export interface Nursery {
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
 	/**
-	 * Enforces the use of a recommended font-display strategy with Google Fonts.
+	 * Enforces the use of a recommended display strategy with Google Fonts.
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
 	/**

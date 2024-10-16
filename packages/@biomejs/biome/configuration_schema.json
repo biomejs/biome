@@ -2374,7 +2374,7 @@
 					]
 				},
 				"useGoogleFontDisplay": {
-					"description": "Enforces the use of a recommended font-display strategy with Google Fonts.",
+					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

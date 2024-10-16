@@ -3417,7 +3417,7 @@ pub struct Nursery {
     #[doc = "Require explicit return types on functions and class methods."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_explicit_type: Option<RuleConfiguration<biome_js_analyze::options::UseExplicitType>>,
-    #[doc = "Enforces the use of a recommended font-display strategy with Google Fonts."]
+    #[doc = "Enforces the use of a recommended display strategy with Google Fonts."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_google_font_display:
         Option<RuleConfiguration<biome_js_analyze::options::UseGoogleFontDisplay>>,
