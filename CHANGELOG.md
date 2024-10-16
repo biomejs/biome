@@ -17,6 +17,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Improved the message for unused suppression comments. Contributed by @dyc3
 
+- Fix [#4228](https://github.com/biomejs/biome/issues/4228), where the rule `a11y/noInteractiveElementToNoninteractiveRole` incorrectlly reports a `role` for non interactive elements. Contributed by @eryue0220
+- Catch suspicious semicolon in react fragment in `noSuspiciousSemicolonInJsx`. Contributed by @vasucp1207
+
 ### CLI
 
 #### Enhancements
@@ -46,7 +49,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add [noDocumentCookie](https://biomejs.dev/linter/rules/no-document-cookie/). Contributed by @tunamaguro
+- Add [noDocumentImportInPage](https://biomejs.dev/linter/rules/no-document-import-in-page/). Contributed by @kaioduarte
+- Add [noHeadElement](https://biomejs.dev/linter/rules/no-head-element/). Contributed by @kaioduarte
+- Add [noHeadImportInDocument](https://biomejs.dev/linter/rules/no-head-import-in-document/). Contributed by @kaioduarte
+- Add [noImgElement](https://biomejs.dev/linter/rules/no-img-element/). Contributed by @kaioduarte
 - Add [guardForIn](https://biomejs.dev/linter/rules/guard-for-in/). Contributed by @fireairforce
+- Add [noUselessStringRaw](https://github.com/biomejs/biome/pull/4263). Contributed by @fireairforce
 - Add [noUselessUndefined](https://biomejs.dev/linter/rules/no-useless-undefined/). Contributed by @unvalley
 
 #### Bug Fixes
@@ -132,6 +140,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now accepts dependency names with dots. Contributed by @Conaclos
+
 - [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now correctly handles renamed exports ([#4254](https://github.com/biomejs/biome/issues/4254)).
 
   The rule allows the filename to be named as one of the exports of the module.
@@ -153,7 +163,36 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useConsistentMemberAccessibility](https://biomejs.dev/linter/rules/use-consistent-member-accessibility/) now ignore private class members such as `#property` ([#4276](https://github.com/biomejs/biome/issues/4276)). Contributed by @Conaclos
+
+- [noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function/) correctly handles `calc-size` function ([#4212](https://github.com/biomejs/biome/issues/4212)).
+
+ The following code `calc-size` is no longer reported as unknown:
+
+ ```css
+ .a { height: calc-size(0px); }
+ ```
+
+ Contributed by @fireairforce
+
+ - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
+
+  Contributed by @sepruko
+
+- [noDuplicateCustomProperties](https://biomejs.dev/linter/rules/no-duplicate-custom-properties/) now correctly handles custom properties and ignores non-custom properties.
+  Previously, the rule incorrectly reported duplicates for all properties, including non-custom ones. Contributed by @togami2864
+
 ### Parser
+
+#### New features
+
+- Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
+
+   ```js
+   import defer * as myModule from "my-module";
+   ```
+
+  Contributed by @fireairforce
 
 #### Bug Fixes
 

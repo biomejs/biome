@@ -34,3 +34,5 @@ import "fs";
 import "os";
 import "path";
 import "process";
+
+import "dep.js"

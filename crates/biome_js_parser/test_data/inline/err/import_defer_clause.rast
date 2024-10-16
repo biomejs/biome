@@ -1,0 +1,76 @@
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsImport {
+            import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+            import_clause: JsImportDefaultClause {
+                type_token: missing (optional),
+                default_specifier: JsDefaultImportSpecifier {
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@7..12 "type" [] [Whitespace(" ")],
+                    },
+                },
+                from_token: missing (required),
+                source: missing (required),
+                assertion: missing (optional),
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                DEFER_KW@12..18 "defer" [] [Whitespace(" ")],
+                STAR@18..20 "*" [] [Whitespace(" ")],
+                AS_KW@20..23 "as" [] [Whitespace(" ")],
+                IDENT@23..34 "yNamespace" [] [Whitespace(" ")],
+                FROM_KW@34..39 "from" [] [Whitespace(" ")],
+                JS_STRING_LITERAL@39..42 "\"y\"" [] [],
+            ],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@42..43 ";" [] [],
+        },
+    ],
+    eof_token: EOF@43..44 "" [Newline("\n")] [],
+}
+
+0: JS_MODULE@0..44
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..43
+    0: JS_IMPORT@0..12
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IMPORT_DEFAULT_CLAUSE@7..12
+        0: (empty)
+        1: JS_DEFAULT_IMPORT_SPECIFIER@7..12
+          0: JS_IDENTIFIER_BINDING@7..12
+            0: IDENT@7..12 "type" [] [Whitespace(" ")]
+        2: (empty)
+        3: (empty)
+        4: (empty)
+      2: (empty)
+    1: JS_BOGUS_STATEMENT@12..42
+      0: DEFER_KW@12..18 "defer" [] [Whitespace(" ")]
+      1: STAR@18..20 "*" [] [Whitespace(" ")]
+      2: AS_KW@20..23 "as" [] [Whitespace(" ")]
+      3: IDENT@23..34 "yNamespace" [] [Whitespace(" ")]
+      4: FROM_KW@34..39 "from" [] [Whitespace(" ")]
+      5: JS_STRING_LITERAL@39..42 "\"y\"" [] []
+    2: JS_EMPTY_STATEMENT@42..43
+      0: SEMICOLON@42..43 ";" [] []
+  4: EOF@43..44 "" [Newline("\n")] []
+--
+import_defer_clause.js:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `from` but instead found `defer`
+  
+  > 1 │ import type defer * as yNamespace from "y";
+      │             ^^^^^
+    2 │ 
+  
+  i Remove defer
+  
+--
+import type defer * as yNamespace from "y";

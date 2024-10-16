@@ -3900,6 +3900,7 @@ impl JsImportNamespaceClause {
     pub fn as_fields(&self) -> JsImportNamespaceClauseFields {
         JsImportNamespaceClauseFields {
             type_token: self.type_token(),
+            defer_token: self.defer_token(),
             namespace_specifier: self.namespace_specifier(),
             from_token: self.from_token(),
             source: self.source(),
@@ -3909,17 +3910,20 @@ impl JsImportNamespaceClause {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
+    pub fn defer_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
     pub fn namespace_specifier(&self) -> SyntaxResult<JsNamespaceImportSpecifier> {
-        support::required_node(&self.syntax, 1usize)
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
+        support::required_token(&self.syntax, 3usize)
     }
     pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
-        support::required_node(&self.syntax, 3usize)
+        support::required_node(&self.syntax, 4usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
-        support::node(&self.syntax, 4usize)
+        support::node(&self.syntax, 5usize)
     }
 }
 impl Serialize for JsImportNamespaceClause {
@@ -3933,6 +3937,7 @@ impl Serialize for JsImportNamespaceClause {
 #[derive(Serialize)]
 pub struct JsImportNamespaceClauseFields {
     pub type_token: Option<SyntaxToken>,
+    pub defer_token: Option<SyntaxToken>,
     pub namespace_specifier: SyntaxResult<JsNamespaceImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<AnyJsModuleSource>,
@@ -19953,6 +19958,10 @@ impl std::fmt::Debug for JsImportNamespaceClause {
             .field(
                 "type_token",
                 &support::DebugOptionalElement(self.type_token()),
+            )
+            .field(
+                "defer_token",
+                &support::DebugOptionalElement(self.defer_token()),
             )
             .field(
                 "namespace_specifier",

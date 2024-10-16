@@ -14,6 +14,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.no_this_in_static.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@next/no-document-import-in-page" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_document_import_in_page
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@next/no-head-element" => {
             if !options.include_nursery {
                 return false;
@@ -1531,6 +1541,14 @@ pub(crate) fn migrate_eslint_any_rule(
         "unicorn/no-instanceof-array" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.use_is_array.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "unicorn/no-lonely-if" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_collapsed_if.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "unicorn/no-static-only-class" => {
