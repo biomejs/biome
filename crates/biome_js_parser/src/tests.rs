@@ -408,7 +408,7 @@ fn diagnostics_print_correctly() {
 #[test]
 pub fn quick_test() {
     let code = r#"
-        type Equals = A extends (x: B extends C ? D : E) => 0 ? F : G;
+        import defer * as yNamespace from "y";
     "#;
     let root = parse(
         code,

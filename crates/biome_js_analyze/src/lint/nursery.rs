@@ -4,6 +4,7 @@ use biome_analyze::declare_lint_group;
 
 pub mod no_common_js;
 pub mod no_document_cookie;
+pub mod no_document_import_in_page;
 pub mod no_duplicate_else_if;
 pub mod no_dynamic_namespace_import_access;
 pub mod no_enum;
@@ -22,6 +23,7 @@ pub mod no_static_element_interactions;
 pub mod no_substr;
 pub mod no_template_curly_in_string;
 pub mod no_useless_escape_in_regex;
+pub mod no_useless_string_raw;
 pub mod use_adjacent_overload_signatures;
 pub mod use_aria_props_supported_by_role;
 pub mod use_at_index;
@@ -43,6 +45,7 @@ declare_lint_group! {
         rules : [
             self :: no_common_js :: NoCommonJs ,
             self :: no_document_cookie :: NoDocumentCookie ,
+            self :: no_document_import_in_page :: NoDocumentImportInPage ,
             self :: no_duplicate_else_if :: NoDuplicateElseIf ,
             self :: no_dynamic_namespace_import_access :: NoDynamicNamespaceImportAccess ,
             self :: no_enum :: NoEnum ,
@@ -61,6 +64,7 @@ declare_lint_group! {
             self :: no_substr :: NoSubstr ,
             self :: no_template_curly_in_string :: NoTemplateCurlyInString ,
             self :: no_useless_escape_in_regex :: NoUselessEscapeInRegex ,
+            self :: no_useless_string_raw :: NoUselessStringRaw ,
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
             self :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRole ,
             self :: use_at_index :: UseAtIndex ,

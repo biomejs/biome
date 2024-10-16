@@ -60,6 +60,7 @@ pub type NoDistractingElements =
     <lint::a11y::no_distracting_elements::NoDistractingElements as biome_analyze::Rule>::Options;
 pub type NoDocumentCookie =
     <lint::nursery::no_document_cookie::NoDocumentCookie as biome_analyze::Rule>::Options;
+pub type NoDocumentImportInPage = < lint :: nursery :: no_document_import_in_page :: NoDocumentImportInPage as biome_analyze :: Rule > :: Options ;
 pub type NoDoneCallback =
     <lint::style::no_done_callback::NoDoneCallback as biome_analyze::Rule>::Options;
 pub type NoDoubleEquals =
@@ -257,6 +258,8 @@ pub type NoUselessLoneBlockStatements = < lint :: complexity :: no_useless_lone_
 pub type NoUselessRename =
     <lint::complexity::no_useless_rename::NoUselessRename as biome_analyze::Rule>::Options;
 pub type NoUselessStringConcat = < lint :: complexity :: no_useless_string_concat :: NoUselessStringConcat as biome_analyze :: Rule > :: Options ;
+pub type NoUselessStringRaw =
+    <lint::nursery::no_useless_string_raw::NoUselessStringRaw as biome_analyze::Rule>::Options;
 pub type NoUselessSwitchCase =
     <lint::complexity::no_useless_switch_case::NoUselessSwitchCase as biome_analyze::Rule>::Options;
 pub type NoUselessTernary =

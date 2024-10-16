@@ -2106,6 +2106,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noDocumentImportInPage": {
+					"description": "Prevents importing next/document outside of pages/_document.jsx in Next.js projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateCustomProperties": {
 					"description": "Disallow duplicate custom properties within declaration blocks.",
 					"anyOf": [
@@ -2115,6 +2122,13 @@
 				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateProperties": {
+					"description": "Disallow duplicate properties within declaration blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2271,6 +2285,13 @@
 					"description": "Disallow unnecessary escape sequence in regular expression literals.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessStringRaw": {
+					"description": "Disallow unnecessary String.raw function in template string literals without any escape sequence.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},

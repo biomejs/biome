@@ -1231,6 +1231,10 @@ export interface Nursery {
 	 */
 	noDocumentCookie?: RuleConfiguration_for_Null;
 	/**
+	 * Prevents importing next/document outside of pages/_document.jsx in Next.js projects.
+	 */
+	noDocumentImportInPage?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate custom properties within declaration blocks.
 	 */
 	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
@@ -1238,6 +1242,10 @@ export interface Nursery {
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate properties within declaration blocks.
+	 */
+	noDuplicateProperties?: RuleConfiguration_for_Null;
 	/**
 	 * No duplicated fields in GraphQL operations.
 	 */
@@ -1326,6 +1334,10 @@ export interface Nursery {
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow unnecessary String.raw function in template string literals without any escape sequence.
+	 */
+	noUselessStringRaw?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use of @value rule in css modules.
 	 */
@@ -2898,10 +2910,12 @@ export type Category =
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDescendingSpecificity"
 	| "lint/nursery/noDocumentCookie"
+	| "lint/nursery/noDocumentImportInPage"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
@@ -2940,6 +2954,7 @@ export type Category =
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
+	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
