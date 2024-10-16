@@ -10,8 +10,8 @@
     "tailwindcss": "^3.4.13"
   },
   "devDependencies": {
-    "@types/bun": "1.1.10",
+    "@types/bun": "1.1.11",
     "read-package-up": "11.0.0",
-    "typescript": "5.6.2"
+    "typescript": "5.6.3"
   }
 }

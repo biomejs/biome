@@ -4,10 +4,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
-    JsConstructorClassMember, JsGetterClassMember, JsMethodClassMember, JsPropertyClassMember,
-    JsSetterClassMember, TsAccessibilityModifier, TsConstructorSignatureClassMember,
-    TsGetterSignatureClassMember, TsMethodSignatureClassMember, TsPropertyParameter,
-    TsPropertySignatureClassMember, TsSetterSignatureClassMember,
+    AnyJsClassMemberName, JsConstructorClassMember, JsGetterClassMember, JsMethodClassMember,
+    JsPropertyClassMember, JsSetterClassMember, TsAccessibilityModifier,
+    TsConstructorSignatureClassMember, TsGetterSignatureClassMember, TsMethodSignatureClassMember,
+    TsPropertyParameter, TsPropertySignatureClassMember, TsSetterSignatureClassMember,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 use serde::{Deserialize, Serialize};
@@ -246,6 +246,10 @@ impl Rule for UseConsistentMemberAccessibility {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        // Ignore private class members such as `#property`
+        if node.has_private_class_member_name() {
+            return None;
+        }
         let accessibility = node.accessibility_modifier();
         let options = ctx.options();
         match &options.accessibility {
@@ -304,6 +308,25 @@ declare_node_union! {
 }
 
 impl AnyJsMemberWithAccessibility {
+    fn has_private_class_member_name(&self) -> bool {
+        let name = match self {
+            Self::JsConstructorClassMember(_)
+            | Self::TsConstructorSignatureClassMember(_)
+            | Self::TsPropertyParameter(_) => {
+                return false;
+            }
+            Self::JsPropertyClassMember(member) => member.name(),
+            Self::JsMethodClassMember(member) => member.name(),
+            Self::JsGetterClassMember(member) => member.name(),
+            Self::JsSetterClassMember(member) => member.name(),
+            Self::TsMethodSignatureClassMember(member) => member.name(),
+            Self::TsPropertySignatureClassMember(member) => member.name(),
+            Self::TsGetterSignatureClassMember(member) => member.name(),
+            Self::TsSetterSignatureClassMember(member) => member.name(),
+        };
+        matches!(name, Ok(AnyJsClassMemberName::JsPrivateClassMemberName(_)))
+    }
+
     fn accessibility_modifier(&self) -> Option<TsAccessibilityModifier> {
         match self {
             Self::JsConstructorClassMember(member) => member

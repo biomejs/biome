@@ -1243,6 +1243,10 @@ export interface Nursery {
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow duplicate properties within declaration blocks.
+	 */
+	noDuplicateProperties?: RuleConfiguration_for_Null;
+	/**
 	 * No duplicated fields in GraphQL operations.
 	 */
 	noDuplicatedFields?: RuleConfiguration_for_Null;
@@ -1331,6 +1335,10 @@ export interface Nursery {
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary String.raw function in template string literals without any escape sequence.
+	 */
+	noUselessStringRaw?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow use of @value rule in css modules.
 	 */
 	noValueAtRule?: RuleConfiguration_for_Null;
@@ -1350,6 +1358,10 @@ export interface Nursery {
 	 * Use at() instead of integer index access.
 	 */
 	useAtIndex?: RuleFixConfiguration_for_Null;
+	/**
+	 * Enforce using single if instead of nested if clauses.
+	 */
+	useCollapsedIf?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */
@@ -2903,6 +2915,7 @@ export type Category =
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
@@ -2941,11 +2954,13 @@ export type Category =
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
+	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
 	| "lint/nursery/useAtIndex"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useCollapsedIf"
 	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"

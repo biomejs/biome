@@ -258,6 +258,8 @@ pub type NoUselessLoneBlockStatements = < lint :: complexity :: no_useless_lone_
 pub type NoUselessRename =
     <lint::complexity::no_useless_rename::NoUselessRename as biome_analyze::Rule>::Options;
 pub type NoUselessStringConcat = < lint :: complexity :: no_useless_string_concat :: NoUselessStringConcat as biome_analyze :: Rule > :: Options ;
+pub type NoUselessStringRaw =
+    <lint::nursery::no_useless_string_raw::NoUselessStringRaw as biome_analyze::Rule>::Options;
 pub type NoUselessSwitchCase =
     <lint::complexity::no_useless_switch_case::NoUselessSwitchCase as biome_analyze::Rule>::Options;
 pub type NoUselessTernary =
@@ -300,6 +302,8 @@ pub type UseButtonType =
     <lint::a11y::use_button_type::UseButtonType as biome_analyze::Rule>::Options;
 pub type UseCollapsedElseIf =
     <lint::style::use_collapsed_else_if::UseCollapsedElseIf as biome_analyze::Rule>::Options;
+pub type UseCollapsedIf =
+    <lint::nursery::use_collapsed_if::UseCollapsedIf as biome_analyze::Rule>::Options;
 pub type UseComponentExportOnlyModules = < lint :: nursery :: use_component_export_only_modules :: UseComponentExportOnlyModules as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentArrayType = < lint :: style :: use_consistent_array_type :: UseConsistentArrayType as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentBuiltinInstantiation = < lint :: style :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation as biome_analyze :: Rule > :: Options ;

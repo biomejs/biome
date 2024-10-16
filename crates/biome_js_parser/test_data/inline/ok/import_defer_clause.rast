@@ -1,0 +1,50 @@
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsImport {
+            import_token: IMPORT_KW@0..7 "import" [] [Whitespace(" ")],
+            import_clause: JsImportNamespaceClause {
+                type_token: missing (optional),
+                defer_token: DEFER_KW@7..13 "defer" [] [Whitespace(" ")],
+                namespace_specifier: JsNamespaceImportSpecifier {
+                    star_token: STAR@13..15 "*" [] [Whitespace(" ")],
+                    as_token: AS_KW@15..18 "as" [] [Whitespace(" ")],
+                    local_name: JsIdentifierBinding {
+                        name_token: IDENT@18..29 "yNamespace" [] [Whitespace(" ")],
+                    },
+                },
+                from_token: FROM_KW@29..34 "from" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@34..37 "\"y\"" [] [],
+                },
+                assertion: missing (optional),
+            },
+            semicolon_token: SEMICOLON@37..38 ";" [] [],
+        },
+    ],
+    eof_token: EOF@38..39 "" [Newline("\n")] [],
+}
+
+0: JS_MODULE@0..39
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..38
+    0: JS_IMPORT@0..38
+      0: IMPORT_KW@0..7 "import" [] [Whitespace(" ")]
+      1: JS_IMPORT_NAMESPACE_CLAUSE@7..37
+        0: (empty)
+        1: DEFER_KW@7..13 "defer" [] [Whitespace(" ")]
+        2: JS_NAMESPACE_IMPORT_SPECIFIER@13..29
+          0: STAR@13..15 "*" [] [Whitespace(" ")]
+          1: AS_KW@15..18 "as" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_BINDING@18..29
+            0: IDENT@18..29 "yNamespace" [] [Whitespace(" ")]
+        3: FROM_KW@29..34 "from" [] [Whitespace(" ")]
+        4: JS_MODULE_SOURCE@34..37
+          0: JS_STRING_LITERAL@34..37 "\"y\"" [] []
+        5: (empty)
+      2: SEMICOLON@37..38 ";" [] []
+  4: EOF@38..39 "" [Newline("\n")] []
