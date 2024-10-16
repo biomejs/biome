@@ -5,13 +5,15 @@ use crate::prelude::*;
 use crate::state::{EnterType, SignatureFlags};
 use crate::syntax::expr::{
     is_at_binary_operator, is_at_expression, is_at_identifier, is_nth_at_identifier,
-    is_nth_at_identifier_or_keyword, parse_big_int_literal_expression, parse_identifier,
-    parse_literal_expression, parse_name, parse_number_literal_expression,
-    parse_reference_identifier, parse_template_elements, ExpressionContext,
+    is_nth_at_identifier_or_keyword, parse_assignment_expression_or_higher,
+    parse_big_int_literal_expression, parse_identifier, parse_literal_expression, parse_name,
+    parse_number_literal_expression, parse_reference_identifier, parse_template_elements,
+    ExpressionContext,
 };
 use crate::syntax::function::{
     parse_formal_parameter, parse_parameter_list, skip_parameter_start, ParameterContext,
 };
+use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{
     decorators_not_allowed, expected_identifier, expected_object_member_name, expected_parameter,
     expected_parameters, expected_property_or_signature, modifier_already_seen,
@@ -29,6 +31,7 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_in_out_modifier_cannot_appear_on_a_type_parameter,
 };
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
+use biome_parser::ParserProgress;
 use enumflags2::{bitflags, make_bitflags, BitFlags};
 use smallvec::SmallVec;
 
@@ -1150,6 +1153,11 @@ fn parse_ts_mapped_type_optional_modifier_clause(p: &mut JsParser) -> ParsedSynt
 // type C = typeof import("test").a.b.c.d.e.f;
 // type D = import("test")<string>;
 // type E = import("test").C<string>;
+// type F = typeof import("test", { with: { "resolution-mode": "import" } });
+// type G = import("test", { with: { "resolution-mode": "import" } }).TypeFromImport;
+// type H = import("test", { with: { "resolution-mode": "import" } })<string>;
+// type I = import("test", { with: { "resolution-mode": "require" } }).C<string>;
+// type J = typeof import("test", { with: { "resolution-mode": "require" } }).a.b.c.d.e.f;
 fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T![typeof]) && !p.at(T![import]) {
         return Absent;
@@ -1158,9 +1166,42 @@ fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
     let m = p.start();
     p.eat(T![typeof]);
     p.expect(T![import]);
+    let args = p.start();
     p.expect(T!['(']);
-    p.expect(JS_STRING_LITERAL);
+    let args_list = p.start();
+
+    let mut progress = ParserProgress::default();
+    let mut error_range_start = p.cur_range().start();
+    let mut args_count = 0;
+
+    while !p.at(EOF) && !p.at(T![')']) {
+        progress.assert_progressing(p);
+        args_count += 1;
+
+        if args_count == 3 {
+            error_range_start = p.cur_range().start();
+        }
+
+        parse_assignment_expression_or_higher(p, ExpressionContext::default())
+            .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
+
+        if p.at(T![,]) {
+            p.bump_any();
+        } else {
+            break;
+        }
+    }
+    args_list.complete(p, JS_CALL_ARGUMENT_LIST);
+
+    if args_count == 0 || args_count > 2 {
+        let err = p.err_builder(
+            "`typeof import()` requires exactly one or two arguments. ",
+            error_range_start..p.cur_range().end(),
+        );
+        p.error(err);
+    }
     p.expect(T![')']);
+    args.complete(p, JS_CALL_ARGUMENTS);
 
     if p.at(T![.]) {
         let qualifier = p.start();
