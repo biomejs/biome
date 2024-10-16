@@ -73,7 +73,7 @@ where
     let mut analyzer = Analyzer::new(
         METADATA.deref(),
         InspectMatcher::new(registry, inspect_matcher),
-        |_| -> Vec<Result<_, Infallible>> { unreachable!() },
+        |_, _| -> Vec<Result<_, Infallible>> { unreachable!() },
         Box::new(TestAction),
         &mut emit_signal,
     );
@@ -152,7 +152,5 @@ mod tests {
                 ControlFlow::<Never>::Continue(())
             },
         );
-
-        // assert_eq!(error_ranges.as_slice(), &[]);
     }
 }
