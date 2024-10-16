@@ -27,6 +27,7 @@ pub mod no_useless_string_raw;
 pub mod use_adjacent_overload_signatures;
 pub mod use_aria_props_supported_by_role;
 pub mod use_at_index;
+pub mod use_collapsed_if;
 pub mod use_component_export_only_modules;
 pub mod use_consistent_curly_braces;
 pub mod use_consistent_member_accessibility;
@@ -67,6 +68,7 @@ declare_lint_group! {
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
             self :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRole ,
             self :: use_at_index :: UseAtIndex ,
+            self :: use_collapsed_if :: UseCollapsedIf ,
             self :: use_component_export_only_modules :: UseComponentExportOnlyModules ,
             self :: use_consistent_curly_braces :: UseConsistentCurlyBraces ,
             self :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility ,

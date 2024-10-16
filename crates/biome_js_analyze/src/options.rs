@@ -302,6 +302,8 @@ pub type UseButtonType =
     <lint::a11y::use_button_type::UseButtonType as biome_analyze::Rule>::Options;
 pub type UseCollapsedElseIf =
     <lint::style::use_collapsed_else_if::UseCollapsedElseIf as biome_analyze::Rule>::Options;
+pub type UseCollapsedIf =
+    <lint::nursery::use_collapsed_if::UseCollapsedIf as biome_analyze::Rule>::Options;
 pub type UseComponentExportOnlyModules = < lint :: nursery :: use_component_export_only_modules :: UseComponentExportOnlyModules as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentArrayType = < lint :: style :: use_consistent_array_type :: UseConsistentArrayType as biome_analyze :: Rule > :: Options ;
 pub type UseConsistentBuiltinInstantiation = < lint :: style :: use_consistent_builtin_instantiation :: UseConsistentBuiltinInstantiation as biome_analyze :: Rule > :: Options ;

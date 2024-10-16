@@ -1543,6 +1543,14 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_is_array.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "unicorn/no-lonely-if" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group.use_collapsed_if.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "unicorn/no-static-only-class" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.no_static_only_class.get_or_insert(Default::default());

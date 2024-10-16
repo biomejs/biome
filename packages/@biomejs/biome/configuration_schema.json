@@ -2327,6 +2327,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useCollapsedIf": {
+					"description": "Enforce using single if instead of nested if clauses.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useComponentExportOnlyModules": {
 					"description": "Enforce declaring components only within modules that export React Components exclusively.",
 					"anyOf": [
