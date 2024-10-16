@@ -1,0 +1,46 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/without-quotes.html
+---
+# Input
+
+```html
+<p title=Title>String</p>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1 +1 @@
+-<p title="Title">String</p>
++<ptitle=Title>String</p>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<ptitle=Title>String</p>```
+
+# Errors
+```
+without-quotes.html:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an initializer but instead found 'Title'.
+  
+  > 1 │ <p title=Title>String</p>
+      │          ^^^^^
+    2 │ 
+  
+  i Expected an initializer here.
+  
+  > 1 │ <p title=Title>String</p>
+      │          ^^^^^
+    2 │ 
+  
+
+```

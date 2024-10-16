@@ -1,0 +1,713 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/attributes.html
+---
+# Input
+
+```html
+<input name=address maxlength=200>
+<input name='address' maxlength='200'>
+<input name="address" maxlength="200">
+<div class="foo"></div>
+<div   class="foo"   ></div>
+<div class="foo bar"></div>
+<div class="foo bar" id="header"></div>
+<div   class="foo bar"   id="header"   ></div>
+<div data-prettier></div>
+<div data-prettier="true"></div>
+<meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+<div attribute>String</div>
+<div attribute="">String</div>
+<div attribute=''>String</div>
+<div attribute >String</div>
+<div attribute = "" >String</div>
+<div attribute = '' >String</div>
+<div  attribute  >String</div>
+<div  attribute  =  ""  >String</div>
+<div  attribute  =  ''  >String</div>
+<div attribute="attribute = attribute"></div>
+<div ATTRIBUTE>String</div>
+<div ATTRIBUTE="">String</div>
+<div ATTRIBUTE=''>String</div>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">...</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+  ...
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+
+
+
+</article>
+<X>
+</X>
+<X a="1">
+</X>
+<X a="1" b="2">
+</X>
+<X a="1" b="2" c="3">
+</X>
+<p 
+  class="
+    foo
+    bar
+    baz
+  "
+>
+</p>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,68 +1,76 @@
+-<input name="address" maxlength="200" />
+-<input name="address" maxlength="200" />
+-<input name="address" maxlength="200" />
+-<div class="foo"></div>
++<input name=address maxlength=200>
++<input name='address' maxlength='200'>
++<input name="address" maxlength="200">
+ <div class="foo"></div>
++<div   class="foo"   ></div>
+ <div class="foo bar"></div>
+ <div class="foo bar" id="header"></div>
+-<div class="foo bar" id="header"></div>
++<div   class="foo bar"   id="header"   ></div>
+ <div data-prettier></div>
+ <div data-prettier="true"></div>
+-<meta
+-  property="og:description"
+-  content="The Mozilla Developer Network (MDN) provides
++<meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+-and HTML5 Apps. It also documents Mozilla products, like Firefox OS."
+-/>
+-<div attribute>String</div>
+-<div attribute="">String</div>
+-<div attribute="">String</div>
+-<div attribute>String</div>
+-<div attribute="">String</div>
+-<div attribute="">String</div>
++and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+ <div attribute>String</div>
+ <div attribute="">String</div>
+-<div attribute="">String</div>
++<div attribute=''>String</div>
++<div attribute >String</div>
++<div attribute = "" >String</div>
++<div attribute = '' >String</div>
++<div  attribute  >String</div>
++<div  attribute  =  ""  >String</div>
++<div  attribute  =  ''  >String</div>
+ <div attribute="attribute = attribute"></div>
+ <div ATTRIBUTE>String</div>
+-<div ATTRIBUTE="">String</div>
+ <div ATTRIBUTE="">String</div>
++<div ATTRIBUTE=''>String</div>
+ <article
+   id="electriccars"
+   data-columns="3"
+   data-index-number="12314"
+-  data-parent="cars"
+-></article>
++  data-parent="cars">
++</article>
+ <article
+   id="electriccars"
+   data-columns="3"
+   data-index-number="12314"
+-  data-parent="cars"
+->
+-  ...
+-</article>
++  data-parent="cars">...</article>
+ <article
+   id="electriccars"
+   data-columns="3"
+   data-index-number="12314"
+-  data-parent="cars"
+->
++  data-parent="cars">
+   ...
+ </article>
+ <article
+   id="electriccars"
+   data-columns="3"
+   data-index-number="12314"
+-  data-parent="cars"
+-></article>
++  data-parent="cars">
++
++</article>
+ <article
+   id="electriccars"
+   data-columns="3"
+   data-index-number="12314"
+-  data-parent="cars"
+-></article>
+-<X> </X>
+-<X a="1"> </X>
+-<X a="1" b="2"> </X>
+-<X a="1" b="2" c="3"> </X>
+-<p class="foo bar baz"></p>
++  data-parent="cars">
++
++
++
++</article>
++<X>
++</X>
++<X a="1">
++</X>
++<X a="1" b="2">
++</X>
++<X a="1" b="2" c="3">
++</X>
++<p 
++  class="
++    foo
++    bar
++    baz
++  "
++>
++</p>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<input name=address maxlength=200>
+<input name='address' maxlength='200'>
+<input name="address" maxlength="200">
+<div class="foo"></div>
+<div   class="foo"   ></div>
+<div class="foo bar"></div>
+<div class="foo bar" id="header"></div>
+<div   class="foo bar"   id="header"   ></div>
+<div data-prettier></div>
+<div data-prettier="true"></div>
+<meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+<div attribute>String</div>
+<div attribute="">String</div>
+<div attribute=''>String</div>
+<div attribute >String</div>
+<div attribute = "" >String</div>
+<div attribute = '' >String</div>
+<div  attribute  >String</div>
+<div  attribute  =  ""  >String</div>
+<div  attribute  =  ''  >String</div>
+<div attribute="attribute = attribute"></div>
+<div ATTRIBUTE>String</div>
+<div ATTRIBUTE="">String</div>
+<div ATTRIBUTE=''>String</div>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">...</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+  ...
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+
+</article>
+<article
+  id="electriccars"
+  data-columns="3"
+  data-index-number="12314"
+  data-parent="cars">
+
+
+
+</article>
+<X>
+</X>
+<X a="1">
+</X>
+<X a="1" b="2">
+</X>
+<X a="1" b="2" c="3">
+</X>
+<p 
+  class="
+    foo
+    bar
+    baz
+  "
+>
+</p>```
+
+# Errors
+```
+attributes.html:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an initializer but instead found 'address'.
+  
+  > 1 │ <input name=address maxlength=200>
+      │             ^^^^^^^
+    2 │ <input name='address' maxlength='200'>
+    3 │ <input name="address" maxlength="200">
+  
+  i Expected an initializer here.
+  
+  > 1 │ <input name=address maxlength=200>
+      │             ^^^^^^^
+    2 │ <input name='address' maxlength='200'>
+    3 │ <input name="address" maxlength="200">
+  
+attributes.html:1:31 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an initializer but instead found '200'.
+  
+  > 1 │ <input name=address maxlength=200>
+      │                               ^^^
+    2 │ <input name='address' maxlength='200'>
+    3 │ <input name="address" maxlength="200">
+  
+  i Expected an initializer here.
+  
+  > 1 │ <input name=address maxlength=200>
+      │                               ^^^
+    2 │ <input name='address' maxlength='200'>
+    3 │ <input name="address" maxlength="200">
+  
+attributes.html:9:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+     7 │ <div class="foo bar" id="header"></div>
+     8 │ <div   class="foo bar"   id="header"   ></div>
+   > 9 │ <div data-prettier></div>
+       │          ^
+    10 │ <div data-prettier="true"></div>
+    11 │ <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+  
+attributes.html:10:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+     8 │ <div   class="foo bar"   id="header"   ></div>
+     9 │ <div data-prettier></div>
+  > 10 │ <div data-prettier="true"></div>
+       │          ^
+    11 │ <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+    12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+  
+attributes.html:11:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+     9 │ <div data-prettier></div>
+    10 │ <div data-prettier="true"></div>
+  > 11 │ <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+       │                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+    13 │ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+  
+  i The closing quote must be on the same line.
+  
+attributes.html:12:55 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    10 │ <div data-prettier="true"></div>
+    11 │ <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+  > 12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+       │                                                       ^
+    13 │ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+    14 │ <div attribute>String</div>
+  
+attributes.html:12:60 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    10 │ <div data-prettier="true"></div>
+    11 │ <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+  > 12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+       │                                                            ^
+    13 │ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+    14 │ <div attribute>String</div>
+  
+attributes.html:13:15 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+    11 │ <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+    12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+  > 13 │ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+       │               ^
+    14 │ <div attribute>String</div>
+    15 │ <div attribute="">String</div>
+  
+attributes.html:13:51 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `,`
+  
+    11 │ <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+    12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+  > 13 │ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+       │                                                   ^
+    14 │ <div attribute>String</div>
+    15 │ <div attribute="">String</div>
+  
+attributes.html:13:68 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `.`
+  
+    11 │ <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+    12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+  > 13 │ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+       │                                                                    ^
+    14 │ <div attribute>String</div>
+    15 │ <div attribute="">String</div>
+  
+attributes.html:13:69 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    11 │ <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+    12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+  > 13 │ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+       │                                                                     ^^
+    14 │ <div attribute>String</div>
+    15 │ <div attribute="">String</div>
+  
+  i The closing quote must be on the same line.
+  
+attributes.html:14:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an attribute but instead found '<'.
+  
+    12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+    13 │ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+  > 14 │ <div attribute>String</div>
+       │ ^
+    15 │ <div attribute="">String</div>
+    16 │ <div attribute=''>String</div>
+  
+  i Expected an attribute here.
+  
+    12 │ information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+    13 │ and HTML5 Apps. It also documents Mozilla products, like Firefox OS.">
+  > 14 │ <div attribute>String</div>
+       │ ^
+    15 │ <div attribute="">String</div>
+    16 │ <div attribute=''>String</div>
+  
+attributes.html:29:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    27 │ <article
+    28 │   id="electriccars"
+  > 29 │   data-columns="3"
+       │       ^
+    30 │   data-index-number="12314"
+    31 │   data-parent="cars">
+  
+attributes.html:30:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    28 │   id="electriccars"
+    29 │   data-columns="3"
+  > 30 │   data-index-number="12314"
+       │       ^
+    31 │   data-parent="cars">
+    32 │ </article>
+  
+attributes.html:30:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    28 │   id="electriccars"
+    29 │   data-columns="3"
+  > 30 │   data-index-number="12314"
+       │             ^
+    31 │   data-parent="cars">
+    32 │ </article>
+  
+attributes.html:31:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    29 │   data-columns="3"
+    30 │   data-index-number="12314"
+  > 31 │   data-parent="cars">
+       │       ^
+    32 │ </article>
+    33 │ <article
+  
+attributes.html:35:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    33 │ <article
+    34 │   id="electriccars"
+  > 35 │   data-columns="3"
+       │       ^
+    36 │   data-index-number="12314"
+    37 │   data-parent="cars">...</article>
+  
+attributes.html:36:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    34 │   id="electriccars"
+    35 │   data-columns="3"
+  > 36 │   data-index-number="12314"
+       │       ^
+    37 │   data-parent="cars">...</article>
+    38 │ <article
+  
+attributes.html:36:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    34 │   id="electriccars"
+    35 │   data-columns="3"
+  > 36 │   data-index-number="12314"
+       │             ^
+    37 │   data-parent="cars">...</article>
+    38 │ <article
+  
+attributes.html:37:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    35 │   data-columns="3"
+    36 │   data-index-number="12314"
+  > 37 │   data-parent="cars">...</article>
+       │       ^
+    38 │ <article
+    39 │   id="electriccars"
+  
+attributes.html:40:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    38 │ <article
+    39 │   id="electriccars"
+  > 40 │   data-columns="3"
+       │       ^
+    41 │   data-index-number="12314"
+    42 │   data-parent="cars">
+  
+attributes.html:41:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    39 │   id="electriccars"
+    40 │   data-columns="3"
+  > 41 │   data-index-number="12314"
+       │       ^
+    42 │   data-parent="cars">
+    43 │   ...
+  
+attributes.html:41:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    39 │   id="electriccars"
+    40 │   data-columns="3"
+  > 41 │   data-index-number="12314"
+       │             ^
+    42 │   data-parent="cars">
+    43 │   ...
+  
+attributes.html:42:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    40 │   data-columns="3"
+    41 │   data-index-number="12314"
+  > 42 │   data-parent="cars">
+       │       ^
+    43 │   ...
+    44 │ </article>
+  
+attributes.html:47:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    45 │ <article
+    46 │   id="electriccars"
+  > 47 │   data-columns="3"
+       │       ^
+    48 │   data-index-number="12314"
+    49 │   data-parent="cars">
+  
+attributes.html:48:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    46 │   id="electriccars"
+    47 │   data-columns="3"
+  > 48 │   data-index-number="12314"
+       │       ^
+    49 │   data-parent="cars">
+    50 │ 
+  
+attributes.html:48:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    46 │   id="electriccars"
+    47 │   data-columns="3"
+  > 48 │   data-index-number="12314"
+       │             ^
+    49 │   data-parent="cars">
+    50 │ 
+  
+attributes.html:49:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    47 │   data-columns="3"
+    48 │   data-index-number="12314"
+  > 49 │   data-parent="cars">
+       │       ^
+    50 │ 
+    51 │ </article>
+  
+attributes.html:54:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    52 │ <article
+    53 │   id="electriccars"
+  > 54 │   data-columns="3"
+       │       ^
+    55 │   data-index-number="12314"
+    56 │   data-parent="cars">
+  
+attributes.html:55:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    53 │   id="electriccars"
+    54 │   data-columns="3"
+  > 55 │   data-index-number="12314"
+       │       ^
+    56 │   data-parent="cars">
+    57 │ 
+  
+attributes.html:55:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    53 │   id="electriccars"
+    54 │   data-columns="3"
+  > 55 │   data-index-number="12314"
+       │             ^
+    56 │   data-parent="cars">
+    57 │ 
+  
+attributes.html:56:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+    54 │   data-columns="3"
+    55 │   data-index-number="12314"
+  > 56 │   data-parent="cars">
+       │       ^
+    57 │ 
+  
+attributes.html:70:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    68 │ </X>
+    69 │ <p·
+  > 70 │   class="
+       │         ^
+    71 │     foo
+    72 │     bar
+  
+  i The closing quote must be on the same line.
+  
+attributes.html:74:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing closing quote
+  
+    72 │     bar
+    73 │     baz
+  > 74 │   "
+       │   ^
+    75 │ >
+    76 │ </p>
+  
+  i The closing quote must be on the same line.
+  
+attributes.html:77:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a closing tag but instead found the end of the file.
+  
+    75 │ >
+    76 │ </p>
+  > 77 │ 
+       │ 
+  
+  i Expected a closing tag here.
+  
+    75 │ >
+    76 │ </p>
+  > 77 │ 
+       │ 
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+   11: <meta property="og:description" content="The Mozilla Developer Network (MDN) provides
+   12: information about Open Web technologies including HTML, CSS, and APIs for both Web sites
+```
