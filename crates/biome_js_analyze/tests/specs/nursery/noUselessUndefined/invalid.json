@@ -14,19 +14,6 @@
 	"function* foo() {yield undefined;}",
 	"function* foo() {yield undefined;}",
 
-	"foo(undefined);",
-	"foo(undefined, undefined);",
-	"foo(undefined,);",
-	"foo(undefined, undefined,);",
-	"foo(bar, undefined);",
-	"foo(bar, undefined, undefined);",
-	"foo(undefined, bar, undefined);",
-	"foo(bar, undefined,);",
-	"foo(undefined, bar, undefined,);",
-	"foo(bar, undefined, undefined,);",
-	"foo(undefined, bar, undefined, undefined,);",
-	"foo(undefined, bar, undefined, undefined, undefined, undefined,)",
-
 	"const {foo = undefined} = {};",
 	"const [foo = undefined] = [];",
 

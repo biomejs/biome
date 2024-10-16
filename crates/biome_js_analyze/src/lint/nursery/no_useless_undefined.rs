@@ -6,13 +6,12 @@ use biome_console::markup;
 use biome_js_factory::make::{self, js_function_body, js_variable_declarator_list};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, JsArrayBindingPatternElement, JsArrowFunctionExpression,
-    JsCallExpression, JsFormalParameter, JsLanguage, JsObjectBindingPatternShorthandProperty,
-    JsReturnStatement, JsSyntaxToken, JsVariableDeclarator, JsVariableStatement, JsYieldArgument,
-    T,
+    JsFormalParameter, JsLanguage, JsObjectBindingPatternShorthandProperty, JsReturnStatement,
+    JsSyntaxToken, JsVariableDeclarator, JsVariableStatement, JsYieldArgument, T,
 };
 use biome_rowan::{
-    chain_trivia_pieces, declare_node_union, AstNode, AstSeparatedList, BatchMutationExt,
-    SyntaxTriviaPiece, TextRange, TriviaPieceKind,
+    chain_trivia_pieces, declare_node_union, AstNode, BatchMutationExt, SyntaxTriviaPiece,
+    TextRange,
 };
 
 use crate::JsRuleAction;
@@ -94,69 +93,8 @@ declare_node_union! {
         | JsYieldArgument
         | JsReturnStatement
         | JsArrayBindingPatternElement
-        | JsCallExpression
         | JsArrowFunctionExpression
         | JsFormalParameter
-}
-
-static FUNCTION_NAMES: [&str; 28] = [
-    // `set.add(undefined)`
-    "add",
-    // Function#bind()
-    "bind",
-    // `React.createContext(undefined)`
-    "createContext",
-    // Compare function names
-    "equal",
-    // `set.has(undefined)`
-    "has",
-    // `array.includes(undefined)`
-    "include",
-    // `array.includes(undefined)`
-    "includes",
-    // Compare function names
-    "is",
-    "not",
-    "notEqual",
-    "notPropertyVal",
-    "notSame",
-    "notStrictEqual",
-    "property",
-    "propertyVal",
-    // `array.push(undefined)`
-    "push",
-    // https://vuejs.org/api/reactivity-core.html#ref
-    "ref",
-    "same",
-    // `map.set(foo, undefined)`
-    "set",
-    "strictEqual",
-    "strictNotSame",
-    "strictSame",
-    "toBe",
-    "toContain",
-    "toContainEqual",
-    "toEqual",
-    "toHaveBeenCalledWith",
-    // `array.unshift(undefined)`
-    "unshift",
-];
-
-fn should_ignore_function(expr: &AnyJsExpression) -> bool {
-    let name = match expr {
-        AnyJsExpression::JsIdentifierExpression(ident) => ident.text(),
-        AnyJsExpression::JsStaticMemberExpression(member_expr) => {
-            let Ok(member) = member_expr.member() else {
-                return false;
-            };
-            member.text()
-        }
-        _ => return false,
-    };
-
-    FUNCTION_NAMES.binary_search(&name.as_str()).is_ok() ||
-    // setState(undefined), setXXX(undefined)
-    name.starts_with("set")
 }
 
 fn find_undefined_range(expr: Option<&AnyJsExpression>) -> Option<TextRange> {
@@ -200,31 +138,6 @@ impl Rule for NoUselessUndefined {
                             continue;
                         };
                         signals.push((Some(binding_name), range));
-                    }
-                }
-            }
-            // foo(bar, undefined, undefined);
-            AnyUndefinedNode::JsCallExpression(js_call_expr) => {
-                if let Ok(callee) = js_call_expr.callee() {
-                    if should_ignore_function(&callee) {
-                        return signals;
-                    }
-                };
-
-                let Some(js_call_argument_list) = js_call_expr.arguments().ok() else {
-                    return signals;
-                };
-                let call_argument_list = js_call_argument_list.args();
-                let mut non_undefined_found = false;
-                for argument in call_argument_list.iter().rev().flatten() {
-                    if non_undefined_found {
-                        return signals;
-                    }
-                    let expr = argument.as_any_js_expression();
-                    if let Some(range) = find_undefined_range(expr) {
-                        signals.push((None, range));
-                    } else {
-                        non_undefined_found = true;
                     }
                 }
             }
@@ -373,13 +286,6 @@ impl Rule for NoUselessUndefined {
                     .append_trivia_pieces(chained_comments)?;
 
                 mutation.replace_node_discard_trivia(assignment_statement, new_node);
-
-                return Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
-                    ctx.metadata().applicability(),
-                    markup! { "Remove the undefined."}.to_owned(),
-                    mutation,
-                ));
             }
             AnyUndefinedNode::JsObjectBindingPatternShorthandProperty(property) => {
                 mutation.remove_node(property.init()?);
@@ -393,40 +299,6 @@ impl Rule for NoUselessUndefined {
             AnyUndefinedNode::JsArrayBindingPatternElement(pattern_element) => {
                 let init = pattern_element.init()?;
                 mutation.remove_node(init)
-            }
-            AnyUndefinedNode::JsCallExpression(js_call_expression) => {
-                let arguments = js_call_expression.arguments().ok()?;
-                let argument_list = arguments.args();
-
-                let mut non_undefined_index = None;
-                for (idx, arg) in argument_list.iter().rev().enumerate() {
-                    let expr = arg.ok()?;
-                    let expr = expr.as_any_js_expression();
-                    if find_undefined_range(expr).is_none() {
-                        non_undefined_index = Some(idx);
-                        break;
-                    }
-                }
-
-                match non_undefined_index {
-                    Some(idx) => {
-                        let new_arguments = argument_list
-                            .iter()
-                            .take(argument_list.len() - idx)
-                            .filter_map(Result::ok)
-                            .collect::<Vec<_>>();
-
-                        let separators = make::token(T![,])
-                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]);
-                        let last_token = argument_list.syntax().last_token()?;
-
-                        let new_argument_list =
-                            make::js_call_argument_list(new_arguments, Some(separators))
-                                .with_leading_trivia_pieces(last_token.leading_trivia().pieces())?;
-                        mutation.replace_node(argument_list, new_argument_list);
-                    }
-                    None => mutation.remove_node(argument_list),
-                };
             }
             AnyUndefinedNode::JsArrowFunctionExpression(js_arrow_function_expression) => {
                 let undefined_body = js_arrow_function_expression.body().ok()?;
@@ -453,12 +325,5 @@ impl Rule for NoUselessUndefined {
             markup! { "Remove the undefined."}.to_owned(),
             mutation,
         ))
-    }
-}
-
-#[test]
-fn test_order() {
-    for items in FUNCTION_NAMES.windows(2) {
-        assert!(items[0] < items[1]);
     }
 }
