@@ -351,6 +351,7 @@ mod tests {
 
         fn parse_suppression_comment(
             comment: &'_ str,
+            _range: TextRange,
         ) -> Vec<Result<SuppressionKind<'_>, Infallible>> {
             comment
                 .trim_start_matches("//")

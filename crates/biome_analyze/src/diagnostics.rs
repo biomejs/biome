@@ -1,7 +1,7 @@
-use biome_console::MarkupBuf;
+use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::{
     advice::CodeSuggestionAdvice, category, Advices, Category, Diagnostic, DiagnosticExt,
-    DiagnosticTags, Error, Location, Severity, Visit,
+    DiagnosticTags, Error, Location, LogCategory, Severity, Visit,
 };
 use biome_rowan::TextRange;
 use std::borrow::Cow;
@@ -141,7 +141,7 @@ impl AnalyzerDiagnostic {
 
 #[derive(Debug, Diagnostic, Clone)]
 #[diagnostic(severity = Warning)]
-pub struct SuppressionDiagnostic {
+pub struct AnalyzerSuppressionDiagnostic {
     #[category]
     category: &'static Category,
     #[location(span)]
@@ -151,9 +151,12 @@ pub struct SuppressionDiagnostic {
     message: String,
     #[tags]
     tags: DiagnosticTags,
+
+    #[advice]
+    advice: SuppressionAdvice,
 }
 
-impl SuppressionDiagnostic {
+impl AnalyzerSuppressionDiagnostic {
     pub(crate) fn new(
         category: &'static Category,
         range: TextRange,
@@ -164,12 +167,30 @@ impl SuppressionDiagnostic {
             range,
             message: message.to_string(),
             tags: DiagnosticTags::empty(),
+            advice: SuppressionAdvice::default(),
         }
     }
 
-    pub(crate) fn with_tags(mut self, tags: DiagnosticTags) -> Self {
-        self.tags |= tags;
+    pub(crate) fn note(mut self, message: impl Into<String>, range: impl Into<TextRange>) -> Self {
+        self.advice.messages.push((message.into(), range.into()));
         self
+    }
+}
+
+#[derive(Debug, Default, Clone)]
+struct SuppressionAdvice {
+    messages: Vec<(String, TextRange)>,
+}
+
+impl Advices for SuppressionAdvice {
+    fn record(&self, visitor: &mut dyn Visit) -> std::io::Result<()> {
+        for (message, range) in &self.messages {
+            visitor.record_log(LogCategory::Info, &markup! {{message}})?;
+            let location = Location::builder().span(range);
+
+            visitor.record_frame(location.build())?
+        }
+        Ok(())
     }
 }
 
