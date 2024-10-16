@@ -1,4 +1,6 @@
-use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize::{
+    DeserializableContext, DeserializableValidator, DeserializationDiagnostic,
+};
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -68,12 +70,12 @@ impl PartialVcsConfiguration {
 impl DeserializableValidator for PartialVcsConfiguration {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializableContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.client_kind.is_none() && self.is_enabled() {
-            diagnostics.push(
+            ctx.report(
                 DeserializationDiagnostic::new(
                     "You enabled the VCS integration, but you didn't specify a client.",
                 )

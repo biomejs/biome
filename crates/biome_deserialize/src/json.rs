@@ -1,7 +1,8 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
 use crate::{
-    diagnostics::DeserializableType, Deserializable, DeserializableValue,
-    DeserializationDiagnostic, DeserializationVisitor, Deserialized, Text, TextNumber,
+    diagnostics::DeserializableType, DefaultDeserializableContext, Deserializable,
+    DeserializableContext, DeserializableValue, DeserializationVisitor, Deserialized, Text,
+    TextNumber,
 };
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{parse_json, JsonParserOptions};
@@ -40,13 +41,13 @@ use crate::DeserializableTypes;
 pub fn deserialize_from_json_str<Output: Deserializable>(
     source: &str,
     options: JsonParserOptions,
-    name: &str,
+    id: &str,
 ) -> Deserialized<Output> {
     let parse = parse_json(source, options);
     let Deserialized {
         diagnostics,
         deserialized,
-    } = deserialize_from_json_ast::<Output>(&parse.tree(), name);
+    } = deserialize_from_json_ast::<Output>(&parse.tree(), id);
     let errors = parse
         .into_diagnostics()
         .into_iter()
@@ -66,18 +67,18 @@ pub fn deserialize_from_str<Output: Deserializable>(source: &str) -> Deserialize
 
 /// Attempts to deserialize a JSON AST, given the `Output`.
 ///
-/// `name` corresponds to the name used in a diagnostic to designate the deserialized value.
+/// `id` corresponds to the identifier of the deserialized value.
 pub fn deserialize_from_json_ast<Output: Deserializable>(
     parse: &JsonRoot,
-    name: &str,
+    id: &str,
 ) -> Deserialized<Output> {
-    let mut diagnostics = vec![];
+    let mut ctx = DefaultDeserializableContext::new(id);
     let deserialized = parse
         .value()
         .ok()
-        .and_then(|value| Output::deserialize(&value, name, &mut diagnostics));
+        .and_then(|value| Output::deserialize(&mut ctx, &value, ""));
     Deserialized {
-        diagnostics: diagnostics.into_iter().map(Error::from).collect::<Vec<_>>(),
+        diagnostics: ctx.diagnostics,
         deserialized,
     }
 }
@@ -89,15 +90,15 @@ impl DeserializableValue for AnyJsonValue {
 
     fn deserialize<V: DeserializationVisitor>(
         &self,
+        ctx: &mut impl DeserializableContext,
         visitor: V,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<V::Output> {
         let range = AstNode::range(self);
         match self {
             AnyJsonValue::JsonArrayValue(array) => {
                 let items = array.elements().iter().map(|x| x.ok());
-                visitor.visit_array(items, range, name, diagnostics)
+                visitor.visit_array(ctx, items, range, name)
             }
             AnyJsonValue::JsonBogusValue(_) => {
                 // The parser should emit an error about this node
@@ -106,24 +107,24 @@ impl DeserializableValue for AnyJsonValue {
             }
             AnyJsonValue::JsonBooleanValue(value) => {
                 let value = value.value_token().ok()?;
-                visitor.visit_bool(value.kind() == T![true], range, name, diagnostics)
+                visitor.visit_bool(ctx, value.kind() == T![true], range, name)
             }
-            AnyJsonValue::JsonNullValue(_) => visitor.visit_null(range, name, diagnostics),
+            AnyJsonValue::JsonNullValue(_) => visitor.visit_null(ctx, range, name),
             AnyJsonValue::JsonNumberValue(value) => {
                 let value = value.value_token().ok()?;
                 let token_text = value.token_text_trimmed();
-                visitor.visit_number(TextNumber(token_text), range, name, diagnostics)
+                visitor.visit_number(ctx, TextNumber(token_text), range, name)
             }
             AnyJsonValue::JsonObjectValue(object) => {
                 let members = object.json_member_list().iter().map(|member| {
                     let member = member.ok()?;
                     Some((member.name().ok()?, member.value().ok()?))
                 });
-                visitor.visit_map(members, range, name, diagnostics)
+                visitor.visit_map(ctx, members, range, name)
             }
             AnyJsonValue::JsonStringValue(value) => {
                 let value = unescape_json(value.inner_string_text().ok()?);
-                visitor.visit_str(value, range, name, diagnostics)
+                visitor.visit_str(ctx, value, range, name)
             }
         }
     }
@@ -144,9 +145,9 @@ impl DeserializableValue for AnyJsonValue {
 #[cfg(feature = "serde")]
 impl Deserializable for serde_json::Value {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
@@ -154,34 +155,34 @@ impl Deserializable for serde_json::Value {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::all();
             fn visit_null(
                 self,
+                _ctx: &mut impl DeserializableContext,
                 _range: biome_rowan::TextRange,
                 _name: &str,
-                _diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(serde_json::Value::Null)
             }
 
             fn visit_bool(
                 self,
+                _ctx: &mut impl DeserializableContext,
                 value: bool,
                 _range: biome_rowan::TextRange,
                 _name: &str,
-                _diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(serde_json::Value::Bool(value))
             }
 
             fn visit_number(
                 self,
+                ctx: &mut impl DeserializableContext,
                 value: TextNumber,
                 _range: biome_rowan::TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 match serde_json::from_str(value.text()) {
                     Ok(num) => Some(serde_json::Value::Number(num)),
                     Err(err) => {
-                        diagnostics.push(DeserializationDiagnostic::new(err.to_string()));
+                        ctx.report(crate::DeserializationDiagnostic::new(err.to_string()));
                         None
                     }
                 }
@@ -189,43 +190,43 @@ impl Deserializable for serde_json::Value {
 
             fn visit_str(
                 self,
+                _ctx: &mut impl DeserializableContext,
                 value: Text,
                 _range: biome_rowan::TextRange,
                 _name: &str,
-                _diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(serde_json::Value::String(value.text().to_string()))
             }
 
             fn visit_array(
                 self,
+                ctx: &mut impl DeserializableContext,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
                 _range: biome_rowan::TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(serde_json::Value::Array(
                     values
-                        .filter_map(|value| Deserializable::deserialize(&value?, "", diagnostics))
+                        .filter_map(|value| Deserializable::deserialize(ctx, &value?, ""))
                         .collect(),
                 ))
             }
 
             fn visit_map(
                 self,
+                ctx: &mut impl DeserializableContext,
                 members: impl Iterator<
                     Item = Option<(impl DeserializableValue, impl DeserializableValue)>,
                 >,
                 _range: biome_rowan::TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 Some(serde_json::Value::Object(
                     members
                         .filter_map(|entry| {
                             let (key, value) = entry?;
-                            let key = Deserializable::deserialize(&key, "", diagnostics)?;
-                            let value = value.deserialize(Visitor, "", diagnostics)?;
+                            let key = Deserializable::deserialize(ctx, &key, "")?;
+                            let value = value.deserialize(ctx, Visitor, "")?;
                             Some((key, value))
                         })
                         .collect(),
@@ -233,7 +234,7 @@ impl Deserializable for serde_json::Value {
             }
         }
 
-        value.deserialize(Visitor, name, diagnostics)
+        value.deserialize(ctx, Visitor, name)
     }
 }
 
@@ -244,12 +245,12 @@ impl DeserializableValue for JsonMemberName {
 
     fn deserialize<V: DeserializationVisitor>(
         &self,
+        ctx: &mut impl DeserializableContext,
         visitor: V,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<V::Output> {
         let value = unescape_json(self.inner_string_text().ok()?);
-        visitor.visit_str(value, AstNode::range(self), name, diagnostics)
+        visitor.visit_str(ctx, value, AstNode::range(self), name)
     }
 
     fn visitable_type(&self) -> Option<DeserializableType> {
@@ -300,12 +301,12 @@ mod tests {
         }
         impl Deserializable for Name {
             fn deserialize(
+                ctx: &mut impl DeserializableContext,
                 _value: &impl DeserializableValue,
                 name: &str,
-                _diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self> {
                 Some(Name {
-                    name: name.to_string(),
+                    name: ctx.id().unwrap_or(name).to_string(),
                 })
             }
         }

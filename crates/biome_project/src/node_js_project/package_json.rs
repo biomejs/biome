@@ -1,7 +1,7 @@
 use crate::{LanguageRoot, Manifest};
 use biome_deserialize::json::deserialize_from_json_ast;
 use biome_deserialize::{
-    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
+    Deserializable, DeserializableContext, DeserializableTypes, DeserializableValue,
     DeserializationVisitor, Deserialized, Text,
 };
 use biome_json_syntax::JsonLanguage;
@@ -66,11 +66,11 @@ impl From<String> for Version {
 
 impl Deserializable for PackageJson {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(PackageJsonVisitor, name, diagnostics)
+        value.deserialize(ctx, PackageJsonVisitor, name)
     }
 }
 
@@ -82,59 +82,54 @@ impl DeserializationVisitor for PackageJsonVisitor {
 
     fn visit_map(
         self,
+        ctx: &mut impl DeserializableContext,
         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         let mut result = Self::Output::default();
         for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 continue;
             };
             match key_text.text() {
                 "version" => {
-                    result.version = Deserializable::deserialize(&value, &key_text, diagnostics);
+                    result.version = Deserializable::deserialize(ctx, &value, &key_text);
                 }
                 "name" => {
-                    result.name = Deserializable::deserialize(&value, &key_text, diagnostics);
+                    result.name = Deserializable::deserialize(ctx, &value, &key_text);
                 }
                 "license" => {
                     let license_range = value.range();
                     // TODO: add proper parsing of license, e.g. support for AND keywords
-                    result.license = Deserializable::deserialize(&value, &key_text, diagnostics)
+                    result.license = Deserializable::deserialize(ctx, &value, &key_text)
                         .map(|license| (license, license_range));
                 }
                 "description" => {
-                    result.description =
-                        Deserializable::deserialize(&value, &key_text, diagnostics);
+                    result.description = Deserializable::deserialize(ctx, &value, &key_text);
                 }
                 "dependencies" => {
-                    if let Some(deps) = Deserializable::deserialize(&value, &key_text, diagnostics)
-                    {
+                    if let Some(deps) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.dependencies = deps;
                     }
                 }
                 "devDependencies" => {
-                    if let Some(deps) = Deserializable::deserialize(&value, &key_text, diagnostics)
-                    {
+                    if let Some(deps) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.dev_dependencies = deps;
                     }
                 }
                 "peerDependencies" => {
-                    if let Some(deps) = Deserializable::deserialize(&value, &key_text, diagnostics)
-                    {
+                    if let Some(deps) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.peer_dependencies = deps;
                     }
                 }
                 "optionalDependencies" => {
-                    if let Some(deps) = Deserializable::deserialize(&value, &key_text, diagnostics)
-                    {
+                    if let Some(deps) = Deserializable::deserialize(ctx, &value, &key_text) {
                         result.optional_dependencies = deps;
                     }
                 }
                 "type" => {
-                    result.r#type = Deserializable::deserialize(&value, &key_text, diagnostics);
+                    result.r#type = Deserializable::deserialize(ctx, &value, &key_text);
                 }
                 _ => {
                     // each package can add their own field, so we should ignore any extraneous key
@@ -148,11 +143,11 @@ impl DeserializationVisitor for PackageJsonVisitor {
 
 impl Deserializable for Version {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let value = Text::deserialize(value, name, diagnostics)?;
+        let value = Text::deserialize(ctx, value, name)?;
         match value.text().parse() {
             Ok(version) => Some(Version::SemVer(version)),
             Err(_) => Some(Version::Literal(value.text().to_string())),

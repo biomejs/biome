@@ -8,8 +8,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableTypes, DeserializableValue, DeserializationDiagnostic,
-    DeserializationVisitor, Text,
+    Deserializable, DeserializableContext, DeserializableTypes, DeserializableValue,
+    DeserializationDiagnostic, DeserializationVisitor, Text,
 };
 use biome_js_semantic::{CallsExtensions, SemanticModel};
 use biome_js_syntax::{
@@ -558,11 +558,11 @@ pub struct DeprecatedHooksOptions {}
 
 impl Deserializable for DeprecatedHooksOptions {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        value.deserialize(DeprecatedHooksOptionsVisitor, name, diagnostics)
+        value.deserialize(ctx, DeprecatedHooksOptionsVisitor, name)
     }
 }
 
@@ -575,19 +575,19 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
 
     fn visit_map(
         self,
+        ctx: &mut impl DeserializableContext,
         members: impl Iterator<Item = Option<(impl DeserializableValue, impl DeserializableValue)>>,
         _range: TextRange,
         _name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self::Output> {
         const ALLOWED_KEYS: &[&str] = &["hooks"];
         for (key, value) in members.flatten() {
-            let Some(key_text) = Text::deserialize(&key, "", diagnostics) else {
+            let Some(key_text) = Text::deserialize(ctx, &key, "") else {
                 continue;
             };
             match key_text.text() {
                 "hooks" => {
-                    diagnostics.push(
+                    ctx.report(
                         DeserializationDiagnostic::new_deprecated(
                             key_text.text(),
                             value.range()
@@ -597,7 +597,7 @@ impl DeserializationVisitor for DeprecatedHooksOptionsVisitor {
                         })
                     );
                 }
-                text => diagnostics.push(DeserializationDiagnostic::new_unknown_key(
+                text => ctx.report(DeserializationDiagnostic::new_unknown_key(
                     text,
                     key.range(),
                     ALLOWED_KEYS,

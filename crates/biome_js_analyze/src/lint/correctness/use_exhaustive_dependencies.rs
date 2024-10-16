@@ -3,7 +3,9 @@ use crate::services::semantic::Semantic;
 use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_deserialize::{non_empty, DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize::{
+    non_empty, DeserializableContext, DeserializableValidator, DeserializationDiagnostic,
+};
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{Capture, SemanticModel};
 use biome_js_syntax::{
@@ -354,15 +356,15 @@ pub struct Hook {
 impl DeserializableValidator for Hook {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializableContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         match (self.closure_index, self.dependencies_index) {
             (Some(closure_index), Some(dependencies_index))
                 if closure_index == dependencies_index =>
             {
-                diagnostics.push(
+                ctx.report(
                     DeserializationDiagnostic::new(markup! {
                         <Emphasis>"closureIndex"</Emphasis>" and "<Emphasis>"dependenciesIndex"</Emphasis>" may not be the same"
                     })

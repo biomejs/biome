@@ -1,6 +1,6 @@
 use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableTypes, DeserializableValue,
-    DeserializationDiagnostic, DeserializationVisitor, Merge,
+    Deserializable, DeserializableContext, DeserializableType, DeserializableTypes,
+    DeserializableValue, DeserializationDiagnostic, DeserializationVisitor, Merge,
 };
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
@@ -125,15 +125,15 @@ impl Deref for IgnorePattern {
 }
 impl biome_deserialize::Deserializable for IgnorePattern {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let s = biome_deserialize::Text::deserialize(value, name, diagnostics)?;
+        let s = biome_deserialize::Text::deserialize(ctx, value, name)?;
         match ignorefile::convert_pattern(s.text()) {
             Ok(pattern) => Some(Self(pattern)),
             Err(msg) => {
-                diagnostics.push(DeserializationDiagnostic::new(msg).with_range(value.range()));
+                ctx.report(DeserializationDiagnostic::new(msg).with_range(value.range()));
                 None
             }
         }
@@ -184,14 +184,14 @@ impl GlobalConf {
 }
 impl Deserializable for GlobalConf {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Str {
-            Deserializable::deserialize(value, name, diagnostics).map(Self::Qualifier)
+            Deserializable::deserialize(ctx, value, name).map(Self::Qualifier)
         } else {
-            Deserializable::deserialize(value, name, diagnostics).map(Self::Flag)
+            Deserializable::deserialize(ctx, value, name).map(Self::Flag)
         }
     }
 }
@@ -249,15 +249,15 @@ impl<T> IntoIterator for ShorthandVec<T> {
 }
 impl<T: Deserializable> Deserializable for ShorthandVec<T> {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         Some(ShorthandVec(
             if value.visitable_type()? == DeserializableType::Array {
-                Deserializable::deserialize(value, name, diagnostics)?
+                Deserializable::deserialize(ctx, value, name)?
             } else {
-                Vec::from_iter([Deserializable::deserialize(value, name, diagnostics)?])
+                Vec::from_iter([Deserializable::deserialize(ctx, value, name)?])
             },
         ))
     }
@@ -306,9 +306,9 @@ impl<T: Default, U: Default> RuleConf<T, U> {
 }
 impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable for RuleConf<T, U> {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor<T, U>(PhantomData<(T, U)>);
         impl<T: Deserializable + 'static, U: Deserializable + 'static> DeserializationVisitor
@@ -318,26 +318,26 @@ impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable fo
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
+                ctx: &mut impl DeserializableContext,
                 values: impl Iterator<Item = Option<impl DeserializableValue>>,
                 range: TextRange,
                 _name: &str,
-                diagnostics: &mut Vec<DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 let mut values = values.flatten();
                 let Some(first_value) = values.next() else {
-                    diagnostics.push(
+                    ctx.report(
                         DeserializationDiagnostic::new("A severity is expected.").with_range(range),
                     );
                     return None;
                 };
-                let severity = Deserializable::deserialize(&first_value, "", diagnostics)?;
+                let severity = Deserializable::deserialize(ctx, &first_value, "")?;
                 if TypeId::of::<T>() == TypeId::of::<()>() {
                     return Some(RuleConf::Severity(severity));
                 }
                 let Some(second_value) = values.next() else {
                     return Some(RuleConf::Severity(severity));
                 };
-                let Some(option) = T::deserialize(&second_value, "", diagnostics) else {
+                let Some(option) = T::deserialize(ctx, &second_value, "") else {
                     // Recover by ignoring the failed deserialization
                     return Some(RuleConf::Severity(severity));
                 };
@@ -345,21 +345,21 @@ impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable fo
                     return Some(RuleConf::Option(severity, option));
                 };
                 if TypeId::of::<U>() != TypeId::of::<()>() {
-                    if let Some(option2) = U::deserialize(&third_value, "", diagnostics) {
+                    if let Some(option2) = U::deserialize(ctx, &third_value, "") {
                         return Some(RuleConf::Options(severity, option, option2));
                     } else {
                         // Recover by ignoring the failed deserialization
                         return Some(RuleConf::Option(severity, option));
                     }
                 }
-                let Some(option2) = T::deserialize(&third_value, "", diagnostics) else {
+                let Some(option2) = T::deserialize(ctx, &third_value, "") else {
                     // Recover by ignoring the failed deserialization
                     return Some(RuleConf::Option(severity, option));
                 };
                 let mut spread = Vec::new();
                 spread.push(option);
                 spread.push(option2);
-                spread.extend(values.filter_map(|val| T::deserialize(&val, "", diagnostics)));
+                spread.extend(values.filter_map(|val| T::deserialize(ctx, &val, "")));
                 Some(RuleConf::Spread(severity, spread))
             }
         }
@@ -367,9 +367,9 @@ impl<T: Deserializable + 'static, U: Deserializable + 'static> Deserializable fo
             value.visitable_type()?,
             DeserializableType::Number | DeserializableType::Str
         ) {
-            Deserializable::deserialize(value, name, diagnostics).map(RuleConf::Severity)
+            Deserializable::deserialize(ctx, value, name).map(RuleConf::Severity)
         } else {
-            value.deserialize(Visitor(PhantomData), name, diagnostics)
+            value.deserialize(ctx, Visitor(PhantomData), name)
         }
     }
 }
@@ -417,14 +417,14 @@ enum NumberOrString {
 }
 impl Deserializable for NumberOrString {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
         Some(if value.visitable_type()? == DeserializableType::Str {
-            Self::String(Deserializable::deserialize(value, name, diagnostics)?)
+            Self::String(Deserializable::deserialize(ctx, value, name)?)
         } else {
-            Self::Number(Deserializable::deserialize(value, name, diagnostics)?)
+            Self::Number(Deserializable::deserialize(ctx, value, name)?)
         })
     }
 }
@@ -450,9 +450,9 @@ impl Deref for Rules {
 }
 impl Deserializable for Rules {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
         struct Visitor;
         impl DeserializationVisitor for Visitor {
@@ -460,6 +460,7 @@ impl Deserializable for Rules {
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,
+                ctx: &mut impl DeserializableContext,
                 members: impl Iterator<
                     Item = Option<(
                         impl biome_deserialize::DeserializableValue,
@@ -468,57 +469,54 @@ impl Deserializable for Rules {
                 >,
                 _range: biome_rowan::TextRange,
                 name: &str,
-                diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self::Output> {
                 use biome_deserialize::Text;
                 let mut result = IndexSet::default();
                 for (key, value) in members.flatten() {
-                    let Some(rule_name) = Text::deserialize(&key, "", diagnostics) else {
+                    let Some(rule_name) = Text::deserialize(ctx, &key, "") else {
                         continue;
                     };
                     match rule_name.text() {
                         // Eslint rules with options that we handle
                         "no-console" => {
-                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoConsole(conf));
                             }
                         }
                         "no-restricted-globals" => {
-                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::NoRestrictedGlobals(conf));
                             }
                         }
                         // Eslint plugin rules with options that we handle
                         "jsx-a11y/aria-role" => {
-                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::Jsxa11yArioaRoles(conf));
                             }
                         }
                         "@typescript-eslint/array-type" => {
-                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::TypeScriptArrayType(conf));
                             }
                         }
                         "@typescript-eslint/explicit-member-accessibility" => {
-                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::TypeScriptExplicitMemberAccessibility(conf));
                             }
                         }
                         "@typescript-eslint/naming-convention" => {
-                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::TypeScriptNamingConvention(conf));
                             }
                         }
                         "unicorn/filename-case" => {
-                            if let Some(conf) = RuleConf::deserialize(&value, name, diagnostics) {
+                            if let Some(conf) = RuleConf::deserialize(ctx, &value, name) {
                                 result.insert(Rule::UnicornFilenameCase(conf));
                             }
                         }
                         // Other rules
                         rule_name => {
-                            if let Some(conf) =
-                                RuleConf::<()>::deserialize(&value, name, diagnostics)
-                            {
+                            if let Some(conf) = RuleConf::<()>::deserialize(ctx, &value, name) {
                                 result.insert(Rule::Any(
                                     Cow::Owned(rule_name.to_string()),
                                     conf.severity(),
@@ -530,7 +528,7 @@ impl Deserializable for Rules {
                 Some(Rules(result))
             }
         }
-        value.deserialize(Visitor, name, diagnostics)
+        value.deserialize(ctx, Visitor, name)
     }
 }
 
@@ -560,15 +558,14 @@ impl NoRestrictedGlobal {
 }
 impl Deserializable for NoRestrictedGlobal {
     fn deserialize(
+        ctx: &mut impl DeserializableContext,
         value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Str {
-            Deserializable::deserialize(value, name, diagnostics).map(NoRestrictedGlobal::Plain)
+            Deserializable::deserialize(ctx, value, name).map(NoRestrictedGlobal::Plain)
         } else {
-            Deserializable::deserialize(value, name, diagnostics)
-                .map(NoRestrictedGlobal::WithMessage)
+            Deserializable::deserialize(ctx, value, name).map(NoRestrictedGlobal::WithMessage)
         }
     }
 }
