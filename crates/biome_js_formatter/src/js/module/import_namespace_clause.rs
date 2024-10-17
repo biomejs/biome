@@ -13,16 +13,12 @@ impl FormatNodeRule<JsImportNamespaceClause> for FormatJsImportNamespaceClause {
             type_token,
             namespace_specifier,
             from_token,
-            defer_token,
             source,
             assertion,
         } = node.as_fields();
 
         if let Some(type_token) = type_token {
             write!(f, [type_token.format(), space()])?;
-        }
-        if let Some(defer_token) = defer_token {
-            write!(f, [defer_token.format(), space()])?;
         }
 
         write![

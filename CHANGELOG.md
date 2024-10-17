@@ -9,7 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## v1.9.4 (2024-10-18)
+## v1.9.4 (2024-10-17)
 
 ### Analyzer
 
@@ -189,28 +189,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
-#### New features
-
-- Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
-
-  ```js
-  import defer * as myModule from "my-module";
-  ```
-
-  Contributed by @fireairforce
-
-- Add support for parsing typescript's `resolution-mode` in Import Types([#2115](https://github.com/biomejs/biome/issues/2115))
-
-  ```ts
-  export type Fs = typeof import('fs', { with: { 'resolution-mode': 'import' } });
-  export type TypeFromRequire =
-    import("pkg", { with: { "resolution-mode": "require" } }).TypeFromRequire;
-  export type TypeFromImport =
-    import("pkg", { with: { "resolution-mode": "import" } }).TypeFromImport;
-  ```
-
-  Contributed by @fireairforce
-
 #### Bug Fixes
 
 - The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
@@ -228,6 +206,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @Conaclos
+
+- Add support for parsing typescript's `resolution-mode` in Import Types([#2115](https://github.com/biomejs/biome/issues/2115))
+
+  ```ts
+  export type Fs = typeof import('fs', { with: { 'resolution-mode': 'import' } });
+  export type TypeFromRequire =
+    import("pkg", { with: { "resolution-mode": "require" } }).TypeFromRequire;
+  export type TypeFromImport =
+    import("pkg", { with: { "resolution-mode": "import" } }).TypeFromImport;
+  ```
+
+  Contributed by @fireairforce
 
 ## v1.9.3 (2024-10-01)
 
