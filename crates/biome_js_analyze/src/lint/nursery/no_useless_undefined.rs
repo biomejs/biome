@@ -9,7 +9,7 @@ use biome_js_syntax::{
     JsFormalParameter, JsObjectBindingPatternShorthandProperty, JsReturnStatement,
     JsVariableStatement, JsYieldArgument, T,
 };
-use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange};
+use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, TextRange, TokenText};
 
 use crate::JsRuleAction;
 
@@ -104,7 +104,7 @@ fn find_undefined_range(expr: Option<&AnyJsExpression>) -> Option<TextRange> {
 }
 
 pub struct RuleState {
-    binding_text: Option<Box<str>>,
+    binding_text: Option<TokenText>,
     diagnostic_range: TextRange,
 }
 
@@ -139,10 +139,18 @@ impl Rule for NoUselessUndefined {
                         let Ok(binding_text) = decl.id() else {
                             continue;
                         };
-                        signals.push(RuleState {
-                            binding_text: Some(binding_text.text().into()),
-                            diagnostic_range: undefined_range,
-                        })
+                        if let Some(binding) = binding_text.as_any_js_binding() {
+                            if let Some(ident_binding) = binding.as_js_identifier_binding() {
+                                let binding_text = ident_binding
+                                    .name_token()
+                                    .map(|t| t.token_text_trimmed())
+                                    .ok();
+                                signals.push(RuleState {
+                                    binding_text,
+                                    diagnostic_range: undefined_range,
+                                });
+                            }
+                        }
                     }
                 }
             }
@@ -275,7 +283,7 @@ impl Rule for NoUselessUndefined {
                 mutation.remove_node(init)
             }
             AnyUndefinedNode::JsArrowFunctionExpression(js_arrow_function_expression) => {
-                let undefined_body = js_arrow_function_expression.body().ok()?;
+                let undefined_body: AnyJsFunctionBody = js_arrow_function_expression.body().ok()?;
                 let next_node = js_function_body(
                     make::token(T!['{']),
                     make::js_directive_list(None),
