@@ -408,7 +408,7 @@ fn diagnostics_print_correctly() {
 #[test]
 pub fn quick_test() {
     let code = r#"
-        import defer * as yNamespace from "y";
+        type A = typeof import("test");
     "#;
     let root = parse(
         code,

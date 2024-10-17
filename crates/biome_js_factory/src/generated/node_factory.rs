@@ -4971,15 +4971,11 @@ impl TsImportEqualsDeclarationBuilder {
 }
 pub fn ts_import_type(
     import_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    argument_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
+    arguments: JsCallArguments,
 ) -> TsImportTypeBuilder {
     TsImportTypeBuilder {
         import_token,
-        l_paren_token,
-        argument_token,
-        r_paren_token,
+        arguments,
         typeof_token: None,
         qualifier_clause: None,
         type_arguments: None,
@@ -4987,9 +4983,7 @@ pub fn ts_import_type(
 }
 pub struct TsImportTypeBuilder {
     import_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    argument_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
+    arguments: JsCallArguments,
     typeof_token: Option<SyntaxToken>,
     qualifier_clause: Option<TsImportTypeQualifier>,
     type_arguments: Option<TsTypeArguments>,
@@ -5013,9 +5007,7 @@ impl TsImportTypeBuilder {
             [
                 self.typeof_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Token(self.import_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                Some(SyntaxElement::Token(self.argument_token)),
-                Some(SyntaxElement::Token(self.r_paren_token)),
+                Some(SyntaxElement::Node(self.arguments.into_syntax())),
                 self.qualifier_clause
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.type_arguments

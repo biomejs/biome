@@ -2133,9 +2133,7 @@ TsMappedTypeReadonlyModifierClause =
 TsImportType =
 	'typeof'?
 	'import'
-	'('
-	argument: 'js_string_literal'
-	')'
+	arguments: JsCallArguments
 	qualifier_clause: TsImportTypeQualifier?
 	type_arguments: TsTypeArguments?
 
