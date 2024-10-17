@@ -2470,6 +2470,10 @@ export interface FilenamingConventionOptions {
 	 */
 	filenameCases: FilenameCases;
 	/**
+	 * Regular expression to enforce
+	 */
+	match?: Regex;
+	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
 	requireAscii: boolean;
@@ -2545,6 +2549,7 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
+export type Regex = string;
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -2578,7 +2583,6 @@ export type FilenameCase =
 	| "PascalCase"
 	| "snake_case";
 export type Formats = Format[];
-export type Regex = string;
 export interface Selector {
 	/**
 	 * Declaration kind
