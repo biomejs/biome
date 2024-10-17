@@ -279,7 +279,7 @@ impl Rule for NoUselessUndefined {
                 mutation.remove_node(init)
             }
             AnyUndefinedNode::JsArrowFunctionExpression(js_arrow_function_expression) => {
-                let undefined_body: AnyJsFunctionBody = js_arrow_function_expression.body().ok()?;
+                let undefined_body = js_arrow_function_expression.body().ok()?;
                 let next_node = js_function_body(
                     make::token(T!['{']),
                     make::js_directive_list(None),
