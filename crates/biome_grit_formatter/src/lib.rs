@@ -4,6 +4,7 @@ mod cst;
 mod generated;
 mod grit;
 mod prelude;
+pub(crate) mod separated;
 
 use biome_formatter::{
     comments::Comments,
