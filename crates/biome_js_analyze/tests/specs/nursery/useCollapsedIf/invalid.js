@@ -111,40 +111,6 @@ if (condition) {
 	// Comment
 }
 
-if (condition) { // Comment
-	if (anotherCondition) {
-		// ...
-	}
-} else {
-	// ...
-}
-
-if (condition) {
-	// Comment
-	if (anotherCondition) {
-		// ...
-	}
-} else {
-	// ...
-}
-
-if (condition) {
-	if (anotherCondition) {
-		// ...
-	} // Comment
-} else {
-	// ...
-}
-
-if (condition) {
-	if (anotherCondition) {
-		// ...
-	}
-	// Comment
-} else {
-	// ...
-}
-
 if (condition)
 	if (anotherCondition) // Comment
 		doSomething();
