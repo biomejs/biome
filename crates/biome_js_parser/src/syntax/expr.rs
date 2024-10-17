@@ -1450,12 +1450,13 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                 // test js import_call
                 // import("foo")
                 // import("foo", { assert: { type: 'json' } })
+                // import("foo", { with: { 'resolution-mode': 'import' } })
 
                 // test_err js import_invalid_args
                 // import()
                 // import(...["foo"])
                 // import("foo", { assert: { type: 'json' } }, "bar")
-
+                // import("foo", { with: { type: 'json' } }, "bar")
                 let args = p.start();
                 p.bump(T!['(']);
                 let args_list = p.start();
@@ -1834,7 +1835,7 @@ fn parse_array_expr(p: &mut JsParser) -> ParsedSyntax {
 // test_err js spread
 // [...]
 /// A spread element consisting of three dots and an assignment expression such as `...foo`
-fn parse_spread_element(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
+pub(crate) fn parse_spread_element(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
     if !p.at(T![...]) {
         return Absent;
     }

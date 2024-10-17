@@ -1387,6 +1387,10 @@ export interface Nursery {
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
 	/**
+	 * Enforces the use of a recommended display strategy with Google Fonts.
+	 */
+	useGoogleFontDisplay?: RuleConfiguration_for_Null;
+	/**
 	 * Require for-in loops to include an if statement.
 	 */
 	useGuardForIn?: RuleConfiguration_for_Null;
@@ -2970,7 +2974,9 @@ export type Category =
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
+	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useGoogleFontDisplay"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
