@@ -15,6 +15,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Implement [GraphQL suppression action](https://github.com/biomejs/biome/pull/4312). Contributed by @vohoanglong0107
+
 - Improved the message for unused suppression comments. Contributed by @dyc3
 
 - Fix [#4228](https://github.com/biomejs/biome/issues/4228), where the rule `a11y/noInteractiveElementToNoninteractiveRole` incorrectlly reports a `role` for non interactive elements. Contributed by @eryue0220
@@ -186,7 +188,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
-  
+
    ```js
    import defer * as myModule from "my-module";
    ```
