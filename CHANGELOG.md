@@ -9,6 +9,39 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+### Parser
+
+#### Bug fixes
+
+- Fix [#4317](https://github.com/biomejs/biome/issues/4317), get accessors parameter can contain a trailing comma, the following example can be parsed correctly:
+
+  ```js
+  export class DummyClass {
+    set input(
+      value: string,
+    ) {}
+  }
+  ```
+  
+  Contributed by @fireairforce.
+
+
 ## v1.9.4 (2024-10-17)
 
 ### Analyzer

@@ -2907,16 +2907,22 @@ impl JsSetterObjectMember {
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
+    pub fn with_comma_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
+        )
+    }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(5usize..=5usize, once(Some(element.into()))),
         )
     }
     pub fn with_body(self, element: JsFunctionBody) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
