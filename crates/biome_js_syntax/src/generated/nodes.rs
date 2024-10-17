@@ -6008,6 +6008,7 @@ impl JsSetterObjectMember {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             parameter: self.parameter(),
+            comma_token: self.comma_token(),
             r_paren_token: self.r_paren_token(),
             body: self.body(),
         }
@@ -6024,11 +6025,14 @@ impl JsSetterObjectMember {
     pub fn parameter(&self) -> SyntaxResult<AnyJsFormalParameter> {
         support::required_node(&self.syntax, 3usize)
     }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
+    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 5usize)
     }
     pub fn body(&self) -> SyntaxResult<JsFunctionBody> {
-        support::required_node(&self.syntax, 5usize)
+        support::required_node(&self.syntax, 6usize)
     }
 }
 impl Serialize for JsSetterObjectMember {
@@ -6045,6 +6049,7 @@ pub struct JsSetterObjectMemberFields {
     pub name: SyntaxResult<AnyJsObjectMemberName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameter: SyntaxResult<AnyJsFormalParameter>,
+    pub comma_token: Option<SyntaxToken>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<JsFunctionBody>,
 }
@@ -22013,6 +22018,10 @@ impl std::fmt::Debug for JsSetterObjectMember {
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
             .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+            .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),

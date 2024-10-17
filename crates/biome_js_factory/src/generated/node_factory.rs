@@ -3166,18 +3166,45 @@ pub fn js_setter_object_member(
     parameter: AnyJsFormalParameter,
     r_paren_token: SyntaxToken,
     body: JsFunctionBody,
-) -> JsSetterObjectMember {
-    JsSetterObjectMember::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_SETTER_OBJECT_MEMBER,
-        [
-            Some(SyntaxElement::Token(set_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(parameter.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-            Some(SyntaxElement::Node(body.into_syntax())),
-        ],
-    ))
+) -> JsSetterObjectMemberBuilder {
+    JsSetterObjectMemberBuilder {
+        set_token,
+        name,
+        l_paren_token,
+        parameter,
+        r_paren_token,
+        body,
+        comma_token: None,
+    }
+}
+pub struct JsSetterObjectMemberBuilder {
+    set_token: SyntaxToken,
+    name: AnyJsObjectMemberName,
+    l_paren_token: SyntaxToken,
+    parameter: AnyJsFormalParameter,
+    r_paren_token: SyntaxToken,
+    body: JsFunctionBody,
+    comma_token: Option<SyntaxToken>,
+}
+impl JsSetterObjectMemberBuilder {
+    pub fn with_comma_token(mut self, comma_token: SyntaxToken) -> Self {
+        self.comma_token = Some(comma_token);
+        self
+    }
+    pub fn build(self) -> JsSetterObjectMember {
+        JsSetterObjectMember::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_SETTER_OBJECT_MEMBER,
+            [
+                Some(SyntaxElement::Token(self.set_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.parameter.into_syntax())),
+                self.comma_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+                Some(SyntaxElement::Node(self.body.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn js_shorthand_named_import_specifier(
     local_name: AnyJsBinding,
