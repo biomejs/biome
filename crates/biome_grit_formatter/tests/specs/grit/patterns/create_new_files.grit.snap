@@ -5,11 +5,11 @@ info: grit/patterns/create_new_files.grit
 # Input
 
 ```grit
-`function $functionName($_) {$_}` as $f where {
-  $functionName <: r"test.*",
-  $f => .,
-  $new_file_name = `$functionName.test.js`,
-  $new_files += file(name = $new_file_name, body = $f)
+`function $functionName($_) {$_}` as $f where{
+  $functionName<:r"test.*",
+  $f=>.,
+  $new_file_name=`$functionName.test.js`,
+  $new_files+=file(name = $new_file_name, body = $f)
 }
 ```
 
@@ -42,8 +42,11 @@ Attribute Position: Auto
 ## Unimplemented nodes/tokens
 
 "`function $functionName($_) {$_}` as $f " => 0..40
-"\t$functionName <: r\"test.*\",\n" => 48..77
-"\t$f => .,\n" => 77..87
-"\t$new_file_name = " => 87..105
+"\t$functionName <" => 48..64
+" r\"test.*" => 65..74
+"\t$f =" => 77..82
+" " => 83..84
+"\t$new_file_name =" => 87..104
 " `$functionName.test.js" => 104..127
-"\t$new_files += file(name = $new_file_name, body = $f)\n}" => 130..185
+"\t$new_files +" => 130..143
+" file(name = $new_file_name, body = $f" => 144..182
