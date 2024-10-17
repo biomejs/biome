@@ -5,4 +5,6 @@ expression: valid.ts
 # Input
 ```ts
 declare module "node:fs" {}
+declare module "lodash/get" {}
+declare module "lodash/sortBy" {}
 ```

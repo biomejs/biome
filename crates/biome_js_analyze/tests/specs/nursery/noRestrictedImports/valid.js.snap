@@ -5,7 +5,6 @@ expression: valid.js
 # Input
 ```jsx
 const path = require('lodash');
+const path = require('lodash/get');
 
 ```
-
-
