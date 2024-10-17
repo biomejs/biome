@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoImgElement {
-        version: "next",
+        version: "1.9.4",
         name: "noImgElement",
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-img-element")],
