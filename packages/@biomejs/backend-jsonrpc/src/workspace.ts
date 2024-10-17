@@ -1339,6 +1339,10 @@ export interface Nursery {
 	 */
 	noUselessStringRaw?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow the use of useless undefined.
+	 */
+	noUselessUndefined?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow use of @value rule in css modules.
 	 */
 	noValueAtRule?: RuleConfiguration_for_Null;
@@ -2959,6 +2963,7 @@ export type Category =
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
 	| "lint/nursery/noUselessStringRaw"
+	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"

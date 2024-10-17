@@ -1,0 +1,25 @@
+[
+	"let a = undefined;",
+	"let a = undefined, b = 2;",
+	"var a = undefined;",
+	"var a = undefined, b = 2;",
+
+	"function foo() {return undefined;}",
+
+	"const foo = () => undefined;",
+	"const foo = () => {return undefined;};",
+
+	"function foo() {return undefined;}",
+	"function foo() {return /* comment */ undefined;}",
+	"function* foo() {yield undefined;}",
+	"function* foo() {yield undefined;}",
+
+	"const {foo = undefined} = {};",
+	"const [foo = undefined] = [];",
+
+	"function foo(bar = undefined) {}",
+	"function foo({bar = undefined}) {}",
+	"function foo({bar = undefined} = {}) {}",
+	"function foo([bar = undefined]) {}",
+	"function foo([bar = undefined] = []) {}"
+]

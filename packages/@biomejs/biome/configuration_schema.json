@@ -2295,6 +2295,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessUndefined": {
+					"description": "Disallow the use of useless undefined.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noValueAtRule": {
 					"description": "Disallow use of @value rule in css modules.",
 					"anyOf": [
