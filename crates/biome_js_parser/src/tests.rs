@@ -408,7 +408,7 @@ fn diagnostics_print_correctly() {
 #[test]
 pub fn quick_test() {
     let code = r#"
-        type A = typeof import("test");
+        type Equals = A extends (x: B extends C ? D : E) => 0 ? F : G;
     "#;
     let root = parse(
         code,

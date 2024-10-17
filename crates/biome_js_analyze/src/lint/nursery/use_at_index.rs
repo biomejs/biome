@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// array[array.length - 1] = foo;
     /// ```
     pub UseAtIndex {
-        version: "next",
+        version: "1.9.4",
         name: "useAtIndex",
         language: "js",
         recommended: false,

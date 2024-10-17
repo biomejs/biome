@@ -64,7 +64,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseCollapsedIf {
-        version: "next",
+        version: "1.9.4",
         name: "useCollapsedIf",
         language: "js",
         sources: &[

@@ -9,7 +9,7 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
-## Unreleased
+## v1.9.4 (2024-10-17)
 
 ### Analyzer
 
@@ -17,8 +17,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Improved the message for unused suppression comments. Contributed by @dyc3
 
-- Fix [#4228](https://github.com/biomejs/biome/issues/4228), where the rule `a11y/noInteractiveElementToNoninteractiveRole` incorrectlly reports a `role` for non interactive elements. Contributed by @eryue0220
-- Catch suspicious semicolon in react fragment in `noSuspiciousSemicolonInJsx`. Contributed by @vasucp1207
+- Fix [#4228](https://github.com/biomejs/biome/issues/4228), where the rule `a11y/noInteractiveElementToNoninteractiveRole` incorrectly reports a `role` for non-interactive elements. Contributed by @eryue0220
+
+- `noSuspiciousSemicolonInJsx` now catches suspicious semicolons in React fragments. Contributed by @vasucp1207
 
 ### CLI
 
@@ -48,13 +49,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [useGuardForIn](https://biomejs.dev/linter/rules/use-guard-for-in/). Contributed by @fireairforce
 - Add [noDocumentCookie](https://biomejs.dev/linter/rules/no-document-cookie/). Contributed by @tunamaguro
 - Add [noDocumentImportInPage](https://biomejs.dev/linter/rules/no-document-import-in-page/). Contributed by @kaioduarte
+- Add [noDuplicateProperties](https://biomejs.dev/linter/rules/no-duplicate-properties/). Contributed by @togami2864
 - Add [noHeadElement](https://biomejs.dev/linter/rules/no-head-element/). Contributed by @kaioduarte
 - Add [noHeadImportInDocument](https://biomejs.dev/linter/rules/no-head-import-in-document/). Contributed by @kaioduarte
 - Add [noImgElement](https://biomejs.dev/linter/rules/no-img-element/). Contributed by @kaioduarte
-- Add [guardForIn](https://biomejs.dev/linter/rules/guard-for-in/). Contributed by @fireairforce
-- Add [noUselessStringRaw](https://github.com/biomejs/biome/pull/4263). Contributed by @fireairforce
+- Add [noUnknownTypeSelector](https://biomejs.dev/linter/rules/no-unknown-type-selector/). Contributed by @Kazuhiro-Mimaki
+- Add [useAtIndex](https://biomejs.dev/linter/rules/use-at-index/). Contributed by @GunseiKPaseri
+- Add [noUselessStringRaw](https://biomejs.dev/linter/rules/no-useless-string-raw/). Contributed by @fireairforce
+- Add [nursery/useCollapsedIf](https://biomejs.dev/linter/rules/use-collapsed-if/). Contributed by @siketyan
 - Add [useGoogleFontDisplay](https://biomejs.dev/linter/rules/use-google-font-display/). Contributed by @kaioduarte
 
 #### Bug Fixes
@@ -64,10 +69,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   This fixes a regression introduced in Biome 1.9.3
   The regression affected the following linter rules:
 
-  - nursery/useSortedClasses
-  - nursery/useTrimStartEnd
-  - style/useTemplate
-  - suspicious/noMisleadingCharacterClass
+  - `nursery/useSortedClasses`
+  - `nursery/useTrimStartEnd`
+  - `style/useTemplate`
+  - `suspicious/noMisleadingCharacterClass`
 
   Contributed by @Conaclos
 
@@ -167,13 +172,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function/) correctly handles `calc-size` function ([#4212](https://github.com/biomejs/biome/issues/4212)).
 
- The following code `calc-size` is no longer reported as unknown:
+   The following code `calc-size` is no longer reported as unknown:
 
- ```css
- .a { height: calc-size(0px); }
- ```
+   ```css
+   .a { height: calc-size(0px); }
+   ```
 
- Contributed by @fireairforce
+   Contributed by @fireairforce
 
  - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
 
@@ -184,15 +189,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
-#### New features
+#### Bug Fixes
 
-- Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
+- The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
 
-   ```js
-   import defer * as myModule from "my-module";
-   ```
+  Browsers accept more emoji than the standard allows.
+  Biome now accepts these additional emojis.
 
-  Contributed by @fireairforce
+  The following code is now correctly parsed:
+
+  ```css
+  p {
+    --✨-color: red;
+    color: var(--✨-color);
+  }
+  ```
+
+  Contributed by @Conaclos
 
 - Add support for parsing typescript's `resolution-mode` in Import Types([#2115](https://github.com/biomejs/biome/issues/2115))
 
@@ -205,24 +218,6 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @fireairforce
-
-#### Bug Fixes
-
-- The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
-
-  Browsers accept more emoji than the standard allows.
-  Biome now accepts these additional emoji.
-
-  The following code is now correctly parsed:
-
-  ```css
-  p {
-    --✨-color: red;
-    color: var(--✨-color);
-  }
-  ```
-
-  Contributed by @Conaclos
 
 ## v1.9.3 (2024-10-01)
 

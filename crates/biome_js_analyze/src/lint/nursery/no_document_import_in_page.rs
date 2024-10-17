@@ -30,7 +30,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDocumentImportInPage {
-        version: "next",
+        version: "1.9.4",
         name: "noDocumentImportInPage",
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-document-import-in-page")],
