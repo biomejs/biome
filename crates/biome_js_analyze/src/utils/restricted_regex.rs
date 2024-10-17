@@ -27,12 +27,19 @@ impl Deref for RestrictedRegex {
     }
 }
 
-impl std::fmt::Display for RestrictedRegex {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl RestrictedRegex {
+    /// Returns the original string of this regex.
+    pub fn as_str(&self) -> &str {
         let repr = self.0.as_str();
         debug_assert!(repr.starts_with("^(?:"));
         debug_assert!(repr.ends_with(")$"));
-        f.write_str(&repr[4..(repr.len() - 2)])
+        &repr[4..(repr.len() - 2)]
+    }
+}
+
+impl std::fmt::Display for RestrictedRegex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
     }
 }
 
