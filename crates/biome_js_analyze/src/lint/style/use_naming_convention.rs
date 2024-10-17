@@ -3,8 +3,8 @@ use std::ops::{Deref, Range};
 use crate::{
     services::{control_flow::AnyJsControlFlowRoot, semantic::Semantic},
     utils::{
-        regex::RestrictedRegex,
         rename::{AnyJsRenamableDeclaration, RenameSymbolExtensions},
+        restricted_regex::RestrictedRegex,
     },
     JsRuleAction,
 };
@@ -667,7 +667,7 @@ impl Rule for UseNamingConvention {
                             start: name_range_start as u16,
                             end: (name_range_start + name.len()) as u16,
                         },
-                        suggestion: Suggestion::Match(matching.to_string()),
+                        suggestion: Suggestion::Match(matching.to_string().into_boxed_str()),
                     });
                 };
                 if let Some(first_capture) = capture.iter().skip(1).find_map(|x| x) {
@@ -756,7 +756,7 @@ impl Rule for UseNamingConvention {
                     rule_category!(),
                     name_token_range,
                     markup! {
-                        "This "<Emphasis>{format_args!("{convention_selector}")}</Emphasis>" name"{trimmed_info}" should match the following regex "<Emphasis>"/"{regex}"/"</Emphasis>"."
+                        "This "<Emphasis>{format_args!("{convention_selector}")}</Emphasis>" name"{trimmed_info}" should match the following regex "<Emphasis>"/"{regex.as_ref()}"/"</Emphasis>"."
                     },
                 ))
             }
@@ -897,7 +897,7 @@ pub enum Suggestion {
     /// Use only ASCII characters
     Ascii,
     /// Use a name that matches this regex
-    Match(String),
+    Match(Box<str>),
     /// Use a name that follows one of these formats
     Formats(Formats),
 }
