@@ -351,6 +351,7 @@ mod tests {
 
         fn parse_suppression_comment(
             comment: &'_ str,
+            _range: TextRange,
         ) -> Vec<Result<SuppressionKind<'_>, Infallible>> {
             comment
                 .trim_start_matches("//")
@@ -368,14 +369,14 @@ mod tests {
         impl SuppressionAction for TestAction {
             type Language = RawLanguage;
 
-            fn find_token_to_apply_suppression(
+            fn find_token_for_inline_suppression(
                 &self,
                 _: SyntaxToken<Self::Language>,
             ) -> Option<ApplySuppression<Self::Language>> {
                 None
             }
 
-            fn apply_suppression(
+            fn apply_inline_suppression(
                 &self,
                 _: &mut BatchMutation<Self::Language>,
                 _: ApplySuppression<Self::Language>,

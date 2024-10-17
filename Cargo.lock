@@ -878,6 +878,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
+ "biome_suppression",
  "biome_test_utils",
  "insta",
  "natord",

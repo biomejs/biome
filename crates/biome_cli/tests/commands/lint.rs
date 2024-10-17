@@ -1560,35 +1560,6 @@ fn no_supported_file_found() {
 }
 
 #[test]
-fn deprecated_suppression_comment() {
-    let mut fs = MemoryFileSystem::default();
-    let mut console = BufferConsole::default();
-
-    let file_path = Path::new("file.js");
-    fs.insert(
-        file_path.into(),
-        *b"// biome-ignore lint(suspicious/noDoubleEquals): test
-a == b;",
-    );
-
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
-    );
-
-    assert!(result.is_ok(), "run_cli returned {result:?}");
-
-    assert_cli_snapshot(SnapshotPayload::new(
-        module_path!(),
-        "deprecated_suppression_comment",
-        fs,
-        console,
-        result,
-    ));
-}
-
-#[test]
 fn print_verbose() {
     let mut fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();

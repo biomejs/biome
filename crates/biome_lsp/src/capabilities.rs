@@ -62,6 +62,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
                     CodeActionKind::from("quickfix.biome"),
                     CodeActionKind::from("source.fixAll.biome"),
                     CodeActionKind::from("source.organizeImports.biome"),
+                    CodeActionKind::from("quickfix.suppressRule"),
                 ]),
                 ..Default::default()
             }
