@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue4227.ts
+---
+# Input
+```ts
+class Foo {
+    bar(name: string, _class: new (name: string) => any) {
+        return name
+    }
+}
+```

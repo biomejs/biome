@@ -1,4 +1,4 @@
-use grit_pattern_matcher::pattern::VariableSourceLocations;
+use grit_pattern_matcher::pattern::VariableSource;
 use grit_util::ByteRange;
 
 use crate::{
@@ -49,7 +49,7 @@ pub(crate) struct NodeCompilationContext<'a> {
     /// The outer vector can be index using `scope_index`, while the individual
     /// variables in a scope can be indexed using the indices stored in `vars`
     /// and `global_vars`.
-    pub vars_array: &'a mut Vec<Vec<VariableSourceLocations>>,
+    pub vars_array: &'a mut Vec<Vec<VariableSource>>,
 
     /// Index of the local scope.
     ///
@@ -69,7 +69,7 @@ impl<'a> NodeCompilationContext<'a> {
     pub(crate) fn new(
         compilation_context: &'a CompilationContext,
         vars: &'a mut BTreeMap<String, usize>,
-        vars_array: &'a mut Vec<Vec<VariableSourceLocations>>,
+        vars_array: &'a mut Vec<Vec<VariableSource>>,
         global_vars: &'a mut BTreeMap<String, usize>,
         diagnostics: &'a mut Vec<CompilerDiagnostic>,
     ) -> Self {
@@ -81,6 +81,10 @@ impl<'a> NodeCompilationContext<'a> {
             global_vars,
             diagnostics,
         }
+    }
+
+    pub(crate) fn get_pattern_definition(&self, name: &str) -> Option<&DefinitionInfo> {
+        self.compilation.pattern_definition_info.get(name)
     }
 
     pub(crate) fn log(&mut self, diagnostic: CompilerDiagnostic) {

@@ -155,11 +155,11 @@ impl Rule for NoLabelWithoutControl {
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct NoLabelWithoutControlOptions {
     /// Array of component names that should be considered the same as an `input` element.
-    pub input_components: Vec<String>,
+    pub input_components: Box<[Box<str>]>,
     /// Array of attributes that should be treated as the `label` accessible text content.
-    pub label_attributes: Vec<String>,
+    pub label_attributes: Box<[Box<str>]>,
     /// Array of component names that should be considered the same as a `label` element.
-    pub label_components: Vec<String>,
+    pub label_components: Box<[Box<str>]>,
 }
 
 impl NoLabelWithoutControlOptions {
@@ -175,7 +175,7 @@ impl NoLabelWithoutControlOptions {
             && !self
                 .label_attributes
                 .iter()
-                .any(|name| name == attribute_name)
+                .any(|name| name.as_ref() == attribute_name)
         {
             return false;
         }
@@ -245,7 +245,7 @@ impl NoLabelWithoutControlOptions {
                             || self
                                 .input_components
                                 .iter()
-                                .any(|name| name == element_name)
+                                .any(|name| name.as_ref() == element_name)
                         {
                             return true;
                         }
@@ -260,7 +260,7 @@ impl NoLabelWithoutControlOptions {
     fn has_element_name(&self, element_name: &str) -> bool {
         self.label_components
             .iter()
-            .any(|label_component_name| label_component_name == element_name)
+            .any(|label_component_name| label_component_name.as_ref() == element_name)
     }
 }
 

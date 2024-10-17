@@ -115,6 +115,12 @@ pub struct VcsTargeted {
     pub changed: bool,
 }
 
+impl From<(bool, bool)> for VcsTargeted {
+    fn from((staged, changed): (bool, bool)) -> Self {
+        Self { staged, changed }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum TraversalMode {
     /// This mode is enabled when running the command `biome check`

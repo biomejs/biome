@@ -68,7 +68,7 @@ impl Rule for NoInteractiveElementToNoninteractiveRole {
             {
                 // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
                 // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.
-                let role_sensitive_elements = ["div", "span"];
+                let role_sensitive_elements = ["div", "span", "source"];
                 if role_sensitive_elements.contains(&element_name.text_trimmed()) {
                     return None;
                 }

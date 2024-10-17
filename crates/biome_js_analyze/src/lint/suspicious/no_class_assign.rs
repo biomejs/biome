@@ -77,7 +77,7 @@ declare_lint_rule! {
 impl Rule for NoClassAssign {
     type Query = Semantic<AnyJsClass>;
     type State = Reference;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -86,11 +86,14 @@ impl Rule for NoClassAssign {
 
         if let Some(id) = node.id() {
             if let Some(id_binding) = id.as_js_identifier_binding() {
-                return id_binding.all_writes(model).collect();
+                return id_binding
+                    .all_writes(model)
+                    .collect::<Vec<_>>()
+                    .into_boxed_slice();
             }
         }
 
-        Vec::new()
+        Vec::new().into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, reference: &Self::State) -> Option<RuleDiagnostic> {

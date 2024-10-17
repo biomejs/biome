@@ -26,8 +26,8 @@ use rustc_hash::FxHashSet;
 declare_lint_rule! {
     /// Promotes the use of `import type` for types.
     ///
-    /// _TypeScript_ allows specifying a `type` qualifier on an `import` to indicate that the `import` doesn't exist at runtime.
-    /// This allows transpilers to safely drop imports of types without looking for their definition.
+    /// _TypeScript_ allows specifying a `type` keyword on an `import` to indicate that the `import` doesn't exist at runtime.
+    /// This allows compilers to safely drop imports of types without looking for their definition.
     /// This also ensures that some modules are not loaded at runtime.
     ///
     /// The rule ensures that all imports used only as a type use a type-only `import`.
@@ -35,9 +35,9 @@ declare_lint_rule! {
     ///
     /// If you use the TypeScript Compiler (TSC) to compile your code into JavaScript,
     /// then you can disable this rule, as TSC can remove imports only used as types.
-    /// However, for consistency and compatibility with other transpilers, you may want to enable this rule.
+    /// However, for consistency and compatibility with other compilers, you may want to enable this rule.
     /// In that case we recommend to enable TSC's [`verbatimModuleSyntax`](https://www.typescriptlang.org/tsconfig/#verbatimModuleSyntax).
-    /// This configuration ensures that TSC preserves imports not marked with the `type` qualifier.
+    /// This configuration ensures that TSC preserves imports not marked with the `type` keyword.
     ///
     /// You may also want to enable the editor setting [`typescript.preferences.preferTypeOnlyAutoImports`](https://devblogs.microsoft.com/typescript/announcing-typescript-5-3-rc/#settings-to-prefer-type-auto-imports) from the TypeScript LSP.
     /// This setting is available in Visual Studio Code.
@@ -136,10 +136,8 @@ impl Rule for UseImportType {
         if import_clause.assertion().is_some() {
             return None;
         }
-        if import_clause.type_token().is_some() ||
-            // Import attributes and type-only imports are not compatible.
-            import_clause.assertion().is_some()
-        {
+        // Import attributes and type-only imports are not compatible.
+        if import_clause.assertion().is_some() {
             return None;
         }
         let model = ctx.model();
@@ -157,7 +155,7 @@ impl Rule for UseImportType {
                 };
                 match clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifiers) => {
-                        match named_import_type_fix(model, &named_specifiers) {
+                        match named_import_type_fix(model, &named_specifiers, false) {
                             Some(NamedImportTypeFix::UseImportType(specifiers)) => {
                                 if is_default_used_as_type {
                                     Some(ImportTypeFix::UseImportType)
@@ -166,7 +164,7 @@ impl Rule for UseImportType {
                                     // when the default import is not only used as a type.
                                     None
                                 } else {
-                                    // Prefer adding type qualifier instead of
+                                    // Prefer adding type keyword instead of
                                     // splitting the import statement into two import statements
                                     Some(ImportTypeFix::AddInlineTypeQualifiers(specifiers))
                                 }
@@ -179,6 +177,10 @@ impl Rule for UseImportType {
                                 } else {
                                     Some(ImportTypeFix::AddInlineTypeQualifiers(specifiers))
                                 }
+                            }
+                            Some(NamedImportTypeFix::RemoveInlineTypeQualifiers(_)) => {
+                                // Should not be reached because we pass `false` to `named_import_type_fix`.
+                                None
                             }
                             None => is_default_used_as_type
                                 .then_some(ImportTypeFix::ExtractDefaultImportType(vec![])),
@@ -206,6 +208,9 @@ impl Rule for UseImportType {
                 }
             }
             AnyJsImportClause::JsImportDefaultClause(clause) => {
+                if clause.type_token().is_some() {
+                    return None;
+                }
                 let default_binding = clause.default_specifier().ok()?.local_name().ok()?;
                 let default_binding = default_binding.as_js_identifier_binding()?;
                 if ctx.jsx_runtime() == JsxRuntime::ReactClassic
@@ -217,14 +222,24 @@ impl Rule for UseImportType {
                 is_only_used_as_type(model, default_binding).then_some(ImportTypeFix::UseImportType)
             }
             AnyJsImportClause::JsImportNamedClause(clause) => {
-                match named_import_type_fix(model, &clause.named_specifiers().ok()?)? {
+                match named_import_type_fix(
+                    model,
+                    &clause.named_specifiers().ok()?,
+                    clause.type_token().is_some(),
+                )? {
                     NamedImportTypeFix::UseImportType(_) => Some(ImportTypeFix::UseImportType),
                     NamedImportTypeFix::AddInlineTypeQualifiers(specifiers) => {
                         Some(ImportTypeFix::AddInlineTypeQualifiers(specifiers))
                     }
+                    NamedImportTypeFix::RemoveInlineTypeQualifiers(type_tokens) => {
+                        Some(ImportTypeFix::RemoveTypeQualifiers(type_tokens))
+                    }
                 }
             }
             AnyJsImportClause::JsImportNamespaceClause(clause) => {
+                if clause.type_token().is_some() {
+                    return None;
+                }
                 let namespace_binding = clause.namespace_specifier().ok()?.local_name().ok()?;
                 let namespace_binding = namespace_binding.as_js_identifier_binding()?;
                 if ctx.jsx_runtime() == JsxRuntime::ReactClassic
@@ -245,20 +260,20 @@ impl Rule for UseImportType {
         let diagnostic = match state {
             ImportTypeFix::UseImportType => RuleDiagnostic::new(
                 rule_category!(),
-                import.range(),
+                import_clause.range(),
                 "All these imports are only used as types.",
             ),
             ImportTypeFix::ExtractDefaultImportType(named_specifiers) => {
                 if named_specifiers.is_empty() {
                     RuleDiagnostic::new(
                         rule_category!(),
-                        import.range(),
+                        import_clause.range(),
                         "The default import is only used as a type.",
                     )
                 } else {
                     let mut diagnostic = RuleDiagnostic::new(
                         rule_category!(),
-                        import.range(),
+                        import_clause.range(),
                         "The default import and some named imports are only used as types.",
                     );
                     for specifier in named_specifiers {
@@ -291,7 +306,7 @@ impl Rule for UseImportType {
             ImportTypeFix::AddInlineTypeQualifiers(named_specifiers) => {
                 let mut diagnostic = RuleDiagnostic::new(
                     rule_category!(),
-                    import.range(),
+                    import_clause.range(),
                     "Some named imports are only used as types.",
                 );
                 for specifier in named_specifiers {
@@ -300,9 +315,27 @@ impl Rule for UseImportType {
                 }
                 diagnostic
             }
+            ImportTypeFix::RemoveTypeQualifiers(type_tokens) => {
+                let mut diagnostic = RuleDiagnostic::new(
+                    rule_category!(),
+                    import_clause.type_token()?.text_trimmed_range(),
+                    markup! {
+                        "This "<Emphasis>"type"</Emphasis>" keyword makes all inline "<Emphasis>"type"</Emphasis>" keywords useless."
+                    },
+                );
+                for type_token in type_tokens {
+                    diagnostic = diagnostic.detail(
+                        type_token.text_trimmed_range(),
+                        markup! {
+                            "This inline "<Emphasis>"type"</Emphasis>" keyword is useless."
+                        },
+                    )
+                }
+                return Some(diagnostic);
+            }
         };
         Some(diagnostic.note(markup! {
-            "Importing the types with "<Emphasis>"import type"</Emphasis>" ensures that they are removed by the transpilers and avoids loading unnecessary modules."
+            "Importing the types with "<Emphasis>"import type"</Emphasis>" ensures that they are removed by the compilers and avoids loading unnecessary modules."
         }))
     }
 
@@ -526,6 +559,24 @@ impl Rule for UseImportType {
                         ));
                     mutation.replace_node(specifier.clone(), new_specifier);
                 }
+                return Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "Add inline "<Emphasis>"type"</Emphasis>" keywords." }.to_owned(),
+                    mutation,
+                ));
+            }
+            ImportTypeFix::RemoveTypeQualifiers(type_tokens) => {
+                for type_token in type_tokens {
+                    mutation.remove_token(type_token.clone());
+                }
+                return Some(JsRuleAction::new(
+                    ActionCategory::QuickFix,
+                    ctx.metadata().applicability(),
+                    markup! { "Remove useless inline "<Emphasis>"type"</Emphasis>" keywords." }
+                        .to_owned(),
+                    mutation,
+                ));
             }
         }
         Some(JsRuleAction::new(
@@ -543,6 +594,7 @@ pub enum ImportTypeFix {
     ExtractDefaultImportType(Vec<AnyJsNamedImportSpecifier>),
     ExtractCombinedImportType,
     AddInlineTypeQualifiers(Vec<AnyJsNamedImportSpecifier>),
+    RemoveTypeQualifiers(Vec<JsSyntaxToken>),
 }
 
 /// Returns `true` if all references of `binding` are only used as a type.
@@ -564,50 +616,66 @@ fn is_only_used_as_type(model: &SemanticModel, binding: &JsIdentifierBinding) ->
 pub enum NamedImportTypeFix {
     UseImportType(Vec<AnyJsNamedImportSpecifier>),
     AddInlineTypeQualifiers(Vec<AnyJsNamedImportSpecifier>),
+    RemoveInlineTypeQualifiers(Vec<JsSyntaxToken>),
 }
 
 fn named_import_type_fix(
     model: &SemanticModel,
     named_specifiers: &JsNamedImportSpecifiers,
+    has_type_token: bool,
 ) -> Option<NamedImportTypeFix> {
     let specifiers = named_specifiers.specifiers();
     if specifiers.is_empty() {
         return None;
     };
-    let mut imports_only_types = true;
-    let mut specifiers_requiring_type_marker = Vec::with_capacity(specifiers.len());
-    for specifier in specifiers.iter() {
-        let Ok(specifier) = specifier else {
-            imports_only_types = false;
-            continue;
-        };
-        if specifier.type_token().is_none() {
-            if specifier
-                .local_name()
-                .and_then(|local_name| {
-                    Some(is_only_used_as_type(
-                        model,
-                        local_name.as_js_identifier_binding()?,
-                    ))
-                })
-                .unwrap_or(false)
-            {
-                specifiers_requiring_type_marker.push(specifier);
-            } else {
+    if has_type_token {
+        let useless_type_tokens: Vec<_> = specifiers
+            .iter()
+            .filter_map(|specifier| specifier.ok()?.type_token())
+            .collect();
+        if useless_type_tokens.is_empty() {
+            None
+        } else {
+            Some(NamedImportTypeFix::RemoveInlineTypeQualifiers(
+                useless_type_tokens,
+            ))
+        }
+    } else {
+        let mut imports_only_types = true;
+        let mut specifiers_requiring_type_marker = Vec::with_capacity(specifiers.len());
+        for specifier in specifiers.iter() {
+            let Ok(specifier) = specifier else {
                 imports_only_types = false;
+                continue;
+            };
+            if specifier.type_token().is_none() {
+                if specifier
+                    .local_name()
+                    .and_then(|local_name| {
+                        Some(is_only_used_as_type(
+                            model,
+                            local_name.as_js_identifier_binding()?,
+                        ))
+                    })
+                    .unwrap_or(false)
+                {
+                    specifiers_requiring_type_marker.push(specifier);
+                } else {
+                    imports_only_types = false;
+                }
             }
         }
-    }
-    if imports_only_types {
-        Some(NamedImportTypeFix::UseImportType(
-            specifiers_requiring_type_marker,
-        ))
-    } else if specifiers_requiring_type_marker.is_empty() {
-        None
-    } else {
-        Some(NamedImportTypeFix::AddInlineTypeQualifiers(
-            specifiers_requiring_type_marker,
-        ))
+        if imports_only_types {
+            Some(NamedImportTypeFix::UseImportType(
+                specifiers_requiring_type_marker,
+            ))
+        } else if specifiers_requiring_type_marker.is_empty() {
+            None
+        } else {
+            Some(NamedImportTypeFix::AddInlineTypeQualifiers(
+                specifiers_requiring_type_marker,
+            ))
+        }
     }
 }
 

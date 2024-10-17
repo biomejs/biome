@@ -1227,6 +1227,14 @@ export interface Nursery {
 	 */
 	noDescendingSpecificity?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow direct assignments to document.cookie.
+	 */
+	noDocumentCookie?: RuleConfiguration_for_Null;
+	/**
+	 * Prevents importing next/document outside of pages/_document.jsx in Next.js projects.
+	 */
+	noDocumentImportInPage?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow duplicate custom properties within declaration blocks.
 	 */
 	noDuplicateCustomProperties?: RuleConfiguration_for_Null;
@@ -1234,6 +1242,10 @@ export interface Nursery {
 	 * Disallow duplicate conditions in if-else-if chains
 	 */
 	noDuplicateElseIf?: RuleConfiguration_for_Null;
+	/**
+	 * Disallow duplicate properties within declaration blocks.
+	 */
+	noDuplicateProperties?: RuleConfiguration_for_Null;
 	/**
 	 * No duplicated fields in GraphQL operations.
 	 */
@@ -1254,6 +1266,14 @@ export interface Nursery {
 	 * Prevent usage of \<head> element in a Next.js project.
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent using the next/head module in pages/_document.js on Next.js projects.
+	 */
+	noHeadImportInDocument?: RuleConfiguration_for_Null;
+	/**
+	 * Prevent usage of \<img> element in a Next.js project.
+	 */
+	noImgElement?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows the use of irregular whitespace characters.
 	 */
@@ -1285,7 +1305,7 @@ export interface Nursery {
 	/**
 	 * Disallow usage of sensitive data such as API keys and tokens.
 	 */
-	noSecrets?: RuleConfiguration_for_Null;
+	noSecrets?: RuleConfiguration_for_NoSecretsOptions;
 	/**
 	 * Enforce that static, visible elements (such as \<div>) that have click handlers use the valid role attribute.
 	 */
@@ -1307,9 +1327,17 @@ export interface Nursery {
 	 */
 	noUnknownPseudoElement?: RuleConfiguration_for_Null;
 	/**
+	 * Disallow unknown type selectors.
+	 */
+	noUnknownTypeSelector?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary escape sequence in regular expression literals.
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
+	/**
+	 * Disallow unnecessary String.raw function in template string literals without any escape sequence.
+	 */
+	noUselessStringRaw?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use of @value rule in css modules.
 	 */
@@ -1326,6 +1354,14 @@ export interface Nursery {
 	 * Enforce that ARIA properties are valid for the roles that are supported by the element.
 	 */
 	useAriaPropsSupportedByRole?: RuleConfiguration_for_Null;
+	/**
+	 * Use at() instead of integer index access.
+	 */
+	useAtIndex?: RuleFixConfiguration_for_Null;
+	/**
+	 * Enforce using single if instead of nested if clauses.
+	 */
+	useCollapsedIf?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce declaring components only within modules that export React Components exclusively.
 	 */
@@ -1345,7 +1381,11 @@ export interface Nursery {
 	/**
 	 * Require explicit return types on functions and class methods.
 	 */
-	useExplicitFunctionReturnType?: RuleConfiguration_for_Null;
+	useExplicitType?: RuleConfiguration_for_Null;
+	/**
+	 * Require for-in loops to include an if statement.
+	 */
+	useGuardForIn?: RuleConfiguration_for_Null;
 	/**
 	 * Disallows package private imports.
 	 */
@@ -2004,6 +2044,9 @@ export type RuleConfiguration_for_RestrictedImportsOptions =
 export type RuleFixConfiguration_for_NoRestrictedTypesOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoRestrictedTypesOptions;
+export type RuleConfiguration_for_NoSecretsOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoSecretsOptions;
 export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseComponentExportOnlyModulesOptions;
@@ -2164,6 +2207,16 @@ export interface RuleWithFixOptions_for_NoRestrictedTypesOptions {
 	 * Rule's options
 	 */
 	options: NoRestrictedTypesOptions;
+}
+export interface RuleWithOptions_for_NoSecretsOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoSecretsOptions;
 }
 export interface RuleWithOptions_for_UseComponentExportOnlyModulesOptions {
 	/**
@@ -2360,6 +2413,12 @@ export interface RestrictedImportsOptions {
 }
 export interface NoRestrictedTypesOptions {
 	types?: {};
+}
+export interface NoSecretsOptions {
+	/**
+	 * Set entropy threshold (default is 41).
+	 */
+	entropyThreshold?: number;
 }
 export interface UseComponentExportOnlyModulesOptions {
 	/**
@@ -2850,14 +2909,20 @@ export type Category =
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
 	| "lint/nursery/noDescendingSpecificity"
+	| "lint/nursery/noDocumentCookie"
+	| "lint/nursery/noDocumentImportInPage"
 	| "lint/nursery/noDoneCallback"
 	| "lint/nursery/noDuplicateAtImportRules"
 	| "lint/nursery/noDuplicateCustomProperties"
 	| "lint/nursery/noDuplicateElseIf"
+	| "lint/nursery/noDuplicateProperties"
 	| "lint/nursery/noDuplicatedFields"
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noHeadElement"
+	| "lint/nursery/noHeadImportInDocument"
+	| "lint/nursery/noImgElement"
 	| "lint/nursery/noImportantInKeyframe"
 	| "lint/nursery/noInvalidDirectionInLinearGradient"
 	| "lint/nursery/noInvalidGridAreas"
@@ -2866,7 +2931,6 @@ export type Category =
 	| "lint/nursery/noMissingGenericFamilyKeyword"
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
-	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noOctalEscape"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
@@ -2885,19 +2949,24 @@ export type Category =
 	| "lint/nursery/noUnknownPseudoClassSelector"
 	| "lint/nursery/noUnknownPseudoElement"
 	| "lint/nursery/noUnknownSelectorPseudoElement"
+	| "lint/nursery/noUnknownTypeSelector"
 	| "lint/nursery/noUnknownUnit"
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
+	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noValueAtRule"
 	| "lint/nursery/useAdjacentOverloadSignatures"
 	| "lint/nursery/useAriaPropsSupportedByRole"
+	| "lint/nursery/useAtIndex"
 	| "lint/nursery/useBiomeSuppressionComment"
+	| "lint/nursery/useCollapsedIf"
 	| "lint/nursery/useComponentExportOnlyModules"
 	| "lint/nursery/useConsistentCurlyBraces"
 	| "lint/nursery/useConsistentMemberAccessibility"
 	| "lint/nursery/useDeprecatedReason"
-	| "lint/nursery/useExplicitFunctionReturnType"
+	| "lint/nursery/useExplicitType"
+	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useSortedClasses"
@@ -3049,6 +3118,10 @@ export type Category =
 	| "internalError/io"
 	| "internalError/fs"
 	| "internalError/panic"
+	| "reporter/parse"
+	| "reporter/format"
+	| "reporter/analyzer"
+	| "reporter/organizeImports"
 	| "parse"
 	| "lint"
 	| "lint/a11y"

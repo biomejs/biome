@@ -72,7 +72,7 @@ declare_lint_rule! {
 impl Rule for NoInvalidUseBeforeDeclaration {
     type Query = SemanticServices;
     type State = InvalidUseBeforeDeclaration;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -156,7 +156,7 @@ impl Rule for NoInvalidUseBeforeDeclaration {
                 }
             }
         }
-        result
+        result.into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
