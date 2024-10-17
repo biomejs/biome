@@ -62,20 +62,28 @@ where
     impl SuppressionAction for TestAction {
         type Language = JsonLanguage;
 
-        fn find_token_to_apply_suppression(
+        fn find_token_for_inline_suppression(
             &self,
             _: SyntaxToken<Self::Language>,
         ) -> Option<ApplySuppression<Self::Language>> {
             None
         }
 
-        fn apply_suppression(
+        fn apply_inline_suppression(
             &self,
             _: &mut BatchMutation<Self::Language>,
             _: ApplySuppression<Self::Language>,
             _: &str,
         ) {
             unreachable!("")
+        }
+
+        fn apply_top_level_suppression(
+            &self,
+            _: &mut BatchMutation<Self::Language>,
+            _: SyntaxToken<Self::Language>,
+            _: &str,
+        ) {
         }
     }
     let mut analyzer = Analyzer::new(
