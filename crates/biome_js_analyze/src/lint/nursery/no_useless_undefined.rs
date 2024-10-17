@@ -54,10 +54,6 @@ declare_lint_rule! {
     /// function foo({bar = undefined}) {}
     /// ```
     ///
-    /// ```js,expect_diagnostic
-    /// foo(undefined);
-    /// ```
-    ///
     /// ### Valid
     ///
     /// ```js
