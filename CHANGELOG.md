@@ -55,6 +55,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [noImgElement](https://biomejs.dev/linter/rules/no-img-element/). Contributed by @kaioduarte
 - Add [guardForIn](https://biomejs.dev/linter/rules/guard-for-in/). Contributed by @fireairforce
 - Add [noUselessStringRaw](https://github.com/biomejs/biome/pull/4263). Contributed by @fireairforce
+- Add [useGoogleFontDisplay](https://biomejs.dev/linter/rules/use-google-font-display/). Contributed by @kaioduarte
 
 #### Bug Fixes
 
@@ -186,7 +187,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
-  
+
    ```js
    import defer * as myModule from "my-module";
    ```

@@ -2373,6 +2373,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGoogleFontDisplay": {
+					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGuardForIn": {
 					"description": "Require for-in loops to include an if statement.",
 					"anyOf": [
