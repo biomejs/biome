@@ -1666,6 +1666,41 @@ pub struct CssDocumentCustomMatcherFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct CssEmptyDeclaration {
+    pub(crate) syntax: SyntaxNode,
+}
+impl CssEmptyDeclaration {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> CssEmptyDeclarationFields {
+        CssEmptyDeclarationFields {
+            semicolon_token: self.semicolon_token(),
+        }
+    }
+    pub fn semicolon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+}
+impl Serialize for CssEmptyDeclaration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct CssEmptyDeclarationFields {
+    pub semicolon_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct CssFontFaceAtRule {
     pub(crate) syntax: SyntaxNode,
 }
@@ -10388,6 +10423,47 @@ impl From<CssDocumentCustomMatcher> for SyntaxNode {
 }
 impl From<CssDocumentCustomMatcher> for SyntaxElement {
     fn from(n: CssDocumentCustomMatcher) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for CssEmptyDeclaration {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(CSS_EMPTY_DECLARATION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == CSS_EMPTY_DECLARATION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for CssEmptyDeclaration {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CssEmptyDeclaration")
+            .field(
+                "semicolon_token",
+                &support::DebugSyntaxResult(self.semicolon_token()),
+            )
+            .finish()
+    }
+}
+impl From<CssEmptyDeclaration> for SyntaxNode {
+    fn from(n: CssEmptyDeclaration) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<CssEmptyDeclaration> for SyntaxElement {
+    fn from(n: CssEmptyDeclaration) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -22390,6 +22466,11 @@ impl std::fmt::Display for CssDocumentAtRule {
     }
 }
 impl std::fmt::Display for CssDocumentCustomMatcher {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for CssEmptyDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }
