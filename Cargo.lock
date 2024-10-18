@@ -750,6 +750,7 @@ dependencies = [
  "biome_unicode_table",
  "bitvec",
  "enumflags2",
+ "globset",
  "insta",
  "natord",
  "regex",
