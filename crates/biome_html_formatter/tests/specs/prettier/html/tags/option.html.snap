@@ -1,0 +1,52 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/option.html
+---
+# Input
+
+```html
+<select><option>Blue</option><option>Green</option><optgroup label="Darker"><option>Dark Blue</option><option>Dark Green</option></optgroup></select>
+<input list=colors>
+<datalist id=colors><option>Blue</option><option>Green</option></datalist>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,13 +1,4 @@
+-<select>
+-  <option>Blue</option>
+-  <option>Green</option>
+-  <optgroup label="Darker">
+-    <option>Dark Blue</option>
+-    <option>Dark Green</option>
+-  </optgroup>
+-</select>
+-<input list="colors" />
+-<datalist id="colors">
+-  <option>Blue</option>
+-  <option>Green</option>
+-</datalist>
++<select><option>Blue</option><option>Green</option><optgroup
++  label="Darker"
++><option>Dark Blue</option><option>Dark Green</option></optgroup></select><input list=colors>
++<datalist id=colors><option>Blue</option><option>Green</option></datalist>
+```
+
+# Output
+
+```html
+<select><option>Blue</option><option>Green</option><optgroup
+  label="Darker"
+><option>Dark Blue</option><option>Dark Green</option></optgroup></select><input list=colors>
+<datalist id=colors><option>Blue</option><option>Green</option></datalist>
+```
+
+# Lines exceeding max width of 80 characters
+```
+    3: ><option>Dark Blue</option><option>Dark Green</option></optgroup></select><input list=colors>
+```

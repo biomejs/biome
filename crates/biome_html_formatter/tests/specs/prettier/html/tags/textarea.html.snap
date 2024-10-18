@@ -1,0 +1,95 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/tags/textarea.html
+---
+# Input
+
+```html
+<div>
+  <div>
+    <div>
+      <div>
+        <div>
+          <div>
+            <div>
+              <div>
+                <div>
+                  <div>
+                    <div>
+                      <div>
+                        <textarea rows="10" cols="45" name="text">
+                        String
+                        </textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<textarea></textarea>
+
+<div><textarea>lorem ipsum</textarea></div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -12,19 +12,6 @@
+                       <div>
+                         <textarea rows="10" cols="45" name="text">
+                         String
+-                        </textarea>
+-                      </div>
+-                    </div>
+-                  </div>
+-                </div>
+-              </div>
+-            </div>
+-          </div>
+-        </div>
+-      </div>
+-    </div>
+-  </div>
+-</div>
+-<textarea></textarea>
++                        </textarea></div></div></div></div></div></div></div></div></div></div></div></div><textarea></textarea>
+ 
+ <div><textarea>lorem ipsum</textarea></div>
+```
+
+# Output
+
+```html
+<div>
+  <div>
+    <div>
+      <div>
+        <div>
+          <div>
+            <div>
+              <div>
+                <div>
+                  <div>
+                    <div>
+                      <div>
+                        <textarea rows="10" cols="45" name="text">
+                        String
+                        </textarea></div></div></div></div></div></div></div></div></div></div></div></div><textarea></textarea>
+
+<div><textarea>lorem ipsum</textarea></div>
+```
+
+# Lines exceeding max width of 80 characters
+```
+   15:                         </textarea></div></div></div></div></div></div></div></div></div></div></div></div><textarea></textarea>
+```
