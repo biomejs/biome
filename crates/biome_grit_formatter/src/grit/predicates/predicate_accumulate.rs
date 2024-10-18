@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritPredicateAccumulate;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritPredicateAccumulate, GritPredicateAccumulateFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPredicateAccumulate;
 impl FormatNodeRule<GritPredicateAccumulate> for FormatGritPredicateAccumulate {
@@ -9,6 +10,21 @@ impl FormatNodeRule<GritPredicateAccumulate> for FormatGritPredicateAccumulate {
         node: &GritPredicateAccumulate,
         f: &mut GritFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritPredicateAccumulateFields {
+            left,
+            add_assign_token,
+            right,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                left.format(),
+                space(),
+                add_assign_token.format(),
+                space(),
+                right.format()
+            ]
+        )
     }
 }

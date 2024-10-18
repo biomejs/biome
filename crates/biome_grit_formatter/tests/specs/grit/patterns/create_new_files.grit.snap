@@ -1,0 +1,47 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/patterns/create_new_files.grit
+---
+# Input
+
+```grit
+`function $functionName($_) {$_}` as $f where{ $functionName<:r"test.*",$f=>.,$new_file_name=`$functionName.test.js`,$new_files+=file(name = $new_file_name, body = $f)}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+`function $functionName($_) {$_}` as $f where {
+	$functionName <: r"test.*",
+	$f => .,
+	$new_file_name = `$functionName.test.js`,
+	$new_files += file(name = $new_file_name, body = $f)
+}
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"`function $functionName($_) {$_}` as $f " => 0..40
+"\t$functionNam" => 48..61
+" r\"test.*" => 65..74
+"\t$" => 77..79
+" " => 83..84
+"\t$new_file_nam" => 87..101
+" `$functionName.test.js" => 104..127
+"\t$new_file" => 130..140
+" file(name = $new_file_name, body = $f" => 144..182

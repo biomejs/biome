@@ -1,0 +1,1 @@
+`function $functionName($_) {$_}` as $f where{ $functionName<:r"test.*",$f=>.,$new_file_name=`$functionName.test.js`,$new_files+=file(name = $new_file_name, body = $f)}
