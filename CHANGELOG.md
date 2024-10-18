@@ -9,6 +9,27 @@ New entries must be placed in a section entitled `Unreleased`.
 Read
 our [guidelines for writing a good changelog entry](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#changelog).
 
+## Unreleased
+
+### Analyzer
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add [noUselessUndefined](https://biomejs.dev/linter/rules/no-useless-undefined/). Contributed by @unvalley
+
+
 ## v1.9.4 (2024-10-17)
 
 ### Analyzer
@@ -189,6 +210,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
+<<<<<<< HEAD
+#### New features
+
+- Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
+
+   ```js
+   import defer * as myModule from "my-module";
+   ```
+
+  Contributed by @fireairforce
+
+||||||| ea7d35c26a
+#### New features
+
+- Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
+
+   ```js
+   import defer * as myModule from "my-module";
+   ```
+
+  Contributed by @fireairforce
+
+=======
+>>>>>>> main
 #### Bug Fixes
 
 - The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).

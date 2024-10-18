@@ -24,6 +24,7 @@ pub mod no_substr;
 pub mod no_template_curly_in_string;
 pub mod no_useless_escape_in_regex;
 pub mod no_useless_string_raw;
+pub mod no_useless_undefined;
 pub mod use_adjacent_overload_signatures;
 pub mod use_aria_props_supported_by_role;
 pub mod use_at_index;
@@ -66,6 +67,7 @@ declare_lint_group! {
             self :: no_template_curly_in_string :: NoTemplateCurlyInString ,
             self :: no_useless_escape_in_regex :: NoUselessEscapeInRegex ,
             self :: no_useless_string_raw :: NoUselessStringRaw ,
+            self :: no_useless_undefined :: NoUselessUndefined ,
             self :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures ,
             self :: use_aria_props_supported_by_role :: UseAriaPropsSupportedByRole ,
             self :: use_at_index :: UseAtIndex ,

@@ -183,6 +183,7 @@ define_categories! {
     "lint/nursery/noUnusedFunctionParameters": "https://biomejs.dev/linter/rules/no-unused-function-parameters",
     "lint/nursery/noUselessEscapeInRegex": "https://biomejs.dev/linter/rules/no-useless-escape-in-regex",
     "lint/nursery/noUselessStringRaw": "https://biomejs.dev/linter/rules/no-useless-string-raw",
+    "lint/nursery/noUselessUndefined": "https://biomejs.dev/linter/rules/no-useless-undefined",
     "lint/nursery/noValueAtRule": "https://biomejs.dev/linter/rules/no-value-at-rule",
     "lint/nursery/useAdjacentOverloadSignatures": "https://biomejs.dev/linter/rules/use-adjacent-overload-signatures",
     "lint/nursery/useAriaPropsSupportedByRole": "https://biomejs.dev/linter/rules/use-aria-props-supported-by-role",
