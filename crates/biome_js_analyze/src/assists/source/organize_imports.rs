@@ -16,6 +16,8 @@ use biome_rowan::{
 
 use crate::JsRuleAction;
 
+pub mod util;
+
 declare_source_rule! {
     /// Provides a whole-source code action to sort the imports in the file
     /// using import groups and natural ordering.

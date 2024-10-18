@@ -26,7 +26,7 @@ use biome_formatter::{
 };
 use biome_formatter::{Formatted, Printed};
 use biome_rowan::{AstNode, SyntaxNode, TextRange};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 /// Used to get an object that knows how to format this object.
 pub(crate) trait AsFormat<Context> {

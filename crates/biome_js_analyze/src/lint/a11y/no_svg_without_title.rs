@@ -1,10 +1,8 @@
-use std::borrow::Cow;
-
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute, JsxChildList, JsxElement};
 use biome_rowan::{AstNode, AstNodeList};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforces the usage of the `title` element for the `svg` element.
@@ -152,8 +150,8 @@ impl Rule for NoSvgWithoutTitle {
             return Some(());
         };
 
-        match role_attribute_text.to_lowercase_cow() {
-            Cow::Borrowed("img") => {
+        match role_attribute_text.to_ascii_lowercase_cow().as_ref() {
+            "img" => {
                 let [aria_label, aria_labelledby] = node
                     .attributes()
                     .find_by_names(["aria-label", "aria-labelledby"]);
@@ -166,7 +164,7 @@ impl Rule for NoSvgWithoutTitle {
                 Some(())
             }
             // if role attribute is empty, the svg element should have title element
-            Cow::Borrowed("") => Some(()),
+            "" => Some(()),
             _ => None,
         }
     }

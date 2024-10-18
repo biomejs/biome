@@ -9,7 +9,7 @@ use biome_js_syntax::{
     JsBinaryOperator, JsUnaryOperator, TextRange,
 };
 use biome_rowan::{AstNode, BatchMutationExt};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 use crate::JsRuleAction;
 
@@ -129,14 +129,14 @@ impl Rule for UseValidTypeof {
                         .text_trimmed()
                         .trim_start_matches(['"', '\''])
                         .trim_end_matches(['"', '\''])
-                        .to_lowercase_cow();
+                        .to_ascii_lowercase_cow();
 
                     if JsTypeName::from_str(&literal).is_some() {
                         return None;
                     }
 
                     // Try to fix the casing of the literal eg. "String" -> "string"
-                    let suggestion = literal.to_lowercase_cow();
+                    let suggestion = literal.to_ascii_lowercase_cow();
                     return Some((
                         TypeofError::InvalidLiteral(range, literal.to_string()),
                         JsTypeName::from_str(&suggestion).map(|type_name| (lit.clone(), type_name)),
@@ -180,7 +180,7 @@ impl Rule for UseValidTypeof {
                 let suggestion = ident.name().ok().and_then(|name| {
                     let value = name.value_token().ok()?;
 
-                    let to_lower = value.text_trimmed().to_lowercase_cow();
+                    let to_lower = value.text_trimmed().to_ascii_lowercase_cow();
                     let as_type = JsTypeName::from_str(&to_lower)?;
 
                     Some((id.clone(), as_type))

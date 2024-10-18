@@ -94,6 +94,12 @@ impl PartialEq<TokenText> for &'_ str {
     }
 }
 
+impl AsRef<str> for TokenText {
+    fn as_ref(&self) -> &str {
+        self.text()
+    }
+}
+
 impl Borrow<str> for TokenText {
     fn borrow(&self) -> &str {
         self.text()
