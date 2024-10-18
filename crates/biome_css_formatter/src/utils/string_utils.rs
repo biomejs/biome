@@ -13,7 +13,7 @@ use biome_formatter::{
     Format, FormatResult,
 };
 use biome_rowan::SyntaxToken;
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 use crate::{prelude::CssFormatContext, AsFormat, CssFormatter};
 
