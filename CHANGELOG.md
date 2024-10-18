@@ -29,6 +29,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [noUselessUndefined](https://biomejs.dev/linter/rules/no-useless-undefined/). Contributed by @unvalley
 
+### Parser
+
+#### Bug fixes
+
+#### Bug fixes
+
+- Fix [#4317](https://github.com/biomejs/biome/issues/4317), get accessors parameter can contain a trailing comma, the following example can be parsed correctly:
+
+  ```js
+  export class DummyClass {
+    set input(
+      value: string,
+    ) {}
+  }
+  ```
+  
+  Contributed by @fireairforce
 
 ## v1.9.4 (2024-10-17)
 

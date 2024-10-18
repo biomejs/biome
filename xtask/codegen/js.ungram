@@ -561,7 +561,7 @@ JsSetterObjectMember =
 	'set'
 	name: AnyJsObjectMemberName
 	'('
-	parameter: AnyJsFormalParameter
+	parameter: AnyJsFormalParameter','?
 	')'
 	body: JsFunctionBody
 

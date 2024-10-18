@@ -67,6 +67,7 @@ JsModule {
                                                 type_annotation: missing (optional),
                                                 initializer: missing (optional),
                                             },
+                                            comma_token: missing (optional),
                                             r_paren_token: R_PAREN@99..101 ")" [] [Whitespace(" ")],
                                             body: JsFunctionBody {
                                                 l_curly_token: L_CURLY@101..102 "{" [] [],
@@ -191,6 +192,7 @@ JsModule {
                                                     type_annotation: missing (optional),
                                                     initializer: missing (optional),
                                                 },
+                                                comma_token: missing (optional),
                                                 r_paren_token: R_PAREN@249..251 ")" [] [Whitespace(" ")],
                                                 body: JsFunctionBody {
                                                     l_curly_token: L_CURLY@251..252 "{" [] [],
@@ -312,8 +314,9 @@ JsModule {
                         2: (empty)
                         3: (empty)
                         4: (empty)
-                      4: R_PAREN@99..101 ")" [] [Whitespace(" ")]
-                      5: JS_FUNCTION_BODY@101..126
+                      4: (empty)
+                      5: R_PAREN@99..101 ")" [] [Whitespace(" ")]
+                      6: JS_FUNCTION_BODY@101..126
                         0: L_CURLY@101..102 "{" [] []
                         1: JS_DIRECTIVE_LIST@102..102
                         2: JS_STATEMENT_LIST@102..122
@@ -399,8 +402,9 @@ JsModule {
                           2: (empty)
                           3: (empty)
                           4: (empty)
-                        4: R_PAREN@249..251 ")" [] [Whitespace(" ")]
-                        5: JS_FUNCTION_BODY@251..276
+                        4: (empty)
+                        5: R_PAREN@249..251 ")" [] [Whitespace(" ")]
+                        6: JS_FUNCTION_BODY@251..276
                           0: L_CURLY@251..252 "{" [] []
                           1: JS_DIRECTIVE_LIST@252..252
                           2: JS_STATEMENT_LIST@252..272
