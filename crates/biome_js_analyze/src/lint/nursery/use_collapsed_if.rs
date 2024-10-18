@@ -1,6 +1,4 @@
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, QueryMatch, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_syntax::parentheses::NeedsParentheses;
