@@ -45,18 +45,23 @@ declare_source_rule! {
 
 impl Rule for OrganizeImports {
     type Query = Ast<JsModule>;
-    type State = legacy::ImportGroups;
+    type State = State;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let root = ctx.query();
-        legacy::run(root)
+        legacy::run(root).map(State::Legacy)
     }
 
-    fn action(ctx: &RuleContext<Self>, groups: &Self::State) -> Option<JsRuleAction> {
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        legacy::action(ctx.query(), groups, &mut mutation)?;
+        match state {
+            State::Legacy(groups) => {
+                legacy::action(ctx.query(), groups, &mut mutation)?;
+            }
+            State::Modern => {}
+        }
         Some(JsRuleAction::new(
             ActionCategory::Source(SourceActionKind::OrganizeImports),
             ctx.metadata().applicability(),
@@ -64,4 +69,10 @@ impl Rule for OrganizeImports {
             mutation,
         ))
     }
+}
+
+#[derive(Debug)]
+pub enum State {
+    Legacy(legacy::ImportGroups),
+    Modern,
 }
