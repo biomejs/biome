@@ -61,6 +61,15 @@ noDoubleEquals.js:3:5 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
      4  5 │   `;
      5  6 │   
   
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+     1    │ - const·foo·=·`
+        1 │ + /**·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>·*/
+        2 │ + 
+        3 │ + const··foo·=·`
+     2  4 │   text
+     3  5 │   ${a == b}
+  
 
 ```
 
@@ -92,6 +101,15 @@ noDoubleEquals.js:7:3 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
         7 │ + //·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>
      7  8 │   a == b;
      8  9 │   
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+     1    │ - const·foo·=·`
+        1 │ + /**·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>·*/
+        2 │ + 
+        3 │ + const··foo·=·`
+     2  4 │   text
+     3  5 │   ${a == b}
   
 
 ```
@@ -127,6 +145,15 @@ noDoubleEquals.js:9:7 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━�
      9 10 │   if (a == b) {
     10 11 │       false;
   
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+     1    │ - const·foo·=·`
+        1 │ + /**·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>·*/
+        2 │ + 
+        3 │ + const··foo·=·`
+     2  4 │   text
+     3  5 │   ${a == b}
+  
 
 ```
 
@@ -161,6 +188,15 @@ noDoubleEquals.js:14:11 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
     15 16 │   
     16 17 │       }
   
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+     1    │ - const·foo·=·`
+        1 │ + /**·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>·*/
+        2 │ + 
+        3 │ + const··foo·=·`
+     2  4 │   text
+     3  5 │   ${a == b}
+  
 
 ```
 
@@ -194,6 +230,15 @@ noDoubleEquals.js:19:34 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
        20 │ + formatter·==·true}
     20 21 │     linter: ${linter}
     21 22 │   `;
+  
+  i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
+  
+     1    │ - const·foo·=·`
+        1 │ + /**·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>·*/
+        2 │ + 
+        3 │ + const··foo·=·`
+     2  4 │   text
+     3  5 │   ${a == b}
   
 
 ```

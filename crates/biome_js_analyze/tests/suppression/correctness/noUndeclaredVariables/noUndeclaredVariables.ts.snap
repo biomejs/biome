@@ -34,6 +34,15 @@ noUndeclaredVariables.ts:1:50 lint/correctness/noUndeclaredVariables  FIXABLE  �
     2 3 │   
     3 4 │   export type Invalid<S extends number> = `
   
+  i Safe fix: Suppress rule lint/correctness/noUndeclaredVariables for the whole file.
+  
+    1   │ - export·type·Invalid<S·extends·number>·=·`Hello·${T}`
+      1 │ + /**·biome-ignore·lint/correctness/noUndeclaredVariables:·<explanation>·*/
+      2 │ + 
+      3 │ + export··type·Invalid<S·extends·number>·=·`Hello·${T}`
+    2 4 │   
+    3 5 │   export type Invalid<S extends number> = `
+  
 
 ```
 
@@ -59,6 +68,15 @@ noUndeclaredVariables.ts:5:7 lint/correctness/noUndeclaredVariables  FIXABLE  �
       5 │ + ····${//·biome-ignore·lint/correctness/noUndeclaredVariables:·<explanation>
       6 │ + T}
     6 7 │   `
+  
+  i Safe fix: Suppress rule lint/correctness/noUndeclaredVariables for the whole file.
+  
+    1   │ - export·type·Invalid<S·extends·number>·=·`Hello·${T}`
+      1 │ + /**·biome-ignore·lint/correctness/noUndeclaredVariables:·<explanation>·*/
+      2 │ + 
+      3 │ + export··type·Invalid<S·extends·number>·=·`Hello·${T}`
+    2 4 │   
+    3 5 │   export type Invalid<S extends number> = `
   
 
 ```

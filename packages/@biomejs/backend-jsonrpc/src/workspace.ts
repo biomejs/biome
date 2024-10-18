@@ -3244,7 +3244,7 @@ export type ActionCategory =
 	| "QuickFix"
 	| { Refactor: RefactorKind }
 	| { Source: SourceActionKind }
-	| { Other: string };
+	| { Other: OtherActionCategory };
 /**
  * A Suggestion that is provided by Biome's linter, and can be reported to the user, and can be automatically applied if it has the right [`Applicability`].
  */
@@ -3274,6 +3274,10 @@ export type SourceActionKind =
 	| "None"
 	| "OrganizeImports"
 	| { Other: string };
+export type OtherActionCategory =
+	| "InlineSuppression"
+	| "ToplevelSuppression"
+	| { Generic: string };
 /**
  * Indicates how a tool should manage this suggestion.
  */
