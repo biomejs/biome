@@ -50,6 +50,15 @@ useDeprecatedReason.graphql:2:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
      3  4 │   		id
      4  5 │   	}
   
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for the whole file.
+  
+     1    │ - query·{
+        1 │ + #·biome-ignore·lint/nursery/useDeprecatedReason:·<explanation>
+        2 │ + 
+        3 │ + query··{
+     2  4 │     member @deprecated {
+     3  5 │   		id
+  
 
 ```
 
@@ -75,6 +84,15 @@ useDeprecatedReason.graphql:8:10 lint/nursery/useDeprecatedReason  FIXABLE  ━�
         9 │ + ··member··@deprecated()
      9 10 │   }
     10 11 │   
+  
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for the whole file.
+  
+     1    │ - query·{
+        1 │ + #·biome-ignore·lint/nursery/useDeprecatedReason:·<explanation>
+        2 │ + 
+        3 │ + query··{
+     2  4 │     member @deprecated {
+     3  5 │   		id
   
 
 ```
@@ -102,6 +120,15 @@ useDeprecatedReason.graphql:13:3 lint/nursery/useDeprecatedReason  FIXABLE  ━�
        14 │ + ··@deprecated(abc:·123)
     14 15 │   }
     15 16 │   
+  
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason for the whole file.
+  
+     1    │ - query·{
+        1 │ + #·biome-ignore·lint/nursery/useDeprecatedReason:·<explanation>
+        2 │ + 
+        3 │ + query··{
+     2  4 │     member @deprecated {
+     3  5 │   		id
   
 
 ```
