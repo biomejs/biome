@@ -19,6 +19,7 @@ impl From<FilenameCaseOptions> for use_filenaming_convention::FilenamingConventi
         use_filenaming_convention::FilenamingConventionOptions {
             strict_case: true,
             require_ascii: true,
+            matching: None,
             filename_cases: filename_cases.unwrap_or_else(|| {
                 use_filenaming_convention::FilenameCases::from_iter([val.case.into()])
             }),

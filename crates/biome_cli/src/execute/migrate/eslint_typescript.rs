@@ -8,7 +8,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_analyze::{
     lint::nursery::use_consistent_member_accessibility,
     lint::style::{use_consistent_array_type, use_naming_convention},
-    utils::regex::RestrictedRegex,
+    utils::restricted_regex::RestrictedRegex,
 };
 
 use super::eslint_eslint;
