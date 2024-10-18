@@ -237,7 +237,7 @@ impl Rule for NoUselessUndefined {
                     "Don't use unnecessary "<Emphasis>"undefined"</Emphasis>"."
                 },
             )
-            .note(markup! {
+                .note(markup! {
                 ""<Emphasis>"undefined"</Emphasis>" is the default value for new variables, parameters, return statements, etc… so specifying it doesn't make any difference."
             }),
         )
@@ -258,7 +258,8 @@ impl Rule for NoUselessUndefined {
                         .filter_map(Result::ok)
                         .find(|decl| {
                             decl.id().is_ok_and(|id| {
-                                id.text() == state.binding_text.as_deref().unwrap_or("")
+                                id.syntax().text_trimmed()
+                                    == state.binding_text.as_deref().unwrap_or("")
                             })
                         })?;
 
