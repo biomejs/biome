@@ -88,7 +88,6 @@ impl ActionCategory {
     /// assert!(ActionCategory::Other(OtherActionCategory::ToplevelSuppression).matches("quickfix.suppressRule.topLevel.biome"));
     /// ```
     pub fn matches(&self, filter: &str) -> bool {
-        dbg!("");
         self.to_str().starts_with(filter)
     }
 

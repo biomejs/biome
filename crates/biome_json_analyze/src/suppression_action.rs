@@ -16,7 +16,7 @@ impl SuppressionAction for JsonSuppressionAction {
         let new_token = token.with_leading_trivia([
             (
                 TriviaPieceKind::SingleLineComment,
-                format!("/* {suppression_text}: <explanation> */").as_str(),
+                format!("/** {suppression_text}: <explanation> */").as_str(),
             ),
             (TriviaPieceKind::Newline, "\n"),
             (TriviaPieceKind::Newline, "\n"),
