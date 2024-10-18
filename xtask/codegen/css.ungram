@@ -475,6 +475,9 @@ CssDeclarationWithSemicolon =
     declaration: CssDeclaration
     ';'?
 
+CssEmptyDeclaration =
+    ';'
+
 AnyCssDeclarationBlock =
 	CssDeclarationBlock
 	| CssBogusBlock

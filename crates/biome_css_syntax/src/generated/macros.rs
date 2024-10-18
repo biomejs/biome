@@ -178,6 +178,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::CssDocumentCustomMatcher::new_unchecked(node) };
                     $body
                 }
+                $crate::CssSyntaxKind::CSS_EMPTY_DECLARATION => {
+                    let $pattern = unsafe { $crate::CssEmptyDeclaration::new_unchecked(node) };
+                    $body
+                }
                 $crate::CssSyntaxKind::CSS_FONT_FACE_AT_RULE => {
                     let $pattern = unsafe { $crate::CssFontFaceAtRule::new_unchecked(node) };
                     $body
