@@ -554,6 +554,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             return ControlFlow::Break(action);
                         }
                     }
+                    FixFileMode::ApplySuppressions => {
+                        // TODO: to implement
+                    }
                 }
             }
 
