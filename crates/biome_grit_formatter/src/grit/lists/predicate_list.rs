@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use biome_grit_syntax::GritPredicateList;
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPredicateList;
 impl FormatRule<GritPredicateList> for FormatGritPredicateList {

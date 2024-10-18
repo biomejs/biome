@@ -17,6 +17,7 @@ impl FormatNodeRule<GritPredicateRewrite> for FormatGritPredicateRewrite {
             f,
             [
                 annotation.format(),
+                space(),
                 left.format(),
                 space(),
                 fat_arrow_token.format(),
