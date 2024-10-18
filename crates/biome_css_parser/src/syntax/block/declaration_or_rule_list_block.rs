@@ -10,8 +10,8 @@ use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
-use biome_parser::parsed_syntax::ParsedSyntax;
-use biome_parser::parsed_syntax::ParsedSyntax::Absent;
+use biome_parser::prelude::ParsedSyntax;
+use biome_parser::prelude::ParsedSyntax::{Absent, Present};
 use biome_parser::{CompletedMarker, Parser};
 
 #[inline]
@@ -88,6 +88,10 @@ impl ParseNodeList for DeclarationOrRuleList {
                 // If either condition is true, the declaration is considered valid.
                 if matches!(p.last(), Some(T![;])) || p.at(T!['}']) {
                     Ok(declaration)
+                } 
+                let marker = p.start();
+                if p.eat(T![;]) {
+                    Ok(Present(marker.complete(p, CSS_EMPTY_DECLARATION)))
                 } else {
                     // If neither condition is met, return an error to indicate parsing failure.
                     // And rewind the parser to the start of the declaration.

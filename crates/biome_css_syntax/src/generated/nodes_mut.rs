@@ -685,6 +685,14 @@ impl CssDocumentCustomMatcher {
         )
     }
 }
+impl CssEmptyDeclaration {
+    pub fn with_semicolon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+}
 impl CssFontFaceAtRule {
     pub fn with_font_face_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
