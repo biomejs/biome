@@ -28,13 +28,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add [noUselessUndefined](https://biomejs.dev/linter/rules/no-useless-undefined/). Contributed by @unvalley
+- Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
 
+   ```js
+   import defer * as myModule from "my-module";
+   ```
+
+  Contributed by @fireairforce
 
 ## v1.9.4 (2024-10-17)
 
 ### Analyzer
 
 #### Bug fixes
+
+- Implement [GraphQL suppression action](https://github.com/biomejs/biome/pull/4312). Contributed by @vohoanglong0107
 
 - Improved the message for unused suppression comments. Contributed by @dyc3
 
