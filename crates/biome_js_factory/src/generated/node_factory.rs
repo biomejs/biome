@@ -2209,7 +2209,6 @@ pub fn js_import_namespace_clause(
         from_token,
         source,
         type_token: None,
-        defer_token: None,
         assertion: None,
     }
 }
@@ -2218,16 +2217,11 @@ pub struct JsImportNamespaceClauseBuilder {
     from_token: SyntaxToken,
     source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
-    defer_token: Option<SyntaxToken>,
     assertion: Option<JsImportAssertion>,
 }
 impl JsImportNamespaceClauseBuilder {
     pub fn with_type_token(mut self, type_token: SyntaxToken) -> Self {
         self.type_token = Some(type_token);
-        self
-    }
-    pub fn with_defer_token(mut self, defer_token: SyntaxToken) -> Self {
-        self.defer_token = Some(defer_token);
         self
     }
     pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
@@ -2239,7 +2233,6 @@ impl JsImportNamespaceClauseBuilder {
             JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE,
             [
                 self.type_token.map(|token| SyntaxElement::Token(token)),
-                self.defer_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Node(self.namespace_specifier.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
@@ -4971,15 +4964,11 @@ impl TsImportEqualsDeclarationBuilder {
 }
 pub fn ts_import_type(
     import_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    argument_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
+    arguments: JsCallArguments,
 ) -> TsImportTypeBuilder {
     TsImportTypeBuilder {
         import_token,
-        l_paren_token,
-        argument_token,
-        r_paren_token,
+        arguments,
         typeof_token: None,
         qualifier_clause: None,
         type_arguments: None,
@@ -4987,9 +4976,7 @@ pub fn ts_import_type(
 }
 pub struct TsImportTypeBuilder {
     import_token: SyntaxToken,
-    l_paren_token: SyntaxToken,
-    argument_token: SyntaxToken,
-    r_paren_token: SyntaxToken,
+    arguments: JsCallArguments,
     typeof_token: Option<SyntaxToken>,
     qualifier_clause: Option<TsImportTypeQualifier>,
     type_arguments: Option<TsTypeArguments>,
@@ -5013,9 +5000,7 @@ impl TsImportTypeBuilder {
             [
                 self.typeof_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Token(self.import_token)),
-                Some(SyntaxElement::Token(self.l_paren_token)),
-                Some(SyntaxElement::Token(self.argument_token)),
-                Some(SyntaxElement::Token(self.r_paren_token)),
+                Some(SyntaxElement::Node(self.arguments.into_syntax())),
                 self.qualifier_clause
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.type_arguments

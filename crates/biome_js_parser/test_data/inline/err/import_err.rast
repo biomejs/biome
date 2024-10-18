@@ -12,7 +12,6 @@ JsModule {
             import_token: IMPORT_KW@7..15 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportNamespaceClause {
                 type_token: missing (optional),
-                defer_token: missing (optional),
                 namespace_specifier: JsNamespaceImportSpecifier {
                     star_token: STAR@15..16 "*" [] [],
                     as_token: missing (required),
@@ -28,7 +27,6 @@ JsModule {
             import_token: IMPORT_KW@17..25 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportNamespaceClause {
                 type_token: missing (optional),
-                defer_token: missing (optional),
                 namespace_specifier: JsNamespaceImportSpecifier {
                     star_token: STAR@25..27 "*" [] [Whitespace(" ")],
                     as_token: AS_KW@27..30 "as" [] [Whitespace(" ")],
@@ -293,28 +291,26 @@ JsModule {
       0: IMPORT_KW@7..15 "import" [Newline("\n")] [Whitespace(" ")]
       1: JS_IMPORT_NAMESPACE_CLAUSE@15..16
         0: (empty)
-        1: (empty)
-        2: JS_NAMESPACE_IMPORT_SPECIFIER@15..16
+        1: JS_NAMESPACE_IMPORT_SPECIFIER@15..16
           0: STAR@15..16 "*" [] []
           1: (empty)
           2: (empty)
+        2: (empty)
         3: (empty)
         4: (empty)
-        5: (empty)
       2: SEMICOLON@16..17 ";" [] []
     2: JS_IMPORT@17..31
       0: IMPORT_KW@17..25 "import" [Newline("\n")] [Whitespace(" ")]
       1: JS_IMPORT_NAMESPACE_CLAUSE@25..31
         0: (empty)
-        1: (empty)
-        2: JS_NAMESPACE_IMPORT_SPECIFIER@25..31
+        1: JS_NAMESPACE_IMPORT_SPECIFIER@25..31
           0: STAR@25..27 "*" [] [Whitespace(" ")]
           1: AS_KW@27..30 "as" [] [Whitespace(" ")]
           2: JS_IDENTIFIER_BINDING@30..31
             0: IDENT@30..31 "c" [] []
+        2: (empty)
         3: (empty)
         4: (empty)
-        5: (empty)
       2: (empty)
     3: JS_BOGUS_STATEMENT@31..33
       0: COMMA@31..33 "," [] [Whitespace(" ")]
