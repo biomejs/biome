@@ -7,7 +7,6 @@ pub(crate) struct GraphqlSuppressionAction;
 impl SuppressionAction for GraphqlSuppressionAction {
     type Language = GraphqlLanguage;
 
-
     fn apply_top_level_suppression(
         &self,
         mutation: &mut BatchMutation<Self::Language>,
