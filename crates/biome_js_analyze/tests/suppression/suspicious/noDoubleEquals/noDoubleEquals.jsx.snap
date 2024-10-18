@@ -50,7 +50,7 @@ noDoubleEquals.jsx:3:51 lint/suspicious/noDoubleEquals  FIXABLE  ━━━━━
   i Safe fix: Suppress rule lint/suspicious/noDoubleEquals for the whole file.
   
     1   │ - let·a·=·<button
-      1 │ + /*·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>·*/
+      1 │ + /**·biome-ignore·lint/suspicious/noDoubleEquals:·<explanation>·*/
       2 │ + 
       3 │ + let··a·=·<button
     2 4 │       className="SomeManyClasses"

@@ -42,7 +42,7 @@ noAssignInExpressions.ts:3:10 lint/suspicious/noAssignInExpressions  FIXABLE  �
   i Safe fix: Suppress rule lint/suspicious/noAssignInExpressions for the whole file.
   
     1   │ - export·function·foo()·{
-      1 │ + /*·biome-ignore·lint/suspicious/noAssignInExpressions:·<explanation>·*/
+      1 │ + /**·biome-ignore·lint/suspicious/noAssignInExpressions:·<explanation>·*/
       2 │ + 
       3 │ + export··function·foo()·{
     2 4 │   	let x: number;

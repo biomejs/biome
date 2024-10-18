@@ -155,7 +155,7 @@ noArrayIndexKey.jsx:4:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -202,7 +202,7 @@ noArrayIndexKey.jsx:7:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━�
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -249,7 +249,7 @@ noArrayIndexKey.jsx:10:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -295,7 +295,7 @@ noArrayIndexKey.jsx:14:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -342,7 +342,7 @@ noArrayIndexKey.jsx:17:18 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -389,7 +389,7 @@ noArrayIndexKey.jsx:20:31 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -436,7 +436,7 @@ noArrayIndexKey.jsx:23:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -482,7 +482,7 @@ noArrayIndexKey.jsx:28:35 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -528,7 +528,7 @@ noArrayIndexKey.jsx:32:42 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -574,7 +574,7 @@ noArrayIndexKey.jsx:36:29 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -620,7 +620,7 @@ noArrayIndexKey.jsx:40:36 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -666,7 +666,7 @@ noArrayIndexKey.jsx:44:41 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -712,7 +712,7 @@ noArrayIndexKey.jsx:50:37 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -757,7 +757,7 @@ noArrayIndexKey.jsx:54:63 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -803,7 +803,7 @@ noArrayIndexKey.jsx:57:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -849,7 +849,7 @@ noArrayIndexKey.jsx:61:25 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -894,7 +894,7 @@ noArrayIndexKey.jsx:65:54 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -939,7 +939,7 @@ noArrayIndexKey.jsx:69:64 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -984,7 +984,7 @@ noArrayIndexKey.jsx:72:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -1029,7 +1029,7 @@ noArrayIndexKey.jsx:74:67 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -1074,7 +1074,7 @@ noArrayIndexKey.jsx:77:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -1119,7 +1119,7 @@ noArrayIndexKey.jsx:81:58 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -1166,7 +1166,7 @@ noArrayIndexKey.jsx:83:55 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -1213,7 +1213,7 @@ noArrayIndexKey.jsx:90:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -1260,7 +1260,7 @@ noArrayIndexKey.jsx:98:50 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━━
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
@@ -1299,7 +1299,7 @@ noArrayIndexKey.jsx:107:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━�
     105 105 │   	return (
     106 106 │   		<HoC>
     107     │ - → → → {({·things·})·=>·things.map((_,·index)·=>·<Component·key={index}·/>)}
-        107 │ + → → → {/*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/}
+        107 │ + → → → {/**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/}
         108 │ + {({·things·})·=>·things.map((_,·index)·=>·<Component·key={index}·/>)}
     108 109 │   		</HoC>
     109 110 │   	);
@@ -1307,7 +1307,7 @@ noArrayIndexKey.jsx:107:62 lint/suspicious/noArrayIndexKey  FIXABLE  ━━━�
   i Safe fix: Suppress rule lint/suspicious/noArrayIndexKey for the whole file.
   
       1     │ - import·{·Children,·cloneElement·}·from·"react";
-          1 │ + /*·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
+          1 │ + /**·biome-ignore·lint/suspicious/noArrayIndexKey:·<explanation>·*/
           2 │ + 
           3 │ + import··{·Children,·cloneElement·}·from·"react";
       2   4 │   
