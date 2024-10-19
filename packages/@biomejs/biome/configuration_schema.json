@@ -76,6 +76,10 @@
 			"description": "A list of granular patterns that should be applied only to a sub set of files",
 			"anyOf": [{ "$ref": "#/definitions/Overrides" }, { "type": "null" }]
 		},
+		"plugins": {
+			"description": "List of plugins to load.",
+			"anyOf": [{ "$ref": "#/definitions/Plugins" }, { "type": "null" }]
+		},
 		"vcs": {
 			"description": "The configuration of the VCS integration",
 			"anyOf": [

@@ -215,6 +215,10 @@ versioned_files = ["crates/biome_graphql_semantic/Cargo.toml"]
 changelog       = "crates/biome_css_semantic/CHANGELOG.md"
 versioned_files = ["crates/biome_css_semantic/Cargo.toml"]
 
+[packages.biome_plugin_loader]
+changelog       = "crates/biome_plugin_loader/CHANGELOG.md"
+versioned_files = ["crates/biome_plugin_loader/Cargo.toml"]
+
 ## End of crates. DO NOT CHANGE!
 
 # Workflow to create a changeset
