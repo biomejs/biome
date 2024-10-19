@@ -139,7 +139,7 @@ impl ServiceLanguage for JsonLanguage {
                 .unwrap_or_default(),
             globals: vec![],
             preferred_quote: PreferredQuote::Double,
-            jsx_runtime: Default::default(),
+            ..Default::default()
         };
         AnalyzerOptions {
             configuration,
