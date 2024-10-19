@@ -36,7 +36,6 @@ pub enum PluginDiagnostic {
 
 impl From<CompileError> for PluginDiagnostic {
     fn from(value: CompileError) -> Self {
-        println!("Compile Error: {value:?}");
         PluginDiagnostic::Compile(CompileDiagnostic {
             source: Some(Error::from(value)),
         })
