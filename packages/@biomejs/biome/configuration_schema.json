@@ -2416,6 +2416,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNamedOperation": {
+					"description": "Enforce specifying the name of GraphQL operations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
