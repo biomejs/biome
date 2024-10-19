@@ -13,6 +13,7 @@ pub mod javascript;
 pub mod json;
 pub mod organize_imports;
 mod overrides;
+pub mod plugins;
 pub mod vcs;
 
 use crate::analyzer::assists::{
@@ -58,6 +59,7 @@ pub use overrides::{
     OverrideAssistsConfiguration, OverrideFormatterConfiguration, OverrideLinterConfiguration,
     OverrideOrganizeImportsConfiguration, OverridePattern, Overrides,
 };
+use plugins::Plugins;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::num::NonZeroU64;
@@ -131,6 +133,10 @@ pub struct Configuration {
     /// A list of granular patterns that should be applied only to a sub set of files
     #[partial(bpaf(hide))]
     pub overrides: Overrides,
+
+    /// List of plugins to load.
+    #[partial(bpaf(hide))]
+    pub plugins: Plugins,
 
     /// Specific configuration for assists
     #[partial(type, bpaf(external(partial_assists_configuration), optional))]
