@@ -145,9 +145,8 @@ impl ServiceLanguage for CssLanguage {
             rules: global
                 .map(|g| to_analyzer_rules(g, file_path.as_path()))
                 .unwrap_or_default(),
-            globals: Vec::new(),
             preferred_quote,
-            jsx_runtime: None,
+            ..Default::default()
         };
 
         AnalyzerOptions {

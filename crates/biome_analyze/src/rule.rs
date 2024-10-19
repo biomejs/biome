@@ -1050,6 +1050,14 @@ impl RuleDiagnostic {
         self
     }
 
+    /// Marks this diagnostic as verbose.
+    ///
+    /// The diagnostic will only be shown when using the `--verbose` argument.
+    pub fn verbose(mut self) -> Self {
+        self.tags |= DiagnosticTags::VERBOSE;
+        self
+    }
+
     /// Attaches a label to this [`RuleDiagnostic`].
     ///
     /// The given span has to be in the file that was provided while creating this [`RuleDiagnostic`].
