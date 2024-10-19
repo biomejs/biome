@@ -45,6 +45,19 @@ impl BiomePlugin {
                 .into_path_buf()
         };
 
+        // If the plugin path references a `.grit` file directly, treat it as
+        // a single-rule plugin instead of going through the manifest process:
+        if plugin_path
+            .as_os_str()
+            .as_encoded_bytes()
+            .ends_with(b".grit")
+        {
+            let plugin = AnalyzerGritPlugin::load(fs, &plugin_path)?;
+            return Ok(Self {
+                analyzer_plugins: vec![Box::new(plugin) as Box<dyn AnalyzerPlugin>],
+            });
+        }
+
         let manifest_path = plugin_path.join("biome-manifest.jsonc");
         if !fs.path_is_file(&manifest_path) {
             return Err(PluginDiagnostic::cant_resolve(
@@ -165,5 +178,15 @@ mod test {
         let error = BiomePlugin::load(&fs, "./my-plugin", Path::new("/"), Path::new("/"))
             .expect_err("Plugin loading should've failed");
         snap_diagnostic("load_plugin_with_wrong_rule_extension", error.into());
+    }
+
+    #[test]
+    fn load_single_rule_plugin() {
+        let mut fs = MemoryFileSystem::default();
+        fs.insert("/my-plugin.grit".into(), r#"`hello`"#);
+
+        let plugin = BiomePlugin::load(&fs, "./my-plugin.grit", Path::new("/"), Path::new("/"))
+            .expect("Couldn't load plugin");
+        assert_eq!(plugin.analyzer_plugins.len(), 1);
     }
 }
