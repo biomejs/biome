@@ -64,6 +64,14 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) and [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention) `match` options now accept case-insensitive and case-sensitive groups.
+
+  By default, the regular expression in `match` is case-sensitive.
+  You can now make it case-insensitive by using a case-insensitive group `(?i:)`.
+  For example, the regular expression `(?i:a)` matches `a` and `A`.
+
+  Contributed by @Conaclos
+
 ### Parser
 
 #### New features
