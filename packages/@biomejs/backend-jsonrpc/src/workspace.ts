@@ -98,6 +98,10 @@ export interface PartialConfiguration {
 	 */
 	overrides?: Overrides;
 	/**
+	 * List of plugins to load.
+	 */
+	plugins?: Plugins;
+	/**
 	 * The configuration of the VCS integration
 	 */
 	vcs?: PartialVcsConfiguration;
@@ -305,6 +309,7 @@ export interface PartialOrganizeImports {
 	include?: StringSet;
 }
 export type Overrides = OverridePattern[];
+export type Plugins = PluginConfiguration[];
 /**
  * Set of properties to integrate Biome with a VCS software.
  */
@@ -660,6 +665,7 @@ export interface OverridePattern {
 	 */
 	organizeImports?: OverrideOrganizeImportsConfiguration;
 }
+export type PluginConfiguration = string;
 export type VcsClientKind = "git";
 /**
  * A list of rules that belong to this group
@@ -3216,6 +3222,7 @@ export type Category =
 	| "assists"
 	| "migrate"
 	| "deserialize"
+	| "plugin"
 	| "project"
 	| "search"
 	| "internalError/io"
