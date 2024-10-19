@@ -507,6 +507,7 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_graphql_factory",
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_rowan",

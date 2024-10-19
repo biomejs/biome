@@ -2,6 +2,8 @@
 
 use crate::lint;
 
+pub type NoAnonymousOperations =
+    <lint::nursery::no_anonymous_operations::NoAnonymousOperations as biome_analyze::Rule>::Options;
 pub type NoDuplicatedFields =
     <lint::nursery::no_duplicated_fields::NoDuplicatedFields as biome_analyze::Rule>::Options;
 pub type UseDeprecatedReason =

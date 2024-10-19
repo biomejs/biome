@@ -1,0 +1,4 @@
+/* should not generate diagnostics */
+query myQuery { a }
+mutation doSomething { a }
+subscription myData { a }
