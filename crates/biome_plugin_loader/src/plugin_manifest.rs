@@ -19,6 +19,7 @@ pub fn supported_version(
     value: &u8,
     name: &str,
     range: TextRange,
+    diagnostics: &mut Vec<DeserializationDiagnostic>,
 ) -> bool {
     if *value == 1 {
         true
