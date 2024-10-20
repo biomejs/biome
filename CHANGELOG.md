@@ -32,6 +32,54 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### New features
 
 - Add [noUselessUndefined](https://biomejs.dev/linter/rules/no-useless-undefined/). Contributed by @unvalley
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) accepts a new option `match` ([#4105](https://github.com/biomejs/biome/issues/4105)).
+
+  You can now validate filenames with a regular expression.
+  For instance, you can allow filenames to start with `%`:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "useFilenamingConvention": {
+            "level": "warn",
+            "options": {
+                "match": "%?(.+?)[.](.+)",
+                "filenameCases": ["camelCase"]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  If the regular expression captures strings, the first capture is considered to be the name of the file, and the second one to be the extensions (dot-separated values).
+  The name of the file and the extensions are checked against `filenameCases`.
+  Given the previous configuration, the filename `%index.d.ts` is valid because the first capture `index` is in `camelCase` and the second capture `d.ts` include dot-separated values in `lowercase`.
+  On the other hand, `%Index.d.ts` is not valid because the first capture `Index` is in `PascalCase`.
+
+  Note that specifying `match` disallows any exceptions that are handled by the rule by default.
+  For example, the previous configuration doesn't allow filenames to be prefixed with underscores,
+  a period or a plus sign.
+  You need to include them in the regular expression if you still want to allow these exceptions.
+
+  Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) and [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention) `match` options now accept case-insensitive and case-sensitive groups.
+
+  By default, the regular expression in `match` is case-sensitive.
+  You can now make it case-insensitive by using a case-insensitive group `(?i:)`.
+  For example, the regular expression `(?i:a)` matches `a` and `A`.
+
+  Contributed by @Conaclos
+
+### Parser
+
+#### New features
+
 - Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
 
    ```js

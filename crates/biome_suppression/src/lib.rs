@@ -43,7 +43,7 @@ pub fn parse_suppression_comment(
         "/*" => {
             comment = comment
                 .strip_suffix("*/")
-                .or_else(|| comment.strip_suffix(&['*', '/']))
+                .or_else(|| comment.strip_suffix(['*', '/']))
                 .unwrap_or(comment);
             true
         }

@@ -1,4 +1,4 @@
-use crate::services::semantic::SemanticServices;
+use crate::{services::semantic::SemanticServices, utils::restricted_regex::RestrictedRegex};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
@@ -18,21 +18,24 @@ declare_lint_rule! {
     ///
     /// Enforcing [naming conventions](https://en.wikipedia.org/wiki/Naming_convention_(programming)) helps to keep the codebase consistent.
     ///
-    /// A filename consists of two parts: a name and a set of consecutive extension.
+    /// A filename consists of two parts: a name and a set of consecutive extensions.
     /// For instance, `my-filename.test.js` has `my-filename` as name, and two consecutive extensions: `.test` and `.js`.
     ///
-    /// The filename can start with a dot or a plus sign, be prefixed and suffixed by underscores `_`.
-    /// For example, `.filename.js`, `+filename.js`, `__filename__.js`, or even `.__filename__.js`.
-    ///
-    /// The convention of prefixing a filename with a plus sign is used by
-    /// [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
-    ///
-    /// Also, the rule supports dynamic route syntaxes of [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments), [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index), [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route), and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters).
-    /// For example `[...slug].js` and `[[...slug]].js` are valid filenames.
-    ///
-    /// By default, the rule ensures that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`],
+    /// By default, the rule ensures that the name is either in [`camelCase`], [`kebab-case`], [`snake_case`],
     /// or equal to the name of one export in the file.
     /// By default, the rule ensures that the extensions are either in [`camelCase`], [`kebab-case`], or [`snake_case`].
+    ///
+    /// The rule supports the following exceptions:
+    ///
+    /// - The name of the file can start with a dot or a plus sign, be prefixed and suffixed by underscores `_`.
+    ///   For example, `.filename.js`, `+filename.js`, `__filename__.js`, or even `.__filename__.js`.
+    ///
+    ///   The convention of prefixing a filename with a plus sign is used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+    ///
+    /// - Also, the rule supports dynamic route syntaxes of [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments), [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index), [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route), and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters).
+    ///   For example `[...slug].js` and `[[...slug]].js` are valid filenames.
+    ///
+    /// Note that if you specify the `match' option, the previous exceptions will no longer be handled.
     ///
     /// ## Ignoring some files
     ///
@@ -68,6 +71,7 @@ declare_lint_rule! {
     ///     "options": {
     ///         "strictCase": false,
     ///         "requireAscii": true,
+    ///         "match": "%?(.+?)[.](.+)",
     ///         "filenameCases": ["camelCase", "export"]
     ///     }
     /// }
@@ -95,6 +99,31 @@ declare_lint_rule! {
     /// Default: `false`
     ///
     /// **This option will be turned on by default in Biome 2.0.**
+    ///
+    /// ### match
+    ///
+    /// `match` defines a regular expression that the filename must match.
+    /// If the regex has capturing groups, then the first capture is considered as the filename
+    /// and the second one as file extensions separated by dots.
+    ///
+    /// For example, given the regular expression `%?(.+?)\.(.+)` and the filename `%index.d.ts`,
+    /// the filename matches the regular expression with two captures: `index` and `d.ts`.
+    /// The captures are checked against `filenameCases`.
+    /// Note that we use the non-greedy quantifier `+?` to stop capturing as soon as we met the next character (`.`).
+    /// If we use the greedy quantifier `+` instead, then the captures could be `index.d` and `ts`.
+    ///
+    /// The regular expression supports the following syntaxes:
+    ///
+    /// - Greedy quantifiers `*`, `?`, `+`, `{n}`, `{n,m}`, `{n,}`, `{m}`
+    /// - Non-greedy quantifiers `*?`, `??`, `+?`, `{n}?`, `{n,m}?`, `{n,}?`, `{m}?`
+    /// - Any character matcher `.`
+    /// - Character classes `[a-z]`, `[xyz]`, `[^a-z]`
+    /// - Alternations `|`
+    /// - Capturing groups `()`
+    /// - Non-capturing groups `(?:)`
+    /// - Case-insensitive groups `(?i:)` and case-sensitive groups `(?-i:)`
+    /// - A limited set of escaped characters including all special characters
+    ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`
     ///
     /// ### filenameCases
     ///
@@ -134,7 +163,23 @@ impl Rule for UseFilenamingConvention {
             return Some(FileNamingConventionState::Ascii);
         }
         let first_char = file_name.bytes().next()?;
-        let (name, mut extensions) = if matches!(first_char, b'(' | b'[') {
+        let (name, mut extensions) = if let Some(matching) = &options.matching {
+            let Some(captures) = matching.captures(file_name) else {
+                return Some(FileNamingConventionState::Match);
+            };
+            let mut captures = captures.iter().skip(1).flatten();
+            let Some(first_capture) = captures.next() else {
+                // Match without any capture implies a valid case
+                return None;
+            };
+            let name = first_capture.as_str();
+            if name.is_empty() {
+                // Empty string are always valid.
+                return None;
+            }
+            let split = captures.next().map_or("", |x| x.as_str()).split('.');
+            (name, split)
+        } else if matches!(first_char, b'(' | b'[') {
             // Support [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments),
             // [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index),
             // [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route),
@@ -329,6 +374,16 @@ impl Rule for UseFilenamingConvention {
                     },
                 ))
             },
+            FileNamingConventionState::Match => {
+                let matching = options.matching.as_ref()?.as_str();
+                Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    None as Option<TextRange>,
+                    markup! {
+                        "This filename should match the following regex "<Emphasis>"/"{matching}"/"</Emphasis>"."
+                    },
+                ))
+            }
         }
     }
 }
@@ -341,6 +396,8 @@ pub enum FileNamingConventionState {
     Filename,
     /// An extension is not in lowercase
     Extension,
+    /// The filename doesn't match the provided regex
+    Match,
 }
 
 /// Rule's options.
@@ -356,6 +413,10 @@ pub struct FilenamingConventionOptions {
     /// If `false`, then non-ASCII characters are allowed.
     #[serde(default, skip_serializing_if = "is_default")]
     pub require_ascii: bool,
+
+    /// Regular expression to enforce
+    #[serde(default, rename = "match", skip_serializing_if = "Option::is_none")]
+    pub matching: Option<RestrictedRegex>,
 
     /// Allowed cases for file names.
     #[serde(default, skip_serializing_if = "is_default")]
@@ -375,6 +436,7 @@ impl Default for FilenamingConventionOptions {
         Self {
             strict_case: true,
             require_ascii: false,
+            matching: None,
             filename_cases: FilenameCases::default(),
         }
     }

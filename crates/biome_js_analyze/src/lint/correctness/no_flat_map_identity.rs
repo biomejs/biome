@@ -73,7 +73,7 @@ impl Rule for NoFlatMapIdentity {
                 AnyJsExpression::JsArrowFunctionExpression(arg) => {
                     let parameter: String = match arg.parameters().ok()? {
                         biome_js_syntax::AnyJsArrowFunctionParameters::AnyJsBinding(p) => {
-                            p.text().trim_matches(&['(', ')']).to_owned()
+                            p.text().trim_matches(['(', ')']).to_owned()
                         }
                         biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(p) => {
                             if p.items().len() == 1 {
@@ -110,8 +110,7 @@ impl Rule for NoFlatMapIdentity {
                 }
                 AnyJsExpression::JsFunctionExpression(arg) => {
                     let function_parameter = arg.parameters().ok()?.text();
-                    let function_parameter =
-                        function_parameter.trim_matches(&['(', ')']).to_owned();
+                    let function_parameter = function_parameter.trim_matches(['(', ')']).to_owned();
 
                     let mut statement = arg.body().ok()?.statements().into_iter();
                     if let Some(AnyJsStatement::JsReturnStatement(body)) = statement.next() {
