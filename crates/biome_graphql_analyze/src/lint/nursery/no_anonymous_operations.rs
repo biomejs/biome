@@ -13,7 +13,7 @@ use crate::GraphqlRuleAction;
 declare_lint_rule! {
     /// Require specifying name for GraphQL operations.
     ///
-    /// This is useful since most GraphQL client libraries are using the operation name for caching purposes..
+    /// This is useful since most GraphQL client libraries are using the operation name for caching purposes.
     ///
     /// ## Examples
     ///
@@ -73,7 +73,7 @@ impl Rule for NoAnonymousOperations {
                 },
             )
             .note(markup! {
-                "Rename this "{state.operation_type}" to "{state.suggested_name}"."
+                "Most GraphQL client libraries use operation name for caching purposes."
             }),
         )
     }

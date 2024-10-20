@@ -21,7 +21,7 @@ invalid.graphql:1:1 lint/nursery/noAnonymousOperations  FIXABLE  ━━━━━
     2 │ mutation { ...Type }
     3 │ subscription {}
   
-  i Rename this query to Human.
+  i Most GraphQL client libraries use operation name for caching purposes.
   
   i Unsafe fix: Rename this query to Human.
   
@@ -41,7 +41,7 @@ invalid.graphql:2:1 lint/nursery/noAnonymousOperations  FIXABLE  ━━━━━
     3 │ subscription {}
     4 │ 
   
-  i Rename this mutation to Mutation.
+  i Most GraphQL client libraries use operation name for caching purposes.
   
   i Unsafe fix: Rename this mutation to Mutation.
   
@@ -61,7 +61,7 @@ invalid.graphql:3:1 lint/nursery/noAnonymousOperations  FIXABLE  ━━━━━
       │ ^^^^^^^^^^^^^^^
     4 │ 
   
-  i Rename this subscription to Subscription.
+  i Most GraphQL client libraries use operation name for caching purposes.
   
   i Unsafe fix: Rename this subscription to Subscription.
   
