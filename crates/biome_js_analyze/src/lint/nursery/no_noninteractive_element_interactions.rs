@@ -8,24 +8,41 @@ use rustc_hash::FxHashMap;
 declare_lint_rule! {
     /// Disallow use event handlers on non-interactive elements.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
+    /// Non-interactive HTML elements indicate _content_ and _containers_ in the user interface.
+    /// Non-interactive elements include `<main>`, `<area>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.
+    /// 
+    /// A Non-interactive element does not support event handlers(mouse and key handlers).
+    /// 
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// ```jsx,expect_diagnostic
+    /// <div onClick={() => {}}>button</div>
     /// ```
     ///
     /// ### Valid
     ///
-    /// ```js
-    /// // var a = 1;
+    /// ```jsx
+    /// <button onClick={() => {}}>button</button>
+    /// <div role="button" onClick={() => {}}>button</div>
+    /// <div role="presentation" onClick={() => {}}>button</div>
+    /// ```
+    /// 
+    /// ```jsx
+    /// // Hidden from screen reader.
+    /// <div onClick={() => void 0} role="button" aria-hidden />
+    /// ```
+    /// 
+    /// ```jsx
+    /// // Custom component is not checked.
+    /// <SomeComponent onClick={()=>{}}>button</SomeComponent>
+    /// ```
+    /// 
+    /// ```jsx
+    /// // Spread attributes is not supported.
+    /// <div {...{"onClick":()=>{}}}>button</div>
     /// ```
     ///
     pub NoNoninteractiveElementInteractions {
