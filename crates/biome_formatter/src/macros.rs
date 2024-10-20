@@ -329,6 +329,7 @@ macro_rules! format {
 #[macro_export]
 macro_rules! best_fitting {
     ($least_expanded:expr, $($tail:expr),+ $(,)?) => {{
+        #[allow(clippy::macro_metavars_in_unsafe)]
         unsafe {
             $crate::BestFitting::from_arguments_unchecked($crate::format_args!($least_expanded, $($tail),+))
         }
