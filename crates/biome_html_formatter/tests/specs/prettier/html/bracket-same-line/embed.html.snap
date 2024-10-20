@@ -1,0 +1,90 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/bracket-same-line/embed.html
+---
+# Input
+
+```html
+<script long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+alert(1)</script>
+<style long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+.a{color: #f00}</style>
+<script>
+alert(1)</script>
+<style>
+.a{color: #f00}</style>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,16 +1,8 @@
+-<script
+-  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+->
+-  alert(1)
+-</script>
+-<style
+-  long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value"
+->
+-  .a{color: #f00}
+-</style>
++<script long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
++alert(1)</script>
++<style long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
++.a{color: #f00}</style>
+ <script>
+-  alert(1)
+-</script>
++alert(1)</script>
+ <style>
+-  .a{color: #f00}
+-</style>
++.a{color: #f00}</style>
+```
+
+# Output
+
+```html
+<script long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+alert(1)</script>
+<style long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+.a{color: #f00}</style>
+<script>
+alert(1)</script>
+<style>
+.a{color: #f00}</style>
+```
+
+# Errors
+```
+embed.html:1:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `_`
+  
+  > 1 │ <script long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+      │             ^
+    2 │ alert(1)</script>
+    3 │ <style long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+  
+embed.html:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `_`
+  
+  > 1 │ <script long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+      │                  ^
+    2 │ alert(1)</script>
+    3 │ <style long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: <script long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+    3: <style long_long_attribute="long_long_long_long_long_long_long_long_long_long_long_value">
+```
