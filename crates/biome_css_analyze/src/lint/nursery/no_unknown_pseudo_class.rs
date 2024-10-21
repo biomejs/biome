@@ -14,7 +14,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Disallow unknown pseudo-class selectors.
@@ -169,7 +169,7 @@ impl Rule for NoUnknownPseudoClass {
             }
         };
 
-        let lower_name = name.to_lowercase_cow();
+        let lower_name = name.to_ascii_lowercase_cow();
         let lower_name = lower_name.as_ref();
 
         let is_valid_class = match pseudo_type {

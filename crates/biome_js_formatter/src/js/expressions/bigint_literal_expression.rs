@@ -4,7 +4,7 @@ use biome_formatter::write;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::JsBigintLiteralExpression;
 use biome_js_syntax::JsBigintLiteralExpressionFields;
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 use std::borrow::Cow;
 
 #[derive(Debug, Clone, Default)]
