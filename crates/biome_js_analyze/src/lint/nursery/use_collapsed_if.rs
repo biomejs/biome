@@ -3,7 +3,7 @@ use biome_analyze::{
     RuleSource,
 };
 use biome_console::markup;
-use biome_js_factory::make::{js_logical_expression, parenthesized, token};
+use biome_js_factory::make;
 use biome_js_syntax::parentheses::NeedsParentheses;
 use biome_js_syntax::{AnyJsStatement, JsIfStatement, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
@@ -64,7 +64,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseCollapsedIf {
-        version: "next",
+        version: "1.9.4",
         name: "useCollapsedIf",
         language: "js",
         sources: &[
@@ -89,9 +89,13 @@ impl Rule for UseCollapsedIf {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let if_stmt = ctx.query();
-        let consequent = if_stmt.consequent().ok()?;
 
-        let child_if_statement = match consequent {
+        // Ignore `if` with an `else` clause
+        if if_stmt.else_clause().is_some() {
+            return None;
+        }
+
+        let child_if_statement = match if_stmt.consequent().ok()? {
             // If `consequent` is a `JsBlockStatement` and the block contains only one
             // `JsIfStatement`, the child `if` statement should be merged.
             AnyJsStatement::JsBlockStatement(parent_block_statement) => {
@@ -160,19 +164,19 @@ impl Rule for UseCollapsedIf {
         if has_comments {
             return None;
         }
-
+        let operator = make::token_decorated_with_space(T![&&]);
         let mut expr =
-            js_logical_expression(parent_test.clone(), token(T![&&]), child_test.clone());
+            make::js_logical_expression(parent_test.clone(), operator, child_test.clone());
 
         // Parenthesize arms of the `&&` expression if needed
         let left = expr.left().ok()?;
         if left.needs_parentheses() {
-            expr = expr.with_left(parenthesized(left).into());
+            expr = expr.with_left(make::parenthesized(left).into());
         }
 
         let right = expr.right().ok()?;
         if right.needs_parentheses() {
-            expr = expr.with_right(parenthesized(right).into());
+            expr = expr.with_right(make::parenthesized(right).into());
         }
 
         // If the inner `if` statement has no block and the statement does not end with semicolon,

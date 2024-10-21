@@ -11,6 +11,11 @@ use biome_deserialize_macros::Deserializable;
 /// - Alternations `|`
 /// - Capturing groups `()`
 /// - Non-capturing groups `(?:)`
+/// - Non-capturing groups with flags `(?flags:)` and negated flags `(?-flags:)`
+///   Supported flags:
+///   - `i`: ignore case
+///   - `m`: multiline mode
+///   - `s`: single line mode (`.` matches also `\n`)
 /// - A limited set of escaped characters including all regex special characters
 ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`
 ///
@@ -27,12 +32,19 @@ impl Deref for RestrictedRegex {
     }
 }
 
-impl std::fmt::Display for RestrictedRegex {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl RestrictedRegex {
+    /// Returns the original string of this regex.
+    pub fn as_str(&self) -> &str {
         let repr = self.0.as_str();
         debug_assert!(repr.starts_with("^(?:"));
         debug_assert!(repr.ends_with(")$"));
-        f.write_str(&repr[4..(repr.len() - 2)])
+        &repr[4..(repr.len() - 2)]
+    }
+}
+
+impl std::fmt::Display for RestrictedRegex {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
     }
 }
 
@@ -166,10 +178,31 @@ fn is_restricted_regex(pattern: &str) -> Result<(), regex::Error> {
                         };
                     }
                     Some(b':') => {}
-                    _ => {
-                        return Err(regex::Error::Syntax(
-                            "Group flags `(?flags:)` are not supported.".to_string(),
-                        ));
+                    c => {
+                        let mut current = c;
+                        while matches!(current, Some(b'i' | b'm' | b's' | b'-')) {
+                            current = it.next()
+                        }
+                        match current {
+                            Some(b':') => {}
+                            Some(b')') => {
+                                return Err(regex::Error::Syntax(
+                                    "Group modifiers `(?flags)` are not supported.".to_string(),
+                                ));
+                            }
+                            Some(c) if c.is_ascii() => {
+                                // SAFETY: `c` is ASCII according to the guard
+                                let c = c as char;
+                                return Err(regex::Error::Syntax(format!(
+                                    "Group flags `(?{c}:)` are not supported."
+                                )));
+                            }
+                            _ => {
+                                return Err(regex::Error::Syntax(
+                                    "Unterminated non-capturing group.".to_string(),
+                                ));
+                            }
+                        }
                     }
                 },
                 _ => {}
@@ -190,7 +223,6 @@ mod tests {
         assert!(is_restricted_regex("a$").is_err());
         assert!(is_restricted_regex(r"\").is_err());
         assert!(is_restricted_regex(r"\p{L}").is_err());
-        assert!(is_restricted_regex(r"(?i:)").is_err());
         assert!(is_restricted_regex(r"(?=a)").is_err());
         assert!(is_restricted_regex(r"(?!a)").is_err());
         assert!(is_restricted_regex(r"(?<NAME>:a)").is_err());
@@ -203,6 +235,9 @@ mod tests {
         assert!(is_restricted_regex("").is_ok());
         assert!(is_restricted_regex("abc").is_ok());
         assert!(is_restricted_regex("(?:a)(.+)z").is_ok());
+        assert!(is_restricted_regex("(?ims:a)(.+)z").is_ok());
+        assert!(is_restricted_regex("(?-ims:a)(.+)z").is_ok());
+        assert!(is_restricted_regex("(?i-ms:a)(.+)z").is_ok());
         assert!(is_restricted_regex("[A-Z][^a-z]").is_ok());
         assert!(is_restricted_regex(r"\n\t\v\f").is_ok());
         assert!(is_restricted_regex("([^_])").is_ok());

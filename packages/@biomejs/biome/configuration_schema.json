@@ -1267,6 +1267,10 @@
 					"description": "Allowed cases for file names.",
 					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
 				},
+				"match": {
+					"description": "Regular expression to enforce",
+					"anyOf": [{ "$ref": "#/definitions/Regex" }, { "type": "null" }]
+				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
 					"type": "boolean"
@@ -2295,6 +2299,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noUselessUndefined": {
+					"description": "Disallow the use of useless undefined.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noValueAtRule": {
 					"description": "Disallow use of @value rule in css modules.",
 					"anyOf": [
@@ -2368,6 +2379,13 @@
 				},
 				"useExplicitType": {
 					"description": "Require explicit return types on functions and class methods.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGoogleFontDisplay": {
+					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }

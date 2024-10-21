@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub UseGuardForIn {
-        version: "next",
+        version: "1.9.4",
         name: "useGuardForIn",
         language: "js",
         sources: &[RuleSource::Eslint("guard-for-in")],

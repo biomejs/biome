@@ -38,3 +38,19 @@ if (condition) {
 		// ...
 	}
 }
+
+// Ignore `if` with an `else` clause
+if (condition) { // Comment
+	if (anotherCondition) {
+		// ...
+	}
+} else {
+	// ...
+}
+if (condition) { // Comment
+	if (anotherCondition) {
+		// ...
+	}
+} else if(condition) {
+	// ...
+}

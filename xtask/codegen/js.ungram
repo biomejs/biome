@@ -1252,7 +1252,6 @@ JsImportDefaultClause =
 // import type * as foo from "mod";
 JsImportNamespaceClause =
 	'type'?
-	'defer'?
 	namespace_specifier: JsNamespaceImportSpecifier
 	'from'
 	source: AnyJsModuleSource
@@ -2133,9 +2132,7 @@ TsMappedTypeReadonlyModifierClause =
 TsImportType =
 	'typeof'?
 	'import'
-	'('
-	argument: 'js_string_literal'
-	')'
+	arguments: JsCallArguments
 	qualifier_clause: TsImportTypeQualifier?
 	type_arguments: TsTypeArguments?
 
