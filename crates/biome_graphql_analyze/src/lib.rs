@@ -10,7 +10,7 @@ use biome_analyze::{
     MetadataRegistry, RuleAction, RuleRegistry, SuppressionKind,
 };
 use biome_diagnostics::{category, Error};
-use biome_graphql_syntax::GraphqlLanguage;
+use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxToken, TextSize};
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
 use std::sync::LazyLock;
@@ -57,9 +57,10 @@ where
     F: FnMut(&dyn AnalyzerSignal<GraphqlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-    ) -> Vec<Result<SuppressionKind, SuppressionDiagnostic>> {
+    fn parse_linter_suppression_comment<'a>(
+        text: &'a str,
+        token: &'_ GraphqlSyntaxToken,
+    ) -> Vec<Result<SuppressionKind<'a>, SuppressionDiagnostic>> {
         let mut result = Vec::new();
 
         for comment in parse_suppression_comment(text) {
@@ -73,15 +74,24 @@ where
 
             for (key, value) in categories {
                 if key == category!("lint") {
-                    if let Some(value) = value {
-                        result.push(Ok(SuppressionKind::MaybeLegacy(value)));
-                    } else {
-                        result.push(Ok(SuppressionKind::Everything));
-                    }
+                    result.push(Ok(SuppressionKind::Everything));
                 } else {
                     let category = key.name();
                     if let Some(rule) = category.strip_prefix("lint/") {
-                        result.push(Ok(SuppressionKind::Rule(rule)));
+                        let is_top_level = {
+                            let mut trivia = token.leading_trivia().pieces().rev();
+                            match (trivia.next(), trivia.next()) {
+                                (Some(a), Some(b)) => a.is_newline() && b.is_newline(),
+                                _ => false,
+                            }
+                        };
+                        if is_top_level && token.text_range().start() == TextSize::from(0) {
+                            result.push(Ok(SuppressionKind::TopLevel(rule)));
+                        } else if let Some(instance) = value {
+                            result.push(Ok(SuppressionKind::RuleInstance(rule, instance)));
+                        } else {
+                            result.push(Ok(SuppressionKind::Rule(rule)));
+                        }
                     }
                 }
             }

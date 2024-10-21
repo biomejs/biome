@@ -10,10 +10,11 @@ pub use crate::registry::visit_registry;
 use crate::suppression_action::JsonSuppressionAction;
 use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleAction, RuleRegistry, SuppressionDiagnostic, SuppressionKind,
+    MetadataRegistry, RuleAction, RuleRegistry, SuppressionKind,
 };
-use biome_diagnostics::Error;
-use biome_json_syntax::{JsonFileSource, JsonLanguage};
+use biome_diagnostics::{category, Error};
+use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonSyntaxToken, TextSize};
+use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
 use std::sync::LazyLock;
 
@@ -61,10 +62,47 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsonLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        _text: &str,
-    ) -> Vec<Result<SuppressionKind, SuppressionDiagnostic>> {
-        vec![]
+    fn parse_linter_suppression_comment<'a>(
+        text: &'a str,
+        token: &'_ JsonSyntaxToken,
+    ) -> Vec<Result<SuppressionKind<'a>, SuppressionDiagnostic>> {
+        let mut result = Vec::new();
+
+        for comment in parse_suppression_comment(text) {
+            let categories = match comment {
+                Ok(comment) => comment.categories,
+                Err(err) => {
+                    result.push(Err(err));
+                    continue;
+                }
+            };
+
+            for (key, value) in categories {
+                if key == category!("lint") {
+                    result.push(Ok(SuppressionKind::Everything));
+                } else {
+                    let category = key.name();
+                    if let Some(rule) = category.strip_prefix("lint/") {
+                        let is_top_level = {
+                            let mut trivia = token.leading_trivia().pieces().rev();
+                            match (trivia.next(), trivia.next()) {
+                                (Some(a), Some(b)) => a.is_newline() && b.is_newline(),
+                                _ => false,
+                            }
+                        };
+                        if is_top_level && token.text_range().start() == TextSize::from(0) {
+                            result.push(Ok(SuppressionKind::TopLevel(rule)));
+                        } else if let Some(instance) = value {
+                            result.push(Ok(SuppressionKind::RuleInstance(rule, instance)));
+                        } else {
+                            result.push(Ok(SuppressionKind::Rule(rule)));
+                        }
+                    }
+                }
+            }
+        }
+
+        result
     }
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_registry(&mut registry);

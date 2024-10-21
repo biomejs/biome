@@ -552,7 +552,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
     } = params;
     debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
-        trace_span!("Parsed file", tree =? tree).in_scope(move || {
+        trace_span!("Parsed file").in_scope(move || {
             let analyzer_options =
                 workspace.analyzer_options::<JsLanguage>(path, &language, suppression_reason);
             let mut actions = Vec::new();
@@ -590,6 +590,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 manifest,
                 |signal| {
                     actions.extend(signal.actions().into_code_action_iter().map(|item| {
+                        trace!("Pulled action category {:?}", item.category);
                         CodeAction {
                             category: item.category.clone(),
                             rule_name: item

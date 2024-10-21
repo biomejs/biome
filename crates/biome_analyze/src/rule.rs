@@ -890,9 +890,42 @@ pub trait Rule: RuleMeta + Sized {
         None
     }
 
+    fn top_level_suppression(
+        ctx: &RuleContext<Self>,
+        suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
+    ) -> Option<SuppressAction<RuleLanguage<Self>>>
+    where
+        Self: 'static,
+    {
+        if <Self::Group as RuleGroup>::Category::CATEGORY == RuleCategory::Lint {
+            let rule_category = format!(
+                "lint/{}/{}",
+                <Self::Group as RuleGroup>::NAME,
+                Self::METADATA.name
+            );
+            let suppression_text = format!("biome-ignore {rule_category}");
+            let root = ctx.root();
+
+            if let Some(first_token) = root.syntax().first_token() {
+                let mut mutation = root.begin();
+                suppression_action.apply_top_level_suppression(
+                    &mut mutation,
+                    first_token,
+                    suppression_text.as_str(),
+                );
+                return Some(SuppressAction {
+                    mutation,
+                    message: markup! { "Suppress rule " {rule_category} " for the whole file."}
+                        .to_owned(),
+                });
+            }
+        }
+        None
+    }
+
     /// Create a code action that allows to suppress the rule. The function
     /// returns the node to which the suppression comment is applied.
-    fn suppress(
+    fn inline_suppression(
         ctx: &RuleContext<Self>,
         text_range: &TextRange,
         suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
@@ -912,7 +945,7 @@ pub trait Rule: RuleMeta + Sized {
             let root = ctx.root();
             let token = root.syntax().token_at_offset(text_range.start());
             let mut mutation = root.begin();
-            suppression_action.apply_suppression_comment(SuppressionCommentEmitterPayload {
+            suppression_action.inline_suppression(SuppressionCommentEmitterPayload {
                 suppression_text: suppression_text.as_str(),
                 mutation: &mut mutation,
                 token_offset: token,
