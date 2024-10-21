@@ -142,6 +142,78 @@ fn is_content_editable(attributes: AttributesRef) -> bool {
     false
 }
 
+/// List of `widget` role
+/// https://www.w3.org/TR/wai-aria-1.2/#widget
+const INTERACTIVE_ROLES: &[&str] = &[
+    // https://www.w3.org/TR/wai-aria-1.2/#command
+    "button",
+    "link",
+    // https://www.w3.org/TR/wai-aria-1.2/#menuitem
+    "menuitem",
+    "menuitemcheckbox",
+    "menuitemradio",
+    // https://www.w3.org/TR/wai-aria-1.2/#composite
+    "spinbutton",
+    "tablist",
+    // https://www.w3.org/TR/wai-aria-1.2/#grid
+    "grid",
+    "treegrid",
+    // https://www.w3.org/TR/wai-aria-1.2/#select
+    "listbox",
+    "radiogroup",
+    // https://www.w3.org/TR/wai-aria-1.2/#menu
+    "menu",
+    "munubar",
+    // https://www.w3.org/TR/wai-aria-1.2/#tree
+    "tree",
+    "treegrid",
+    // https://www.w3.org/TR/wai-aria-1.2/#gridcell
+    "columnheader",
+    "rowheader",
+    // https://www.w3.org/TR/wai-aria-1.2/#input
+    "combobox",
+    "radio",
+    "slider",
+    // https://www.w3.org/TR/wai-aria-1.2/#option
+    "option",
+    "treeitem",
+    // https://www.w3.org/TR/wai-aria-1.2/#checkbox
+    "checkbox",
+    "switch",
+    // https://www.w3.org/TR/wai-aria-1.2/#textbox
+    "textbox",
+    "searchbox",
+    // https://www.w3.org/TR/wai-aria-1.2/#progressbar
+    "progressbar",
+    // https://www.w3.org/TR/wai-aria-1.2/#row
+    "row",
+    // https://www.w3.org/TR/wai-aria-1.2/#scrollbar
+    "scrollbar",
+    // https://www.w3.org/TR/wai-aria-1.2/#separator
+    "separator",
+    // https://www.w3.org/TR/wai-aria-1.2/#tab
+    "tab",
+    // This does not descend from widget, but support `aria-activedescendant`.
+    // So we treat them as widget.
+    // See https://www.w3.org/TR/wai-aria-1.2/#aria-activedescendant
+    // Ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isInteractiveRole.js
+    "toolbar",
+];
+
+/// Check if the element has interactive role
+///
+/// Ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isInteractiveRole.js
+fn is_interactive_role(attributes: AttributesRef) -> bool {
+    if let Some(attributes) = attributes {
+        if let Some(roles) = attributes.get("role") {
+            return roles
+                .iter()
+                .any(|role| INTERACTIVE_ROLES.contains(&role.as_str()));
+        }
+    }
+    false
+}
+
 impl Rule for NoNoninteractiveElementInteractions {
     type Query = Aria<AnyJsxElement>;
     type State = ();
@@ -166,6 +238,7 @@ impl Rule for NoNoninteractiveElementInteractions {
             || is_content_editable(attributes_ref)
             || has_presentation_role(attributes_ref)
             || is_hidden_from_screen_reader(element_name, attributes_ref)
+            || is_interactive_role(attributes_ref)
         {
             return None;
         }
