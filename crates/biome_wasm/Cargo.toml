@@ -24,10 +24,10 @@ experimental-html = ["biome_service/experimental-html"]
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
 biome_service      = { workspace = true }
-js-sys             = "0.3.70"
+js-sys             = "0.3.72"
 serde              = { workspace = true }
 serde-wasm-bindgen = "0.6.5"
-wasm-bindgen       = { version = "0.2.93", features = ["serde-serialize"] }
+wasm-bindgen       = { version = "0.2.95", features = ["serde-serialize"] }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

@@ -58,7 +58,7 @@ tracing-subscriber       = { workspace = true, features = ["env-filter", "json"]
 tracing-tree             = "0.4.0"
 
 [target.'cfg(unix)'.dependencies]
-libc  = "0.2.159"
+libc  = "0.2.161"
 tokio = { workspace = true, features = ["process"] }
 
 [target.'cfg(windows)'.dependencies]

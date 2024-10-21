@@ -23,7 +23,7 @@ biome_json_analyze    = { workspace = true }
 biome_json_parser     = { workspace = true }
 biome_json_syntax     = { workspace = true }
 biome_service         = { workspace = true }
-pulldown-cmark        = "0.12.1"
+pulldown-cmark        = "0.12.2"
 
 
 [lints]

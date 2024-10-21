@@ -9,7 +9,7 @@ anyhow         = { workspace = true }
 bpaf           = { workspace = true, features = ["derive"] }
 git2           = { version = "0.19.0", default-features = false }
 proc-macro2    = { workspace = true, features = ["span-locations"] }
-pulldown-cmark = { version = "0.12.1", default-features = false, optional = true }
+pulldown-cmark = { version = "0.12.2", default-features = false, optional = true }
 quote          = "1.0.36"
 serde          = { workspace = true, optional = true }
 ureq           = "2.10.1"
