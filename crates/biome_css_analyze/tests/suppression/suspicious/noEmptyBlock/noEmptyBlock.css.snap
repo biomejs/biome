@@ -86,13 +86,11 @@ noEmptyBlock.css:2:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -123,13 +121,11 @@ noEmptyBlock.css:3:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -163,13 +159,11 @@ noEmptyBlock.css:4:3 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -198,13 +192,11 @@ noEmptyBlock.css:8:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -232,13 +224,11 @@ noEmptyBlock.css:9:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -270,13 +260,11 @@ noEmptyBlock.css:10:4 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -304,13 +292,11 @@ noEmptyBlock.css:15:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -342,13 +328,11 @@ noEmptyBlock.css:16:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -376,13 +360,11 @@ noEmptyBlock.css:19:18 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -410,13 +392,11 @@ noEmptyBlock.css:22:30 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -445,13 +425,11 @@ noEmptyBlock.css:23:12 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -479,13 +457,11 @@ noEmptyBlock.css:26:20 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -518,13 +494,11 @@ noEmptyBlock.css:28:10 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -558,13 +532,11 @@ noEmptyBlock.css:38:13 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -592,13 +564,11 @@ noEmptyBlock.css:44:7 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━�
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -628,13 +598,11 @@ noEmptyBlock.css:45:14 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -662,13 +630,11 @@ noEmptyBlock.css:50:28 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```
@@ -701,13 +667,11 @@ noEmptyBlock.css:52:16 lint/suspicious/noEmptyBlock  FIXABLE  ━━━━━━
   
   i Safe fix: Suppress rule lint/suspicious/noEmptyBlock for the whole file.
   
-     1  1 │   /* CssDeclarationOrRuleBlock */
-     2    │ - a·{}
-        2 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
-        3 │ + 
-        4 │ + a··{}
-     3  5 │   a { }
-     4  6 │   a {
+     1    │ - /*·CssDeclarationOrRuleBlock·*/
+        1 │ + /**·biome-ignore·lint/suspicious/noEmptyBlock:·<explanation>·*/
+        2 │ + 
+     2  3 │   a {}
+     3  4 │   a { }
   
 
 ```

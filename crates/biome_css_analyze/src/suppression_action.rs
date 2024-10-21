@@ -22,7 +22,7 @@ impl SuppressionAction for CssSuppressionAction {
             (TriviaPieceKind::Newline, "\n"),
         ]);
 
-        mutation.replace_token_transfer_trivia(token, new_token);
+        mutation.replace_token_discard_trivia(token, new_token);
     }
 
     fn find_token_for_inline_suppression(
