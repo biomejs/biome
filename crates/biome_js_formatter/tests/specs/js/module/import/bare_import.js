@@ -1,16 +1,16 @@
 import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_";
-import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long" assert { type :   "json"}
-import "short" assert {
+import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long" with { type :   "json"}
+import "short" with {
 
         type :   "json"
 }
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
     // something good is here
     "type": /****/ "json"
         }
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
 		// something good is here
 		"type": /****/ "json",
 		"type2" /****/ : "json",
