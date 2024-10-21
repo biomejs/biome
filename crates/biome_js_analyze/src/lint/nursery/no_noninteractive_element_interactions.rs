@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// // Spread attributes is not supported.
     /// <div {...{"onClick":()=>{}}}>button</div>
     /// ```
-    /// 
+    ///
     /// ## Accessibility guidelines
     ///
     /// - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)
@@ -205,7 +205,8 @@ const INTERACTIVE_ROLES: &[&str] = &[
     // https://www.w3.org/TR/wai-aria-1.2/#scrollbar
     "scrollbar",
     // https://www.w3.org/TR/wai-aria-1.2/#separator
-    "separator",
+    // `separator` is not included because it is a `widget` only when it is focusable
+    // "separator",
     // https://www.w3.org/TR/wai-aria-1.2/#tab
     "tab",
     // This does not descend from widget, but support `aria-activedescendant`.
