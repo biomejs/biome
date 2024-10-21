@@ -3015,6 +3015,25 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseSelfClosingElementsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseSelfClosingElementsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseValidAutocompleteOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -3502,7 +3521,7 @@
 				"useSelfClosingElements": {
 					"description": "Prevent extra closing tags for components without children",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/UseSelfClosingElementsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3921,7 +3940,7 @@
 				"noPrototypeBuiltins": {
 					"description": "Disallow direct use of Object.prototype builtins.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4174,6 +4193,20 @@
 						"$ref": "#/definitions/SuggestedExtensionMapping"
 					}
 				}
+			},
+			"additionalProperties": false
+		},
+		"UseSelfClosingElementsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseSelfClosingElementsOptions" }
+			]
+		},
+		"UseSelfClosingElementsOptions": {
+			"description": "Options for the `useSelfClosingElements` rule.",
+			"type": "object",
+			"properties": {
+				"ignoreHtmlElements": { "default": false, "type": "boolean" }
 			},
 			"additionalProperties": false
 		},
