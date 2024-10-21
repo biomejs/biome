@@ -177,7 +177,7 @@ mod tests {
 
     use crate::{analyze, AnalysisFilter, ControlFlow};
 
-    #[ignore]
+    // #[ignore]
     #[test]
     fn quick_test() {
         fn markup_to_string(markup: Markup) -> String {
@@ -189,13 +189,22 @@ mod tests {
             String::from_utf8(buffer).unwrap()
         }
 
-        const SOURCE: &str = r#"import buffer from "buffer"; "#;
+        const SOURCE: &str = r#"
+        <div>
+            // Valid
+            <div role="presentation" onClick={() => {}} />
+            <button onClick={() => {}} />
+            // Invalid
+            <main onClick={() => void 0} />
+            <div role="alert" onClick={() => {}} />
+        </div>
+        "#;
 
         let parsed = parse(SOURCE, JsFileSource::tsx(), JsParserOptions::default());
-
+        dbg!(parsed.tree());
         let mut error_ranges: Vec<TextRange> = Vec::new();
         let options = AnalyzerOptions::default();
-        let rule_filter = RuleFilter::Rule("style", "useNodejsImportProtocol");
+        let rule_filter = RuleFilter::Rule("nursery", "noNoninteractiveElementInteractions");
 
         let mut dependencies = Dependencies::default();
         dependencies.add("buffer", "latest");
