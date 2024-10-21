@@ -22,6 +22,7 @@ biome_configuration   = { workspace = true, optional = true }
 biome_css_analyze     = { workspace = true, optional = true }
 biome_css_syntax      = { workspace = true, optional = true }
 biome_diagnostics     = { workspace = true, optional = true }
+biome_formatter       = { workspace = true, optional = true }
 biome_graphql_analyze = { workspace = true, optional = true }
 biome_graphql_parser  = { workspace = true, optional = true }
 biome_graphql_syntax  = { workspace = true, optional = true }
@@ -68,6 +69,7 @@ schema = [
   "biome_json_parser",
   "biome_diagnostics",
   "biome_configuration",
+  "biome_formatter",
 ]
 
 [lints]
