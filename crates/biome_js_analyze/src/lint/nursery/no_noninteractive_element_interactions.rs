@@ -177,11 +177,12 @@ const INTERACTIVE_ROLES: &[&str] = &[
     "radiogroup",
     // https://www.w3.org/TR/wai-aria-1.2/#menu
     "menu",
-    "munubar",
+    "menubar",
     // https://www.w3.org/TR/wai-aria-1.2/#tree
     "tree",
     "treegrid",
     // https://www.w3.org/TR/wai-aria-1.2/#gridcell
+    "gridcell",
     "columnheader",
     "rowheader",
     // https://www.w3.org/TR/wai-aria-1.2/#input
