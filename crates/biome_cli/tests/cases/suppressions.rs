@@ -1,11 +1,10 @@
-use bpaf::Args;
-use std::path::Path;
-
 use crate::snap_test::SnapshotPayload;
 use crate::{assert_cli_snapshot, run_cli, FORMATTED};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
 use biome_service::DynRef;
+use bpaf::Args;
+use std::path::Path;
 
 const SUPPRESS_BEFORE: &str = "(1 >= -0)";
 const SUPPRESS_AFTER: &str =
@@ -226,6 +225,44 @@ fn suppress_skip_ok() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "suppress_skip_ok",
+        fs,
+        console,
+        result,
+    ));
+}
+
+
+#[test]
+fn unused_suppression_after_top_level() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("file.js");
+    fs.insert(
+        file_path.into(),
+        *b"/**
+* biome-ignore lint/style/useConst: reason
+*/
+
+
+let foo = 2;
+/**
+* biome-ignore lint/style/useConst: reason
+*/
+let bar = 33;",
+    );
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "unused_suppression_after_top_level",
         fs,
         console,
         result,

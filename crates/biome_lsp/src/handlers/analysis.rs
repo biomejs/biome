@@ -2,7 +2,9 @@ use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
 use anyhow::{Context, Result};
-use biome_analyze::{ActionCategory, RuleCategoriesBuilder, SourceActionKind};
+use biome_analyze::{
+    ActionCategory, RuleCategoriesBuilder, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
+};
 use biome_diagnostics::Applicability;
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
@@ -167,6 +169,23 @@ pub(crate) fn code_actions(
             }
             // Filter out quickfix.biome action when lint is not supported.
             if action.category.matches("quickfix.biome") && !file_features.supports_lint() {
+                return None;
+            }
+
+            // Filter out suppressions if the linter isn't supported
+            if (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
+                || action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY))
+                && !file_features.supports_lint()
+            {
+                return None;
+            }
+
+            // Filter out the suppressions if the client is requesting a fix all signal.
+            // Fix all should apply only the safe changes.
+            if has_fix_all
+                && (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
+                    || action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY))
+            {
                 return None;
             }
 

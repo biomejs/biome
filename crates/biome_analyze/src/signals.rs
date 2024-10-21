@@ -1,15 +1,17 @@
-use crate::categories::SUPPRESSION_ACTION_CATEGORY;
+use crate::categories::{
+    SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
+};
 use crate::{
     categories::ActionCategory,
     context::RuleContext,
     registry::{RuleLanguage, RuleRoot},
     rule::Rule,
-    AnalyzerDiagnostic, AnalyzerOptions, Queryable, RuleGroup, ServiceBag, SuppressionAction,
+    AnalyzerDiagnostic, AnalyzerOptions, OtherActionCategory, Queryable, RuleGroup, ServiceBag,
+    SuppressionAction,
 };
 use biome_console::MarkupBuf;
 use biome_diagnostics::{advice::CodeSuggestionAdvice, Applicability, CodeSuggestion, Error};
 use biome_rowan::{BatchMutation, Language};
-use std::borrow::Cow;
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 use std::vec::IntoIter;
@@ -115,7 +117,15 @@ pub struct AnalyzerAction<L: Language> {
 
 impl<L: Language> AnalyzerAction<L> {
     pub fn is_suppression(&self) -> bool {
-        self.category.matches(SUPPRESSION_ACTION_CATEGORY)
+        self.is_inline_suppression() || self.is_top_level_suppression()
+    }
+
+    pub fn is_inline_suppression(&self) -> bool {
+        self.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
+    }
+
+    pub fn is_top_level_suppression(&self) -> bool {
+        self.category.matches(SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY)
     }
 }
 
@@ -390,8 +400,8 @@ where
             self.options.jsx_runtime(),
         )
         .ok();
+        let mut actions = Vec::new();
         if let Some(ctx) = ctx {
-            let mut actions = Vec::new();
             if let Some(action) = R::action(&ctx, &self.state) {
                 actions.push(AnalyzerAction {
                     rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
@@ -403,17 +413,30 @@ where
             };
             if let Some(text_range) = R::text_range(&ctx, &self.state) {
                 if let Some(suppression_action) =
-                    R::suppress(&ctx, &text_range, self.suppression_action)
+                    R::inline_suppression(&ctx, &text_range, self.suppression_action)
                 {
                     let action = AnalyzerAction {
                         rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
-                        category: ActionCategory::Other(Cow::Borrowed(SUPPRESSION_ACTION_CATEGORY)),
+                        category: ActionCategory::Other(OtherActionCategory::InlineSuppression),
                         applicability: Applicability::Always,
                         mutation: suppression_action.mutation,
                         message: suppression_action.message,
                     };
                     actions.push(action);
                 }
+            }
+
+            if let Some(suppression_action) =
+                R::top_level_suppression(&ctx, self.suppression_action)
+            {
+                let action = AnalyzerAction {
+                    rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
+                    category: ActionCategory::Other(OtherActionCategory::ToplevelSuppression),
+                    applicability: Applicability::Always,
+                    mutation: suppression_action.mutation,
+                    message: suppression_action.message,
+                };
+                actions.push(action);
             }
 
             AnalyzerActionIter::new(actions)
