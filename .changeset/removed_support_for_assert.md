@@ -4,7 +4,7 @@ cli: major
 
 # Removed support for `assert` syntax
 
-Biome now longer supports the `assert` syntax, use thew new `with` syntax instead
+Biome now longer supports the `assert` syntax, use the new `with` syntax instead:
 
 ```diff
 -import {test} from "foo.json" assert { for: "for" }
