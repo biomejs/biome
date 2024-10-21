@@ -26,7 +26,8 @@ pub use biome_diagnostics::category_concat;
 
 pub use crate::categories::{
     ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,
-    RuleCategory, SourceActionKind, SUPPRESSION_ACTION_CATEGORY,
+    RuleCategory, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
+    SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
 pub use crate::diagnostics::{AnalyzerDiagnostic, AnalyzerSuppressionDiagnostic, RuleError};
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};

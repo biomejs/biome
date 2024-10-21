@@ -22,7 +22,6 @@ pub enum RuleCategory {
 }
 
 /// Actions that suppress rules should start with this string
-pub const SUPPRESSION_ACTION_CATEGORY: &str = "quickfix.suppressRule";
 pub const SUPPRESSION_INLINE_ACTION_CATEGORY: &str = "quickfix.suppressRule.inline";
 pub const SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY: &str = "quickfix.suppressRule.topLevel";
 
