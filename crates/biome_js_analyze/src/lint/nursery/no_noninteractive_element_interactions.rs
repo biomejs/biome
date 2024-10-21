@@ -280,7 +280,7 @@ impl Rule for NoNoninteractiveElementInteractions {
                 },
             )
             .note(markup! {
-                "Consider replace semantically interactive element("<Emphasis>"<button/>"</Emphasis>","<Emphasis>"<a href/>"</Emphasis>")."
+                "Consider replace semantically interactive element like "<Emphasis>"<button/>"</Emphasis>" or "<Emphasis>"<a href/>"</Emphasis>"."
             })
         )
     }
