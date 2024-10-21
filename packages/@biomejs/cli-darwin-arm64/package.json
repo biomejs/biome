@@ -8,7 +8,7 @@
     "directory": "packages/@biomejs/biome/cli-darwin-arm64"
   },
   "engines": {
-    "node": ">=14.21.3"
+    "node": ">=20.18.0"
   },
   "homepage": "https://biomejs.dev",
   "os": [
