@@ -1,6 +1,4 @@
 use crate::prelude::*;
-use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
-
 use biome_formatter::write;
 use biome_js_syntax::TsImportType;
 use biome_js_syntax::TsImportTypeFields;
@@ -13,9 +11,7 @@ impl FormatNodeRule<TsImportType> for FormatTsImportType {
         let TsImportTypeFields {
             typeof_token,
             import_token,
-            l_paren_token,
-            argument_token,
-            r_paren_token,
+            arguments,
             qualifier_clause,
             type_arguments,
         } = node.as_fields();
@@ -28,12 +24,7 @@ impl FormatNodeRule<TsImportType> for FormatTsImportType {
             f,
             [
                 import_token.format(),
-                l_paren_token.format(),
-                FormatLiteralStringToken::new(
-                    &argument_token?,
-                    StringLiteralParentKind::Expression
-                ),
-                r_paren_token.format(),
+                arguments.format(),
                 qualifier_clause.format(),
                 type_arguments.format(),
             ]

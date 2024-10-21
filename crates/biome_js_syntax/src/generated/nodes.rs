@@ -3900,7 +3900,6 @@ impl JsImportNamespaceClause {
     pub fn as_fields(&self) -> JsImportNamespaceClauseFields {
         JsImportNamespaceClauseFields {
             type_token: self.type_token(),
-            defer_token: self.defer_token(),
             namespace_specifier: self.namespace_specifier(),
             from_token: self.from_token(),
             source: self.source(),
@@ -3910,20 +3909,17 @@ impl JsImportNamespaceClause {
     pub fn type_token(&self) -> Option<SyntaxToken> {
         support::token(&self.syntax, 0usize)
     }
-    pub fn defer_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 1usize)
-    }
     pub fn namespace_specifier(&self) -> SyntaxResult<JsNamespaceImportSpecifier> {
-        support::required_node(&self.syntax, 2usize)
+        support::required_node(&self.syntax, 1usize)
     }
     pub fn from_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
+        support::required_token(&self.syntax, 2usize)
     }
     pub fn source(&self) -> SyntaxResult<AnyJsModuleSource> {
-        support::required_node(&self.syntax, 4usize)
+        support::required_node(&self.syntax, 3usize)
     }
     pub fn assertion(&self) -> Option<JsImportAssertion> {
-        support::node(&self.syntax, 5usize)
+        support::node(&self.syntax, 4usize)
     }
 }
 impl Serialize for JsImportNamespaceClause {
@@ -3937,7 +3933,6 @@ impl Serialize for JsImportNamespaceClause {
 #[derive(Serialize)]
 pub struct JsImportNamespaceClauseFields {
     pub type_token: Option<SyntaxToken>,
-    pub defer_token: Option<SyntaxToken>,
     pub namespace_specifier: SyntaxResult<JsNamespaceImportSpecifier>,
     pub from_token: SyntaxResult<SyntaxToken>,
     pub source: SyntaxResult<AnyJsModuleSource>,
@@ -9942,9 +9937,7 @@ impl TsImportType {
         TsImportTypeFields {
             typeof_token: self.typeof_token(),
             import_token: self.import_token(),
-            l_paren_token: self.l_paren_token(),
-            argument_token: self.argument_token(),
-            r_paren_token: self.r_paren_token(),
+            arguments: self.arguments(),
             qualifier_clause: self.qualifier_clause(),
             type_arguments: self.type_arguments(),
         }
@@ -9955,20 +9948,14 @@ impl TsImportType {
     pub fn import_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn argument_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn arguments(&self) -> SyntaxResult<JsCallArguments> {
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn qualifier_clause(&self) -> Option<TsImportTypeQualifier> {
-        support::node(&self.syntax, 5usize)
+        support::node(&self.syntax, 3usize)
     }
     pub fn type_arguments(&self) -> Option<TsTypeArguments> {
-        support::node(&self.syntax, 6usize)
+        support::node(&self.syntax, 4usize)
     }
 }
 impl Serialize for TsImportType {
@@ -9983,9 +9970,7 @@ impl Serialize for TsImportType {
 pub struct TsImportTypeFields {
     pub typeof_token: Option<SyntaxToken>,
     pub import_token: SyntaxResult<SyntaxToken>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub argument_token: SyntaxResult<SyntaxToken>,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub arguments: SyntaxResult<JsCallArguments>,
     pub qualifier_clause: Option<TsImportTypeQualifier>,
     pub type_arguments: Option<TsTypeArguments>,
 }
@@ -19960,10 +19945,6 @@ impl std::fmt::Debug for JsImportNamespaceClause {
                 &support::DebugOptionalElement(self.type_token()),
             )
             .field(
-                "defer_token",
-                &support::DebugOptionalElement(self.defer_token()),
-            )
-            .field(
                 "namespace_specifier",
                 &support::DebugSyntaxResult(self.namespace_specifier()),
             )
@@ -26013,18 +25994,7 @@ impl std::fmt::Debug for TsImportType {
                 "import_token",
                 &support::DebugSyntaxResult(self.import_token()),
             )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "argument_token",
-                &support::DebugSyntaxResult(self.argument_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
+            .field("arguments", &support::DebugSyntaxResult(self.arguments()))
             .field(
                 "qualifier_clause",
                 &support::DebugOptionalElement(self.qualifier_clause()),

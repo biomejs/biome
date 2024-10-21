@@ -438,11 +438,11 @@ When releasing a new version of a Biome, follow these steps:
    This field is set to `next` for newly created rules.
    This field must be updated to the new version.
 
-1. [ ] Update the website with the new version number:
-   `BIOME_VERSION=<version> just gen-web`.
-   This will also copy the configuration schema in the right place.
-
 1. [ ] Once the PR is merged, the CI will trigger the `Release: *` workflows. Once these workflows finish compiling the final artefact, **they need to be approved manually**.
+
+1. [ ] Open a new PR in the [website repository](https://github.com/biomejs/website) to update the website with the new version number:
+   `BIOME_VERSION=<version> pnpm run codegen:all`.
+   This will also copy the configuration schema in the right place.
 
 ## Resources
 

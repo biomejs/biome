@@ -3,20 +3,15 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
+use biome_deserialize::DeserializableValidator;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, AnyJsIdentifierUsage, JsExportNamedSpecifier,
 };
 use biome_rowan::{AstNode, TextRange};
 use biome_string_case::{Case, Cases};
-use rustc_hash::FxHashSet;
-use serde::{Deserialize, Serialize};
-use std::{hash::Hash, str::FromStr};
-
-use biome_deserialize::{DeserializableValue, DeserializationDiagnostic};
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
 use smallvec::SmallVec;
+use std::{hash::Hash, str::FromStr};
 
 declare_lint_rule! {
     /// Enforce naming conventions for JavaScript and TypeScript filenames.
@@ -192,7 +187,7 @@ impl Rule for UseFilenamingConvention {
             };
             (name, split)
         };
-        let allowed_cases = options.filename_cases.cases();
+        let allowed_cases = options.filename_cases.cases;
         let allowed_extension_cases = allowed_cases | Case::Lower;
         // Check extension case
         if extensions.any(|extension| {
@@ -211,7 +206,7 @@ impl Rule for UseFilenamingConvention {
                 return None;
             }
         }
-        if options.filename_cases.0.contains(&FilenameCase::Export) {
+        if options.filename_cases.allow_export {
             // If no exported binding has the file name, then reports the filename
             ctx.model()
                 .all_exported_bindings()
@@ -249,9 +244,9 @@ impl Rule for UseFilenamingConvention {
                 }))
             },
             FileNamingConventionState::Filename => {
-                let allowed_cases = options.filename_cases.cases();
+                let allowed_cases = options.filename_cases.cases;
                 let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
-                let allowed_case_names = if options.filename_cases.0.contains(&FilenameCase::Export) {
+                let allowed_case_names = if options.filename_cases.allow_export {
                     allowed_case_names
                         .chain(["equal to the name of an export".to_string()])
                         .collect::<SmallVec<[_; 4]>>()
@@ -277,7 +272,7 @@ impl Rule for UseFilenamingConvention {
                 } else {
                     markup! {""}.to_owned()
                 };
-                if options.strict_case && options.filename_cases.0.contains(&FilenameCase::Camel) {
+                if options.strict_case && options.filename_cases.cases.contains(Case::Camel) {
                     let case_type = Case::identify(trimmed_name, false);
                     let case_strict = Case::identify(trimmed_name, true);
                     if case_type == Case::Camel && case_strict == Case::Unknown {
@@ -304,7 +299,7 @@ impl Rule for UseFilenamingConvention {
                         }
                     })
                     // Deduplicate suggestions
-                    .collect::<FxHashSet<_>>()
+                    .collect::<rustc_hash::FxHashSet<_>>()
                     .into_iter()
                     .collect::<SmallVec<[_; 3]>>()
                     .join("\n");
@@ -323,7 +318,7 @@ impl Rule for UseFilenamingConvention {
                 }))
             },
             FileNamingConventionState::Extension => {
-                let allowed_cases = options.filename_cases.cases() | Case::Lower;
+                let allowed_cases = options.filename_cases.cases | Case::Lower;
                 let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
                 let allowed_case_names = allowed_case_names.collect::<SmallVec<[_; 4]>>().join(" or ");
                 Some(RuleDiagnostic::new(
@@ -349,13 +344,13 @@ pub enum FileNamingConventionState {
 }
 
 /// Rule's options.
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[derive(Clone, Debug, serde::Deserialize, Deserializable, Eq, PartialEq, serde::Serialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct FilenamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
-    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
+    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
@@ -363,7 +358,7 @@ pub struct FilenamingConventionOptions {
     pub require_ascii: bool,
 
     /// Allowed cases for file names.
-    #[serde(default, skip_serializing_if = "is_default_filename_cases")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub filename_cases: FilenameCases,
 }
 
@@ -371,16 +366,8 @@ const fn enabled() -> bool {
     true
 }
 
-const fn is_enabled(value: &bool) -> bool {
-    *value
-}
-
 fn is_default<T: Default + Eq>(value: &T) -> bool {
     value == &T::default()
-}
-
-fn is_default_filename_cases(value: &FilenameCases) -> bool {
-    value.0.len() == 4 && !value.0.contains(&FilenameCase::Pascal)
 }
 
 impl Default for FilenamingConventionOptions {
@@ -393,60 +380,98 @@ impl Default for FilenamingConventionOptions {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-pub struct FilenameCases(FxHashSet<FilenameCase>);
-
-impl FilenameCases {
-    fn cases(&self) -> Cases {
-        self.0
-            .iter()
-            .filter_map(|case| Case::try_from(*case).ok())
-            .fold(Cases::empty(), |acc, case| acc | case)
+#[derive(
+    Clone, Copy, Debug, Deserializable, Eq, Hash, PartialEq, serde::Deserialize, serde::Serialize,
+)]
+#[serde(
+    from = "SmallVec<[FilenameCase; 5]>",
+    into = "SmallVec<[FilenameCase; 5]>"
+)]
+#[deserializable(with_validator)]
+pub struct FilenameCases {
+    cases: Cases,
+    /// `true` is the filename can be equal to the name of an export.
+    allow_export: bool,
+}
+impl From<SmallVec<[FilenameCase; 5]>> for FilenameCases {
+    fn from(values: SmallVec<[FilenameCase; 5]>) -> Self {
+        Self::from_iter(values)
     }
 }
-
 impl FromIterator<FilenameCase> for FilenameCases {
-    fn from_iter<T: IntoIterator<Item = FilenameCase>>(iter: T) -> Self {
-        Self(FxHashSet::from_iter(iter))
+    fn from_iter<T: IntoIterator<Item = FilenameCase>>(values: T) -> Self {
+        let mut result = Self {
+            cases: Cases::empty(),
+            allow_export: false,
+        };
+        for filename_case in values {
+            if let Ok(case) = Case::try_from(filename_case) {
+                result.cases |= case;
+            } else {
+                result.allow_export = true;
+            }
+        }
+        result
     }
 }
-
+impl From<FilenameCases> for SmallVec<[FilenameCase; 5]> {
+    fn from(value: FilenameCases) -> Self {
+        let maybe_export = if value.allow_export {
+            &[FilenameCase::Export][..]
+        } else {
+            &[]
+        };
+        value
+            .cases
+            .into_iter()
+            .filter_map(|case| FilenameCase::try_from(case).ok())
+            .chain(maybe_export.iter().copied())
+            .collect()
+    }
+}
+#[cfg(feature = "schemars")]
+impl schemars::JsonSchema for FilenameCases {
+    fn schema_name() -> String {
+        "FilenameCases".to_string()
+    }
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<FilenameCase>>::json_schema(gen)
+    }
+}
 impl Default for FilenameCases {
     fn default() -> Self {
-        Self(FxHashSet::from_iter([
-            FilenameCase::Camel,
-            FilenameCase::Export,
-            FilenameCase::Kebab,
-            FilenameCase::Snake,
-        ]))
+        Self {
+            cases: Case::Camel | Case::Kebab | Case::Snake,
+            allow_export: true,
+        }
     }
 }
-
-impl biome_deserialize::Deserializable for FilenameCases {
-    fn deserialize(
-        value: &impl DeserializableValue,
+impl DeserializableValidator for FilenameCases {
+    fn validate(
+        &mut self,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        let cases: FxHashSet<_> =
-            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)?;
-        if cases.is_empty() {
+        range: TextRange,
+        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
+    ) -> bool {
+        if !self.allow_export && self.cases.is_empty() {
             diagnostics.push(
-                DeserializationDiagnostic::new(markup! {
+                biome_deserialize::DeserializationDiagnostic::new(markup! {
                     ""<Emphasis>{name}</Emphasis>" cannot be an empty array."
                 })
-                .with_range(value.range()),
+                .with_range(range),
             );
-            return None;
+            false
+        } else {
+            true
         }
-        Some(Self(cases))
     }
 }
 
 /// Supported cases for file names.
-#[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, Hash, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[derive(
+    Clone, Copy, Debug, serde::Deserialize, Deserializable, Eq, Hash, PartialEq, serde::Serialize,
+)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub enum FilenameCase {
     /// camelCase
     #[serde(rename = "camelCase")]
@@ -468,7 +493,6 @@ pub enum FilenameCase {
     #[serde(rename = "snake_case")]
     Snake,
 }
-
 impl FilenameCase {
     pub const ALLOWED_VARIANTS: &'static [&'static str] = &[
         "camelCase",
@@ -478,7 +502,6 @@ impl FilenameCase {
         "snake_case",
     ];
 }
-
 impl FromStr for FilenameCase {
     type Err = &'static str;
 
@@ -493,7 +516,6 @@ impl FromStr for FilenameCase {
         }
     }
 }
-
 impl TryFrom<FilenameCase> for Case {
     type Error = &'static str;
 
@@ -504,6 +526,25 @@ impl TryFrom<FilenameCase> for Case {
             FilenameCase::Kebab => Ok(Self::Kebab),
             FilenameCase::Pascal => Ok(Self::Pascal),
             FilenameCase::Snake => Ok(Self::Snake),
+        }
+    }
+}
+impl TryFrom<Case> for FilenameCase {
+    type Error = &'static str;
+
+    fn try_from(value: Case) -> Result<Self, Self::Error> {
+        match value {
+            Case::Camel => Ok(FilenameCase::Camel),
+            Case::Kebab => Ok(FilenameCase::Kebab),
+            Case::Pascal => Ok(FilenameCase::Pascal),
+            Case::Snake => Ok(FilenameCase::Snake),
+            Case::Constant
+            | Case::Lower
+            | Case::Number
+            | Case::NumberableCapital
+            | Case::Uni
+            | Case::Upper
+            | Case::Unknown => Err("Unsupported case"),
         }
     }
 }
