@@ -5989,7 +5989,7 @@ pub struct Suspicious {
     #[doc = "Disallow direct use of Object.prototype builtins."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_prototype_builtins:
-        Option<RuleConfiguration<biome_js_analyze::options::NoPrototypeBuiltins>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::NoPrototypeBuiltins>>,
     #[doc = "Prevents React-specific JSX properties from being used."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_react_specific_props:

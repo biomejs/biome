@@ -3921,7 +3921,7 @@
 				"noPrototypeBuiltins": {
 					"description": "Disallow direct use of Object.prototype builtins.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

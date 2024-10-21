@@ -1448,6 +1448,13 @@ impl AnyJsMemberExpression {
         }
     }
 
+    pub fn is_optional_chain(&self) -> bool {
+        match self {
+            AnyJsMemberExpression::JsComputedMemberExpression(e) => e.is_optional_chain(),
+            AnyJsMemberExpression::JsStaticMemberExpression(e) => e.is_optional_chain(),
+        }
+    }
+
     /// Returns the member name of `self` if `self` is a static member or a computed member with a literal string.
     ///
     /// ## Examples
