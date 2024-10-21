@@ -310,6 +310,8 @@ pub(crate) struct RuleSignal<'phase, R: Rule> {
     services: &'phase ServiceBag,
     /// An optional action to suppress the rule.
     suppression_action: &'phase dyn SuppressionAction<Language = RuleLanguage<R>>,
+    /// An optional explanation for the suppression to be used with `--suppress` and `--reason`
+    suppression_reason: Option<&'phase str>,
     /// A list of strings that are considered "globals" inside the analyzer
     options: &'phase AnalyzerOptions,
 }
@@ -326,7 +328,7 @@ where
         suppression_action: &'phase dyn SuppressionAction<
             Language = <<R as Rule>::Query as Queryable>::Language,
         >,
-
+        suppression_reason: Option<&'phase str>,
         options: &'phase AnalyzerOptions,
     ) -> Self {
         Self {
@@ -335,6 +337,7 @@ where
             state,
             services,
             suppression_action,
+            suppression_reason,
             options,
         }
     }
@@ -357,6 +360,7 @@ where
             &options,
             preferred_quote,
             self.options.jsx_runtime(),
+            self.suppression_reason,
         )
         .ok()?;
 
@@ -388,6 +392,7 @@ where
             &options,
             self.options.preferred_quote(),
             self.options.jsx_runtime(),
+            self.suppression_reason,
         )
         .ok();
         if let Some(ctx) = ctx {
@@ -402,9 +407,12 @@ where
                 });
             };
             if let Some(text_range) = R::text_range(&ctx, &self.state) {
-                if let Some(suppression_action) =
-                    R::suppress(&ctx, &text_range, self.suppression_action)
-                {
+                if let Some(suppression_action) = R::suppress(
+                    &ctx,
+                    &text_range,
+                    self.suppression_action,
+                    self.suppression_reason,
+                ) {
                     let action = AnalyzerAction {
                         rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
                         category: ActionCategory::Other(Cow::Borrowed(SUPPRESSION_ACTION_CATEGORY)),
@@ -434,6 +442,7 @@ where
             &options,
             self.options.preferred_quote(),
             self.options.jsx_runtime(),
+            self.suppression_reason,
         )
         .ok();
         if let Some(ctx) = ctx {

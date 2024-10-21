@@ -18,6 +18,7 @@ pub struct RuleContext<'a, R: Rule> {
     options: &'a R::Options,
     preferred_quote: &'a PreferredQuote,
     jsx_runtime: Option<JsxRuntime>,
+    suppression_reason: Option<&'a str>,
 }
 
 impl<'a, R> RuleContext<'a, R>
@@ -34,6 +35,7 @@ where
         options: &'a R::Options,
         preferred_quote: &'a PreferredQuote,
         jsx_runtime: Option<JsxRuntime>,
+        suppression_reason: Option<&'a str>,
     ) -> Result<Self, Error> {
         let rule_key = RuleKey::rule::<R>();
         Ok(Self {
@@ -46,6 +48,7 @@ where
             options,
             preferred_quote,
             jsx_runtime,
+            suppression_reason,
         })
     }
 
