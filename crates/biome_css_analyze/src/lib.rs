@@ -12,7 +12,7 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
     MetadataRegistry, RuleRegistry, SuppressionKind,
 };
-use biome_css_syntax::CssLanguage;
+use biome_css_syntax::{CssLanguage, CssSyntaxToken, TextSize};
 use biome_diagnostics::{category, Error};
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
@@ -58,9 +58,10 @@ where
     F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment(
-        text: &str,
-    ) -> Vec<Result<SuppressionKind, SuppressionDiagnostic>> {
+    fn parse_linter_suppression_comment<'a>(
+        text: &'a str,
+        token: &'_ CssSyntaxToken,
+    ) -> Vec<Result<SuppressionKind<'a>, SuppressionDiagnostic>> {
         let mut result = Vec::new();
 
         for comment in parse_suppression_comment(text) {
@@ -74,15 +75,24 @@ where
 
             for (key, value) in categories {
                 if key == category!("lint") {
-                    if let Some(value) = value {
-                        result.push(Ok(SuppressionKind::MaybeLegacy(value)));
-                    } else {
-                        result.push(Ok(SuppressionKind::Everything));
-                    }
+                    result.push(Ok(SuppressionKind::Everything));
                 } else {
                     let category = key.name();
                     if let Some(rule) = category.strip_prefix("lint/") {
-                        result.push(Ok(SuppressionKind::Rule(rule)));
+                        let is_top_level = {
+                            let mut trivia = token.leading_trivia().pieces().rev();
+                            match (trivia.next(), trivia.next()) {
+                                (Some(a), Some(b)) => a.is_newline() && b.is_newline(),
+                                _ => false,
+                            }
+                        };
+                        if is_top_level && token.text_range().start() == TextSize::from(0) {
+                            result.push(Ok(SuppressionKind::TopLevel(rule)));
+                        } else if let Some(instance) = value {
+                            result.push(Ok(SuppressionKind::RuleInstance(rule, instance)));
+                        } else {
+                            result.push(Ok(SuppressionKind::Rule(rule)));
+                        }
                     }
                 }
             }
@@ -126,13 +136,15 @@ where
 
 #[cfg(test)]
 mod tests {
-    use biome_analyze::{AnalyzerOptions, Never, RuleFilter};
+    use biome_analyze::{AnalyzerOptions, Never, RuleCategoriesBuilder, RuleFilter};
     use biome_console::fmt::{Formatter, Termcolor};
     use biome_console::{markup, Markup};
     use biome_css_parser::{parse_css, CssParserOptions};
     use biome_css_syntax::TextRange;
     use biome_diagnostics::termcolor::NoColor;
-    use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic, Severity};
+    use biome_diagnostics::{
+        category, print_diagnostic_to_string, Diagnostic, DiagnosticExt, PrintDiagnostic, Severity,
+    };
     use std::slice;
 
     use crate::{analyze, AnalysisFilter, ControlFlow};
@@ -204,5 +216,145 @@ mod tests {
         );
 
         assert_eq!(error_ranges.as_slice(), &[]);
+    }
+
+    #[test]
+    fn top_level_suppression_simple() {
+        const SOURCE: &str = "
+/**
+* biome-ignore lint/suspicious/noEmptyBlock: reason
+*/
+
+#foo {}
+#bar {}
+        ";
+
+        let parsed = parse_css(SOURCE, CssParserOptions::default());
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        analyze(&parsed.tree(), filter, &options, |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let error = diag
+                    .with_file_path("dummyFile")
+                    .with_file_source_code(SOURCE);
+                let text = print_diagnostic_to_string(&error);
+                eprintln!("{text}");
+                panic!("Unexpected diagnostic");
+            }
+
+            ControlFlow::<Never>::Continue(())
+        });
+    }
+
+    #[test]
+    fn top_level_suppression_multiple() {
+        const SOURCE: &str = "
+/**
+* biome-ignore lint/suspicious/noEmptyBlock: reason
+*/
+
+/**
+* biome-ignore lint/correctness/noUnknownProperty: reason2
+*/
+
+
+#foo {}
+a {
+    colr: blue;
+}
+        ";
+
+        let parsed = parse_css(SOURCE, CssParserOptions::default());
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        analyze(&parsed.tree(), filter, &options, |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let error = diag
+                    .with_file_path("dummyFile")
+                    .with_file_source_code(SOURCE);
+                let text = print_diagnostic_to_string(&error);
+                eprintln!("{text}");
+                panic!("Unexpected diagnostic");
+            }
+
+            ControlFlow::<Never>::Continue(())
+        });
+    }
+
+    #[test]
+    fn top_level_suppression_multiple2() {
+        const SOURCE: &str = "
+/**
+* biome-ignore lint/suspicious/noEmptyBlock: reason
+* biome-ignore lint/correctness/noUnknownProperty: reason2
+*/
+
+#foo {}
+a {
+    colr: blue;
+}
+        ";
+
+        let parsed = parse_css(SOURCE, CssParserOptions::default());
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        analyze(&parsed.tree(), filter, &options, |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let error = diag
+                    .with_file_path("dummyFile")
+                    .with_file_source_code(SOURCE);
+                let text = print_diagnostic_to_string(&error);
+                eprintln!("{text}");
+                panic!("Unexpected diagnostic");
+            }
+
+            ControlFlow::<Never>::Continue(())
+        });
+    }
+
+    #[test]
+    fn top_level_suppression_with_unused() {
+        const SOURCE: &str = "
+/**
+*/
+
+#foo {}
+// biome-ignore lint/suspicious/noEmptyBlock: reason
+#bar {}
+        ";
+
+        let parsed = parse_css(SOURCE, CssParserOptions::default());
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        analyze(&parsed.tree(), filter, &options, |signal| {
+            if let Some(diag) = signal.diagnostic() {
+                let code = diag.category().unwrap();
+                if code != category!("suppressions/unused") {
+                    panic!("unexpected diagnostic {code:?}");
+                }
+            }
+
+            ControlFlow::<Never>::Continue(())
+        });
     }
 }

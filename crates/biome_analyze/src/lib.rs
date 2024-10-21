@@ -1,5 +1,6 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
+use rustc_hash::{FxHashMap, FxHashSet};
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
@@ -24,10 +25,11 @@ mod visitor;
 pub use biome_diagnostics::category_concat;
 
 pub use crate::categories::{
-    ActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder, RuleCategory,
-    SourceActionKind, SUPPRESSION_ACTION_CATEGORY,
+    ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,
+    RuleCategory, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
+    SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY,
 };
-pub use crate::diagnostics::{AnalyzerDiagnostic, RuleError, SuppressionDiagnostic};
+pub use crate::diagnostics::{AnalyzerDiagnostic, AnalyzerSuppressionDiagnostic, RuleError};
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
 pub use crate::options::{AnalyzerConfiguration, AnalyzerOptions, AnalyzerRules};
 pub use crate::query::{AddVisitor, QueryKey, QueryMatch, Queryable};
@@ -45,8 +47,7 @@ pub use crate::signals::{
 };
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
-use biome_console::markup;
-use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, DiagnosticTags};
+use biome_diagnostics::{category, Diagnostic, DiagnosticExt};
 use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextRange, TextSize,
     TokenAtOffset, TriviaPieceKind, WalkEvent,
@@ -67,7 +68,7 @@ pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     /// Executor for the query matches emitted by the visitors
     query_matcher: Matcher,
     /// Language-specific suppression comment parsing function
-    parse_suppression_comment: SuppressionParser<Diag>,
+    parse_suppression_comment: SuppressionParser<L, Diag>,
     /// Language-specific suppression comment emitter
     suppression_action: Box<dyn SuppressionAction<Language = L>>,
     /// Handles analyzer signals emitted by individual rules
@@ -92,7 +93,7 @@ where
     pub fn new(
         metadata: &'analyzer MetadataRegistry,
         query_matcher: Matcher,
-        parse_suppression_comment: SuppressionParser<Diag>,
+        parse_suppression_comment: SuppressionParser<L, Diag>,
         suppression_action: Box<dyn SuppressionAction<Language = L>>,
         emit_signal: SignalHandler<'analyzer, L, Break>,
     ) -> Self {
@@ -127,6 +128,7 @@ where
 
         let mut line_index = 0;
         let mut line_suppressions = Vec::new();
+        let mut top_level_suppressions = TopLevelSuppressions::default();
 
         for (index, (phase, mut visitors)) in phases.into_iter().enumerate() {
             let runner = PhaseRunner {
@@ -144,6 +146,7 @@ where
                 range: ctx.range,
                 suppression_action: suppression_action.as_ref(),
                 options: ctx.options,
+                top_level_suppressions: &mut top_level_suppressions,
             };
 
             // The first phase being run will inspect the tokens and parse the
@@ -176,11 +179,22 @@ where
             }
 
             let signal = DiagnosticSignal::new(|| {
-                SuppressionDiagnostic::new(
+                if suppression.already_suppressed {
+                    AnalyzerSuppressionDiagnostic::new(
+                        category!("suppressions/unused"),
+                        suppression.comment_span,
+                        "Suppression comment has no effect because another suppression comment suppresses the same rule.",
+                    ).note(
+                        "This is the suppression comment that was used.",
+                        top_level_suppressions.range.unwrap_or_default()
+                    )
+                } else {
+                    AnalyzerSuppressionDiagnostic::new(
                     category!("suppressions/unused"),
                     suppression.comment_span,
                     "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
                 )
+                }
             });
 
             if let ControlFlow::Break(br) = (emit_signal)(&signal) {
@@ -205,7 +219,7 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     /// Queue for pending analyzer signals
     signal_queue: BinaryHeap<SignalEntry<'phase, L>>,
     /// Language-specific suppression comment parsing function
-    parse_suppression_comment: SuppressionParser<Diag>,
+    parse_suppression_comment: SuppressionParser<L, Diag>,
     /// Language-specific suppression comment emitter
     suppression_action: &'phase dyn SuppressionAction<Language = L>,
     /// Line index at the current position of the traversal
@@ -222,6 +236,36 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     range: Option<TextRange>,
     /// Analyzer options
     options: &'phase AnalyzerOptions,
+
+    top_level_suppressions: &'phase mut TopLevelSuppressions,
+}
+
+#[derive(Debug, Default)]
+struct TopLevelSuppressions {
+    filters: FxHashSet<RuleFilter<'static>>,
+    range: Option<TextRange>,
+}
+
+impl TopLevelSuppressions {
+    pub(crate) fn insert(&mut self, filter: RuleFilter<'static>) {
+        self.filters.insert(filter);
+    }
+
+    pub(crate) fn suppressed_rule(&self, filter: &RuleKey) -> bool {
+        self.filters.iter().any(|f| f == filter)
+    }
+
+    pub(crate) fn expand_range(&mut self, range: TextRange) {
+        if let Some(current_range) = self.range.as_mut() {
+            current_range.cover(range);
+        } else {
+            self.range = Some(range);
+        }
+    }
+
+    pub(crate) fn has_filter(&self, filter: &RuleFilter) -> bool {
+        self.filters.contains(filter)
+    }
 }
 
 /// Single entry for a suppression comment in the `line_suppressions` buffer
@@ -238,12 +282,14 @@ struct LineSuppression {
     suppress_all: bool,
     /// List of all the rules this comment has started suppressing (must be
     /// removed from the suppressed set on expiration)
-    suppressed_rules: Vec<RuleFilter<'static>>,
+    suppressed_rules: FxHashSet<RuleFilter<'static>>,
     /// List of all the rule instances this comment has started suppressing.
-    suppressed_instances: Vec<(RuleFilter<'static>, String)>,
+    suppressed_instances: FxHashMap<String, RuleFilter<'static>>,
     /// Set to `true` when a signal matching this suppression was emitted and
     /// suppressed
     did_suppress_signal: bool,
+    /// Set to `true` when this line suppresses a signal that was already suppressed by another entity e.g. top-level suppression
+    already_suppressed: bool,
 }
 
 impl<'a, 'phase, L, Matcher, Break, Diag> PhaseRunner<'a, 'phase, L, Matcher, Break, Diag>
@@ -373,6 +419,11 @@ where
                 }
             }
 
+            if self.top_level_suppressions.suppressed_rule(&entry.rule) {
+                self.signal_queue.pop();
+                break;
+            }
+
             // Search for an active suppression comment covering the range of
             // this signal: first try to load the last line suppression and see
             // if it matches the current line index, otherwise perform a binary
@@ -421,11 +472,11 @@ where
                     suppression
                         .suppressed_instances
                         .iter()
-                        .any(|(filter, v)| *filter == entry.rule && v == value.as_ref())
+                        .any(|(v, filter)| *filter == entry.rule && v == value.as_ref())
                 })
             });
 
-            // If the signal is being suppressed mark the line suppression as
+            // If the signal is being suppressed, mark the line suppression as
             // hit, otherwise emit the signal
             if let Some(suppression) = suppression {
                 suppression.did_suppress_signal = true;
@@ -445,17 +496,18 @@ where
     fn handle_comment(
         &mut self,
         token: &SyntaxToken<L>,
-        is_leading: bool,
-        index: usize,
+        _is_leading: bool,
+        _index: usize,
         text: &str,
         range: TextRange,
     ) -> ControlFlow<Break> {
         let mut suppress_all = false;
-        let mut suppressed_rules = Vec::new();
-        let mut suppressed_instances = Vec::new();
-        let mut has_legacy = false;
+        let mut suppressed_rules = FxHashSet::default();
+        let mut suppressed_instances = FxHashMap::default();
+        let mut is_top_level_suppression = false;
+        let mut already_suppressed = false;
 
-        for result in (self.parse_suppression_comment)(text) {
+        for result in (self.parse_suppression_comment)(text, token) {
             let kind = match result {
                 Ok(kind) => kind,
                 Err(diag) => {
@@ -475,8 +527,10 @@ where
                 SuppressionKind::Everything => (None, None),
                 SuppressionKind::Rule(rule) => (Some(rule), None),
                 SuppressionKind::RuleInstance(rule, instance) => (Some(rule), Some(instance)),
-                SuppressionKind::MaybeLegacy(rule) => (Some(rule), None),
+                SuppressionKind::TopLevel(rule) => (Some(rule), None),
             };
+
+            is_top_level_suppression |= kind.is_top_level();
 
             if let Some(rule) = rule {
                 let group_rule = rule.split_once('/');
@@ -489,15 +543,28 @@ where
                 };
 
                 match (key, instance) {
-                    (Some(key), Some(value)) => suppressed_instances.push((key, value.to_owned())),
+                    (Some(key), Some(value)) => {
+                        suppressed_instances.insert(value.to_owned(), key);
+                        if kind.is_top_level() {
+                            self.top_level_suppressions.insert(key);
+                        }
+                        if self.top_level_suppressions.has_filter(&key) {
+                            already_suppressed = true
+                        }
+                    }
                     (Some(key), None) => {
-                        suppressed_rules.push(key);
-                        has_legacy |= matches!(kind, SuppressionKind::MaybeLegacy(_));
+                        if kind.is_top_level() {
+                            self.top_level_suppressions.insert(key);
+                        }
+                        if self.top_level_suppressions.has_filter(&key) {
+                            already_suppressed = true
+                        }
+                        suppressed_rules.insert(key);
                     }
                     _ if range_match(self.range, range) => {
                         // Emit a warning for the unknown rule
                         let signal = DiagnosticSignal::new(move || match group_rule {
-                            Some((group, rule)) => SuppressionDiagnostic::new(
+                            Some((group, rule)) => AnalyzerSuppressionDiagnostic::new(
                                 category!("suppressions/unknownRule"),
                                 range,
                                 format_args!(
@@ -505,7 +572,7 @@ where
                                 ),
                             ),
 
-                            None => SuppressionDiagnostic::new(
+                            None => AnalyzerSuppressionDiagnostic::new(
                                 category!("suppressions/unknownGroup"),
                                 range,
                                 format_args!(
@@ -527,21 +594,9 @@ where
             }
         }
 
-        // Emit a warning for legacy suppression syntax
-        if has_legacy && range_match(self.range, range) {
-            let signal = DiagnosticSignal::new(move || {
-                SuppressionDiagnostic::new(
-                    category!("suppressions/deprecatedSuppressionComment"),
-                    range,
-                    "Suppression is using a deprecated syntax",
-                )
-                .with_tags(DiagnosticTags::DEPRECATED_CODE)
-            });
-
-            let signal = signal
-                .with_action(|| update_suppression(self.root, token, is_leading, index, text));
-
-            (self.emit_signal)(&signal)?;
+        if is_top_level_suppression {
+            self.top_level_suppressions.expand_range(range);
+            return ControlFlow::Continue(());
         }
 
         if !suppress_all && suppressed_rules.is_empty() && suppressed_instances.is_empty() {
@@ -581,6 +636,7 @@ where
             suppressed_rules,
             suppressed_instances,
             did_suppress_signal: false,
+            already_suppressed,
         };
 
         self.line_suppressions.push(entry);
@@ -624,8 +680,12 @@ fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
 
 /// Signature for a suppression comment parser function
 ///
-/// This function receives the text content of a comment and returns a list of
-/// lint suppressions as an optional lint rule (if the lint rule is `None` the
+/// This function receives two parameters:
+/// 1. The text content of a comment.
+/// 2. The range of the token the comment belongs too. The range is calculated from [SyntaxToken::text_range], so the range
+///    includes all trivia.
+///
+/// It returns the lint suppressions as an optional lint rule (if the lint rule is `None` the
 /// comment is interpreted as suppressing all lints)
 ///
 /// # Examples
@@ -635,75 +695,27 @@ fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
 /// - `// biome-ignore lint/style/useWhile` -> `vec![Rule("style/useWhile")]`
 /// - `// biome-ignore lint/style/useWhile(foo)` -> `vec![RuleWithValue("style/useWhile", "foo")]`
 /// - `// biome-ignore lint/style/useWhile lint/nursery/noUnreachable` -> `vec![Rule("style/useWhile"), Rule("nursery/noUnreachable")]`
-/// - `// biome-ignore lint(style/useWhile)` -> `vec![MaybeLegacy("style/useWhile")]`
-/// - `// biome-ignore lint(style/useWhile) lint(nursery/noUnreachable)` -> `vec![MaybeLegacy("style/useWhile"), MaybeLegacy("nursery/noUnreachable")]`
-type SuppressionParser<D> = fn(&str) -> Vec<Result<SuppressionKind, D>>;
+/// - `/** biome-ignore lint/style/useWhile */` if the comment is top-level -> `vec![TopLevel("style/useWhile")]`
+type SuppressionParser<L, D> =
+    for<'a> fn(&'a str, &'a SyntaxToken<L>) -> Vec<Result<SuppressionKind<'a>, D>>;
 
+#[derive(Debug, Clone)]
 /// This enum is used to categorize what is disabled by a suppression comment and with what syntax
 pub enum SuppressionKind<'a> {
+    // TODO: docs
+    TopLevel(&'a str),
     /// A suppression disabling all lints eg. `// biome-ignore lint`
     Everything,
     /// A suppression disabling a specific rule eg. `// biome-ignore lint/style/useWhile`
     Rule(&'a str),
     /// A suppression to be evaluated by a specific rule eg. `// biome-ignore lint/correctness/useExhaustiveDependencies(foo)`
     RuleInstance(&'a str, &'a str),
-    /// A suppression using the legacy syntax to disable a specific rule eg. `// biome-ignore lint(style/useWhile)`
-    MaybeLegacy(&'a str),
 }
 
-fn update_suppression<L: Language>(
-    root: &L::Root,
-    token: &SyntaxToken<L>,
-    is_leading: bool,
-    index: usize,
-    text: &str,
-) -> Option<AnalyzerAction<L>> {
-    let old_token = token.clone();
-    let new_token = token.clone().detach();
-
-    let old_trivia = if is_leading {
-        old_token.leading_trivia()
-    } else {
-        old_token.trailing_trivia()
-    };
-
-    let old_trivia: Vec<_> = old_trivia.pieces().collect();
-
-    let mut text = text.to_string();
-
-    while let Some(range_start) = text.find("lint(") {
-        let range_end = range_start + text[range_start..].find(')')?;
-        text.replace_range(range_end..range_end + 1, "");
-        text.replace_range(range_start + 4..range_start + 5, "/");
+impl<'a> SuppressionKind<'a> {
+    pub const fn is_top_level(&self) -> bool {
+        matches!(self, SuppressionKind::TopLevel(_))
     }
-
-    let new_trivia = old_trivia.iter().enumerate().map(|(piece_index, piece)| {
-        if piece_index == index {
-            (piece.kind(), text.as_str())
-        } else {
-            (piece.kind(), piece.text())
-        }
-    });
-
-    let new_token = if is_leading {
-        new_token.with_leading_trivia(new_trivia)
-    } else {
-        new_token.with_trailing_trivia(new_trivia)
-    };
-
-    let mut mutation = BatchMutation::new(root.syntax().clone());
-    mutation.replace_token_discard_trivia(old_token, new_token);
-
-    Some(AnalyzerAction {
-        rule_name: None,
-        category: ActionCategory::QuickFix,
-        applicability: Applicability::Always,
-        message: markup! {
-            "Rewrite suppression to use the newer syntax"
-        }
-        .to_owned(),
-        mutation,
-    })
 }
 
 /// Payload received by the function responsible to mark a suppression comment

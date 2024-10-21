@@ -50,7 +50,25 @@ pub struct JsSuppressionAction;
 impl SuppressionAction for JsSuppressionAction {
     type Language = JsLanguage;
 
-    fn find_token_to_apply_suppression(
+    fn apply_top_level_suppression(
+        &self,
+        mutation: &mut BatchMutation<Self::Language>,
+        token: JsSyntaxToken,
+        suppression_text: &str,
+    ) {
+        let new_token = token.with_leading_trivia([
+            (
+                TriviaPieceKind::SingleLineComment,
+                format!("/** {suppression_text}: <explanation> */").as_str(),
+            ),
+            (TriviaPieceKind::Newline, "\n"),
+            (TriviaPieceKind::Newline, "\n"),
+        ]);
+
+        mutation.replace_token_discard_trivia(token, new_token);
+    }
+
+    fn find_token_for_inline_suppression(
         &self,
         token: JsSyntaxToken,
     ) -> Option<ApplySuppression<Self::Language>> {
@@ -124,7 +142,7 @@ impl SuppressionAction for JsSuppressionAction {
     /// - JS templates are an exception to the rule. JS templates might contain expressions inside their
     ///     content, and those expressions can contain diagnostics. The function uses the token `${` as boundary
     ///     and tries to place the suppression comment after it;
-    fn apply_suppression(
+    fn apply_inline_suppression(
         &self,
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
@@ -156,7 +174,7 @@ impl SuppressionAction for JsSuppressionAction {
                 let jsx_comment = jsx_expression_child(
                     token(T!['{']).with_trailing_trivia([(
                         TriviaPieceKind::SingleLineComment,
-                        format!("/* {suppression_text}: <explanation> */").as_str(),
+                        format!("/** {suppression_text}: <explanation> */").as_str(),
                     )]),
                     token(T!['}']),
                 )

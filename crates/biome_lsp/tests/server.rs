@@ -955,22 +955,72 @@ async fn pull_quick_fixes() -> Result<()> {
         }],
     );
 
-    let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
-        title: String::from("Suppress rule lint/suspicious/noCompareNegZero"),
-        kind: Some(lsp::CodeActionKind::new("quickfix.suppressRule.biome")),
-        diagnostics: Some(vec![fixable_diagnostic(0)?]),
-        edit: Some(lsp::WorkspaceEdit {
-            changes: Some(suppression_changes),
-            document_changes: None,
-            change_annotations: None,
-        }),
-        command: None,
-        is_preferred: None,
-        disabled: None,
-        data: None,
-    });
+    let expected_inline_suppression_action =
+        lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+            title: String::from("Suppress rule lint/suspicious/noCompareNegZero"),
+            kind: Some(lsp::CodeActionKind::new(
+                "quickfix.suppressRule.inline.biome",
+            )),
+            diagnostics: Some(vec![fixable_diagnostic(0)?]),
+            edit: Some(lsp::WorkspaceEdit {
+                changes: Some(suppression_changes),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        });
 
-    assert_eq!(res, vec![expected_suppression_action, expected_code_action]);
+    let mut top_level_changes = HashMap::default();
+    top_level_changes.insert(
+        url!("document.js"),
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 0,
+                },
+                end: Position {
+                    line: 0,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                "/** biome-ignore lint/suspicious/noCompareNegZero: <explanation> */\n\n",
+            ),
+        }],
+    );
+
+    let expected_top_level_suppression_action =
+        lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+            title: String::from(
+                "Suppress rule lint/suspicious/noCompareNegZero for the whole file.",
+            ),
+            kind: Some(lsp::CodeActionKind::new(
+                "quickfix.suppressRule.topLevel.biome",
+            )),
+            diagnostics: Some(vec![fixable_diagnostic(0)?]),
+            edit: Some(lsp::WorkspaceEdit {
+                changes: Some(top_level_changes),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        });
+
+    assert_eq!(
+        res,
+        vec![
+            expected_top_level_suppression_action,
+            expected_inline_suppression_action,
+            expected_code_action
+        ]
+    );
 
     server.close_document().await?;
 
@@ -1279,24 +1329,69 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
         }],
     );
 
-    let expected_suppression_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
-        title: String::from("Suppress rule lint/suspicious/noDoubleEquals"),
-        kind: Some(lsp::CodeActionKind::new("quickfix.suppressRule.biome")),
-        diagnostics: Some(vec![unsafe_fixable]),
-        edit: Some(lsp::WorkspaceEdit {
-            changes: Some(suppression_changes),
-            document_changes: None,
-            change_annotations: None,
-        }),
-        command: None,
-        is_preferred: None,
-        disabled: None,
-        data: None,
-    });
+    let expected_inline_suppression_action =
+        lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+            title: String::from("Suppress rule lint/suspicious/noDoubleEquals"),
+            kind: Some(lsp::CodeActionKind::new(
+                "quickfix.suppressRule.inline.biome",
+            )),
+            diagnostics: Some(vec![unsafe_fixable.clone()]),
+            edit: Some(lsp::WorkspaceEdit {
+                changes: Some(suppression_changes),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        });
+
+    let mut top_level_changes = HashMap::default();
+    top_level_changes.insert(
+        url!("document.js"),
+        vec![TextEdit {
+            range: Range {
+                start: Position {
+                    line: 0,
+                    character: 0,
+                },
+                end: Position {
+                    line: 0,
+                    character: 0,
+                },
+            },
+            new_text: String::from(
+                "/** biome-ignore lint/suspicious/noDoubleEquals: <explanation> */\n\n",
+            ),
+        }],
+    );
+
+    let expected_toplevel_suppression_action =
+        lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+            title: String::from("Suppress rule lint/suspicious/noDoubleEquals for the whole file."),
+            kind: Some(lsp::CodeActionKind::new(
+                "quickfix.suppressRule.topLevel.biome",
+            )),
+            diagnostics: Some(vec![unsafe_fixable]),
+            edit: Some(lsp::WorkspaceEdit {
+                changes: Some(top_level_changes),
+                document_changes: None,
+                change_annotations: None,
+            }),
+            command: None,
+            is_preferred: None,
+            disabled: None,
+            data: None,
+        });
 
     assert_eq!(
         res,
-        vec![expected_suppression_action, expected_code_action,]
+        vec![
+            expected_toplevel_suppression_action,
+            expected_inline_suppression_action,
+            expected_code_action,
+        ]
     );
 
     server.close_document().await?;
