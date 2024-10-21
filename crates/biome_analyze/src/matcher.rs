@@ -349,9 +349,10 @@ mod tests {
             ControlFlow::Continue(())
         };
 
-        fn parse_suppression_comment(
-            comment: &'_ str,
-        ) -> Vec<Result<SuppressionKind<'_>, Infallible>> {
+        fn parse_suppression_comment<'a>(
+            comment: &'a str,
+            _token: &'_ SyntaxToken<RawLanguage>,
+        ) -> Vec<Result<SuppressionKind<'a>, Infallible>> {
             comment
                 .trim_start_matches("//")
                 .split(' ')
@@ -368,18 +369,27 @@ mod tests {
         impl SuppressionAction for TestAction {
             type Language = RawLanguage;
 
-            fn find_token_to_apply_suppression(
+            fn find_token_for_inline_suppression(
                 &self,
                 _: SyntaxToken<Self::Language>,
             ) -> Option<ApplySuppression<Self::Language>> {
                 None
             }
 
-            fn apply_suppression(
+            fn apply_inline_suppression(
                 &self,
                 _: &mut BatchMutation<Self::Language>,
                 _: ApplySuppression<Self::Language>,
                 _: &str,
+                _: &str,
+            ) {
+                unreachable!("")
+            }
+
+            fn apply_top_level_suppression(
+                &self,
+                _: &mut BatchMutation<Self::Language>,
+                _: SyntaxToken<Self::Language>,
                 _: &str,
             ) {
                 unreachable!("")

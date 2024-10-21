@@ -22,7 +22,8 @@ pub enum RuleCategory {
 }
 
 /// Actions that suppress rules should start with this string
-pub const SUPPRESSION_ACTION_CATEGORY: &str = "quickfix.suppressRule";
+pub const SUPPRESSION_INLINE_ACTION_CATEGORY: &str = "quickfix.suppressRule.inline";
+pub const SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY: &str = "quickfix.suppressRule.topLevel";
 
 /// The category of a code action, this type maps directly to the
 /// [CodeActionKind] type in the Language Server Protocol specification
@@ -48,7 +49,21 @@ pub enum ActionCategory {
     Source(SourceActionKind),
     /// This action is using a base kind not covered by any of the previous
     /// variants
-    Other(Cow<'static, str>),
+    Other(OtherActionCategory),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+)]
+pub enum OtherActionCategory {
+    /// Base kind for inline suppressions actions: `quickfix.suppressRule.inline.biome`
+    InlineSuppression,
+    /// Base kind for inline suppressions actions: `quickfix.suppressRule.topLevel.biome`
+    ToplevelSuppression,
+    /// Generic action that can't be mapped
+    Generic(Cow<'static, str>),
 }
 
 impl ActionCategory {
@@ -58,7 +73,7 @@ impl ActionCategory {
     ///
     /// ```
     /// use std::borrow::Cow;
-    /// use biome_analyze::{ActionCategory, RefactorKind};
+    /// use biome_analyze::{ActionCategory, RefactorKind, OtherActionCategory};
     ///
     /// assert!(ActionCategory::QuickFix(Cow::from("quickfix")).matches("quickfix"));
     ///
@@ -67,6 +82,9 @@ impl ActionCategory {
     ///
     /// assert!(ActionCategory::Refactor(RefactorKind::Extract).matches("refactor"));
     /// assert!(ActionCategory::Refactor(RefactorKind::Extract).matches("refactor.extract"));
+    ///
+    /// assert!(ActionCategory::Other(OtherActionCategory::InlineSuppression).matches("quickfix.suppressRule.inline.biome"));
+    /// assert!(ActionCategory::Other(OtherActionCategory::ToplevelSuppression).matches("quickfix.suppressRule.topLevel.biome"));
     /// ```
     pub fn matches(&self, filter: &str) -> bool {
         self.to_str().starts_with(filter)
@@ -108,7 +126,15 @@ impl ActionCategory {
                 Cow::Owned(format!("source.{tag}.biome"))
             }
 
-            ActionCategory::Other(tag) => Cow::Owned(format!("{tag}.biome")),
+            ActionCategory::Other(other_action) => match other_action {
+                OtherActionCategory::InlineSuppression => {
+                    Cow::Borrowed("quickfix.suppressRule.inline.biome")
+                }
+                OtherActionCategory::ToplevelSuppression => {
+                    Cow::Borrowed("quickfix.suppressRule.topLevel.biome")
+                }
+                OtherActionCategory::Generic(tag) => Cow::Owned(format!("{tag}.biome")),
+            },
         }
     }
 }

@@ -4,7 +4,7 @@ use biome_rowan::{BatchMutation, Language, SyntaxToken, TextRange, TokenAtOffset
 pub trait SuppressionAction {
     type Language: Language;
 
-    fn apply_suppression_comment(&self, payload: SuppressionCommentEmitterPayload<Self::Language>) {
+    fn inline_suppression(&self, payload: SuppressionCommentEmitterPayload<Self::Language>) {
         let SuppressionCommentEmitterPayload {
             token_offset,
             mutation,
@@ -19,11 +19,11 @@ pub trait SuppressionAction {
         // considering that our suppression system works via lines, we need to look for the first newline,
         // so we can place the comment there
         let apply_suppression = original_token.as_ref().and_then(|original_token| {
-            self.find_token_to_apply_suppression(original_token.clone())
+            self.find_token_for_inline_suppression(original_token.clone())
         });
 
         if let Some(apply_suppression) = apply_suppression {
-            self.apply_suppression(
+            self.apply_inline_suppression(
                 mutation,
                 apply_suppression,
                 suppression_text,
@@ -68,17 +68,24 @@ pub trait SuppressionAction {
         }
     }
 
-    fn find_token_to_apply_suppression(
+    fn find_token_for_inline_suppression(
         &self,
         original_token: SyntaxToken<Self::Language>,
     ) -> Option<ApplySuppression<Self::Language>>;
 
-    fn apply_suppression(
+    fn apply_inline_suppression(
         &self,
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
         suppression_reason: &str,
+    );
+
+    fn apply_top_level_suppression(
+        &self,
+        mutation: &mut BatchMutation<Self::Language>,
+        token: SyntaxToken<Self::Language>,
+        suppression_text: &str,
     );
 }
 

@@ -887,6 +887,7 @@ dependencies = [
  "biome_json_parser",
  "biome_json_syntax",
  "biome_rowan",
+ "biome_suppression",
  "biome_test_utils",
  "insta",
  "natord",
@@ -1248,7 +1249,7 @@ version = "0.5.7"
 
 [[package]]
 name = "biome_wasm"
-version = "1.9.3"
+version = "1.9.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
