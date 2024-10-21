@@ -189,7 +189,7 @@ quickcheck_macros  = "1.0.0"
 quote              = "1.0.37"
 rayon              = "1.10.0"
 regex              = "1.11.0"
-rustc-hash         = "1.1.0"
+rustc-hash         = "2.0.0"
 schemars           = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
 serde              = { version = "1.0.210", features = ["derive"] }
 serde_ini          = "0.2.0"
