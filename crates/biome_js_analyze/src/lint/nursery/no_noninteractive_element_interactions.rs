@@ -97,7 +97,13 @@ const INTERACTIVE_HANDLERS: &[&str] = &[
     "onMouseMove",
     "onMouseOut",
     "onMouseOver",
-    "onMouseUp",
+    "onKeyDown",
+    "onKeyPress",
+    "onKeyUp",
+    "onFocus",
+    "onBlur",
+    "onLoad",
+    "onError",
 ];
 
 type AttributesRef<'a> = Option<&'a FxHashMap<String, Vec<String>>>;
