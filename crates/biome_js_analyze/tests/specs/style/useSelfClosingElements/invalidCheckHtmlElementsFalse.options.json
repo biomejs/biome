@@ -1,0 +1,14 @@
+{
+	"linter": {
+		"rules": {
+			"style": {
+				"useSelfClosingElements": {
+					"level": "error",
+					"options": {
+						"ignoreHtmlElements": true
+					}
+				}
+			}
+		}
+	}
+}

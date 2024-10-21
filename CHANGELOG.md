@@ -336,6 +336,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#3924](https://github.com/biomejs/biome/issues/3924) where GraphQL formatter panics in block comments with empty line. Contributed by @vohoanglong0107
+- Fix [#3364](https://github.com/biomejs/biome/issues/3364) where the `useSelfClosingElements` rule forces the `script` tag to be self-closing. Previously, this rule applies to all elements and cannot be disabled for native HTML elements.
+
+  Now, this rule accepts a `ignoreHtmlElements` option, which when set to `true`, ignores native HTML elements and allows them to be non-self-closing.
+  
+  Contributed by @abidjappie
 
 - Fix a case where raw values inside `url()` functions weren't properly trimmed.
   ```diff
