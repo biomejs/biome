@@ -274,6 +274,7 @@ impl ServiceLanguage for JsLanguage {
             globals,
             preferred_quote,
             jsx_runtime,
+            suppression_reason: Some("Ignored using `--suppress`".to_string()),
         };
 
         AnalyzerOptions {
