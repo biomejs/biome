@@ -24,6 +24,7 @@ pub(crate) struct LintCommandPayload {
     pub(crate) write: bool,
     pub(crate) fix: bool,
     pub(crate) unsafe_: bool,
+    pub(crate) suppress: bool,
     pub(crate) linter_configuration: Option<PartialLinterConfiguration>,
     pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
@@ -136,6 +137,7 @@ impl CommandRunner for LintCommandPayload {
                 write: self.write,
                 fix: self.fix,
                 unsafe_: self.unsafe_,
+                suppress: self.suppress,
             },
             console,
         )?;
@@ -145,6 +147,7 @@ impl CommandRunner for LintCommandPayload {
             only: self.only.clone(),
             skip: self.skip.clone(),
             vcs_targeted: (self.staged, self.changed).into(),
+            suppress: self.suppress,
         })
         .set_report(cli_options))
     }

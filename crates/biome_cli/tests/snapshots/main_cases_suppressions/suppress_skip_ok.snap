@@ -1,0 +1,16 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 423
+expression: content
+---
+## `fix.js`
+
+```js
+(1 >= -0)
+```
+
+# Emitted Messages
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+```
