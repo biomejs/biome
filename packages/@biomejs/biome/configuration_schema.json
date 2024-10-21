@@ -1267,6 +1267,10 @@
 					"description": "Allowed cases for file names.",
 					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
 				},
+				"match": {
+					"description": "Regular expression to enforce",
+					"anyOf": [{ "$ref": "#/definitions/Regex" }, { "type": "null" }]
+				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
 					"type": "boolean"
