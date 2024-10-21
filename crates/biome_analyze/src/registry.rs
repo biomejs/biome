@@ -410,7 +410,6 @@ impl<L: Language + Default> RegistryRule<L> {
                 &options,
                 preferred_quote,
                 jsx_runtime,
-                params.options.suppression_reason(),
             ) {
                 Ok(ctx) => ctx,
                 Err(error) => return Err(error),

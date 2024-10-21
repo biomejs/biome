@@ -360,7 +360,6 @@ where
             &options,
             preferred_quote,
             self.options.jsx_runtime(),
-            self.suppression_reason,
         )
         .ok()?;
 
@@ -392,7 +391,6 @@ where
             &options,
             self.options.preferred_quote(),
             self.options.jsx_runtime(),
-            self.suppression_reason,
         )
         .ok();
         if let Some(ctx) = ctx {
@@ -442,7 +440,6 @@ where
             &options,
             self.options.preferred_quote(),
             self.options.jsx_runtime(),
-            self.suppression_reason,
         )
         .ok();
         if let Some(ctx) = ctx {
