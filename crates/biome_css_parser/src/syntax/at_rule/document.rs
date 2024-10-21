@@ -1,9 +1,10 @@
+use crate::lexer::CssLexContext;
 use crate::parser::CssParser;
 use crate::syntax::at_rule::parse_error::expected_any_document_matcher;
 use crate::syntax::block::parse_rule_block;
 use crate::syntax::parse_error::expected_string;
 use crate::syntax::parse_string;
-use crate::syntax::value::url::{is_at_url_function, parse_url_function};
+use crate::syntax::value::url::{is_at_url_function, parse_url_function, parse_url_value};
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseSeparatedList;
@@ -158,6 +159,12 @@ pub(crate) fn is_at_document_custom_matcher(p: &mut CssParser) -> bool {
     p.at_ts(DOCUMENT_CUSTOM_MATCHER_SET) && p.nth_at(1, T!['('])
 }
 
+const URL_PREFIX_SET: TokenSet<CssSyntaxKind> = token_set!(T![url_prefix]);
+
+pub(crate) fn is_at_url_prefix(p: &mut CssParser) -> bool {
+    p.at_ts(URL_PREFIX_SET) && p.nth_at(1, T!['('])
+}
+
 /// Parses a custom matcher for the `@document` at-rule in a CSS stylesheet.
 /// # Example
 /// Basic usage in CSS:
@@ -176,6 +183,14 @@ pub(crate) fn parse_document_custom_matcher(p: &mut CssParser) -> ParsedSyntax {
     }
 
     let m = p.start();
+
+    if is_at_url_prefix(p) {
+        p.bump_ts(URL_PREFIX_SET);
+        p.bump_with_context(T!['('], CssLexContext::UrlRawValue);
+        parse_url_value(p).ok();
+        p.expect(T![')']);
+        return Present(m.complete(p, CSS_DOCUMENT_CUSTOM_MATCHER));
+    }
 
     p.bump_ts(DOCUMENT_CUSTOM_MATCHER_SET);
     p.bump(T!['(']);
