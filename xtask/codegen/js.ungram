@@ -1331,7 +1331,7 @@ JsShorthandNamedImportSpecifier =
 // import a from "mod" assert { type: "json" }
 //                     ^^^^^^^^^^^^^^^^^^^^^^^
 JsImportAssertion =
-    assertion_kind: ('assert' | 'with')
+    'with'
     '{'
     assertions: JsImportAssertionEntryList
     '}'
@@ -1749,7 +1749,7 @@ TsTypeAliasDeclaration =
 	ty: AnyTsType
 	';'?
 
-AnyTsIdentifierBinding = 
+AnyTsIdentifierBinding =
 	TsIdentifierBinding
 	| JsMetavariable
 
