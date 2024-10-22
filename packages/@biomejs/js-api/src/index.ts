@@ -126,8 +126,8 @@ export class Biome {
 		try {
 			this.workspace.updateSettings({
 				configuration,
-				gitignore_matches: [],
-				workspace_directory: "./",
+				gitignoreMatches: [],
+				workspaceDirectory: "./",
 			});
 		} catch (e) {
 			throw wrapError(e);
@@ -158,8 +158,8 @@ export class Biome {
 		return this.tryCatchWrapper(() => {
 			const biomePath: BiomePath = {
 				path,
-				was_written: false,
-				kind: ["Handleable"],
+				wasWritten: false,
+				kind: ["handleable"],
 			};
 
 			this.workspace.openFile({
@@ -199,8 +199,8 @@ export class Biome {
 
 			const { diagnostics } = this.workspace.pullDiagnostics({
 				path,
-				categories: ["Syntax"],
-				max_diagnostics: Number.MAX_SAFE_INTEGER,
+				categories: ["syntax"],
+				maxDiagnostics: Number.MAX_SAFE_INTEGER,
 				only: [],
 				skip: [],
 			});
@@ -258,11 +258,11 @@ export class Biome {
 
 					const result = this.workspace.fixFile({
 						path,
-						fix_file_mode: fixFileMode,
-						should_format: false,
+						fixFileMode: fixFileMode,
+						shouldFormat: false,
 						only: [],
 						skip: [],
-						rule_categories: ["Syntax", "Lint"],
+						ruleCategories: ["syntax", "lint"],
 					});
 
 					code = result.code;
@@ -274,8 +274,8 @@ export class Biome {
 		return this.withFile(filePath, maybeFixedContent, (path) => {
 			const { diagnostics } = this.workspace.pullDiagnostics({
 				path,
-				categories: ["Syntax", "Lint"],
-				max_diagnostics: Number.MAX_SAFE_INTEGER,
+				categories: ["syntax", "lint"],
+				maxDiagnostics: Number.MAX_SAFE_INTEGER,
 				only: [],
 				skip: [],
 			});

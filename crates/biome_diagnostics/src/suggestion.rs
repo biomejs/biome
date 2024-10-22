@@ -6,6 +6,7 @@ use biome_text_edit::TextEdit;
 /// Indicates how a tool should manage this suggestion.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum Applicability {
     /// The suggestion is definitely what the user intended.
     /// This suggestion should be automatically applied.

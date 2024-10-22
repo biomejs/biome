@@ -20,7 +20,8 @@ use std::{fs::File, io, io::Write, ops::Deref, path::PathBuf};
 #[bitflags]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 // NOTE: The order of the variants is important, the one on the top has the highest priority
 pub enum FileKind {
@@ -92,7 +93,8 @@ impl From<FileKind> for FileKinds {
 #[derive(Debug, Clone, Eq, PartialEq, Hash, Default)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 pub struct BiomePath {
     /// The path to the file

@@ -6,6 +6,7 @@ use std::{ffi::OsStr, path::Path};
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub struct CssFileSource {
     // Unused until we potentially support postcss/less/sass
     #[allow(unused)]
@@ -20,6 +21,7 @@ pub struct CssFileSource {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 enum CssVariant {
     #[default]
     Standard,
