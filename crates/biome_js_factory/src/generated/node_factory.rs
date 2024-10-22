@@ -3145,19 +3145,48 @@ pub fn js_setter_class_member(
     parameter: AnyJsFormalParameter,
     r_paren_token: SyntaxToken,
     body: JsFunctionBody,
-) -> JsSetterClassMember {
-    JsSetterClassMember::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_SETTER_CLASS_MEMBER,
-        [
-            Some(SyntaxElement::Node(modifiers.into_syntax())),
-            Some(SyntaxElement::Token(set_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(parameter.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-            Some(SyntaxElement::Node(body.into_syntax())),
-        ],
-    ))
+) -> JsSetterClassMemberBuilder {
+    JsSetterClassMemberBuilder {
+        modifiers,
+        set_token,
+        name,
+        l_paren_token,
+        parameter,
+        r_paren_token,
+        body,
+        comma_token: None,
+    }
+}
+pub struct JsSetterClassMemberBuilder {
+    modifiers: JsMethodModifierList,
+    set_token: SyntaxToken,
+    name: AnyJsClassMemberName,
+    l_paren_token: SyntaxToken,
+    parameter: AnyJsFormalParameter,
+    r_paren_token: SyntaxToken,
+    body: JsFunctionBody,
+    comma_token: Option<SyntaxToken>,
+}
+impl JsSetterClassMemberBuilder {
+    pub fn with_comma_token(mut self, comma_token: SyntaxToken) -> Self {
+        self.comma_token = Some(comma_token);
+        self
+    }
+    pub fn build(self) -> JsSetterClassMember {
+        JsSetterClassMember::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_SETTER_CLASS_MEMBER,
+            [
+                Some(SyntaxElement::Node(self.modifiers.into_syntax())),
+                Some(SyntaxElement::Token(self.set_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.parameter.into_syntax())),
+                self.comma_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+                Some(SyntaxElement::Node(self.body.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn js_setter_object_member(
     set_token: SyntaxToken,
@@ -3166,18 +3195,45 @@ pub fn js_setter_object_member(
     parameter: AnyJsFormalParameter,
     r_paren_token: SyntaxToken,
     body: JsFunctionBody,
-) -> JsSetterObjectMember {
-    JsSetterObjectMember::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_SETTER_OBJECT_MEMBER,
-        [
-            Some(SyntaxElement::Token(set_token)),
-            Some(SyntaxElement::Node(name.into_syntax())),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(parameter.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-            Some(SyntaxElement::Node(body.into_syntax())),
-        ],
-    ))
+) -> JsSetterObjectMemberBuilder {
+    JsSetterObjectMemberBuilder {
+        set_token,
+        name,
+        l_paren_token,
+        parameter,
+        r_paren_token,
+        body,
+        comma_token: None,
+    }
+}
+pub struct JsSetterObjectMemberBuilder {
+    set_token: SyntaxToken,
+    name: AnyJsObjectMemberName,
+    l_paren_token: SyntaxToken,
+    parameter: AnyJsFormalParameter,
+    r_paren_token: SyntaxToken,
+    body: JsFunctionBody,
+    comma_token: Option<SyntaxToken>,
+}
+impl JsSetterObjectMemberBuilder {
+    pub fn with_comma_token(mut self, comma_token: SyntaxToken) -> Self {
+        self.comma_token = Some(comma_token);
+        self
+    }
+    pub fn build(self) -> JsSetterObjectMember {
+        JsSetterObjectMember::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::JS_SETTER_OBJECT_MEMBER,
+            [
+                Some(SyntaxElement::Token(self.set_token)),
+                Some(SyntaxElement::Node(self.name.into_syntax())),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.parameter.into_syntax())),
+                self.comma_token.map(|token| SyntaxElement::Token(token)),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+                Some(SyntaxElement::Node(self.body.into_syntax())),
+            ],
+        ))
+    }
 }
 pub fn js_shorthand_named_import_specifier(
     local_name: AnyJsBinding,
@@ -6068,6 +6124,7 @@ pub fn ts_setter_signature_class_member(
         l_paren_token,
         parameter,
         r_paren_token,
+        comma_token: None,
         semicolon_token: None,
     }
 }
@@ -6078,9 +6135,14 @@ pub struct TsSetterSignatureClassMemberBuilder {
     l_paren_token: SyntaxToken,
     parameter: AnyJsFormalParameter,
     r_paren_token: SyntaxToken,
+    comma_token: Option<SyntaxToken>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl TsSetterSignatureClassMemberBuilder {
+    pub fn with_comma_token(mut self, comma_token: SyntaxToken) -> Self {
+        self.comma_token = Some(comma_token);
+        self
+    }
     pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
         self.semicolon_token = Some(semicolon_token);
         self
@@ -6094,6 +6156,7 @@ impl TsSetterSignatureClassMemberBuilder {
                 Some(SyntaxElement::Node(self.name.into_syntax())),
                 Some(SyntaxElement::Token(self.l_paren_token)),
                 Some(SyntaxElement::Node(self.parameter.into_syntax())),
+                self.comma_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Token(self.r_paren_token)),
                 self.semicolon_token
                     .map(|token| SyntaxElement::Token(token)),
@@ -6114,6 +6177,7 @@ pub fn ts_setter_signature_type_member(
         l_paren_token,
         parameter,
         r_paren_token,
+        comma_token: None,
         separator_token_token: None,
     }
 }
@@ -6123,9 +6187,14 @@ pub struct TsSetterSignatureTypeMemberBuilder {
     l_paren_token: SyntaxToken,
     parameter: AnyJsFormalParameter,
     r_paren_token: SyntaxToken,
+    comma_token: Option<SyntaxToken>,
     separator_token_token: Option<SyntaxToken>,
 }
 impl TsSetterSignatureTypeMemberBuilder {
+    pub fn with_comma_token(mut self, comma_token: SyntaxToken) -> Self {
+        self.comma_token = Some(comma_token);
+        self
+    }
     pub fn with_separator_token_token(mut self, separator_token_token: SyntaxToken) -> Self {
         self.separator_token_token = Some(separator_token_token);
         self
@@ -6138,6 +6207,7 @@ impl TsSetterSignatureTypeMemberBuilder {
                 Some(SyntaxElement::Node(self.name.into_syntax())),
                 Some(SyntaxElement::Token(self.l_paren_token)),
                 Some(SyntaxElement::Node(self.parameter.into_syntax())),
+                self.comma_token.map(|token| SyntaxElement::Token(token)),
                 Some(SyntaxElement::Token(self.r_paren_token)),
                 self.separator_token_token
                     .map(|token| SyntaxElement::Token(token)),

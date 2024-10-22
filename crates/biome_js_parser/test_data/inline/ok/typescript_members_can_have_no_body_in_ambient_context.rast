@@ -77,6 +77,7 @@ JsModule {
                             type_annotation: missing (optional),
                             initializer: missing (optional),
                         },
+                        comma_token: missing (optional),
                         r_paren_token: R_PAREN@90..91 ")" [] [],
                         semicolon_token: SEMICOLON@91..92 ";" [] [],
                     },
@@ -166,6 +167,7 @@ JsModule {
                                         type_annotation: missing (optional),
                                         initializer: missing (optional),
                                     },
+                                    comma_token: missing (optional),
                                     r_paren_token: R_PAREN@221..222 ")" [] [],
                                     semicolon_token: missing (optional),
                                 },
@@ -246,8 +248,9 @@ JsModule {
               2: (empty)
               3: (empty)
               4: (empty)
-            5: R_PAREN@90..91 ")" [] []
-            6: SEMICOLON@91..92 ";" [] []
+            5: (empty)
+            6: R_PAREN@90..91 ")" [] []
+            7: SEMICOLON@91..92 ";" [] []
         9: R_CURLY@92..94 "}" [Newline("\n")] []
     1: TS_DECLARE_STATEMENT@94..231
       0: DECLARE_KW@94..103 "declare" [Newline("\n")] [Whitespace(" ")]
@@ -316,8 +319,9 @@ JsModule {
                     2: (empty)
                     3: (empty)
                     4: (empty)
-                  5: R_PAREN@221..222 ")" [] []
-                  6: (empty)
+                  5: (empty)
+                  6: R_PAREN@221..222 ")" [] []
+                  7: (empty)
               9: R_CURLY@222..229 "}" [Newline("\n"), Whitespace("     ")] []
           2: R_CURLY@229..231 "}" [Newline("\n")] []
   4: EOF@231..232 "" [Newline("\n")] []

@@ -4,3 +4,6 @@ type B = { set a(b) }
 type C = { set(a) }
 type D = { set: number }
 type E = { set }
+type F = { set(b: number,) }
+type G = {set a(b,)}
+type H = {set(a, ) }

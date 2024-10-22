@@ -74,14 +74,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
-#### New features
+#### Bug fixes
 
-- Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
+- Fix [#4317](https://github.com/biomejs/biome/issues/4317), setter parameter can contain a trailing comma, the following example will now parsed correctly:
 
-   ```js
-   import defer * as myModule from "my-module";
-   ```
-
+  ```js
+  export class DummyClass {
+    set input(
+      value: string,
+    ) {}
+  }
+  ```
+  
   Contributed by @fireairforce
 
 ## v1.9.4 (2024-10-17)
