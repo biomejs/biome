@@ -521,15 +521,6 @@ fn parse_any_named_import_specifier(p: &mut JsParser) -> ParsedSyntax {
     }
 }
 
-// test js import_assertion
-// import "x" assert { type: "json" }
-// import "foo" assert { "type": "json" };
-// import foo from "foo.json" assert { type: "json" };
-// import {test} from "foo.json" assert { for: "for" }
-// import foo_json from "foo.json" assert { type: "json", hasOwnProperty: "true" };
-// import "x" assert
-// { type: "json" }
-
 // test js import_attribute
 // import "x" with { type: "json" }
 // import "foo" with { "type": "json" };
@@ -539,22 +530,9 @@ fn parse_any_named_import_specifier(p: &mut JsParser) -> ParsedSyntax {
 // import "x" with
 // { type: "json" }
 
-// test_err js import_assertion_err
-// import "foo" assert { type, "json" };
-// import "bar" \u{61}ssert { type: "json" };
-// import { foo } assert { type: "json" };
-// import "lorem"
-// assert { type: "json" }
-// import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
-// import "x" assert;
-// import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
-// import { a } from "a.json" assert
-
 // test_err js import_attribute_err
 // import "foo" with { type, "json" };
 // import { foo } with { type: "json" };
-// import "lorem"
-// assert { type: "json" }
 // import foo2 from "foo.json" with { "type": "json", type: "html", "type": "js" };
 // import "x" with;
 // import ipsum from "ipsum.json" with { type: "json", lazy: true, startAtLine: 1 };
@@ -569,9 +547,6 @@ fn parse_import_assertion(p: &mut JsParser) -> ParsedSyntax {
 
     let m = p.start();
     match p.cur() {
-        T![assert] => {
-            p.expect(T![assert]);
-        }
         T![with] => {
             p.expect(T![with]);
         }
@@ -1028,7 +1003,7 @@ where
 // export * from "a";
 // export * as c from "b";
 // export * as default from "b"
-// export * from "mod" assert { type: "json" }
+// export * from "mod" with { type: "json" }
 // export type * from "types";
 // export type * as types from "types";
 //
@@ -1067,7 +1042,7 @@ fn parse_export_from_clause(p: &mut JsParser) -> ParsedSyntax {
 // export { as } from "mod";
 // export { default as "b" } from "mod";
 // export { "a" as b } from "mod";
-// export { a } from "mod" assert { type: "json" }
+// export { a } from "mod" with { type: "json" }
 // export { "a" } from "./mod";
 // export {
 //      "a"

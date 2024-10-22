@@ -6,18 +6,18 @@ info: js/module/import/bare_import.js
 
 ```js
 import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_";
-import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long" assert { type :   "json"}
-import "short" assert {
+import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long" with { type :   "json"}
+import "short" with {
 
         type :   "json"
 }
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
     // something good is here
     "type": /****/ "json"
         }
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
 		// something good is here
 		"type": /****/ "json",
 		"type2" /****/ : "json",
@@ -56,17 +56,17 @@ Attribute Position: Auto
 
 ```js
 import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_";
-import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long" assert {
+import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long" with {
 	type: "json",
 };
-import "short" assert { type: "json" };
+import "short" with { type: "json" };
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
 	// something good is here
 	type: /****/ "json",
 };
 
-import "very_long_import_very_long_import_very" assert {
+import "very_long_import_very_long_import_very" with {
 	// something good is here
 	type: /****/ "json",
 	type2: /****/ "json",
@@ -81,6 +81,6 @@ import "very_long_import_very_long_import_very" assert {
 # Lines exceeding max width of 80 characters
 ```
     1: import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_";
-    2: import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long" assert {
+    2: import "very_long_import_very_long_import_very_long_import_very_long_import_very_long_import_very_long" with {
    20: 	typetypetypetypetypetypetypetypetypetypetype: /****/ "typetypetypetypetypetypetypetypetypetypetypetypetypetype",
 ```
