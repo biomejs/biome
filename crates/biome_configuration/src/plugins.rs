@@ -1,5 +1,5 @@
 use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic,
+    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
 use biome_deserialize_macros::{Deserializable, Merge};
 use schemars::JsonSchema;
@@ -29,12 +29,12 @@ pub enum PluginConfiguration {
 
 impl Deserializable for PluginConfiguration {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         rule_name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Str {
-            Deserializable::deserialize(value, rule_name, diagnostics).map(Self::Path)
+            Deserializable::deserialize(ctx, value, rule_name).map(Self::Path)
         } else {
             // TODO: Fix this to allow plugins to receive options.
             //       Difficulty is that we need a `Deserializable` implementation

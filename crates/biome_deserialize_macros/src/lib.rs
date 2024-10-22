@@ -225,31 +225,6 @@ use syn::{parse_macro_input, DeriveInput};
 /// }
 /// ```
 ///
-/// ### `passthrough_name`
-///
-/// A particularly noteworthy attribute is `passthrough_name`. Every
-/// deserializer receives a `name` argument which is used to add context to
-/// diagnostics reported when deserializing the value. Typically, when the value
-/// of an object property is deserialized, the `name` refers to the name of the
-/// property. In some cases however, you may want to pass through the name given
-/// to the object's deserializer instead, in order to prevent losing more
-/// "distant" context.
-///
-/// An example is the `RuleWithOptions` struct, where the name of the rule is
-/// passed through to the deserializer for `PossibleOptions`. Without this
-/// attribute, the name given to the field's deserializer would always be
-/// "options".
-///
-/// ```no_test
-/// #[derive(Default, Deserializable)]
-/// pub struct RuleWithOptions {
-///     pub level: RulePlainConfiguration,
-///
-///     #[deserializable(passthrough_name)]
-///     pub options: Option<PossibleOptions>,
-/// }
-/// ```
-///
 /// ### `rename`
 ///
 /// ```no_test
