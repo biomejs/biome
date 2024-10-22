@@ -98,6 +98,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - `noSuspiciousSemicolonInJsx` now catches suspicious semicolons in React fragments. Contributed by @vasucp1207
 
+- The syntax rule `noTypeOnlyImportAttributes` now ignores `.cts` files ([#4361](https://github.com/biomejs/biome/issues/4361)).
+
+  Since TypeScript 5.3, type-only imports can be associated to an import attribute in CommonJS-enabled files.
+  See the [TypeScript docs](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-3.html#stable-support-resolution-mode-in-import-types).
+
+  The following code is no longer reported as a syntax error:
+
+  ```cts
+  import type { TypeFromRequire } from "pkg" with {
+      "resolution-mode": "require"
+  };
+  ```
+
+  Note that this is only allowed in files ending with the `cts` extension.
+
+  Contributed by @Conaclos
+
 ### CLI
 
 #### Enhancements
