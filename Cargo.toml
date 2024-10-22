@@ -178,6 +178,7 @@ crossbeam          = "0.8.4"
 dashmap            = "6.1.0"
 enumflags2         = "0.7.10"
 getrandom          = "0.2.15"
+globset            = "0.4.15"
 ignore             = "0.4.23"
 indexmap           = { version = "2.6.0", features = ["serde"] }
 insta              = "1.40.0"
