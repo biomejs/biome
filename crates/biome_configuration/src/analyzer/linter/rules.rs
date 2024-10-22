@@ -3,7 +3,6 @@
 use crate::analyzer::{RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration};
 use biome_analyze::{options::RuleOptions, RuleFilter};
 use biome_console::markup;
-use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
 use biome_rowan::TextRange;
@@ -103,15 +102,15 @@ pub struct Rules {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub suspicious: Option<Suspicious>,
 }
-impl DeserializableValidator for Rules {
+impl biome_deserialize::DeserializableValidator for Rules {
     fn validate(
         &mut self,
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
             return false;
         }
         true
@@ -558,15 +557,15 @@ pub struct A11y {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_lang: Option<RuleConfiguration<biome_js_analyze::options::UseValidLang>>,
 }
-impl DeserializableValidator for A11y {
+impl biome_deserialize::DeserializableValidator for A11y {
     fn validate(
         &mut self,
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
             return false;
         }
         true
@@ -1386,15 +1385,15 @@ pub struct Complexity {
     pub use_simplified_logic_expression:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseSimplifiedLogicExpression>>,
 }
-impl DeserializableValidator for Complexity {
+impl biome_deserialize::DeserializableValidator for Complexity {
     fn validate(
         &mut self,
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
             return false;
         }
         true
@@ -2248,15 +2247,15 @@ pub struct Correctness {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_yield: Option<RuleConfiguration<biome_js_analyze::options::UseYield>>,
 }
-impl DeserializableValidator for Correctness {
+impl biome_deserialize::DeserializableValidator for Correctness {
     fn validate(
         &mut self,
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
             return false;
         }
         true
@@ -3460,15 +3459,15 @@ pub struct Nursery {
     pub use_valid_autocomplete:
         Option<RuleConfiguration<biome_js_analyze::options::UseValidAutocomplete>>,
 }
-impl DeserializableValidator for Nursery {
+impl biome_deserialize::DeserializableValidator for Nursery {
     fn validate(
         &mut self,
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
             return false;
         }
         true
@@ -4418,15 +4417,15 @@ pub struct Performance {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_top_level_regex: Option<RuleConfiguration<biome_js_analyze::options::UseTopLevelRegex>>,
 }
-impl DeserializableValidator for Performance {
+impl biome_deserialize::DeserializableValidator for Performance {
     fn validate(
         &mut self,
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
             return false;
         }
         true
@@ -4606,15 +4605,15 @@ pub struct Security {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_global_eval: Option<RuleConfiguration<biome_js_analyze::options::NoGlobalEval>>,
 }
-impl DeserializableValidator for Security {
+impl biome_deserialize::DeserializableValidator for Security {
     fn validate(
         &mut self,
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
             return false;
         }
         true
@@ -4942,15 +4941,15 @@ pub struct Style {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_while: Option<RuleFixConfiguration<biome_js_analyze::options::UseWhile>>,
 }
-impl DeserializableValidator for Style {
+impl biome_deserialize::DeserializableValidator for Style {
     fn validate(
         &mut self,
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
             return false;
         }
         true
@@ -6123,15 +6122,15 @@ pub struct Suspicious {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_valid_typeof: Option<RuleFixConfiguration<biome_js_analyze::options::UseValidTypeof>>,
 }
-impl DeserializableValidator for Suspicious {
+impl biome_deserialize::DeserializableValidator for Suspicious {
     fn validate(
         &mut self,
+        ctx: &mut impl biome_deserialize::DeserializationContext,
         _name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self.recommended == Some(true) && self.all == Some(true) {
-            diagnostics . push (DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
+            ctx . report (biome_deserialize :: DeserializationDiagnostic :: new (markup ! (< Emphasis > "'recommended'" < / Emphasis > " and " < Emphasis > "'all'" < / Emphasis > " can't be both " < Emphasis > "'true'" < / Emphasis > ". You should choose only one of them.")) . with_range (range) . with_note (markup ! ("Biome will fallback to its defaults for this section."))) ;
             return false;
         }
         true

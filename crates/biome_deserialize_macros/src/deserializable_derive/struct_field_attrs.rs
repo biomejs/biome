@@ -17,11 +17,6 @@ pub struct StructFieldAttrs {
     /// If set, this provides information about the deprecated of the field.
     pub deprecated: Option<DeprecatedField>,
 
-    /// If set, the name passed to the deserializer (which was passed by the
-    /// deserializer of the parent object) is also passed through to the
-    /// deserializer of the field value.
-    pub passthrough_name: bool,
-
     /// Optional name to use in the serialized format.
     ///
     /// See also: <https://serde.rs/field-attrs.html#rename>
@@ -61,8 +56,6 @@ impl TryFrom<&Vec<Attribute>> for StructFieldAttrs {
                         Meta::Path(path) => {
                             if path.is_ident("required") {
                                 opts.required = true;
-                            } else if path.is_ident("passthrough_name") {
-                                opts.passthrough_name = true;
                             } else if path.is_ident("bail_on_error") {
                                 opts.bail_on_error = true;
                             } else if path.is_ident("rest") {
