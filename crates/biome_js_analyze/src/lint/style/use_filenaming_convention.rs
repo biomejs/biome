@@ -3,7 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
-use biome_deserialize::DeserializableValidator;
+use biome_deserialize::DeserializationContext;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     binding_ext::AnyJsIdentifierBinding, AnyJsIdentifierUsage, JsExportNamedSpecifier,
@@ -504,15 +504,16 @@ impl Default for FilenameCases {
         }
     }
 }
-impl DeserializableValidator for FilenameCases {
+
+impl biome_deserialize::DeserializableValidator for FilenameCases {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         name: &str,
         range: TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if !self.allow_export && self.cases.is_empty() {
-            diagnostics.push(
+            ctx.report(
                 biome_deserialize::DeserializationDiagnostic::new(markup! {
                     ""<Emphasis>{name}</Emphasis>" cannot be an empty array."
                 })

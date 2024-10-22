@@ -13,7 +13,9 @@ use biome_analyze::{
     RuleSourceKind,
 };
 use biome_console::markup;
-use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
+use biome_deserialize::{
+    DeserializableValidator, DeserializationContext, DeserializationDiagnostic,
+};
 use biome_deserialize_macros::Deserializable;
 use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
@@ -1003,12 +1005,12 @@ pub struct Convention {
 impl DeserializableValidator for Convention {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if self.formats.is_empty() && self.matching.is_none() {
-            diagnostics.push(
+            ctx.report(
                 DeserializationDiagnostic::new(
                     "At least one field among `format` and `match` must be set.",
                 )
@@ -1141,13 +1143,12 @@ impl Selector {
 impl DeserializableValidator for Selector {
     fn validate(
         &mut self,
+        ctx: &mut impl DeserializationContext,
         _name: &str,
         range: biome_rowan::TextRange,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> bool {
         if let Err(error) = self.check() {
-            diagnostics
-                .push(DeserializationDiagnostic::new(format_args!("{error}")).with_range(range));
+            ctx.report(DeserializationDiagnostic::new(format_args!("{error}")).with_range(range));
             return false;
         }
         true
