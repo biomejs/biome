@@ -41,6 +41,7 @@ JsModule {
                             },
                         ],
                     },
+                    comma_token: missing (optional),
                     r_paren_token: R_PAREN@28..30 ")" [] [Whitespace(" ")],
                     body: JsFunctionBody {
                         l_curly_token: L_CURLY@30..31 "{" [] [],
@@ -90,6 +91,7 @@ JsModule {
                             },
                         ],
                     },
+                    comma_token: missing (optional),
                     r_paren_token: R_PAREN@56..58 ")" [] [Whitespace(" ")],
                     body: JsFunctionBody {
                         l_curly_token: L_CURLY@58..59 "{" [] [],
@@ -133,6 +135,7 @@ JsModule {
                             },
                         ],
                     },
+                    comma_token: missing (optional),
                     r_paren_token: R_PAREN@81..83 ")" [] [Whitespace(" ")],
                     body: JsFunctionBody {
                         l_curly_token: L_CURLY@83..84 "{" [] [],
@@ -179,8 +182,9 @@ JsModule {
                     0: IDENT@23..27 "dec" [] [Whitespace(" ")]
             1: JS_IDENTIFIER_BINDING@27..28
               0: IDENT@27..28 "x" [] []
-          5: R_PAREN@28..30 ")" [] [Whitespace(" ")]
-          6: JS_FUNCTION_BODY@30..32
+          5: (empty)
+          6: R_PAREN@28..30 ")" [] [Whitespace(" ")]
+          7: JS_FUNCTION_BODY@30..32
             0: L_CURLY@30..31 "{" [] []
             1: JS_DIRECTIVE_LIST@31..31
             2: JS_STATEMENT_LIST@31..31
@@ -211,8 +215,9 @@ JsModule {
                     2: R_PAREN@53..55 ")" [] [Whitespace(" ")]
             1: JS_IDENTIFIER_BINDING@55..56
               0: IDENT@55..56 "x" [] []
-          5: R_PAREN@56..58 ")" [] [Whitespace(" ")]
-          6: JS_FUNCTION_BODY@58..60
+          5: (empty)
+          6: R_PAREN@56..58 ")" [] [Whitespace(" ")]
+          7: JS_FUNCTION_BODY@58..60
             0: L_CURLY@58..59 "{" [] []
             1: JS_DIRECTIVE_LIST@59..59
             2: JS_STATEMENT_LIST@59..59
@@ -239,8 +244,9 @@ JsModule {
                     2: R_PAREN@78..80 ")" [] [Whitespace(" ")]
             1: JS_IDENTIFIER_BINDING@80..81
               0: IDENT@80..81 "x" [] []
-          5: R_PAREN@81..83 ")" [] [Whitespace(" ")]
-          6: JS_FUNCTION_BODY@83..85
+          5: (empty)
+          6: R_PAREN@81..83 ")" [] [Whitespace(" ")]
+          7: JS_FUNCTION_BODY@83..85
             0: L_CURLY@83..84 "{" [] []
             1: JS_DIRECTIVE_LIST@84..84
             2: JS_STATEMENT_LIST@84..84

@@ -313,6 +313,7 @@ JsModule {
                                     },
                                 ],
                             },
+                            comma_token: missing (optional),
                             r_paren_token: R_PAREN@197..199 ")" [] [Whitespace(" ")],
                             body: JsFunctionBody {
                                 l_curly_token: L_CURLY@199..200 "{" [] [],
@@ -362,6 +363,7 @@ JsModule {
                                     },
                                 ],
                             },
+                            comma_token: missing (optional),
                             r_paren_token: R_PAREN@225..227 ")" [] [Whitespace(" ")],
                             body: JsFunctionBody {
                                 l_curly_token: L_CURLY@227..228 "{" [] [],
@@ -405,6 +407,7 @@ JsModule {
                                     },
                                 ],
                             },
+                            comma_token: missing (optional),
                             r_paren_token: R_PAREN@250..252 ")" [] [Whitespace(" ")],
                             body: JsFunctionBody {
                                 l_curly_token: L_CURLY@252..253 "{" [] [],
@@ -629,8 +632,9 @@ JsModule {
                         0: IDENT@192..196 "dec" [] [Whitespace(" ")]
                 1: JS_IDENTIFIER_BINDING@196..197
                   0: IDENT@196..197 "x" [] []
-              4: R_PAREN@197..199 ")" [] [Whitespace(" ")]
-              5: JS_FUNCTION_BODY@199..201
+              4: (empty)
+              5: R_PAREN@197..199 ")" [] [Whitespace(" ")]
+              6: JS_FUNCTION_BODY@199..201
                 0: L_CURLY@199..200 "{" [] []
                 1: JS_DIRECTIVE_LIST@200..200
                 2: JS_STATEMENT_LIST@200..200
@@ -661,8 +665,9 @@ JsModule {
                         2: R_PAREN@222..224 ")" [] [Whitespace(" ")]
                 1: JS_IDENTIFIER_BINDING@224..225
                   0: IDENT@224..225 "x" [] []
-              4: R_PAREN@225..227 ")" [] [Whitespace(" ")]
-              5: JS_FUNCTION_BODY@227..229
+              4: (empty)
+              5: R_PAREN@225..227 ")" [] [Whitespace(" ")]
+              6: JS_FUNCTION_BODY@227..229
                 0: L_CURLY@227..228 "{" [] []
                 1: JS_DIRECTIVE_LIST@228..228
                 2: JS_STATEMENT_LIST@228..228
@@ -689,8 +694,9 @@ JsModule {
                         2: R_PAREN@247..249 ")" [] [Whitespace(" ")]
                 1: JS_IDENTIFIER_BINDING@249..250
                   0: IDENT@249..250 "x" [] []
-              4: R_PAREN@250..252 ")" [] [Whitespace(" ")]
-              5: JS_FUNCTION_BODY@252..254
+              4: (empty)
+              5: R_PAREN@250..252 ")" [] [Whitespace(" ")]
+              6: JS_FUNCTION_BODY@252..254
                 0: L_CURLY@252..253 "{" [] []
                 1: JS_DIRECTIVE_LIST@253..253
                 2: JS_STATEMENT_LIST@253..253

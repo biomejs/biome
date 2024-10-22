@@ -211,6 +211,7 @@ JsModule {
                         type_annotation: missing (optional),
                         initializer: missing (optional),
                     },
+                    comma_token: missing (optional),
                     r_paren_token: R_PAREN@245..247 ")" [] [Whitespace(" ")],
                     body: JsFunctionBody {
                         l_curly_token: L_CURLY@247..249 "{" [] [Whitespace(" ")],
@@ -350,21 +351,46 @@ JsModule {
                         type_annotation: missing (optional),
                         initializer: missing (optional),
                     },
+                    comma_token: missing (optional),
                     r_paren_token: R_PAREN@437..438 ")" [] [],
                     semicolon_token: SEMICOLON@438..439 ";" [] [],
                 },
+                TsSetterSignatureClassMember {
+                    modifiers: TsMethodSignatureModifierList [
+                        TsAbstractModifier {
+                            modifier_token: ABSTRACT_KW@439..453 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                    ],
+                    set_token: SET_KW@453..457 "set" [] [Whitespace(" ")],
+                    name: JsLiteralMemberName {
+                        value: IDENT@457..463 "my_age" [] [],
+                    },
+                    l_paren_token: L_PAREN@463..464 "(" [] [],
+                    parameter: JsFormalParameter {
+                        decorators: JsDecoratorList [],
+                        binding: JsIdentifierBinding {
+                            name_token: IDENT@464..467 "age" [] [],
+                        },
+                        question_mark_token: missing (optional),
+                        type_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                    comma_token: COMMA@467..468 "," [] [],
+                    r_paren_token: R_PAREN@468..469 ")" [] [],
+                    semicolon_token: SEMICOLON@469..470 ";" [] [],
+                },
             ],
-            r_curly_token: R_CURLY@439..441 "}" [Newline("\n")] [],
+            r_curly_token: R_CURLY@470..472 "}" [Newline("\n")] [],
         },
     ],
-    eof_token: EOF@441..442 "" [Newline("\n")] [],
+    eof_token: EOF@472..473 "" [Newline("\n")] [],
 }
 
-0: JS_MODULE@0..442
+0: JS_MODULE@0..473
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..441
+  3: JS_MODULE_ITEM_LIST@0..472
     0: JS_CLASS_DECLARATION@0..19
       0: JS_DECORATOR_LIST@0..0
       1: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")]
@@ -516,8 +542,9 @@ JsModule {
             2: (empty)
             3: (empty)
             4: (empty)
-          5: R_PAREN@245..247 ")" [] [Whitespace(" ")]
-          6: JS_FUNCTION_BODY@247..268
+          5: (empty)
+          6: R_PAREN@245..247 ")" [] [Whitespace(" ")]
+          7: JS_FUNCTION_BODY@247..268
             0: L_CURLY@247..249 "{" [] [Whitespace(" ")]
             1: JS_DIRECTIVE_LIST@249..249
             2: JS_STATEMENT_LIST@249..267
@@ -555,7 +582,7 @@ JsModule {
             2: JS_STATEMENT_LIST@293..293
             3: R_CURLY@293..294 "}" [] []
       9: R_CURLY@294..296 "}" [Newline("\n")] []
-    2: JS_CLASS_DECLARATION@296..441
+    2: JS_CLASS_DECLARATION@296..472
       0: JS_DECORATOR_LIST@296..296
       1: ABSTRACT_KW@296..306 "abstract" [Newline("\n")] [Whitespace(" ")]
       2: CLASS_KW@306..312 "class" [] [Whitespace(" ")]
@@ -565,7 +592,7 @@ JsModule {
       5: (empty)
       6: (empty)
       7: L_CURLY@328..329 "{" [] []
-      8: JS_CLASS_MEMBER_LIST@329..439
+      8: JS_CLASS_MEMBER_LIST@329..470
         0: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@329..356
           0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@329..343
             0: TS_ABSTRACT_MODIFIER@329..343
@@ -618,7 +645,26 @@ JsModule {
             2: (empty)
             3: (empty)
             4: (empty)
-          5: R_PAREN@437..438 ")" [] []
-          6: SEMICOLON@438..439 ";" [] []
-      9: R_CURLY@439..441 "}" [Newline("\n")] []
-  4: EOF@441..442 "" [Newline("\n")] []
+          5: (empty)
+          6: R_PAREN@437..438 ")" [] []
+          7: SEMICOLON@438..439 ";" [] []
+        4: TS_SETTER_SIGNATURE_CLASS_MEMBER@439..470
+          0: TS_METHOD_SIGNATURE_MODIFIER_LIST@439..453
+            0: TS_ABSTRACT_MODIFIER@439..453
+              0: ABSTRACT_KW@439..453 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: SET_KW@453..457 "set" [] [Whitespace(" ")]
+          2: JS_LITERAL_MEMBER_NAME@457..463
+            0: IDENT@457..463 "my_age" [] []
+          3: L_PAREN@463..464 "(" [] []
+          4: JS_FORMAL_PARAMETER@464..467
+            0: JS_DECORATOR_LIST@464..464
+            1: JS_IDENTIFIER_BINDING@464..467
+              0: IDENT@464..467 "age" [] []
+            2: (empty)
+            3: (empty)
+            4: (empty)
+          5: COMMA@467..468 "," [] []
+          6: R_PAREN@468..469 ")" [] []
+          7: SEMICOLON@469..470 ";" [] []
+      9: R_CURLY@470..472 "}" [Newline("\n")] []
+  4: EOF@472..473 "" [Newline("\n")] []

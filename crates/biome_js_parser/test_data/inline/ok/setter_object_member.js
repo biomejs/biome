@@ -1,6 +1,8 @@
 let a = {
  set foo(value) {
  },
+ set a(value,) {
+ },
  set "bar"(value) {
  },
  set ["a" + "b"](value) {

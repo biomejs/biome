@@ -89,6 +89,7 @@ JsModule {
                         type_annotation: missing (optional),
                         initializer: missing (optional),
                     },
+                    comma_token: missing (optional),
                     r_paren_token: R_PAREN@107..109 ")" [] [Whitespace(" ")],
                     semicolon_token: missing (optional),
                 },
@@ -178,8 +179,9 @@ JsModule {
             2: (empty)
             3: (empty)
             4: (empty)
-          5: R_PAREN@107..109 ")" [] [Whitespace(" ")]
-          6: (empty)
+          5: (empty)
+          6: R_PAREN@107..109 ")" [] [Whitespace(" ")]
+          7: (empty)
         4: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@109..123
           0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@109..118
             0: TS_ABSTRACT_MODIFIER@109..118
