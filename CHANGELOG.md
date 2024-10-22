@@ -92,6 +92,17 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   
   Contributed by @fireairforce
 
+- Fix [#3836](https://github.com/biomejs/biome/issues/3836), css parser allow multiple semicolons after a declaration, the following example will now parsed correctly:
+
+  ```css
+  .foo {
+    color: red;;
+  }
+  ```
+
+  Contributed by @fireairforce
+
+
 ## v1.9.4 (2024-10-17)
 
 ### Analyzer

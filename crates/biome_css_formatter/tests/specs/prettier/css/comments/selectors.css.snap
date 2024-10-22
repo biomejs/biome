@@ -435,7 +435,7 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
        /* comment 161 */
      } /* comment 162 */
      /* comment 163 */
-@@ -201,30 +188,35 @@
+@@ -201,30 +188,34 @@
    /* comment 165 */
  } /* comment 166 */
  
@@ -482,7 +482,6 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
      justify-content: center;
 -  };
 +  }
-+  ;
  }
 ```
 
@@ -709,7 +708,6 @@ input:not(
     align-items: center;
     justify-content: center;
   }
-  ;
 }
 ```
 
@@ -853,26 +851,6 @@ selectors.css:152:75 parse ━━━━━━━━━━━━━━━━━�
   - current
   - past
   - future
-  
-selectors.css:156:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration, or an at rule but instead found ';'.
-  
-    154 │         align-items: center;
-    155 │         justify-content: center;
-  > 156 │     };
-        │      ^
-    157 │ }
-    158 │ 
-  
-  i Expected a declaration, or an at rule here.
-  
-    154 │         align-items: center;
-    155 │         justify-content: center;
-  > 156 │     };
-        │      ^
-    157 │ }
-    158 │ 
   
 
 ```

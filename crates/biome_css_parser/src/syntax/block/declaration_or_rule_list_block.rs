@@ -3,15 +3,16 @@ use crate::syntax::at_rule::{is_at_at_rule, parse_at_rule};
 use crate::syntax::block::ParseBlockBody;
 use crate::syntax::parse_error::expected_any_declaration_or_at_rule;
 use crate::syntax::{
-    is_at_declaration, is_at_metavariable, is_at_nested_qualified_rule,
-    parse_declaration_with_semicolon, parse_metavariable, parse_nested_qualified_rule, try_parse,
+    is_at_declaration, is_at_declaration_semicolon, is_at_metavariable,
+    is_at_nested_qualified_rule, parse_declaration_with_semicolon, parse_empty_declaration,
+    parse_metavariable, parse_nested_qualified_rule, try_parse,
 };
 use biome_css_syntax::CssSyntaxKind::*;
 use biome_css_syntax::{CssSyntaxKind, T};
 use biome_parser::parse_lists::ParseNodeList;
 use biome_parser::parse_recovery::{ParseRecovery, RecoveryResult};
-use biome_parser::parsed_syntax::ParsedSyntax;
-use biome_parser::parsed_syntax::ParsedSyntax::Absent;
+use biome_parser::prelude::ParsedSyntax;
+use biome_parser::prelude::ParsedSyntax::Absent;
 use biome_parser::{CompletedMarker, Parser};
 
 #[inline]
@@ -89,8 +90,6 @@ impl ParseNodeList for DeclarationOrRuleList {
                 if matches!(p.last(), Some(T![;])) || p.at(T!['}']) {
                     Ok(declaration)
                 } else {
-                    // If neither condition is met, return an error to indicate parsing failure.
-                    // And rewind the parser to the start of the declaration.
                     Err(())
                 }
             });
@@ -129,6 +128,8 @@ impl ParseNodeList for DeclarationOrRuleList {
             parse_nested_qualified_rule(p)
         } else if is_at_metavariable(p) {
             parse_metavariable(p)
+        } else if is_at_declaration_semicolon(p) {
+            parse_empty_declaration(p)
         } else {
             Absent
         }
