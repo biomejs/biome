@@ -1,13 +1,13 @@
 import hey from "hey"
 import hey from "hey";
-import "x" assert { type: "json" }
-import "foo" assert { "type": "json" };
-import foo from "foo.json" assert { type: "json" };
-import foo from "foo.json" assert {
+import "x" with { type: "json" }
+import "foo" with { "type": "json" };
+import foo from "foo.json" with { type: "json" };
+import foo from "foo.json" with {
 
     type:
         "json" };
-import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+import foo2 from "foo.json" with { "type": "json", type: "html", "type": "js" };
 import a, * as b from "foo"
 
 const foo = {};
@@ -42,7 +42,7 @@ export * from "hey"
 
 export * as something_bad_will_happen from "something_bad_might_not_happen"
 
-export * as something_bad_will_happen from "something_bad_might_not_happen" assert { "type": "json", "type2": "json3"}
+export * as something_bad_will_happen from "something_bad_might_not_happen" with { "type": "json", "type2": "json3"}
 
 
 // this one should switch to use single quotes
