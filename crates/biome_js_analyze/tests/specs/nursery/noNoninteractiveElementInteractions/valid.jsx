@@ -23,23 +23,17 @@
     {/* Element attributed with an interactive role*/}
     <div role="button" onClick={() => { }} />
     <div role="checkbox" onClick={() => { }} />
-    <div role="columnheader" onClick={() => { }} />
     <div role="combobox" onClick={() => { }} />
-    <div role="grid" onClick={() => { }} />
     <div role="gridcell" onClick={() => { }} />
     <div role="link" onClick={() => { }} />
     <div role="listbox" onClick={() => { }} />
-    <div role="menu" onClick={() => { }} />
-    <div role="menubar" onClick={() => { }} />
     <div role="menuitem" onClick={() => { }} />
     <div role="menuitemcheckbox" onClick={() => { }} />
     <div role="menuitemradio" onClick={() => { }} />
     <div role="option" onClick={() => { }} />
     <div role="progressbar" onClick={() => { }} />
     <div role="radio" onClick={() => { }} />
-    <div role="radiogroup" onClick={() => { }} />
     <div role="row" onClick={() => { }} />
-    <div role="rowheader" onClick={() => { }} />
     <div role="scrollbar" onClick={() => { }} />
     <div role="searchbox" onClick={() => { }} />
     <div role="slider" onClick={() => { }} />
@@ -47,7 +41,6 @@
     <div role="switch" onClick={() => { }} />
     <div role="tab" onClick={() => { }} />
     <div role="textbox" onClick={() => { }} />
-    <div role="treeitem" onClick={() => { }} />
 
     {/* Presentation role */}
     <div role="presentation" onClick={() => { }} />

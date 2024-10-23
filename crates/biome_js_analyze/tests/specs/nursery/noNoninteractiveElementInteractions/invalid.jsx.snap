@@ -86,7 +86,6 @@ expression: invalid.jsx
     <div role="region" onClick={() => { }} />
     <div role="rowgroup" onClick={() => { }} />
     <div role="search" onClick={() => { }} />
-    <div role="separator" onClick={() => { }} />
     <div role="status" onClick={() => { }} />
     <div role="table" onClick={() => { }} />
     <div role="tabpanel" onClick={() => { }} />
@@ -1449,7 +1448,7 @@ invalid.jsx:81:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
   > 81 │     <div role="rowgroup" onClick={() => { }} />
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     82 │     <div role="search" onClick={() => { }} />
-    83 │     <div role="separator" onClick={() => { }} />
+    83 │     <div role="status" onClick={() => { }} />
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1465,8 +1464,8 @@ invalid.jsx:82:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
     81 │     <div role="rowgroup" onClick={() => { }} />
   > 82 │     <div role="search" onClick={() => { }} />
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    83 │     <div role="separator" onClick={() => { }} />
-    84 │     <div role="status" onClick={() => { }} />
+    83 │     <div role="status" onClick={() => { }} />
+    84 │     <div role="table" onClick={() => { }} />
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1480,10 +1479,10 @@ invalid.jsx:83:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
   
     81 │     <div role="rowgroup" onClick={() => { }} />
     82 │     <div role="search" onClick={() => { }} />
-  > 83 │     <div role="separator" onClick={() => { }} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    84 │     <div role="status" onClick={() => { }} />
-    85 │     <div role="table" onClick={() => { }} />
+  > 83 │     <div role="status" onClick={() => { }} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │     <div role="table" onClick={() => { }} />
+    85 │     <div role="tabpanel" onClick={() => { }} />
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1496,11 +1495,11 @@ invalid.jsx:84:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
   ! Non-interactive element should not have event handler.
   
     82 │     <div role="search" onClick={() => { }} />
-    83 │     <div role="separator" onClick={() => { }} />
-  > 84 │     <div role="status" onClick={() => { }} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    85 │     <div role="table" onClick={() => { }} />
-    86 │     <div role="tabpanel" onClick={() => { }} />
+    83 │     <div role="status" onClick={() => { }} />
+  > 84 │     <div role="table" onClick={() => { }} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │     <div role="tabpanel" onClick={() => { }} />
+    86 │     <div role="term" onClick={() => { }} />
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1512,12 +1511,12 @@ invalid.jsx:85:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 
   ! Non-interactive element should not have event handler.
   
-    83 │     <div role="separator" onClick={() => { }} />
-    84 │     <div role="status" onClick={() => { }} />
-  > 85 │     <div role="table" onClick={() => { }} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    86 │     <div role="tabpanel" onClick={() => { }} />
-    87 │     <div role="term" onClick={() => { }} />
+    83 │     <div role="status" onClick={() => { }} />
+    84 │     <div role="table" onClick={() => { }} />
+  > 85 │     <div role="tabpanel" onClick={() => { }} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    86 │     <div role="term" onClick={() => { }} />
+    87 │     <div role="timer" onClick={() => { }} />
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1529,12 +1528,12 @@ invalid.jsx:86:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 
   ! Non-interactive element should not have event handler.
   
-    84 │     <div role="status" onClick={() => { }} />
-    85 │     <div role="table" onClick={() => { }} />
-  > 86 │     <div role="tabpanel" onClick={() => { }} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    87 │     <div role="term" onClick={() => { }} />
-    88 │     <div role="timer" onClick={() => { }} />
+    84 │     <div role="table" onClick={() => { }} />
+    85 │     <div role="tabpanel" onClick={() => { }} />
+  > 86 │     <div role="term" onClick={() => { }} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │     <div role="timer" onClick={() => { }} />
+    88 │     <div role="tooltip" onClick={() => { }} />
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1546,12 +1545,12 @@ invalid.jsx:87:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 
   ! Non-interactive element should not have event handler.
   
-    85 │     <div role="table" onClick={() => { }} />
-    86 │     <div role="tabpanel" onClick={() => { }} />
-  > 87 │     <div role="term" onClick={() => { }} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    88 │     <div role="timer" onClick={() => { }} />
-    89 │     <div role="tooltip" onClick={() => { }} />
+    85 │     <div role="tabpanel" onClick={() => { }} />
+    86 │     <div role="term" onClick={() => { }} />
+  > 87 │     <div role="timer" onClick={() => { }} />
+       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    88 │     <div role="tooltip" onClick={() => { }} />
+    89 │ </>
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   
@@ -1563,28 +1562,11 @@ invalid.jsx:88:5 lint/nursery/noNoninteractiveElementInteractions ━━━━�
 
   ! Non-interactive element should not have event handler.
   
-    86 │     <div role="tabpanel" onClick={() => { }} />
-    87 │     <div role="term" onClick={() => { }} />
-  > 88 │     <div role="timer" onClick={() => { }} />
-       │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    89 │     <div role="tooltip" onClick={() => { }} />
-    90 │ </>
-  
-  i Consider replace semantically interactive element like <button/> or <a href/>.
-  
-
-```
-
-```
-invalid.jsx:89:5 lint/nursery/noNoninteractiveElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Non-interactive element should not have event handler.
-  
-    87 │     <div role="term" onClick={() => { }} />
-    88 │     <div role="timer" onClick={() => { }} />
-  > 89 │     <div role="tooltip" onClick={() => { }} />
+    86 │     <div role="term" onClick={() => { }} />
+    87 │     <div role="timer" onClick={() => { }} />
+  > 88 │     <div role="tooltip" onClick={() => { }} />
        │     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    90 │ </>
+    89 │ </>
   
   i Consider replace semantically interactive element like <button/> or <a href/>.
   

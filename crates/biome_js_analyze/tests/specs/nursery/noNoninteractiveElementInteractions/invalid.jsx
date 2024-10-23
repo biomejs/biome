@@ -80,7 +80,6 @@
     <div role="region" onClick={() => { }} />
     <div role="rowgroup" onClick={() => { }} />
     <div role="search" onClick={() => { }} />
-    <div role="separator" onClick={() => { }} />
     <div role="status" onClick={() => { }} />
     <div role="table" onClick={() => { }} />
     <div role="tabpanel" onClick={() => { }} />

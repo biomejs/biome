@@ -1,5 +1,6 @@
 use crate::services::aria::Aria;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_aria::AriaRoles;
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
@@ -171,75 +172,15 @@ fn is_content_editable(attributes: AttributesRef) -> bool {
     false
 }
 
-/// List of `widget` role
-/// https://www.w3.org/TR/wai-aria-1.2/#widget
-const INTERACTIVE_ROLES: &[&str] = &[
-    // https://www.w3.org/TR/wai-aria-1.2/#command
-    "button",
-    "link",
-    // https://www.w3.org/TR/wai-aria-1.2/#menuitem
-    "menuitem",
-    "menuitemcheckbox",
-    "menuitemradio",
-    // https://www.w3.org/TR/wai-aria-1.2/#composite
-    "spinbutton",
-    "tablist",
-    // https://www.w3.org/TR/wai-aria-1.2/#grid
-    "grid",
-    "treegrid",
-    // https://www.w3.org/TR/wai-aria-1.2/#select
-    "listbox",
-    "radiogroup",
-    // https://www.w3.org/TR/wai-aria-1.2/#menu
-    "menu",
-    "menubar",
-    // https://www.w3.org/TR/wai-aria-1.2/#tree
-    "tree",
-    "treegrid",
-    // https://www.w3.org/TR/wai-aria-1.2/#gridcell
-    "gridcell",
-    "columnheader",
-    "rowheader",
-    // https://www.w3.org/TR/wai-aria-1.2/#input
-    "combobox",
-    "radio",
-    "slider",
-    // https://www.w3.org/TR/wai-aria-1.2/#option
-    "option",
-    "treeitem",
-    // https://www.w3.org/TR/wai-aria-1.2/#checkbox
-    "checkbox",
-    "switch",
-    // https://www.w3.org/TR/wai-aria-1.2/#textbox
-    "textbox",
-    "searchbox",
-    // https://www.w3.org/TR/wai-aria-1.2/#progressbar
-    "progressbar",
-    // https://www.w3.org/TR/wai-aria-1.2/#row
-    "row",
-    // https://www.w3.org/TR/wai-aria-1.2/#scrollbar
-    "scrollbar",
-    // https://www.w3.org/TR/wai-aria-1.2/#separator
-    // `separator` is not included because it is a `widget` only when it is focusable
-    // "separator",
-    // https://www.w3.org/TR/wai-aria-1.2/#tab
-    "tab",
-    // This does not descend from widget, but support `aria-activedescendant`.
-    // So we treat them as widget.
-    // See https://www.w3.org/TR/wai-aria-1.2/#aria-activedescendant
-    // Ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isInteractiveRole.js
-    "toolbar",
-];
-
 /// Check if the element has interactive role
 ///
 /// Ref: https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/v6.10.0/src/util/isInteractiveRole.js
-fn is_interactive_role(attributes: AttributesRef) -> bool {
+fn is_interactive_role(attributes: AttributesRef, aria_roles: &AriaRoles) -> bool {
     if let Some(attributes) = attributes {
         if let Some(roles) = attributes.get("role") {
             return roles
                 .iter()
-                .any(|role| INTERACTIVE_ROLES.contains(&role.as_str()));
+                .any(|role| aria_roles.is_role_interactive(role.as_str()));
         }
     }
     false
@@ -264,17 +205,16 @@ impl Rule for NoNoninteractiveElementInteractions {
         let attributes_ref = attributes.as_ref();
         let element_name = element.name().ok()?.as_jsx_name()?.value_token().ok()?;
         let element_name = element_name.text_trimmed();
+        let aria_roles = ctx.aria_roles();
 
         if !has_handler_props(attributes_ref)
             || is_content_editable(attributes_ref)
             || has_presentation_role(attributes_ref)
             || is_hidden_from_screen_reader(element_name, attributes_ref)
-            || is_interactive_role(attributes_ref)
+            || is_interactive_role(attributes_ref, aria_roles)
         {
             return None;
         }
-
-        let aria_roles = ctx.aria_roles();
 
         // Non-interactive elements what contains event handler should be reported.
         if aria_roles.is_not_interactive_element(element_name, attributes) {
