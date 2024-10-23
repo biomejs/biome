@@ -2,7 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_source_rule, ActionCategory, Ast, FixKind, Rule, SourceActionKind,
 };
 use biome_console::markup;
-use biome_deserialize::Deserializable;
+use biome_deserialize::{Deserializable, DeserializableValue, DeserializationContext};
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::JsModule;
 use biome_rowan::BatchMutationExt;
@@ -98,15 +98,15 @@ pub enum ImportGroup {
 }
 impl Deserializable for ImportGroup {
     fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
         Some(
-            if let Some(predefined) = Deserializable::deserialize(value, name, diagnostics) {
+            if let Some(predefined) = Deserializable::deserialize(ctx, value, name) {
                 ImportGroup::Predefined(predefined)
             } else {
-                ImportGroup::Custom(Deserializable::deserialize(value, name, diagnostics)?)
+                ImportGroup::Custom(Deserializable::deserialize(ctx, value, name)?)
             },
         )
     }

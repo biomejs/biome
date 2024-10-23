@@ -239,7 +239,7 @@ fn has_left_hand_object(member_expr: &AnyJsMemberExpression) -> Option<bool> {
     };
 
     if let AnyJsExpression::JsIdentifierExpression(id_expr) = &node {
-        if id_expr.name().ok()?.text() == "Object" {
+        if id_expr.name().ok()?.syntax().text_trimmed() == "Object" {
             return Some(true);
         }
     }

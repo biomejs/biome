@@ -1,3 +1,4 @@
+use biome_deserialize::{DeserializableValue, DeserializationContext};
 use biome_rowan::{TextRange, TextSize};
 
 /// A restricted glob pattern only supports the following syntaxes:
@@ -110,11 +111,11 @@ impl TryFrom<String> for RestrictedGlob {
 // We use a custom impl to precisely report the location of the error.
 impl biome_deserialize::Deserializable for RestrictedGlob {
     fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let glob = String::deserialize(value, name, diagnostics)?;
+        let glob = String::deserialize(ctx, value, name)?;
         match glob.parse() {
             Ok(glob) => Some(glob),
             Err(error) => {
@@ -122,7 +123,7 @@ impl biome_deserialize::Deserializable for RestrictedGlob {
                 let range = error.index().map_or(range, |index| {
                     TextRange::at(range.start() + TextSize::from(1 + index), 1u32.into())
                 });
-                diagnostics.push(
+                ctx.report(
                     biome_deserialize::DeserializationDiagnostic::new(format_args!("{error}"))
                         .with_range(range),
                 );
