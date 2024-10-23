@@ -195,7 +195,7 @@ fn css_identifier_to_prop_name(ident: &CssIdentifier) -> Option<(String, String)
     let raw_prop_name = tok.token_text_trimmed().text().to_string();
 
     let prop_lowercase = raw_prop_name.to_lowercase();
-    let prop_prefix = vender_prefix(&prop_lowercase);
+    let prop_prefix = vender_prefix(&prop_lowercase).to_string();
     let unprefixed_prop = if let Some(unprefixed_slice) = prop_lowercase.strip_prefix(&prop_prefix)
     {
         unprefixed_slice.to_string()
