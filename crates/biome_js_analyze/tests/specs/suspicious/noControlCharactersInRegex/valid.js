@@ -17,5 +17,7 @@ new RegExp("\n");
 /\u{1F}/g;
 /\t/;
 /\n/;
+/\x/;
+/\u/;
 new (function foo() {})("\\x1f");
 /[\u200E\u2066-\u2069]/gu;

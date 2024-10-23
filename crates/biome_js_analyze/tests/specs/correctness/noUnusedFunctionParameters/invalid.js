@@ -23,3 +23,11 @@ new Promise((accept, reject) => {
 (function (a, b) {
     console.log(a);
 })
+
+function withSpread({ a: { x }, ...rest }) {
+    return rest;
+}
+
+function withArraySpread([a, ...rest]) {
+    return rest;
+}

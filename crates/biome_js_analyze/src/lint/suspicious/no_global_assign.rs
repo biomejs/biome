@@ -9,7 +9,7 @@ use biome_js_syntax::{JsSyntaxKind, TextRange};
 declare_lint_rule! {
     /// Disallow assignments to native objects and read-only global variables.
     ///
-    /// _JavaScript environments contain numerous built-in global variables, such as `window` in browsers and `process` in _Node.js.
+    /// JavaScript's environments contain numerous built-in global variables, such as `window` in browsers and `process` in Node.js.
     /// Assigning values to these global variables can be problematic as it can override essential functionality.
     ///
     /// ## Examples
@@ -50,12 +50,12 @@ declare_lint_rule! {
 impl Rule for NoGlobalAssign {
     type Query = SemanticServices;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let global_refs = ctx.query().all_unresolved_references();
-        let mut result = vec![];
+        let mut result = Vec::new();
         for global_ref in global_refs {
             let is_write = global_ref.syntax().kind() == JsSyntaxKind::JS_IDENTIFIER_ASSIGNMENT;
             if is_write {
@@ -67,7 +67,7 @@ impl Rule for NoGlobalAssign {
                 }
             }
         }
-        result
+        result.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {

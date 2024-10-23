@@ -1,5 +1,5 @@
 use biome_rowan::FileSourceError;
-use biome_string_case::StrExtension;
+use biome_string_case::StrLikeExtension;
 use std::{borrow::Cow, ffi::OsStr, path::Path};
 
 /// Enum of the different ECMAScript standard versions.
@@ -281,10 +281,16 @@ impl JsFileSource {
                 }
             }
             Language::TypeScript { .. } => {
-                if matches!(self.variant, LanguageVariant::Jsx) {
-                    "tsx"
-                } else {
-                    "ts"
+                match self.variant {
+                    LanguageVariant::Standard => "ts",
+                    LanguageVariant::StandardRestricted => {
+                        // This could also be `mts`.
+                        // We choose `cts` because we expect this extension to be more widely used.
+                        // Moreover, it allows more valid syntax such as `import type` with import
+                        // attributes (See `noTypeOnlyImportAttributes` syntax rule).
+                        "cts"
+                    }
+                    LanguageVariant::Jsx => "tsx",
                 }
             }
         }

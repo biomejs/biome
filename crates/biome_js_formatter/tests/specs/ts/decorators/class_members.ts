@@ -28,6 +28,8 @@ class Foo {
 	public get getter() {}
 	@dec
 	public set setter(val) {}
+	@dec
+	public set setter(val,) {}
 
 	// two decorators without a newline
 	@dec

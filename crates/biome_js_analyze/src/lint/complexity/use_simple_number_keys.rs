@@ -57,28 +57,28 @@ declare_lint_rule! {
 pub enum NumberLiteral {
     Binary {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         big_int: bool,
     },
     Decimal {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         big_int: bool,
         underscore: bool,
     },
     Octal {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         big_int: bool,
     },
     Hexadecimal {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         big_int: bool,
     },
     FloatingPoint {
         node: JsLiteralMemberName,
-        value: String,
+        value: Box<str>,
         exponent: bool,
         underscore: bool,
     },
@@ -90,69 +90,66 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
     type Error = NumberLiteralError;
 
     fn try_from(any_member: AnyJsObjectMember) -> Result<Self, Self::Error> {
-        let Some(literal_member_name_syntax) = any_member
+        let Some(literal_member_name) = any_member
             .syntax()
             .children()
-            .find(|x| JsLiteralMemberName::can_cast(x.kind()))
+            .find_map(JsLiteralMemberName::cast)
         else {
             return Err(NumberLiteralError);
         };
-        let literal_member_name = JsLiteralMemberName::cast(literal_member_name_syntax).unwrap();
-
-        let token = literal_member_name.value().unwrap();
+        let Ok(token) = literal_member_name.value() else {
+            return Err(NumberLiteralError);
+        };
         match token.kind() {
             JsSyntaxKind::JS_NUMBER_LITERAL | JsSyntaxKind::JS_BIGINT_LITERAL => {
-                let chars: Vec<char> = token.text_trimmed().chars().collect();
+                let text = token.text_trimmed();
                 let mut value = String::new();
 
                 let mut is_first_char_zero: bool = false;
-                let mut is_second_char_a_letter: Option<char> = None;
+                let mut is_second_char_a_letter: Option<u8> = None;
                 let mut contains_dot: bool = false;
                 let mut exponent: bool = false;
-                let mut largest_digit: char = '0';
+                let mut largest_digit: u8 = b'0';
                 let mut underscore: bool = false;
                 let mut big_int: bool = false;
 
-                for i in 0..chars.len() {
-                    if i == 0 && chars[i] == '0' && chars.len() > 1 {
-                        is_first_char_zero = true;
-                        continue;
+                for (i, b) in text.bytes().enumerate() {
+                    match b {
+                        b'0' if i == 0 && text.len() > 1 => {
+                            is_first_char_zero = true;
+                            continue;
+                        }
+                        b'n' => {
+                            big_int = true;
+                            break;
+                        }
+                        b'e' | b'E' => {
+                            exponent = true;
+                        }
+                        b'_' => {
+                            underscore = true;
+                            continue;
+                        }
+                        b'.' => {
+                            contains_dot = true;
+                        }
+                        b if i == 1 && b.is_ascii_alphabetic() => {
+                            is_second_char_a_letter = Some(b);
+                            continue;
+                        }
+                        _ => {
+                            if largest_digit < b {
+                                largest_digit = b;
+                            }
+                        }
                     }
-
-                    if chars[i] == 'n' {
-                        big_int = true;
-                        break;
-                    }
-
-                    if chars[i] == 'e' || chars[i] == 'E' {
-                        exponent = true;
-                    }
-
-                    if i == 1 && chars[i].is_alphabetic() && !exponent {
-                        is_second_char_a_letter = Some(chars[i]);
-                        continue;
-                    }
-
-                    if chars[i] == '_' {
-                        underscore = true;
-                        continue;
-                    }
-
-                    if chars[i] == '.' {
-                        contains_dot = true;
-                    }
-
-                    if largest_digit < chars[i] {
-                        largest_digit = chars[i];
-                    }
-
-                    value.push(chars[i])
+                    value.push(b as char);
                 }
 
                 if contains_dot {
                     return Ok(Self::FloatingPoint {
                         node: literal_member_name,
-                        value,
+                        value: value.into_boxed_str(),
                         exponent,
                         underscore,
                     });
@@ -160,48 +157,48 @@ impl TryFrom<AnyJsObjectMember> for NumberLiteral {
                 if !is_first_char_zero {
                     return Ok(Self::Decimal {
                         node: literal_member_name,
-                        value,
+                        value: value.into_boxed_str(),
                         big_int,
                         underscore,
                     });
                 };
 
                 match is_second_char_a_letter {
-                    Some('b' | 'B') => {
+                    Some(b'b' | b'B') => {
                         return Ok(Self::Binary {
                             node: literal_member_name,
-                            value,
+                            value: value.into_boxed_str(),
                             big_int,
                         })
                     }
-                    Some('o' | 'O') => {
+                    Some(b'o' | b'O') => {
                         return Ok(Self::Octal {
                             node: literal_member_name,
-                            value,
+                            value: value.into_boxed_str(),
                             big_int,
                         })
                     }
-                    Some('x' | 'X') => {
+                    Some(b'x' | b'X') => {
                         return Ok(Self::Hexadecimal {
                             node: literal_member_name,
-                            value,
+                            value: value.into_boxed_str(),
                             big_int,
                         })
                     }
                     _ => (),
                 }
 
-                if largest_digit < '8' {
+                if largest_digit < b'8' {
                     return Ok(Self::Octal {
                         node: literal_member_name,
-                        value,
+                        value: value.into_boxed_str(),
                         big_int,
                     });
                 }
 
                 Ok(Self::Decimal {
                     node: literal_member_name,
-                    value,
+                    value: value.into_boxed_str(),
                     big_int,
                     underscore,
                 })
@@ -232,13 +229,13 @@ impl NumberLiteral {
         }
     }
 
-    fn value(&self) -> &String {
+    fn value(&self) -> &str {
         match self {
-            Self::Decimal { value, .. } => value,
-            Self::Binary { value, .. } => value,
-            Self::FloatingPoint { value, .. } => value,
-            Self::Octal { value, .. } => value,
-            Self::Hexadecimal { value, .. } => value,
+            Self::Decimal { value, .. } => value.as_ref(),
+            Self::Binary { value, .. } => value.as_ref(),
+            Self::FloatingPoint { value, .. } => value.as_ref(),
+            Self::Octal { value, .. } => value.as_ref(),
+            Self::Hexadecimal { value, .. } => value.as_ref(),
         }
     }
 }
@@ -270,13 +267,12 @@ pub struct RuleState(WrongNumberLiteralName, NumberLiteral);
 impl Rule for UseSimpleNumberKeys {
     type Query = Ast<JsObjectExpression>;
     type State = RuleState;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut signals: Self::Signals = Vec::new();
+        let mut result = Vec::new();
         let node = ctx.query();
-
         for number_literal in node
             .members()
             .into_iter()
@@ -285,32 +281,31 @@ impl Rule for UseSimpleNumberKeys {
         {
             match number_literal {
                 NumberLiteral::Decimal { big_int: true, .. } => {
-                    signals.push(RuleState(WrongNumberLiteralName::BigInt, number_literal))
+                    result.push(RuleState(WrongNumberLiteralName::BigInt, number_literal))
                 }
                 NumberLiteral::FloatingPoint {
                     underscore: true, ..
                 }
                 | NumberLiteral::Decimal {
                     underscore: true, ..
-                } => signals.push(RuleState(
+                } => result.push(RuleState(
                     WrongNumberLiteralName::WithUnderscore,
                     number_literal,
                 )),
                 NumberLiteral::Binary { .. } => {
-                    signals.push(RuleState(WrongNumberLiteralName::Binary, number_literal))
+                    result.push(RuleState(WrongNumberLiteralName::Binary, number_literal))
                 }
-                NumberLiteral::Hexadecimal { .. } => signals.push(RuleState(
+                NumberLiteral::Hexadecimal { .. } => result.push(RuleState(
                     WrongNumberLiteralName::Hexadecimal,
                     number_literal,
                 )),
                 NumberLiteral::Octal { .. } => {
-                    signals.push(RuleState(WrongNumberLiteralName::Octal, number_literal))
+                    result.push(RuleState(WrongNumberLiteralName::Octal, number_literal))
                 }
                 _ => (),
             }
         }
-
-        signals
+        result.into_boxed_slice()
     }
 
     fn diagnostic(

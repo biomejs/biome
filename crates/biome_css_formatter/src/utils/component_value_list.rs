@@ -2,6 +2,7 @@ use crate::comments::CssComments;
 use biome_css_syntax::{CssGenericDelimiter, CssGenericProperty, CssLanguage, CssSyntaxKind};
 use biome_formatter::{write, CstFormatContext};
 use biome_formatter::{FormatOptions, FormatResult};
+use biome_string_case::StrLikeExtension;
 
 use crate::prelude::*;
 use crate::CssFormatter;
@@ -38,9 +39,11 @@ where
                     // Consider the CSS example: `font: first , second;`
                     // The desired format is: `font: first, second;`
                     // A separator should not be added before the comma because the comma acts as a `CssGenericDelimiter`.
-                    let is_comma = CssGenericDelimiter::cast_ref(element.syntax())
+                    let token_kind = CssGenericDelimiter::cast_ref(element.syntax())
                         .and_then(|node| node.value().ok())
-                        .map_or(false, |node| node.kind() == CssSyntaxKind::COMMA);
+                        .map(|token| token.kind());
+
+                    let is_comma = matches!(token_kind, Some(CssSyntaxKind::COMMA));
 
                     if !is_comma {
                         if matches!(
@@ -175,11 +178,10 @@ where
     let is_grid_property = list
         .parent::<CssGenericProperty>()
         .and_then(|parent| parent.name().ok())
-        .and_then(|name| {
-            name.as_css_identifier()
-                .map(|name| name.text().to_lowercase())
-        })
+        .and_then(|name| name.as_css_identifier().map(|name| name.text()))
         .map_or(false, |name| {
+            let name = name.to_ascii_lowercase_cow();
+
             name.starts_with("grid-template") || name == "grid"
         });
 

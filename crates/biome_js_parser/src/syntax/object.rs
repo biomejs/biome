@@ -115,6 +115,8 @@ fn parse_object_member(p: &mut JsParser) -> ParsedSyntax {
         // let a = {
         //  set foo(value) {
         //  },
+        //  set a(value,) {
+        //  },
         //  set "bar"(value) {
         //  },
         //  set ["a" + "b"](value) {
@@ -331,6 +333,11 @@ fn parse_setter_object_member(p: &mut JsParser) -> ParsedSyntax {
             TypeContext::default(),
         )
         .or_add_diagnostic(p, js_parse_error::expected_parameter);
+
+        if p.at(T![,]) {
+            p.bump_any();
+        }
+
         p.expect(T![')']);
     });
 

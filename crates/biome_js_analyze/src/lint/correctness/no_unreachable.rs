@@ -11,7 +11,7 @@ use biome_js_syntax::{
     JsLanguage, JsReturnStatement, JsSwitchStatement, JsSyntaxElement, JsSyntaxKind, JsSyntaxNode,
     JsTryFinallyStatement, JsTryStatement, JsVariableStatement, JsWhileStatement, TextRange,
 };
-use biome_rowan::{declare_node_union, AstNode};
+use biome_rowan::{declare_node_union, AstNode, NodeOrToken};
 use roaring::bitmap::RoaringBitmap;
 use rustc_hash::FxHashMap;
 
@@ -92,7 +92,7 @@ impl Rule for NoUnreachable {
         // Pluralize and adapt the error message accordingly based on the
         // number and position of secondary labels
         match state.terminators.as_slice() {
-            // The CFG didn't contain enough informations to determine a cause
+            // The CFG didn't contain enough information to determine a cause
             // for this range being unreachable
             [] => {}
             // A single node is responsible for this range being unreachable
@@ -137,7 +137,7 @@ impl Rule for NoUnreachable {
             }
             // The range has three or more dominating terminator instructions
             terminators => {
-                // SAFETY: This substraction is safe since the match expression
+                // SAFETY: This subtraction is safe since the match expression
                 // ensures the slice has at least 3 elements
                 let last = terminators.len() - 1;
 
@@ -206,7 +206,7 @@ impl Rule for NoUnreachable {
 const COMPLEXITY_THRESHOLD: u32 = 20;
 
 /// Returns true if the "complexity score" for the [JsControlFlowGraph] is higher
-/// than [COMPLEXITY_THRESHOLD]. This score is an arbritrary value (the formula
+/// than [COMPLEXITY_THRESHOLD]. This score is an arbitrary value (the formula
 /// is similar to the cyclomatic complexity of the function but this is only
 /// approximative) used to determine whether the NoDeadCode rule should perform
 /// a fine reachability analysis or fall back to a simpler algorithm to avoid
@@ -535,14 +535,17 @@ fn has_side_effects(inst: &Instruction<JsLanguage>) -> bool {
         None => return false,
     };
 
-    match element.kind() {
+    let NodeOrToken::Node(node) = element else {
+        return false;
+    };
+
+    match node.kind() {
         JsSyntaxKind::JS_RETURN_STATEMENT => {
-            let node = JsReturnStatement::unwrap_cast(element.as_node().unwrap().clone());
+            let node = JsReturnStatement::unwrap_cast(node.clone());
             node.argument().is_some()
         }
-
         JsSyntaxKind::JS_BREAK_STATEMENT | JsSyntaxKind::JS_CONTINUE_STATEMENT => false,
-        kind => element.as_node().is_some() && !kind.is_literal(),
+        kind => !kind.is_literal(),
     }
 }
 
@@ -653,7 +656,7 @@ impl UnreachableRanges {
 
                 if let Some(terminator) = terminator {
                     // Terminator labels are also stored in ascending order to
-                    // faciliate the generation of labels when the diagnostic
+                    // facilitate the generation of labels when the diagnostic
                     // gets emitted
                     let terminator_insertion = entry
                         .terminators

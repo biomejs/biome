@@ -13,10 +13,15 @@ export const Component2 = () => (
     </div>
 );
 
-export const C = <svg role="img" aria-label="Description of your SVG image">
-</svg>;
+<>
+    <svg role="img" aria-label="Description of your SVG image"></svg>
+    <div role="img" aria-label="Description of the overall image">
+    <img src="graphic1.png" alt="" />
+    <img src="graphic2.png" />
+    </div>
+</>;
 
 <>
     <div role="alert"></div>
     <div role="alertdialog"></div>
-</>
+</>;

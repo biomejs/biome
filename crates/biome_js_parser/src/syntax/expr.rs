@@ -254,10 +254,9 @@ pub(crate) fn parse_number_literal_expression(p: &mut JsParser) -> ParsedSyntax 
     if p.state().strict().is_some()
         && cur_src.starts_with('0')
         && cur_src
-            .chars()
-            .nth(1)
-            .filter(|c| c.is_ascii_digit())
-            .is_some()
+            .as_bytes()
+            .get(1)
+            .is_some_and(|b| b.is_ascii_digit())
     {
         let err_msg = if cur_src.contains(['8', '9']) {
             "Decimals with leading zeros are not allowed in strict mode."
@@ -1451,12 +1450,13 @@ fn parse_primary_expression(p: &mut JsParser, context: ExpressionContext) -> Par
                 // test js import_call
                 // import("foo")
                 // import("foo", { assert: { type: 'json' } })
+                // import("foo", { with: { 'resolution-mode': 'import' } })
 
                 // test_err js import_invalid_args
                 // import()
                 // import(...["foo"])
                 // import("foo", { assert: { type: 'json' } }, "bar")
-
+                // import("foo", { with: { type: 'json' } }, "bar")
                 let args = p.start();
                 p.bump(T!['(']);
                 let args_list = p.start();
@@ -1835,7 +1835,7 @@ fn parse_array_expr(p: &mut JsParser) -> ParsedSyntax {
 // test_err js spread
 // [...]
 /// A spread element consisting of three dots and an assignment expression such as `...foo`
-fn parse_spread_element(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
+pub(crate) fn parse_spread_element(p: &mut JsParser, context: ExpressionContext) -> ParsedSyntax {
     if !p.at(T![...]) {
         return Absent;
     }

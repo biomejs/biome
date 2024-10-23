@@ -25,7 +25,7 @@ pub use biome_diagnostics::category_concat;
 
 pub use crate::categories::{
     ActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder, RuleCategory,
-    SourceActionKind,
+    SourceActionKind, SUPPRESSION_ACTION_CATEGORY,
 };
 pub use crate::diagnostics::{AnalyzerDiagnostic, RuleError, SuppressionDiagnostic};
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
@@ -182,7 +182,7 @@ where
                 SuppressionDiagnostic::new(
                     category!("suppressions/unused"),
                     suppression.comment_span,
-                    "Suppression comment is not being used",
+                    "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
                 )
             });
 
@@ -424,7 +424,7 @@ where
                     suppression
                         .suppressed_instances
                         .iter()
-                        .any(|(filter, v)| *filter == entry.rule && v == value)
+                        .any(|(filter, v)| *filter == entry.rule && v == value.as_ref())
                 })
             });
 

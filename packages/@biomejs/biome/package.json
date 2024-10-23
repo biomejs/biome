@@ -1,6 +1,6 @@
 {
   "name": "@biomejs/biome",
-  "version": "1.9.2",
+  "version": "1.9.4",
   "bin": {
     "biome": "bin/biome"
   },
@@ -50,13 +50,13 @@
     "provenance": true
   },
   "optionalDependencies": {
-    "@biomejs/cli-win32-x64": "1.9.2",
-    "@biomejs/cli-win32-arm64": "1.9.2",
-    "@biomejs/cli-darwin-x64": "1.9.2",
-    "@biomejs/cli-darwin-arm64": "1.9.2",
-    "@biomejs/cli-linux-x64": "1.9.2",
-    "@biomejs/cli-linux-arm64": "1.9.2",
-    "@biomejs/cli-linux-x64-musl": "1.9.2",
-    "@biomejs/cli-linux-arm64-musl": "1.9.2"
+    "@biomejs/cli-win32-x64": "1.9.4",
+    "@biomejs/cli-win32-arm64": "1.9.4",
+    "@biomejs/cli-darwin-x64": "1.9.4",
+    "@biomejs/cli-darwin-arm64": "1.9.4",
+    "@biomejs/cli-linux-x64": "1.9.4",
+    "@biomejs/cli-linux-arm64": "1.9.4",
+    "@biomejs/cli-linux-x64-musl": "1.9.4",
+    "@biomejs/cli-linux-arm64-musl": "1.9.4"
   }
 }

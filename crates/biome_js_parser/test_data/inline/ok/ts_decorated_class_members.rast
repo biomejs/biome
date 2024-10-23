@@ -119,6 +119,7 @@ JsModule {
                         type_annotation: missing (optional),
                         initializer: missing (optional),
                     },
+                    comma_token: missing (optional),
                     r_paren_token: R_PAREN@99..101 ")" [] [Whitespace(" ")],
                     body: JsFunctionBody {
                         l_curly_token: L_CURLY@101..102 "{" [] [],
@@ -224,8 +225,9 @@ JsModule {
             2: (empty)
             3: (empty)
             4: (empty)
-          5: R_PAREN@99..101 ")" [] [Whitespace(" ")]
-          6: JS_FUNCTION_BODY@101..103
+          5: (empty)
+          6: R_PAREN@99..101 ")" [] [Whitespace(" ")]
+          7: JS_FUNCTION_BODY@101..103
             0: L_CURLY@101..102 "{" [] []
             1: JS_DIRECTIVE_LIST@102..102
             2: JS_STATEMENT_LIST@102..102

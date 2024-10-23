@@ -39,6 +39,7 @@ declare module test {
 		[computed]
 
 		set setter(a: string)
+		set setter(a: string, )
 		[computed]
 
 		method()

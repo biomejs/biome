@@ -31,6 +31,7 @@ JsModule {
                         type_annotation: missing (optional),
                         initializer: missing (optional),
                     },
+                    comma_token: missing (optional),
                     r_paren_token: R_PAREN@27..28 ")" [] [],
                     body: missing (required),
                 },
@@ -70,8 +71,9 @@ JsModule {
             2: (empty)
             3: (empty)
             4: (empty)
-          5: R_PAREN@27..28 ")" [] []
-          6: (empty)
+          5: (empty)
+          6: R_PAREN@27..28 ")" [] []
+          7: (empty)
       9: R_CURLY@28..30 "}" [Newline("\n")] []
   4: EOF@30..31 "" [Newline("\n")] []
 --

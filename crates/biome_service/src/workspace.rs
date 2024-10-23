@@ -75,7 +75,7 @@ use smallvec::SmallVec;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::{borrow::Cow, panic::RefUnwindSafe, sync::Arc};
-use tracing::debug;
+use tracing::{debug, instrument};
 
 mod client;
 mod server;
@@ -170,6 +170,7 @@ impl FileFeaturesResult {
         self
     }
 
+    #[instrument(level = "debug", skip(self, settings))]
     pub(crate) fn with_settings_and_language(
         mut self,
         settings: &Settings,
@@ -235,7 +236,8 @@ impl FileFeaturesResult {
         }
 
         debug!(
-            "The file has the following feature sets: \n{:?}",
+            "The file {} has the following feature sets: \n{:?}",
+            path.display().to_string(),
             &self.features_supported
         );
 
@@ -663,6 +665,8 @@ pub enum FixFileMode {
     SafeFixes,
     /// Applies [safe](biome_diagnostics::Applicability::Always) and [unsafe](biome_diagnostics::Applicability::MaybeIncorrect) fixes
     SafeAndUnsafeFixes,
+    /// Applies suppression comments to existing diagnostics when using `--suppress`
+    ApplySuppressions,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

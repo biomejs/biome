@@ -37,20 +37,20 @@ export { T, type U };
 
 # Diagnostics
 ```
-invalid-combined.ts:2:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-combined.ts:2:12 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All these imports are only used as types.
   
     1 │ // Leading comment
   > 2 │ import/*1*/A/*2*/
-      │ ^^^^^^^^^^^^^^^^^
+      │            ^^^^^^
   > 3 │ // Comma comment
   > 4 │ ,/*3*/{ B }/*4*/from/*5*/""/*6*/; // Trailing comment
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     5 │ // Comment
     6 │ export type { A, B };
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
   i Safe fix: Use import type.
   
@@ -67,14 +67,14 @@ invalid-combined.ts:2:1 lint/style/useImportType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid-combined.ts:8:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-combined.ts:8:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The default import and some named imports are only used as types.
   
      6 │ export type { A, B };
      7 │ 
    > 8 │ import C, { D, E, F } from "";
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │        ^^^^^^^^^^^^^^^^^^^^^^
      9 │ export { type C, type D, type E, F };
     10 │ 
   
@@ -96,7 +96,7 @@ invalid-combined.ts:8:1 lint/style/useImportType  FIXABLE  ━━━━━━━
      9 │ export { type C, type D, type E, F };
     10 │ 
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
   i Safe fix: Use import type.
   
@@ -112,18 +112,18 @@ invalid-combined.ts:8:1 lint/style/useImportType  FIXABLE  ━━━━━━━
 ```
 
 ```
-invalid-combined.ts:11:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-combined.ts:11:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All these imports are only used as types.
   
      9 │ export { type C, type D, type E, F };
     10 │ 
   > 11 │ import G, { type H, I } from "";
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^
     12 │ export type { G, H, I };
     13 │ 
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
   i Safe fix: Use import type.
   
@@ -139,20 +139,20 @@ invalid-combined.ts:11:1 lint/style/useImportType  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid-combined.ts:15:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-combined.ts:15:13 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! All these imports are only used as types.
   
     14 │ // Leading comment
   > 15 │ import /*1*/M/*2*/
-       │ ^^^^^^^^^^^^^^^^^^
+       │             ^^^^^^
   > 16 │ // Comma comment
   > 17 │ ,/*3*/*/*4*/as/*5*/N/*6*/from/*7*/""/*8*/;/*9*/
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     18 │ // Comment
     19 │ export type { M, N };
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
   i Safe fix: Use import type.
   
@@ -170,18 +170,18 @@ invalid-combined.ts:15:1 lint/style/useImportType  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid-combined.ts:21:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-combined.ts:21:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The default import is only used as a type.
   
     19 │ export type { M, N };
     20 │ 
   > 21 │ import O, * as P from "";
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+       │        ^^^^^^^^^^^^^^^^^
     22 │ export { type O, P };
     23 │ 
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
   i Safe fix: Use import type.
   
@@ -208,7 +208,7 @@ invalid-combined.ts:24:11 lint/style/useImportType  FIXABLE  ━━━━━━�
     25 │ export { Q, type R };
     26 │ 
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
   i Safe fix: Use import type.
   
@@ -224,14 +224,14 @@ invalid-combined.ts:24:11 lint/style/useImportType  FIXABLE  ━━━━━━�
 ```
 
 ```
-invalid-combined.ts:27:1 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-combined.ts:27:8 lint/style/useImportType  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Some named imports are only used as types.
   
     25 │ export { Q, type R };
     26 │ 
   > 27 │ import T, { U } from "";
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^
+       │        ^^^^^^^^^^^^^^^^
     28 │ export { T, type U };
     29 │ 
   
@@ -244,13 +244,11 @@ invalid-combined.ts:27:1 lint/style/useImportType  FIXABLE  ━━━━━━�
     28 │ export { T, type U };
     29 │ 
   
-  i Importing the types with import type ensures that they are removed by the transpilers and avoids loading unnecessary modules.
+  i Importing the types with import type ensures that they are removed by the compilers and avoids loading unnecessary modules.
   
-  i Safe fix: Use import type.
+  i Safe fix: Add inline type keywords.
   
     27 │ import·T,·{·type·U·}·from·"";
        │             +++++            
 
 ```
-
-

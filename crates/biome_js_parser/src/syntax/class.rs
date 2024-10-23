@@ -118,6 +118,7 @@ pub(super) fn parse_class_expression(
 //     abstract display();
 //     abstract get my_name();
 //     abstract set my_name(val);
+//     abstract set my_age(age,);
 // }
 
 // test_err ts typescript_abstract_classes_incomplete
@@ -252,6 +253,10 @@ fn parse_class(p: &mut JsParser, kind: ClassKind, decorator_list: ParsedSyntax) 
         Present(id) => {
             let text = p.text(id.range(p));
             if TypeScript.is_supported(p) && is_reserved_type_name(text) {
+                // test_err ts ts_class_name_reserved_as_type
+                // class undefined {}
+                // class string {}
+                // class any {}
                 let err = p
                     .err_builder(format!(
                             "`{text}` cannot be used as a class name because it is already reserved as a type"
@@ -707,11 +712,14 @@ fn parse_class_member_impl(
     // test js setter_class_member
     // class Setters {
     //   set foo(a) {}
+    //   set bax(a,) {}
     //   set static(a) {}
     //   static set bar(a) {}
+    //   static set baz(a,) {}
     //   set "baz"(a) {}
     //   set ["a" + "b"](a) {}
     //   set 5(a) {}
+    //   set 6(a,) {}
     //   set #private(a) {}
     // }
     // class NotSetters {
@@ -785,6 +793,11 @@ fn parse_class_member_impl(
                 )
             })
             .or_add_diagnostic(p, js_parse_error::expected_parameter);
+
+            if p.at(T![,]) {
+                p.bump_any();
+            }
+
             p.expect(T![')']);
 
             // test_err ts ts_setter_return_type_annotation

@@ -61,7 +61,7 @@ impl ParsedSyntax {
         }
     }
 
-    /// Calls `op` if the syntax is absent ond otherwise returns [ParsedSyntax::Present]
+    /// Calls `op` if the syntax is absent and otherwise returns [ParsedSyntax::Present]
     #[inline]
     pub fn or_else<F>(self, op: F) -> ParsedSyntax
     where

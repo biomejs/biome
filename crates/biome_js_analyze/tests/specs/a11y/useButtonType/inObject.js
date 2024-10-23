@@ -12,6 +12,5 @@ React.createElement('button', {
 React.createElement('button', {});
 
 // valid
-React.createElement('button', {
-    "type": foo
-});
+React.createElement('button', { "type": foo });
+React.createElement("button", { type: "button" }, "foo")

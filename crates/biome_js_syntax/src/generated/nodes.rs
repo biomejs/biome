@@ -5944,6 +5944,7 @@ impl JsSetterClassMember {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             parameter: self.parameter(),
+            comma_token: self.comma_token(),
             r_paren_token: self.r_paren_token(),
             body: self.body(),
         }
@@ -5963,11 +5964,14 @@ impl JsSetterClassMember {
     pub fn parameter(&self) -> SyntaxResult<AnyJsFormalParameter> {
         support::required_node(&self.syntax, 4usize)
     }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 5usize)
+    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+        support::required_token(&self.syntax, 6usize)
     }
     pub fn body(&self) -> SyntaxResult<JsFunctionBody> {
-        support::required_node(&self.syntax, 6usize)
+        support::required_node(&self.syntax, 7usize)
     }
 }
 impl Serialize for JsSetterClassMember {
@@ -5985,6 +5989,7 @@ pub struct JsSetterClassMemberFields {
     pub name: SyntaxResult<AnyJsClassMemberName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameter: SyntaxResult<AnyJsFormalParameter>,
+    pub comma_token: Option<SyntaxToken>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<JsFunctionBody>,
 }
@@ -6008,6 +6013,7 @@ impl JsSetterObjectMember {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             parameter: self.parameter(),
+            comma_token: self.comma_token(),
             r_paren_token: self.r_paren_token(),
             body: self.body(),
         }
@@ -6024,11 +6030,14 @@ impl JsSetterObjectMember {
     pub fn parameter(&self) -> SyntaxResult<AnyJsFormalParameter> {
         support::required_node(&self.syntax, 3usize)
     }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
+    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 5usize)
     }
     pub fn body(&self) -> SyntaxResult<JsFunctionBody> {
-        support::required_node(&self.syntax, 5usize)
+        support::required_node(&self.syntax, 6usize)
     }
 }
 impl Serialize for JsSetterObjectMember {
@@ -6045,6 +6054,7 @@ pub struct JsSetterObjectMemberFields {
     pub name: SyntaxResult<AnyJsObjectMemberName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameter: SyntaxResult<AnyJsFormalParameter>,
+    pub comma_token: Option<SyntaxToken>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<JsFunctionBody>,
 }
@@ -9937,9 +9947,7 @@ impl TsImportType {
         TsImportTypeFields {
             typeof_token: self.typeof_token(),
             import_token: self.import_token(),
-            l_paren_token: self.l_paren_token(),
-            argument_token: self.argument_token(),
-            r_paren_token: self.r_paren_token(),
+            arguments: self.arguments(),
             qualifier_clause: self.qualifier_clause(),
             type_arguments: self.type_arguments(),
         }
@@ -9950,20 +9958,14 @@ impl TsImportType {
     pub fn import_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn argument_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn arguments(&self) -> SyntaxResult<JsCallArguments> {
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn qualifier_clause(&self) -> Option<TsImportTypeQualifier> {
-        support::node(&self.syntax, 5usize)
+        support::node(&self.syntax, 3usize)
     }
     pub fn type_arguments(&self) -> Option<TsTypeArguments> {
-        support::node(&self.syntax, 6usize)
+        support::node(&self.syntax, 4usize)
     }
 }
 impl Serialize for TsImportType {
@@ -9978,9 +9980,7 @@ impl Serialize for TsImportType {
 pub struct TsImportTypeFields {
     pub typeof_token: Option<SyntaxToken>,
     pub import_token: SyntaxResult<SyntaxToken>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub argument_token: SyntaxResult<SyntaxToken>,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub arguments: SyntaxResult<JsCallArguments>,
     pub qualifier_clause: Option<TsImportTypeQualifier>,
     pub type_arguments: Option<TsTypeArguments>,
 }
@@ -12085,6 +12085,7 @@ impl TsSetterSignatureClassMember {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             parameter: self.parameter(),
+            comma_token: self.comma_token(),
             r_paren_token: self.r_paren_token(),
             semicolon_token: self.semicolon_token(),
         }
@@ -12104,11 +12105,14 @@ impl TsSetterSignatureClassMember {
     pub fn parameter(&self) -> SyntaxResult<AnyJsFormalParameter> {
         support::required_node(&self.syntax, 4usize)
     }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 5usize)
+    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+        support::required_token(&self.syntax, 6usize)
     }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 6usize)
+        support::token(&self.syntax, 7usize)
     }
 }
 impl Serialize for TsSetterSignatureClassMember {
@@ -12126,6 +12130,7 @@ pub struct TsSetterSignatureClassMemberFields {
     pub name: SyntaxResult<AnyJsClassMemberName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameter: SyntaxResult<AnyJsFormalParameter>,
+    pub comma_token: Option<SyntaxToken>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub semicolon_token: Option<SyntaxToken>,
 }
@@ -12149,6 +12154,7 @@ impl TsSetterSignatureTypeMember {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             parameter: self.parameter(),
+            comma_token: self.comma_token(),
             r_paren_token: self.r_paren_token(),
             separator_token: self.separator_token(),
         }
@@ -12165,11 +12171,14 @@ impl TsSetterSignatureTypeMember {
     pub fn parameter(&self) -> SyntaxResult<AnyJsFormalParameter> {
         support::required_node(&self.syntax, 3usize)
     }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
+    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 5usize)
     }
     pub fn separator_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 5usize)
+        support::token(&self.syntax, 6usize)
     }
 }
 impl Serialize for TsSetterSignatureTypeMember {
@@ -12186,6 +12195,7 @@ pub struct TsSetterSignatureTypeMemberFields {
     pub name: SyntaxResult<AnyJsObjectMemberName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameter: SyntaxResult<AnyJsFormalParameter>,
+    pub comma_token: Option<SyntaxToken>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub separator_token: Option<SyntaxToken>,
 }
@@ -21975,6 +21985,10 @@ impl std::fmt::Debug for JsSetterClassMember {
             )
             .field("parameter", &support::DebugSyntaxResult(self.parameter()))
             .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
+            .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
             )
@@ -22023,6 +22037,10 @@ impl std::fmt::Debug for JsSetterObjectMember {
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
             .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+            .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
@@ -26004,18 +26022,7 @@ impl std::fmt::Debug for TsImportType {
                 "import_token",
                 &support::DebugSyntaxResult(self.import_token()),
             )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "argument_token",
-                &support::DebugSyntaxResult(self.argument_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
+            .field("arguments", &support::DebugSyntaxResult(self.arguments()))
             .field(
                 "qualifier_clause",
                 &support::DebugOptionalElement(self.qualifier_clause()),
@@ -28161,6 +28168,10 @@ impl std::fmt::Debug for TsSetterSignatureClassMember {
             )
             .field("parameter", &support::DebugSyntaxResult(self.parameter()))
             .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
+            .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
             )
@@ -28212,6 +28223,10 @@ impl std::fmt::Debug for TsSetterSignatureTypeMember {
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
             .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+            .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),

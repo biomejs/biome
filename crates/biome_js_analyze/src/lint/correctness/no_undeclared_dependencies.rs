@@ -1,4 +1,4 @@
-use crate::services::manifest::Manifest;
+use crate::{globals::is_node_builtin_module, services::manifest::Manifest};
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
@@ -64,6 +64,8 @@ impl Rule for NoUndeclaredDependencies {
             // TODO: we should also check that an `.` exports exists.
             // See https://nodejs.org/api/packages.html#self-referencing-a-package-using-its-name
             || ctx.name() == Some(package_name)
+            // ignore Node.js builtin modules
+            || is_node_builtin_module(package_name)
             // Ignore `bun` import
             || package_name == "bun"
         {
@@ -115,9 +117,9 @@ fn parse_package_name(path: &str) -> Option<&str> {
                 in_scope = true;
             }
             // uppercase characters are not allowed in package name
-            // and a package name cannot start with an underscore.
             // Here we are more tolerant and accept them.
             b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' => {}
+            b'.' if i != 0 => {}
             b'/' => {
                 if in_scope {
                     if i == 1 {
@@ -162,6 +164,8 @@ fn test() {
     assert_eq!(parse_package_name("0/path"), Some("0"));
     assert_eq!(parse_package_name("-"), Some("-"));
     assert_eq!(parse_package_name("-/path"), Some("-"));
+    assert_eq!(parse_package_name("a.js"), Some("a.js"));
+    assert_eq!(parse_package_name("@././file"), Some("@./."));
 
     // Invalid package names that we accept
     assert_eq!(parse_package_name("PACKAGE"), Some("PACKAGE"));

@@ -111,7 +111,7 @@ impl Rule for NoInvalidGridAreas {
             // Need to remove `"` with escaping slash from the grid area
             // Ex: "\"a a a\""
             .map(|x| {
-                let trimmed_text = x.token_text();
+                let trimmed_text = x.token_text_trimmed();
                 let text_range = x.text_range();
                 (trimmed_text, text_range)
             })
@@ -168,12 +168,12 @@ impl Rule for NoInvalidGridAreas {
 
 // Check if the grid areas are consistent
 fn is_consistent_grids(grid_areas_props: GridAreasProps) -> Option<UseConsistentGridAreasState> {
-    let first_prop = clean_text(&grid_areas_props[0].0);
+    let first_prop = inner_string_text(&grid_areas_props[0].0);
     let first_len = first_prop.len();
     let mut shortest = &grid_areas_props[0];
 
     for grid_areas_prop in &grid_areas_props {
-        let cleaned_text = clean_text(&grid_areas_prop.0);
+        let cleaned_text = inner_string_text(&grid_areas_prop.0);
         // Check if the grid areas are empty
         if cleaned_text.is_empty() {
             return Some(UseConsistentGridAreasState {
@@ -184,7 +184,7 @@ fn is_consistent_grids(grid_areas_props: GridAreasProps) -> Option<UseConsistent
         }
         // Check if all elements have the same length
         if cleaned_text.len() != first_len {
-            if cleaned_text.len() < clean_text(&shortest.0).len() {
+            if cleaned_text.len() < inner_string_text(&shortest.0).len() {
                 shortest = grid_areas_prop;
             }
             return Some(UseConsistentGridAreasState {
@@ -223,17 +223,19 @@ fn is_consistent_grids(grid_areas_props: GridAreasProps) -> Option<UseConsistent
 
 // Check if all characters in a string are the same
 fn is_all_same(token_text: TokenText) -> bool {
-    let prop = clean_text(&token_text);
-    let chars: Vec<char> = prop.chars().filter(|c| !c.is_whitespace()).collect();
-    let head = chars[0];
-    chars.iter().all(|&c| c == head)
+    let prop = inner_string_text(&token_text);
+    let mut iter = prop.chars().filter(|c| !c.is_whitespace());
+    let Some(head) = iter.next() else {
+        return true;
+    };
+    iter.all(|c| c == head)
 }
 
 fn has_partial_match(grid_areas_props: &GridAreasProps) -> Option<GridAreasProp> {
     let mut seen_parts = FxHashSet::default();
 
     for (text, range) in grid_areas_props {
-        let prop = clean_text(text);
+        let prop = inner_string_text(text);
         let parts: FxHashSet<String> = prop
             .split_whitespace()
             .map(|part| part.to_string())
@@ -248,6 +250,15 @@ fn has_partial_match(grid_areas_props: &GridAreasProps) -> Option<GridAreasProp>
     None
 }
 
-fn clean_text(text: &TokenText) -> String {
-    text.replace('"', "").trim().to_string()
+fn inner_string_text(text: &TokenText) -> &str {
+    let result = text.text();
+    if result.len() >= 2 {
+        debug_assert!(
+            (result.starts_with('"') && result.len() >= 2 && result.ends_with('"'))
+                || (result.starts_with('\'') && result.len() >= 2 && result.ends_with('\''))
+        );
+        result[1..result.len() - 1].trim()
+    } else {
+        result
+    }
 }

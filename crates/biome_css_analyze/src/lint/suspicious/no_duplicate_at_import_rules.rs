@@ -6,6 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssAtRule, AnyCssRule, CssImportAtRule, CssRuleList};
 use biome_rowan::AstNode;
+use biome_string_case::StrOnlyExtension;
 
 declare_lint_rule! {
     /// Disallow duplicate `@import` rules.
@@ -71,7 +72,7 @@ impl Rule for NoDuplicateAtImportRules {
                             .url()
                             .ok()?
                             .text()
-                            .to_lowercase()
+                            .to_lowercase_cow()
                             .replace("url(", "")
                             .replace(')', "")
                             .replace('"', "'");
@@ -85,7 +86,9 @@ impl Rule for NoDuplicateAtImportRules {
                             for media in import_rule.media() {
                                 match media {
                                     Ok(media) => {
-                                        if !media_query_set.insert(media.text().to_lowercase()) {
+                                        if !media_query_set
+                                            .insert(media.text().to_lowercase_cow().into())
+                                        {
                                             return Some(import_rule);
                                         }
                                     }
@@ -97,7 +100,7 @@ impl Rule for NoDuplicateAtImportRules {
                             for media in import_rule.media() {
                                 match media {
                                     Ok(media) => {
-                                        media_set.insert(media.text().to_lowercase());
+                                        media_set.insert(media.text().to_lowercase_cow().into());
                                     }
                                     _ => return None,
                                 }

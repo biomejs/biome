@@ -115,6 +115,12 @@ pub struct VcsTargeted {
     pub changed: bool,
 }
 
+impl From<(bool, bool)> for VcsTargeted {
+    fn from((staged, changed): (bool, bool)) -> Self {
+        Self { staged, changed }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum TraversalMode {
     /// This mode is enabled when running the command `biome check`
@@ -151,6 +157,8 @@ pub enum TraversalMode {
         skip: Vec<RuleSelector>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
+        /// Supress existing diagnostics with a `// biome-ignore` comment
+        suppress: bool,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {
@@ -390,6 +398,18 @@ impl Execution {
             | TraversalMode::Format { vcs_targeted, .. }
             | TraversalMode::CI { vcs_targeted, .. } => vcs_targeted.staged || vcs_targeted.changed,
             TraversalMode::Migrate { .. } | TraversalMode::Search { .. } => false,
+        }
+    }
+
+    /// Returns [true] if the user used the `--write`/`--fix` option
+    pub(crate) fn is_write(&self) -> bool {
+        match self.traversal_mode {
+            TraversalMode::Check { fix_file_mode, .. } => fix_file_mode.is_some(),
+            TraversalMode::Lint { fix_file_mode, .. } => fix_file_mode.is_some(),
+            TraversalMode::CI { .. } => false,
+            TraversalMode::Format { write, .. } => write,
+            TraversalMode::Migrate { write, .. } => write,
+            TraversalMode::Search { .. } => false,
         }
     }
 }

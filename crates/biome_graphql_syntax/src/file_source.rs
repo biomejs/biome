@@ -1,5 +1,5 @@
 use biome_rowan::FileSourceError;
-use biome_string_case::StrExtension;
+use biome_string_case::StrLikeExtension;
 use std::ffi::OsStr;
 use std::path::Path;
 

@@ -1,0 +1,91 @@
+[
+  // ========================================================================
+  // Index access
+  // ========================================================================
+  "array.at(-1)",
+  "array[array.length - 0];",
+  "array[array.length + 1]",
+  "array[array.length + -1]",
+  "foo[bar.length - 1]",
+  "array?.[array.length - 1];",
+  // LHS
+  "array[array.length - 1] = 1",
+  "array[array.length - 1] %= 1",
+  "++ array[array.length - 1]",
+  "array[array.length - 1] --",
+  "delete array[array.length - 1]",
+  "class Foo {bar; #bar; baz() {return this.#bar[this.bar.length - 1]}}",
+  "([array[array.length - 1]] = [])",
+  "({foo: array[array.length - 1] = 9} = {})",
+  // ========================================================================
+  // `String#charAt`
+  // ========================================================================
+  "string.charAt(string.length - 0);",
+  "string.charAt(string.length + 1)",
+  "string.charAt(string.length + -1)",
+  "foo.charAt(bar.length - 1)",
+  "string?.charAt?.(string.length - 1);",
+  "string?.charAt(string.length - 1);",
+  "string.charAt(9);",
+  "string1.charAt(string2.length - 1);",
+  "string.charAt(hoge.string.length - 1)",
+  "string.charAt(string.length - 1 + 1)",
+  "string.charAt(string.length + 1 - 1)",
+  // ========================================================================
+  // `.slice(x)`
+  // ========================================================================
+  "array.slice(-1)",
+  "new array.slice(-1)",
+  "array.slice(-1)?.[0]",
+  "array.slice?.(-1)[0]",
+  "array?.slice(-1)[0]",
+  "array.notSlice(-1)[0]",
+  "array.slice()[0]",
+  "array.slice(...[-1])[0]",
+  "array.slice(-1).shift?.()",
+  "array.slice(-1)?.shift()",
+  "array.slice(-1).shift(...[])",
+  "new array.slice(-1).shift()",
+  // LHS
+  "array.slice(-1)[0] += 1",
+  "++ array.slice(-1)[0]",
+  "array.slice(-1)[0] --",
+  "delete array.slice(-1)[0]",
+  // ========================================================================
+  // `.slice(x, y)`
+  // ========================================================================
+  "array.slice(-9.1, -8.1)[0]",
+  "array.slice(-unknown, -unknown2)[0]",
+  "array.slice(-9.1, unknown)[0]",
+  "array.slice(-9, unknown).pop()",
+  "array.slice(-9, ...unknown)[0]",
+  "array.slice(...[-9], unknown)[0]",
+  // Since the second argument is explicitly specified and its value can change the output if it is not a number, ignore all cases.
+  "array.slice(-9, unknown)[0]",
+  "array.slice(-9, unknown).shift()",
+  "const KNOWN = -8; array.slice(-9, KNOWN).shift()",
+  "(( (( array.slice( ((-9)), ((unknown)), ).shift ))() ));",
+  "array.slice(-9, (a, really, _really, complicated, second) => argument)[0]",
+  // ========================================================================
+  // `lodash.last(array)`
+  // ========================================================================
+  // Under the original rules, it was considered an error, but due to concerns about false positives, it is currently allowed.
+  "_.last(array)",
+  "lodash.last(array)",
+  "underscore.last(array)",
+  "_.last(new Array)",
+  "const foo = []; _.last([bar])",
+  "const foo = []; _.last(new Array)",
+  "const foo = []; _.last(((new Array)))",
+  "if (foo) _.last([bar])",
+  "function foo() {return _.last(arguments)}",
+  // valid
+  "new _.last(array)",
+  "_.last(array, 2)",
+  "_.last(...array)",
+  // not lodash
+  "_.last()",
+  "other._.last(array)",
+  "other.underscore.last(array)",
+  "other.lodash.last(array)"
+]

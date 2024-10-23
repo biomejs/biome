@@ -2,8 +2,8 @@ use crate::grit_tree::GritTargetTree;
 use crate::util::TextRangeGritExt;
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::{NodeOrToken, SyntaxKind, SyntaxSlot, TextRange};
-use grit_util::{AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
-use std::{borrow::Cow, fmt::Debug, ops::Deref, str::Utf8Error};
+use grit_util::{error::GritResult, AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
+use std::{borrow::Cow, fmt::Debug, ops::Deref};
 
 use NodeOrToken::*;
 
@@ -261,6 +261,52 @@ impl<'a> GritTargetNode<'a> {
         let trimmed_range = self.text_trimmed_range();
         &self.source()[trimmed_range.start().into()..trimmed_range.end().into()]
     }
+
+    /// Matches the `kind` of this node, and those of all its children, with
+    /// those of another node.
+    ///
+    /// This is a relatively cheap way to discover whether two parsed snippets
+    /// are identical when they were parsed from the same source string, but
+    /// with different contexts. In that use case, we already know the snippet
+    /// is essentially the same, but we only detect a meaningful difference in
+    /// context by looking for a variance in node kinds.
+    pub fn matches_kinds_recursively_with(&self, other: &Self) -> bool {
+        let mut cursor_a = self.walk();
+        let mut cursor_b = other.walk();
+
+        // Are we navigating back up? If so, we shouldn't try to visit any
+        // children until we've visited another sibling, or we'd run in circles.
+        let mut up = false;
+
+        loop {
+            if cursor_a.node().kind() != cursor_b.node().kind() {
+                break false;
+            }
+
+            if !up && cursor_a.goto_first_child() {
+                if !cursor_b.goto_first_child() {
+                    break false;
+                }
+            } else if cursor_a.goto_next_sibling() {
+                if cursor_b.goto_first_child() || !cursor_b.goto_next_sibling() {
+                    break false;
+                }
+
+                up = false;
+            } else if cursor_a.goto_parent() {
+                if (!up && cursor_b.goto_first_child())
+                    || cursor_b.goto_next_sibling()
+                    || !cursor_b.goto_parent()
+                {
+                    break false;
+                }
+
+                up = true;
+            } else {
+                break true;
+            }
+        }
+    }
 }
 
 impl<'a> Debug for GritTargetNode<'a> {
@@ -338,7 +384,7 @@ impl<'a> GritAstNode for GritTargetNode<'a> {
         }
     }
 
-    fn text(&self) -> Result<Cow<str>, Utf8Error> {
+    fn text(&self) -> GritResult<Cow<str>> {
         Ok(Cow::Borrowed(self.text()))
     }
 

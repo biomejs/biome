@@ -158,6 +158,7 @@ impl ParseNodeList for ElementList {
 
     fn parse_element(&mut self, p: &mut Self::Parser<'_>) -> ParsedSyntax {
         match p.cur() {
+            T![<!--] => parse_comment(p),
             T![<] => parse_element(p),
             HTML_LITERAL => {
                 let m = p.start();
@@ -262,4 +263,15 @@ fn parse_attribute_initializer(p: &mut HtmlParser) -> ParsedSyntax {
     p.bump_with_context(T![=], HtmlLexContext::AttributeValue);
     parse_attribute_string_literal(p).or_add_diagnostic(p, expected_initializer);
     Present(m.complete(p, HTML_ATTRIBUTE_INITIALIZER_CLAUSE))
+}
+
+fn parse_comment(p: &mut HtmlParser) -> ParsedSyntax {
+    if !p.at(T![<!--]) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump_with_context(T![<!--], HtmlLexContext::Comment);
+    p.bump_with_context(HTML_LITERAL, HtmlLexContext::Comment);
+    p.expect(T![-->]);
+    Present(m.complete(p, HTML_COMMENT))
 }

@@ -8,7 +8,7 @@
 [![cargo version][cargo-badge]][cargo-url]
 
 [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=green
-[discord-url]: https://discord.gg/BypW39g6Yc
+[discord-url]: https://biomejs.dev/chat
 [cargo-badge]: https://badgen.net/crates/v/biome_css_parser?&color=green
 [cargo-url]: https://crates.io/crates/biome_css_parser/
 

@@ -48,13 +48,8 @@ impl BubbleCompiler {
             .map(|(name, range)| Ok(Pattern::Variable(context.register_variable(name, range))))
             .collect::<Result<Vec<_>, CompileError>>()?;
 
-        let pattern_def = PatternDefinition::new(
-            "<bubble>".to_owned(),
-            local_scope_index,
-            params,
-            local_vars.values().copied().collect(),
-            body,
-        );
+        let pattern_def =
+            PatternDefinition::new("<bubble>".to_owned(), local_scope_index, params, body);
 
         Ok(Bubble::new(pattern_def, args))
     }
