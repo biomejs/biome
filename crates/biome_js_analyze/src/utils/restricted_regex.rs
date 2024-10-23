@@ -1,6 +1,6 @@
 use std::{ops::Deref, str::FromStr};
 
-use biome_deserialize::DeserializationDiagnostic;
+use biome_deserialize::{DeserializableValue, DeserializationContext, DeserializationDiagnostic};
 use biome_rowan::{TextRange, TextSize};
 
 /// A restricted regular expression only supports widespread syntaxes:
@@ -77,11 +77,11 @@ impl TryFrom<String> for RestrictedRegex {
 // We use a custom impl to precisely report the location of the error.
 impl biome_deserialize::Deserializable for RestrictedRegex {
     fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
-        let regex = String::deserialize(value, name, diagnostics)?;
+        let regex = String::deserialize(ctx, value, name)?;
         match regex.parse() {
             Ok(regex) => Some(regex),
             Err(error) => {
@@ -89,7 +89,7 @@ impl biome_deserialize::Deserializable for RestrictedRegex {
                 let range = error.index().map_or(range, |index| {
                     TextRange::at(range.start() + TextSize::from(1 + index), 1u32.into())
                 });
-                diagnostics.push(
+                ctx.report(
                     DeserializationDiagnostic::new(format_args!("{error}")).with_range(range),
                 );
                 None

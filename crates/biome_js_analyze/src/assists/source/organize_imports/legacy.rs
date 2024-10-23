@@ -1,5 +1,4 @@
-use std::{cell::Cell, cmp::Ordering, collections::BTreeMap, iter};
-
+use biome_analyze::QueryMatch;
 use biome_js_factory::make;
 use biome_js_syntax::{
     AnyJsImportClause, AnyJsModuleItem, AnyJsNamedImportSpecifier, JsImport, JsLanguage, JsModule,
@@ -9,6 +8,7 @@ use biome_rowan::{
     chain_trivia_pieces, AstNode, AstNodeExt, AstNodeList, AstSeparatedList, BatchMutation,
     SyntaxTriviaPiece, TextRange, TokenText, TriviaPiece, TriviaPieceKind,
 };
+use std::{cell::Cell, cmp::Ordering, collections::BTreeMap, iter};
 
 pub(crate) fn run(root: &JsModule) -> Option<ImportGroups> {
     let mut groups = Vec::new();

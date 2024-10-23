@@ -315,7 +315,6 @@ fn custom_explanation_with_reason() {
     ));
 }
 
-
 #[test]
 fn unused_suppression_after_top_level() {
     let mut fs = MemoryFileSystem::default();
