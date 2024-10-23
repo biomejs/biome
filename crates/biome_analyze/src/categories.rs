@@ -142,9 +142,9 @@ impl ActionCategory {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
-#[serde(rename_all = "camelCase")]
 pub enum RefactorKind {
     /// This action describes a refactor with no particular sub-category
     None,
@@ -183,9 +183,9 @@ pub enum RefactorKind {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
-#[serde(rename_all = "camelCase")]
 pub enum SourceActionKind {
     /// This action describes a source action with no particular sub-category
     None,
