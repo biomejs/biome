@@ -1,0 +1,59 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: html/attributes/class-many-short-names.html
+---
+# Input
+
+```html
+<div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 text-gray-light ml-1 f6 d-none d-on-nav-focus js-jump-to-badge-jump">
+  Jump to
+  <span class="d-inline-block ml-1 v-align-middle">x</span>
+</div>
+
+```
+
+
+# Prettier differences
+
+```diff
+--- Prettier
++++ Biome
+@@ -1,7 +1,4 @@
+-<div
+-  aria-hidden="true"
+-  class="border rounded-1 flex-shrink-0 bg-gray px-1 text-gray-light ml-1 f6 d-none d-on-nav-focus js-jump-to-badge-jump"
+->
++<div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 text-gray-light ml-1 f6 d-none d-on-nav-focus js-jump-to-badge-jump">
+   Jump to
+   <span class="d-inline-block ml-1 v-align-middle">x</span>
+-</div>
++</div>
+\ No newline at end of file
+```
+
+# Output
+
+```html
+<div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 text-gray-light ml-1 f6 d-none d-on-nav-focus js-jump-to-badge-jump">
+  Jump to
+  <span class="d-inline-block ml-1 v-align-middle">x</span>
+</div>```
+
+# Errors
+```
+class-many-short-names.html:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected character `-`
+  
+  > 1 │ <div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 text-gray-light ml-1 f6 d-none d-on-nav-focus js-jump-to-badge-jump">
+      │          ^
+    2 │   Jump to
+    3 │   <span class="d-inline-block ml-1 v-align-middle">x</span>
+  
+
+```
+
+# Lines exceeding max width of 80 characters
+```
+    1: <div aria-hidden="true" class="border rounded-1 flex-shrink-0 bg-gray px-1 text-gray-light ml-1 f6 d-none d-on-nav-focus js-jump-to-badge-jump">
+```
