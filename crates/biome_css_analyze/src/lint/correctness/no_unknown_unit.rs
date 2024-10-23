@@ -6,7 +6,7 @@ use biome_css_syntax::{
     AnyCssDimension, CssFunction, CssGenericProperty, CssQueryFeaturePlain, CssSyntaxKind,
 };
 use biome_rowan::{SyntaxNodeCast, TextRange};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 const RESOLUTION_MEDIA_FEATURE_NAMES: [&str; 3] =
     ["resolution", "min-resolution", "max-resolution"];
@@ -111,7 +111,7 @@ impl Rule for NoUnknownUnit {
                                     .value_token()
                                     .ok()?;
                                 let function_name =
-                                    function_name_token.text_trimmed().to_lowercase_cow();
+                                    function_name_token.text_trimmed().to_ascii_lowercase_cow();
 
                                 if function_name.ends_with("image-set") {
                                     allow_x = true;
@@ -127,7 +127,7 @@ impl Rule for NoUnknownUnit {
                                     .value_token()
                                     .ok()?;
                                 let property_name =
-                                    property_name_token.text_trimmed().to_lowercase_cow();
+                                    property_name_token.text_trimmed().to_ascii_lowercase_cow();
 
                                 if property_name == "image-resolution" {
                                     allow_x = true;
@@ -142,7 +142,7 @@ impl Rule for NoUnknownUnit {
                                     .value_token()
                                     .ok()?;
                                 let feature_name =
-                                    feature_name_token.text_trimmed().to_lowercase_cow();
+                                    feature_name_token.text_trimmed().to_ascii_lowercase_cow();
 
                                 if RESOLUTION_MEDIA_FEATURE_NAMES.contains(&feature_name.as_ref()) {
                                     allow_x = true;

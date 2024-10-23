@@ -23,6 +23,7 @@ JsModule {
                     },
                     l_paren_token: L_PAREN@25..26 "(" [] [],
                     parameter: missing (required),
+                    comma_token: missing (optional),
                     r_paren_token: R_PAREN@26..28 ")" [] [Whitespace(" ")],
                     body: JsFunctionBody {
                         l_curly_token: L_CURLY@28..29 "{" [] [],
@@ -61,8 +62,9 @@ JsModule {
             0: IDENT@22..25 "foo" [] []
           3: L_PAREN@25..26 "(" [] []
           4: (empty)
-          5: R_PAREN@26..28 ")" [] [Whitespace(" ")]
-          6: JS_FUNCTION_BODY@28..30
+          5: (empty)
+          6: R_PAREN@26..28 ")" [] [Whitespace(" ")]
+          7: JS_FUNCTION_BODY@28..30
             0: L_CURLY@28..29 "{" [] []
             1: JS_DIRECTIVE_LIST@29..29
             2: JS_STATEMENT_LIST@29..29

@@ -1433,6 +1433,9 @@ fn parse_ts_getter_signature_type_member(p: &mut JsParser, context: TypeContext)
 // type C = { set(a) }
 // type D = { set: number }
 // type E = { set }
+// type F = { set(b: number,) }
+// type G = {set a(b,)}
+// type H = {set(a, ) }
 fn parse_ts_setter_signature_type_member(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
     if !p.at(T![set]) {
         return Absent;
@@ -1464,6 +1467,11 @@ fn parse_ts_setter_signature_type_member(p: &mut JsParser, context: TypeContext)
         context,
     )
     .or_add_diagnostic(p, expected_parameter);
+
+    if p.at(T![,]) {
+        p.bump_any();
+    }
+
     p.expect(T![')']);
     parse_ts_type_member_semi(p);
     Present(m.complete(p, TS_SETTER_SIGNATURE_TYPE_MEMBER))

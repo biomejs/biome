@@ -12,4 +12,5 @@ abstract class AbstractMembers {
     abstract display();
     abstract get my_name();
     abstract set my_name(val);
+    abstract set my_age(age,);
 }

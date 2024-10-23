@@ -7,7 +7,7 @@
   "author": "Dani Guardiola",
   "type": "module",
   "dependencies": {
-    "tailwindcss": "^3.4.13"
+    "tailwindcss": "^3.4.14"
   },
   "devDependencies": {
     "@types/bun": "1.1.11",
