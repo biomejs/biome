@@ -108,7 +108,7 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
                 | JS_BOGUS_BINDING
                 | JS_BOGUS_MEMBER
                 | JS_BOGUS_EXPRESSION
-                | JS_BOGUS_IMPORT_ASSERTION_ENTRY
+                | JS_BOGUS_IMPORT_ATTRIBUTE_ENTRY
                 | JS_BOGUS_NAMED_IMPORT_SPECIFIER
                 | JS_BOGUS_ASSIGNMENT
                 | TS_BOGUS_TYPE
@@ -125,7 +125,7 @@ impl biome_rowan::SyntaxKind for JsSyntaxKind {
             }
             kind if AnyJsAssignment::can_cast(*kind) => JS_BOGUS_ASSIGNMENT,
             kind if AnyJsNamedImportSpecifier::can_cast(*kind) => JS_BOGUS_NAMED_IMPORT_SPECIFIER,
-            kind if AnyJsImportAssertionEntry::can_cast(*kind) => JS_BOGUS_IMPORT_ASSERTION_ENTRY,
+            kind if AnyJsImportAttributeEntry::can_cast(*kind) => JS_BOGUS_IMPORT_ATTRIBUTE_ENTRY,
             kind if AnyJsParameter::can_cast(*kind) => JS_BOGUS_PARAMETER,
             kind if AnyTsType::can_cast(*kind) => TS_BOGUS_TYPE,
 

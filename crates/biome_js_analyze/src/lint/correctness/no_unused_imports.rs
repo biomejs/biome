@@ -178,14 +178,14 @@ fn remove_import_specifier(
             let default_specifier = default_extra_clause.default_specifier().ok()?;
             let from_token = default_extra_clause.from_token().ok()?;
             let source = default_extra_clause.source().ok()?;
-            let assertion = default_extra_clause.assertion();
+            let assertion = default_extra_clause.attribute();
             if default_specifier.syntax() == specifier {
                 let new_clause = match default_extra_clause.specifier().ok()? {
                     AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_specifier) => {
                         let named_clause =
                             make::js_import_named_clause(named_specifier, from_token, source);
                         let named_clause = if let Some(assertion) = assertion {
-                            named_clause.with_assertion(assertion)
+                            named_clause.with_attribute(assertion)
                         } else {
                             named_clause
                         };
@@ -198,7 +198,7 @@ fn remove_import_specifier(
                             source,
                         );
                         let namespace_clause = if let Some(assertion) = assertion {
-                            namespace_clause.with_assertion(assertion)
+                            namespace_clause.with_attribute(assertion)
                         } else {
                             namespace_clause
                         };
@@ -212,7 +212,7 @@ fn remove_import_specifier(
                 let default_clause =
                     make::js_import_default_clause(default_specifier, from_token, source);
                 let default_clause = if let Some(assertion) = assertion {
-                    default_clause.with_assertion(assertion)
+                    default_clause.with_attribute(assertion)
                 } else {
                     default_clause
                 };

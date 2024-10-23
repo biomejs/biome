@@ -16,7 +16,7 @@ JsModule {
                 source: JsMetavariable {
                     value_token: GRIT_METAVARIABLE@28..36 "µsource" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@36..37 ";" [] [],
         },
@@ -47,7 +47,7 @@ JsModule {
                 source: JsMetavariable {
                     value_token: GRIT_METAVARIABLE@86..94 "µsource" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@94..95 ";" [] [],
         },

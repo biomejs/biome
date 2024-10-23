@@ -9,7 +9,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@7..13 "\"test\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@13..14 ";" [] [],
         },
@@ -19,7 +19,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@22..36 "\"no_semicolon\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },

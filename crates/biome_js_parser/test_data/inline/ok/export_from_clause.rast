@@ -28,7 +28,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@33..36 "\"b\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
                 semicolon_token: SEMICOLON@36..37 ";" [] [],
             },
         },
@@ -57,7 +57,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@67..70 "\"b\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
                 semicolon_token: SEMICOLON@70..71 ";" [] [],
             },
         },
@@ -72,7 +72,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@86..89 "\"a\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
                 semicolon_token: SEMICOLON@89..90 ";" [] [],
             },
         },
@@ -92,7 +92,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@110..113 "\"b\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
                 semicolon_token: SEMICOLON@113..114 ";" [] [],
             },
         },
@@ -112,7 +112,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@140..143 "\"b\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
                 semicolon_token: missing (optional),
             },
         },
@@ -127,11 +127,11 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@158..164 "\"mod\"" [] [Whitespace(" ")],
                 },
-                assertion: JsImportAssertion {
+                attribute: JsImportAttribute {
                     with_token: WITH_KW@164..169 "with" [] [Whitespace(" ")],
                     l_curly_token: L_CURLY@169..171 "{" [] [Whitespace(" ")],
-                    assertions: JsImportAssertionEntryList [
-                        JsImportAssertionEntry {
+                    attributes: JsImportAttributeEntryList [
+                        JsImportAttributeEntry {
                             key: IDENT@171..175 "type" [] [],
                             colon_token: COLON@175..177 ":" [] [Whitespace(" ")],
                             value_token: JS_STRING_LITERAL@177..184 "\"json\"" [] [Whitespace(" ")],
@@ -153,7 +153,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@205..212 "\"types\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
                 semicolon_token: SEMICOLON@212..213 ";" [] [],
             },
         },
@@ -173,7 +173,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@242..249 "\"types\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
                 semicolon_token: SEMICOLON@249..250 ";" [] [],
             },
         },
@@ -280,11 +280,11 @@ JsModule {
         3: FROM_KW@153..158 "from" [] [Whitespace(" ")]
         4: JS_MODULE_SOURCE@158..164
           0: JS_STRING_LITERAL@158..164 "\"mod\"" [] [Whitespace(" ")]
-        5: JS_IMPORT_ASSERTION@164..185
+        5: JS_IMPORT_ATTRIBUTE@164..185
           0: WITH_KW@164..169 "with" [] [Whitespace(" ")]
           1: L_CURLY@169..171 "{" [] [Whitespace(" ")]
-          2: JS_IMPORT_ASSERTION_ENTRY_LIST@171..184
-            0: JS_IMPORT_ASSERTION_ENTRY@171..184
+          2: JS_IMPORT_ATTRIBUTE_ENTRY_LIST@171..184
+            0: JS_IMPORT_ATTRIBUTE_ENTRY@171..184
               0: IDENT@171..175 "type" [] []
               1: COLON@175..177 ":" [] [Whitespace(" ")]
               2: JS_STRING_LITERAL@177..184 "\"json\"" [] [Whitespace(" ")]

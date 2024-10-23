@@ -9,7 +9,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@7..13 "\"foo\"" [] [Whitespace(" ")],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },
@@ -50,7 +50,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@45..51 "\"bar\"" [] [Whitespace(" ")],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },
@@ -101,7 +101,7 @@ JsModule {
                 },
                 from_token: missing (required),
                 source: missing (required),
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },
@@ -140,7 +140,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@128..135 "\"lorem\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },
@@ -183,7 +183,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@177..188 "\"foo.json\"" [] [Whitespace(" ")],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },
@@ -247,7 +247,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@250..254 "\"x\"" [] [Whitespace(" ")],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },
@@ -272,7 +272,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@280..293 "\"ipsum.json\"" [] [Whitespace(" ")],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },
@@ -343,7 +343,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@364..373 "\"a.json\"" [] [Whitespace(" ")],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },

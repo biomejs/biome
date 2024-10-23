@@ -16,7 +16,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@15..18 "\"a\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@18..19 ";" [] [],
         },
@@ -55,7 +55,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@45..48 "\"b\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@48..49 ";" [] [],
         },
@@ -105,7 +105,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@101..104 "\"b\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@104..105 ";" [] [],
         },
