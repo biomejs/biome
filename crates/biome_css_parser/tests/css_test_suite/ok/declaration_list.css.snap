@@ -38,6 +38,15 @@ a {
     prop1: --custom;
 }
 
+a {
+    prop1: 1px;
+    prop2: 2px;;;
+}
+
+a {
+    prop1: 1px;;;
+}
+
 div {
 	flex: 1 1 auto !important;
 }
@@ -461,43 +470,59 @@ CssRoot {
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
-                            value_token: IDENT@216..222 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                            value_token: IDENT@216..220 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
                         },
                     },
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@222..223 "{" [] [],
+                l_curly_token: L_CURLY@220..221 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@223..229 "flex" [Newline("\n"), Whitespace("\t")] [],
+                                    value_token: IDENT@221..231 "prop1" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@229..231 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@231..233 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
-                                    CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@231..233 "1" [] [Whitespace(" ")],
-                                    },
-                                    CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@233..235 "1" [] [Whitespace(" ")],
-                                    },
-                                    CssIdentifier {
-                                        value_token: IDENT@235..240 "auto" [] [Whitespace(" ")],
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@233..234 "1" [] [],
+                                        unit_token: IDENT@234..236 "px" [] [],
                                     },
                                 ],
                             },
-                            important: CssDeclarationImportant {
-                                excl_token: BANG@240..241 "!" [] [],
-                                important_token: IMPORTANT_KW@241..250 "important" [] [],
-                            },
+                            important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@250..251 ";" [] [],
+                        semicolon_token: SEMICOLON@236..237 ";" [] [],
+                    },
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@237..247 "prop2" [Newline("\n"), Whitespace("    ")] [],
+                                },
+                                colon_token: COLON@247..249 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@249..250 "2" [] [],
+                                        unit_token: IDENT@250..252 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@252..253 ";" [] [],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@253..254 ";" [] [],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@254..255 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@251..253 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@255..257 "}" [Newline("\n")] [],
             },
         },
         CssQualifiedRule {
@@ -507,52 +532,142 @@ CssRoot {
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
-                            value_token: IDENT@253..259 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                            value_token: IDENT@257..261 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
                         },
                     },
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@259..260 "{" [] [],
+                l_curly_token: L_CURLY@261..262 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@260..287 "border-bottom-left-radius" [Newline("\n"), Whitespace("\t")] [],
+                                    value_token: IDENT@262..272 "prop1" [Newline("\n"), Whitespace("    ")] [],
                                 },
-                                colon_token: COLON@287..289 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@272..274 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssRegularDimension {
+                                        value_token: CSS_NUMBER_LITERAL@274..275 "1" [] [],
+                                        unit_token: IDENT@275..277 "px" [] [],
+                                    },
+                                ],
+                            },
+                            important: missing (optional),
+                        },
+                        semicolon_token: SEMICOLON@277..278 ";" [] [],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@278..279 ";" [] [],
+                    },
+                    CssEmptyDeclaration {
+                        semicolon_token: SEMICOLON@279..280 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@280..282 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@282..288 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@288..289 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@289..295 "flex" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@295..297 ":" [] [Whitespace(" ")],
+                                value: CssGenericComponentValueList [
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@297..299 "1" [] [Whitespace(" ")],
+                                    },
+                                    CssNumber {
+                                        value_token: CSS_NUMBER_LITERAL@299..301 "1" [] [Whitespace(" ")],
+                                    },
+                                    CssIdentifier {
+                                        value_token: IDENT@301..306 "auto" [] [Whitespace(" ")],
+                                    },
+                                ],
+                            },
+                            important: CssDeclarationImportant {
+                                excl_token: BANG@306..307 "!" [] [],
+                                important_token: IMPORTANT_KW@307..316 "important" [] [],
+                            },
+                        },
+                        semicolon_token: SEMICOLON@316..317 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@317..319 "}" [Newline("\n")] [],
+            },
+        },
+        CssQualifiedRule {
+            prelude: CssSelectorList [
+                CssCompoundSelector {
+                    nesting_selectors: CssNestedSelectorList [],
+                    simple_selector: CssTypeSelector {
+                        namespace: missing (optional),
+                        ident: CssIdentifier {
+                            value_token: IDENT@319..325 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                        },
+                    },
+                    sub_selectors: CssSubSelectorList [],
+                },
+            ],
+            block: CssDeclarationOrRuleBlock {
+                l_curly_token: L_CURLY@325..326 "{" [] [],
+                items: CssDeclarationOrRuleList [
+                    CssDeclarationWithSemicolon {
+                        declaration: CssDeclaration {
+                            property: CssGenericProperty {
+                                name: CssIdentifier {
+                                    value_token: IDENT@326..353 "border-bottom-left-radius" [Newline("\n"), Whitespace("\t")] [],
+                                },
+                                colon_token: COLON@353..355 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssFunction {
                                         name: CssIdentifier {
-                                            value_token: IDENT@289..292 "var" [] [],
+                                            value_token: IDENT@355..358 "var" [] [],
                                         },
-                                        l_paren_token: L_PAREN@292..293 "(" [] [],
+                                        l_paren_token: L_PAREN@358..359 "(" [] [],
                                         items: CssParameterList [
                                             CssParameter {
                                                 any_css_expression: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssDashedIdentifier {
-                                                            value_token: IDENT@293..315 "--bs-border-radius-xxl" [] [],
+                                                            value_token: IDENT@359..381 "--bs-border-radius-xxl" [] [],
                                                         },
                                                     ],
                                                 },
                                             },
                                         ],
-                                        r_paren_token: R_PAREN@315..317 ")" [] [Whitespace(" ")],
+                                        r_paren_token: R_PAREN@381..383 ")" [] [Whitespace(" ")],
                                     },
                                 ],
                             },
                             important: CssDeclarationImportant {
-                                excl_token: BANG@317..318 "!" [] [],
-                                important_token: IMPORTANT_KW@318..327 "important" [] [],
+                                excl_token: BANG@383..384 "!" [] [],
+                                important_token: IMPORTANT_KW@384..393 "important" [] [],
                             },
                         },
-                        semicolon_token: SEMICOLON@327..328 ";" [] [],
+                        semicolon_token: SEMICOLON@393..394 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@328..330 "}" [Newline("\n")] [],
+                r_curly_token: R_CURLY@394..396 "}" [Newline("\n")] [],
             },
         },
         CssQualifiedRule {
@@ -562,110 +677,110 @@ CssRoot {
                     simple_selector: CssTypeSelector {
                         namespace: missing (optional),
                         ident: CssIdentifier {
-                            value_token: IDENT@330..336 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
+                            value_token: IDENT@396..402 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")],
                         },
                     },
                     sub_selectors: CssSubSelectorList [],
                 },
             ],
             block: CssDeclarationOrRuleBlock {
-                l_curly_token: L_CURLY@336..337 "{" [] [],
+                l_curly_token: L_CURLY@402..403 "{" [] [],
                 items: CssDeclarationOrRuleList [
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssDashedIdentifier {
-                                    value_token: IDENT@337..364 "--bs-btn-focus-shadow-rgb" [Newline("\n"), Whitespace("\t")] [],
+                                    value_token: IDENT@403..430 "--bs-btn-focus-shadow-rgb" [Newline("\n"), Whitespace("\t")] [],
                                 },
-                                colon_token: COLON@364..366 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@430..432 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@366..368 "33" [] [],
+                                        value_token: CSS_NUMBER_LITERAL@432..434 "33" [] [],
                                     },
                                     CssGenericDelimiter {
-                                        value: COMMA@368..370 "," [] [Whitespace(" ")],
+                                        value: COMMA@434..436 "," [] [Whitespace(" ")],
                                     },
                                     CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@370..372 "37" [] [],
+                                        value_token: CSS_NUMBER_LITERAL@436..438 "37" [] [],
                                     },
                                     CssGenericDelimiter {
-                                        value: COMMA@372..374 "," [] [Whitespace(" ")],
+                                        value: COMMA@438..440 "," [] [Whitespace(" ")],
                                     },
                                     CssNumber {
-                                        value_token: CSS_NUMBER_LITERAL@374..376 "41" [] [],
+                                        value_token: CSS_NUMBER_LITERAL@440..442 "41" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@376..377 ";" [] [],
+                        semicolon_token: SEMICOLON@442..443 ";" [] [],
                     },
                     CssDeclarationWithSemicolon {
                         declaration: CssDeclaration {
                             property: CssGenericProperty {
                                 name: CssIdentifier {
-                                    value_token: IDENT@377..389 "background" [Newline("\n"), Whitespace("\t")] [],
+                                    value_token: IDENT@443..455 "background" [Newline("\n"), Whitespace("\t")] [],
                                 },
-                                colon_token: COLON@389..391 ":" [] [Whitespace(" ")],
+                                colon_token: COLON@455..457 ":" [] [Whitespace(" ")],
                                 value: CssGenericComponentValueList [
                                     CssIdentifier {
-                                        value_token: IDENT@391..403 "transparent" [] [Whitespace(" ")],
+                                        value_token: IDENT@457..469 "transparent" [] [Whitespace(" ")],
                                     },
                                     CssFunction {
                                         name: CssIdentifier {
-                                            value_token: IDENT@403..406 "var" [] [],
+                                            value_token: IDENT@469..472 "var" [] [],
                                         },
-                                        l_paren_token: L_PAREN@406..407 "(" [] [],
+                                        l_paren_token: L_PAREN@472..473 "(" [] [],
                                         items: CssParameterList [
                                             CssParameter {
                                                 any_css_expression: CssListOfComponentValuesExpression {
                                                     css_component_value_list: CssComponentValueList [
                                                         CssDashedIdentifier {
-                                                            value_token: IDENT@407..424 "--bs-btn-close-bg" [] [],
+                                                            value_token: IDENT@473..490 "--bs-btn-close-bg" [] [],
                                                         },
                                                     ],
                                                 },
                                             },
                                         ],
-                                        r_paren_token: R_PAREN@424..426 ")" [] [Whitespace(" ")],
+                                        r_paren_token: R_PAREN@490..492 ")" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@426..432 "center" [] [],
+                                        value_token: IDENT@492..498 "center" [] [],
                                     },
                                     CssGenericDelimiter {
-                                        value: SLASH@432..433 "/" [] [],
+                                        value: SLASH@498..499 "/" [] [],
                                     },
                                     CssRegularDimension {
-                                        value_token: CSS_NUMBER_LITERAL@433..434 "1" [] [],
-                                        unit_token: IDENT@434..437 "em" [] [Whitespace(" ")],
+                                        value_token: CSS_NUMBER_LITERAL@499..500 "1" [] [],
+                                        unit_token: IDENT@500..503 "em" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@437..442 "auto" [] [Whitespace(" ")],
+                                        value_token: IDENT@503..508 "auto" [] [Whitespace(" ")],
                                     },
                                     CssIdentifier {
-                                        value_token: IDENT@442..451 "no-repeat" [] [],
+                                        value_token: IDENT@508..517 "no-repeat" [] [],
                                     },
                                 ],
                             },
                             important: missing (optional),
                         },
-                        semicolon_token: SEMICOLON@451..452 ";" [] [],
+                        semicolon_token: SEMICOLON@517..518 ";" [] [],
                     },
                 ],
-                r_curly_token: R_CURLY@452..455 "}" [Newline("\n"), Newline("\n")] [],
+                r_curly_token: R_CURLY@518..521 "}" [Newline("\n"), Newline("\n")] [],
             },
         },
     ],
-    eof_token: EOF@455..456 "" [Newline("\n")] [],
+    eof_token: EOF@521..522 "" [Newline("\n")] [],
 }
 ```
 
 ## CST
 
 ```
-0: CSS_ROOT@0..456
+0: CSS_ROOT@0..522
   0: (empty)
-  1: CSS_RULE_LIST@0..455
+  1: CSS_RULE_LIST@0..521
     0: CSS_QUALIFIED_RULE@0..41
       0: CSS_SELECTOR_LIST@0..2
         0: CSS_COMPOUND_SELECTOR@0..2
@@ -919,136 +1034,206 @@ CssRoot {
               1: (empty)
             1: SEMICOLON@213..214 ";" [] []
         2: R_CURLY@214..216 "}" [Newline("\n")] []
-    8: CSS_QUALIFIED_RULE@216..253
-      0: CSS_SELECTOR_LIST@216..222
-        0: CSS_COMPOUND_SELECTOR@216..222
+    8: CSS_QUALIFIED_RULE@216..257
+      0: CSS_SELECTOR_LIST@216..220
+        0: CSS_COMPOUND_SELECTOR@216..220
           0: CSS_NESTED_SELECTOR_LIST@216..216
-          1: CSS_TYPE_SELECTOR@216..222
+          1: CSS_TYPE_SELECTOR@216..220
             0: (empty)
-            1: CSS_IDENTIFIER@216..222
-              0: IDENT@216..222 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          2: CSS_SUB_SELECTOR_LIST@222..222
-      1: CSS_DECLARATION_OR_RULE_BLOCK@222..253
-        0: L_CURLY@222..223 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@223..251
-          0: CSS_DECLARATION_WITH_SEMICOLON@223..251
-            0: CSS_DECLARATION@223..250
-              0: CSS_GENERIC_PROPERTY@223..240
-                0: CSS_IDENTIFIER@223..229
-                  0: IDENT@223..229 "flex" [Newline("\n"), Whitespace("\t")] []
-                1: COLON@229..231 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@231..240
-                  0: CSS_NUMBER@231..233
-                    0: CSS_NUMBER_LITERAL@231..233 "1" [] [Whitespace(" ")]
-                  1: CSS_NUMBER@233..235
-                    0: CSS_NUMBER_LITERAL@233..235 "1" [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@235..240
-                    0: IDENT@235..240 "auto" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_IMPORTANT@240..250
-                0: BANG@240..241 "!" [] []
-                1: IMPORTANT_KW@241..250 "important" [] []
-            1: SEMICOLON@250..251 ";" [] []
-        2: R_CURLY@251..253 "}" [Newline("\n")] []
-    9: CSS_QUALIFIED_RULE@253..330
-      0: CSS_SELECTOR_LIST@253..259
-        0: CSS_COMPOUND_SELECTOR@253..259
-          0: CSS_NESTED_SELECTOR_LIST@253..253
-          1: CSS_TYPE_SELECTOR@253..259
-            0: (empty)
-            1: CSS_IDENTIFIER@253..259
-              0: IDENT@253..259 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          2: CSS_SUB_SELECTOR_LIST@259..259
-      1: CSS_DECLARATION_OR_RULE_BLOCK@259..330
-        0: L_CURLY@259..260 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@260..328
-          0: CSS_DECLARATION_WITH_SEMICOLON@260..328
-            0: CSS_DECLARATION@260..327
-              0: CSS_GENERIC_PROPERTY@260..317
-                0: CSS_IDENTIFIER@260..287
-                  0: IDENT@260..287 "border-bottom-left-radius" [Newline("\n"), Whitespace("\t")] []
-                1: COLON@287..289 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@289..317
-                  0: CSS_FUNCTION@289..317
-                    0: CSS_IDENTIFIER@289..292
-                      0: IDENT@289..292 "var" [] []
-                    1: L_PAREN@292..293 "(" [] []
-                    2: CSS_PARAMETER_LIST@293..315
-                      0: CSS_PARAMETER@293..315
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@293..315
-                          0: CSS_COMPONENT_VALUE_LIST@293..315
-                            0: CSS_DASHED_IDENTIFIER@293..315
-                              0: IDENT@293..315 "--bs-border-radius-xxl" [] []
-                    3: R_PAREN@315..317 ")" [] [Whitespace(" ")]
-              1: CSS_DECLARATION_IMPORTANT@317..327
-                0: BANG@317..318 "!" [] []
-                1: IMPORTANT_KW@318..327 "important" [] []
-            1: SEMICOLON@327..328 ";" [] []
-        2: R_CURLY@328..330 "}" [Newline("\n")] []
-    10: CSS_QUALIFIED_RULE@330..455
-      0: CSS_SELECTOR_LIST@330..336
-        0: CSS_COMPOUND_SELECTOR@330..336
-          0: CSS_NESTED_SELECTOR_LIST@330..330
-          1: CSS_TYPE_SELECTOR@330..336
-            0: (empty)
-            1: CSS_IDENTIFIER@330..336
-              0: IDENT@330..336 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
-          2: CSS_SUB_SELECTOR_LIST@336..336
-      1: CSS_DECLARATION_OR_RULE_BLOCK@336..455
-        0: L_CURLY@336..337 "{" [] []
-        1: CSS_DECLARATION_OR_RULE_LIST@337..452
-          0: CSS_DECLARATION_WITH_SEMICOLON@337..377
-            0: CSS_DECLARATION@337..376
-              0: CSS_GENERIC_PROPERTY@337..376
-                0: CSS_DASHED_IDENTIFIER@337..364
-                  0: IDENT@337..364 "--bs-btn-focus-shadow-rgb" [Newline("\n"), Whitespace("\t")] []
-                1: COLON@364..366 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@366..376
-                  0: CSS_NUMBER@366..368
-                    0: CSS_NUMBER_LITERAL@366..368 "33" [] []
-                  1: CSS_GENERIC_DELIMITER@368..370
-                    0: COMMA@368..370 "," [] [Whitespace(" ")]
-                  2: CSS_NUMBER@370..372
-                    0: CSS_NUMBER_LITERAL@370..372 "37" [] []
-                  3: CSS_GENERIC_DELIMITER@372..374
-                    0: COMMA@372..374 "," [] [Whitespace(" ")]
-                  4: CSS_NUMBER@374..376
-                    0: CSS_NUMBER_LITERAL@374..376 "41" [] []
+            1: CSS_IDENTIFIER@216..220
+              0: IDENT@216..220 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@220..220
+      1: CSS_DECLARATION_OR_RULE_BLOCK@220..257
+        0: L_CURLY@220..221 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@221..255
+          0: CSS_DECLARATION_WITH_SEMICOLON@221..237
+            0: CSS_DECLARATION@221..236
+              0: CSS_GENERIC_PROPERTY@221..236
+                0: CSS_IDENTIFIER@221..231
+                  0: IDENT@221..231 "prop1" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@231..233 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@233..236
+                  0: CSS_REGULAR_DIMENSION@233..236
+                    0: CSS_NUMBER_LITERAL@233..234 "1" [] []
+                    1: IDENT@234..236 "px" [] []
               1: (empty)
-            1: SEMICOLON@376..377 ";" [] []
-          1: CSS_DECLARATION_WITH_SEMICOLON@377..452
-            0: CSS_DECLARATION@377..451
-              0: CSS_GENERIC_PROPERTY@377..451
-                0: CSS_IDENTIFIER@377..389
-                  0: IDENT@377..389 "background" [Newline("\n"), Whitespace("\t")] []
-                1: COLON@389..391 ":" [] [Whitespace(" ")]
-                2: CSS_GENERIC_COMPONENT_VALUE_LIST@391..451
-                  0: CSS_IDENTIFIER@391..403
-                    0: IDENT@391..403 "transparent" [] [Whitespace(" ")]
-                  1: CSS_FUNCTION@403..426
-                    0: CSS_IDENTIFIER@403..406
-                      0: IDENT@403..406 "var" [] []
-                    1: L_PAREN@406..407 "(" [] []
-                    2: CSS_PARAMETER_LIST@407..424
-                      0: CSS_PARAMETER@407..424
-                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@407..424
-                          0: CSS_COMPONENT_VALUE_LIST@407..424
-                            0: CSS_DASHED_IDENTIFIER@407..424
-                              0: IDENT@407..424 "--bs-btn-close-bg" [] []
-                    3: R_PAREN@424..426 ")" [] [Whitespace(" ")]
-                  2: CSS_IDENTIFIER@426..432
-                    0: IDENT@426..432 "center" [] []
-                  3: CSS_GENERIC_DELIMITER@432..433
-                    0: SLASH@432..433 "/" [] []
-                  4: CSS_REGULAR_DIMENSION@433..437
-                    0: CSS_NUMBER_LITERAL@433..434 "1" [] []
-                    1: IDENT@434..437 "em" [] [Whitespace(" ")]
-                  5: CSS_IDENTIFIER@437..442
-                    0: IDENT@437..442 "auto" [] [Whitespace(" ")]
-                  6: CSS_IDENTIFIER@442..451
-                    0: IDENT@442..451 "no-repeat" [] []
+            1: SEMICOLON@236..237 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@237..253
+            0: CSS_DECLARATION@237..252
+              0: CSS_GENERIC_PROPERTY@237..252
+                0: CSS_IDENTIFIER@237..247
+                  0: IDENT@237..247 "prop2" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@247..249 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@249..252
+                  0: CSS_REGULAR_DIMENSION@249..252
+                    0: CSS_NUMBER_LITERAL@249..250 "2" [] []
+                    1: IDENT@250..252 "px" [] []
               1: (empty)
-            1: SEMICOLON@451..452 ";" [] []
-        2: R_CURLY@452..455 "}" [Newline("\n"), Newline("\n")] []
-  2: EOF@455..456 "" [Newline("\n")] []
+            1: SEMICOLON@252..253 ";" [] []
+          2: CSS_EMPTY_DECLARATION@253..254
+            0: SEMICOLON@253..254 ";" [] []
+          3: CSS_EMPTY_DECLARATION@254..255
+            0: SEMICOLON@254..255 ";" [] []
+        2: R_CURLY@255..257 "}" [Newline("\n")] []
+    9: CSS_QUALIFIED_RULE@257..282
+      0: CSS_SELECTOR_LIST@257..261
+        0: CSS_COMPOUND_SELECTOR@257..261
+          0: CSS_NESTED_SELECTOR_LIST@257..257
+          1: CSS_TYPE_SELECTOR@257..261
+            0: (empty)
+            1: CSS_IDENTIFIER@257..261
+              0: IDENT@257..261 "a" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@261..261
+      1: CSS_DECLARATION_OR_RULE_BLOCK@261..282
+        0: L_CURLY@261..262 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@262..280
+          0: CSS_DECLARATION_WITH_SEMICOLON@262..278
+            0: CSS_DECLARATION@262..277
+              0: CSS_GENERIC_PROPERTY@262..277
+                0: CSS_IDENTIFIER@262..272
+                  0: IDENT@262..272 "prop1" [Newline("\n"), Whitespace("    ")] []
+                1: COLON@272..274 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@274..277
+                  0: CSS_REGULAR_DIMENSION@274..277
+                    0: CSS_NUMBER_LITERAL@274..275 "1" [] []
+                    1: IDENT@275..277 "px" [] []
+              1: (empty)
+            1: SEMICOLON@277..278 ";" [] []
+          1: CSS_EMPTY_DECLARATION@278..279
+            0: SEMICOLON@278..279 ";" [] []
+          2: CSS_EMPTY_DECLARATION@279..280
+            0: SEMICOLON@279..280 ";" [] []
+        2: R_CURLY@280..282 "}" [Newline("\n")] []
+    10: CSS_QUALIFIED_RULE@282..319
+      0: CSS_SELECTOR_LIST@282..288
+        0: CSS_COMPOUND_SELECTOR@282..288
+          0: CSS_NESTED_SELECTOR_LIST@282..282
+          1: CSS_TYPE_SELECTOR@282..288
+            0: (empty)
+            1: CSS_IDENTIFIER@282..288
+              0: IDENT@282..288 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@288..288
+      1: CSS_DECLARATION_OR_RULE_BLOCK@288..319
+        0: L_CURLY@288..289 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@289..317
+          0: CSS_DECLARATION_WITH_SEMICOLON@289..317
+            0: CSS_DECLARATION@289..316
+              0: CSS_GENERIC_PROPERTY@289..306
+                0: CSS_IDENTIFIER@289..295
+                  0: IDENT@289..295 "flex" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@295..297 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@297..306
+                  0: CSS_NUMBER@297..299
+                    0: CSS_NUMBER_LITERAL@297..299 "1" [] [Whitespace(" ")]
+                  1: CSS_NUMBER@299..301
+                    0: CSS_NUMBER_LITERAL@299..301 "1" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@301..306
+                    0: IDENT@301..306 "auto" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_IMPORTANT@306..316
+                0: BANG@306..307 "!" [] []
+                1: IMPORTANT_KW@307..316 "important" [] []
+            1: SEMICOLON@316..317 ";" [] []
+        2: R_CURLY@317..319 "}" [Newline("\n")] []
+    11: CSS_QUALIFIED_RULE@319..396
+      0: CSS_SELECTOR_LIST@319..325
+        0: CSS_COMPOUND_SELECTOR@319..325
+          0: CSS_NESTED_SELECTOR_LIST@319..319
+          1: CSS_TYPE_SELECTOR@319..325
+            0: (empty)
+            1: CSS_IDENTIFIER@319..325
+              0: IDENT@319..325 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@325..325
+      1: CSS_DECLARATION_OR_RULE_BLOCK@325..396
+        0: L_CURLY@325..326 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@326..394
+          0: CSS_DECLARATION_WITH_SEMICOLON@326..394
+            0: CSS_DECLARATION@326..393
+              0: CSS_GENERIC_PROPERTY@326..383
+                0: CSS_IDENTIFIER@326..353
+                  0: IDENT@326..353 "border-bottom-left-radius" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@353..355 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@355..383
+                  0: CSS_FUNCTION@355..383
+                    0: CSS_IDENTIFIER@355..358
+                      0: IDENT@355..358 "var" [] []
+                    1: L_PAREN@358..359 "(" [] []
+                    2: CSS_PARAMETER_LIST@359..381
+                      0: CSS_PARAMETER@359..381
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@359..381
+                          0: CSS_COMPONENT_VALUE_LIST@359..381
+                            0: CSS_DASHED_IDENTIFIER@359..381
+                              0: IDENT@359..381 "--bs-border-radius-xxl" [] []
+                    3: R_PAREN@381..383 ")" [] [Whitespace(" ")]
+              1: CSS_DECLARATION_IMPORTANT@383..393
+                0: BANG@383..384 "!" [] []
+                1: IMPORTANT_KW@384..393 "important" [] []
+            1: SEMICOLON@393..394 ";" [] []
+        2: R_CURLY@394..396 "}" [Newline("\n")] []
+    12: CSS_QUALIFIED_RULE@396..521
+      0: CSS_SELECTOR_LIST@396..402
+        0: CSS_COMPOUND_SELECTOR@396..402
+          0: CSS_NESTED_SELECTOR_LIST@396..396
+          1: CSS_TYPE_SELECTOR@396..402
+            0: (empty)
+            1: CSS_IDENTIFIER@396..402
+              0: IDENT@396..402 "div" [Newline("\n"), Newline("\n")] [Whitespace(" ")]
+          2: CSS_SUB_SELECTOR_LIST@402..402
+      1: CSS_DECLARATION_OR_RULE_BLOCK@402..521
+        0: L_CURLY@402..403 "{" [] []
+        1: CSS_DECLARATION_OR_RULE_LIST@403..518
+          0: CSS_DECLARATION_WITH_SEMICOLON@403..443
+            0: CSS_DECLARATION@403..442
+              0: CSS_GENERIC_PROPERTY@403..442
+                0: CSS_DASHED_IDENTIFIER@403..430
+                  0: IDENT@403..430 "--bs-btn-focus-shadow-rgb" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@430..432 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@432..442
+                  0: CSS_NUMBER@432..434
+                    0: CSS_NUMBER_LITERAL@432..434 "33" [] []
+                  1: CSS_GENERIC_DELIMITER@434..436
+                    0: COMMA@434..436 "," [] [Whitespace(" ")]
+                  2: CSS_NUMBER@436..438
+                    0: CSS_NUMBER_LITERAL@436..438 "37" [] []
+                  3: CSS_GENERIC_DELIMITER@438..440
+                    0: COMMA@438..440 "," [] [Whitespace(" ")]
+                  4: CSS_NUMBER@440..442
+                    0: CSS_NUMBER_LITERAL@440..442 "41" [] []
+              1: (empty)
+            1: SEMICOLON@442..443 ";" [] []
+          1: CSS_DECLARATION_WITH_SEMICOLON@443..518
+            0: CSS_DECLARATION@443..517
+              0: CSS_GENERIC_PROPERTY@443..517
+                0: CSS_IDENTIFIER@443..455
+                  0: IDENT@443..455 "background" [Newline("\n"), Whitespace("\t")] []
+                1: COLON@455..457 ":" [] [Whitespace(" ")]
+                2: CSS_GENERIC_COMPONENT_VALUE_LIST@457..517
+                  0: CSS_IDENTIFIER@457..469
+                    0: IDENT@457..469 "transparent" [] [Whitespace(" ")]
+                  1: CSS_FUNCTION@469..492
+                    0: CSS_IDENTIFIER@469..472
+                      0: IDENT@469..472 "var" [] []
+                    1: L_PAREN@472..473 "(" [] []
+                    2: CSS_PARAMETER_LIST@473..490
+                      0: CSS_PARAMETER@473..490
+                        0: CSS_LIST_OF_COMPONENT_VALUES_EXPRESSION@473..490
+                          0: CSS_COMPONENT_VALUE_LIST@473..490
+                            0: CSS_DASHED_IDENTIFIER@473..490
+                              0: IDENT@473..490 "--bs-btn-close-bg" [] []
+                    3: R_PAREN@490..492 ")" [] [Whitespace(" ")]
+                  2: CSS_IDENTIFIER@492..498
+                    0: IDENT@492..498 "center" [] []
+                  3: CSS_GENERIC_DELIMITER@498..499
+                    0: SLASH@498..499 "/" [] []
+                  4: CSS_REGULAR_DIMENSION@499..503
+                    0: CSS_NUMBER_LITERAL@499..500 "1" [] []
+                    1: IDENT@500..503 "em" [] [Whitespace(" ")]
+                  5: CSS_IDENTIFIER@503..508
+                    0: IDENT@503..508 "auto" [] [Whitespace(" ")]
+                  6: CSS_IDENTIFIER@508..517
+                    0: IDENT@508..517 "no-repeat" [] []
+              1: (empty)
+            1: SEMICOLON@517..518 ";" [] []
+        2: R_CURLY@518..521 "}" [Newline("\n"), Newline("\n")] []
+  2: EOF@521..522 "" [Newline("\n")] []
 
 ```

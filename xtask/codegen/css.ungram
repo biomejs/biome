@@ -443,6 +443,7 @@ AnyCssDeclarationOrRule =
 	| CssDeclarationWithSemicolon
 	| CssBogus
 	| CssMetavariable
+	| CssEmptyDeclaration
 
 // @page :left { background: red; @media (500px <= width <= 500px) {  } }
 // 						 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -474,6 +475,9 @@ AnyCssConditionalBlock =
 CssDeclarationWithSemicolon =
     declaration: CssDeclaration
     ';'?
+
+CssEmptyDeclaration =
+    ';'
 
 AnyCssDeclarationBlock =
 	CssDeclarationBlock

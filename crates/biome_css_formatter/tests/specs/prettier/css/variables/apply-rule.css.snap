@@ -44,7 +44,7 @@ info: css/variables/apply-rule.css
 ```diff
 --- Prettier
 +++ Biome
-@@ -5,28 +5,33 @@
+@@ -5,28 +5,31 @@
      background-color: hsl(120, 70%, 95%);
      border-radius: 4px;
      border: 1px solid var(--theme-color late);
@@ -55,7 +55,6 @@ info: css/variables/apply-rule.css
      color: green;
 -  };
 +  }
-+  ;
  }
  
  :root {
@@ -83,7 +82,6 @@ info: css/variables/apply-rule.css
 -  };
 +    color: red;
 +  }
-+  ;
  }
 ```
 
@@ -102,7 +100,6 @@ info: css/variables/apply-rule.css
   --toolbar-title-theme: {
     color: green;
   }
-  ;
 }
 
 :root {
@@ -125,7 +122,6 @@ info: css/variables/apply-rule.css
   --another-one-like-a-apply-rule: {
     color: red;
   }
-  ;
 }
 ```
 
@@ -267,26 +263,6 @@ apply-rule.css:9:26 parse ━━━━━━━━━━━━━━━━━━
   - current
   - past
   - future
-  
-apply-rule.css:11:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration, or an at rule but instead found ';'.
-  
-     9 │   --toolbar-title-theme: {
-    10 │     color: green;
-  > 11 │   };
-       │    ^
-    12 │ }
-    13 │ 
-  
-  i Expected a declaration, or an at rule here.
-  
-     9 │   --toolbar-title-theme: {
-    10 │     color: green;
-  > 11 │   };
-       │    ^
-    12 │ }
-    13 │ 
   
 apply-rule.css:15:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -520,26 +496,6 @@ apply-rule.css:27:36 parse ━━━━━━━━━━━━━━━━━�
   - current
   - past
   - future
-  
-apply-rule.css:29:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Expected a declaration, or an at rule but instead found ';'.
-  
-    27 │   --another-one-like-a-apply-rule: {
-    28 │     color:red;
-  > 29 │   };
-       │    ^
-    30 │ }
-    31 │ 
-  
-  i Expected a declaration, or an at rule here.
-  
-    27 │   --another-one-like-a-apply-rule: {
-    28 │     color:red;
-  > 29 │   };
-       │    ^
-    30 │ }
-    31 │ 
   
 
 ```
