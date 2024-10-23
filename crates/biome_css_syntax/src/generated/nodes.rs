@@ -1643,8 +1643,8 @@ impl CssDocumentCustomMatcher {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> SyntaxResult<CssString> {
-        support::required_node(&self.syntax, 2usize)
+    pub fn value(&self) -> Option<CssString> {
+        support::node(&self.syntax, 2usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
@@ -1662,7 +1662,7 @@ impl Serialize for CssDocumentCustomMatcher {
 pub struct CssDocumentCustomMatcherFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value: SyntaxResult<CssString>,
+    pub value: Option<CssString>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -10373,7 +10373,7 @@ impl std::fmt::Debug for CssDocumentCustomMatcher {
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
-            .field("value", &support::DebugSyntaxResult(self.value()))
+            .field("value", &support::DebugOptionalElement(self.value()))
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),

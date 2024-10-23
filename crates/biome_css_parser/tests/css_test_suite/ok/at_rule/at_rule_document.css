@@ -22,3 +22,19 @@
 		}
 	}
 }
+
+@-moz-document url-prefix() {}
+
+@-moz-document url-prefix("https://www.example.com/") {}
+
+@-moz-document url-prefix() {
+	body {
+		background-color: green;
+	}
+}
+
+@-moz-document url-prefix("https://www.example.com/") {
+	body {
+		background-color: green;
+	}
+}
