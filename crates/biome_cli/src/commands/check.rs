@@ -136,7 +136,8 @@ impl CommandRunner for CheckCommandPayload {
     ) -> Result<Execution, CliDiagnostic> {
         let fix_file_mode = determine_fix_file_mode(FixFileModeOptions {
             write: self.write,
-            suppress: false,fix: self.fix,
+            suppress: false,
+            fix: self.fix,
             unsafe_: self.unsafe_,
         })?;
 

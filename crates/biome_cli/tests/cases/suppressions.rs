@@ -231,7 +231,6 @@ fn suppress_skip_ok() {
     ));
 }
 
-
 #[test]
 fn unused_suppression_after_top_level() {
     let mut fs = MemoryFileSystem::default();
