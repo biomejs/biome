@@ -1411,6 +1411,10 @@ export interface Nursery {
 	 */
 	useNamedOperation?: RuleFixConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	useParseIntRadix?: RuleConfiguration_for_Null;
+	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
 	useSortedClasses?: RuleFixConfiguration_for_UtilityClassSortingOptions;
@@ -3021,6 +3025,7 @@ export type Category =
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
 	| "lint/nursery/useNamedOperation"
+	| "lint/nursery/useParseIntRadix"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"
