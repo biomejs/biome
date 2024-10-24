@@ -21,7 +21,7 @@ describe("Workspace API", () => {
 			path: {
 				path: "test.js",
 				was_written: false,
-				kind: ["Handleable"],
+				kind: ["handleable"],
 			},
 			content: "statement()",
 			version: 0,
@@ -31,7 +31,7 @@ describe("Workspace API", () => {
 			path: {
 				path: "test.js",
 				was_written: false,
-				kind: ["Handleable"],
+				kind: ["handleable"],
 			},
 		});
 
@@ -41,7 +41,7 @@ describe("Workspace API", () => {
 			path: {
 				path: "test.js",
 				was_written: false,
-				kind: ["Handleable"],
+				kind: ["handleable"],
 			},
 		});
 

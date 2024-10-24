@@ -22,6 +22,9 @@ versioned_files = [
   "packages/@biomejs/backend-jsonrpc/package.json",
 ]
 
+[packages.js-api]
+changelog       = "packages/@biomejs/js-api/CHANGELOG.md"
+versioned_files = ["packages/@biomejs/js-api/package.json"]
 
 # Special crate. This is the main binary that we are going to release.
 [packages.biome_cli]

@@ -1,5 +1,5 @@
 {
-  "name": "@biomejs/wasm-nodejs",
+  "name": "@biomejs/biome_wasm",
   "collaborators": [
     "Biome Developers and Contributors"
   ],
@@ -8,8 +8,7 @@
   "license": "MIT OR Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/biomejs/biome.git",
-    "directory": "packages/@biomejs/biome/wasm-nodejs"
+    "url": "https://github.com/biomejs/biome"
   },
   "files": [
     "biome_wasm_bg.wasm",
