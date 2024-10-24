@@ -1248,7 +1248,7 @@ fn handle_import_export_specifier_comment(
             CommentPlacement::leading(enclosing_node.clone(), comment)
         }
         // Make end of line or own line comments in the middle of an import assertion a leading comment of the assertion
-        JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY => {
+        JsSyntaxKind::JS_IMPORT_ATTRIBUTE_ENTRY => {
             CommentPlacement::leading(enclosing_node.clone(), comment)
         }
 

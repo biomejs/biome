@@ -23,7 +23,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@23..26 "\"a\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
                 semicolon_token: missing (optional),
             },
         },
@@ -47,7 +47,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@48..56 "\"./type\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
                 semicolon_token: SEMICOLON@56..57 ";" [] [],
             },
         },

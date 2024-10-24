@@ -18,7 +18,7 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
             r_curly_token,
             from_token,
             source,
-            assertion,
+            attribute,
             semicolon_token,
         } = node.as_fields();
         let should_insert_space_around_brackets = f.options().bracket_spacing().value();
@@ -74,8 +74,8 @@ impl FormatNodeRule<JsExportNamedFromClause> for FormatJsExportNamedFromClause {
             ]
         ]?;
 
-        if let Some(assertion) = &assertion {
-            write!(f, [assertion.format()])?;
+        if let Some(attribute) = &attribute {
+            write!(f, [attribute.format()])?;
         }
 
         write!(f, [FormatStatementSemicolon::new(semicolon_token.as_ref())])

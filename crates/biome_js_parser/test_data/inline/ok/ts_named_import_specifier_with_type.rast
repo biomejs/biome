@@ -30,7 +30,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@30..37 "\"./mod\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@37..38 ";" [] [],
         },
@@ -58,7 +58,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@69..76 "\"./mod\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },
@@ -86,7 +86,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@104..111 "\"./mod\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@111..112 ";" [] [],
         },
@@ -114,7 +114,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@143..150 "\"./mod\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: missing (optional),
         },
@@ -142,7 +142,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@192..199 "\"./mod\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@199..200 ";" [] [],
         },

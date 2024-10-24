@@ -18,7 +18,7 @@ impl SyntaxFactory for JsSyntaxFactory {
             | JS_BOGUS_ASSIGNMENT
             | JS_BOGUS_BINDING
             | JS_BOGUS_EXPRESSION
-            | JS_BOGUS_IMPORT_ASSERTION_ENTRY
+            | JS_BOGUS_IMPORT_ATTRIBUTE_ENTRY
             | JS_BOGUS_MEMBER
             | JS_BOGUS_NAMED_IMPORT_SPECIFIER
             | JS_BOGUS_PARAMETER
@@ -1666,7 +1666,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if JsImportAssertion::can_cast(element.kind()) {
+                    if JsImportAttribute::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -1781,7 +1781,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if JsImportAssertion::can_cast(element.kind()) {
+                    if JsImportAttribute::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2799,7 +2799,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.into_node(JS_IMPORT, children)
             }
-            JS_IMPORT_ASSERTION => {
+            JS_IMPORT_ATTRIBUTE => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<4usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -2818,7 +2818,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if JsImportAssertionEntryList::can_cast(element.kind()) {
+                    if JsImportAttributeEntryList::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2833,13 +2833,13 @@ impl SyntaxFactory for JsSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        JS_IMPORT_ASSERTION.to_bogus(),
+                        JS_IMPORT_ATTRIBUTE.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(JS_IMPORT_ASSERTION, children)
+                slots.into_node(JS_IMPORT_ATTRIBUTE, children)
             }
-            JS_IMPORT_ASSERTION_ENTRY => {
+            JS_IMPORT_ATTRIBUTE_ENTRY => {
                 let mut elements = (&children).into_iter();
                 let mut slots: RawNodeSlots<3usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
@@ -2866,11 +2866,11 @@ impl SyntaxFactory for JsSyntaxFactory {
                 slots.next_slot();
                 if current_element.is_some() {
                     return RawSyntaxNode::new(
-                        JS_IMPORT_ASSERTION_ENTRY.to_bogus(),
+                        JS_IMPORT_ATTRIBUTE_ENTRY.to_bogus(),
                         children.into_iter().map(Some),
                     );
                 }
-                slots.into_node(JS_IMPORT_ASSERTION_ENTRY, children)
+                slots.into_node(JS_IMPORT_ATTRIBUTE_ENTRY, children)
             }
             JS_IMPORT_BARE_CLAUSE => {
                 let mut elements = (&children).into_iter();
@@ -2884,7 +2884,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if JsImportAssertion::can_cast(element.kind()) {
+                    if JsImportAttribute::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -2964,7 +2964,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if JsImportAssertion::can_cast(element.kind()) {
+                    if JsImportAttribute::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3011,7 +3011,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if JsImportAssertion::can_cast(element.kind()) {
+                    if JsImportAttribute::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3091,7 +3091,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if JsImportAssertion::can_cast(element.kind()) {
+                    if JsImportAttribute::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -3138,7 +3138,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if JsImportAssertion::can_cast(element.kind()) {
+                    if JsImportAttribute::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -9957,10 +9957,10 @@ impl SyntaxFactory for JsSyntaxFactory {
                 T ! [,],
                 true,
             ),
-            JS_IMPORT_ASSERTION_ENTRY_LIST => Self::make_separated_list_syntax(
+            JS_IMPORT_ATTRIBUTE_ENTRY_LIST => Self::make_separated_list_syntax(
                 kind,
                 children,
-                AnyJsImportAssertionEntry::can_cast,
+                AnyJsImportAttributeEntry::can_cast,
                 T ! [,],
                 true,
             ),

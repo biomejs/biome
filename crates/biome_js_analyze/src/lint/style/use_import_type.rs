@@ -133,11 +133,11 @@ impl Rule for UseImportType {
         }
         let import = ctx.query();
         let import_clause = import.import_clause().ok()?;
-        if import_clause.assertion().is_some() {
+        if import_clause.attribute().is_some() {
             return None;
         }
         // Import attributes and type-only imports are not compatible.
-        if import_clause.assertion().is_some() {
+        if import_clause.attribute().is_some() {
             return None;
         }
         let model = ctx.model();

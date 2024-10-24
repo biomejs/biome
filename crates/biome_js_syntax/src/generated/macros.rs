@@ -315,12 +315,12 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsImport::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::JS_IMPORT_ASSERTION => {
-                    let $pattern = unsafe { $crate::JsImportAssertion::new_unchecked(node) };
+                $crate::JsSyntaxKind::JS_IMPORT_ATTRIBUTE => {
+                    let $pattern = unsafe { $crate::JsImportAttribute::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY => {
-                    let $pattern = unsafe { $crate::JsImportAssertionEntry::new_unchecked(node) };
+                $crate::JsSyntaxKind::JS_IMPORT_ATTRIBUTE_ENTRY => {
+                    let $pattern = unsafe { $crate::JsImportAttributeEntry::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_IMPORT_BARE_CLAUSE => {
@@ -1252,9 +1252,9 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::JsBogusExpression::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::JS_BOGUS_IMPORT_ASSERTION_ENTRY => {
+                $crate::JsSyntaxKind::JS_BOGUS_IMPORT_ATTRIBUTE_ENTRY => {
                     let $pattern =
-                        unsafe { $crate::JsBogusImportAssertionEntry::new_unchecked(node) };
+                        unsafe { $crate::JsBogusImportAttributeEntry::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_BOGUS_MEMBER => {
@@ -1328,9 +1328,9 @@ macro_rules! map_syntax_node {
                         unsafe { $crate::JsExportNamedSpecifierList::new_unchecked(node) };
                     $body
                 }
-                $crate::JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY_LIST => {
+                $crate::JsSyntaxKind::JS_IMPORT_ATTRIBUTE_ENTRY_LIST => {
                     let $pattern =
-                        unsafe { $crate::JsImportAssertionEntryList::new_unchecked(node) };
+                        unsafe { $crate::JsImportAttributeEntryList::new_unchecked(node) };
                     $body
                 }
                 $crate::JsSyntaxKind::JS_METHOD_MODIFIER_LIST => {
