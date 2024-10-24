@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../../../../packages/@biomejs/biome/configuration_schema.json",
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noUndeclaredDependencies": {
+          "level": "error",
+          "options": {
+            "devDependencies": ["**/*.test.js"]
+          }
+        }
+      }
+    }
+  }
+}
