@@ -15,6 +15,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Fix CSS parser case error, if `@-moz-document url-prefix(https://example.com)` or `@-moz-document domain(example.com)` should be valid. Contributed by @eryue0220
+
 - Fix [#4258](https://github.com/biomejs/biome/issues/4258), where fixed css parse error with @-moz-document url-prefix(). Contributed by @eryue0220
 
 ### CLI
@@ -89,7 +91,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     ) {}
   }
   ```
-  
+
   Contributed by @fireairforce
 
 ## v1.9.4 (2024-10-17)
@@ -364,7 +366,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#3364](https://github.com/biomejs/biome/issues/3364) where the `useSelfClosingElements` rule forces the `script` tag to be self-closing. Previously, this rule applies to all elements and cannot be disabled for native HTML elements.
 
   Now, this rule accepts a `ignoreHtmlElements` option, which when set to `true`, ignores native HTML elements and allows them to be non-self-closing.
-  
+
   Contributed by @abidjappie
 
 - Fix a case where raw values inside `url()` functions weren't properly trimmed.

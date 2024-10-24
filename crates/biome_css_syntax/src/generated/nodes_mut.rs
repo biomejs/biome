@@ -672,7 +672,7 @@ impl CssDocumentCustomMatcher {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_value(self, element: Option<CssString>) -> Self {
+    pub fn with_value(self, element: Option<AnyCssUrlValue>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             2usize..=2usize,
             once(element.map(|element| element.into_syntax().into())),
