@@ -147,12 +147,12 @@ impl ServiceLanguage for CssLanguage {
             globals: Vec::new(),
             preferred_quote,
             jsx_runtime: None,
-            suppression_reason: Some("Ignored using `--suppress`".to_string()),
         };
 
         AnalyzerOptions {
             configuration,
             file_path: file_path.to_path_buf(),
+            suppression_reason: Some("Ignored using `--suppress`".to_string()),
         }
     }
 }

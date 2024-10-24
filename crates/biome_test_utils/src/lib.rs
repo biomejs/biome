@@ -43,7 +43,6 @@ pub fn create_analyzer_options(
         globals: vec![],
         preferred_quote: PreferredQuote::Double,
         jsx_runtime: Some(JsxRuntime::Transparent),
-        suppression_reason: Some("Ignored using `--suppress`".to_string()),
     };
     let options_file = input_file.with_extension("options.json");
     if let Ok(json) = std::fs::read_to_string(options_file.clone()) {

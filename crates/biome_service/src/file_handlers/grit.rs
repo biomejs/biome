@@ -99,6 +99,7 @@ impl ServiceLanguage for GritLanguage {
         AnalyzerOptions {
             configuration: AnalyzerConfiguration::default(),
             file_path: path.to_path_buf(),
+            suppression_reason: Some("Ignored using `--suppress`".to_string()),
         }
     }
 }

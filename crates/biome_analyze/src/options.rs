@@ -67,9 +67,6 @@ pub struct AnalyzerConfiguration {
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     pub jsx_runtime: Option<JsxRuntime>,
-
-    /// Suppression reason to be used with `--suppress` and `--reason`
-    pub suppression_reason: Option<String>,
 }
 
 /// A set of information useful to the analyzer infrastructure
@@ -80,6 +77,9 @@ pub struct AnalyzerOptions {
 
     /// The file that is being analyzed
     pub file_path: PathBuf,
+
+    /// Suppression reason to be used with `--suppress` and `--reason`
+    pub suppression_reason: Option<String>,
 }
 
 impl AnalyzerOptions {
@@ -93,10 +93,6 @@ impl AnalyzerOptions {
 
     pub fn jsx_runtime(&self) -> Option<JsxRuntime> {
         self.configuration.jsx_runtime
-    }
-
-    pub fn suppression_reason(&self) -> Option<&str> {
-        self.configuration.suppression_reason.as_deref()
     }
 
     pub fn rule_options<R>(&self) -> Option<R::Options>

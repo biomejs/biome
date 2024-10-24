@@ -140,11 +140,11 @@ impl ServiceLanguage for JsonLanguage {
             globals: vec![],
             preferred_quote: PreferredQuote::Double,
             jsx_runtime: Default::default(),
-            suppression_reason: Some("Ignored using `--suppress`".to_string()),
         };
         AnalyzerOptions {
             configuration,
             file_path: path.to_path_buf(),
+            suppression_reason: Some("Ignored using `--suppress`".to_string()),
         }
     }
 }
