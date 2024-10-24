@@ -15,8 +15,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
-- Fix CSS parser case error, if `@-moz-document url-prefix(https://example.com)` or `@-moz-document domain(example.com)` should be valid. Contributed by @eryue0220
-
+- Fix CSS parser case error, `@-moz-document url-prefix(https://example.com)` and `@-moz-document domain(example.com)` are now valid. Contributed by @eryue0220
 - Fix [#4258](https://github.com/biomejs/biome/issues/4258), where fixed css parse error with @-moz-document url-prefix(). Contributed by @eryue0220
 
 ### CLI
