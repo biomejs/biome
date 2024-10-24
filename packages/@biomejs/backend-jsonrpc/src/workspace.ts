@@ -1219,6 +1219,10 @@ export interface Nursery {
 	 */
 	all?: boolean;
 	/**
+	 * Require specifying name for GraphQL operations.
+	 */
+	noAnonymousOperations?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
 	noCommonJs?: RuleConfiguration_for_Null;
@@ -2940,6 +2944,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
+	| "lint/nursery/noAnonymousOperations"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"
