@@ -184,7 +184,7 @@ indexmap           = { version = "2.6.0", features = ["serde"] }
 insta              = "1.40.0"
 natord             = "1.0.9"
 oxc_resolver       = "1.12.0"
-proc-macro2        = "1.0.86"
+proc-macro2        = "1.0.89"
 quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
 quote              = "1.0.37"
