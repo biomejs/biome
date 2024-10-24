@@ -238,7 +238,7 @@ export interface PartialJavascriptConfiguration {
 	/**
 	* A list of global bindings that should be ignored by the analyzers
 
-If defined here, they should not emit diagnostics.
+If defined here, they should not emit diagnostics. 
 	 */
 	globals?: StringSet;
 	/**
@@ -329,7 +329,7 @@ export interface PartialVcsConfiguration {
 	/**
 	* The folder where Biome should check for VCS files. By default, Biome will use the same folder where `biome.json` was found.
 
-If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted
+If Biome can't find the configuration, it will attempt to use the current working directory. If no current working directory can't be found, Biome won't use the VCS integration, and a diagnostic will be emitted 
 	 */
 	root?: string;
 	/**
@@ -408,7 +408,7 @@ export type LineEnding = "lf" | "crlf" | "cr";
 /**
 	* Validated value for the `line_width` formatter options
 
-The allowed range of values is 1..=320
+The allowed range of values is 1..=320 
 	 */
 export type LineWidth = number;
 /**
@@ -544,7 +544,7 @@ export interface PartialJavascriptParser {
 	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
-These decorators belong to an old proposal, and they are subject to change.
+These decorators belong to an old proposal, and they are subject to change. 
 	 */
 	unsafeParameterDecoratorsEnabled?: boolean;
 }
@@ -1638,7 +1638,7 @@ export interface Style {
 	/**
 	 * Prevent extra closing tags for components without children
 	 */
-	useSelfClosingElements?: RuleFixConfiguration_for_Null;
+	useSelfClosingElements?: RuleFixConfiguration_for_UseSelfClosingElementsOptions;
 	/**
 	 * When expressing array types, this rule promotes the usage of T\[] shorthand instead of Array\<T>.
 	 */
@@ -1871,7 +1871,7 @@ export interface Suspicious {
 	/**
 	 * Disallow direct use of Object.prototype builtins.
 	 */
-	noPrototypeBuiltins?: RuleConfiguration_for_Null;
+	noPrototypeBuiltins?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevents React-specific JSX properties from being used.
 	 */
@@ -2065,6 +2065,9 @@ export type RuleConfiguration_for_FilenamingConventionOptions =
 export type RuleFixConfiguration_for_NamingConventionOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NamingConventionOptions;
+export type RuleFixConfiguration_for_UseSelfClosingElementsOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_UseSelfClosingElementsOptions;
 export type RuleFixConfiguration_for_NoConsoleOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoConsoleOptions;
@@ -2304,6 +2307,20 @@ export interface RuleWithFixOptions_for_NamingConventionOptions {
 	 */
 	options: NamingConventionOptions;
 }
+export interface RuleWithFixOptions_for_UseSelfClosingElementsOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UseSelfClosingElementsOptions;
+}
 export interface RuleWithFixOptions_for_NoConsoleOptions {
 	/**
 	 * The kind of the code actions emitted by the rule
@@ -2464,6 +2481,10 @@ export interface FilenamingConventionOptions {
 	 */
 	filenameCases: FilenameCases;
 	/**
+	 * Regular expression to enforce
+	 */
+	match?: Regex;
+	/**
 	 * If `false`, then non-ASCII characters are allowed.
 	 */
 	requireAscii: boolean;
@@ -2493,6 +2514,12 @@ export interface NamingConventionOptions {
 	 */
 	strictCase: boolean;
 }
+/**
+ * Options for the `useSelfClosingElements` rule.
+ */
+export interface UseSelfClosingElementsOptions {
+	ignoreHtmlElements?: boolean;
+}
 export interface NoConsoleOptions {
 	/**
 	 * Allowed calls on the console object.
@@ -2506,7 +2533,7 @@ export interface NoDoubleEqualsOptions {
 	/**
 	* If `true`, an exception is made when comparing with `null`, as it's often relied on to check both for `null` or `undefined`.
 
-If `false`, no such exception will be made.
+If `false`, no such exception will be made. 
 	 */
 	ignoreNull: boolean;
 }
@@ -2514,13 +2541,13 @@ export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
 
-For example, for React's `useEffect()` hook, the closure index is 0.
+For example, for React's `useEffect()` hook, the closure index is 0. 
 	 */
 	closureIndex?: number;
 	/**
 	* The "position" of the array of dependencies, starting from zero.
 
-For example, for React's `useEffect()` hook, the dependencies index is 1.
+For example, for React's `useEffect()` hook, the dependencies index is 1. 
 	 */
 	dependenciesIndex?: number;
 	/**
@@ -2532,13 +2559,14 @@ For example, for React's `useEffect()` hook, the dependencies index is 1.
 
 Set to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the "positions" in the return array as stable.
 
-For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`.
+For example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`. 
 	 */
 	stableResult?: StableHookResult;
 }
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
+export type Regex = string;
 export interface Convention {
 	/**
 	 * String cases to enforce
@@ -2572,7 +2600,6 @@ export type FilenameCase =
 	| "PascalCase"
 	| "snake_case";
 export type Formats = Format[];
-export type Regex = string;
 export interface Selector {
 	/**
 	 * Declaration kind
@@ -2696,13 +2723,13 @@ export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
 /**
 	* Enum of the different ECMAScript standard versions. The versions are ordered in increasing order; The newest version comes last.
 
-Defaults to the latest stable ECMAScript standard.
+Defaults to the latest stable ECMAScript standard. 
 	 */
 export type LanguageVersion = "eS2022" | "eSNext";
 /**
 	* The style of CSS contained in the file.
 
-Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards.
+Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
 	 */
 export type CssVariant = "standard";
 /**
@@ -3152,7 +3179,7 @@ export type DiagnosticTags = DiagnosticTag[];
 /**
 	* Serializable representation of a [Diagnostic](super::Diagnostic) advice
 
-See the [Visitor] trait for additional documentation on all the supported advice types.
+See the [Visitor] trait for additional documentation on all the supported advice types. 
 	 */
 export type Advice =
 	| { log: [LogCategory, MarkupBuf] }
@@ -3245,13 +3272,13 @@ export interface CodeAction {
 /**
 	* The category of a code action, this type maps directly to the [CodeActionKind] type in the Language Server Protocol specification
 
-[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind
+[CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
-	| "QuickFix"
-	| { Refactor: RefactorKind }
-	| { Source: SourceActionKind }
-	| { Other: OtherActionCategory };
+	| "quickFix"
+	| { refactor: RefactorKind }
+	| { source: SourceActionKind }
+	| { other: OtherActionCategory };
 /**
  * A Suggestion that is provided by Biome's linter, and can be reported to the user, and can be automatically applied if it has the right [`Applicability`].
  */
@@ -3265,30 +3292,30 @@ export interface CodeSuggestion {
 /**
 	* The sub-category of a refactor code action.
 
-[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information:
+[Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
 	 */
 export type RefactorKind =
-	| "None"
-	| "Extract"
-	| "Inline"
-	| "Rewrite"
-	| { Other: string };
+	| "none"
+	| "extract"
+	| "inline"
+	| "rewrite"
+	| { other: string };
 /**
  * The sub-category of a source code action
  */
 export type SourceActionKind =
-	| "FixAll"
-	| "None"
-	| "OrganizeImports"
-	| { Other: string };
+	| "fixAll"
+	| "none"
+	| "organizeImports"
+	| { other: string };
 export type OtherActionCategory =
-	| "InlineSuppression"
-	| "ToplevelSuppression"
-	| { Generic: string };
+	| "inlineSuppression"
+	| "toplevelSuppression"
+	| { generic: string };
 /**
  * Indicates how a tool should manage this suggestion.
  */
-export type Applicability = "Always" | "MaybeIncorrect";
+export type Applicability = "always" | "maybeIncorrect";
 export interface FormatFileParams {
 	path: BiomePath;
 }
@@ -3296,7 +3323,7 @@ export interface Printed {
 	code: string;
 	range?: TextRange;
 	sourcemap: SourceMarker[];
-	verbatim_ranges: TextRange[];
+	verbatimRanges: TextRange[];
 }
 /**
  * Lightweight sourcemap marker between source and output tokens
@@ -3330,7 +3357,10 @@ export interface FixFileParams {
 /**
  * Which fixes should be applied during the analyzing phase
  */
-export type FixFileMode = "safeFixes" | "safeAndUnsafeFixes";
+export type FixFileMode =
+	| "safeFixes"
+	| "safeAndUnsafeFixes"
+	| "applySuppressions";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file

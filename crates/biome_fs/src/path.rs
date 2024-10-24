@@ -402,7 +402,7 @@ mod test {
     #[test]
     #[cfg(feature = "serde")]
     fn deserialize_file_kind_from_str() {
-        let result = serde_json::from_str::<FileKinds>("[\"Config\"]");
+        let result = serde_json::from_str::<FileKinds>("[\"config\"]");
         assert!(result.is_ok());
         let file_kinds = result.unwrap();
         assert!(file_kinds.contains(FileKind::Config));
@@ -414,6 +414,6 @@ mod test {
         let file_kinds = FileKinds::from(FileKind::Config);
         let result = serde_json::to_string(&file_kinds);
         assert!(result.is_ok());
-        assert_eq!(result.unwrap(), "[\"Config\"]");
+        assert_eq!(result.unwrap(), "[\"config\"]");
     }
 }
