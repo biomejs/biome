@@ -7,27 +7,46 @@ use biome_rowan::{TextRange, TextSize};
 /// - Use `\*` to escape `*`
 /// - `?`, `[`, `]`, `{`, and `}` must be escaped using `\`.
 ///   These characters are reserved for future use.
-/// - `!` must be escaped if it is the first character of the pattern
+/// - Use `!` as first character to negate the glob
 ///
 /// A path segment is delimited by path separator `/` or the start/end of the path.
 #[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
 #[serde(try_from = "String", into = "String")]
-pub struct RestrictedGlob(globset::GlobMatcher);
+pub struct RestrictedGlob {
+    is_negated: bool,
+    glob: globset::GlobMatcher,
+}
 impl RestrictedGlob {
+    /// Returns `true` if this glob is negated.
+    pub fn is_negated(&self) -> bool {
+        self.is_negated
+    }
+
     /// Tests whether the given path matches this pattern or not.
     pub fn is_match(&self, path: impl AsRef<std::path::Path>) -> bool {
-        self.0.is_match(path)
+        self.is_raw_match(path) != self.is_negated
+    }
+
+    /// Tests whether the given path matches this pattern or not ignoring the negation.
+    fn is_raw_match(&self, path: impl AsRef<std::path::Path>) -> bool {
+        self.glob.is_match(path)
     }
 
     /// Tests whether the given path matches this pattern or not.
     pub fn is_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
-        self.0.is_match_candidate(&path.0)
+        self.is_raw_match_candidate(path) != self.is_negated
+    }
+
+    /// Tests whether the given path matches this pattern or not ignoring the negation.
+    fn is_raw_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
+        self.glob.is_match_candidate(&path.0)
     }
 }
 impl std::fmt::Display for RestrictedGlob {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let repr = self.0.glob().to_string();
-        f.write_str(&repr)
+        let repr = self.glob.glob().to_string();
+        let negation = if self.is_negated { "!" } else { "" };
+        write!(f, "{negation}{repr}")
     }
 }
 impl From<RestrictedGlob> for String {
@@ -38,6 +57,11 @@ impl From<RestrictedGlob> for String {
 impl std::str::FromStr for RestrictedGlob {
     type Err = RestrictedGlobError;
     fn from_str(value: &str) -> Result<Self, Self::Err> {
+        let (is_negated, value) = if let Some(stripped) = value.strip_prefix('!') {
+            (true, stripped)
+        } else {
+            (false, value)
+        };
         validate_restricted_glob(value)?;
         let mut glob_builder = globset::GlobBuilder::new(value);
         // Allow escaping with `\` on all platforms.
@@ -45,7 +69,10 @@ impl std::str::FromStr for RestrictedGlob {
         // Only `**` can match `/`
         glob_builder.literal_separator(true);
         match glob_builder.build() {
-            Ok(glob) => Ok(RestrictedGlob(glob.compile_matcher())),
+            Ok(glob) => Ok(RestrictedGlob {
+                is_negated,
+                glob: glob.compile_matcher(),
+            }),
             Err(error) => Err(RestrictedGlobError::Generic(
                 error.kind().to_string().into_boxed_str(),
             )),
@@ -98,11 +125,39 @@ impl schemars::JsonSchema for RestrictedGlob {
 /// Constructing candidates has a very small cost associated with it, so
 /// callers may find it beneficial to amortize that cost when matching a single
 /// path against multiple globs or sets of globs.
+#[derive(Debug, Clone)]
 pub struct CandidatePath<'a>(globset::Candidate<'a>);
 impl<'a> CandidatePath<'a> {
     /// Create a new candidate for matching from the given path.
     pub fn new(path: &'a impl AsRef<std::path::Path>) -> Self {
         Self(globset::Candidate::new(path))
+    }
+
+    /// Tests whether the current path matches `glob` or not.
+    pub fn matches(&self, glob: &RestrictedGlob) -> bool {
+        glob.is_match_candidate(self)
+    }
+
+    /// Match against a list of globs where negated globs are handled as exceptions.
+    ///
+    /// This mimics the behavior of `.gitignore`.
+    /// For example, given the list `["**/*", "!a*", "aa", "!a"]`, we have:
+    /// - The file `a` doesn't match
+    /// - The file `aa` matches
+    /// - The file `aaa` doesn't match
+    /// - The file `b` matches
+    pub fn matches_with_exceptions<'b, I>(&self, globs: I) -> bool
+    where
+        I: IntoIterator<Item = &'b RestrictedGlob>,
+        I::IntoIter: DoubleEndedIterator,
+    {
+        // Iterate in reverse order to avoid unnecessary tests.
+        for glob in globs.into_iter().rev() {
+            if glob.is_raw_match_candidate(self) {
+                return !glob.is_negated();
+            }
+        }
+        false
     }
 }
 
@@ -144,7 +199,6 @@ pub enum RestrictedGlobErrorKind {
     UnsupportedAlternates,
     UnsupportedCharacterClass,
     UnsupportedAnyCharacter,
-    UnsupportedNegation,
 }
 impl std::fmt::Display for RestrictedGlobErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -162,9 +216,6 @@ impl std::fmt::Display for RestrictedGlobErrorKind {
             Self::UnsupportedAnyCharacter => {
                 r"`?` matcher is not supported. Use `\?` to escape the character."
             }
-            Self::UnsupportedNegation => {
-                r"Negated globs `!` are not supported. Use `\!` to escape the character."
-            }
         };
         write!(f, "{desc}")
     }
@@ -175,12 +226,6 @@ fn validate_restricted_glob(pattern: &str) -> Result<(), RestrictedGlobError> {
     let mut it = pattern.bytes().enumerate();
     while let Some((i, c)) = it.next() {
         match c {
-            b'!' if i == 0 => {
-                return Err(RestrictedGlobError::Regular {
-                    kind: RestrictedGlobErrorKind::UnsupportedNegation,
-                    index: i as u32,
-                });
-            }
             b'\\' => {
                 // Accept a restrictive set of escape sequence
                 if let Some((j, c)) = it.next() {
@@ -227,11 +272,12 @@ fn validate_restricted_glob(pattern: &str) -> Result<(), RestrictedGlobError> {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use super::*;
 
     #[test]
     fn test_validate_restricted_glob() {
-        assert!(validate_restricted_glob("!*.js").is_err());
         assert!(validate_restricted_glob("*.[jt]s").is_err());
         assert!(validate_restricted_glob("*.{js,ts}").is_err());
         assert!(validate_restricted_glob("?*.js").is_err());
@@ -240,6 +286,7 @@ mod tests {
         assert!(validate_restricted_glob(r"\😀").is_err());
         assert!(validate_restricted_glob("!").is_err());
 
+        assert!(validate_restricted_glob("!*.js").is_ok());
         assert!(validate_restricted_glob("*.js").is_ok());
         assert!(validate_restricted_glob("**/*.js").is_ok());
         assert!(validate_restricted_glob(r"\*").is_ok());
@@ -257,5 +304,36 @@ mod tests {
             .parse::<RestrictedGlob>()
             .unwrap()
             .is_match("file/path.js"));
+    }
+
+    #[test]
+    fn test_match_with_exceptions() {
+        let a = CandidatePath::new(&"a");
+
+        assert!(a.matches_with_exceptions(&[
+            RestrictedGlob::from_str("*").unwrap(),
+            RestrictedGlob::from_str("!b").unwrap(),
+        ]));
+        assert!(!a.matches_with_exceptions(&[
+            RestrictedGlob::from_str("*").unwrap(),
+            RestrictedGlob::from_str("!a*").unwrap(),
+        ]));
+        assert!(a.matches_with_exceptions(&[
+            RestrictedGlob::from_str("*").unwrap(),
+            RestrictedGlob::from_str("!a*").unwrap(),
+            RestrictedGlob::from_str("a").unwrap(),
+        ]));
+    }
+
+    #[test]
+    fn test_to_string() {
+        assert_eq!(
+            RestrictedGlob::from_str("**/*.js").unwrap().to_string(),
+            "**/*.js"
+        );
+        assert_eq!(
+            RestrictedGlob::from_str("!**/*.js").unwrap().to_string(),
+            "!**/*.js"
+        );
     }
 }
