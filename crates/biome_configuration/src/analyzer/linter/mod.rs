@@ -29,6 +29,10 @@ pub struct LinterConfiguration {
     /// match these patterns.
     #[partial(bpaf(hide))]
     pub include: StringSet,
+
+    /// Explanation for suppressions when using the `--suppress` flag
+    #[partial(bpaf(hide))]
+    pub suppression_reason: String,
 }
 
 impl LinterConfiguration {
@@ -44,6 +48,7 @@ impl Default for LinterConfiguration {
             rules: Default::default(),
             ignore: Default::default(),
             include: Default::default(),
+            suppression_reason: Default::default(),
         }
     }
 }

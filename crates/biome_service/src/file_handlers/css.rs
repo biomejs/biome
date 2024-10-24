@@ -152,7 +152,7 @@ impl ServiceLanguage for CssLanguage {
         AnalyzerOptions {
             configuration,
             file_path: file_path.to_path_buf(),
-            suppression_reason: Some("Ignored using `--suppress`".to_string()),
+            suppression_reason: "todoooo".to_string(),
         }
     }
 }

@@ -468,6 +468,9 @@ pub struct LinterSettings {
 
     /// List of included paths/files to match
     pub included_files: Matcher,
+
+    /// Explanation for suppressions when using `--suppress` and/or `--reason`
+    pub suppression_reason: String,
 }
 
 impl Default for LinterSettings {
@@ -477,6 +480,7 @@ impl Default for LinterSettings {
             rules: Some(biome_configuration::analyzer::linter::Rules::default()),
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
+            suppression_reason: String::from("<explanation>"),
         }
     }
 }
@@ -593,6 +597,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.globals = Some(javascript.globals.into_index_set());
         language_setting.environment = javascript.jsx_runtime.into();
         language_setting.linter.enabled = Some(javascript.linter.enabled);
+        language_setting.linter.suppression_reason = Some(javascript.linter.suppression_reason);
 
         language_setting
     }
@@ -1782,6 +1787,7 @@ pub fn to_linter_settings(
         rules: Some(conf.rules),
         ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
         included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
+        suppression_reason: conf.suppression_reason,
     })
 }
 
@@ -1794,6 +1800,8 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
             rules: conf.rules,
             ignored_files: Matcher::empty(),
             included_files: Matcher::empty(),
+            // suppression_reason: conf.suppression_reason,
+            suppression_reason: "you are here".to_string(),
         })
     }
 }

@@ -144,7 +144,7 @@ impl ServiceLanguage for JsonLanguage {
         AnalyzerOptions {
             configuration,
             file_path: path.to_path_buf(),
-            suppression_reason: Some("Ignored using `--suppress`".to_string()),
+            suppression_reason: "todooooo".to_string(),
         }
     }
 }

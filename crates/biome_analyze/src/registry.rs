@@ -428,7 +428,7 @@ impl<L: Language + Default> RegistryRule<L> {
                     result,
                     params.services,
                     params.suppression_action,
-                    params.options.suppression_reason.as_deref(),
+                    params.options.suppression_reason.clone(),
                     params.options,
                 ));
 

@@ -264,7 +264,7 @@ fn assert_lint(
                         ..Default::default()
                     },
                     file_path: PathBuf::from(&file_path),
-                    suppression_reason: Some("Ignored using `--suppress`".to_string()),
+                    suppression_reason: "todoooo".to_string(),
                 };
                 biome_js_analyze::analyze(&root, filter, &options, file_source, None, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {

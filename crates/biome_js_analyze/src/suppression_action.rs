@@ -129,7 +129,7 @@ impl SuppressionAction for JsSuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
-        suppression_reason: Option<&str>,
+        suppression_reason: String,
     ) {
         let ApplySuppression {
             token_to_apply_suppression,
@@ -146,8 +146,6 @@ impl SuppressionAction for JsSuppressionAction {
             }
         });
 
-        let suppression_explanation = suppression_reason.unwrap_or("<explanation>");
-
         // When inside a JSX element, we have to apply different logics when applying suppression comments.
         // Newlines are inside JsxText.
         if let Some(current_jsx_element) = current_jsx_element {
@@ -159,7 +157,7 @@ impl SuppressionAction for JsSuppressionAction {
                 let jsx_comment = jsx_expression_child(
                     token(T!['{']).with_trailing_trivia([(
                         TriviaPieceKind::SingleLineComment,
-                        format!("/* {suppression_text}: {suppression_explanation} */").as_str(),
+                        format!("/* {suppression_text}: {suppression_reason} */").as_str(),
                     )]),
                     token(T!['}']),
                 )
@@ -196,7 +194,7 @@ impl SuppressionAction for JsSuppressionAction {
                         (TriviaPieceKind::Newline, "\n"),
                         (
                             TriviaPieceKind::SingleLineComment,
-                            format!("// {suppression_text}: {suppression_explanation}").as_str(),
+                            format!("// {suppression_text}: {suppression_reason}").as_str(),
                         ),
                         (TriviaPieceKind::Newline, "\n"),
                     ])
@@ -204,7 +202,7 @@ impl SuppressionAction for JsSuppressionAction {
                     new_token = new_token.with_leading_trivia([
                         (
                             TriviaPieceKind::SingleLineComment,
-                            format!("// {suppression_text}: {suppression_explanation}").as_str(),
+                            format!("// {suppression_text}: {suppression_reason}").as_str(),
                         ),
                         (TriviaPieceKind::Newline, "\n"),
                     ])
@@ -219,7 +217,7 @@ impl SuppressionAction for JsSuppressionAction {
                         (TriviaPieceKind::Newline, "\n"),
                         (
                             TriviaPieceKind::SingleLineComment,
-                            format!("// {suppression_text}: {suppression_explanation}").as_str(),
+                            format!("// {suppression_text}: {suppression_reason}").as_str(),
                         ),
                         (TriviaPieceKind::Newline, "\n"),
                     ])
@@ -228,7 +226,7 @@ impl SuppressionAction for JsSuppressionAction {
                         (TriviaPieceKind::Newline, "\n"),
                         (
                             TriviaPieceKind::SingleLineComment,
-                            format!("// {suppression_text}: {suppression_explanation}").as_str(),
+                            format!("// {suppression_text}: {suppression_reason}").as_str(),
                         ),
                         (TriviaPieceKind::Newline, "\n"),
                     ])
@@ -237,12 +235,12 @@ impl SuppressionAction for JsSuppressionAction {
                 new_token = new_token.with_trailing_trivia([
                     (
                         TriviaPieceKind::SingleLineComment,
-                        format!("// {suppression_text}: {suppression_explanation}").as_str(),
+                        format!("// {suppression_text}: {suppression_reason}").as_str(),
                     ),
                     (TriviaPieceKind::Newline, "\n"),
                 ])
             } else {
-                let comment = format!("// {suppression_text}: {suppression_explanation}");
+                let comment = format!("// {suppression_text}: {suppression_reason}");
                 let mut trivia = vec![
                     (TriviaPieceKind::SingleLineComment, comment.as_str()),
                     (TriviaPieceKind::Newline, "\n"),

@@ -881,7 +881,7 @@ pub trait Rule: RuleMeta + Sized {
         ctx: &RuleContext<Self>,
         text_range: &TextRange,
         suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
-        suppression_reason: Option<&str>,
+        suppression_reason: String,
     ) -> Option<SuppressAction<RuleLanguage<Self>>>
     where
         Self: 'static,

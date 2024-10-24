@@ -79,6 +79,7 @@ pub struct JsParserSettings {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct JsLinterSettings {
     pub enabled: Option<bool>,
+    pub suppression_reason: Option<String>,
 }
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
@@ -193,6 +194,17 @@ impl ServiceLanguage for JsLanguage {
         path: &BiomePath,
         _file_source: &DocumentFileSource,
     ) -> AnalyzerOptions {
+        let suppression_reason = global
+            .and_then(|global| {
+                global
+                    .languages
+                    .javascript
+                    .linter
+                    .suppression_reason
+                    .clone()
+            })
+            .unwrap_or_else(|| "<explanation>".to_string());
+
         let preferred_quote =
             global
                 .and_then(|global| {
@@ -279,7 +291,7 @@ impl ServiceLanguage for JsLanguage {
         AnalyzerOptions {
             configuration,
             file_path: path.to_path_buf(),
-            suppression_reason: Some("Ignored using `--suppress`".to_string()),
+            suppression_reason,
         }
     }
 }

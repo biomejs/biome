@@ -39,7 +39,7 @@ impl SuppressionAction for GraphqlSuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
-         _suppression_reason: Option<&str>,
+        _suppression_reason: String,
     ) {
         let ApplySuppression {
             token_to_apply_suppression,
