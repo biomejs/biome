@@ -3,9 +3,9 @@
 **/generated/* linguist-generated=true text=auto eol=lf
 /crates/biome_cli/src/execute/migrate/eslint_any_rule_to_biome.rs linguist-generated=true text=auto eol=lf
 /crates/biome_configuration/src/generated.rs linguist-generated=true text=auto eol=lf
-/crates/biome_configuration/src/linter/rules.rs linguist-generated=true text=auto eol=lf
-/crates/biome_configuration/src/assists/rules.rs linguist-generated=true text=auto eol=lf
-/crates/biome_configuration/src/parse/json/rules.rs linguist-generated=true text=auto eol=lf
+/crates/biome_configuration/src/analyzer/linter/rules.rs linguist-generated=true text=auto eol=lf
+/crates/biome_configuration/src/analyzer/assists/actions.rs linguist-generated=true text=auto eol=lf
+/crates/biome_configuration/src/analyzer/parse/rules.rs linguist-generated=true text=auto eol=lf
 # GraphQL
 /crates/biome_graphql_analyze/src/{lint,assists,syntax}.rs linguist-generated=true text=auto eol=lf
 /crates/biome_graphql_analyze/src/{lint,assists,syntax}/*.rs linguist-generated=true text=auto eol=lf

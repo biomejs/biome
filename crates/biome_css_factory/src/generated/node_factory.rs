@@ -647,6 +647,12 @@ impl CssDocumentCustomMatcherBuilder {
         ))
     }
 }
+pub fn css_empty_declaration(semicolon_token: SyntaxToken) -> CssEmptyDeclaration {
+    CssEmptyDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_EMPTY_DECLARATION,
+        [Some(SyntaxElement::Token(semicolon_token))],
+    ))
+}
 pub fn css_font_face_at_rule(
     font_face_token: SyntaxToken,
     block: AnyCssDeclarationBlock,

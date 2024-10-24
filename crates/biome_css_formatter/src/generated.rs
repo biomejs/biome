@@ -1415,6 +1415,46 @@ impl IntoFormat<CssFormatContext> for biome_css_syntax::CssDocumentCustomMatcher
         )
     }
 }
+impl FormatRule<biome_css_syntax::CssEmptyDeclaration>
+    for crate::css::auxiliary::empty_declaration::FormatCssEmptyDeclaration
+{
+    type Context = CssFormatContext;
+    #[inline(always)]
+    fn fmt(
+        &self,
+        node: &biome_css_syntax::CssEmptyDeclaration,
+        f: &mut CssFormatter,
+    ) -> FormatResult<()> {
+        FormatNodeRule::<biome_css_syntax::CssEmptyDeclaration>::fmt(self, node, f)
+    }
+}
+impl AsFormat<CssFormatContext> for biome_css_syntax::CssEmptyDeclaration {
+    type Format<'a> = FormatRefWithRule<
+        'a,
+        biome_css_syntax::CssEmptyDeclaration,
+        crate::css::auxiliary::empty_declaration::FormatCssEmptyDeclaration,
+    >;
+    fn format(&self) -> Self::Format<'_> {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatRefWithRule::new(
+            self,
+            crate::css::auxiliary::empty_declaration::FormatCssEmptyDeclaration::default(),
+        )
+    }
+}
+impl IntoFormat<CssFormatContext> for biome_css_syntax::CssEmptyDeclaration {
+    type Format = FormatOwnedWithRule<
+        biome_css_syntax::CssEmptyDeclaration,
+        crate::css::auxiliary::empty_declaration::FormatCssEmptyDeclaration,
+    >;
+    fn into_format(self) -> Self::Format {
+        #![allow(clippy::default_constructed_unit_structs)]
+        FormatOwnedWithRule::new(
+            self,
+            crate::css::auxiliary::empty_declaration::FormatCssEmptyDeclaration::default(),
+        )
+    }
+}
 impl FormatRule<biome_css_syntax::CssFontFaceAtRule>
     for crate::css::statements::font_face_at_rule::FormatCssFontFaceAtRule
 {
