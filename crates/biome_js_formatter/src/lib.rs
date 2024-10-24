@@ -178,6 +178,8 @@ mod parentheses;
 pub(crate) mod separated;
 mod syntax_rewriter;
 
+use std::rc::Rc;
+
 use biome_formatter::format_element::tag::Label;
 use biome_formatter::prelude::*;
 use biome_formatter::{
@@ -442,13 +444,28 @@ impl IntoFormat<JsFormatContext> for JsSyntaxToken {
     }
 }
 
+pub enum JsForeignLanguage {
+    Css,
+}
+
+pub trait JsForeignLanguageFormatter: std::fmt::Debug + 'static {
+    fn format(&self, language: JsForeignLanguage, source: &str) -> FormatResult<Document>;
+}
+
 #[derive(Debug, Clone)]
 pub struct JsFormatLanguage {
     options: JsFormatOptions,
+    foreign_language_formatter: Rc<dyn JsForeignLanguageFormatter>,
 }
 impl JsFormatLanguage {
-    pub fn new(options: JsFormatOptions) -> Self {
-        Self { options }
+    pub fn new(
+        options: JsFormatOptions,
+        foreign_language_formatter: impl JsForeignLanguageFormatter,
+    ) -> Self {
+        Self {
+            options,
+            foreign_language_formatter: Rc::new(foreign_language_formatter),
+        }
     }
 }
 
@@ -490,7 +507,8 @@ impl FormatLanguage for JsFormatLanguage {
         source_map: Option<TransformSourceMap>,
     ) -> Self::Context {
         let comments = Comments::from_node(root, &JsCommentStyle, source_map.as_ref());
-        JsFormatContext::new(self.options, comments).with_source_map(source_map)
+        JsFormatContext::new(self.options, self.foreign_language_formatter, comments)
+            .with_source_map(source_map)
     }
 }
 
@@ -507,10 +525,15 @@ impl FormatLanguage for JsFormatLanguage {
 /// range of the input that was effectively overwritten by the formatter
 pub fn format_range(
     options: JsFormatOptions,
+    foreign_language_formatter: impl JsForeignLanguageFormatter,
     root: &JsSyntaxNode,
     range: TextRange,
 ) -> FormatResult<Printed> {
-    biome_formatter::format_range(root, range, JsFormatLanguage::new(options))
+    biome_formatter::format_range(
+        root,
+        range,
+        JsFormatLanguage::new(options, foreign_language_formatter),
+    )
 }
 
 /// Formats a JavaScript (and its super languages) file based on its features.
@@ -518,9 +541,13 @@ pub fn format_range(
 /// It returns a [Formatted] result, which the user can use to override a file.
 pub fn format_node(
     options: JsFormatOptions,
+    foreign_language_formatter: impl JsForeignLanguageFormatter,
     root: &JsSyntaxNode,
 ) -> FormatResult<Formatted<JsFormatContext>> {
-    biome_formatter::format_node(root, JsFormatLanguage::new(options))
+    biome_formatter::format_node(
+        root,
+        JsFormatLanguage::new(options, foreign_language_formatter),
+    )
 }
 
 /// Formats a single node within a file, supported by Biome.
@@ -533,8 +560,15 @@ pub fn format_node(
 /// even if it's a mismatch from the rest of the block the selection is in
 ///
 /// It returns a [Formatted] result
-pub fn format_sub_tree(options: JsFormatOptions, root: &JsSyntaxNode) -> FormatResult<Printed> {
-    biome_formatter::format_sub_tree(root, JsFormatLanguage::new(options))
+pub fn format_sub_tree(
+    options: JsFormatOptions,
+    foreign_language_formatter: impl JsForeignLanguageFormatter,
+    root: &JsSyntaxNode,
+) -> FormatResult<Printed> {
+    biome_formatter::format_sub_tree(
+        root,
+        JsFormatLanguage::new(options, foreign_language_formatter),
+    )
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -559,11 +593,24 @@ mod tests {
 
     use super::format_range;
 
-    use crate::context::JsFormatOptions;
-    use biome_formatter::IndentStyle;
+    use crate::{context::JsFormatOptions, JsForeignLanguageFormatter};
+    use biome_formatter::{prelude::Document, FormatError, IndentStyle};
     use biome_js_parser::{parse, parse_script, JsParserOptions};
     use biome_js_syntax::JsFileSource;
     use biome_rowan::{TextRange, TextSize};
+
+    #[derive(Debug, Clone)]
+    struct FakeFormatter;
+
+    impl JsForeignLanguageFormatter for FakeFormatter {
+        fn format(
+            &self,
+            _language: super::JsForeignLanguage,
+            _source: &str,
+        ) -> biome_formatter::FormatResult<Document> {
+            Err(FormatError::SyntaxError)
+        }
+    }
 
     #[test]
     fn test_range_formatting() {
@@ -600,6 +647,7 @@ while(
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
+            FakeFormatter,
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -634,6 +682,7 @@ function() {
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
+            FakeFormatter,
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -663,6 +712,7 @@ function() {
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
+            FakeFormatter,
             &tree.syntax(),
             TextRange::new(range_start, range_end),
         );
@@ -693,6 +743,7 @@ function() {
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
+            FakeFormatter,
             &tree.syntax(),
             range,
         )
@@ -726,6 +777,7 @@ function() {
             JsFormatOptions::new(JsFileSource::js_script())
                 .with_indent_style(IndentStyle::Space)
                 .with_indent_width(4.try_into().unwrap()),
+            FakeFormatter,
             &tree.syntax(),
             range,
         )
@@ -747,6 +799,7 @@ function() {
 
         let result = format_range(
             JsFormatOptions::new(syntax),
+            FakeFormatter,
             &tree.syntax(),
             TextRange::new(TextSize::from(0), TextSize::of(src) + TextSize::from(5)),
         );
