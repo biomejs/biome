@@ -1,10 +1,25 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritList;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritList, GritListFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritList;
 impl FormatNodeRule<GritList> for FormatGritList {
     fn fmt_fields(&self, node: &GritList, f: &mut GritFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritListFields {
+            l_brack_token,
+            name,
+            patterns,
+            r_brack_token,
+        } = node.as_fields();
+        write!(
+            f,
+            [
+                l_brack_token.format(),
+                name.format(),
+                patterns.format(),
+                r_brack_token.format(),
+            ]
+        )
     }
 }
