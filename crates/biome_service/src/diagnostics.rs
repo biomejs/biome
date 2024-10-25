@@ -1,4 +1,4 @@
-use crate::workspace::DocumentFileSource;
+use crate::workspace::{CheckFileSizeResult, DocumentFileSource};
 use biome_analyze::RuleError;
 use biome_configuration::diagnostics::{ConfigurationDiagnostic, EditorConfigDiagnostic};
 use biome_configuration::{BiomeDiagnostic, CantLoadExtendFile};
@@ -52,8 +52,6 @@ pub enum WorkspaceError {
     TransportError(TransportError),
     /// Emitted when the file is ignored and should not be processed
     FileIgnored(FileIgnored),
-    /// Emitted when a file could not be parsed because it's larger than the size limit
-    FileTooLarge(FileTooLarge),
     /// Diagnostics emitted when querying the file system
     FileSystem(FileSystemDiagnostic),
     /// Raised when there's an issue around the VCS integration
@@ -75,10 +73,6 @@ impl WorkspaceError {
 
     pub fn not_found() -> Self {
         Self::NotFound(NotFound)
-    }
-
-    pub fn file_too_large(path: String, size: usize, limit: usize) -> Self {
-        Self::FileTooLarge(FileTooLarge { path, size, limit })
     }
 
     pub fn file_ignored(path: String) -> Self {
@@ -247,32 +241,30 @@ pub struct FileIgnored {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FileTooLarge {
-    path: String,
-    size: usize,
-    limit: usize,
+    pub size: usize,
+    pub limit: usize,
+}
+
+impl From<CheckFileSizeResult> for FileTooLarge {
+    fn from(value: CheckFileSizeResult) -> Self {
+        Self {
+            size: value.file_size,
+            limit: value.limit,
+        }
+    }
 }
 
 impl Diagnostic for FileTooLarge {
-    fn category(&self) -> Option<&'static Category> {
-        Some(category!("internalError/fs"))
+    fn severity(&self) -> Severity {
+        Severity::Information
     }
 
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(
             markup!{
-                "Size of "{self.path}" is "{Bytes(self.size)}" which exceeds configured maximum of "{Bytes(self.limit)}" for this project.
-                The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-                Use the `files.maxSize` configuration to change the maximum size of files processed."
+                "Size of the file is "{Bytes(self.size)}" which exceeds configured maximum of "{Bytes(self.limit)}" for this project.
+Use the `files.maxSize` configuration to change the maximum size of files processed."
             }
-        )
-    }
-
-    fn description(&self, fmt: &mut Formatter<'_>) -> fmt::Result {
-        write!(fmt,
-               "Size of {} is {} which exceeds configured maximum of {} for this project.\n\
-               The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.\n\
-               Use the `files.maxSize` configuration to change the maximum size of files processed.",
-               self.path, Bytes(self.size), Bytes(self.limit)
         )
     }
 }
@@ -538,7 +530,7 @@ impl Advices for ProtectedFileAdvice {
 #[cfg(test)]
 mod test {
     use crate::diagnostics::{
-        CantReadDirectory, CantReadFile, DirtyWorkspace, FileIgnored, FileTooLarge, NotFound,
+        CantReadDirectory, CantReadFile, DirtyWorkspace, FileIgnored, NotFound,
         SourceFileNotSupported,
     };
     use crate::file_handlers::DocumentFileSource;
@@ -624,19 +616,6 @@ mod test {
                 extension: path.extension().and_then(OsStr::to_str).map(str::to_string),
             })
             .with_file_path("not_supported.toml"),
-        )
-    }
-
-    #[test]
-    fn file_too_large() {
-        snap_diagnostic(
-            "file_too_large",
-            WorkspaceError::FileTooLarge(FileTooLarge {
-                path: "example.js".to_string(),
-                limit: 100,
-                size: 500,
-            })
-            .with_file_path("example.js"),
         )
     }
 

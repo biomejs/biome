@@ -18,13 +18,12 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 ```block
 check.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Size of check.js is 1.0 MiB which exceeds configured maximum of 1.0 MiB for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
+  i Size of the file is 1.0 MiB which exceeds configured maximum of 1.0 MiB for this project.
     Use the `files.maxSize` configuration to change the maximum size of files processed.
   
 
 ```
 
 ```block
-Checked 1 file in <TIME>. No fixes applied.
+Checked 0 files in <TIME>. No fixes applied.
 ```

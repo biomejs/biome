@@ -1,11 +1,12 @@
 use super::{
-    ChangeFileParams, CloseFileParams, FeatureKind, FeatureName, FixFileResult, FormatFileParams,
-    FormatOnTypeParams, FormatRangeParams, GetControlFlowGraphParams, GetFormatterIRParams,
-    GetSyntaxTreeParams, GetSyntaxTreeResult, OpenFileParams, ParsePatternParams,
-    ParsePatternResult, PatternId, ProjectKey, PullActionsParams, PullActionsResult,
-    PullDiagnosticsParams, PullDiagnosticsResult, RegisterProjectFolderParams, RenameResult,
-    SearchPatternParams, SearchResults, SetManifestForProjectParams, SupportsFeatureParams,
-    UnregisterProjectFolderParams, UpdateSettingsParams,
+    ChangeFileParams, CheckFileSizeParams, CheckFileSizeResult, CloseFileParams, FeatureKind,
+    FeatureName, FixFileResult, FormatFileParams, FormatOnTypeParams, FormatRangeParams,
+    GetControlFlowGraphParams, GetFormatterIRParams, GetSyntaxTreeParams, GetSyntaxTreeResult,
+    OpenFileParams, ParsePatternParams, ParsePatternResult, PatternId, ProjectKey,
+    PullActionsParams, PullActionsResult, PullDiagnosticsParams, PullDiagnosticsResult,
+    RegisterProjectFolderParams, RenameResult, SearchPatternParams, SearchResults,
+    SetManifestForProjectParams, SupportsFeatureParams, UnregisterProjectFolderParams,
+    UpdateSettingsParams,
 };
 use crate::diagnostics::{InvalidPattern, SearchError};
 use crate::file_handlers::{
@@ -236,24 +237,7 @@ impl WorkspaceServer {
                     .parse
                     .ok_or_else(self.build_capability_error(biome_path))?;
 
-                let size_limit = {
-                    let workspace = self.workspace();
-                    let settings = workspace.settings();
-                    let limit =
-                        settings.map_or(DEFAULT_FILE_SIZE_LIMIT.get(), |s| s.files.max_size.get());
-                    usize::try_from(limit).unwrap_or(usize::MAX)
-                };
-
                 let document = &mut *document;
-                let size = document.content.as_bytes().len();
-                if size >= size_limit {
-                    return Err(WorkspaceError::file_too_large(
-                        biome_path.to_path_buf().display().to_string(),
-                        size,
-                        size_limit,
-                    ));
-                }
-
                 let workspace = self.workspace();
                 let Some(file_source) = self.get_source(document.file_source_index) else {
                     return Err(WorkspaceError::not_found());
@@ -365,6 +349,24 @@ impl WorkspaceServer {
 }
 
 impl Workspace for WorkspaceServer {
+    fn check_file_size(
+        &self,
+        params: CheckFileSizeParams,
+    ) -> Result<CheckFileSizeResult, WorkspaceError> {
+        let Some(document) = self.documents.get(&params.path) else {
+            return Err(WorkspaceError::not_found());
+        };
+        let limit = {
+            let workspace = self.workspace();
+            let settings = workspace.settings();
+            let limit = settings.map_or(DEFAULT_FILE_SIZE_LIMIT.get(), |s| s.files.max_size.get());
+            usize::try_from(limit).unwrap_or(usize::MAX)
+        };
+
+        let file_size = document.content.as_bytes().len();
+        Ok(CheckFileSizeResult { file_size, limit })
+    }
+
     fn file_features(
         &self,
         params: SupportsFeatureParams,

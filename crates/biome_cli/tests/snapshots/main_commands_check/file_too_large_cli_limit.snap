@@ -12,9 +12,9 @@ statement2();
 # Termination Message
 
 ```block
-check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some errors were emitted while running checks.
+  × No files were processed in the specified paths.
   
 
 
@@ -23,46 +23,14 @@ check ━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-check.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+check.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Size of check.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
+  i Size of the file is 27 B which exceeds configured maximum of 16 B for this project.
     Use the `files.maxSize` configuration to change the maximum size of files processed.
   
 
 ```
 
 ```block
-check.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of check.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-check.js assists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of check.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-check.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of check.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-Checked 1 file in <TIME>. No fixes applied.
-Found 1 error.
+Checked 0 files in <TIME>. No fixes applied.
 ```

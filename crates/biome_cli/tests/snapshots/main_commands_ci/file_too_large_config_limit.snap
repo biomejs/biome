@@ -22,9 +22,9 @@ statement2();
 # Termination Message
 
 ```block
-ci ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Some errors were emitted while running checks.
+  × No files were processed in the specified paths.
   
 
 
@@ -33,46 +33,14 @@ ci ━━━━━━━━━━━━━━━━━━━━━━━━━�
 # Emitted Messages
 
 ```block
-ci.js lint ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ci.js check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Size of ci.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
+  i Size of the file is 27 B which exceeds configured maximum of 16 B for this project.
     Use the `files.maxSize` configuration to change the maximum size of files processed.
   
 
 ```
 
 ```block
-ci.js organizeImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of ci.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-ci.js assists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of ci.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-ci.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Size of ci.js is 27 B which exceeds configured maximum of 16 B for this project.
-    The file size limit exists to prevent us inadvertently slowing down and loading large files that we shouldn't.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
-  
-
-```
-
-```block
-Checked 1 file in <TIME>. No fixes applied.
-Found 1 error.
+Checked 0 files in <TIME>. No fixes applied.
 ```

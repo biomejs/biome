@@ -594,6 +594,26 @@ pub struct GetFormatterIRParams {
 pub struct GetFileContentParams {
     pub path: BiomePath,
 }
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct CheckFileSizeParams {
+    pub path: BiomePath,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
+pub struct CheckFileSizeResult {
+    pub file_size: usize,
+    pub limit: usize,
+}
+
+impl CheckFileSizeResult {
+    pub fn is_too_large(&self) -> bool {
+        self.file_size >= self.limit
+    }
+}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -967,6 +987,12 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
     /// Return the content of a file
     fn get_file_content(&self, params: GetFileContentParams) -> Result<String, WorkspaceError>;
 
+    /// Returns `true` if the size of the file is smaller than the configured limit, `false` if equals or greater.
+    fn check_file_size(
+        &self,
+        params: CheckFileSizeParams,
+    ) -> Result<CheckFileSizeResult, WorkspaceError>;
+
     /// Change the content of an open file
     fn change_file(&self, params: ChangeFileParams) -> Result<(), WorkspaceError>;
 
@@ -1120,6 +1146,12 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
 
     pub fn format_file(&self) -> Result<Printed, WorkspaceError> {
         self.workspace.format_file(FormatFileParams {
+            path: self.path.clone(),
+        })
+    }
+
+    pub fn check_file_size(&self) -> Result<CheckFileSizeResult, WorkspaceError> {
+        self.workspace.check_file_size(CheckFileSizeParams {
             path: self.path.clone(),
         })
     }
