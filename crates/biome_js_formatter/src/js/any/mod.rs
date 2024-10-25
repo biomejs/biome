@@ -26,7 +26,7 @@ pub(crate) mod for_initializer;
 pub(crate) mod formal_parameter;
 pub(crate) mod function;
 pub(crate) mod function_body;
-pub(crate) mod import_assertion_entry;
+pub(crate) mod import_attribute_entry;
 pub(crate) mod import_clause;
 pub(crate) mod in_property;
 pub(crate) mod literal_expression;

@@ -3,15 +3,15 @@ use biome_formatter::write;
 
 use crate::utils::{FormatLiteralStringToken, StringLiteralParentKind};
 
-use biome_js_syntax::JsImportAssertionEntryFields;
-use biome_js_syntax::{JsImportAssertionEntry, JsSyntaxKind};
+use biome_js_syntax::JsImportAttributeEntryFields;
+use biome_js_syntax::{JsImportAttributeEntry, JsSyntaxKind};
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatJsImportAssertionEntry;
+pub(crate) struct FormatJsImportAttributeEntry;
 
-impl FormatNodeRule<JsImportAssertionEntry> for FormatJsImportAssertionEntry {
-    fn fmt_fields(&self, node: &JsImportAssertionEntry, f: &mut JsFormatter) -> FormatResult<()> {
-        let JsImportAssertionEntryFields {
+impl FormatNodeRule<JsImportAttributeEntry> for FormatJsImportAttributeEntry {
+    fn fmt_fields(&self, node: &JsImportAttributeEntry, f: &mut JsFormatter) -> FormatResult<()> {
+        let JsImportAttributeEntryFields {
             key,
             colon_token,
             value_token,
@@ -54,7 +54,7 @@ impl FormatNodeRule<JsImportAssertionEntry> for FormatJsImportAssertionEntry {
 
     fn fmt_dangling_comments(
         &self,
-        _: &JsImportAssertionEntry,
+        _: &JsImportAttributeEntry,
         _: &mut JsFormatter,
     ) -> FormatResult<()> {
         // Handled inside `fmt_fields`

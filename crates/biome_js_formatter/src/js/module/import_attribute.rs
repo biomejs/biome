@@ -1,21 +1,21 @@
 use crate::prelude::*;
 
 use biome_formatter::write;
-use biome_js_syntax::JsImportAssertion;
-use biome_js_syntax::JsImportAssertionFields;
+use biome_js_syntax::JsImportAttribute;
+use biome_js_syntax::JsImportAttributeFields;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct FormatJsImportAssertion;
+pub(crate) struct FormatJsImportAttribute;
 
-impl FormatNodeRule<JsImportAssertion> for FormatJsImportAssertion {
-    fn fmt_fields(&self, node: &JsImportAssertion, f: &mut JsFormatter) -> FormatResult<()> {
-        let JsImportAssertionFields {
+impl FormatNodeRule<JsImportAttribute> for FormatJsImportAttribute {
+    fn fmt_fields(&self, node: &JsImportAttribute, f: &mut JsFormatter) -> FormatResult<()> {
+        let JsImportAttributeFields {
             l_curly_token,
-            assertions,
+            attributes,
             r_curly_token,
             with_token,
         } = node.as_fields();
-        if assertions.is_empty() {
+        if attributes.is_empty() {
             let has_dangling = f.comments().has_dangling_comments(node.syntax());
             write!(
                 f,
@@ -37,7 +37,7 @@ impl FormatNodeRule<JsImportAssertion> for FormatJsImportAssertion {
                     space(),
                     l_curly_token.format(),
                     group(&soft_block_indent_with_maybe_space(
-                        &assertions.format(),
+                        &attributes.format(),
                         should_insert_space_around_brackets
                     )),
                     r_curly_token.format()
@@ -48,7 +48,7 @@ impl FormatNodeRule<JsImportAssertion> for FormatJsImportAssertion {
 
     fn fmt_dangling_comments(
         &self,
-        _: &JsImportAssertion,
+        _: &JsImportAttribute,
         _: &mut JsFormatter,
     ) -> FormatResult<()> {
         // Handled as part of `fmt_fields`
