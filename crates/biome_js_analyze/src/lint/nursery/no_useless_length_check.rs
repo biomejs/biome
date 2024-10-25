@@ -287,13 +287,13 @@ impl Rule for NoUselessLengthCheck {
             return fixable_list;
         }
 
-        for err_type in [FunctionKind::Every, FunctionKind::Some] {
+        for function_kind in [FunctionKind::Every, FunctionKind::Some] {
             let mut comparing_zeros = HashMap::new();
             let mut array_tokens_used_api = HashSet::new();
             let search_result = search_logical_exp(
                 &AnyJsExpression::from(node.clone()),
                 None,
-                &err_type,
+                &function_kind,
                 &mut comparing_zeros,
                 &mut array_tokens_used_api,
             );
@@ -301,7 +301,7 @@ impl Rule for NoUselessLengthCheck {
                 for array_token in array_tokens_used_api {
                     if let Some(replacers) = comparing_zeros.get(&array_token) {
                         for replacer in replacers {
-                            fixable_list.push((err_type.clone(), replacer.clone()));
+                            fixable_list.push((function_kind.clone(), replacer.clone()));
                         }
                     }
                 }
