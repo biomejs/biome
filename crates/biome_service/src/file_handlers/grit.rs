@@ -97,13 +97,10 @@ impl ServiceLanguage for GritLanguage {
         _file_source: &super::DocumentFileSource,
         suppression_reason: Option<String>,
     ) -> biome_analyze::AnalyzerOptions {
-        let suppression_explanation =
-            suppression_reason.unwrap_or_else(|| "<explanation>".to_string());
-
         AnalyzerOptions {
             configuration: AnalyzerConfiguration::default(),
             file_path: path.to_path_buf(),
-            suppression_reason: suppression_explanation,
+            suppression_reason,
         }
     }
 }

@@ -311,7 +311,7 @@ pub(crate) struct RuleSignal<'phase, R: Rule> {
     /// An optional action to suppress the rule.
     suppression_action: &'phase dyn SuppressionAction<Language = RuleLanguage<R>>,
     /// An optional explanation for the suppression to be used with `--suppress` and `--reason`
-    suppression_reason: String,
+    suppression_reason: Option<String>,
     /// A list of strings that are considered "globals" inside the analyzer
     options: &'phase AnalyzerOptions,
 }
@@ -328,7 +328,7 @@ where
         suppression_action: &'phase dyn SuppressionAction<
             Language = <<R as Rule>::Query as Queryable>::Language,
         >,
-        suppression_reason: String,
+        suppression_reason: Option<String>,
         options: &'phase AnalyzerOptions,
     ) -> Self {
         Self {

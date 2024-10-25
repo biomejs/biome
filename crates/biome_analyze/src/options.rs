@@ -79,7 +79,7 @@ pub struct AnalyzerOptions {
     pub file_path: PathBuf,
 
     /// Suppression reason to be used with `--suppress` and `--reason`
-    pub suppression_reason: String,
+    pub suppression_reason: Option<String>,
 }
 
 impl AnalyzerOptions {

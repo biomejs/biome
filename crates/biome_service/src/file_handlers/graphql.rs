@@ -143,13 +143,10 @@ impl ServiceLanguage for GraphqlLanguage {
         _file_source: &DocumentFileSource,
         suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
-        let suppression_explanation =
-            suppression_reason.unwrap_or_else(|| "<explanation>".to_string());
-
         AnalyzerOptions {
             configuration: AnalyzerConfiguration::default(),
             file_path: path.to_path_buf(),
-            suppression_reason: suppression_explanation,
+            suppression_reason,
         }
     }
 }

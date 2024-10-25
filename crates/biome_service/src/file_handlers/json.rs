@@ -134,9 +134,6 @@ impl ServiceLanguage for JsonLanguage {
         _file_source: &DocumentFileSource,
         suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
-        let suppression_explanation =
-            suppression_reason.unwrap_or_else(|| "<explanation>".to_string());
-
         let configuration = AnalyzerConfiguration {
             rules: global
                 .map(|g| to_analyzer_rules(g, path.as_path()))
@@ -148,7 +145,7 @@ impl ServiceLanguage for JsonLanguage {
         AnalyzerOptions {
             configuration,
             file_path: path.to_path_buf(),
-            suppression_reason: suppression_explanation,
+            suppression_reason,
         }
     }
 }

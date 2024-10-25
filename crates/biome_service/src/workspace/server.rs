@@ -633,7 +633,7 @@ impl Workspace for WorkspaceServer {
                         language: self.get_file_source(&params.path),
                         categories: params.categories,
                         manifest,
-                        suppression_reason: Some("todooooo".to_string()),
+                        suppression_reason: None,
                     });
 
                     (

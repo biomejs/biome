@@ -124,9 +124,6 @@ impl ServiceLanguage for CssLanguage {
         _file_source: &DocumentFileSource,
         suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
-        let suppression_explanation =
-            suppression_reason.unwrap_or_else(|| "<explanation>".to_string());
-
         let preferred_quote = global
             .and_then(|global| {
                 global
@@ -156,7 +153,7 @@ impl ServiceLanguage for CssLanguage {
         AnalyzerOptions {
             configuration,
             file_path: file_path.to_path_buf(),
-            suppression_reason: suppression_explanation,
+            suppression_reason,
         }
     }
 }
