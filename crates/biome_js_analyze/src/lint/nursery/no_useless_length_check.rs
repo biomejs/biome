@@ -332,10 +332,10 @@ impl Rule for NoUselessLengthCheck {
             .note(
                 match error_type {
                     ErrorType::UselessLengthCheckWithEvery => markup! {
-                        "The empty check is useless as `Array#every()` returns `true` for an empty array."
+                        "The empty check is useless as "<Emphasis>"`Array#every()`"</Emphasis>" returns "<Emphasis>"`true`"</Emphasis>" for an empty array."
                     },
                     ErrorType::UselessLengthCheckWithSome => markup! {
-                        "The non-empty check is useless as `Array#some()` returns `false` for an empty array."
+                        "The non-empty check is useless as "<Emphasis>"`Array#some()`"</Emphasis>" returns "<Emphasis>"`false`"</Emphasis>" for an empty array."
                     },
                 }
             ),
