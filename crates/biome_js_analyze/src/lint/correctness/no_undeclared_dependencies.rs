@@ -99,10 +99,12 @@ impl PartialEq for DependencyAvailability {
             Self::Available => matches!(other, Self::Available),
             Self::Unavailable => matches!(other, Self::Unavailable),
             Self::FilesGlob(a) => match other {
-                Self::FilesGlob(b) => a
-                    .iter()
-                    .zip(b.iter())
-                    .all(|(a, b)| a.to_string() == b.to_string()),
+                Self::FilesGlob(b) => {
+                    a.len() == b.len()
+                        && a.iter()
+                            .zip(b.iter())
+                            .all(|(a, b)| a.to_string() == b.to_string())
+                }
                 _ => false,
             },
         }
