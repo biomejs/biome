@@ -327,7 +327,7 @@ impl Rule for NoUselessLengthCheck {
                 rule_category!(),
                 error_range,
                 markup! {
-                    "This is a check for unnecessary length."
+                    "This length check is unnecessary."
                 },
             )
             .note(
