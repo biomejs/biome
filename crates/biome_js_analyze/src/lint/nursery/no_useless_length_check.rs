@@ -94,7 +94,7 @@ fn is_logical_exp_descendant(node: &AnyJsExpression, operator: JsSyntaxKind) -> 
     parent
         .ancestors()
         .find_map(|ancestor| {
-            if let Some(logical_exp) = JsLogicalExpression::cast(ancestor.clone()) {
+            if let Some(logical_exp) = JsLogicalExpression::cast_ref(ancestor) {
                 return logical_exp
                     .operator_token()
                     .ok()
