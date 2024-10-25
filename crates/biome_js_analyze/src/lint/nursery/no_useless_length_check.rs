@@ -17,7 +17,7 @@ declare_lint_rule! {
     /// Disallow unnecessary length checks within logical expressions.
     ///
     /// - `Array#some()` returns `false` for an empty array. There is no need to check if the array is not empty.
-    /// - `Array#every()` returns `true`` for an empty array. There is no need to check if the array is empty.
+    /// - `Array#every()` returns `true` for an empty array. There is no need to check if the array is empty.
     ///
     /// ## Examples
     ///
