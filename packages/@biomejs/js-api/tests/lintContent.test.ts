@@ -43,7 +43,7 @@ describe("Biome WebAssembly lintContent", () => {
 		it("should emit diagnotics", () => {
 			const result = biome.lintContent(inputCode, {
 				filePath: "example.js",
-				fixFileMode: "SafeFixes",
+				fixFileMode: "safeFixes",
 			});
 			expect(result.diagnostics).toMatchObject([
 				{ category: "lint/style/useTemplate" },
@@ -52,7 +52,7 @@ describe("Biome WebAssembly lintContent", () => {
 		it("should fix the SafeFixes only", () => {
 			const result = biome.lintContent(inputCode, {
 				filePath: "example.js",
-				fixFileMode: "SafeFixes",
+				fixFileMode: "safeFixes",
 			});
 			expect(result.content).toMatchSnapshot();
 		});
@@ -62,14 +62,14 @@ describe("Biome WebAssembly lintContent", () => {
 		it("should emit diagnotics", () => {
 			const result = biome.lintContent(inputCode, {
 				filePath: "example.js",
-				fixFileMode: "SafeAndUnsafeFixes",
+				fixFileMode: "safeAndUnsafeFixes",
 			});
 			expect(result.diagnostics).toHaveLength(0);
 		});
 		it("should fix the code", () => {
 			const result = biome.lintContent(inputCode, {
 				filePath: "example.js",
-				fixFileMode: "SafeAndUnsafeFixes",
+				fixFileMode: "safeAndUnsafeFixes",
 			});
 			expect(result.content).toMatchSnapshot();
 		});
