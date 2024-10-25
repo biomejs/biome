@@ -7,6 +7,7 @@ use std::path::Path;
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub struct GraphqlFileSource {
     #[allow(unused)]
     variant: GraphqlVariant,
@@ -17,6 +18,7 @@ pub struct GraphqlFileSource {
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 enum GraphqlVariant {
     #[default]
     Standard,

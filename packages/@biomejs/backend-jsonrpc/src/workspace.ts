@@ -17,33 +17,33 @@ export interface BiomePath {
 	/**
 	 * Whether this path (usually a file) was fixed as a result of a format/lint/check command with the `--write` filag.
 	 */
-	was_written: boolean;
+	wasWritten: boolean;
 }
 export type FeatureKind =
-	| "Format"
-	| "Lint"
-	| "OrganizeImports"
-	| "Search"
-	| "Assists"
-	| "Debug";
+	| "format"
+	| "lint"
+	| "organizeImports"
+	| "search"
+	| "assists"
+	| "debug";
 export type FileKind = FileKind2[];
 /**
  * The priority of the file
  */
 export type FileKind2 =
-	| "Config"
-	| "Manifest"
-	| "Ignore"
-	| "Inspectable"
-	| "Handleable";
+	| "config"
+	| "manifest"
+	| "ignore"
+	| "inspectable"
+	| "handleable";
 export interface FileFeaturesResult {
-	features_supported: {};
+	featuresSupported: {};
 }
 export interface UpdateSettingsParams {
 	configuration: PartialConfiguration;
-	gitignore_matches: string[];
-	vcs_base_path?: string;
-	workspace_directory?: string;
+	gitignoreMatches: string[];
+	vcsBasePath?: string;
+	workspaceDirectory?: string;
 }
 /**
  * The configuration that is contained inside the file `biome.json`
@@ -2668,12 +2668,12 @@ export interface RegisterProjectFolderParams {
 export type ProjectKey = string;
 export interface SetManifestForProjectParams {
 	content: string;
-	manifest_path: BiomePath;
+	manifestPath: BiomePath;
 	version: number;
 }
 export interface OpenFileParams {
 	content: string;
-	document_file_source?: DocumentFileSource;
+	documentFileSource?: DocumentFileSource;
 	path: BiomePath;
 	version: number;
 }
@@ -2696,8 +2696,8 @@ export interface JsFileSource {
 	version: LanguageVersion;
 }
 export interface JsonFileSource {
-	allow_comments: boolean;
-	allow_trailing_commas: boolean;
+	allowComments: boolean;
+	allowTrailingCommas: boolean;
 }
 export interface CssFileSource {
 	variant: CssVariant;
@@ -2713,29 +2713,29 @@ export interface GritFileSource {
 }
 export type EmbeddingKind = "Astro" | "Vue" | "Svelte" | "None";
 export type Language =
-	| "JavaScript"
-	| { TypeScript: { definition_file: boolean } };
+	| "javaScript"
+	| { typeScript: { definition_file: boolean } };
 /**
  * Is the source file an ECMAScript Module or Script. Changes the parsing semantic.
  */
-export type ModuleKind = "Script" | "Module";
-export type LanguageVariant = "Standard" | "StandardRestricted" | "Jsx";
+export type ModuleKind = "script" | "module";
+export type LanguageVariant = "standard" | "standardRestricted" | "jsx";
 /**
 	* Enum of the different ECMAScript standard versions. The versions are ordered in increasing order; The newest version comes last.
 
 Defaults to the latest stable ECMAScript standard. 
 	 */
-export type LanguageVersion = "ES2022" | "ESNext";
+export type LanguageVersion = "eS2022" | "eSNext";
 /**
 	* The style of CSS contained in the file.
 
 Currently, Biome only supports plain CSS, and aims to be compatible with the latest Recommendation level standards. 
 	 */
-export type CssVariant = "Standard";
+export type CssVariant = "standard";
 /**
  * The style of GraphQL contained in the file.
  */
-export type GraphqlVariant = "Standard";
+export type GraphqlVariant = "standard";
 export type HtmlVariant = "Standard" | "Astro";
 export type GritVariant = "Standard";
 export interface ChangeFileParams {
@@ -2772,18 +2772,18 @@ export interface GetFormatterIRParams {
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
-	max_diagnostics: number;
+	maxDiagnostics: number;
 	only: RuleCode[];
 	path: BiomePath;
 	skip: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
 export type RuleCode = string;
-export type RuleCategory = "Syntax" | "Lint" | "Action" | "Transformation";
+export type RuleCategory = "syntax" | "lint" | "action" | "transformation";
 export interface PullDiagnosticsResult {
 	diagnostics: Diagnostic[];
 	errors: number;
-	skipped_diagnostics: number;
+	skippedDiagnostics: number;
 }
 /**
  * Serializable representation for a [Diagnostic](super::Diagnostic).
@@ -3266,7 +3266,7 @@ export interface PullActionsResult {
 }
 export interface CodeAction {
 	category: ActionCategory;
-	rule_name?: [string, string];
+	ruleName?: [string, string];
 	suggestion: CodeSuggestion;
 }
 /**
@@ -3275,10 +3275,10 @@ export interface CodeAction {
 [CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
-	| "QuickFix"
-	| { Refactor: RefactorKind }
-	| { Source: SourceActionKind }
-	| { Other: OtherActionCategory };
+	| "quickFix"
+	| { refactor: RefactorKind }
+	| { source: SourceActionKind }
+	| { other: OtherActionCategory };
 /**
  * A Suggestion that is provided by Biome's linter, and can be reported to the user, and can be automatically applied if it has the right [`Applicability`].
  */
@@ -3295,27 +3295,27 @@ export interface CodeSuggestion {
 [Check the LSP spec](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind) for more information: 
 	 */
 export type RefactorKind =
-	| "None"
-	| "Extract"
-	| "Inline"
-	| "Rewrite"
-	| { Other: string };
+	| "none"
+	| "extract"
+	| "inline"
+	| "rewrite"
+	| { other: string };
 /**
  * The sub-category of a source code action
  */
 export type SourceActionKind =
-	| "FixAll"
-	| "None"
-	| "OrganizeImports"
-	| { Other: string };
+	| "fixAll"
+	| "none"
+	| "organizeImports"
+	| { other: string };
 export type OtherActionCategory =
-	| "InlineSuppression"
-	| "ToplevelSuppression"
-	| { Generic: string };
+	| "inlineSuppression"
+	| "toplevelSuppression"
+	| { generic: string };
 /**
  * Indicates how a tool should manage this suggestion.
  */
-export type Applicability = "Always" | "MaybeIncorrect";
+export type Applicability = "always" | "maybeIncorrect";
 export interface FormatFileParams {
 	path: BiomePath;
 }
@@ -3323,7 +3323,7 @@ export interface Printed {
 	code: string;
 	range?: TextRange;
 	sourcemap: SourceMarker[];
-	verbatim_ranges: TextRange[];
+	verbatimRanges: TextRange[];
 }
 /**
  * Lightweight sourcemap marker between source and output tokens
@@ -3347,20 +3347,20 @@ export interface FormatOnTypeParams {
 	path: BiomePath;
 }
 export interface FixFileParams {
-	fix_file_mode: FixFileMode;
+	fixFileMode: FixFileMode;
 	only: RuleCode[];
 	path: BiomePath;
-	rule_categories: RuleCategories;
-	should_format: boolean;
+	ruleCategories: RuleCategories;
+	shouldFormat: boolean;
 	skip: RuleCode[];
 }
 /**
  * Which fixes should be applied during the analyzing phase
  */
 export type FixFileMode =
-	| "SafeFixes"
-	| "SafeAndUnsafeFixes"
-	| "ApplySuppressions";
+	| "safeFixes"
+	| "safeAndUnsafeFixes"
+	| "applySuppressions";
 export interface FixFileResult {
 	/**
 	 * List of all the code actions applied to the file
@@ -3377,7 +3377,7 @@ export interface FixFileResult {
 	/**
 	 * number of skipped suggested fixes
 	 */
-	skipped_suggested_fixes: number;
+	skippedSuggestedFixes: number;
 }
 export interface FixAction {
 	/**
@@ -3390,9 +3390,9 @@ export interface FixAction {
 	rule_name?: [string, string];
 }
 export interface RenameParams {
-	new_name: string;
+	newName: string;
 	path: BiomePath;
-	symbol_at: TextSize;
+	symbolAt: TextSize;
 }
 export interface RenameResult {
 	/**

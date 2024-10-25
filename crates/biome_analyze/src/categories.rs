@@ -4,7 +4,8 @@ use std::borrow::Cow;
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 pub enum RuleCategory {
     /// This rule checks the syntax according to the language specification
@@ -32,7 +33,8 @@ pub const SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY: &str = "quickfix.suppressRule.t
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 pub enum ActionCategory {
     /// Base kind for quickfix actions: 'quickfix'.
@@ -55,7 +57,8 @@ pub enum ActionCategory {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 pub enum OtherActionCategory {
     /// Base kind for inline suppressions actions: `quickfix.suppressRule.inline.biome`
@@ -139,7 +142,8 @@ impl ActionCategory {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 pub enum RefactorKind {
     /// This action describes a refactor with no particular sub-category
@@ -179,7 +183,8 @@ pub enum RefactorKind {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema)
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
 )]
 pub enum SourceActionKind {
     /// This action describes a source action with no particular sub-category
