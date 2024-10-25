@@ -1,6 +1,8 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
-use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
+use crate::diagnostics::{
+    DeprecatedArgument, DeprecatedConfigurationFile, IncompatibleEndConfiguration,
+};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -190,6 +192,9 @@ pub enum BiomeCommand {
         /// Fix diagnostics with suppression comments if the language supports it.
         #[bpaf(long("suppress"))]
         suppress: bool,
+
+        #[bpaf(long("reason"))]
+        suppression_reason: Option<String>,
 
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
@@ -708,6 +713,7 @@ pub(crate) struct FixFileModeOptions {
     apply_unsafe: bool,
     write: bool,
     suppress: bool,
+    suppression_reason: Option<String>,
     fix: bool,
     unsafe_: bool,
 }
@@ -725,6 +731,7 @@ pub(crate) fn determine_fix_file_mode(
         write,
         fix,
         suppress,
+        suppression_reason: _,
         unsafe_,
     } = options;
 
@@ -763,6 +770,7 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         apply_unsafe,
         write,
         suppress,
+        suppression_reason,
         fix,
         unsafe_,
     } = options;
@@ -795,7 +803,13 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
         ));
     } else if suppress && fix {
         return Err(CliDiagnostic::incompatible_arguments("--suppress", "--fix"));
-    }
+    } else if !suppress && suppression_reason.is_some() {
+        return Err(CliDiagnostic::IncompatibleEndConfiguration(
+            IncompatibleEndConfiguration {
+                reason: "`--reason` is only valid when `--suppress` is used.".to_string(),
+            },
+        ));
+    };
     Ok(())
 }
 

@@ -159,6 +159,8 @@ pub enum TraversalMode {
         vcs_targeted: VcsTargeted,
         /// Supress existing diagnostics with a `// biome-ignore` comment
         suppress: bool,
+        /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
+        suppression_reason: Option<String>,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {

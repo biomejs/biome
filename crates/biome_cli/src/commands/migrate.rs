@@ -85,6 +85,7 @@ impl CommandRunner for MigrateCommandPayload {
             fix: self.fix,
             unsafe_: false,
             suppress: false,
+            suppression_reason: None,
         })
     }
 

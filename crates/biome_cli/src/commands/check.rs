@@ -142,6 +142,7 @@ impl CommandRunner for CheckCommandPayload {
                 apply_unsafe: self.apply_unsafe,
                 write: self.write,
                 suppress: false,
+                suppression_reason: None,
                 fix: self.fix,
                 unsafe_: self.unsafe_,
             },
