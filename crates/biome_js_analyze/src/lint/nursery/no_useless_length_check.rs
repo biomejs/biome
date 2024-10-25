@@ -158,7 +158,16 @@ fn get_comparing_length_exp(
     None
 }
 
-pub type Replacer = (JsLogicalExpression, AnyJsExpression, TextRange);
+#[derive(Clone)]
+/// A struct that manages the form before and after replacement.
+pub struct Replacer {
+    /// The node before the replacement.
+    prev_node: JsLogicalExpression,
+    /// The node after the replacement.
+    next_node: AnyJsExpression,
+    /// Error occurrence location.
+    range: TextRange,
+}
 
 /// Search for logical expressions and list expressions that compare to 0 and Array APIs (`.some()`, `.every()`).
 fn search_logical_exp(
@@ -179,7 +188,11 @@ fn search_logical_exp(
                 return None;
             };
             let left = logical_exp.left().ok()?;
-            let left_replacer = (logical_exp.clone(), logical_exp.right().ok()?, left.range());
+            let left_replacer = Replacer {
+                prev_node: logical_exp.clone(),
+                next_node: logical_exp.right().ok()?,
+                range: left.range(),
+            };
             search_logical_exp(
                 &left,
                 Some(left_replacer),
@@ -189,7 +202,11 @@ fn search_logical_exp(
             )?;
 
             let right = logical_exp.right().ok()?;
-            let right_replacer = (logical_exp.clone(), logical_exp.left().ok()?, right.range());
+            let right_replacer = Replacer {
+                prev_node: logical_exp.clone(),
+                next_node: logical_exp.left().ok()?,
+                range: right.range(),
+            };
             search_logical_exp(
                 &right,
                 Some(right_replacer),
@@ -312,12 +329,12 @@ impl Rule for NoUselessLengthCheck {
 
     fn diagnostic(
         _ctx: &RuleContext<Self>,
-        (function_kind, (_, _, error_range)): &Self::State,
+        (function_kind, replacer): &Self::State,
     ) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                error_range,
+                replacer.range,
                 markup! {
                     "This length check is unnecessary."
                 },
@@ -337,9 +354,14 @@ impl Rule for NoUselessLengthCheck {
 
     fn action(
         ctx: &RuleContext<Self>,
-        (_error_type, (prev_node, next_node, _error_range)): &Self::State,
+        (_error_type, replacer): &Self::State,
     ) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
+        let Replacer {
+            prev_node,
+            next_node,
+            ..
+        } = replacer;
 
         mutation.replace_node(
             get_parenthesized_parent(AnyJsExpression::from(prev_node.clone())),
