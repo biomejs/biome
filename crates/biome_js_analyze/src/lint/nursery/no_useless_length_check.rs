@@ -288,8 +288,8 @@ impl Rule for NoUselessLengthCheck {
         }
 
         for err_type in [FunctionKind::Every, FunctionKind::Some] {
-            let mut comparing_zeros: HashMap<String, Vec<Replacer>> = HashMap::new();
-            let mut array_tokens_used_api: HashSet<String> = HashSet::new();
+            let mut comparing_zeros = HashMap::new();
+            let mut array_tokens_used_api = HashSet::new();
             let search_result = search_logical_exp(
                 &AnyJsExpression::from(node.clone()),
                 None,
