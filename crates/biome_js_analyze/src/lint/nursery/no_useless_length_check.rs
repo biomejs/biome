@@ -247,7 +247,6 @@ fn search_logical_exp(
             comparing_zeros,
             array_tokens_used_api,
         ),
-        // hoge
         AnyJsExpression::JsIdentifierExpression(_) => Some(()),
         _ => None,
     }
