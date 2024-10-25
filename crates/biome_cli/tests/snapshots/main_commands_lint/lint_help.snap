@@ -8,8 +8,8 @@ expression: content
 ```block
 Run various checks on a set of files.
 
-Usage: lint [--write] [--suppress] [--unsafe] [--only=<GROUP|RULE>]... [--skip=<GROUP|RULE>]... [
---staged] [--changed] [--since=REF] [PATH]...
+Usage: lint [--write] [--suppress] [--reason=STRING] [--unsafe] [--only=<GROUP|RULE>]... [--skip=
+<GROUP|RULE>]... [--staged] [--changed] [--since=REF] [PATH]...
 
 Set of properties to integrate Biome with a VCS software.
         --vcs-enabled=<true|false>  Whether Biome should integrate itself with the VCS client
@@ -79,6 +79,7 @@ Available positional items:
 Available options:
         --write               Writes safe fixes
         --suppress            Fix diagnostics with suppression comments if the language supports it.
+        --reason=STRING       Explanation for suppressing diagnostics with `--suppress`
         --unsafe              Allow to do unsafe fixes, should be used with `--write` or `--fix`
         --fix                 Alias for `--write`, writes safe fixes
         --apply               Alias for `--write`, writes safe fixes (deprecated, use `--write`)
