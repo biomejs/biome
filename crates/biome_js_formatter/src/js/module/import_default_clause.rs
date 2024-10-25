@@ -14,7 +14,7 @@ impl FormatNodeRule<JsImportDefaultClause> for FormatJsImportDefaultClause {
             default_specifier,
             from_token,
             source,
-            assertion,
+            attribute,
         } = node.as_fields();
 
         if let Some(type_token) = type_token {
@@ -32,8 +32,8 @@ impl FormatNodeRule<JsImportDefaultClause> for FormatJsImportDefaultClause {
             ]
         ]?;
 
-        if let Some(assertion) = assertion {
-            write!(f, [assertion.format()])?;
+        if let Some(attribute) = attribute {
+            write!(f, [attribute.format()])?;
         }
 
         Ok(())

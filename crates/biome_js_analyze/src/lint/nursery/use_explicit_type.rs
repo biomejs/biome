@@ -632,7 +632,7 @@ fn is_property_of_object_with_type(syntax: &SyntaxNode<JsLanguage>) -> bool {
 /// const castTyped = <() => string>(() => '');
 /// ```
 fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
-    fn is_assertion_kind(kind: JsSyntaxKind) -> bool {
+    fn is_attribute_kind(kind: JsSyntaxKind) -> bool {
         matches!(
             kind,
             JsSyntaxKind::TS_AS_EXPRESSION | JsSyntaxKind::TS_TYPE_ASSERTION_EXPRESSION
@@ -643,9 +643,9 @@ fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
         if parent.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
             parent
                 .parent()
-                .is_some_and(|grandparent| is_assertion_kind(grandparent.kind()))
+                .is_some_and(|grandparent| is_attribute_kind(grandparent.kind()))
         } else {
-            is_assertion_kind(parent.kind())
+            is_attribute_kind(parent.kind())
         }
     })
 }

@@ -14,7 +14,7 @@ impl FormatNodeRule<JsImportNamespaceClause> for FormatJsImportNamespaceClause {
             namespace_specifier,
             from_token,
             source,
-            assertion,
+            attribute,
         } = node.as_fields();
 
         if let Some(type_token) = type_token {
@@ -32,8 +32,8 @@ impl FormatNodeRule<JsImportNamespaceClause> for FormatJsImportNamespaceClause {
             ]
         ]?;
 
-        if let Some(assertion) = assertion {
-            write!(f, [assertion.format()])?;
+        if let Some(attribute) = attribute {
+            write!(f, [attribute.format()])?;
         }
 
         Ok(())

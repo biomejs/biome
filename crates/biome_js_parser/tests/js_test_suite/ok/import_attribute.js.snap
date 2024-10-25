@@ -30,11 +30,11 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@7..11 "\"x\"" [] [Whitespace(" ")],
                 },
-                assertion: JsImportAssertion {
+                attribute: JsImportAttribute {
                     with_token: WITH_KW@11..16 "with" [] [Whitespace(" ")],
                     l_curly_token: L_CURLY@16..18 "{" [] [Whitespace(" ")],
-                    assertions: JsImportAssertionEntryList [
-                        JsImportAssertionEntry {
+                    attributes: JsImportAttributeEntryList [
+                        JsImportAttributeEntry {
                             key: IDENT@18..22 "type" [] [],
                             colon_token: COLON@22..24 ":" [] [Whitespace(" ")],
                             value_token: JS_STRING_LITERAL@24..31 "\"json\"" [] [Whitespace(" ")],
@@ -51,11 +51,11 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")],
                 },
-                assertion: JsImportAssertion {
+                attribute: JsImportAttribute {
                     with_token: WITH_KW@46..51 "with" [] [Whitespace(" ")],
                     l_curly_token: L_CURLY@51..53 "{" [] [Whitespace(" ")],
-                    assertions: JsImportAssertionEntryList [
-                        JsImportAssertionEntry {
+                    attributes: JsImportAttributeEntryList [
+                        JsImportAttributeEntry {
                             key: JS_STRING_LITERAL@53..59 "\"type\"" [] [],
                             colon_token: COLON@59..61 ":" [] [Whitespace(" ")],
                             value_token: JS_STRING_LITERAL@61..68 "\"json\"" [] [Whitespace(" ")],
@@ -79,11 +79,11 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@87..98 "\"foo.json\"" [] [Whitespace(" ")],
                 },
-                assertion: JsImportAssertion {
+                attribute: JsImportAttribute {
                     with_token: WITH_KW@98..103 "with" [] [Whitespace(" ")],
                     l_curly_token: L_CURLY@103..105 "{" [] [Whitespace(" ")],
-                    assertions: JsImportAssertionEntryList [
-                        JsImportAssertionEntry {
+                    attributes: JsImportAttributeEntryList [
+                        JsImportAttributeEntry {
                             key: IDENT@105..109 "type" [] [],
                             colon_token: COLON@109..111 ":" [] [Whitespace(" ")],
                             value_token: JS_STRING_LITERAL@111..118 "\"json\"" [] [Whitespace(" ")],
@@ -114,11 +114,11 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@140..151 "\"foo.json\"" [] [Whitespace(" ")],
                 },
-                assertion: JsImportAssertion {
+                attribute: JsImportAttribute {
                     with_token: WITH_KW@151..156 "with" [] [Whitespace(" ")],
                     l_curly_token: L_CURLY@156..158 "{" [] [Whitespace(" ")],
-                    assertions: JsImportAssertionEntryList [
-                        JsImportAssertionEntry {
+                    attributes: JsImportAttributeEntryList [
+                        JsImportAttributeEntry {
                             key: IDENT@158..161 "for" [] [],
                             colon_token: COLON@161..163 ":" [] [Whitespace(" ")],
                             value_token: JS_STRING_LITERAL@163..169 "\"for\"" [] [Whitespace(" ")],
@@ -142,17 +142,17 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@192..203 "\"foo.json\"" [] [Whitespace(" ")],
                 },
-                assertion: JsImportAssertion {
+                attribute: JsImportAttribute {
                     with_token: WITH_KW@203..208 "with" [] [Whitespace(" ")],
                     l_curly_token: L_CURLY@208..210 "{" [] [Whitespace(" ")],
-                    assertions: JsImportAssertionEntryList [
-                        JsImportAssertionEntry {
+                    attributes: JsImportAttributeEntryList [
+                        JsImportAttributeEntry {
                             key: IDENT@210..214 "type" [] [],
                             colon_token: COLON@214..216 ":" [] [Whitespace(" ")],
                             value_token: JS_STRING_LITERAL@216..222 "\"json\"" [] [],
                         },
                         COMMA@222..224 "," [] [Whitespace(" ")],
-                        JsImportAssertionEntry {
+                        JsImportAttributeEntry {
                             key: IDENT@224..238 "hasOwnProperty" [] [],
                             colon_token: COLON@238..240 ":" [] [Whitespace(" ")],
                             value_token: JS_STRING_LITERAL@240..247 "\"true\"" [] [Whitespace(" ")],
@@ -169,11 +169,11 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@257..261 "\"x\"" [] [Whitespace(" ")],
                 },
-                assertion: JsImportAssertion {
+                attribute: JsImportAttribute {
                     with_token: WITH_KW@261..265 "with" [] [],
                     l_curly_token: L_CURLY@265..268 "{" [Newline("\n")] [Whitespace(" ")],
-                    assertions: JsImportAssertionEntryList [
-                        JsImportAssertionEntry {
+                    attributes: JsImportAttributeEntryList [
+                        JsImportAttributeEntry {
                             key: IDENT@268..272 "type" [] [],
                             colon_token: COLON@272..274 ":" [] [Whitespace(" ")],
                             value_token: JS_STRING_LITERAL@274..281 "\"json\"" [] [Whitespace(" ")],
@@ -202,11 +202,11 @@ JsModule {
       1: JS_IMPORT_BARE_CLAUSE@7..32
         0: JS_MODULE_SOURCE@7..11
           0: JS_STRING_LITERAL@7..11 "\"x\"" [] [Whitespace(" ")]
-        1: JS_IMPORT_ASSERTION@11..32
+        1: JS_IMPORT_ATTRIBUTE@11..32
           0: WITH_KW@11..16 "with" [] [Whitespace(" ")]
           1: L_CURLY@16..18 "{" [] [Whitespace(" ")]
-          2: JS_IMPORT_ASSERTION_ENTRY_LIST@18..31
-            0: JS_IMPORT_ASSERTION_ENTRY@18..31
+          2: JS_IMPORT_ATTRIBUTE_ENTRY_LIST@18..31
+            0: JS_IMPORT_ATTRIBUTE_ENTRY@18..31
               0: IDENT@18..22 "type" [] []
               1: COLON@22..24 ":" [] [Whitespace(" ")]
               2: JS_STRING_LITERAL@24..31 "\"json\"" [] [Whitespace(" ")]
@@ -217,11 +217,11 @@ JsModule {
       1: JS_IMPORT_BARE_CLAUSE@40..69
         0: JS_MODULE_SOURCE@40..46
           0: JS_STRING_LITERAL@40..46 "\"foo\"" [] [Whitespace(" ")]
-        1: JS_IMPORT_ASSERTION@46..69
+        1: JS_IMPORT_ATTRIBUTE@46..69
           0: WITH_KW@46..51 "with" [] [Whitespace(" ")]
           1: L_CURLY@51..53 "{" [] [Whitespace(" ")]
-          2: JS_IMPORT_ASSERTION_ENTRY_LIST@53..68
-            0: JS_IMPORT_ASSERTION_ENTRY@53..68
+          2: JS_IMPORT_ATTRIBUTE_ENTRY_LIST@53..68
+            0: JS_IMPORT_ATTRIBUTE_ENTRY@53..68
               0: JS_STRING_LITERAL@53..59 "\"type\"" [] []
               1: COLON@59..61 ":" [] [Whitespace(" ")]
               2: JS_STRING_LITERAL@61..68 "\"json\"" [] [Whitespace(" ")]
@@ -237,11 +237,11 @@ JsModule {
         2: FROM_KW@82..87 "from" [] [Whitespace(" ")]
         3: JS_MODULE_SOURCE@87..98
           0: JS_STRING_LITERAL@87..98 "\"foo.json\"" [] [Whitespace(" ")]
-        4: JS_IMPORT_ASSERTION@98..119
+        4: JS_IMPORT_ATTRIBUTE@98..119
           0: WITH_KW@98..103 "with" [] [Whitespace(" ")]
           1: L_CURLY@103..105 "{" [] [Whitespace(" ")]
-          2: JS_IMPORT_ASSERTION_ENTRY_LIST@105..118
-            0: JS_IMPORT_ASSERTION_ENTRY@105..118
+          2: JS_IMPORT_ATTRIBUTE_ENTRY_LIST@105..118
+            0: JS_IMPORT_ATTRIBUTE_ENTRY@105..118
               0: IDENT@105..109 "type" [] []
               1: COLON@109..111 ":" [] [Whitespace(" ")]
               2: JS_STRING_LITERAL@111..118 "\"json\"" [] [Whitespace(" ")]
@@ -262,11 +262,11 @@ JsModule {
         2: FROM_KW@135..140 "from" [] [Whitespace(" ")]
         3: JS_MODULE_SOURCE@140..151
           0: JS_STRING_LITERAL@140..151 "\"foo.json\"" [] [Whitespace(" ")]
-        4: JS_IMPORT_ASSERTION@151..170
+        4: JS_IMPORT_ATTRIBUTE@151..170
           0: WITH_KW@151..156 "with" [] [Whitespace(" ")]
           1: L_CURLY@156..158 "{" [] [Whitespace(" ")]
-          2: JS_IMPORT_ASSERTION_ENTRY_LIST@158..169
-            0: JS_IMPORT_ASSERTION_ENTRY@158..169
+          2: JS_IMPORT_ATTRIBUTE_ENTRY_LIST@158..169
+            0: JS_IMPORT_ATTRIBUTE_ENTRY@158..169
               0: IDENT@158..161 "for" [] []
               1: COLON@161..163 ":" [] [Whitespace(" ")]
               2: JS_STRING_LITERAL@163..169 "\"for\"" [] [Whitespace(" ")]
@@ -282,16 +282,16 @@ JsModule {
         2: FROM_KW@187..192 "from" [] [Whitespace(" ")]
         3: JS_MODULE_SOURCE@192..203
           0: JS_STRING_LITERAL@192..203 "\"foo.json\"" [] [Whitespace(" ")]
-        4: JS_IMPORT_ASSERTION@203..248
+        4: JS_IMPORT_ATTRIBUTE@203..248
           0: WITH_KW@203..208 "with" [] [Whitespace(" ")]
           1: L_CURLY@208..210 "{" [] [Whitespace(" ")]
-          2: JS_IMPORT_ASSERTION_ENTRY_LIST@210..247
-            0: JS_IMPORT_ASSERTION_ENTRY@210..222
+          2: JS_IMPORT_ATTRIBUTE_ENTRY_LIST@210..247
+            0: JS_IMPORT_ATTRIBUTE_ENTRY@210..222
               0: IDENT@210..214 "type" [] []
               1: COLON@214..216 ":" [] [Whitespace(" ")]
               2: JS_STRING_LITERAL@216..222 "\"json\"" [] []
             1: COMMA@222..224 "," [] [Whitespace(" ")]
-            2: JS_IMPORT_ASSERTION_ENTRY@224..247
+            2: JS_IMPORT_ATTRIBUTE_ENTRY@224..247
               0: IDENT@224..238 "hasOwnProperty" [] []
               1: COLON@238..240 ":" [] [Whitespace(" ")]
               2: JS_STRING_LITERAL@240..247 "\"true\"" [] [Whitespace(" ")]
@@ -302,11 +302,11 @@ JsModule {
       1: JS_IMPORT_BARE_CLAUSE@257..282
         0: JS_MODULE_SOURCE@257..261
           0: JS_STRING_LITERAL@257..261 "\"x\"" [] [Whitespace(" ")]
-        1: JS_IMPORT_ASSERTION@261..282
+        1: JS_IMPORT_ATTRIBUTE@261..282
           0: WITH_KW@261..265 "with" [] []
           1: L_CURLY@265..268 "{" [Newline("\n")] [Whitespace(" ")]
-          2: JS_IMPORT_ASSERTION_ENTRY_LIST@268..281
-            0: JS_IMPORT_ASSERTION_ENTRY@268..281
+          2: JS_IMPORT_ATTRIBUTE_ENTRY_LIST@268..281
+            0: JS_IMPORT_ATTRIBUTE_ENTRY@268..281
               0: IDENT@268..272 "type" [] []
               1: COLON@272..274 ":" [] [Whitespace(" ")]
               2: JS_STRING_LITERAL@274..281 "\"json\"" [] [Whitespace(" ")]
