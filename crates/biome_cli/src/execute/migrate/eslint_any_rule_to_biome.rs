@@ -1335,6 +1335,13 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_numeric_literals.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "prefer-object-has-own" => {
+            let group = rules.suspicious.get_or_insert_with(Default::default);
+            let rule = group
+                .no_prototype_builtins
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "prefer-regex-literals" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_regex_literals.get_or_insert(Default::default());

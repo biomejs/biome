@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttribute, AnyJsxElementName};
 use biome_rowan::AstNode;
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 declare_lint_rule! {
     /// Enforce onClick is accompanied by at least one of the following: `onKeyUp`, `onKeyDown`, `onKeyPress`.
@@ -78,7 +78,7 @@ impl Rule for UseKeyWithClickEvents {
         match element.name() {
             Ok(AnyJsxElementName::JsxName(name)) => {
                 let name_token = name.value_token().ok()?;
-                let element_name = name_token.text_trimmed().to_lowercase_cow();
+                let element_name = name_token.text_trimmed().to_ascii_lowercase_cow();
 
                 // Don't handle interactive roles
                 // TODO Support aria roles https://github.com/rome/tools/issues/3640

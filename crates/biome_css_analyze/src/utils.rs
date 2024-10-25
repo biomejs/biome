@@ -15,7 +15,7 @@ use crate::keywords::{
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 pub fn is_font_family_keyword(value: &str) -> bool {
     BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)
@@ -39,7 +39,7 @@ pub fn is_font_shorthand_keyword(value: &str) -> bool {
 }
 
 pub fn is_css_variable(value: &str) -> bool {
-    value.to_lowercase_cow().starts_with("var(")
+    value.to_ascii_lowercase_cow().starts_with("var(")
 }
 
 /// Get the font-families within a `font` shorthand property value.
@@ -47,7 +47,7 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {
         let value = v.text();
-        let lower_case_value = value.to_lowercase_cow();
+        let lower_case_value = value.to_ascii_lowercase_cow();
 
         // Ignore CSS variables
         if is_css_variable(&lower_case_value) {
@@ -112,7 +112,7 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
 /// Check if the value is a known CSS value function.
 pub fn is_function_keyword(value: &str) -> bool {
     FUNCTION_KEYWORDS
-        .binary_search(&value.to_lowercase_cow().as_ref())
+        .binary_search(&value.to_ascii_lowercase_cow().as_ref())
         .is_ok()
 }
 
@@ -180,7 +180,7 @@ pub fn vendor_prefixed(props: &str) -> bool {
 
 /// Check if the input string is a media feature name.
 pub fn is_media_feature_name(prop: &str) -> bool {
-    let input = prop.to_lowercase_cow();
+    let input = prop.to_ascii_lowercase_cow();
     let count = MEDIA_FEATURE_NAMES.binary_search(&input.as_ref());
     if count.is_ok() {
         return true;
@@ -224,7 +224,7 @@ fn is_custom_element(prop: &str) -> bool {
 
 /// Check if the input string is a known type selector.
 pub fn is_known_type_selector(prop: &str) -> bool {
-    let input = prop.to_lowercase_cow();
+    let input = prop.to_ascii_lowercase_cow();
     HTML_TAGS.binary_search(&input.as_ref()).is_ok()
         || SVG_TAGS.binary_search(&prop).is_ok()
         || MATH_ML_TAGS.binary_search(&input.as_ref()).is_ok()
