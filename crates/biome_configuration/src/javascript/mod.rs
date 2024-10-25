@@ -109,17 +109,11 @@ pub struct JavascriptLinter {
     /// Control the linter for JavaScript (and its super languages) files.
     #[partial(bpaf(long("javascript-linter-enabled"), argument("true|false"), optional))]
     pub enabled: bool,
-
-    /// Explanation for suppressing diagnostics with `--suppress` and `--reason`
-    pub suppression_reason: String,
 }
 
 impl Default for JavascriptLinter {
     fn default() -> Self {
-        Self {
-            enabled: true,
-            suppression_reason: "<explanation>".to_string(),
-        }
+        Self { enabled: true }
     }
 }
 
@@ -127,10 +121,6 @@ impl PartialJavascriptLinter {
     pub fn get_linter_configuration(&self) -> JavascriptLinter {
         JavascriptLinter {
             enabled: self.enabled.unwrap_or_default(),
-            suppression_reason: self
-                .suppression_reason
-                .clone()
-                .unwrap_or("<explanation>".to_string()),
         }
     }
 }

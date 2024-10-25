@@ -597,7 +597,6 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.globals = Some(javascript.globals.into_index_set());
         language_setting.environment = javascript.jsx_runtime.into();
         language_setting.linter.enabled = Some(javascript.linter.enabled);
-        language_setting.linter.suppression_reason = Some(javascript.linter.suppression_reason);
 
         language_setting
     }
