@@ -1,0 +1,167 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+html<A, B>`abcd`
+html<A, B>`abcd`._string
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsTemplateExpression {
+                tag: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@0..4 "html" [] [],
+                    },
+                },
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@4..5 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@5..6 "A" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                        COMMA@6..8 "," [] [Whitespace(" ")],
+                        TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@8..9 "B" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@9..10 ">" [] [],
+                },
+                l_tick_token: BACKTICK@10..11 "`" [] [],
+                elements: JsTemplateElementList [
+                    JsTemplateChunkElement {
+                        template_chunk_token: TEMPLATE_CHUNK@11..15 "abcd" [] [],
+                    },
+                ],
+                r_tick_token: BACKTICK@15..16 "`" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsStaticMemberExpression {
+                object: JsTemplateExpression {
+                    tag: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@16..21 "html" [Newline("\n")] [],
+                        },
+                    },
+                    type_arguments: TsTypeArguments {
+                        l_angle_token: L_ANGLE@21..22 "<" [] [],
+                        ts_type_argument_list: TsTypeArgumentList [
+                            TsReferenceType {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@22..23 "A" [] [],
+                                },
+                                type_arguments: missing (optional),
+                            },
+                            COMMA@23..25 "," [] [Whitespace(" ")],
+                            TsReferenceType {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@25..26 "B" [] [],
+                                },
+                                type_arguments: missing (optional),
+                            },
+                        ],
+                        r_angle_token: R_ANGLE@26..27 ">" [] [],
+                    },
+                    l_tick_token: BACKTICK@27..28 "`" [] [],
+                    elements: JsTemplateElementList [
+                        JsTemplateChunkElement {
+                            template_chunk_token: TEMPLATE_CHUNK@28..32 "abcd" [] [],
+                        },
+                    ],
+                    r_tick_token: BACKTICK@32..33 "`" [] [],
+                },
+                operator_token: DOT@33..34 "." [] [],
+                member: JsName {
+                    value_token: IDENT@34..41 "_string" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@41..42 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..42
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..41
+    0: JS_EXPRESSION_STATEMENT@0..16
+      0: JS_TEMPLATE_EXPRESSION@0..16
+        0: JS_IDENTIFIER_EXPRESSION@0..4
+          0: JS_REFERENCE_IDENTIFIER@0..4
+            0: IDENT@0..4 "html" [] []
+        1: TS_TYPE_ARGUMENTS@4..10
+          0: L_ANGLE@4..5 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@5..9
+            0: TS_REFERENCE_TYPE@5..6
+              0: JS_REFERENCE_IDENTIFIER@5..6
+                0: IDENT@5..6 "A" [] []
+              1: (empty)
+            1: COMMA@6..8 "," [] [Whitespace(" ")]
+            2: TS_REFERENCE_TYPE@8..9
+              0: JS_REFERENCE_IDENTIFIER@8..9
+                0: IDENT@8..9 "B" [] []
+              1: (empty)
+          2: R_ANGLE@9..10 ">" [] []
+        2: BACKTICK@10..11 "`" [] []
+        3: JS_TEMPLATE_ELEMENT_LIST@11..15
+          0: JS_TEMPLATE_CHUNK_ELEMENT@11..15
+            0: TEMPLATE_CHUNK@11..15 "abcd" [] []
+        4: BACKTICK@15..16 "`" [] []
+      1: (empty)
+    1: JS_EXPRESSION_STATEMENT@16..41
+      0: JS_STATIC_MEMBER_EXPRESSION@16..41
+        0: JS_TEMPLATE_EXPRESSION@16..33
+          0: JS_IDENTIFIER_EXPRESSION@16..21
+            0: JS_REFERENCE_IDENTIFIER@16..21
+              0: IDENT@16..21 "html" [Newline("\n")] []
+          1: TS_TYPE_ARGUMENTS@21..27
+            0: L_ANGLE@21..22 "<" [] []
+            1: TS_TYPE_ARGUMENT_LIST@22..26
+              0: TS_REFERENCE_TYPE@22..23
+                0: JS_REFERENCE_IDENTIFIER@22..23
+                  0: IDENT@22..23 "A" [] []
+                1: (empty)
+              1: COMMA@23..25 "," [] [Whitespace(" ")]
+              2: TS_REFERENCE_TYPE@25..26
+                0: JS_REFERENCE_IDENTIFIER@25..26
+                  0: IDENT@25..26 "B" [] []
+                1: (empty)
+            2: R_ANGLE@26..27 ">" [] []
+          2: BACKTICK@27..28 "`" [] []
+          3: JS_TEMPLATE_ELEMENT_LIST@28..32
+            0: JS_TEMPLATE_CHUNK_ELEMENT@28..32
+              0: TEMPLATE_CHUNK@28..32 "abcd" [] []
+          4: BACKTICK@32..33 "`" [] []
+        1: DOT@33..34 "." [] []
+        2: JS_NAME@34..41
+          0: IDENT@34..41 "_string" [] []
+      1: (empty)
+  4: EOF@41..42 "" [Newline("\n")] []
+
+```

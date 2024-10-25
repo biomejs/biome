@@ -1,0 +1,165 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+enum {A,B,C}
+enum 1 {A,B,C}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsEnumDeclaration {
+            const_token: missing (optional),
+            enum_token: ENUM_KW@0..5 "enum" [] [Whitespace(" ")],
+            id: missing (required),
+            l_curly_token: L_CURLY@5..6 "{" [] [],
+            members: TsEnumMemberList [
+                TsEnumMember {
+                    name: TsLiteralEnumMemberName {
+                        value: IDENT@6..7 "A" [] [],
+                    },
+                    initializer: missing (optional),
+                },
+                COMMA@7..8 "," [] [],
+                TsEnumMember {
+                    name: TsLiteralEnumMemberName {
+                        value: IDENT@8..9 "B" [] [],
+                    },
+                    initializer: missing (optional),
+                },
+                COMMA@9..10 "," [] [],
+                TsEnumMember {
+                    name: TsLiteralEnumMemberName {
+                        value: IDENT@10..11 "C" [] [],
+                    },
+                    initializer: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@11..12 "}" [] [],
+        },
+        TsEnumDeclaration {
+            const_token: missing (optional),
+            enum_token: ENUM_KW@12..18 "enum" [Newline("\n")] [Whitespace(" ")],
+            id: JsBogusBinding {
+                items: [
+                    JS_NUMBER_LITERAL@18..20 "1" [] [Whitespace(" ")],
+                ],
+            },
+            l_curly_token: L_CURLY@20..21 "{" [] [],
+            members: TsEnumMemberList [
+                TsEnumMember {
+                    name: TsLiteralEnumMemberName {
+                        value: IDENT@21..22 "A" [] [],
+                    },
+                    initializer: missing (optional),
+                },
+                COMMA@22..23 "," [] [],
+                TsEnumMember {
+                    name: TsLiteralEnumMemberName {
+                        value: IDENT@23..24 "B" [] [],
+                    },
+                    initializer: missing (optional),
+                },
+                COMMA@24..25 "," [] [],
+                TsEnumMember {
+                    name: TsLiteralEnumMemberName {
+                        value: IDENT@25..26 "C" [] [],
+                    },
+                    initializer: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@26..27 "}" [] [],
+        },
+    ],
+    eof_token: EOF@27..28 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..28
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..27
+    0: TS_ENUM_DECLARATION@0..12
+      0: (empty)
+      1: ENUM_KW@0..5 "enum" [] [Whitespace(" ")]
+      2: (empty)
+      3: L_CURLY@5..6 "{" [] []
+      4: TS_ENUM_MEMBER_LIST@6..11
+        0: TS_ENUM_MEMBER@6..7
+          0: TS_LITERAL_ENUM_MEMBER_NAME@6..7
+            0: IDENT@6..7 "A" [] []
+          1: (empty)
+        1: COMMA@7..8 "," [] []
+        2: TS_ENUM_MEMBER@8..9
+          0: TS_LITERAL_ENUM_MEMBER_NAME@8..9
+            0: IDENT@8..9 "B" [] []
+          1: (empty)
+        3: COMMA@9..10 "," [] []
+        4: TS_ENUM_MEMBER@10..11
+          0: TS_LITERAL_ENUM_MEMBER_NAME@10..11
+            0: IDENT@10..11 "C" [] []
+          1: (empty)
+      5: R_CURLY@11..12 "}" [] []
+    1: TS_ENUM_DECLARATION@12..27
+      0: (empty)
+      1: ENUM_KW@12..18 "enum" [Newline("\n")] [Whitespace(" ")]
+      2: JS_BOGUS_BINDING@18..20
+        0: JS_NUMBER_LITERAL@18..20 "1" [] [Whitespace(" ")]
+      3: L_CURLY@20..21 "{" [] []
+      4: TS_ENUM_MEMBER_LIST@21..26
+        0: TS_ENUM_MEMBER@21..22
+          0: TS_LITERAL_ENUM_MEMBER_NAME@21..22
+            0: IDENT@21..22 "A" [] []
+          1: (empty)
+        1: COMMA@22..23 "," [] []
+        2: TS_ENUM_MEMBER@23..24
+          0: TS_LITERAL_ENUM_MEMBER_NAME@23..24
+            0: IDENT@23..24 "B" [] []
+          1: (empty)
+        3: COMMA@24..25 "," [] []
+        4: TS_ENUM_MEMBER@25..26
+          0: TS_LITERAL_ENUM_MEMBER_NAME@25..26
+            0: IDENT@25..26 "C" [] []
+          1: (empty)
+      5: R_CURLY@26..27 "}" [] []
+  4: EOF@27..28 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+enum_decl_no_id.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `enum` statements must have a name
+  
+  > 1 │ enum {A,B,C}
+      │ ^^^^^
+    2 │ enum 1 {A,B,C}
+    3 │ 
+  
+enum_decl_no_id.ts:2:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × invalid `enum` name
+  
+    1 │ enum {A,B,C}
+  > 2 │ enum 1 {A,B,C}
+      │      ^
+    3 │ 
+  
+```

@@ -1,0 +1,150 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class undefined {}
+class string {}
+class any {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..16 "undefined" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@16..17 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@17..18 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@18..25 "class" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@25..32 "string" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@32..33 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@33..34 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@34..41 "class" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@41..45 "any" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@45..46 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@46..47 "}" [] [],
+        },
+    ],
+    eof_token: EOF@47..48 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..48
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..47
+    0: JS_CLASS_DECLARATION@0..18
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..16
+        0: IDENT@6..16 "undefined" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@16..17 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@17..17
+      9: R_CURLY@17..18 "}" [] []
+    1: JS_CLASS_DECLARATION@18..34
+      0: JS_DECORATOR_LIST@18..18
+      1: (empty)
+      2: CLASS_KW@18..25 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@25..32
+        0: IDENT@25..32 "string" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@32..33 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@33..33
+      9: R_CURLY@33..34 "}" [] []
+    2: JS_CLASS_DECLARATION@34..47
+      0: JS_DECORATOR_LIST@34..34
+      1: (empty)
+      2: CLASS_KW@34..41 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@41..45
+        0: IDENT@41..45 "any" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@45..46 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@46..46
+      9: R_CURLY@46..47 "}" [] []
+  4: EOF@47..48 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_class_name_reserved_as_type.ts:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `undefined` cannot be used as a class name because it is already reserved as a type
+  
+  > 1 │ class undefined {}
+      │       ^^^^^^^^^
+    2 │ class string {}
+    3 │ class any {}
+  
+ts_class_name_reserved_as_type.ts:2:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `string` cannot be used as a class name because it is already reserved as a type
+  
+    1 │ class undefined {}
+  > 2 │ class string {}
+      │       ^^^^^^
+    3 │ class any {}
+    4 │ 
+  
+ts_class_name_reserved_as_type.ts:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `any` cannot be used as a class name because it is already reserved as a type
+  
+    1 │ class undefined {}
+    2 │ class string {}
+  > 3 │ class any {}
+      │       ^^^
+    4 │ 
+  
+```

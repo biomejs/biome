@@ -1,0 +1,137 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+function a(this) {}
+function b(this: string) {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..10 "a" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@10..11 "(" [] [],
+                items: JsParameterList [
+                    TsThisParameter {
+                        this_token: THIS_KW@11..15 "this" [] [],
+                        type_annotation: missing (optional),
+                    },
+                ],
+                r_paren_token: R_PAREN@15..17 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@17..18 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@18..19 "}" [] [],
+            },
+        },
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@19..29 "function" [Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@29..30 "b" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@30..31 "(" [] [],
+                items: JsParameterList [
+                    TsThisParameter {
+                        this_token: THIS_KW@31..35 "this" [] [],
+                        type_annotation: TsTypeAnnotation {
+                            colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@37..43 "string" [] [],
+                            },
+                        },
+                    },
+                ],
+                r_paren_token: R_PAREN@43..45 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@45..46 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@46..47 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@47..48 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..48
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..47
+    0: JS_FUNCTION_DECLARATION@0..19
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..10
+        0: IDENT@9..10 "a" [] []
+      4: (empty)
+      5: JS_PARAMETERS@10..17
+        0: L_PAREN@10..11 "(" [] []
+        1: JS_PARAMETER_LIST@11..15
+          0: TS_THIS_PARAMETER@11..15
+            0: THIS_KW@11..15 "this" [] []
+            1: (empty)
+        2: R_PAREN@15..17 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@17..19
+        0: L_CURLY@17..18 "{" [] []
+        1: JS_DIRECTIVE_LIST@18..18
+        2: JS_STATEMENT_LIST@18..18
+        3: R_CURLY@18..19 "}" [] []
+    1: JS_FUNCTION_DECLARATION@19..47
+      0: (empty)
+      1: FUNCTION_KW@19..29 "function" [Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@29..30
+        0: IDENT@29..30 "b" [] []
+      4: (empty)
+      5: JS_PARAMETERS@30..45
+        0: L_PAREN@30..31 "(" [] []
+        1: JS_PARAMETER_LIST@31..43
+          0: TS_THIS_PARAMETER@31..43
+            0: THIS_KW@31..35 "this" [] []
+            1: TS_TYPE_ANNOTATION@35..43
+              0: COLON@35..37 ":" [] [Whitespace(" ")]
+              1: TS_STRING_TYPE@37..43
+                0: STRING_KW@37..43 "string" [] []
+        2: R_PAREN@43..45 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@45..47
+        0: L_CURLY@45..46 "{" [] []
+        1: JS_DIRECTIVE_LIST@46..46
+        2: JS_STATEMENT_LIST@46..46
+        3: R_CURLY@46..47 "}" [] []
+  4: EOF@47..48 "" [Newline("\n")] []
+
+```

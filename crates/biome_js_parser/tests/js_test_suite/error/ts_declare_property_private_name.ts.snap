@@ -1,0 +1,114 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class A { declare #name(); };
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..10 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        JsBogus {
+                            items: [
+                                TsDeclareModifier {
+                                    modifier_token: DECLARE_KW@10..18 "declare" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        JsPrivateClassMemberName {
+                            hash_token: HASH@18..19 "#" [] [],
+                            id_token: IDENT@19..23 "name" [] [],
+                        },
+                        JsParameters {
+                            l_paren_token: L_PAREN@23..24 "(" [] [],
+                            items: JsParameterList [],
+                            r_paren_token: R_PAREN@24..25 ")" [] [],
+                        },
+                        SEMICOLON@25..27 ";" [] [Whitespace(" ")],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@27..28 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@28..29 ";" [] [],
+        },
+    ],
+    eof_token: EOF@29..30 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..30
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..29
+    0: JS_CLASS_DECLARATION@0..28
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..10 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@10..27
+        0: JS_BOGUS_MEMBER@10..27
+          0: JS_BOGUS@10..18
+            0: TS_DECLARE_MODIFIER@10..18
+              0: DECLARE_KW@10..18 "declare" [] [Whitespace(" ")]
+          1: JS_PRIVATE_CLASS_MEMBER_NAME@18..23
+            0: HASH@18..19 "#" [] []
+            1: IDENT@19..23 "name" [] []
+          2: JS_PARAMETERS@23..25
+            0: L_PAREN@23..24 "(" [] []
+            1: JS_PARAMETER_LIST@24..24
+            2: R_PAREN@24..25 ")" [] []
+          3: SEMICOLON@25..27 ";" [] [Whitespace(" ")]
+      9: R_CURLY@27..28 "}" [] []
+    1: JS_EMPTY_STATEMENT@28..29
+      0: SEMICOLON@28..29 ";" [] []
+  4: EOF@29..30 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_declare_property_private_name.ts:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'declare' modifier is only allowed on properties.
+  
+  > 1 │ class A { declare #name(); };
+      │           ^^^^^^^
+    2 │ 
+  
+```

@@ -804,17 +804,22 @@ dependencies = [
 name = "biome_js_parser"
 version = "0.5.7"
 dependencies = [
+ "biome_configuration",
  "biome_console",
+ "biome_deserialize",
  "biome_diagnostics",
+ "biome_fs",
  "biome_js_factory",
  "biome_js_syntax",
  "biome_parser",
  "biome_rowan",
+ "biome_service",
+ "biome_test_utils",
  "biome_unicode_table",
  "drop_bomb",
  "enumflags2",
- "expect-test",
  "indexmap 2.6.0",
+ "insta",
  "quickcheck",
  "quickcheck_macros",
  "rustc-hash 1.1.0",
@@ -1736,12 +1741,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dissimilar"
-version = "1.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "210ec60ae7d710bed8683e333e9d2855a8a56a3e9892b38bad3bb0d4d29b0d5e"
-
-[[package]]
 name = "drop_bomb"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1836,16 +1835,6 @@ checksum = "aa68f1b12764fab894d2755d2518754e71b4fd80ecfb822714a1206c2aab39bf"
 dependencies = [
  "cc",
  "libc",
-]
-
-[[package]]
-name = "expect-test"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e0be0a561335815e06dab7c62e50353134c796e7a6155402a64bcff66b6a5e0"
-dependencies = [
- "dissimilar",
- "once_cell",
 ]
 
 [[package]]

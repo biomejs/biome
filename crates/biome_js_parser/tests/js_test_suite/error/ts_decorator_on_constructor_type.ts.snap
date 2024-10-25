@@ -1,0 +1,581 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+type I = new(@dec x, second, @dec third = 'default') => string;
+type I = abstract new(@dec.fn() x, second, @dec.fn() third = 'default') => string;
+type I = abstract new(@dec() x, second, @dec() third = 'default') => string;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..7 "I" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            ty: TsConstructorType {
+                abstract_token: missing (optional),
+                new_token: NEW_KW@9..12 "new" [] [],
+                type_parameters: missing (optional),
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@12..13 "(" [] [],
+                    items: JsParameterList [
+                        JsBogusParameter {
+                            items: [
+                                JsBogus {
+                                    items: [
+                                        JsDecorator {
+                                            at_token: AT@13..14 "@" [] [],
+                                            expression: JsIdentifierExpression {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@14..18 "dec" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                JsIdentifierBinding {
+                                    name_token: IDENT@18..19 "x" [] [],
+                                },
+                            ],
+                        },
+                        COMMA@19..21 "," [] [Whitespace(" ")],
+                        JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@21..27 "second" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        COMMA@27..29 "," [] [Whitespace(" ")],
+                        JsBogusParameter {
+                            items: [
+                                JsBogus {
+                                    items: [
+                                        JsDecorator {
+                                            at_token: AT@29..30 "@" [] [],
+                                            expression: JsIdentifierExpression {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@30..34 "dec" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                JsIdentifierBinding {
+                                    name_token: IDENT@34..40 "third" [] [Whitespace(" ")],
+                                },
+                                JsInitializerClause {
+                                    eq_token: EQ@40..42 "=" [] [Whitespace(" ")],
+                                    expression: JsStringLiteralExpression {
+                                        value_token: JS_STRING_LITERAL@42..51 "'default'" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@51..53 ")" [] [Whitespace(" ")],
+                },
+                fat_arrow_token: FAT_ARROW@53..56 "=>" [] [Whitespace(" ")],
+                return_type: TsStringType {
+                    string_token: STRING_KW@56..62 "string" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@62..63 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@63..69 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@69..71 "I" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@71..73 "=" [] [Whitespace(" ")],
+            ty: TsConstructorType {
+                abstract_token: ABSTRACT_KW@73..82 "abstract" [] [Whitespace(" ")],
+                new_token: NEW_KW@82..85 "new" [] [],
+                type_parameters: missing (optional),
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@85..86 "(" [] [],
+                    items: JsParameterList [
+                        JsBogusParameter {
+                            items: [
+                                JsBogus {
+                                    items: [
+                                        JsDecorator {
+                                            at_token: AT@86..87 "@" [] [],
+                                            expression: JsCallExpression {
+                                                callee: JsStaticMemberExpression {
+                                                    object: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@87..90 "dec" [] [],
+                                                        },
+                                                    },
+                                                    operator_token: DOT@90..91 "." [] [],
+                                                    member: JsName {
+                                                        value_token: IDENT@91..93 "fn" [] [],
+                                                    },
+                                                },
+                                                optional_chain_token: missing (optional),
+                                                type_arguments: missing (optional),
+                                                arguments: JsCallArguments {
+                                                    l_paren_token: L_PAREN@93..94 "(" [] [],
+                                                    args: JsCallArgumentList [],
+                                                    r_paren_token: R_PAREN@94..96 ")" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                JsIdentifierBinding {
+                                    name_token: IDENT@96..97 "x" [] [],
+                                },
+                            ],
+                        },
+                        COMMA@97..99 "," [] [Whitespace(" ")],
+                        JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@99..105 "second" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        COMMA@105..107 "," [] [Whitespace(" ")],
+                        JsBogusParameter {
+                            items: [
+                                JsBogus {
+                                    items: [
+                                        JsDecorator {
+                                            at_token: AT@107..108 "@" [] [],
+                                            expression: JsCallExpression {
+                                                callee: JsStaticMemberExpression {
+                                                    object: JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@108..111 "dec" [] [],
+                                                        },
+                                                    },
+                                                    operator_token: DOT@111..112 "." [] [],
+                                                    member: JsName {
+                                                        value_token: IDENT@112..114 "fn" [] [],
+                                                    },
+                                                },
+                                                optional_chain_token: missing (optional),
+                                                type_arguments: missing (optional),
+                                                arguments: JsCallArguments {
+                                                    l_paren_token: L_PAREN@114..115 "(" [] [],
+                                                    args: JsCallArgumentList [],
+                                                    r_paren_token: R_PAREN@115..117 ")" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                JsIdentifierBinding {
+                                    name_token: IDENT@117..123 "third" [] [Whitespace(" ")],
+                                },
+                                JsInitializerClause {
+                                    eq_token: EQ@123..125 "=" [] [Whitespace(" ")],
+                                    expression: JsStringLiteralExpression {
+                                        value_token: JS_STRING_LITERAL@125..134 "'default'" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@134..136 ")" [] [Whitespace(" ")],
+                },
+                fat_arrow_token: FAT_ARROW@136..139 "=>" [] [Whitespace(" ")],
+                return_type: TsStringType {
+                    string_token: STRING_KW@139..145 "string" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@145..146 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@146..152 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@152..154 "I" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@154..156 "=" [] [Whitespace(" ")],
+            ty: TsConstructorType {
+                abstract_token: ABSTRACT_KW@156..165 "abstract" [] [Whitespace(" ")],
+                new_token: NEW_KW@165..168 "new" [] [],
+                type_parameters: missing (optional),
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@168..169 "(" [] [],
+                    items: JsParameterList [
+                        JsBogusParameter {
+                            items: [
+                                JsBogus {
+                                    items: [
+                                        JsDecorator {
+                                            at_token: AT@169..170 "@" [] [],
+                                            expression: JsCallExpression {
+                                                callee: JsIdentifierExpression {
+                                                    name: JsReferenceIdentifier {
+                                                        value_token: IDENT@170..173 "dec" [] [],
+                                                    },
+                                                },
+                                                optional_chain_token: missing (optional),
+                                                type_arguments: missing (optional),
+                                                arguments: JsCallArguments {
+                                                    l_paren_token: L_PAREN@173..174 "(" [] [],
+                                                    args: JsCallArgumentList [],
+                                                    r_paren_token: R_PAREN@174..176 ")" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                JsIdentifierBinding {
+                                    name_token: IDENT@176..177 "x" [] [],
+                                },
+                            ],
+                        },
+                        COMMA@177..179 "," [] [Whitespace(" ")],
+                        JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@179..185 "second" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        COMMA@185..187 "," [] [Whitespace(" ")],
+                        JsBogusParameter {
+                            items: [
+                                JsBogus {
+                                    items: [
+                                        JsDecorator {
+                                            at_token: AT@187..188 "@" [] [],
+                                            expression: JsCallExpression {
+                                                callee: JsIdentifierExpression {
+                                                    name: JsReferenceIdentifier {
+                                                        value_token: IDENT@188..191 "dec" [] [],
+                                                    },
+                                                },
+                                                optional_chain_token: missing (optional),
+                                                type_arguments: missing (optional),
+                                                arguments: JsCallArguments {
+                                                    l_paren_token: L_PAREN@191..192 "(" [] [],
+                                                    args: JsCallArgumentList [],
+                                                    r_paren_token: R_PAREN@192..194 ")" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                                JsIdentifierBinding {
+                                    name_token: IDENT@194..200 "third" [] [Whitespace(" ")],
+                                },
+                                JsInitializerClause {
+                                    eq_token: EQ@200..202 "=" [] [Whitespace(" ")],
+                                    expression: JsStringLiteralExpression {
+                                        value_token: JS_STRING_LITERAL@202..211 "'default'" [] [],
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@211..213 ")" [] [Whitespace(" ")],
+                },
+                fat_arrow_token: FAT_ARROW@213..216 "=>" [] [Whitespace(" ")],
+                return_type: TsStringType {
+                    string_token: STRING_KW@216..222 "string" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@222..223 ";" [] [],
+        },
+    ],
+    eof_token: EOF@223..224 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..224
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..223
+    0: TS_TYPE_ALIAS_DECLARATION@0..63
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "I" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_CONSTRUCTOR_TYPE@9..62
+        0: (empty)
+        1: NEW_KW@9..12 "new" [] []
+        2: (empty)
+        3: JS_PARAMETERS@12..53
+          0: L_PAREN@12..13 "(" [] []
+          1: JS_PARAMETER_LIST@13..51
+            0: JS_BOGUS_PARAMETER@13..19
+              0: JS_BOGUS@13..18
+                0: JS_DECORATOR@13..18
+                  0: AT@13..14 "@" [] []
+                  1: JS_IDENTIFIER_EXPRESSION@14..18
+                    0: JS_REFERENCE_IDENTIFIER@14..18
+                      0: IDENT@14..18 "dec" [] [Whitespace(" ")]
+              1: JS_IDENTIFIER_BINDING@18..19
+                0: IDENT@18..19 "x" [] []
+            1: COMMA@19..21 "," [] [Whitespace(" ")]
+            2: JS_FORMAL_PARAMETER@21..27
+              0: JS_DECORATOR_LIST@21..21
+              1: JS_IDENTIFIER_BINDING@21..27
+                0: IDENT@21..27 "second" [] []
+              2: (empty)
+              3: (empty)
+              4: (empty)
+            3: COMMA@27..29 "," [] [Whitespace(" ")]
+            4: JS_BOGUS_PARAMETER@29..51
+              0: JS_BOGUS@29..34
+                0: JS_DECORATOR@29..34
+                  0: AT@29..30 "@" [] []
+                  1: JS_IDENTIFIER_EXPRESSION@30..34
+                    0: JS_REFERENCE_IDENTIFIER@30..34
+                      0: IDENT@30..34 "dec" [] [Whitespace(" ")]
+              1: JS_IDENTIFIER_BINDING@34..40
+                0: IDENT@34..40 "third" [] [Whitespace(" ")]
+              2: JS_INITIALIZER_CLAUSE@40..51
+                0: EQ@40..42 "=" [] [Whitespace(" ")]
+                1: JS_STRING_LITERAL_EXPRESSION@42..51
+                  0: JS_STRING_LITERAL@42..51 "'default'" [] []
+          2: R_PAREN@51..53 ")" [] [Whitespace(" ")]
+        4: FAT_ARROW@53..56 "=>" [] [Whitespace(" ")]
+        5: TS_STRING_TYPE@56..62
+          0: STRING_KW@56..62 "string" [] []
+      5: SEMICOLON@62..63 ";" [] []
+    1: TS_TYPE_ALIAS_DECLARATION@63..146
+      0: TYPE_KW@63..69 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@69..71
+        0: IDENT@69..71 "I" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@71..73 "=" [] [Whitespace(" ")]
+      4: TS_CONSTRUCTOR_TYPE@73..145
+        0: ABSTRACT_KW@73..82 "abstract" [] [Whitespace(" ")]
+        1: NEW_KW@82..85 "new" [] []
+        2: (empty)
+        3: JS_PARAMETERS@85..136
+          0: L_PAREN@85..86 "(" [] []
+          1: JS_PARAMETER_LIST@86..134
+            0: JS_BOGUS_PARAMETER@86..97
+              0: JS_BOGUS@86..96
+                0: JS_DECORATOR@86..96
+                  0: AT@86..87 "@" [] []
+                  1: JS_CALL_EXPRESSION@87..96
+                    0: JS_STATIC_MEMBER_EXPRESSION@87..93
+                      0: JS_IDENTIFIER_EXPRESSION@87..90
+                        0: JS_REFERENCE_IDENTIFIER@87..90
+                          0: IDENT@87..90 "dec" [] []
+                      1: DOT@90..91 "." [] []
+                      2: JS_NAME@91..93
+                        0: IDENT@91..93 "fn" [] []
+                    1: (empty)
+                    2: (empty)
+                    3: JS_CALL_ARGUMENTS@93..96
+                      0: L_PAREN@93..94 "(" [] []
+                      1: JS_CALL_ARGUMENT_LIST@94..94
+                      2: R_PAREN@94..96 ")" [] [Whitespace(" ")]
+              1: JS_IDENTIFIER_BINDING@96..97
+                0: IDENT@96..97 "x" [] []
+            1: COMMA@97..99 "," [] [Whitespace(" ")]
+            2: JS_FORMAL_PARAMETER@99..105
+              0: JS_DECORATOR_LIST@99..99
+              1: JS_IDENTIFIER_BINDING@99..105
+                0: IDENT@99..105 "second" [] []
+              2: (empty)
+              3: (empty)
+              4: (empty)
+            3: COMMA@105..107 "," [] [Whitespace(" ")]
+            4: JS_BOGUS_PARAMETER@107..134
+              0: JS_BOGUS@107..117
+                0: JS_DECORATOR@107..117
+                  0: AT@107..108 "@" [] []
+                  1: JS_CALL_EXPRESSION@108..117
+                    0: JS_STATIC_MEMBER_EXPRESSION@108..114
+                      0: JS_IDENTIFIER_EXPRESSION@108..111
+                        0: JS_REFERENCE_IDENTIFIER@108..111
+                          0: IDENT@108..111 "dec" [] []
+                      1: DOT@111..112 "." [] []
+                      2: JS_NAME@112..114
+                        0: IDENT@112..114 "fn" [] []
+                    1: (empty)
+                    2: (empty)
+                    3: JS_CALL_ARGUMENTS@114..117
+                      0: L_PAREN@114..115 "(" [] []
+                      1: JS_CALL_ARGUMENT_LIST@115..115
+                      2: R_PAREN@115..117 ")" [] [Whitespace(" ")]
+              1: JS_IDENTIFIER_BINDING@117..123
+                0: IDENT@117..123 "third" [] [Whitespace(" ")]
+              2: JS_INITIALIZER_CLAUSE@123..134
+                0: EQ@123..125 "=" [] [Whitespace(" ")]
+                1: JS_STRING_LITERAL_EXPRESSION@125..134
+                  0: JS_STRING_LITERAL@125..134 "'default'" [] []
+          2: R_PAREN@134..136 ")" [] [Whitespace(" ")]
+        4: FAT_ARROW@136..139 "=>" [] [Whitespace(" ")]
+        5: TS_STRING_TYPE@139..145
+          0: STRING_KW@139..145 "string" [] []
+      5: SEMICOLON@145..146 ";" [] []
+    2: TS_TYPE_ALIAS_DECLARATION@146..223
+      0: TYPE_KW@146..152 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@152..154
+        0: IDENT@152..154 "I" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@154..156 "=" [] [Whitespace(" ")]
+      4: TS_CONSTRUCTOR_TYPE@156..222
+        0: ABSTRACT_KW@156..165 "abstract" [] [Whitespace(" ")]
+        1: NEW_KW@165..168 "new" [] []
+        2: (empty)
+        3: JS_PARAMETERS@168..213
+          0: L_PAREN@168..169 "(" [] []
+          1: JS_PARAMETER_LIST@169..211
+            0: JS_BOGUS_PARAMETER@169..177
+              0: JS_BOGUS@169..176
+                0: JS_DECORATOR@169..176
+                  0: AT@169..170 "@" [] []
+                  1: JS_CALL_EXPRESSION@170..176
+                    0: JS_IDENTIFIER_EXPRESSION@170..173
+                      0: JS_REFERENCE_IDENTIFIER@170..173
+                        0: IDENT@170..173 "dec" [] []
+                    1: (empty)
+                    2: (empty)
+                    3: JS_CALL_ARGUMENTS@173..176
+                      0: L_PAREN@173..174 "(" [] []
+                      1: JS_CALL_ARGUMENT_LIST@174..174
+                      2: R_PAREN@174..176 ")" [] [Whitespace(" ")]
+              1: JS_IDENTIFIER_BINDING@176..177
+                0: IDENT@176..177 "x" [] []
+            1: COMMA@177..179 "," [] [Whitespace(" ")]
+            2: JS_FORMAL_PARAMETER@179..185
+              0: JS_DECORATOR_LIST@179..179
+              1: JS_IDENTIFIER_BINDING@179..185
+                0: IDENT@179..185 "second" [] []
+              2: (empty)
+              3: (empty)
+              4: (empty)
+            3: COMMA@185..187 "," [] [Whitespace(" ")]
+            4: JS_BOGUS_PARAMETER@187..211
+              0: JS_BOGUS@187..194
+                0: JS_DECORATOR@187..194
+                  0: AT@187..188 "@" [] []
+                  1: JS_CALL_EXPRESSION@188..194
+                    0: JS_IDENTIFIER_EXPRESSION@188..191
+                      0: JS_REFERENCE_IDENTIFIER@188..191
+                        0: IDENT@188..191 "dec" [] []
+                    1: (empty)
+                    2: (empty)
+                    3: JS_CALL_ARGUMENTS@191..194
+                      0: L_PAREN@191..192 "(" [] []
+                      1: JS_CALL_ARGUMENT_LIST@192..192
+                      2: R_PAREN@192..194 ")" [] [Whitespace(" ")]
+              1: JS_IDENTIFIER_BINDING@194..200
+                0: IDENT@194..200 "third" [] [Whitespace(" ")]
+              2: JS_INITIALIZER_CLAUSE@200..211
+                0: EQ@200..202 "=" [] [Whitespace(" ")]
+                1: JS_STRING_LITERAL_EXPRESSION@202..211
+                  0: JS_STRING_LITERAL@202..211 "'default'" [] []
+          2: R_PAREN@211..213 ")" [] [Whitespace(" ")]
+        4: FAT_ARROW@213..216 "=>" [] [Whitespace(" ")]
+        5: TS_STRING_TYPE@216..222
+          0: STRING_KW@216..222 "string" [] []
+      5: SEMICOLON@222..223 ";" [] []
+  4: EOF@223..224 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_decorator_on_constructor_type.ts:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+  > 1 │ type I = new(@dec x, second, @dec third = 'default') => string;
+      │              ^^^^
+    2 │ type I = abstract new(@dec.fn() x, second, @dec.fn() third = 'default') => string;
+    3 │ type I = abstract new(@dec() x, second, @dec() third = 'default') => string;
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_decorator_on_constructor_type.ts:1:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+  > 1 │ type I = new(@dec x, second, @dec third = 'default') => string;
+      │                              ^^^^
+    2 │ type I = abstract new(@dec.fn() x, second, @dec.fn() third = 'default') => string;
+    3 │ type I = abstract new(@dec() x, second, @dec() third = 'default') => string;
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_decorator_on_constructor_type.ts:2:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    1 │ type I = new(@dec x, second, @dec third = 'default') => string;
+  > 2 │ type I = abstract new(@dec.fn() x, second, @dec.fn() third = 'default') => string;
+      │                       ^^^^^^^^^
+    3 │ type I = abstract new(@dec() x, second, @dec() third = 'default') => string;
+    4 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_decorator_on_constructor_type.ts:2:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    1 │ type I = new(@dec x, second, @dec third = 'default') => string;
+  > 2 │ type I = abstract new(@dec.fn() x, second, @dec.fn() third = 'default') => string;
+      │                                            ^^^^^^^^^
+    3 │ type I = abstract new(@dec() x, second, @dec() third = 'default') => string;
+    4 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_decorator_on_constructor_type.ts:3:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    1 │ type I = new(@dec x, second, @dec third = 'default') => string;
+    2 │ type I = abstract new(@dec.fn() x, second, @dec.fn() third = 'default') => string;
+  > 3 │ type I = abstract new(@dec() x, second, @dec() third = 'default') => string;
+      │                       ^^^^^^
+    4 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_decorator_on_constructor_type.ts:3:41 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    1 │ type I = new(@dec x, second, @dec third = 'default') => string;
+    2 │ type I = abstract new(@dec.fn() x, second, @dec.fn() third = 'default') => string;
+  > 3 │ type I = abstract new(@dec() x, second, @dec() third = 'default') => string;
+      │                                         ^^^^^^
+    4 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+```

@@ -549,6 +549,10 @@ export interface PartialJavascriptOrganizeImports {}
  */
 export interface PartialJavascriptParser {
 	/**
+	 * Enables parsing of Grit metavariables. Defaults to `false`.
+	 */
+	gritMetavariables?: boolean;
+	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
 These decorators belong to an old proposal, and they are subject to change. 

@@ -1,0 +1,430 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+function f() {
+    return <div string_literal="a" expression={1} novalue el=<a/>></div>;
+}
+<div dashed-name='test' use:validate="abcd" />;
+<div use-dashed_underscore:validate="ahaha" />;
+<div multiline-string='test
+  continues here' />;
+<div invalid-unicode-escape="\u10000\u20000" />;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..10 "f" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@10..11 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@11..13 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@13..14 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsReturnStatement {
+                        return_token: RETURN_KW@14..26 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        argument: JsxTagExpression {
+                            tag: JsxElement {
+                                opening_element: JsxOpeningElement {
+                                    l_angle_token: L_ANGLE@26..27 "<" [] [],
+                                    name: JsxName {
+                                        value_token: JSX_IDENT@27..31 "div" [] [Whitespace(" ")],
+                                    },
+                                    type_arguments: missing (optional),
+                                    attributes: JsxAttributeList [
+                                        JsxAttribute {
+                                            name: JsxName {
+                                                value_token: JSX_IDENT@31..45 "string_literal" [] [],
+                                            },
+                                            initializer: JsxAttributeInitializerClause {
+                                                eq_token: EQ@45..46 "=" [] [],
+                                                value: JsxString {
+                                                    value_token: JSX_STRING_LITERAL@46..50 "\"a\"" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                        JsxAttribute {
+                                            name: JsxName {
+                                                value_token: JSX_IDENT@50..60 "expression" [] [],
+                                            },
+                                            initializer: JsxAttributeInitializerClause {
+                                                eq_token: EQ@60..61 "=" [] [],
+                                                value: JsxExpressionAttributeValue {
+                                                    l_curly_token: L_CURLY@61..62 "{" [] [],
+                                                    expression: JsNumberLiteralExpression {
+                                                        value_token: JS_NUMBER_LITERAL@62..63 "1" [] [],
+                                                    },
+                                                    r_curly_token: R_CURLY@63..65 "}" [] [Whitespace(" ")],
+                                                },
+                                            },
+                                        },
+                                        JsxAttribute {
+                                            name: JsxName {
+                                                value_token: JSX_IDENT@65..73 "novalue" [] [Whitespace(" ")],
+                                            },
+                                            initializer: missing (optional),
+                                        },
+                                        JsxAttribute {
+                                            name: JsxName {
+                                                value_token: JSX_IDENT@73..75 "el" [] [],
+                                            },
+                                            initializer: JsxAttributeInitializerClause {
+                                                eq_token: EQ@75..76 "=" [] [],
+                                                value: JsxSelfClosingElement {
+                                                    l_angle_token: L_ANGLE@76..77 "<" [] [],
+                                                    name: JsxName {
+                                                        value_token: JSX_IDENT@77..78 "a" [] [],
+                                                    },
+                                                    type_arguments: missing (optional),
+                                                    attributes: JsxAttributeList [],
+                                                    slash_token: SLASH@78..79 "/" [] [],
+                                                    r_angle_token: R_ANGLE@79..80 ">" [] [],
+                                                },
+                                            },
+                                        },
+                                    ],
+                                    r_angle_token: R_ANGLE@80..81 ">" [] [],
+                                },
+                                children: JsxChildList [],
+                                closing_element: JsxClosingElement {
+                                    l_angle_token: L_ANGLE@81..82 "<" [] [],
+                                    slash_token: SLASH@82..83 "/" [] [],
+                                    name: JsxName {
+                                        value_token: JSX_IDENT@83..86 "div" [] [],
+                                    },
+                                    r_angle_token: R_ANGLE@86..87 ">" [] [],
+                                },
+                            },
+                        },
+                        semicolon_token: SEMICOLON@87..88 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@88..90 "}" [Newline("\n")] [],
+            },
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@90..92 "<" [Newline("\n")] [],
+                    name: JsxName {
+                        value_token: JSX_IDENT@92..96 "div" [] [Whitespace(" ")],
+                    },
+                    type_arguments: missing (optional),
+                    attributes: JsxAttributeList [
+                        JsxAttribute {
+                            name: JsxName {
+                                value_token: JSX_IDENT@96..107 "dashed-name" [] [],
+                            },
+                            initializer: JsxAttributeInitializerClause {
+                                eq_token: EQ@107..108 "=" [] [],
+                                value: JsxString {
+                                    value_token: JSX_STRING_LITERAL@108..115 "'test'" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                        JsxAttribute {
+                            name: JsxNamespaceName {
+                                namespace: JsxName {
+                                    value_token: JSX_IDENT@115..118 "use" [] [],
+                                },
+                                colon_token: COLON@118..119 ":" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@119..127 "validate" [] [],
+                                },
+                            },
+                            initializer: JsxAttributeInitializerClause {
+                                eq_token: EQ@127..128 "=" [] [],
+                                value: JsxString {
+                                    value_token: JSX_STRING_LITERAL@128..135 "\"abcd\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@135..136 "/" [] [],
+                    r_angle_token: R_ANGLE@136..137 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@137..138 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@138..140 "<" [Newline("\n")] [],
+                    name: JsxName {
+                        value_token: JSX_IDENT@140..144 "div" [] [Whitespace(" ")],
+                    },
+                    type_arguments: missing (optional),
+                    attributes: JsxAttributeList [
+                        JsxAttribute {
+                            name: JsxNamespaceName {
+                                namespace: JsxName {
+                                    value_token: JSX_IDENT@144..165 "use-dashed_underscore" [] [],
+                                },
+                                colon_token: COLON@165..166 ":" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@166..174 "validate" [] [],
+                                },
+                            },
+                            initializer: JsxAttributeInitializerClause {
+                                eq_token: EQ@174..175 "=" [] [],
+                                value: JsxString {
+                                    value_token: JSX_STRING_LITERAL@175..183 "\"ahaha\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@183..184 "/" [] [],
+                    r_angle_token: R_ANGLE@184..185 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@185..186 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@186..188 "<" [Newline("\n")] [],
+                    name: JsxName {
+                        value_token: JSX_IDENT@188..192 "div" [] [Whitespace(" ")],
+                    },
+                    type_arguments: missing (optional),
+                    attributes: JsxAttributeList [
+                        JsxAttribute {
+                            name: JsxName {
+                                value_token: JSX_IDENT@192..208 "multiline-string" [] [],
+                            },
+                            initializer: JsxAttributeInitializerClause {
+                                eq_token: EQ@208..209 "=" [] [],
+                                value: JsxString {
+                                    value_token: JSX_STRING_LITERAL@209..233 "'test\n  continues here'" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@233..234 "/" [] [],
+                    r_angle_token: R_ANGLE@234..235 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@235..236 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@236..238 "<" [Newline("\n")] [],
+                    name: JsxName {
+                        value_token: JSX_IDENT@238..242 "div" [] [Whitespace(" ")],
+                    },
+                    type_arguments: missing (optional),
+                    attributes: JsxAttributeList [
+                        JsxAttribute {
+                            name: JsxName {
+                                value_token: JSX_IDENT@242..264 "invalid-unicode-escape" [] [],
+                            },
+                            initializer: JsxAttributeInitializerClause {
+                                eq_token: EQ@264..265 "=" [] [],
+                                value: JsxString {
+                                    value_token: JSX_STRING_LITERAL@265..282 "\"\\u10000\\u20000\"" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@282..283 "/" [] [],
+                    r_angle_token: R_ANGLE@283..284 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@284..285 ";" [] [],
+        },
+    ],
+    eof_token: EOF@285..286 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..286
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..285
+    0: JS_FUNCTION_DECLARATION@0..90
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..10
+        0: IDENT@9..10 "f" [] []
+      4: (empty)
+      5: JS_PARAMETERS@10..13
+        0: L_PAREN@10..11 "(" [] []
+        1: JS_PARAMETER_LIST@11..11
+        2: R_PAREN@11..13 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@13..90
+        0: L_CURLY@13..14 "{" [] []
+        1: JS_DIRECTIVE_LIST@14..14
+        2: JS_STATEMENT_LIST@14..88
+          0: JS_RETURN_STATEMENT@14..88
+            0: RETURN_KW@14..26 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JSX_TAG_EXPRESSION@26..87
+              0: JSX_ELEMENT@26..87
+                0: JSX_OPENING_ELEMENT@26..81
+                  0: L_ANGLE@26..27 "<" [] []
+                  1: JSX_NAME@27..31
+                    0: JSX_IDENT@27..31 "div" [] [Whitespace(" ")]
+                  2: (empty)
+                  3: JSX_ATTRIBUTE_LIST@31..80
+                    0: JSX_ATTRIBUTE@31..50
+                      0: JSX_NAME@31..45
+                        0: JSX_IDENT@31..45 "string_literal" [] []
+                      1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@45..50
+                        0: EQ@45..46 "=" [] []
+                        1: JSX_STRING@46..50
+                          0: JSX_STRING_LITERAL@46..50 "\"a\"" [] [Whitespace(" ")]
+                    1: JSX_ATTRIBUTE@50..65
+                      0: JSX_NAME@50..60
+                        0: JSX_IDENT@50..60 "expression" [] []
+                      1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@60..65
+                        0: EQ@60..61 "=" [] []
+                        1: JSX_EXPRESSION_ATTRIBUTE_VALUE@61..65
+                          0: L_CURLY@61..62 "{" [] []
+                          1: JS_NUMBER_LITERAL_EXPRESSION@62..63
+                            0: JS_NUMBER_LITERAL@62..63 "1" [] []
+                          2: R_CURLY@63..65 "}" [] [Whitespace(" ")]
+                    2: JSX_ATTRIBUTE@65..73
+                      0: JSX_NAME@65..73
+                        0: JSX_IDENT@65..73 "novalue" [] [Whitespace(" ")]
+                      1: (empty)
+                    3: JSX_ATTRIBUTE@73..80
+                      0: JSX_NAME@73..75
+                        0: JSX_IDENT@73..75 "el" [] []
+                      1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@75..80
+                        0: EQ@75..76 "=" [] []
+                        1: JSX_SELF_CLOSING_ELEMENT@76..80
+                          0: L_ANGLE@76..77 "<" [] []
+                          1: JSX_NAME@77..78
+                            0: JSX_IDENT@77..78 "a" [] []
+                          2: (empty)
+                          3: JSX_ATTRIBUTE_LIST@78..78
+                          4: SLASH@78..79 "/" [] []
+                          5: R_ANGLE@79..80 ">" [] []
+                  4: R_ANGLE@80..81 ">" [] []
+                1: JSX_CHILD_LIST@81..81
+                2: JSX_CLOSING_ELEMENT@81..87
+                  0: L_ANGLE@81..82 "<" [] []
+                  1: SLASH@82..83 "/" [] []
+                  2: JSX_NAME@83..86
+                    0: JSX_IDENT@83..86 "div" [] []
+                  3: R_ANGLE@86..87 ">" [] []
+            2: SEMICOLON@87..88 ";" [] []
+        3: R_CURLY@88..90 "}" [Newline("\n")] []
+    1: JS_EXPRESSION_STATEMENT@90..138
+      0: JSX_TAG_EXPRESSION@90..137
+        0: JSX_SELF_CLOSING_ELEMENT@90..137
+          0: L_ANGLE@90..92 "<" [Newline("\n")] []
+          1: JSX_NAME@92..96
+            0: JSX_IDENT@92..96 "div" [] [Whitespace(" ")]
+          2: (empty)
+          3: JSX_ATTRIBUTE_LIST@96..135
+            0: JSX_ATTRIBUTE@96..115
+              0: JSX_NAME@96..107
+                0: JSX_IDENT@96..107 "dashed-name" [] []
+              1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@107..115
+                0: EQ@107..108 "=" [] []
+                1: JSX_STRING@108..115
+                  0: JSX_STRING_LITERAL@108..115 "'test'" [] [Whitespace(" ")]
+            1: JSX_ATTRIBUTE@115..135
+              0: JSX_NAMESPACE_NAME@115..127
+                0: JSX_NAME@115..118
+                  0: JSX_IDENT@115..118 "use" [] []
+                1: COLON@118..119 ":" [] []
+                2: JSX_NAME@119..127
+                  0: JSX_IDENT@119..127 "validate" [] []
+              1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@127..135
+                0: EQ@127..128 "=" [] []
+                1: JSX_STRING@128..135
+                  0: JSX_STRING_LITERAL@128..135 "\"abcd\"" [] [Whitespace(" ")]
+          4: SLASH@135..136 "/" [] []
+          5: R_ANGLE@136..137 ">" [] []
+      1: SEMICOLON@137..138 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@138..186
+      0: JSX_TAG_EXPRESSION@138..185
+        0: JSX_SELF_CLOSING_ELEMENT@138..185
+          0: L_ANGLE@138..140 "<" [Newline("\n")] []
+          1: JSX_NAME@140..144
+            0: JSX_IDENT@140..144 "div" [] [Whitespace(" ")]
+          2: (empty)
+          3: JSX_ATTRIBUTE_LIST@144..183
+            0: JSX_ATTRIBUTE@144..183
+              0: JSX_NAMESPACE_NAME@144..174
+                0: JSX_NAME@144..165
+                  0: JSX_IDENT@144..165 "use-dashed_underscore" [] []
+                1: COLON@165..166 ":" [] []
+                2: JSX_NAME@166..174
+                  0: JSX_IDENT@166..174 "validate" [] []
+              1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@174..183
+                0: EQ@174..175 "=" [] []
+                1: JSX_STRING@175..183
+                  0: JSX_STRING_LITERAL@175..183 "\"ahaha\"" [] [Whitespace(" ")]
+          4: SLASH@183..184 "/" [] []
+          5: R_ANGLE@184..185 ">" [] []
+      1: SEMICOLON@185..186 ";" [] []
+    3: JS_EXPRESSION_STATEMENT@186..236
+      0: JSX_TAG_EXPRESSION@186..235
+        0: JSX_SELF_CLOSING_ELEMENT@186..235
+          0: L_ANGLE@186..188 "<" [Newline("\n")] []
+          1: JSX_NAME@188..192
+            0: JSX_IDENT@188..192 "div" [] [Whitespace(" ")]
+          2: (empty)
+          3: JSX_ATTRIBUTE_LIST@192..233
+            0: JSX_ATTRIBUTE@192..233
+              0: JSX_NAME@192..208
+                0: JSX_IDENT@192..208 "multiline-string" [] []
+              1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@208..233
+                0: EQ@208..209 "=" [] []
+                1: JSX_STRING@209..233
+                  0: JSX_STRING_LITERAL@209..233 "'test\n  continues here'" [] [Whitespace(" ")]
+          4: SLASH@233..234 "/" [] []
+          5: R_ANGLE@234..235 ">" [] []
+      1: SEMICOLON@235..236 ";" [] []
+    4: JS_EXPRESSION_STATEMENT@236..285
+      0: JSX_TAG_EXPRESSION@236..284
+        0: JSX_SELF_CLOSING_ELEMENT@236..284
+          0: L_ANGLE@236..238 "<" [Newline("\n")] []
+          1: JSX_NAME@238..242
+            0: JSX_IDENT@238..242 "div" [] [Whitespace(" ")]
+          2: (empty)
+          3: JSX_ATTRIBUTE_LIST@242..282
+            0: JSX_ATTRIBUTE@242..282
+              0: JSX_NAME@242..264
+                0: JSX_IDENT@242..264 "invalid-unicode-escape" [] []
+              1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@264..282
+                0: EQ@264..265 "=" [] []
+                1: JSX_STRING@265..282
+                  0: JSX_STRING_LITERAL@265..282 "\"\\u10000\\u20000\"" [] [Whitespace(" ")]
+          4: SLASH@282..283 "/" [] []
+          5: R_ANGLE@283..284 ">" [] []
+      1: SEMICOLON@284..285 ";" [] []
+  4: EOF@285..286 "" [Newline("\n")] []
+
+```
