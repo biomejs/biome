@@ -82,7 +82,7 @@ declare_lint_rule! {
     }
 }
 
-#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
 #[serde(untagged)]
 enum DependencyAvailability {
     /// Dependencies are always available or unavailable.
@@ -97,28 +97,6 @@ impl Default for DependencyAvailability {
         Self::Bool(true)
     }
 }
-
-impl PartialEq for DependencyAvailability {
-    fn eq(&self, other: &Self) -> bool {
-        match self {
-            Self::Bool(a) => match other {
-                Self::Bool(b) => a == b,
-                _ => false,
-            },
-            Self::Patterns(a) => match other {
-                Self::Patterns(b) => {
-                    a.len() == b.len()
-                        && a.iter()
-                            .zip(b.iter())
-                            .all(|(a, b)| a.to_string() == b.to_string())
-                }
-                _ => false,
-            },
-        }
-    }
-}
-
-impl Eq for DependencyAvailability {}
 
 impl Deserializable for DependencyAvailability {
     fn deserialize(
