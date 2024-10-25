@@ -15,7 +15,125 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Fix CSS parser case error, `@-moz-document url-prefix(https://example.com)` and `@-moz-document domain(example.com)` are now valid. Contributed by @eryue0220
+- Fix [#4258](https://github.com/biomejs/biome/issues/4258), where fixed css parse error with @-moz-document url-prefix(). Contributed by @eryue0220
+
+### CLI
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add [noUselessUndefined](https://biomejs.dev/linter/rules/no-useless-undefined/). Contributed by @unvalley
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) accepts a new option `match` ([#4105](https://github.com/biomejs/biome/issues/4105)).
+
+  You can now validate filenames with a regular expression.
+  For instance, you can allow filenames to start with `%`:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "useFilenamingConvention": {
+            "level": "warn",
+            "options": {
+                "match": "%?(.+?)[.](.+)",
+                "filenameCases": ["camelCase"]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  If the regular expression captures strings, the first capture is considered to be the name of the file, and the second one to be the extensions (dot-separated values).
+  The name of the file and the extensions are checked against `filenameCases`.
+  Given the previous configuration, the filename `%index.d.ts` is valid because the first capture `index` is in `camelCase` and the second capture `d.ts` include dot-separated values in `lowercase`.
+  On the other hand, `%Index.d.ts` is not valid because the first capture `Index` is in `PascalCase`.
+
+  Note that specifying `match` disallows any exceptions that are handled by the rule by default.
+  For example, the previous configuration doesn't allow filenames to be prefixed with underscores,
+  a period or a plus sign.
+  You need to include them in the regular expression if you still want to allow these exceptions.
+
+  Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) and [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention) `match` options now accept case-insensitive and case-sensitive groups.
+
+  By default, the regular expression in `match` is case-sensitive.
+  You can now make it case-insensitive by using a case-insensitive group `(?i:)`.
+  For example, the regular expression `(?i:a)` matches `a` and `A`.
+
+  Contributed by @Conaclos
+
+### Parser
+
+#### Bug fixes
+
+- Fix [#4317](https://github.com/biomejs/biome/issues/4317), setter parameter can contain a trailing comma, the following example will now parsed correctly:
+
+  ```js
+  export class DummyClass {
+    set input(
+      value: string,
+    ) {}
+  }
+  ```
+
+  Contributed by @fireairforce
+
+- Fix [#3836](https://github.com/biomejs/biome/issues/3836), css parser allow multiple semicolons after a declaration, the following example will now parsed correctly:
+
+  ```css
+  .foo {
+    color: red;;
+  }
+  ```
+
+  Contributed by @fireairforce
+
+
+## v1.9.4 (2024-10-17)
+
+### Analyzer
+
+#### Bug fixes
+
+- Implement [GraphQL suppression action](https://github.com/biomejs/biome/pull/4312). Contributed by @vohoanglong0107
+
 - Improved the message for unused suppression comments. Contributed by @dyc3
+
+- Fix [#4228](https://github.com/biomejs/biome/issues/4228), where the rule `a11y/noInteractiveElementToNoninteractiveRole` incorrectly reports a `role` for non-interactive elements. Contributed by @eryue0220
+
+- `noSuspiciousSemicolonInJsx` now catches suspicious semicolons in React fragments. Contributed by @vasucp1207
+
+- The syntax rule `noTypeOnlyImportAttributes` now ignores `.cts` files ([#4361](https://github.com/biomejs/biome/issues/4361)).
+
+  Since TypeScript 5.3, type-only imports can be associated to an import attribute in CommonJS-enabled files.
+  See the [TypeScript docs](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-3.html#stable-support-resolution-mode-in-import-types).
+
+  The following code is no longer reported as a syntax error:
+
+  ```cts
+  import type { TypeFromRequire } from "pkg" with {
+      "resolution-mode": "require"
+  };
+  ```
+
+  Note that this is only allowed in files ending with the `cts` extension.
+
+  Contributed by @Conaclos
 
 ### CLI
 
@@ -45,13 +163,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### New features
 
+- Add [useGuardForIn](https://biomejs.dev/linter/rules/use-guard-for-in/). Contributed by @fireairforce
 - Add [noDocumentCookie](https://biomejs.dev/linter/rules/no-document-cookie/). Contributed by @tunamaguro
 - Add [noDocumentImportInPage](https://biomejs.dev/linter/rules/no-document-import-in-page/). Contributed by @kaioduarte
+- Add [noDuplicateProperties](https://biomejs.dev/linter/rules/no-duplicate-properties/). Contributed by @togami2864
 - Add [noHeadElement](https://biomejs.dev/linter/rules/no-head-element/). Contributed by @kaioduarte
 - Add [noHeadImportInDocument](https://biomejs.dev/linter/rules/no-head-import-in-document/). Contributed by @kaioduarte
 - Add [noImgElement](https://biomejs.dev/linter/rules/no-img-element/). Contributed by @kaioduarte
-- Add [guardForIn](https://biomejs.dev/linter/rules/guard-for-in/). Contributed by @fireairforce
-- Add [noUselessStringRaw](https://github.com/biomejs/biome/pull/4263). Contributed by @fireairforce
+- Add [noUnknownTypeSelector](https://biomejs.dev/linter/rules/no-unknown-type-selector/). Contributed by @Kazuhiro-Mimaki
+- Add [useAtIndex](https://biomejs.dev/linter/rules/use-at-index/). Contributed by @GunseiKPaseri
+- Add [noUselessStringRaw](https://biomejs.dev/linter/rules/no-useless-string-raw/). Contributed by @fireairforce
+- Add [nursery/useCollapsedIf](https://biomejs.dev/linter/rules/use-collapsed-if/). Contributed by @siketyan
+- Add [useGoogleFontDisplay](https://biomejs.dev/linter/rules/use-google-font-display/). Contributed by @kaioduarte
 
 #### Bug Fixes
 
@@ -60,10 +183,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   This fixes a regression introduced in Biome 1.9.3
   The regression affected the following linter rules:
 
-  - nursery/useSortedClasses
-  - nursery/useTrimStartEnd
-  - style/useTemplate
-  - suspicious/noMisleadingCharacterClass
+  - `nursery/useSortedClasses`
+  - `nursery/useTrimStartEnd`
+  - `style/useTemplate`
+  - `suspicious/noMisleadingCharacterClass`
 
   Contributed by @Conaclos
 
@@ -136,6 +259,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now accepts dependency names with dots. Contributed by @Conaclos
+
 - [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now correctly handles renamed exports ([#4254](https://github.com/biomejs/biome/issues/4254)).
 
   The rule allows the filename to be named as one of the exports of the module.
@@ -161,13 +286,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function/) correctly handles `calc-size` function ([#4212](https://github.com/biomejs/biome/issues/4212)).
 
- The following code `calc-size` is no longer reported as unknown:
+   The following code `calc-size` is no longer reported as unknown:
 
- ```css
- .a { height: calc-size(0px); }
- ```
+   ```css
+   .a { height: calc-size(0px); }
+   ```
 
- Contributed by @fireairforce
+   Contributed by @fireairforce
 
  - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
 
@@ -178,22 +303,12 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
-#### New features
-
-- JS Parser support defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
-  
-   ```js
-   import defer * as myModule from "my-module";
-   ```
-
-  Contributed by @fireairforce
-
 #### Bug Fixes
 
 - The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
 
   Browsers accept more emoji than the standard allows.
-  Biome now accepts these additional emoji.
+  Biome now accepts these additional emojis.
 
   The following code is now correctly parsed:
 
@@ -205,6 +320,18 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @Conaclos
+
+- Add support for parsing typescript's `resolution-mode` in Import Types([#2115](https://github.com/biomejs/biome/issues/2115))
+
+  ```ts
+  export type Fs = typeof import('fs', { with: { 'resolution-mode': 'import' } });
+  export type TypeFromRequire =
+    import("pkg", { with: { "resolution-mode": "require" } }).TypeFromRequire;
+  export type TypeFromImport =
+    import("pkg", { with: { "resolution-mode": "import" } }).TypeFromImport;
+  ```
+
+  Contributed by @fireairforce
 
 ## v1.9.3 (2024-10-01)
 
@@ -237,11 +364,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix a case where CSS files weren't correctly linted using the default configuration. Contributed by @ematipico
 
+#### Bug fixes
+
+- Fix [#4116](https://github.com/biomejs/biome/issues/4116). Unify LSP code action kinds. Contributed by @vitallium
+
 ### Formatter
 
 #### Bug fixes
 
 - Fix [#3924](https://github.com/biomejs/biome/issues/3924) where GraphQL formatter panics in block comments with empty line. Contributed by @vohoanglong0107
+- Fix [#3364](https://github.com/biomejs/biome/issues/3364) where the `useSelfClosingElements` rule forces the `script` tag to be self-closing. Previously, this rule applies to all elements and cannot be disabled for native HTML elements.
+
+  Now, this rule accepts a `ignoreHtmlElements` option, which when set to `true`, ignores native HTML elements and allows them to be non-self-closing.
+
+  Contributed by @abidjappie
 
 - Fix a case where raw values inside `url()` functions weren't properly trimmed.
   ```diff

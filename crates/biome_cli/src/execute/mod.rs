@@ -157,6 +157,8 @@ pub enum TraversalMode {
         skip: Vec<RuleSelector>,
         /// A flag to know vcs integrated options such as `--staged` or `--changed` are enabled
         vcs_targeted: VcsTargeted,
+        /// Supress existing diagnostics with a `// biome-ignore` comment
+        suppress: bool,
     },
     /// This mode is enabled when running the command `biome ci`
     CI {

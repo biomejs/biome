@@ -20,7 +20,7 @@ declare_lint_rule! {
     /// A more convenient way to achieve the same thing is to use the `at()` method with a negative index.
     /// To access the last element of an array or a string just write `array.at(-1)`.
     ///
-    /// This rule enforces the usage of `at()` over index access, `chatAt()`, and `slice()[0]` when `at()` is more convenient.
+    /// This rule enforces the usage of `at()` over index access, `charAt()`, and `slice()[0]` when `at()` is more convenient.
     ///
     ///
     /// ## Examples
@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// array[array.length - 1] = foo;
     /// ```
     pub UseAtIndex {
-        version: "next",
+        version: "1.9.4",
         name: "useAtIndex",
         language: "js",
         recommended: false,

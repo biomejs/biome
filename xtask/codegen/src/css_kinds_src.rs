@@ -288,6 +288,7 @@ pub const CSS_KINDS_SRC: KindsSrc = KindsSrc {
         "CSS_DECLARATION_OR_AT_RULE_LIST",
         "CSS_DECLARATION_WITH_SEMICOLON",
         "CSS_DECLARATION",
+        "CSS_EMPTY_DECLARATION",
         "CSS_IDENTIFIER",
         "CSS_NUMBER",
         "CSS_PARAMETER",

@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDocumentCookie {
-        version: "next",
+        version: "1.9.4",
         name: "noDocumentCookie",
         language: "js",
         recommended: false,

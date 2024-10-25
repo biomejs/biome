@@ -31,3 +31,7 @@ a {
 	--bs-font-monospace: sfmono-regular , menlo , monaco , consolas ,
 	'Liberation Mono' , 'Courier New' , monospace;
 }
+
+a {
+    color: red;;;;
+}

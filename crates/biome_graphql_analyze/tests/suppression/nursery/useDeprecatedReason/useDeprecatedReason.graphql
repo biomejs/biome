@@ -1,0 +1,20 @@
+query {
+  member @deprecated {
+		id
+	}
+}
+
+query {
+  member @deprecated()
+}
+
+query {
+  member
+  @deprecated(abc: 123)
+}
+
+query {
+  # biome-ignore lint/nursery/useDeprecatedReason: testing
+  member @deprecated()
+}
+

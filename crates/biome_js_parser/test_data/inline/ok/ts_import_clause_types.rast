@@ -41,7 +41,6 @@ JsModule {
             import_token: IMPORT_KW@69..77 "import" [Newline("\n")] [Whitespace(" ")],
             import_clause: JsImportNamespaceClause {
                 type_token: TYPE_KW@77..82 "type" [] [Whitespace(" ")],
-                defer_token: missing (optional),
                 namespace_specifier: JsNamespaceImportSpecifier {
                     star_token: STAR@82..84 "*" [] [Whitespace(" ")],
                     as_token: AS_KW@84..87 "as" [] [Whitespace(" ")],
@@ -135,16 +134,15 @@ JsModule {
       0: IMPORT_KW@69..77 "import" [Newline("\n")] [Whitespace(" ")]
       1: JS_IMPORT_NAMESPACE_CLAUSE@77..104
         0: TYPE_KW@77..82 "type" [] [Whitespace(" ")]
-        1: (empty)
-        2: JS_NAMESPACE_IMPORT_SPECIFIER@82..92
+        1: JS_NAMESPACE_IMPORT_SPECIFIER@82..92
           0: STAR@82..84 "*" [] [Whitespace(" ")]
           1: AS_KW@84..87 "as" [] [Whitespace(" ")]
           2: JS_IDENTIFIER_BINDING@87..92
             0: IDENT@87..92 "foo2" [] [Whitespace(" ")]
-        3: FROM_KW@92..97 "from" [] [Whitespace(" ")]
-        4: JS_MODULE_SOURCE@97..104
+        2: FROM_KW@92..97 "from" [] [Whitespace(" ")]
+        3: JS_MODULE_SOURCE@97..104
           0: JS_STRING_LITERAL@97..104 "\"./mod\"" [] []
-        5: (empty)
+        4: (empty)
       2: SEMICOLON@104..105 ";" [] []
     3: JS_IMPORT@105..138
       0: IMPORT_KW@105..113 "import" [Newline("\n")] [Whitespace(" ")]

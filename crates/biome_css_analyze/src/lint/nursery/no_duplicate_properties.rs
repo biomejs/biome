@@ -35,7 +35,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoDuplicateProperties {
-        version: "next",
+        version: "1.9.4",
         name: "noDuplicateProperties",
         language: "css",
         recommended: true,

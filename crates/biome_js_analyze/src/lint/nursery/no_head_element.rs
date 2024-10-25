@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub NoHeadElement {
-        version: "next",
+        version: "1.9.4",
         name: "noHeadElement",
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-head-element")],

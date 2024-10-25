@@ -659,13 +659,16 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                 }
 
                 for action in signal.actions() {
-                    // suppression actions should not be part of the fixes (safe or suggested)
-                    if action.is_suppression() {
-                        continue;
-                    }
-
                     match params.fix_file_mode {
+                        FixFileMode::ApplySuppressions => {
+                            if action.is_suppression() {
+                                return ControlFlow::Break(action);
+                            }
+                        }
                         FixFileMode::SafeFixes => {
+                            if action.is_suppression() {
+                                continue;
+                            }
                             if action.applicability == Applicability::MaybeIncorrect {
                                 skipped_suggested_fixes += 1;
                             }
@@ -675,6 +678,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
                             }
                         }
                         FixFileMode::SafeAndUnsafeFixes => {
+                            if action.is_suppression() {
+                                continue;
+                            }
                             if matches!(
                                 action.applicability,
                                 Applicability::Always | Applicability::MaybeIncorrect

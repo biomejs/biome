@@ -233,8 +233,24 @@ pub(crate) fn parse_declaration_with_semicolon(p: &mut CssParser) -> ParsedSynta
 }
 
 #[inline]
+pub(crate) fn parse_empty_declaration(p: &mut CssParser) -> ParsedSyntax {
+    if p.at(T![;]) {
+        let m = p.start();
+        p.bump_any(); // bump ;
+        m.complete(p, CSS_EMPTY_DECLARATION).into()
+    } else {
+        Absent
+    }
+}
+
+#[inline]
 fn is_at_declaration_important(p: &mut CssParser) -> bool {
     p.at(T![!]) && p.nth_at(1, T![important])
+}
+
+#[inline]
+pub(crate) fn is_at_declaration_semicolon(p: &mut CssParser) -> bool {
+    p.at(T![;]) && (p.nth_at(1, T![;]) || p.nth_at(1, T!['}']))
 }
 
 #[inline]

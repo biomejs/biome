@@ -584,6 +584,9 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
                             return ControlFlow::Break(action);
                         }
                     }
+                    FixFileMode::ApplySuppressions => {
+                        // TODO: implement once a JSON suppression action is available
+                    }
                 }
             }
 

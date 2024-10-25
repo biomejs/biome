@@ -30,7 +30,7 @@ declare_lint_rule! {
     /// String.raw`\n`;
     /// ```
     pub NoUselessStringRaw {
-        version: "next",
+        version: "1.9.4",
         name: "noUselessStringRaw",
         language: "js",
         recommended: false,

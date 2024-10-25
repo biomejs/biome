@@ -1034,7 +1034,6 @@ impl<'src> JsLexer<'src> {
             b"of" => OF_KW,
             b"out" => OUT_KW,
             b"using" => USING_KW,
-            b"defer" => DEFER_KW,
             _ => T![ident],
         }
     }

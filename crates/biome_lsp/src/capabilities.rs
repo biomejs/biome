@@ -1,4 +1,5 @@
 use crate::converters::{negotiated_encoding, PositionEncoding, WideEncoding};
+use biome_analyze::SUPPRESSION_ACTION_CATEGORY;
 use tower_lsp::lsp_types::{
     ClientCapabilities, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
     DocumentOnTypeFormattingOptions, OneOf, PositionEncodingKind, ServerCapabilities,
@@ -60,8 +61,14 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
             CodeActionOptions {
                 code_action_kinds: Some(vec![
                     CodeActionKind::from("quickfix.biome"),
+                    // quickfix.suppressRule
+                    CodeActionKind::from(SUPPRESSION_ACTION_CATEGORY),
                     CodeActionKind::from("source.fixAll.biome"),
                     CodeActionKind::from("source.organizeImports.biome"),
+                    CodeActionKind::from("refactor.biome"),
+                    CodeActionKind::from("refactor.extract.biome"),
+                    CodeActionKind::from("refactor.inline.biome"),
+                    CodeActionKind::from("refactor.rewrite.biome"),
                 ]),
                 ..Default::default()
             }
