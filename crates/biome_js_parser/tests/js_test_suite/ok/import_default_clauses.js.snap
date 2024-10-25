@@ -43,7 +43,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@21..24 "\"b\"" [] [],
                 },
-                assertion: missing (optional),
+                attribute: missing (optional),
             },
             semicolon_token: SEMICOLON@24..25 ";" [] [],
         },
