@@ -82,26 +82,31 @@ declare_lint_rule! {
     }
 }
 
-#[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+#[serde(untagged)]
 enum DependencyAvailability {
-    /// Dependencies are always available.
-    #[default]
-    Available,
-
-    /// Dependencies are never available.
-    Unavailable,
+    /// Dependencies are always available or unavailable.
+    Bool(bool),
 
     /// Dependencies are available in files that matches any of the globs.
-    FilesGlob(Box<[RestrictedGlob]>),
+    Patterns(Box<[RestrictedGlob]>),
+}
+
+impl Default for DependencyAvailability {
+    fn default() -> Self {
+        Self::Bool(true)
+    }
 }
 
 impl PartialEq for DependencyAvailability {
     fn eq(&self, other: &Self) -> bool {
         match self {
-            Self::Available => matches!(other, Self::Available),
-            Self::Unavailable => matches!(other, Self::Unavailable),
-            Self::FilesGlob(a) => match other {
-                Self::FilesGlob(b) => {
+            Self::Bool(a) => match other {
+                Self::Bool(b) => a == b,
+                _ => false,
+            },
+            Self::Patterns(a) => match other {
+                Self::Patterns(b) => {
                     a.len() == b.len()
                         && a.iter()
                             .zip(b.iter())
@@ -122,13 +127,9 @@ impl Deserializable for DependencyAvailability {
         diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
         Some(if value.visitable_type()? == DeserializableType::Bool {
-            if bool::deserialize(value, name, diagnostics)? {
-                Self::Available
-            } else {
-                Self::Unavailable
-            }
+            Self::Bool(bool::deserialize(value, name, diagnostics)?)
         } else {
-            Self::FilesGlob(Deserializable::deserialize(value, name, diagnostics)?)
+            Self::Patterns(Deserializable::deserialize(value, name, diagnostics)?)
         })
     }
 }
@@ -180,9 +181,8 @@ impl schemars::JsonSchema for DependencyAvailability {
 impl DependencyAvailability {
     fn is_available(&self, path: &Path) -> bool {
         match self {
-            Self::Available => true,
-            Self::Unavailable => false,
-            Self::FilesGlob(globs) => CandidatePath::new(&path).matches_with_exceptions(globs),
+            Self::Bool(b) => *b,
+            Self::Patterns(globs) => CandidatePath::new(&path).matches_with_exceptions(globs),
         }
     }
 }

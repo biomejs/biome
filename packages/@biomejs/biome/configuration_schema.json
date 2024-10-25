@@ -2107,17 +2107,17 @@
 			"properties": {
 				"devDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.",
-					"default": "Available",
+					"default": true,
 					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
 				},
 				"optionalDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.",
-					"default": "Available",
+					"default": true,
 					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
 				},
 				"peerDependencies": {
 					"description": "If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.",
-					"default": "Available",
+					"default": true,
 					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
 				}
 			},
