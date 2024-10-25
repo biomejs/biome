@@ -689,7 +689,7 @@ impl Workspace for WorkspaceServer {
             language,
             only: params.only,
             skip: params.skip,
-            suppression_reason: params.suppression_reason,
+            suppression_reason: None,
         }))
     }
 
