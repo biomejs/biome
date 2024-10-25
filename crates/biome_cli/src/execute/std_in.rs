@@ -121,7 +121,7 @@ pub(crate) fn run<'a>(
                     should_format: mode.is_check() && file_features.supports_format(),
                     only: only.clone(),
                     skip: skip.clone(),
-                    suppression_reason: Some("todoooo".to_string()),
+                    suppression_reason: None,
                     rule_categories: RuleCategoriesBuilder::default()
                         .with_syntax()
                         .with_lint()

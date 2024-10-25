@@ -160,10 +160,6 @@ pub struct OverrideLinterConfiguration {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(pure(crate::analyzer::linter::Rules::default()), optional, hide)]
     pub rules: Option<crate::analyzer::linter::Rules>,
-
-    /// Explanation for suppressions when using the `--suppress` flag
-    #[bpaf(hide)]
-    pub suppression_reason: String,
 }
 
 #[derive(
