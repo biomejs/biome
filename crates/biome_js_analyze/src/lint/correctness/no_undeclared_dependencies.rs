@@ -7,7 +7,7 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_rowan::AstNode;
 
-use crate::utils::restricted_glob::RestrictedGlob;
+use crate::utils::restricted_glob::{CandidatePath, RestrictedGlob};
 use crate::{globals::is_node_builtin_module, services::manifest::Manifest};
 
 declare_lint_rule! {
@@ -182,7 +182,7 @@ impl DependencyAvailability {
         match self {
             Self::Available => true,
             Self::Unavailable => false,
-            Self::FilesGlob(globs) => globs.iter().any(|glob| glob.is_match(path)),
+            Self::FilesGlob(globs) => CandidatePath::new(&path).matches_with_exceptions(globs),
         }
     }
 }
