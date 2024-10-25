@@ -98,11 +98,15 @@ impl ServiceLanguage for HtmlLanguage {
         _language: Option<&Self::LinterSettings>,
         path: &biome_fs::BiomePath,
         _file_source: &super::DocumentFileSource,
+        suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
+        let suppression_explanation =
+            suppression_reason.unwrap_or_else(|| "<explanation>".to_string());
+
         AnalyzerOptions {
             configuration: AnalyzerConfiguration::default(),
             file_path: path.to_path_buf(),
-            suppression_reason: "todooooo".to_string(),
+            suppression_reason: suppression_explanation,
         }
     }
 }

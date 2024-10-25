@@ -28,6 +28,7 @@ pub(crate) fn assists_with_guard<'ctx>(
                     RuleCategoriesBuilder::default().with_action().build(),
                     only.clone(),
                     skip.clone(),
+                    Some("todoooo".to_string()),
                 )
                 .with_file_path_and_code(
                     workspace_file.path.display().to_string(),

@@ -118,6 +118,7 @@ pub(crate) fn code_actions(
         // TODO: compute skip and only based on configuration
         skip: vec![],
         only: vec![],
+        suppression_reason: Some("todoooo".to_string()),
     }) {
         Ok(result) => result,
         Err(err) => {
@@ -245,6 +246,7 @@ fn fix_all(
         should_format,
         only: vec![],
         skip: vec![],
+        suppression_reason: Some("todoooo".to_string()),
         rule_categories: RuleCategoriesBuilder::default()
             .with_syntax()
             .with_lint()
