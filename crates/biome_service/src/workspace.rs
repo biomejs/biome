@@ -95,6 +95,7 @@ pub struct SupportsFeatureResult {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Default, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FileFeaturesResult {
     pub features_supported: HashMap<FeatureKind, SupportKind>,
 }
@@ -373,6 +374,7 @@ impl SupportsFeatureResult {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Eq, PartialEq, Clone)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum SupportKind {
     /// The feature is enabled for the file
     Supported,
@@ -408,6 +410,7 @@ impl SupportKind {
 #[bitflags]
 #[repr(u8)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum FeatureKind {
     Format,
     Lint,
@@ -420,7 +423,8 @@ pub enum FeatureKind {
 #[derive(Debug, Copy, Clone, Hash, serde::Serialize, serde::Deserialize, Eq, PartialEq)]
 #[serde(
     from = "smallvec::SmallVec<[FeatureKind; 6]>",
-    into = "smallvec::SmallVec<[FeatureKind; 6]>"
+    into = "smallvec::SmallVec<[FeatureKind; 6]>",
+    rename_all = "camelCase"
 )]
 pub struct FeatureName(BitFlags<FeatureKind>);
 
@@ -505,6 +509,7 @@ impl FeaturesBuilder {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct UpdateSettingsParams {
     pub configuration: PartialConfiguration,
     // @ematipico TODO: have a better data structure for this
@@ -516,6 +521,7 @@ pub struct UpdateSettingsParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ProjectFeaturesParams {
     pub manifest_path: BiomePath,
 }
@@ -526,6 +532,7 @@ pub struct ProjectFeaturesResult {}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct OpenFileParams {
     pub path: BiomePath,
     pub content: String,
@@ -534,6 +541,7 @@ pub struct OpenFileParams {
 }
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SetManifestForProjectParams {
     pub manifest_path: BiomePath,
     pub content: String,
@@ -552,12 +560,14 @@ impl From<(BiomePath, String)> for SetManifestForProjectParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetSyntaxTreeParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetSyntaxTreeResult {
     pub cst: String,
     pub ast: String,
@@ -565,6 +575,7 @@ pub struct GetSyntaxTreeResult {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetControlFlowGraphParams {
     pub path: BiomePath,
     pub cursor: TextSize,
@@ -578,12 +589,14 @@ pub struct GetFormatterIRParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct GetFileContentParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ChangeFileParams {
     pub path: BiomePath,
     pub content: String,
@@ -592,12 +605,14 @@ pub struct ChangeFileParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct CloseFileParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
@@ -608,6 +623,7 @@ pub struct PullDiagnosticsParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PullDiagnosticsResult {
     pub diagnostics: Vec<biome_diagnostics::serde::Diagnostic>,
     pub errors: usize,
@@ -616,6 +632,7 @@ pub struct PullDiagnosticsResult {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PullActionsParams {
     pub path: BiomePath,
     pub range: Option<TextRange>,
@@ -626,12 +643,14 @@ pub struct PullActionsParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PullActionsResult {
     pub actions: Vec<CodeAction>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct CodeAction {
     pub category: ActionCategory,
     pub rule_name: Option<(Cow<'static, str>, Cow<'static, str>)>,
@@ -640,12 +659,14 @@ pub struct CodeAction {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FormatFileParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FormatRangeParams {
     pub path: BiomePath,
     pub range: TextRange,
@@ -653,6 +674,7 @@ pub struct FormatRangeParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FormatOnTypeParams {
     pub path: BiomePath,
     pub offset: TextSize,
@@ -660,6 +682,7 @@ pub struct FormatOnTypeParams {
 
 #[derive(Debug, Clone, Copy, serde::Serialize, serde::Deserialize, PartialEq)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 /// Which fixes should be applied during the analyzing phase
 pub enum FixFileMode {
     /// Applies [safe](biome_diagnostics::Applicability::Always) fixes
@@ -672,6 +695,7 @@ pub enum FixFileMode {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FixFileParams {
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
@@ -684,6 +708,7 @@ pub struct FixFileParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct FixFileResult {
     /// New source code for the file with all fixes applied
     pub code: String,
@@ -708,6 +733,7 @@ pub struct FixAction {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct RenameParams {
     pub path: BiomePath,
     pub symbol_at: TextSize,
@@ -716,6 +742,7 @@ pub struct RenameParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct RenameResult {
     /// Range of source code modified by this rename operation
     pub range: TextRange,
@@ -725,6 +752,7 @@ pub struct RenameResult {
 
 #[derive(Debug, Eq, PartialEq, Clone, Default, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ServerInfo {
     /// The name of the server as defined by the server.
     pub name: String,
@@ -736,16 +764,19 @@ pub struct ServerInfo {
 
 #[derive(Copy, Clone, Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct RageParams {}
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct RageResult {
     pub entries: Vec<RageEntry>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub enum RageEntry {
     Section(String),
     Pair { name: String, value: MarkupBuf },
@@ -754,12 +785,14 @@ pub enum RageEntry {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct OrganizeImportsParams {
     pub path: BiomePath,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct OrganizeImportsResult {
     pub code: String,
 }
@@ -787,18 +820,21 @@ impl RageEntry {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ParsePatternParams {
     pub pattern: String,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct ParsePatternResult {
     pub pattern_id: PatternId,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SearchPatternParams {
     pub path: BiomePath,
     pub pattern: PatternId,
@@ -806,6 +842,7 @@ pub struct SearchPatternParams {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct SearchResults {
     pub file: BiomePath,
     pub matches: Vec<TextRange>,
@@ -813,12 +850,14 @@ pub struct SearchResults {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct DropPatternParams {
     pub pattern: PatternId,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct PatternId(String);
 
 impl std::fmt::Display for PatternId {
@@ -847,6 +886,7 @@ impl From<&str> for PatternId {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+#[serde(rename_all = "camelCase")]
 pub struct IsPathIgnoredParams {
     pub biome_path: BiomePath,
     pub features: FeatureName,
