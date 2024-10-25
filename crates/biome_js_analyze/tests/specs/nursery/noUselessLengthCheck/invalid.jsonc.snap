@@ -12,7 +12,7 @@ if (array.length === 0 || array.every(Boolean));
 ```
 invalid.jsonc:1:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ if (array.length === 0 || array.every(Boolean));
       │     ^^^^^^^^^^^^^^^^^^
@@ -35,7 +35,7 @@ if (array.length !== 0 && array.some(Boolean));
 ```
 invalid.jsonc:1:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ if (array.length !== 0 && array.some(Boolean));
       │     ^^^^^^^^^^^^^^^^^^
@@ -58,7 +58,7 @@ if (array.length > 0 && array.some(Boolean));
 ```
 invalid.jsonc:1:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ if (array.length > 0 && array.some(Boolean));
       │     ^^^^^^^^^^^^^^^^
@@ -81,7 +81,7 @@ const isAllTrulyOrEmpty = array.length === 0 || array.every(Boolean);
 ```
 invalid.jsonc:1:27 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ const isAllTrulyOrEmpty = array.length === 0 || array.every(Boolean);
       │                           ^^^^^^^^^^^^^^^^^^
@@ -104,7 +104,7 @@ array.length === 0 || array.every(Boolean)
 ```
 invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.length === 0 || array.every(Boolean)
       │ ^^^^^^^^^^^^^^^^^^
@@ -127,7 +127,7 @@ array.length > 0 && array.some(Boolean)
 ```
 invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.length > 0 && array.some(Boolean)
       │ ^^^^^^^^^^^^^^^^
@@ -150,7 +150,7 @@ array.length !== 0 && array.some(Boolean)
 ```
 invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.length !== 0 && array.some(Boolean)
       │ ^^^^^^^^^^^^^^^^^^
@@ -173,7 +173,7 @@ if ((( array.length > 0 )) && array.some(Boolean));
 ```
 invalid.jsonc:1:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ if ((( array.length > 0 )) && array.some(Boolean));
       │     ^^^^^^^^^^^^^^^^^^^^^^
@@ -196,7 +196,7 @@ invalid.jsonc:1:5 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ (array.length === 0 || array.every(Boolean)) || foo
       │  ^^^^^^^^^^^^^^^^^^
@@ -219,7 +219,7 @@ foo || (array.length === 0 || array.every(Boolean))
 ```
 invalid.jsonc:1:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ foo || (array.length === 0 || array.every(Boolean))
       │         ^^^^^^^^^^^^^^^^^^
@@ -242,7 +242,7 @@ invalid.jsonc:1:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ (array.length > 0 && array.some(Boolean)) && foo
       │  ^^^^^^^^^^^^^^^^
@@ -265,7 +265,7 @@ foo && (array.length > 0 && array.some(Boolean))
 ```
 invalid.jsonc:1:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ foo && (array.length > 0 && array.some(Boolean))
       │         ^^^^^^^^^^^^^^^^
@@ -288,7 +288,7 @@ array.every(Boolean) || array.length === 0
 ```
 invalid.jsonc:1:25 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.every(Boolean) || array.length === 0
       │                         ^^^^^^^^^^^^^^^^^^
@@ -311,7 +311,7 @@ array.some(Boolean) && array.length !== 0
 ```
 invalid.jsonc:1:24 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.some(Boolean) && array.length !== 0
       │                        ^^^^^^^^^^^^^^^^^^
@@ -334,7 +334,7 @@ array.some(Boolean) && array.length > 0
 ```
 invalid.jsonc:1:24 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.some(Boolean) && array.length > 0
       │                        ^^^^^^^^^^^^^^^^
@@ -357,7 +357,7 @@ foo && array.length > 0 && array.some(Boolean)
 ```
 invalid.jsonc:1:8 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ foo && array.length > 0 && array.some(Boolean)
       │        ^^^^^^^^^^^^^^^^
@@ -380,7 +380,7 @@ foo || array.length === 0 || array.every(Boolean)
 ```
 invalid.jsonc:1:8 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ foo || array.length === 0 || array.every(Boolean)
       │        ^^^^^^^^^^^^^^^^^^
@@ -403,7 +403,7 @@ invalid.jsonc:1:8 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ (foo || array.length === 0) || array.every(Boolean)
       │         ^^^^^^^^^^^^^^^^^^
@@ -426,7 +426,7 @@ array.length === 0 || (array.every(Boolean) || foo)
 ```
 invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.length === 0 || (array.every(Boolean) || foo)
       │ ^^^^^^^^^^^^^^^^^^
@@ -449,7 +449,7 @@ invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:9 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ (foo && array.length > 0) && array.some(Boolean)
       │         ^^^^^^^^^^^^^^^^
@@ -472,7 +472,7 @@ array.length > 0 && (array.some(Boolean) && foo)
 ```
 invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.length > 0 && (array.some(Boolean) && foo)
       │ ^^^^^^^^^^^^^^^^
@@ -495,7 +495,7 @@ array.every(Boolean) || array.length === 0 || array.every(Boolean)
 ```
 invalid.jsonc:1:25 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.every(Boolean) || array.length === 0 || array.every(Boolean)
       │                         ^^^^^^^^^^^^^^^^^^
@@ -518,7 +518,7 @@ array.length === 0 || array.every(Boolean) || array.length === 0
 ```
 invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.length === 0 || array.every(Boolean) || array.length === 0
       │ ^^^^^^^^^^^^^^^^^^
@@ -535,7 +535,7 @@ invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:47 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ array.length === 0 || array.every(Boolean) || array.length === 0
       │                                               ^^^^^^^^^^^^^^^^^^
@@ -558,7 +558,7 @@ invalid.jsonc:1:47 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━�
 ```
 invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ (array1.length === 0 || array1.every(Boolean)) || (array2.length === 0 || array2.every(Boolean))
       │  ^^^^^^^^^^^^^^^^^^^
@@ -575,7 +575,7 @@ invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:52 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ (array1.length === 0 || array1.every(Boolean)) || (array2.length === 0 || array2.every(Boolean))
       │                                                    ^^^^^^^^^^^^^^^^^^^
@@ -598,7 +598,7 @@ invalid.jsonc:1:52 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━�
 ```
 invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ (array1.length === 0 || array1.every(Boolean)) && (array2.length === 0 || array2.every(Boolean))
       │  ^^^^^^^^^^^^^^^^^^^
@@ -615,7 +615,7 @@ invalid.jsonc:1:2 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━
 ```
 invalid.jsonc:1:52 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This is a check for unnecessary length.
+  ! This length check is unnecessary.
   
   > 1 │ (array1.length === 0 || array1.every(Boolean)) && (array2.length === 0 || array2.every(Boolean))
       │                                                    ^^^^^^^^^^^^^^^^^^^
