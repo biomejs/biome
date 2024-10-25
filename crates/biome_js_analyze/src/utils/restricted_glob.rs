@@ -52,9 +52,21 @@ impl RestrictedGlob {
         self.glob.is_match_candidate(&path.0)
     }
 }
+impl PartialEq for RestrictedGlob {
+    fn eq(&self, other: &Self) -> bool {
+        self.is_negated == other.is_negated && self.glob.glob() == other.glob.glob()
+    }
+}
+impl Eq for RestrictedGlob {}
+impl std::hash::Hash for RestrictedGlob {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.is_negated.hash(state);
+        self.glob.glob().hash(state);
+    }
+}
 impl std::fmt::Display for RestrictedGlob {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let repr = self.glob.glob().to_string();
+        let repr = self.glob.glob();
         let negation = if self.is_negated { "!" } else { "" };
         write!(f, "{negation}{repr}")
     }
