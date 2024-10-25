@@ -81,9 +81,11 @@ declare_lint_rule! {
 }
 
 #[derive(Clone, Debug)]
-pub enum ErrorType {
-    UselessLengthCheckWithSome,
-    UselessLengthCheckWithEvery,
+pub enum FunctionKind {
+    /// `Array.some()` was used
+    Some,
+    /// `Array.every()` was used
+    Every,
 }
 
 /// Whether the node is a descendant of a logical expression.
@@ -109,7 +111,7 @@ fn is_logical_exp_descendant(node: &AnyJsExpression, operator: JsSyntaxKind) -> 
 /// Extract the expressions that perform length comparisons corresponding to the errors you want to check.
 fn get_comparing_length_exp(
     binary_exp: &JsBinaryExpression,
-    expect_error: &ErrorType,
+    function_kind: &FunctionKind,
 ) -> Option<AnyJsExpression> {
     let left = binary_exp.left().ok()?;
     let operator = binary_exp.operator().ok()?;
@@ -136,14 +138,14 @@ fn get_comparing_length_exp(
     };
     let number = literal.as_number()?.round() as i64;
     // .length === 0
-    if matches!(expect_error, ErrorType::UselessLengthCheckWithEvery)
+    if matches!(function_kind, FunctionKind::Every)
         && literal.syntax().text_trimmed() == "0"
         && (operator == JsBinaryOperator::StrictEquality || operator == JsBinaryOperator::LessThan)
     {
         return Some(target);
     }
     // .length !== 0
-    if matches!(expect_error, ErrorType::UselessLengthCheckWithSome)
+    if matches!(function_kind, FunctionKind::Some)
         && (literal.syntax().text_trimmed() == "0"
             && (operator == JsBinaryOperator::StrictInequality
                 || operator == JsBinaryOperator::GreaterThan)
@@ -162,16 +164,16 @@ pub type Replacer = (JsLogicalExpression, AnyJsExpression, TextRange);
 fn search_logical_exp(
     any_exp: &AnyJsExpression,
     replacer: Option<Replacer>,
-    expect_error: &ErrorType,
+    function_kind: &FunctionKind,
     comparing_zeros: &mut HashMap<String, Vec<Replacer>>,
     array_tokens_used_api: &mut HashSet<String>,
 ) -> Option<()> {
     match any_exp {
         // || or &&
         AnyJsExpression::JsLogicalExpression(logical_exp) => {
-            let operator = match expect_error {
-                ErrorType::UselessLengthCheckWithEvery => T![||],
-                ErrorType::UselessLengthCheckWithSome => T![&&],
+            let operator = match function_kind {
+                FunctionKind::Every => T![||],
+                FunctionKind::Some => T![&&],
             };
             if logical_exp.operator_token().ok()?.kind() != operator {
                 return None;
@@ -181,7 +183,7 @@ fn search_logical_exp(
             search_logical_exp(
                 &left,
                 Some(left_replacer),
-                expect_error,
+                function_kind,
                 comparing_zeros,
                 array_tokens_used_api,
             )?;
@@ -191,14 +193,14 @@ fn search_logical_exp(
             search_logical_exp(
                 &right,
                 Some(right_replacer),
-                expect_error,
+                function_kind,
                 comparing_zeros,
                 array_tokens_used_api,
             )
         }
         // a === 0 ext.
         AnyJsExpression::JsBinaryExpression(binary_exp) => {
-            let comparing_zero = get_comparing_length_exp(binary_exp, expect_error)?;
+            let comparing_zero = get_comparing_length_exp(binary_exp, function_kind)?;
             let AnyJsExpression::JsIdentifierExpression(array_token) = comparing_zero else {
                 return None;
             };
@@ -224,8 +226,8 @@ fn search_logical_exp(
 
             let task_member_name_node = task_member_exp.member_name()?;
             let task_member_name = task_member_name_node.text();
-            match expect_error {
-                ErrorType::UselessLengthCheckWithEvery => {
+            match function_kind {
+                FunctionKind::Every => {
                     if task_member_name == "every" {
                         array_tokens_used_api.insert(task_target_token.text());
                         Some(())
@@ -233,7 +235,7 @@ fn search_logical_exp(
                         None
                     }
                 }
-                ErrorType::UselessLengthCheckWithSome => {
+                FunctionKind::Some => {
                     if task_member_name == "some" {
                         array_tokens_used_api.insert(task_target_token.text());
                         Some(())
@@ -247,7 +249,7 @@ fn search_logical_exp(
         AnyJsExpression::JsParenthesizedExpression(parent_exp) => search_logical_exp(
             &parent_exp.expression().ok()?,
             replacer,
-            expect_error,
+            function_kind,
             comparing_zeros,
             array_tokens_used_api,
         ),
@@ -268,7 +270,7 @@ fn get_parenthesized_parent(exp: AnyJsExpression) -> AnyJsExpression {
 
 impl Rule for NoUselessLengthCheck {
     type Query = Ast<JsLogicalExpression>;
-    type State = (ErrorType, Replacer);
+    type State = (FunctionKind, Replacer);
     type Signals = Vec<Self::State>;
     type Options = ();
 
@@ -283,12 +285,9 @@ impl Rule for NoUselessLengthCheck {
             return Vec::new();
         }
 
-        let mut fixable_list: Vec<(ErrorType, Replacer)> = Vec::new();
+        let mut fixable_list: Vec<(FunctionKind, Replacer)> = Vec::new();
 
-        for err_type in [
-            ErrorType::UselessLengthCheckWithEvery,
-            ErrorType::UselessLengthCheckWithSome,
-        ] {
+        for err_type in [FunctionKind::Every, FunctionKind::Some] {
             let mut comparing_zeros: HashMap<String, Vec<Replacer>> = HashMap::new();
             let mut array_tokens_used_api: HashSet<String> = HashSet::new();
             let search_result = search_logical_exp(
@@ -313,7 +312,7 @@ impl Rule for NoUselessLengthCheck {
 
     fn diagnostic(
         _ctx: &RuleContext<Self>,
-        (error_type, (_, _, error_range)): &Self::State,
+        (function_kind, (_, _, error_range)): &Self::State,
     ) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
@@ -324,11 +323,11 @@ impl Rule for NoUselessLengthCheck {
                 },
             )
             .note(
-                match error_type {
-                    ErrorType::UselessLengthCheckWithEvery => markup! {
+                match function_kind {
+                    FunctionKind::Every => markup! {
                         "The empty check is useless as "<Emphasis>"`Array#every()`"</Emphasis>" returns "<Emphasis>"`true`"</Emphasis>" for an empty array."
                     },
-                    ErrorType::UselessLengthCheckWithSome => markup! {
+                    FunctionKind::Some => markup! {
                         "The non-empty check is useless as "<Emphasis>"`Array#some()`"</Emphasis>" returns "<Emphasis>"`false`"</Emphasis>" for an empty array."
                     },
                 }
