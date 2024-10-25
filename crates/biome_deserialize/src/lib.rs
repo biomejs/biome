@@ -44,6 +44,7 @@ pub use diagnostics::{
 pub use impls::*;
 pub use merge::Merge;
 use std::fmt::Debug;
+#[cfg(feature = "indexmap")]
 pub use string_set::StringSet;
 pub use validator::*;
 

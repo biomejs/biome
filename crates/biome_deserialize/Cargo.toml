@@ -12,21 +12,22 @@ version              = "0.6.0"
 
 [dependencies]
 biome_console            = { workspace = true }
-biome_deserialize_macros = { workspace = true }
+biome_deserialize_macros = { workspace = true, optional = true }
 biome_diagnostics        = { workspace = true }
 biome_json_parser        = { workspace = true }
 biome_json_syntax        = { workspace = true }
 biome_rowan              = { workspace = true }
 enumflags2               = { workspace = true }
-indexmap                 = { workspace = true, features = ["serde"] }
+indexmap                 = { workspace = true, optional = true, features = ["serde"] }
 schemars                 = { workspace = true, optional = true }
-serde                    = { workspace = true }
+serde                    = { workspace = true, optional = true }
 serde_json               = { workspace = true, optional = true }
 smallvec                 = { workspace = true, optional = true }
 
 [features]
+indexmap = ["dep:indexmap", "dep:biome_deserialize_macros"]
 schema   = ["schemars", "schemars/indexmap"]
-serde    = ["serde_json"]
+serde    = ["dep:serde", "dep:serde_json"]
 smallvec = ["dep:smallvec"]
 
 [lints]

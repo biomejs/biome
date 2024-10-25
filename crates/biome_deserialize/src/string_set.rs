@@ -1,3 +1,5 @@
+#![cfg(feature = "indexmap")]
+
 use crate::{self as biome_deserialize, Merge};
 use biome_deserialize_macros::Deserializable;
 use indexmap::set::IntoIter;
@@ -7,9 +9,8 @@ use std::str::FromStr;
 
 // To implement schemars trait, we encapsulate `IndexSet<String>` in a new type `StringSet`.
 
-#[derive(
-    Clone, Default, Debug, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
-)]
+#[derive(Clone, Default, Debug, Deserializable, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct StringSet(IndexSet<String>);
 
 impl StringSet {
