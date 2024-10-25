@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{Deserializable, DeserializableType};
@@ -176,7 +178,7 @@ impl schemars::JsonSchema for DependencyAvailability {
 }
 
 impl DependencyAvailability {
-    fn is_available(&self, path: &str) -> bool {
+    fn is_available(&self, path: &Path) -> bool {
         match self {
             Self::Available => true,
             Self::Unavailable => false,
@@ -217,7 +219,7 @@ impl Rule for NoUndeclaredDependencies {
             return None;
         }
 
-        let path = ctx.file_path().to_str()?;
+        let path = ctx.file_path();
         let is_dev_dependency_available = ctx.options().dev_dependencies.is_available(path);
         let is_peer_dependency_available = ctx.options().peer_dependencies.is_available(path);
         let is_optional_dependency_available =
