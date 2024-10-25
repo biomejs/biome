@@ -266,16 +266,6 @@ fn get_parenthesized_parent(exp: AnyJsExpression) -> AnyJsExpression {
     get_parenthesized_parent(AnyJsExpression::from(parent))
 }
 
-fn get_parenthesized_child(exp: &AnyJsExpression) -> AnyJsExpression {
-    let AnyJsExpression::JsParenthesizedExpression(parenthesized) = exp else {
-        return exp.clone();
-    };
-    let Some(child) = parenthesized.expression().ok() else {
-        return exp.clone();
-    };
-    get_parenthesized_child(&child)
-}
-
 impl Rule for NoUselessLengthCheck {
     type Query = Ast<JsLogicalExpression>;
     type State = (ErrorType, Replacer);
@@ -354,7 +344,7 @@ impl Rule for NoUselessLengthCheck {
 
         mutation.replace_node(
             get_parenthesized_parent(AnyJsExpression::from(prev_node.clone())),
-            get_parenthesized_child(next_node),
+            next_node.clone().omit_parentheses(),
         );
 
         Some(JsRuleAction::new(

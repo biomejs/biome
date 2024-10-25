@@ -465,6 +465,29 @@ invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━
 
 # Input
 ```cjs
+array.length === 0 || (((array.every(Boolean) || foo)))
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This length check is unnecessary.
+  
+  > 1 │ array.length === 0 || (((array.every(Boolean) || foo)))
+      │ ^^^^^^^^^^^^^^^^^^
+  
+  i The empty check is useless as `Array#every()` returns `true` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.length·===·0·||·(((array.every(Boolean)·||·foo)))
+      │ -------------------------                           ---
+
+```
+
+# Input
+```cjs
 (foo && array.length > 0) && array.some(Boolean)
 ```
 

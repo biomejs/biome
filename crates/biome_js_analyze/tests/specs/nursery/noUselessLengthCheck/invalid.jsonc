@@ -19,6 +19,7 @@
   "foo || array.length === 0 || array.every(Boolean)",
   "(foo || array.length === 0) || array.every(Boolean)",
   "array.length === 0 || (array.every(Boolean) || foo)",
+  "array.length === 0 || (((array.every(Boolean) || foo)))",
   "(foo && array.length > 0) && array.some(Boolean)",
   "array.length > 0 && (array.some(Boolean) && foo)",
   "array.every(Boolean) || array.length === 0 || array.every(Boolean)",
