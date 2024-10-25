@@ -239,7 +239,7 @@ fn search_logical_exp(
                 }
             }
         }
-        // ( hoge )
+        // ( foo )
         AnyJsExpression::JsParenthesizedExpression(parent_exp) => search_logical_exp(
             &parent_exp.expression().ok()?,
             replacer,
