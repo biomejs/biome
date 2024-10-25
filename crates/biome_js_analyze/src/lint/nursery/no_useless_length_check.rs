@@ -16,8 +16,9 @@ use crate::JsRuleAction;
 declare_lint_rule! {
     /// Disallow unnecessary length checks within logical expressions.
     ///
-    /// - `Array#some()` returns `false` for an empty array. There is no need to check if the array is not empty.
-    /// - `Array#every()` returns `true` for an empty array. There is no need to check if the array is empty.
+    /// When using the function [`Array#some()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/some), it returns `false` when an array is empty; hence, there isn't need to check if the array is not empty.
+    ///
+    /// When using the function [`Array#every()`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/every), it returns `true` when an array is empty; hence, there isn't need to check if the array is empty.
     ///
     /// ## Examples
     ///
