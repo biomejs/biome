@@ -1643,7 +1643,7 @@ impl CssDocumentCustomMatcher {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn value(&self) -> Option<CssString> {
+    pub fn value(&self) -> Option<AnyCssUrlValue> {
         support::node(&self.syntax, 2usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -1662,7 +1662,7 @@ impl Serialize for CssDocumentCustomMatcher {
 pub struct CssDocumentCustomMatcherFields {
     pub name: SyntaxResult<SyntaxToken>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub value: Option<CssString>,
+    pub value: Option<AnyCssUrlValue>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]

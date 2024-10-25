@@ -1517,7 +1517,7 @@ AnyCssDocumentMatcher =
 CssDocumentCustomMatcher =
 	name: ('url-prefix' | 'domain' | 'media-document' | 'regexp')
 	'('
-	value: CssString?
+	value: AnyCssUrlValue?
 	')'
 
 // https://github.com/css-modules/postcss-modules-values

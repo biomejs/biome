@@ -159,7 +159,11 @@ pub(crate) fn is_at_document_custom_matcher(p: &mut CssParser) -> bool {
     p.at_ts(DOCUMENT_CUSTOM_MATCHER_SET) && p.nth_at(1, T!['('])
 }
 
-const URL_PREFIX_SET: TokenSet<CssSyntaxKind> = token_set!(T![url_prefix]);
+// According to MDN, `url-prefix()`, `domain()` and `media-document()` functions
+// can be optionally enclosed by single or double quotes.
+// @see https://developer.mozilla.org/en-US/docs/Web/CSS/@document
+const URL_PREFIX_SET: TokenSet<CssSyntaxKind> =
+    token_set!(T![url_prefix], T![domain], T![media_document]);
 
 pub(crate) fn is_at_url_prefix(p: &mut CssParser) -> bool {
     p.at_ts(URL_PREFIX_SET) && p.nth_at(1, T!['('])
