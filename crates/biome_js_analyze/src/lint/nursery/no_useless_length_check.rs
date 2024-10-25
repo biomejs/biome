@@ -7,7 +7,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsBinaryExpression,
-    JsLogicalExpression, JsParenthesizedExpression, JsSyntaxKind, T,
+    JsBinaryOperator, JsLogicalExpression, JsParenthesizedExpression, JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
@@ -111,7 +111,7 @@ fn get_comparing_length_exp(
     expect_error: &ErrorType,
 ) -> Option<AnyJsExpression> {
     let left = binary_exp.left().ok()?;
-    let operator = binary_exp.operator_token().ok()?.kind();
+    let operator = binary_exp.operator().ok()?;
     let right = binary_exp.right().ok()?;
 
     // Check only when the number appears on the right side according to the original rules.
@@ -136,16 +136,19 @@ fn get_comparing_length_exp(
     let number = literal.as_number()?.round() as i64;
     // .length === 0
     if matches!(expect_error, ErrorType::UselessLengthCheckWithEvery)
-        && literal.to_string().trim() == "0"
-        && (operator == T![===] || operator == T![<])
+        && literal.syntax().text_trimmed() == "0"
+        && (operator == JsBinaryOperator::StrictEquality || operator == JsBinaryOperator::LessThan)
     {
         return Some(target);
     }
     // .length !== 0
     if matches!(expect_error, ErrorType::UselessLengthCheckWithSome)
-        && (literal.to_string().trim() == "0" && (operator == T![!==] || operator == T![>])
-            || number > 0 && operator == T![===]
-            || literal.to_string().trim() == "1" && operator == T![>=])
+        && (literal.syntax().text_trimmed() == "0"
+            && (operator == JsBinaryOperator::StrictInequality
+                || operator == JsBinaryOperator::GreaterThan)
+            || number > 0 && operator == JsBinaryOperator::StrictEquality
+            || literal.syntax().text_trimmed() == "1"
+                && operator == JsBinaryOperator::LessThanOrEqual)
     {
         return Some(target);
     }
