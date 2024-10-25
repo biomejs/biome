@@ -1391,7 +1391,7 @@ export interface Nursery {
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
 	/**
-	 * Ensure preconnect is used with Google Fonts.
+	 * Ensure the preconnect attribute is used when using Google Fonts.
 	 */
 	useGoogleFontPreconnect?: RuleFixConfiguration_for_Null;
 	/**

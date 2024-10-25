@@ -3425,7 +3425,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_google_font_display:
         Option<RuleConfiguration<biome_js_analyze::options::UseGoogleFontDisplay>>,
-    #[doc = "Ensure preconnect is used with Google Fonts."]
+    #[doc = "Ensure the preconnect attribute is used when using Google Fonts."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_google_font_preconnect:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseGoogleFontPreconnect>>,

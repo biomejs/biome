@@ -2392,7 +2392,7 @@
 					]
 				},
 				"useGoogleFontPreconnect": {
-					"description": "Ensure preconnect is used with Google Fonts.",
+					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

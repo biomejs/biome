@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TextRange, TriviaPiece
 use crate::JsRuleAction;
 
 declare_lint_rule! {
-    /// Ensure `preconnect` is used with Google Fonts.
+    /// Ensure the `preconnect` attribute is used when using Google Fonts.
     ///
     /// When using Google Fonts, adding the `rel="preconnect"` attribute to the `<link>` tag
     /// that points to `https://fonts.gstatic.com` is recommended to initiate an early
@@ -86,7 +86,7 @@ impl Rule for UseGoogleFontPreconnect {
                 rule_category!(),
                 range,
                 markup! {
-                    "Attribute "<Emphasis>"rel=\"preconnect\""</Emphasis>" is missing from Google Font link."
+                    "The attribute "<Emphasis>"rel=\"preconnect\""</Emphasis>" is missing from the Google Font."
                 },
             )
             .note(markup!{
@@ -134,7 +134,7 @@ impl Rule for UseGoogleFontPreconnect {
         Some(JsRuleAction::new(
             ActionCategory::QuickFix,
             ctx.metadata().applicability(),
-            markup! { "Add "<Emphasis>"rel=\"preconnect\""</Emphasis>" attribute." }.to_owned(),
+            markup! { "Add the "<Emphasis>"rel=\"preconnect\""</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))
     }
