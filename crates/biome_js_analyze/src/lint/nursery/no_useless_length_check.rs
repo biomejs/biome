@@ -277,15 +277,15 @@ impl Rule for NoUselessLengthCheck {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
+        let mut fixable_list = Vec::new();
+
         let Some(operator) = node.operator_token().ok() else {
-            return Vec::new();
+            return fixable_list;
         };
         // node must not be a child of a logical expression
         if is_logical_exp_descendant(&AnyJsExpression::from(node.clone()), operator.kind()) {
-            return Vec::new();
+            return fixable_list;
         }
-
-        let mut fixable_list: Vec<(FunctionKind, Replacer)> = Vec::new();
 
         for err_type in [FunctionKind::Every, FunctionKind::Some] {
             let mut comparing_zeros: HashMap<String, Vec<Replacer>> = HashMap::new();
