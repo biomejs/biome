@@ -207,9 +207,16 @@ pub struct NoUndeclaredDependenciesOptions {
     optional_dependencies: DependencyAvailability,
 }
 
+pub struct RuleState {
+    package_name: String,
+    is_dev_dependency_available: bool,
+    is_peer_dependency_available: bool,
+    is_optional_dependency_available: bool,
+}
+
 impl Rule for NoUndeclaredDependencies {
     type Query = Manifest<AnyJsImportLike>;
-    type State = ();
+    type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = NoUndeclaredDependenciesOptions;
 
@@ -260,25 +267,52 @@ impl Rule for NoUndeclaredDependencies {
             }
         }
 
-        Some(())
+        Some(RuleState {
+            package_name: package_name.to_string(),
+            is_dev_dependency_available,
+            is_peer_dependency_available,
+            is_optional_dependency_available,
+        })
     }
 
-    fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                ctx.query().range(),
-                markup! {
-                    "The current dependency isn't specified in your package.json."
-                },
+    fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let RuleState {
+            package_name,
+            is_dev_dependency_available,
+            is_peer_dependency_available,
+            is_optional_dependency_available,
+        } = state;
+
+        let diag = RuleDiagnostic::new(
+            rule_category!(),
+            ctx.query().range(),
+            markup! {
+                "The current dependency isn't specified in your package.json."
+            },
+        );
+
+        let available_in = if ctx.is_dev_dependency(package_name) && !is_dev_dependency_available {
+            Some("devDependencies")
+        } else if ctx.is_peer_dependency(package_name) && !is_peer_dependency_available {
+            Some("peerDependencies")
+        } else if ctx.is_optional_dependency(package_name) && !is_optional_dependency_available {
+            Some("optionalDependencies")
+        } else {
+            None
+        };
+
+        if let Some(section) = available_in {
+            Some(diag.note(markup! {
+                <Emphasis>{package_name}</Emphasis>" is part of your "<Emphasis>{section}</Emphasis>", but it's not intended to be used in this file."
+            }).note(markup! {
+                "You may want to consider moving it to the "<Emphasis>"dependencies"</Emphasis>" section."
+            }))
+        } else {
+            Some(
+                diag.note(markup! { "This could lead to errors." })
+                    .note(markup! { "Add the dependency in your manifest." }),
             )
-            .note(markup! {
-                "This could lead to errors."
-            })
-            .note(markup! {
-                "Add the dependency in your manifest."
-            }),
-        )
+        }
     }
 }
 
