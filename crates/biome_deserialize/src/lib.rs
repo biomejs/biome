@@ -33,7 +33,6 @@ mod diagnostics;
 mod impls;
 pub mod json;
 mod merge;
-pub mod string_set;
 mod validator;
 
 use biome_diagnostics::{Error, Severity};
@@ -44,8 +43,6 @@ pub use diagnostics::{
 pub use impls::*;
 pub use merge::Merge;
 use std::fmt::Debug;
-#[cfg(feature = "indexmap")]
-pub use string_set::StringSet;
 pub use validator::*;
 
 /// Implemented by data structures that can deserialize any [DeserializableValue].

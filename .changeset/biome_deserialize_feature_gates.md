@@ -17,5 +17,3 @@ Update your `Cargo.toml` as follows:
 - biome_deserialize = { version: "<version>" }
 + biome_deserialize = { version: "<version>", features = ["indexmap"] }
 ```
-
-Also, `biome_deserialize::StringSet` now requires the `indexmap` and `serde` features.
