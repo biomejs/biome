@@ -2,6 +2,7 @@
   "if (array.length === 0 || array.every(Boolean));",
   "if (array.length !== 0 && array.some(Boolean));",
   "if (array.length > 0 && array.some(Boolean));",
+  "if (((((array.length === 0 || array.every(Boolean))))));",
   "const isAllTrulyOrEmpty = array.length === 0 || array.every(Boolean);",
   "array.length === 0 || array.every(Boolean)",
   "array.length > 0 && array.some(Boolean)",
