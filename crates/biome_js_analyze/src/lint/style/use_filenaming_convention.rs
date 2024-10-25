@@ -65,13 +65,13 @@ declare_lint_rule! {
     ///
     /// The rule provides several options that are detailed in the following subsections.
     ///
-    /// ```json
+    /// ```json5
     /// {
     ///     "//": "...",
     ///     "options": {
     ///         "strictCase": false,
     ///         "requireAscii": true,
-    ///         "match": "%?(.+?)[.](.+)",
+    ///         "match": "%?(.+?)[.](.+)", // Since v2.0.0
     ///         "filenameCases": ["camelCase", "export"]
     ///     }
     /// }
@@ -100,7 +100,7 @@ declare_lint_rule! {
     ///
     /// **This option will be turned on by default in Biome 2.0.**
     ///
-    /// ### match
+    /// ### match (Since v2.0.0)
     ///
     /// `match` defines a regular expression that the filename must match.
     /// If the regex has capturing groups, then the first capture is considered as the filename
