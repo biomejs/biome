@@ -10,6 +10,7 @@ use std::{
 #[derive(
     Debug, Clone, Default, Copy, Eq, PartialEq, Hash, serde::Serialize, serde::Deserialize,
 )]
+#[serde(rename_all = "camelCase")]
 pub struct JsonFileSource {
     allow_trailing_commas: bool,
     allow_comments: bool,
