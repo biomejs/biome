@@ -133,13 +133,7 @@ fn get_comparing_length_exp(
     if member.text() != "length" || member_exp.is_optional_chain() {
         return None;
     }
-    let AnyJsExpression::AnyJsLiteralExpression(AnyJsLiteralExpression::JsNumberLiteralExpression(
-        literal,
-    )) = value_exp
-    else {
-        return None;
-    };
-    let number = literal.as_number()?.round() as i64;
+    let number = literal.as_number()?.round();
     // .length === 0
     if matches!(function_kind, FunctionKind::Every)
         && literal.syntax().text_trimmed() == "0"
@@ -152,7 +146,7 @@ fn get_comparing_length_exp(
         && (literal.syntax().text_trimmed() == "0"
             && (operator == JsBinaryOperator::StrictInequality
                 || operator == JsBinaryOperator::GreaterThan)
-            || number > 0 && operator == JsBinaryOperator::StrictEquality
+            || number > 0.0 && operator == JsBinaryOperator::StrictEquality
             || literal.syntax().text_trimmed() == "1"
                 && operator == JsBinaryOperator::LessThanOrEqual)
     {
