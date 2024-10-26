@@ -39,7 +39,7 @@ impl SuppressionAction for GraphqlSuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
-        _suppression_reason: String,
+        suppression_reason: String,
     ) {
         let ApplySuppression {
             token_to_apply_suppression,
@@ -53,7 +53,7 @@ impl SuppressionAction for GraphqlSuppressionAction {
             .filter(|trivia| trivia.is_whitespace())
             .collect();
 
-        let suppression_comment = format!("# {}: <explanation>", suppression_text);
+        let suppression_comment = format!("# {}: {}", suppression_text, suppression_reason);
         let suppression_comment = suppression_comment.as_str();
         let trivia = [
             (TriviaPieceKind::SingleLineComment, suppression_comment),

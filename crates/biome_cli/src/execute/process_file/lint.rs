@@ -14,15 +14,22 @@ use std::sync::atomic::Ordering;
 pub(crate) fn lint<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     path: &Path,
+    suppress: bool,
     suppression_reason: &Option<String>,
 ) -> FileResult {
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
-    lint_with_guard(ctx, &mut workspace_file, suppression_reason.clone())
+    lint_with_guard(
+        ctx,
+        &mut workspace_file,
+        suppress,
+        suppression_reason.clone(),
+    )
 }
 
 pub(crate) fn lint_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
+    suppress: bool,
     suppression_reason: Option<String>,
 ) -> FileResult {
     tracing::info_span!("Processes linting", path =? workspace_file.path.display()).in_scope(
@@ -36,6 +43,12 @@ pub(crate) fn lint_with_guard<'ctx>(
                     (Vec::new(), Vec::new())
                 };
             if let Some(fix_mode) = ctx.execution.as_fix_file_mode() {
+                let suppression_explanation = if suppress && suppression_reason.is_none() {
+                    "Ignored using `--suppress`".to_string()
+                } else {
+                    suppression_reason.unwrap_or("<explanation>".to_string())
+                };
+
                 let fix_result = workspace_file
                     .guard()
                     .fix_file(
@@ -47,7 +60,7 @@ pub(crate) fn lint_with_guard<'ctx>(
                             .build(),
                         only.clone(),
                         skip.clone(),
-                        Some(suppression_reason.unwrap_or("<explanation>".to_string())),
+                        Some(suppression_explanation),
                     )
                     .with_file_path_and_code(
                         workspace_file.path.display().to_string(),
