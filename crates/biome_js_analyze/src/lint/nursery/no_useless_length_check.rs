@@ -109,6 +109,14 @@ fn is_logical_exp_descendant(node: &AnyJsExpression, operator: JsSyntaxKind) -> 
 }
 
 /// Extract the expressions that perform length comparisons corresponding to the errors you want to check.
+/// # Examples
+/// ## `foo.every()`
+/// `foo.length === 0` -> `Some(foo)`
+/// `foo.length !== 0` -> `None`
+/// ## `foo.some()`
+/// `foo.length !== 0` -> `Some(foo)`
+/// `foo.length >= 1` -> `Some(foo)`
+/// `foo.length === 0` -> `None`
 fn get_comparing_length_exp(
     binary_exp: &JsBinaryExpression,
     function_kind: &FunctionKind,
