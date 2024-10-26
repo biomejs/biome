@@ -44,6 +44,7 @@ JsModule {
                                 },
                             ],
                         },
+                        comma_token: missing (optional),
                         r_paren_token: R_PAREN@31..33 ")" [] [Whitespace(" ")],
                         separator_token: missing (optional),
                     },
@@ -102,6 +103,7 @@ JsModule {
                                 },
                             ],
                         },
+                        comma_token: missing (optional),
                         r_paren_token: R_PAREN@63..65 ")" [] [Whitespace(" ")],
                         separator_token: missing (optional),
                     },
@@ -151,6 +153,7 @@ JsModule {
                                 },
                             ],
                         },
+                        comma_token: missing (optional),
                         r_paren_token: R_PAREN@99..101 ")" [] [Whitespace(" ")],
                         separator_token: missing (optional),
                     },
@@ -209,6 +212,7 @@ JsModule {
                                 },
                             ],
                         },
+                        comma_token: missing (optional),
                         r_paren_token: R_PAREN@132..134 ")" [] [Whitespace(" ")],
                         separator_token: missing (optional),
                     },
@@ -253,8 +257,9 @@ JsModule {
                 0: COLON@23..25 ":" [] [Whitespace(" ")]
                 1: TS_NUMBER_TYPE@25..31
                   0: NUMBER_KW@25..31 "number" [] []
-            4: R_PAREN@31..33 ")" [] [Whitespace(" ")]
-            5: (empty)
+            4: (empty)
+            5: R_PAREN@31..33 ")" [] [Whitespace(" ")]
+            6: (empty)
         2: R_CURLY@33..34 "}" [] []
       5: (empty)
     1: TS_TYPE_ALIAS_DECLARATION@34..66
@@ -290,8 +295,9 @@ JsModule {
                       2: R_PAREN@60..62 ")" [] [Whitespace(" ")]
               1: JS_IDENTIFIER_BINDING@62..63
                 0: IDENT@62..63 "b" [] []
-            4: R_PAREN@63..65 ")" [] [Whitespace(" ")]
-            5: (empty)
+            4: (empty)
+            5: R_PAREN@63..65 ")" [] [Whitespace(" ")]
+            6: (empty)
         2: R_CURLY@65..66 "}" [] []
       5: (empty)
     2: TS_TYPE_ALIAS_DECLARATION@66..102
@@ -321,8 +327,9 @@ JsModule {
                 0: COLON@91..93 ":" [] [Whitespace(" ")]
                 1: TS_NUMBER_TYPE@93..99
                   0: NUMBER_KW@93..99 "number" [] []
-            4: R_PAREN@99..101 ")" [] [Whitespace(" ")]
-            5: (empty)
+            4: (empty)
+            5: R_PAREN@99..101 ")" [] [Whitespace(" ")]
+            6: (empty)
         2: R_CURLY@101..102 "}" [] []
       5: (empty)
     3: TS_TYPE_ALIAS_DECLARATION@102..135
@@ -358,8 +365,9 @@ JsModule {
                       2: R_PAREN@129..131 ")" [] [Whitespace(" ")]
               1: JS_IDENTIFIER_BINDING@131..132
                 0: IDENT@131..132 "b" [] []
-            4: R_PAREN@132..134 ")" [] [Whitespace(" ")]
-            5: (empty)
+            4: (empty)
+            5: R_PAREN@132..134 ")" [] [Whitespace(" ")]
+            6: (empty)
         2: R_CURLY@134..135 "}" [] []
       5: (empty)
   4: EOF@135..136 "" [Newline("\n")] []

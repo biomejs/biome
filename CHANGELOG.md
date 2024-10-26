@@ -13,6 +13,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Analyzer
 
+#### Bug fixes
+
+- Fix CSS parser case error, `@-moz-document url-prefix(https://example.com)` and `@-moz-document domain(example.com)` are now valid. Contributed by @eryue0220
+- Fix [#4258](https://github.com/biomejs/biome/issues/4258), where fixed css parse error with @-moz-document url-prefix(). Contributed by @eryue0220
+
 ### CLI
 
 ### Configuration
@@ -74,15 +79,30 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Parser
 
-#### New features
+#### Bug fixes
 
-- Add support for parsing the defer attribute in import statements ([#4215](https://github.com/biomejs/biome/issues/4215)).
+- Fix [#4317](https://github.com/biomejs/biome/issues/4317), setter parameter can contain a trailing comma, the following example will now parsed correctly:
 
-   ```js
-   import defer * as myModule from "my-module";
-   ```
+  ```js
+  export class DummyClass {
+    set input(
+      value: string,
+    ) {}
+  }
+  ```
 
   Contributed by @fireairforce
+
+- Fix [#3836](https://github.com/biomejs/biome/issues/3836), css parser allow multiple semicolons after a declaration, the following example will now parsed correctly:
+
+  ```css
+  .foo {
+    color: red;;
+  }
+  ```
+
+  Contributed by @fireairforce
+
 
 ## v1.9.4 (2024-10-17)
 
@@ -97,6 +117,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#4228](https://github.com/biomejs/biome/issues/4228), where the rule `a11y/noInteractiveElementToNoninteractiveRole` incorrectly reports a `role` for non-interactive elements. Contributed by @eryue0220
 
 - `noSuspiciousSemicolonInJsx` now catches suspicious semicolons in React fragments. Contributed by @vasucp1207
+
+- The syntax rule `noTypeOnlyImportAttributes` now ignores `.cts` files ([#4361](https://github.com/biomejs/biome/issues/4361)).
+
+  Since TypeScript 5.3, type-only imports can be associated to an import attribute in CommonJS-enabled files.
+  See the [TypeScript docs](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-3.html#stable-support-resolution-mode-in-import-types).
+
+  The following code is no longer reported as a syntax error:
+
+  ```cts
+  import type { TypeFromRequire } from "pkg" with {
+      "resolution-mode": "require"
+  };
+  ```
+
+  Note that this is only allowed in files ending with the `cts` extension.
+
+  Contributed by @Conaclos
 
 ### CLI
 
@@ -339,7 +376,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#3364](https://github.com/biomejs/biome/issues/3364) where the `useSelfClosingElements` rule forces the `script` tag to be self-closing. Previously, this rule applies to all elements and cannot be disabled for native HTML elements.
 
   Now, this rule accepts a `ignoreHtmlElements` option, which when set to `true`, ignores native HTML elements and allows them to be non-self-closing.
-  
+
   Contributed by @abidjappie
 
 - Fix a case where raw values inside `url()` functions weren't properly trimmed.

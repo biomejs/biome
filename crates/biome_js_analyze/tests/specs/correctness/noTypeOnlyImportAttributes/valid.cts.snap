@@ -1,0 +1,10 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid.cts
+---
+# Input
+```cts
+import type { TypeFromRequire } from "pkg" with {
+    "resolution-mode": "require"
+};
+```
