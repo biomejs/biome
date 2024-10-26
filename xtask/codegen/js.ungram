@@ -561,7 +561,7 @@ JsSetterObjectMember =
 	'set'
 	name: AnyJsObjectMemberName
 	'('
-	parameter: AnyJsFormalParameter
+	parameter: AnyJsFormalParameter','?
 	')'
 	body: JsFunctionBody
 
@@ -842,7 +842,7 @@ JsSetterClassMember =
 	'set'
 	name: AnyJsClassMemberName
 	'('
-	parameter: AnyJsFormalParameter
+	parameter: AnyJsFormalParameter','?
 	')'
 	body: JsFunctionBody
 
@@ -851,7 +851,7 @@ TsSetterSignatureClassMember =
 	'set'
 	name: AnyJsClassMemberName
 	'('
-	parameter: AnyJsFormalParameter
+	parameter: AnyJsFormalParameter','?
 	')'
 	';'?
 
@@ -2077,7 +2077,7 @@ TsSetterSignatureTypeMember =
 	'set'
 	name: AnyJsObjectMemberName
 	'('
-	parameter: AnyJsFormalParameter
+	parameter: AnyJsFormalParameter','?
 	')'
 	separator_token: (',' | ';')?
 

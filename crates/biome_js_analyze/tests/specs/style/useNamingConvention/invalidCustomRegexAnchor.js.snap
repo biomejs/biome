@@ -32,14 +32,14 @@ expression: invalidCustomRegexAnchor.js
 
 # Diagnostics
 ```
-invalidCustomRegexAnchor.options:14:18 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalidCustomRegexAnchor.options:14:24 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Anchors `^` and `$` are not supported. They are implciitly present.
   
     12 │ 									"kind": "const"
     13 │ 								},
   > 14 │ 								"match": "(.*?)$",
-       │ 								         ^^^^^^^^
+       │ 								               ^
     15 │ 								"formats": ["camelCase"]
     16 │ 							}
   

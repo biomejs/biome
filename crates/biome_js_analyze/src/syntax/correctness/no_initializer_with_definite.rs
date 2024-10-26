@@ -7,7 +7,7 @@ declare_syntax_rule! {
     ///
     /// ## Examples
     ///
-    /// ```js
+    /// ```ts
     /// let foo!: string = "bar";
     /// ```
     pub NoInitializerWithDefinite {

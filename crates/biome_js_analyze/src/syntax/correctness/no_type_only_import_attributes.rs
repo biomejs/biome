@@ -8,11 +8,23 @@ use biome_rowan::{AstNode, AstSeparatedList, TextRange};
 declare_syntax_rule! {
     /// Disallow type-only imports and exports with import attributes.
     ///
+    /// There is one exception: TypeScript 5.3 and above allow this in CommonJS files, e.g. files ending with the `.cts` extension.
+    /// See the [TypeScript docs](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-3.html#stable-support-resolution-mode-in-import-types).
+    ///
     /// ## Examples
     ///
-    /// ```js
+    /// ### Invalid
+    ///
+    /// ```ts
     /// import type { A } from "./a.json" with { type: "json" };
     /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```cts
+    /// import type { A } from "./a.json" with { "resolution-mode": "require" };
+    /// ```
+    ///
     pub NoTypeOnlyImportAttributes {
         version: "1.5.0",
         name: "noTypeOnlyImportAttributes",
@@ -27,6 +39,11 @@ impl Rule for NoTypeOnlyImportAttributes {
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+        let extension = ctx.file_path().extension()?;
+        if extension.as_encoded_bytes() == b"cts" {
+            // Ignore `*.cts`
+            return None;
+        }
         let module_item = ctx.query();
         match module_item {
             AnyJsModuleItem::AnyJsStatement(_) => None,
