@@ -11,6 +11,9 @@ const SUPPRESS_BEFORE: &str = "(1 >= -0)";
 const SUPPRESS_AFTER: &str =
     "// biome-ignore lint/suspicious/noCompareNegZero: Ignored using `--suppress`\n(1 >= -0)";
 
+const SUPPRESS_WITH_REASON: &str =
+    "// biome-ignore lint/suspicious/noCompareNegZero: We love Biome\n(1 >= -0)";
+
 #[test]
 fn ok() {
     let mut fs = MemoryFileSystem::default();
@@ -266,6 +269,47 @@ fn err_when_only_reason() {
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "err_when_only_reason",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn custom_explanation_with_reason() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("fix.js");
+    fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
+
+    let result = run_cli(
+        DynRef::Borrowed(&mut fs),
+        &mut console,
+        Args::from(
+            [
+                ("lint"),
+                ("--suppress"),
+                ("--reason=We love Biome"),
+                file_path.as_os_str().to_str().unwrap(),
+            ]
+            .as_slice(),
+        ),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    let mut buffer = String::new();
+    fs.open(file_path)
+        .unwrap()
+        .read_to_string(&mut buffer)
+        .unwrap();
+
+    assert_eq!(buffer, SUPPRESS_WITH_REASON);
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "custom_explanation_with_reason",
         fs,
         console,
         result,
