@@ -160,7 +160,7 @@ fn get_comparing_length_exp(
 
 #[derive(Clone)]
 /// A struct that manages the form before and after replacement.
-pub struct Replacer {
+pub struct FixablePoint {
     /// The node before the replacement.
     prev_node: JsLogicalExpression,
     /// The node after the replacement.
@@ -172,9 +172,9 @@ pub struct Replacer {
 /// Search for logical expressions and list expressions that compare to 0 and Array APIs (`.some()`, `.every()`).
 fn search_logical_exp(
     any_exp: &AnyJsExpression,
-    replacer: Option<Replacer>,
+    fixable_point: Option<FixablePoint>,
     function_kind: &FunctionKind,
-    comparing_zeros: &mut HashMap<String, Vec<Replacer>>,
+    comparing_zeros: &mut HashMap<String, Vec<FixablePoint>>,
     array_tokens_used_api: &mut HashSet<String>,
 ) -> Option<()> {
     match any_exp {
@@ -188,28 +188,28 @@ fn search_logical_exp(
                 return None;
             };
             let left = logical_exp.left().ok()?;
-            let left_replacer = Replacer {
+            let left_fixable_point = FixablePoint {
                 prev_node: logical_exp.clone(),
                 next_node: logical_exp.right().ok()?,
                 range: left.range(),
             };
             search_logical_exp(
                 &left,
-                Some(left_replacer),
+                Some(left_fixable_point),
                 function_kind,
                 comparing_zeros,
                 array_tokens_used_api,
             )?;
 
             let right = logical_exp.right().ok()?;
-            let right_replacer = Replacer {
+            let right_fixable_point = FixablePoint {
                 prev_node: logical_exp.clone(),
                 next_node: logical_exp.left().ok()?,
                 range: right.range(),
             };
             search_logical_exp(
                 &right,
-                Some(right_replacer),
+                Some(right_fixable_point),
                 function_kind,
                 comparing_zeros,
                 array_tokens_used_api,
@@ -223,9 +223,9 @@ fn search_logical_exp(
             };
             let key = array_token.text();
             if let Some(comparing_zero_list) = comparing_zeros.get_mut(&key) {
-                comparing_zero_list.push(replacer?);
+                comparing_zero_list.push(fixable_point?);
             } else {
-                comparing_zeros.insert(key, vec![replacer?]);
+                comparing_zeros.insert(key, vec![fixable_point?]);
             }
             Some(())
         }
@@ -265,7 +265,7 @@ fn search_logical_exp(
         // ( foo )
         AnyJsExpression::JsParenthesizedExpression(parent_exp) => search_logical_exp(
             &parent_exp.expression().ok()?,
-            replacer,
+            fixable_point,
             function_kind,
             comparing_zeros,
             array_tokens_used_api,
@@ -285,9 +285,16 @@ fn get_parenthesized_parent(exp: AnyJsExpression) -> AnyJsExpression {
     get_parenthesized_parent(AnyJsExpression::from(parent))
 }
 
+pub struct NoUselessLengthCheckState {
+    /// The kind of function used in the logical expression.
+    function_kind: FunctionKind,
+    /// The form before and after replacement.
+    fixable_point: FixablePoint,
+}
+
 impl Rule for NoUselessLengthCheck {
     type Query = Ast<JsLogicalExpression>;
-    type State = (FunctionKind, Replacer);
+    type State = NoUselessLengthCheckState;
     type Signals = Vec<Self::State>;
     type Options = ();
 
@@ -316,9 +323,12 @@ impl Rule for NoUselessLengthCheck {
             );
             if search_result.is_some() {
                 for array_token in array_tokens_used_api {
-                    if let Some(replacers) = comparing_zeros.get(&array_token) {
-                        for replacer in replacers {
-                            fixable_list.push((function_kind.clone(), replacer.clone()));
+                    if let Some(fixable_points) = comparing_zeros.get(&array_token) {
+                        for fixable_point in fixable_points {
+                            fixable_list.push(NoUselessLengthCheckState {
+                                function_kind: function_kind.clone(),
+                                fixable_point: fixable_point.clone(),
+                            });
                         }
                     }
                 }
@@ -329,12 +339,15 @@ impl Rule for NoUselessLengthCheck {
 
     fn diagnostic(
         _ctx: &RuleContext<Self>,
-        (function_kind, replacer): &Self::State,
+        NoUselessLengthCheckState {
+            function_kind,
+            fixable_point,
+        }: &Self::State,
     ) -> Option<RuleDiagnostic> {
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                replacer.range,
+                fixable_point.range,
                 markup! {
                     "This length check is unnecessary."
                 },
@@ -354,14 +367,14 @@ impl Rule for NoUselessLengthCheck {
 
     fn action(
         ctx: &RuleContext<Self>,
-        (_error_type, replacer): &Self::State,
+        NoUselessLengthCheckState { fixable_point, .. }: &Self::State,
     ) -> Option<JsRuleAction> {
         let mut mutation = ctx.root().begin();
-        let Replacer {
+        let FixablePoint {
             prev_node,
             next_node,
             ..
-        } = replacer;
+        } = fixable_point;
 
         mutation.replace_node(
             get_parenthesized_parent(AnyJsExpression::from(prev_node.clone())),
