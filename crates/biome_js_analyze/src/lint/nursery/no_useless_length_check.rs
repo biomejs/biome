@@ -130,7 +130,7 @@ fn get_comparing_length_exp(
     let member_exp = compare_exp.as_js_static_member_expression()?;
     let target = member_exp.object().ok()?;
     let member = member_exp.member().ok()?;
-    if member.text() != "length" || member_exp.is_optional_chain() {
+    if member.syntax().text_trimmed() != "length" || member_exp.is_optional_chain() {
         return None;
     }
     let number = literal.as_number()?.round();
