@@ -6,8 +6,8 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_js_syntax::{
-    AnyJsExpression, AnyJsLiteralExpression, AnyJsMemberExpression, JsBinaryExpression,
-    JsBinaryOperator, JsLogicalExpression, JsParenthesizedExpression, JsSyntaxKind, T,
+    AnyJsExpression, AnyJsMemberExpression, JsBinaryExpression, JsBinaryOperator,
+    JsLogicalExpression, JsParenthesizedExpression, JsSyntaxKind, T,
 };
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
 
@@ -133,6 +133,8 @@ fn get_comparing_length_exp(
     if member.syntax().text_trimmed() != "length" || member_exp.is_optional_chain() {
         return None;
     }
+    let literal = value_exp.as_any_js_literal_expression()?;
+    let literal = literal.as_js_number_literal_expression()?;
     let number = literal.as_number()?.round();
     // .length === 0
     if matches!(function_kind, FunctionKind::Every)
@@ -234,9 +236,7 @@ fn search_logical_exp(
             let task_member_exp =
                 AnyJsMemberExpression::cast(task_exp.callee().ok()?.into_syntax())?;
             let task_target = task_member_exp.object().ok()?;
-            let AnyJsExpression::JsIdentifierExpression(task_target_token) = task_target else {
-                return None;
-            };
+            let task_target_token = task_target.as_js_identifier_expression()?;
 
             let task_member_name_node = task_member_exp.member_name()?;
             let task_member_name = task_member_name_node.text();
