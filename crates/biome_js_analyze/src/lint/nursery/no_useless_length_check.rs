@@ -167,6 +167,11 @@ pub struct FixablePoint {
 }
 
 /// Search for logical expressions and list expressions that compare to 0 and Array APIs (`.some()`, `.every()`).
+/// `any_exp` is the expression to be searched.
+/// `fixable_point` is the form before and after replacement.
+/// `function_kind` is the kind of function used in the logical expression.
+/// `comparing_zeros` is a HashMap that holds the names of arrays compared with zero and their corresponding expressions.
+/// `array_tokens_used_api` is a HashSet that holds the names of arrays using `some` or `every` corresponding to `function_kind`.
 fn search_logical_exp(
     any_exp: &AnyJsExpression,
     fixable_point: Option<FixablePoint>,
