@@ -1,0 +1,63 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+export interface A {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: TsInterfaceDeclaration {
+                interface_token: INTERFACE_KW@7..17 "interface" [] [Whitespace(" ")],
+                id: TsIdentifierBinding {
+                    name_token: IDENT@17..19 "A" [] [Whitespace(" ")],
+                },
+                type_parameters: missing (optional),
+                extends_clause: missing (optional),
+                l_curly_token: L_CURLY@19..20 "{" [] [],
+                members: TsTypeMemberList [],
+                r_curly_token: R_CURLY@20..21 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@21..22 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..22
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..21
+    0: JS_EXPORT@0..21
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: TS_INTERFACE_DECLARATION@7..21
+        0: INTERFACE_KW@7..17 "interface" [] [Whitespace(" ")]
+        1: TS_IDENTIFIER_BINDING@17..19
+          0: IDENT@17..19 "A" [] [Whitespace(" ")]
+        2: (empty)
+        3: (empty)
+        4: L_CURLY@19..20 "{" [] []
+        5: TS_TYPE_MEMBER_LIST@20..20
+        6: R_CURLY@20..21 "}" [] []
+  4: EOF@21..22 "" [Newline("\n")] []
+
+```

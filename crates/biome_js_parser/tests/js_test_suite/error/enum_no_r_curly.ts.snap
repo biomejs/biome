@@ -1,0 +1,126 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+enum {;
+enum A {;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsEnumDeclaration {
+            const_token: missing (optional),
+            enum_token: ENUM_KW@0..5 "enum" [] [Whitespace(" ")],
+            id: missing (required),
+            l_curly_token: L_CURLY@5..6 "{" [] [],
+            members: TsEnumMemberList [],
+            r_curly_token: missing (required),
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@6..7 ";" [] [],
+        },
+        TsEnumDeclaration {
+            const_token: missing (optional),
+            enum_token: ENUM_KW@7..13 "enum" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@13..15 "A" [] [Whitespace(" ")],
+            },
+            l_curly_token: L_CURLY@15..16 "{" [] [],
+            members: TsEnumMemberList [],
+            r_curly_token: missing (required),
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@16..17 ";" [] [],
+        },
+    ],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..18
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..17
+    0: TS_ENUM_DECLARATION@0..6
+      0: (empty)
+      1: ENUM_KW@0..5 "enum" [] [Whitespace(" ")]
+      2: (empty)
+      3: L_CURLY@5..6 "{" [] []
+      4: TS_ENUM_MEMBER_LIST@6..6
+      5: (empty)
+    1: JS_EMPTY_STATEMENT@6..7
+      0: SEMICOLON@6..7 ";" [] []
+    2: TS_ENUM_DECLARATION@7..16
+      0: (empty)
+      1: ENUM_KW@7..13 "enum" [Newline("\n")] [Whitespace(" ")]
+      2: JS_IDENTIFIER_BINDING@13..15
+        0: IDENT@13..15 "A" [] [Whitespace(" ")]
+      3: L_CURLY@15..16 "{" [] []
+      4: TS_ENUM_MEMBER_LIST@16..16
+      5: (empty)
+    3: JS_EMPTY_STATEMENT@16..17
+      0: SEMICOLON@16..17 ";" [] []
+  4: EOF@17..18 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+enum_no_r_curly.ts:1:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `enum` statements must have a name
+  
+  > 1 │ enum {;
+      │ ^^^^^
+    2 │ enum A {;
+    3 │ 
+  
+enum_no_r_curly.ts:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, a string literal, or a computed name but instead found ';'.
+  
+  > 1 │ enum {;
+      │       ^
+    2 │ enum A {;
+    3 │ 
+  
+  i Expected an identifier, a string literal, or a computed name here.
+  
+  > 1 │ enum {;
+      │       ^
+    2 │ enum A {;
+    3 │ 
+  
+enum_no_r_curly.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, a string literal, or a computed name but instead found ';'.
+  
+    1 │ enum {;
+  > 2 │ enum A {;
+      │         ^
+    3 │ 
+  
+  i Expected an identifier, a string literal, or a computed name here.
+  
+    1 │ enum {;
+  > 2 │ enum A {;
+      │         ^
+    3 │ 
+  
+```

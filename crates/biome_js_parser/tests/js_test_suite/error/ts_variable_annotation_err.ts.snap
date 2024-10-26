@@ -1,0 +1,83 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+let a!;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..5 "a" [] [],
+                        },
+                        variable_annotation: TsDefiniteVariableAnnotation {
+                            excl_token: BANG@5..6 "!" [] [],
+                            type_annotation: missing (required),
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@6..7 ";" [] [],
+        },
+    ],
+    eof_token: EOF@7..8 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..8
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..7
+    0: JS_VARIABLE_STATEMENT@0..7
+      0: JS_VARIABLE_DECLARATION@0..6
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..6
+          0: JS_VARIABLE_DECLARATOR@4..6
+            0: JS_IDENTIFIER_BINDING@4..5
+              0: IDENT@4..5 "a" [] []
+            1: TS_DEFINITE_VARIABLE_ANNOTATION@5..6
+              0: BANG@5..6 "!" [] []
+              1: (empty)
+            2: (empty)
+      1: SEMICOLON@6..7 ";" [] []
+  4: EOF@7..8 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_variable_annotation_err.ts:1:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `:` but instead found `;`
+  
+  > 1 │ let a!;
+      │       ^
+    2 │ 
+  
+  i Remove ;
+  
+```

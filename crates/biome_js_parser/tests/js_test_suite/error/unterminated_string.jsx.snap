@@ -1,0 +1,185 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+const f = () => (
+    <div
+        aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa="a'
+      bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb="b"
+    />
+  );
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@0..6 "const" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@6..8 "f" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@8..10 "=" [] [Whitespace(" ")],
+                            expression: JsArrowFunctionExpression {
+                                async_token: missing (optional),
+                                type_parameters: missing (optional),
+                                parameters: JsParameters {
+                                    l_paren_token: L_PAREN@10..11 "(" [] [],
+                                    items: JsParameterList [],
+                                    r_paren_token: R_PAREN@11..13 ")" [] [Whitespace(" ")],
+                                },
+                                return_type_annotation: missing (optional),
+                                fat_arrow_token: FAT_ARROW@13..16 "=>" [] [Whitespace(" ")],
+                                body: JsParenthesizedExpression {
+                                    l_paren_token: L_PAREN@16..17 "(" [] [],
+                                    expression: JsBogusExpression {
+                                        items: [
+                                            JsBogus {
+                                                items: [
+                                                    L_ANGLE@17..23 "<" [Newline("\n"), Whitespace("    ")] [],
+                                                    JsxName {
+                                                        value_token: JSX_IDENT@23..26 "div" [] [],
+                                                    },
+                                                    JsBogus {
+                                                        items: [
+                                                            JsxAttribute {
+                                                                name: JsxName {
+                                                                    value_token: JSX_IDENT@26..70 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" [Newline("\n"), Whitespace("        ")] [],
+                                                                },
+                                                                initializer: JsxAttributeInitializerClause {
+                                                                    eq_token: EQ@70..71 "=" [] [],
+                                                                    value: JsxString {
+                                                                        value_token: JSX_STRING_LITERAL@71..118 "\"a'\n      bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb=\"" [] [],
+                                                                    },
+                                                                },
+                                                            },
+                                                            JsxAttribute {
+                                                                name: JsxName {
+                                                                    value_token: JSX_IDENT@118..119 "b" [] [],
+                                                                },
+                                                                initializer: missing (optional),
+                                                            },
+                                                            JsBogus {
+                                                                items: [
+                                                                    ERROR_TOKEN@119..120 "\"" [] [],
+                                                                ],
+                                                            },
+                                                        ],
+                                                    },
+                                                    SLASH@120..126 "/" [Newline("\n"), Whitespace("    ")] [],
+                                                    R_ANGLE@126..127 ">" [] [],
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                    r_paren_token: R_PAREN@127..131 ")" [Newline("\n"), Whitespace("  ")] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@131..132 ";" [] [],
+        },
+    ],
+    eof_token: EOF@132..132 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..132
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..132
+    0: JS_VARIABLE_STATEMENT@0..132
+      0: JS_VARIABLE_DECLARATION@0..131
+        0: (empty)
+        1: CONST_KW@0..6 "const" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@6..131
+          0: JS_VARIABLE_DECLARATOR@6..131
+            0: JS_IDENTIFIER_BINDING@6..8
+              0: IDENT@6..8 "f" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@8..131
+              0: EQ@8..10 "=" [] [Whitespace(" ")]
+              1: JS_ARROW_FUNCTION_EXPRESSION@10..131
+                0: (empty)
+                1: (empty)
+                2: JS_PARAMETERS@10..13
+                  0: L_PAREN@10..11 "(" [] []
+                  1: JS_PARAMETER_LIST@11..11
+                  2: R_PAREN@11..13 ")" [] [Whitespace(" ")]
+                3: (empty)
+                4: FAT_ARROW@13..16 "=>" [] [Whitespace(" ")]
+                5: JS_PARENTHESIZED_EXPRESSION@16..131
+                  0: L_PAREN@16..17 "(" [] []
+                  1: JS_BOGUS_EXPRESSION@17..127
+                    0: JS_BOGUS@17..127
+                      0: L_ANGLE@17..23 "<" [Newline("\n"), Whitespace("    ")] []
+                      1: JSX_NAME@23..26
+                        0: JSX_IDENT@23..26 "div" [] []
+                      2: JS_BOGUS@26..120
+                        0: JSX_ATTRIBUTE@26..118
+                          0: JSX_NAME@26..70
+                            0: JSX_IDENT@26..70 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" [Newline("\n"), Whitespace("        ")] []
+                          1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@70..118
+                            0: EQ@70..71 "=" [] []
+                            1: JSX_STRING@71..118
+                              0: JSX_STRING_LITERAL@71..118 "\"a'\n      bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb=\"" [] []
+                        1: JSX_ATTRIBUTE@118..119
+                          0: JSX_NAME@118..119
+                            0: JSX_IDENT@118..119 "b" [] []
+                          1: (empty)
+                        2: JS_BOGUS@119..120
+                          0: ERROR_TOKEN@119..120 "\"" [] []
+                      3: SLASH@120..126 "/" [Newline("\n"), Whitespace("    ")] []
+                      4: R_ANGLE@126..127 ">" [] []
+                  2: R_PAREN@127..131 ")" [Newline("\n"), Whitespace("  ")] []
+      1: SEMICOLON@131..132 ";" [] []
+  4: EOF@132..132 "" [] []
+
+```
+
+## Diagnostics
+
+```
+unterminated_string.jsx:4:45 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × unterminated string literal
+  
+    2 │     <div
+    3 │         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa="a'
+  > 4 │       bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb="b"
+      │                                             ^
+    5 │     />
+    6 │   );
+  
+  i 
+  
+    2 │     <div
+    3 │         aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa="a'
+  > 4 │       bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb="b"
+      │                                             ^
+    5 │     />
+    6 │   );
+  
+  i The closing quote must be on the same line.
+  
+```

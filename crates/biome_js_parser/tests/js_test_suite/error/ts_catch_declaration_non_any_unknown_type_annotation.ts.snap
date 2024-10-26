@@ -1,0 +1,104 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+try {} catch (error: Error) {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsTryStatement {
+            try_token: TRY_KW@0..4 "try" [] [Whitespace(" ")],
+            body: JsBlockStatement {
+                l_curly_token: L_CURLY@4..5 "{" [] [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@5..7 "}" [] [Whitespace(" ")],
+            },
+            catch_clause: JsCatchClause {
+                catch_token: CATCH_KW@7..13 "catch" [] [Whitespace(" ")],
+                declaration: JsCatchDeclaration {
+                    l_paren_token: L_PAREN@13..14 "(" [] [],
+                    binding: JsIdentifierBinding {
+                        name_token: IDENT@14..19 "error" [] [],
+                    },
+                    type_annotation: TsTypeAnnotation {
+                        colon_token: COLON@19..21 ":" [] [Whitespace(" ")],
+                        ty: TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@21..26 "Error" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                    },
+                    r_paren_token: R_PAREN@26..28 ")" [] [Whitespace(" ")],
+                },
+                body: JsBlockStatement {
+                    l_curly_token: L_CURLY@28..29 "{" [] [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@29..30 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@30..31 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..31
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..30
+    0: JS_TRY_STATEMENT@0..30
+      0: TRY_KW@0..4 "try" [] [Whitespace(" ")]
+      1: JS_BLOCK_STATEMENT@4..7
+        0: L_CURLY@4..5 "{" [] []
+        1: JS_STATEMENT_LIST@5..5
+        2: R_CURLY@5..7 "}" [] [Whitespace(" ")]
+      2: JS_CATCH_CLAUSE@7..30
+        0: CATCH_KW@7..13 "catch" [] [Whitespace(" ")]
+        1: JS_CATCH_DECLARATION@13..28
+          0: L_PAREN@13..14 "(" [] []
+          1: JS_IDENTIFIER_BINDING@14..19
+            0: IDENT@14..19 "error" [] []
+          2: TS_TYPE_ANNOTATION@19..26
+            0: COLON@19..21 ":" [] [Whitespace(" ")]
+            1: TS_REFERENCE_TYPE@21..26
+              0: JS_REFERENCE_IDENTIFIER@21..26
+                0: IDENT@21..26 "Error" [] []
+              1: (empty)
+          3: R_PAREN@26..28 ")" [] [Whitespace(" ")]
+        2: JS_BLOCK_STATEMENT@28..30
+          0: L_CURLY@28..29 "{" [] []
+          1: JS_STATEMENT_LIST@29..29
+          2: R_CURLY@29..30 "}" [] []
+  4: EOF@30..31 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_catch_declaration_non_any_unknown_type_annotation.ts:1:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Catch clause variable type annotation must be 'any' or 'unknown' if specified.
+  
+  > 1 │ try {} catch (error: Error) {}
+      │                      ^^^^^
+    2 │ 
+  
+```

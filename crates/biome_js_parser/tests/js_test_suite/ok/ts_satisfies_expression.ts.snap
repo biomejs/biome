@@ -1,0 +1,427 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+interface A {
+   a: string
+};
+let x = { a: 'test' } satisfies A;
+let y = { a: 'test', b: 'test' } satisfies A;
+const z = undefined satisfies 1;
+let not_a_satisfies_expression = undefined
+satisfies;
+let precedence = "hello" satisfies string + 3 satisfies number satisfies number;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsInterfaceDeclaration {
+            interface_token: INTERFACE_KW@0..10 "interface" [] [Whitespace(" ")],
+            id: TsIdentifierBinding {
+                name_token: IDENT@10..12 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            l_curly_token: L_CURLY@12..13 "{" [] [],
+            members: TsTypeMemberList [
+                TsPropertySignatureTypeMember {
+                    readonly_token: missing (optional),
+                    name: JsLiteralMemberName {
+                        value: IDENT@13..18 "a" [Newline("\n"), Whitespace("   ")] [],
+                    },
+                    optional_token: missing (optional),
+                    type_annotation: TsTypeAnnotation {
+                        colon_token: COLON@18..20 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@20..26 "string" [] [],
+                        },
+                    },
+                    separator_token: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@26..28 "}" [Newline("\n")] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@28..29 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@29..34 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@34..36 "x" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@36..38 "=" [] [Whitespace(" ")],
+                            expression: TsSatisfiesExpression {
+                                expression: JsObjectExpression {
+                                    l_curly_token: L_CURLY@38..40 "{" [] [Whitespace(" ")],
+                                    members: JsObjectMemberList [
+                                        JsPropertyObjectMember {
+                                            name: JsLiteralMemberName {
+                                                value: IDENT@40..41 "a" [] [],
+                                            },
+                                            colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
+                                            value: JsStringLiteralExpression {
+                                                value_token: JS_STRING_LITERAL@43..50 "'test'" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@50..52 "}" [] [Whitespace(" ")],
+                                },
+                                satisfies_token: SATISFIES_KW@52..62 "satisfies" [] [Whitespace(" ")],
+                                ty: TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@62..63 "A" [] [],
+                                    },
+                                    type_arguments: missing (optional),
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@63..64 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@64..69 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@69..71 "y" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@71..73 "=" [] [Whitespace(" ")],
+                            expression: TsSatisfiesExpression {
+                                expression: JsObjectExpression {
+                                    l_curly_token: L_CURLY@73..75 "{" [] [Whitespace(" ")],
+                                    members: JsObjectMemberList [
+                                        JsPropertyObjectMember {
+                                            name: JsLiteralMemberName {
+                                                value: IDENT@75..76 "a" [] [],
+                                            },
+                                            colon_token: COLON@76..78 ":" [] [Whitespace(" ")],
+                                            value: JsStringLiteralExpression {
+                                                value_token: JS_STRING_LITERAL@78..84 "'test'" [] [],
+                                            },
+                                        },
+                                        COMMA@84..86 "," [] [Whitespace(" ")],
+                                        JsPropertyObjectMember {
+                                            name: JsLiteralMemberName {
+                                                value: IDENT@86..87 "b" [] [],
+                                            },
+                                            colon_token: COLON@87..89 ":" [] [Whitespace(" ")],
+                                            value: JsStringLiteralExpression {
+                                                value_token: JS_STRING_LITERAL@89..96 "'test'" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                    ],
+                                    r_curly_token: R_CURLY@96..98 "}" [] [Whitespace(" ")],
+                                },
+                                satisfies_token: SATISFIES_KW@98..108 "satisfies" [] [Whitespace(" ")],
+                                ty: TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@108..109 "A" [] [],
+                                    },
+                                    type_arguments: missing (optional),
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@109..110 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@110..117 "const" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@117..119 "z" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@119..121 "=" [] [Whitespace(" ")],
+                            expression: TsSatisfiesExpression {
+                                expression: JsIdentifierExpression {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@121..131 "undefined" [] [Whitespace(" ")],
+                                    },
+                                },
+                                satisfies_token: SATISFIES_KW@131..141 "satisfies" [] [Whitespace(" ")],
+                                ty: TsNumberLiteralType {
+                                    minus_token: missing (optional),
+                                    literal_token: JS_NUMBER_LITERAL@141..142 "1" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@142..143 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@143..148 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@148..175 "not_a_satisfies_expression" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@175..177 "=" [] [Whitespace(" ")],
+                            expression: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@177..186 "undefined" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@186..196 "satisfies" [Newline("\n")] [],
+                },
+            },
+            semicolon_token: SEMICOLON@196..197 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@197..202 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@202..213 "precedence" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@213..215 "=" [] [Whitespace(" ")],
+                            expression: TsSatisfiesExpression {
+                                expression: TsSatisfiesExpression {
+                                    expression: JsBinaryExpression {
+                                        left: TsSatisfiesExpression {
+                                            expression: JsStringLiteralExpression {
+                                                value_token: JS_STRING_LITERAL@215..223 "\"hello\"" [] [Whitespace(" ")],
+                                            },
+                                            satisfies_token: SATISFIES_KW@223..233 "satisfies" [] [Whitespace(" ")],
+                                            ty: TsStringType {
+                                                string_token: STRING_KW@233..240 "string" [] [Whitespace(" ")],
+                                            },
+                                        },
+                                        operator_token: PLUS@240..242 "+" [] [Whitespace(" ")],
+                                        right: JsNumberLiteralExpression {
+                                            value_token: JS_NUMBER_LITERAL@242..244 "3" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                    satisfies_token: SATISFIES_KW@244..254 "satisfies" [] [Whitespace(" ")],
+                                    ty: TsNumberType {
+                                        number_token: NUMBER_KW@254..261 "number" [] [Whitespace(" ")],
+                                    },
+                                },
+                                satisfies_token: SATISFIES_KW@261..271 "satisfies" [] [Whitespace(" ")],
+                                ty: TsNumberType {
+                                    number_token: NUMBER_KW@271..277 "number" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@277..278 ";" [] [],
+        },
+    ],
+    eof_token: EOF@278..279 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..279
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..278
+    0: TS_INTERFACE_DECLARATION@0..28
+      0: INTERFACE_KW@0..10 "interface" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@10..12
+        0: IDENT@10..12 "A" [] [Whitespace(" ")]
+      2: (empty)
+      3: (empty)
+      4: L_CURLY@12..13 "{" [] []
+      5: TS_TYPE_MEMBER_LIST@13..26
+        0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@13..26
+          0: (empty)
+          1: JS_LITERAL_MEMBER_NAME@13..18
+            0: IDENT@13..18 "a" [Newline("\n"), Whitespace("   ")] []
+          2: (empty)
+          3: TS_TYPE_ANNOTATION@18..26
+            0: COLON@18..20 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@20..26
+              0: STRING_KW@20..26 "string" [] []
+          4: (empty)
+      6: R_CURLY@26..28 "}" [Newline("\n")] []
+    1: JS_EMPTY_STATEMENT@28..29
+      0: SEMICOLON@28..29 ";" [] []
+    2: JS_VARIABLE_STATEMENT@29..64
+      0: JS_VARIABLE_DECLARATION@29..63
+        0: (empty)
+        1: LET_KW@29..34 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@34..63
+          0: JS_VARIABLE_DECLARATOR@34..63
+            0: JS_IDENTIFIER_BINDING@34..36
+              0: IDENT@34..36 "x" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@36..63
+              0: EQ@36..38 "=" [] [Whitespace(" ")]
+              1: TS_SATISFIES_EXPRESSION@38..63
+                0: JS_OBJECT_EXPRESSION@38..52
+                  0: L_CURLY@38..40 "{" [] [Whitespace(" ")]
+                  1: JS_OBJECT_MEMBER_LIST@40..50
+                    0: JS_PROPERTY_OBJECT_MEMBER@40..50
+                      0: JS_LITERAL_MEMBER_NAME@40..41
+                        0: IDENT@40..41 "a" [] []
+                      1: COLON@41..43 ":" [] [Whitespace(" ")]
+                      2: JS_STRING_LITERAL_EXPRESSION@43..50
+                        0: JS_STRING_LITERAL@43..50 "'test'" [] [Whitespace(" ")]
+                  2: R_CURLY@50..52 "}" [] [Whitespace(" ")]
+                1: SATISFIES_KW@52..62 "satisfies" [] [Whitespace(" ")]
+                2: TS_REFERENCE_TYPE@62..63
+                  0: JS_REFERENCE_IDENTIFIER@62..63
+                    0: IDENT@62..63 "A" [] []
+                  1: (empty)
+      1: SEMICOLON@63..64 ";" [] []
+    3: JS_VARIABLE_STATEMENT@64..110
+      0: JS_VARIABLE_DECLARATION@64..109
+        0: (empty)
+        1: LET_KW@64..69 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@69..109
+          0: JS_VARIABLE_DECLARATOR@69..109
+            0: JS_IDENTIFIER_BINDING@69..71
+              0: IDENT@69..71 "y" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@71..109
+              0: EQ@71..73 "=" [] [Whitespace(" ")]
+              1: TS_SATISFIES_EXPRESSION@73..109
+                0: JS_OBJECT_EXPRESSION@73..98
+                  0: L_CURLY@73..75 "{" [] [Whitespace(" ")]
+                  1: JS_OBJECT_MEMBER_LIST@75..96
+                    0: JS_PROPERTY_OBJECT_MEMBER@75..84
+                      0: JS_LITERAL_MEMBER_NAME@75..76
+                        0: IDENT@75..76 "a" [] []
+                      1: COLON@76..78 ":" [] [Whitespace(" ")]
+                      2: JS_STRING_LITERAL_EXPRESSION@78..84
+                        0: JS_STRING_LITERAL@78..84 "'test'" [] []
+                    1: COMMA@84..86 "," [] [Whitespace(" ")]
+                    2: JS_PROPERTY_OBJECT_MEMBER@86..96
+                      0: JS_LITERAL_MEMBER_NAME@86..87
+                        0: IDENT@86..87 "b" [] []
+                      1: COLON@87..89 ":" [] [Whitespace(" ")]
+                      2: JS_STRING_LITERAL_EXPRESSION@89..96
+                        0: JS_STRING_LITERAL@89..96 "'test'" [] [Whitespace(" ")]
+                  2: R_CURLY@96..98 "}" [] [Whitespace(" ")]
+                1: SATISFIES_KW@98..108 "satisfies" [] [Whitespace(" ")]
+                2: TS_REFERENCE_TYPE@108..109
+                  0: JS_REFERENCE_IDENTIFIER@108..109
+                    0: IDENT@108..109 "A" [] []
+                  1: (empty)
+      1: SEMICOLON@109..110 ";" [] []
+    4: JS_VARIABLE_STATEMENT@110..143
+      0: JS_VARIABLE_DECLARATION@110..142
+        0: (empty)
+        1: CONST_KW@110..117 "const" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@117..142
+          0: JS_VARIABLE_DECLARATOR@117..142
+            0: JS_IDENTIFIER_BINDING@117..119
+              0: IDENT@117..119 "z" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@119..142
+              0: EQ@119..121 "=" [] [Whitespace(" ")]
+              1: TS_SATISFIES_EXPRESSION@121..142
+                0: JS_IDENTIFIER_EXPRESSION@121..131
+                  0: JS_REFERENCE_IDENTIFIER@121..131
+                    0: IDENT@121..131 "undefined" [] [Whitespace(" ")]
+                1: SATISFIES_KW@131..141 "satisfies" [] [Whitespace(" ")]
+                2: TS_NUMBER_LITERAL_TYPE@141..142
+                  0: (empty)
+                  1: JS_NUMBER_LITERAL@141..142 "1" [] []
+      1: SEMICOLON@142..143 ";" [] []
+    5: JS_VARIABLE_STATEMENT@143..186
+      0: JS_VARIABLE_DECLARATION@143..186
+        0: (empty)
+        1: LET_KW@143..148 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@148..186
+          0: JS_VARIABLE_DECLARATOR@148..186
+            0: JS_IDENTIFIER_BINDING@148..175
+              0: IDENT@148..175 "not_a_satisfies_expression" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@175..186
+              0: EQ@175..177 "=" [] [Whitespace(" ")]
+              1: JS_IDENTIFIER_EXPRESSION@177..186
+                0: JS_REFERENCE_IDENTIFIER@177..186
+                  0: IDENT@177..186 "undefined" [] []
+      1: (empty)
+    6: JS_EXPRESSION_STATEMENT@186..197
+      0: JS_IDENTIFIER_EXPRESSION@186..196
+        0: JS_REFERENCE_IDENTIFIER@186..196
+          0: IDENT@186..196 "satisfies" [Newline("\n")] []
+      1: SEMICOLON@196..197 ";" [] []
+    7: JS_VARIABLE_STATEMENT@197..278
+      0: JS_VARIABLE_DECLARATION@197..277
+        0: (empty)
+        1: LET_KW@197..202 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@202..277
+          0: JS_VARIABLE_DECLARATOR@202..277
+            0: JS_IDENTIFIER_BINDING@202..213
+              0: IDENT@202..213 "precedence" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@213..277
+              0: EQ@213..215 "=" [] [Whitespace(" ")]
+              1: TS_SATISFIES_EXPRESSION@215..277
+                0: TS_SATISFIES_EXPRESSION@215..261
+                  0: JS_BINARY_EXPRESSION@215..244
+                    0: TS_SATISFIES_EXPRESSION@215..240
+                      0: JS_STRING_LITERAL_EXPRESSION@215..223
+                        0: JS_STRING_LITERAL@215..223 "\"hello\"" [] [Whitespace(" ")]
+                      1: SATISFIES_KW@223..233 "satisfies" [] [Whitespace(" ")]
+                      2: TS_STRING_TYPE@233..240
+                        0: STRING_KW@233..240 "string" [] [Whitespace(" ")]
+                    1: PLUS@240..242 "+" [] [Whitespace(" ")]
+                    2: JS_NUMBER_LITERAL_EXPRESSION@242..244
+                      0: JS_NUMBER_LITERAL@242..244 "3" [] [Whitespace(" ")]
+                  1: SATISFIES_KW@244..254 "satisfies" [] [Whitespace(" ")]
+                  2: TS_NUMBER_TYPE@254..261
+                    0: NUMBER_KW@254..261 "number" [] [Whitespace(" ")]
+                1: SATISFIES_KW@261..271 "satisfies" [] [Whitespace(" ")]
+                2: TS_NUMBER_TYPE@271..277
+                  0: NUMBER_KW@271..277 "number" [] []
+      1: SEMICOLON@277..278 ";" [] []
+  4: EOF@278..279 "" [Newline("\n")] []
+
+```

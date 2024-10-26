@@ -1,0 +1,179 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<></>;
+<>abcd</>;
+<>   whitespace
+</>;
+<
+  /*comment */
+  >
+  <
+  /
+>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxFragment {
+                    opening_fragment: JsxOpeningFragment {
+                        l_angle_token: L_ANGLE@0..1 "<" [] [],
+                        r_angle_token: R_ANGLE@1..2 ">" [] [],
+                    },
+                    children: JsxChildList [],
+                    closing_fragment: JsxClosingFragment {
+                        l_angle_token: L_ANGLE@2..3 "<" [] [],
+                        slash_token: SLASH@3..4 "/" [] [],
+                        r_angle_token: R_ANGLE@4..5 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@5..6 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxFragment {
+                    opening_fragment: JsxOpeningFragment {
+                        l_angle_token: L_ANGLE@6..8 "<" [Newline("\n")] [],
+                        r_angle_token: R_ANGLE@8..9 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@9..13 "abcd" [] [],
+                        },
+                    ],
+                    closing_fragment: JsxClosingFragment {
+                        l_angle_token: L_ANGLE@13..14 "<" [] [],
+                        slash_token: SLASH@14..15 "/" [] [],
+                        r_angle_token: R_ANGLE@15..16 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@16..17 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxFragment {
+                    opening_fragment: JsxOpeningFragment {
+                        l_angle_token: L_ANGLE@17..19 "<" [Newline("\n")] [],
+                        r_angle_token: R_ANGLE@19..20 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@20..34 "   whitespace\n" [] [],
+                        },
+                    ],
+                    closing_fragment: JsxClosingFragment {
+                        l_angle_token: L_ANGLE@34..35 "<" [] [],
+                        slash_token: SLASH@35..36 "/" [] [],
+                        r_angle_token: R_ANGLE@36..37 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@37..38 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxFragment {
+                    opening_fragment: JsxOpeningFragment {
+                        l_angle_token: L_ANGLE@38..40 "<" [Newline("\n")] [],
+                        r_angle_token: R_ANGLE@40..59 ">" [Newline("\n"), Whitespace("  "), Comments("/*comment */"), Newline("\n"), Whitespace("  ")] [],
+                    },
+                    children: JsxChildList [
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@59..62 "\n  " [] [],
+                        },
+                    ],
+                    closing_fragment: JsxClosingFragment {
+                        l_angle_token: L_ANGLE@62..63 "<" [] [],
+                        slash_token: SLASH@63..67 "/" [Newline("\n"), Whitespace("  ")] [],
+                        r_angle_token: R_ANGLE@67..69 ">" [Newline("\n")] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@69..70 ";" [] [],
+        },
+    ],
+    eof_token: EOF@70..71 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..71
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..70
+    0: JS_EXPRESSION_STATEMENT@0..6
+      0: JSX_TAG_EXPRESSION@0..5
+        0: JSX_FRAGMENT@0..5
+          0: JSX_OPENING_FRAGMENT@0..2
+            0: L_ANGLE@0..1 "<" [] []
+            1: R_ANGLE@1..2 ">" [] []
+          1: JSX_CHILD_LIST@2..2
+          2: JSX_CLOSING_FRAGMENT@2..5
+            0: L_ANGLE@2..3 "<" [] []
+            1: SLASH@3..4 "/" [] []
+            2: R_ANGLE@4..5 ">" [] []
+      1: SEMICOLON@5..6 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@6..17
+      0: JSX_TAG_EXPRESSION@6..16
+        0: JSX_FRAGMENT@6..16
+          0: JSX_OPENING_FRAGMENT@6..9
+            0: L_ANGLE@6..8 "<" [Newline("\n")] []
+            1: R_ANGLE@8..9 ">" [] []
+          1: JSX_CHILD_LIST@9..13
+            0: JSX_TEXT@9..13
+              0: JSX_TEXT_LITERAL@9..13 "abcd" [] []
+          2: JSX_CLOSING_FRAGMENT@13..16
+            0: L_ANGLE@13..14 "<" [] []
+            1: SLASH@14..15 "/" [] []
+            2: R_ANGLE@15..16 ">" [] []
+      1: SEMICOLON@16..17 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@17..38
+      0: JSX_TAG_EXPRESSION@17..37
+        0: JSX_FRAGMENT@17..37
+          0: JSX_OPENING_FRAGMENT@17..20
+            0: L_ANGLE@17..19 "<" [Newline("\n")] []
+            1: R_ANGLE@19..20 ">" [] []
+          1: JSX_CHILD_LIST@20..34
+            0: JSX_TEXT@20..34
+              0: JSX_TEXT_LITERAL@20..34 "   whitespace\n" [] []
+          2: JSX_CLOSING_FRAGMENT@34..37
+            0: L_ANGLE@34..35 "<" [] []
+            1: SLASH@35..36 "/" [] []
+            2: R_ANGLE@36..37 ">" [] []
+      1: SEMICOLON@37..38 ";" [] []
+    3: JS_EXPRESSION_STATEMENT@38..70
+      0: JSX_TAG_EXPRESSION@38..69
+        0: JSX_FRAGMENT@38..69
+          0: JSX_OPENING_FRAGMENT@38..59
+            0: L_ANGLE@38..40 "<" [Newline("\n")] []
+            1: R_ANGLE@40..59 ">" [Newline("\n"), Whitespace("  "), Comments("/*comment */"), Newline("\n"), Whitespace("  ")] []
+          1: JSX_CHILD_LIST@59..62
+            0: JSX_TEXT@59..62
+              0: JSX_TEXT_LITERAL@59..62 "\n  " [] []
+          2: JSX_CLOSING_FRAGMENT@62..69
+            0: L_ANGLE@62..63 "<" [] []
+            1: SLASH@63..67 "/" [Newline("\n"), Whitespace("  ")] []
+            2: R_ANGLE@67..69 ">" [Newline("\n")] []
+      1: SEMICOLON@69..70 ";" [] []
+  4: EOF@70..71 "" [Newline("\n")] []
+
+```

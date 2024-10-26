@@ -1,0 +1,595 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class Base {
+  base1;
+}
+abstract class Test extends Base {
+    declare a: string;
+    private declare c: string;
+    declare private d: string;
+    declare private readonly e: string;
+    private readonly declare f: string;
+    declare private static readonly g: string;
+    private static readonly declare h: string;
+    protected readonly abstract i: string;
+    protected abstract readonly j: string;
+    protected override readonly base1: string;
+    private static accessor readonly k: string;
+    protected abstract accessor readonly l: string;
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..11 "Base" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@11..12 "{" [] [],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@12..20 "base1" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    property_annotation: missing (optional),
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@20..21 ";" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@21..23 "}" [Newline("\n")] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: ABSTRACT_KW@23..33 "abstract" [Newline("\n")] [Whitespace(" ")],
+            class_token: CLASS_KW@33..39 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@39..44 "Test" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: JsExtendsClause {
+                extends_token: EXTENDS_KW@44..52 "extends" [] [Whitespace(" ")],
+                super_class: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@52..57 "Base" [] [Whitespace(" ")],
+                    },
+                },
+                type_arguments: missing (optional),
+            },
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@57..58 "{" [] [],
+            members: JsClassMemberList [
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsDeclareModifier {
+                            modifier_token: DECLARE_KW@58..71 "declare" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@71..72 "a" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@72..74 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@74..80 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@80..81 ";" [] [],
+                },
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsAccessibilityModifier {
+                            modifier_token: PRIVATE_KW@81..94 "private" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        TsDeclareModifier {
+                            modifier_token: DECLARE_KW@94..102 "declare" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@102..103 "c" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@103..105 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@105..111 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@111..112 ";" [] [],
+                },
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsDeclareModifier {
+                            modifier_token: DECLARE_KW@112..125 "declare" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        TsAccessibilityModifier {
+                            modifier_token: PRIVATE_KW@125..133 "private" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@133..134 "d" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@134..136 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@136..142 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@142..143 ";" [] [],
+                },
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsDeclareModifier {
+                            modifier_token: DECLARE_KW@143..156 "declare" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        TsAccessibilityModifier {
+                            modifier_token: PRIVATE_KW@156..164 "private" [] [Whitespace(" ")],
+                        },
+                        TsReadonlyModifier {
+                            modifier_token: READONLY_KW@164..173 "readonly" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@173..174 "e" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@174..176 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@176..182 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@182..183 ";" [] [],
+                },
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsAccessibilityModifier {
+                            modifier_token: PRIVATE_KW@183..196 "private" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        TsReadonlyModifier {
+                            modifier_token: READONLY_KW@196..205 "readonly" [] [Whitespace(" ")],
+                        },
+                        TsDeclareModifier {
+                            modifier_token: DECLARE_KW@205..213 "declare" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@213..214 "f" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@214..216 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@216..222 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@222..223 ";" [] [],
+                },
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsDeclareModifier {
+                            modifier_token: DECLARE_KW@223..236 "declare" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        TsAccessibilityModifier {
+                            modifier_token: PRIVATE_KW@236..244 "private" [] [Whitespace(" ")],
+                        },
+                        JsStaticModifier {
+                            modifier_token: STATIC_KW@244..251 "static" [] [Whitespace(" ")],
+                        },
+                        TsReadonlyModifier {
+                            modifier_token: READONLY_KW@251..260 "readonly" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@260..261 "g" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@261..263 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@263..269 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@269..270 ";" [] [],
+                },
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsAccessibilityModifier {
+                            modifier_token: PRIVATE_KW@270..283 "private" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        JsStaticModifier {
+                            modifier_token: STATIC_KW@283..290 "static" [] [Whitespace(" ")],
+                        },
+                        TsReadonlyModifier {
+                            modifier_token: READONLY_KW@290..299 "readonly" [] [Whitespace(" ")],
+                        },
+                        TsDeclareModifier {
+                            modifier_token: DECLARE_KW@299..307 "declare" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@307..308 "h" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@308..310 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@310..316 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@316..317 ";" [] [],
+                },
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsAccessibilityModifier {
+                            modifier_token: PROTECTED_KW@317..332 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        TsReadonlyModifier {
+                            modifier_token: READONLY_KW@332..341 "readonly" [] [Whitespace(" ")],
+                        },
+                        TsAbstractModifier {
+                            modifier_token: ABSTRACT_KW@341..350 "abstract" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@350..351 "i" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@351..353 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@353..359 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@359..360 ";" [] [],
+                },
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsAccessibilityModifier {
+                            modifier_token: PROTECTED_KW@360..375 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        TsAbstractModifier {
+                            modifier_token: ABSTRACT_KW@375..384 "abstract" [] [Whitespace(" ")],
+                        },
+                        TsReadonlyModifier {
+                            modifier_token: READONLY_KW@384..393 "readonly" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@393..394 "j" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@394..396 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@396..402 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@402..403 ";" [] [],
+                },
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [
+                        TsAccessibilityModifier {
+                            modifier_token: PROTECTED_KW@403..418 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        TsOverrideModifier {
+                            modifier_token: OVERRIDE_KW@418..427 "override" [] [Whitespace(" ")],
+                        },
+                        TsReadonlyModifier {
+                            modifier_token: READONLY_KW@427..436 "readonly" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@436..441 "base1" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@441..443 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@443..449 "string" [] [],
+                        },
+                    },
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@449..450 ";" [] [],
+                },
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [
+                        TsAccessibilityModifier {
+                            modifier_token: PRIVATE_KW@450..463 "private" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        JsStaticModifier {
+                            modifier_token: STATIC_KW@463..470 "static" [] [Whitespace(" ")],
+                        },
+                        JsAccessorModifier {
+                            modifier_token: ACCESSOR_KW@470..479 "accessor" [] [Whitespace(" ")],
+                        },
+                        TsReadonlyModifier {
+                            modifier_token: READONLY_KW@479..488 "readonly" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@488..489 "k" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@489..491 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@491..497 "string" [] [],
+                        },
+                    },
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@497..498 ";" [] [],
+                },
+                TsPropertySignatureClassMember {
+                    modifiers: TsPropertySignatureModifierList [
+                        TsAccessibilityModifier {
+                            modifier_token: PROTECTED_KW@498..513 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        },
+                        TsAbstractModifier {
+                            modifier_token: ABSTRACT_KW@513..522 "abstract" [] [Whitespace(" ")],
+                        },
+                        JsAccessorModifier {
+                            modifier_token: ACCESSOR_KW@522..531 "accessor" [] [Whitespace(" ")],
+                        },
+                        TsReadonlyModifier {
+                            modifier_token: READONLY_KW@531..540 "readonly" [] [Whitespace(" ")],
+                        },
+                    ],
+                    name: JsLiteralMemberName {
+                        value: IDENT@540..541 "l" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@541..543 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@543..549 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@549..550 ";" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@550..552 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@552..553 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..553
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..552
+    0: JS_CLASS_DECLARATION@0..23
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..11
+        0: IDENT@6..11 "Base" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@11..12 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@12..21
+        0: JS_PROPERTY_CLASS_MEMBER@12..21
+          0: JS_PROPERTY_MODIFIER_LIST@12..12
+          1: JS_LITERAL_MEMBER_NAME@12..20
+            0: IDENT@12..20 "base1" [Newline("\n"), Whitespace("  ")] []
+          2: (empty)
+          3: (empty)
+          4: SEMICOLON@20..21 ";" [] []
+      9: R_CURLY@21..23 "}" [Newline("\n")] []
+    1: JS_CLASS_DECLARATION@23..552
+      0: JS_DECORATOR_LIST@23..23
+      1: ABSTRACT_KW@23..33 "abstract" [Newline("\n")] [Whitespace(" ")]
+      2: CLASS_KW@33..39 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@39..44
+        0: IDENT@39..44 "Test" [] [Whitespace(" ")]
+      4: (empty)
+      5: JS_EXTENDS_CLAUSE@44..57
+        0: EXTENDS_KW@44..52 "extends" [] [Whitespace(" ")]
+        1: JS_IDENTIFIER_EXPRESSION@52..57
+          0: JS_REFERENCE_IDENTIFIER@52..57
+            0: IDENT@52..57 "Base" [] [Whitespace(" ")]
+        2: (empty)
+      6: (empty)
+      7: L_CURLY@57..58 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@58..550
+        0: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@58..81
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@58..71
+            0: TS_DECLARE_MODIFIER@58..71
+              0: DECLARE_KW@58..71 "declare" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@71..72
+            0: IDENT@71..72 "a" [] []
+          2: TS_TYPE_ANNOTATION@72..80
+            0: COLON@72..74 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@74..80
+              0: STRING_KW@74..80 "string" [] []
+          3: SEMICOLON@80..81 ";" [] []
+        1: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@81..112
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@81..102
+            0: TS_ACCESSIBILITY_MODIFIER@81..94
+              0: PRIVATE_KW@81..94 "private" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_DECLARE_MODIFIER@94..102
+              0: DECLARE_KW@94..102 "declare" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@102..103
+            0: IDENT@102..103 "c" [] []
+          2: TS_TYPE_ANNOTATION@103..111
+            0: COLON@103..105 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@105..111
+              0: STRING_KW@105..111 "string" [] []
+          3: SEMICOLON@111..112 ";" [] []
+        2: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@112..143
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@112..133
+            0: TS_DECLARE_MODIFIER@112..125
+              0: DECLARE_KW@112..125 "declare" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ACCESSIBILITY_MODIFIER@125..133
+              0: PRIVATE_KW@125..133 "private" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@133..134
+            0: IDENT@133..134 "d" [] []
+          2: TS_TYPE_ANNOTATION@134..142
+            0: COLON@134..136 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@136..142
+              0: STRING_KW@136..142 "string" [] []
+          3: SEMICOLON@142..143 ";" [] []
+        3: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@143..183
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@143..173
+            0: TS_DECLARE_MODIFIER@143..156
+              0: DECLARE_KW@143..156 "declare" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ACCESSIBILITY_MODIFIER@156..164
+              0: PRIVATE_KW@156..164 "private" [] [Whitespace(" ")]
+            2: TS_READONLY_MODIFIER@164..173
+              0: READONLY_KW@164..173 "readonly" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@173..174
+            0: IDENT@173..174 "e" [] []
+          2: TS_TYPE_ANNOTATION@174..182
+            0: COLON@174..176 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@176..182
+              0: STRING_KW@176..182 "string" [] []
+          3: SEMICOLON@182..183 ";" [] []
+        4: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@183..223
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@183..213
+            0: TS_ACCESSIBILITY_MODIFIER@183..196
+              0: PRIVATE_KW@183..196 "private" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_READONLY_MODIFIER@196..205
+              0: READONLY_KW@196..205 "readonly" [] [Whitespace(" ")]
+            2: TS_DECLARE_MODIFIER@205..213
+              0: DECLARE_KW@205..213 "declare" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@213..214
+            0: IDENT@213..214 "f" [] []
+          2: TS_TYPE_ANNOTATION@214..222
+            0: COLON@214..216 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@216..222
+              0: STRING_KW@216..222 "string" [] []
+          3: SEMICOLON@222..223 ";" [] []
+        5: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@223..270
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@223..260
+            0: TS_DECLARE_MODIFIER@223..236
+              0: DECLARE_KW@223..236 "declare" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ACCESSIBILITY_MODIFIER@236..244
+              0: PRIVATE_KW@236..244 "private" [] [Whitespace(" ")]
+            2: JS_STATIC_MODIFIER@244..251
+              0: STATIC_KW@244..251 "static" [] [Whitespace(" ")]
+            3: TS_READONLY_MODIFIER@251..260
+              0: READONLY_KW@251..260 "readonly" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@260..261
+            0: IDENT@260..261 "g" [] []
+          2: TS_TYPE_ANNOTATION@261..269
+            0: COLON@261..263 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@263..269
+              0: STRING_KW@263..269 "string" [] []
+          3: SEMICOLON@269..270 ";" [] []
+        6: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@270..317
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@270..307
+            0: TS_ACCESSIBILITY_MODIFIER@270..283
+              0: PRIVATE_KW@270..283 "private" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JS_STATIC_MODIFIER@283..290
+              0: STATIC_KW@283..290 "static" [] [Whitespace(" ")]
+            2: TS_READONLY_MODIFIER@290..299
+              0: READONLY_KW@290..299 "readonly" [] [Whitespace(" ")]
+            3: TS_DECLARE_MODIFIER@299..307
+              0: DECLARE_KW@299..307 "declare" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@307..308
+            0: IDENT@307..308 "h" [] []
+          2: TS_TYPE_ANNOTATION@308..316
+            0: COLON@308..310 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@310..316
+              0: STRING_KW@310..316 "string" [] []
+          3: SEMICOLON@316..317 ";" [] []
+        7: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@317..360
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@317..350
+            0: TS_ACCESSIBILITY_MODIFIER@317..332
+              0: PROTECTED_KW@317..332 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_READONLY_MODIFIER@332..341
+              0: READONLY_KW@332..341 "readonly" [] [Whitespace(" ")]
+            2: TS_ABSTRACT_MODIFIER@341..350
+              0: ABSTRACT_KW@341..350 "abstract" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@350..351
+            0: IDENT@350..351 "i" [] []
+          2: TS_TYPE_ANNOTATION@351..359
+            0: COLON@351..353 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@353..359
+              0: STRING_KW@353..359 "string" [] []
+          3: SEMICOLON@359..360 ";" [] []
+        8: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@360..403
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@360..393
+            0: TS_ACCESSIBILITY_MODIFIER@360..375
+              0: PROTECTED_KW@360..375 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ABSTRACT_MODIFIER@375..384
+              0: ABSTRACT_KW@375..384 "abstract" [] [Whitespace(" ")]
+            2: TS_READONLY_MODIFIER@384..393
+              0: READONLY_KW@384..393 "readonly" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@393..394
+            0: IDENT@393..394 "j" [] []
+          2: TS_TYPE_ANNOTATION@394..402
+            0: COLON@394..396 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@396..402
+              0: STRING_KW@396..402 "string" [] []
+          3: SEMICOLON@402..403 ";" [] []
+        9: JS_PROPERTY_CLASS_MEMBER@403..450
+          0: JS_PROPERTY_MODIFIER_LIST@403..436
+            0: TS_ACCESSIBILITY_MODIFIER@403..418
+              0: PROTECTED_KW@403..418 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_OVERRIDE_MODIFIER@418..427
+              0: OVERRIDE_KW@418..427 "override" [] [Whitespace(" ")]
+            2: TS_READONLY_MODIFIER@427..436
+              0: READONLY_KW@427..436 "readonly" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@436..441
+            0: IDENT@436..441 "base1" [] []
+          2: TS_TYPE_ANNOTATION@441..449
+            0: COLON@441..443 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@443..449
+              0: STRING_KW@443..449 "string" [] []
+          3: (empty)
+          4: SEMICOLON@449..450 ";" [] []
+        10: JS_PROPERTY_CLASS_MEMBER@450..498
+          0: JS_PROPERTY_MODIFIER_LIST@450..488
+            0: TS_ACCESSIBILITY_MODIFIER@450..463
+              0: PRIVATE_KW@450..463 "private" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JS_STATIC_MODIFIER@463..470
+              0: STATIC_KW@463..470 "static" [] [Whitespace(" ")]
+            2: JS_ACCESSOR_MODIFIER@470..479
+              0: ACCESSOR_KW@470..479 "accessor" [] [Whitespace(" ")]
+            3: TS_READONLY_MODIFIER@479..488
+              0: READONLY_KW@479..488 "readonly" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@488..489
+            0: IDENT@488..489 "k" [] []
+          2: TS_TYPE_ANNOTATION@489..497
+            0: COLON@489..491 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@491..497
+              0: STRING_KW@491..497 "string" [] []
+          3: (empty)
+          4: SEMICOLON@497..498 ";" [] []
+        11: TS_PROPERTY_SIGNATURE_CLASS_MEMBER@498..550
+          0: TS_PROPERTY_SIGNATURE_MODIFIER_LIST@498..540
+            0: TS_ACCESSIBILITY_MODIFIER@498..513
+              0: PROTECTED_KW@498..513 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: TS_ABSTRACT_MODIFIER@513..522
+              0: ABSTRACT_KW@513..522 "abstract" [] [Whitespace(" ")]
+            2: JS_ACCESSOR_MODIFIER@522..531
+              0: ACCESSOR_KW@522..531 "accessor" [] [Whitespace(" ")]
+            3: TS_READONLY_MODIFIER@531..540
+              0: READONLY_KW@531..540 "readonly" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@540..541
+            0: IDENT@540..541 "l" [] []
+          2: TS_TYPE_ANNOTATION@541..549
+            0: COLON@541..543 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@543..549
+              0: STRING_KW@543..549 "string" [] []
+          3: SEMICOLON@549..550 ";" [] []
+      9: R_CURLY@550..552 "}" [Newline("\n")] []
+  4: EOF@552..553 "" [Newline("\n")] []
+
+```

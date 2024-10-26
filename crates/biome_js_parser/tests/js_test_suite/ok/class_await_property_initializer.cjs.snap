@@ -1,0 +1,134 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```cjs
+// SCRIPT
+async function* test() {
+  class A {
+    prop = await;
+  }
+}
+
+```
+
+
+## AST
+
+```
+JsScript {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    statements: JsStatementList [
+        JsFunctionDeclaration {
+            async_token: ASYNC_KW@0..16 "async" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")],
+            function_token: FUNCTION_KW@16..24 "function" [] [],
+            star_token: STAR@24..26 "*" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@26..30 "test" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@30..31 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@31..33 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@33..34 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsClassDeclaration {
+                        decorators: JsDecoratorList [],
+                        abstract_token: missing (optional),
+                        class_token: CLASS_KW@34..43 "class" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@43..45 "A" [] [Whitespace(" ")],
+                        },
+                        type_parameters: missing (optional),
+                        extends_clause: missing (optional),
+                        implements_clause: missing (optional),
+                        l_curly_token: L_CURLY@45..46 "{" [] [],
+                        members: JsClassMemberList [
+                            JsPropertyClassMember {
+                                modifiers: JsPropertyModifierList [],
+                                name: JsLiteralMemberName {
+                                    value: IDENT@46..56 "prop" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                },
+                                property_annotation: missing (optional),
+                                value: JsInitializerClause {
+                                    eq_token: EQ@56..58 "=" [] [Whitespace(" ")],
+                                    expression: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@58..63 "await" [] [],
+                                        },
+                                    },
+                                },
+                                semicolon_token: SEMICOLON@63..64 ";" [] [],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@64..68 "}" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@68..70 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@70..71 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SCRIPT@0..71
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..70
+    0: JS_FUNCTION_DECLARATION@0..70
+      0: ASYNC_KW@0..16 "async" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
+      1: FUNCTION_KW@16..24 "function" [] []
+      2: STAR@24..26 "*" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@26..30
+        0: IDENT@26..30 "test" [] []
+      4: (empty)
+      5: JS_PARAMETERS@30..33
+        0: L_PAREN@30..31 "(" [] []
+        1: JS_PARAMETER_LIST@31..31
+        2: R_PAREN@31..33 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@33..70
+        0: L_CURLY@33..34 "{" [] []
+        1: JS_DIRECTIVE_LIST@34..34
+        2: JS_STATEMENT_LIST@34..68
+          0: JS_CLASS_DECLARATION@34..68
+            0: JS_DECORATOR_LIST@34..34
+            1: (empty)
+            2: CLASS_KW@34..43 "class" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            3: JS_IDENTIFIER_BINDING@43..45
+              0: IDENT@43..45 "A" [] [Whitespace(" ")]
+            4: (empty)
+            5: (empty)
+            6: (empty)
+            7: L_CURLY@45..46 "{" [] []
+            8: JS_CLASS_MEMBER_LIST@46..64
+              0: JS_PROPERTY_CLASS_MEMBER@46..64
+                0: JS_PROPERTY_MODIFIER_LIST@46..46
+                1: JS_LITERAL_MEMBER_NAME@46..56
+                  0: IDENT@46..56 "prop" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+                2: (empty)
+                3: JS_INITIALIZER_CLAUSE@56..63
+                  0: EQ@56..58 "=" [] [Whitespace(" ")]
+                  1: JS_IDENTIFIER_EXPRESSION@58..63
+                    0: JS_REFERENCE_IDENTIFIER@58..63
+                      0: IDENT@58..63 "await" [] []
+                4: SEMICOLON@63..64 ";" [] []
+            9: R_CURLY@64..68 "}" [Newline("\n"), Whitespace("  ")] []
+        3: R_CURLY@68..70 "}" [Newline("\n")] []
+  4: EOF@70..71 "" [Newline("\n")] []
+
+```

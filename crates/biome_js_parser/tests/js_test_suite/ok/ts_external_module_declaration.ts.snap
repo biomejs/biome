@@ -1,0 +1,99 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+declare module "a";
+declare module "b"
+declare module "import" {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")],
+            declaration: TsExternalModuleDeclaration {
+                module_token: MODULE_KW@8..15 "module" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@15..18 "\"a\"" [] [],
+                },
+                body: TsEmptyExternalModuleDeclarationBody {
+                    semicolon_token: SEMICOLON@18..19 ";" [] [],
+                },
+            },
+        },
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@19..28 "declare" [Newline("\n")] [Whitespace(" ")],
+            declaration: TsExternalModuleDeclaration {
+                module_token: MODULE_KW@28..35 "module" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@35..38 "\"b\"" [] [],
+                },
+                body: missing (optional),
+            },
+        },
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@38..47 "declare" [Newline("\n")] [Whitespace(" ")],
+            declaration: TsExternalModuleDeclaration {
+                module_token: MODULE_KW@47..54 "module" [] [Whitespace(" ")],
+                source: JsModuleSource {
+                    value_token: JS_STRING_LITERAL@54..63 "\"import\"" [] [Whitespace(" ")],
+                },
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@63..64 "{" [] [],
+                    items: JsModuleItemList [],
+                    r_curly_token: R_CURLY@64..65 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@65..66 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..66
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..65
+    0: TS_DECLARE_STATEMENT@0..19
+      0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
+      1: TS_EXTERNAL_MODULE_DECLARATION@8..19
+        0: MODULE_KW@8..15 "module" [] [Whitespace(" ")]
+        1: JS_MODULE_SOURCE@15..18
+          0: JS_STRING_LITERAL@15..18 "\"a\"" [] []
+        2: TS_EMPTY_EXTERNAL_MODULE_DECLARATION_BODY@18..19
+          0: SEMICOLON@18..19 ";" [] []
+    1: TS_DECLARE_STATEMENT@19..38
+      0: DECLARE_KW@19..28 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: TS_EXTERNAL_MODULE_DECLARATION@28..38
+        0: MODULE_KW@28..35 "module" [] [Whitespace(" ")]
+        1: JS_MODULE_SOURCE@35..38
+          0: JS_STRING_LITERAL@35..38 "\"b\"" [] []
+        2: (empty)
+    2: TS_DECLARE_STATEMENT@38..65
+      0: DECLARE_KW@38..47 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: TS_EXTERNAL_MODULE_DECLARATION@47..65
+        0: MODULE_KW@47..54 "module" [] [Whitespace(" ")]
+        1: JS_MODULE_SOURCE@54..63
+          0: JS_STRING_LITERAL@54..63 "\"import\"" [] [Whitespace(" ")]
+        2: TS_MODULE_BLOCK@63..65
+          0: L_CURLY@63..64 "{" [] []
+          1: JS_MODULE_ITEM_LIST@64..64
+          2: R_CURLY@64..65 "}" [] []
+  4: EOF@65..66 "" [Newline("\n")] []
+
+```
