@@ -121,14 +121,11 @@ fn get_comparing_length_exp(
     binary_exp: &JsBinaryExpression,
     function_kind: &FunctionKind,
 ) -> Option<AnyJsExpression> {
-    let left = binary_exp.left().ok()?;
     let operator = binary_exp.operator().ok()?;
-    let right = binary_exp.right().ok()?;
-
     // Check only when the number appears on the right side according to the original rules.
     // We assume that you have already complied with useExplicitLengthCheck
-    let compare_exp = left;
-    let value_exp = right;
+    let compare_exp = binary_exp.left().ok()?;
+    let value_exp = binary_exp.right().ok()?;
 
     let AnyJsExpression::JsStaticMemberExpression(member_exp) = compare_exp else {
         return None;
