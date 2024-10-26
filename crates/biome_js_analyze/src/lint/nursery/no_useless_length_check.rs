@@ -127,9 +127,7 @@ fn get_comparing_length_exp(
     let compare_exp = binary_exp.left().ok()?;
     let value_exp = binary_exp.right().ok()?;
 
-    let AnyJsExpression::JsStaticMemberExpression(member_exp) = compare_exp else {
-        return None;
-    };
+    let member_exp = compare_exp.as_js_static_member_expression()?;
     let target = member_exp.object().ok()?;
     let member = member_exp.member().ok()?;
     if member.text() != "length" || member_exp.is_optional_chain() {
