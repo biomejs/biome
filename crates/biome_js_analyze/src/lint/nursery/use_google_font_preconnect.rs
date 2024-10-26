@@ -72,7 +72,8 @@ impl Rule for UseGoogleFontPreconnect {
         let href = node.get_attribute_inner_string_text("href")?;
         let rel = node.get_attribute_inner_string_text("rel");
 
-        if href.starts_with("https://fonts.gstatic.com") && (rel.is_none() || rel? != "preconnect")
+        if href.starts_with("https://fonts.gstatic.com")
+            && !matches!(rel.as_deref(), Some("preconnect"))
         {
             return Some(node.syntax().text_range());
         }
