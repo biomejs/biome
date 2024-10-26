@@ -189,14 +189,6 @@ pub enum BiomeCommand {
         #[bpaf(long("write"), switch)]
         write: bool,
 
-        /// Fix diagnostics with suppression comments if the language supports it.
-        #[bpaf(long("suppress"))]
-        suppress: bool,
-
-        /// Explanation for suppressing diagnostics with `--suppress`
-        #[bpaf(long("reason"), argument("STRING"))]
-        suppression_reason: Option<String>,
-
         /// Allow to do unsafe fixes, should be used with `--write` or `--fix`
         #[bpaf(long("unsafe"), switch)]
         unsafe_: bool,
@@ -212,6 +204,14 @@ pub enum BiomeCommand {
         /// Alias for `--write --unsafe`, writes safe and unsafe fixes (deprecated, use `--write --unsafe`)
         #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
+
+        /// Bulk fix diagnostics with suppression comments if the language supports it.
+        #[bpaf(long("suppress"))]
+        suppress: bool,
+
+        /// Explanation for suppressing diagnostics with `--suppress`
+        #[bpaf(long("reason"), argument("STRING"))]
+        suppression_reason: Option<String>,
 
         #[bpaf(external(partial_linter_configuration), hide_usage, optional)]
         linter_configuration: Option<PartialLinterConfiguration>,
