@@ -1,0 +1,138 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+var test2 = new <any>Test2();
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: VAR_KW@0..4 "var" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..10 "test2" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@10..12 "=" [] [Whitespace(" ")],
+                            expression: JsBinaryExpression {
+                                left: JsBinaryExpression {
+                                    left: JsNewExpression {
+                                        new_token: NEW_KW@12..16 "new" [] [Whitespace(" ")],
+                                        callee: missing (required),
+                                        type_arguments: missing (optional),
+                                        arguments: missing (optional),
+                                    },
+                                    operator_token: L_ANGLE@16..17 "<" [] [],
+                                    right: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@17..20 "any" [] [],
+                                        },
+                                    },
+                                },
+                                operator_token: R_ANGLE@20..21 ">" [] [],
+                                right: JsCallExpression {
+                                    callee: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@21..26 "Test2" [] [],
+                                        },
+                                    },
+                                    optional_chain_token: missing (optional),
+                                    type_arguments: missing (optional),
+                                    arguments: JsCallArguments {
+                                        l_paren_token: L_PAREN@26..27 "(" [] [],
+                                        args: JsCallArgumentList [],
+                                        r_paren_token: R_PAREN@27..28 ")" [] [],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@28..29 ";" [] [],
+        },
+    ],
+    eof_token: EOF@29..30 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..30
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..29
+    0: JS_VARIABLE_STATEMENT@0..29
+      0: JS_VARIABLE_DECLARATION@0..28
+        0: (empty)
+        1: VAR_KW@0..4 "var" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..28
+          0: JS_VARIABLE_DECLARATOR@4..28
+            0: JS_IDENTIFIER_BINDING@4..10
+              0: IDENT@4..10 "test2" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@10..28
+              0: EQ@10..12 "=" [] [Whitespace(" ")]
+              1: JS_BINARY_EXPRESSION@12..28
+                0: JS_BINARY_EXPRESSION@12..20
+                  0: JS_NEW_EXPRESSION@12..16
+                    0: NEW_KW@12..16 "new" [] [Whitespace(" ")]
+                    1: (empty)
+                    2: (empty)
+                    3: (empty)
+                  1: L_ANGLE@16..17 "<" [] []
+                  2: JS_IDENTIFIER_EXPRESSION@17..20
+                    0: JS_REFERENCE_IDENTIFIER@17..20
+                      0: IDENT@17..20 "any" [] []
+                1: R_ANGLE@20..21 ">" [] []
+                2: JS_CALL_EXPRESSION@21..28
+                  0: JS_IDENTIFIER_EXPRESSION@21..26
+                    0: JS_REFERENCE_IDENTIFIER@21..26
+                      0: IDENT@21..26 "Test2" [] []
+                  1: (empty)
+                  2: (empty)
+                  3: JS_CALL_ARGUMENTS@26..28
+                    0: L_PAREN@26..27 "(" [] []
+                    1: JS_CALL_ARGUMENT_LIST@27..27
+                    2: R_PAREN@27..28 ")" [] []
+      1: SEMICOLON@28..29 ";" [] []
+  4: EOF@29..30 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_type_assertions_not_valid_at_new_expr.ts:1:17 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '<'.
+  
+  > 1 │ var test2 = new <any>Test2();
+      │                 ^
+    2 │ 
+  
+  i Expected an expression here.
+  
+  > 1 │ var test2 = new <any>Test2();
+      │                 ^
+    2 │ 
+  
+```

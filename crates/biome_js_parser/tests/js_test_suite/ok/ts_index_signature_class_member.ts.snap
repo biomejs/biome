@@ -1,0 +1,194 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class A {
+    [a: number]: string;
+}
+class B {
+    [index: string]: { prop }
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..9 "{" [] [],
+            members: JsClassMemberList [
+                TsIndexSignatureClassMember {
+                    modifiers: TsIndexSignatureModifierList [],
+                    l_brack_token: L_BRACK@9..15 "[" [Newline("\n"), Whitespace("    ")] [],
+                    parameter: TsIndexSignatureParameter {
+                        binding: JsIdentifierBinding {
+                            name_token: IDENT@15..16 "a" [] [],
+                        },
+                        type_annotation: TsTypeAnnotation {
+                            colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
+                            ty: TsNumberType {
+                                number_token: NUMBER_KW@18..24 "number" [] [],
+                            },
+                        },
+                    },
+                    r_brack_token: R_BRACK@24..25 "]" [] [],
+                    type_annotation: TsTypeAnnotation {
+                        colon_token: COLON@25..27 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@27..33 "string" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@33..34 ";" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@34..36 "}" [Newline("\n")] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@36..43 "class" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@43..45 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@45..46 "{" [] [],
+            members: JsClassMemberList [
+                TsIndexSignatureClassMember {
+                    modifiers: TsIndexSignatureModifierList [],
+                    l_brack_token: L_BRACK@46..52 "[" [Newline("\n"), Whitespace("    ")] [],
+                    parameter: TsIndexSignatureParameter {
+                        binding: JsIdentifierBinding {
+                            name_token: IDENT@52..57 "index" [] [],
+                        },
+                        type_annotation: TsTypeAnnotation {
+                            colon_token: COLON@57..59 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@59..65 "string" [] [],
+                            },
+                        },
+                    },
+                    r_brack_token: R_BRACK@65..66 "]" [] [],
+                    type_annotation: TsTypeAnnotation {
+                        colon_token: COLON@66..68 ":" [] [Whitespace(" ")],
+                        ty: TsObjectType {
+                            l_curly_token: L_CURLY@68..70 "{" [] [Whitespace(" ")],
+                            members: TsTypeMemberList [
+                                TsPropertySignatureTypeMember {
+                                    readonly_token: missing (optional),
+                                    name: JsLiteralMemberName {
+                                        value: IDENT@70..75 "prop" [] [Whitespace(" ")],
+                                    },
+                                    optional_token: missing (optional),
+                                    type_annotation: missing (optional),
+                                    separator_token: missing (optional),
+                                },
+                            ],
+                            r_curly_token: R_CURLY@75..76 "}" [] [],
+                        },
+                    },
+                    semicolon_token: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@76..78 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@78..79 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..79
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..78
+    0: JS_CLASS_DECLARATION@0..36
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..9 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@9..34
+        0: TS_INDEX_SIGNATURE_CLASS_MEMBER@9..34
+          0: TS_INDEX_SIGNATURE_MODIFIER_LIST@9..9
+          1: L_BRACK@9..15 "[" [Newline("\n"), Whitespace("    ")] []
+          2: TS_INDEX_SIGNATURE_PARAMETER@15..24
+            0: JS_IDENTIFIER_BINDING@15..16
+              0: IDENT@15..16 "a" [] []
+            1: TS_TYPE_ANNOTATION@16..24
+              0: COLON@16..18 ":" [] [Whitespace(" ")]
+              1: TS_NUMBER_TYPE@18..24
+                0: NUMBER_KW@18..24 "number" [] []
+          3: R_BRACK@24..25 "]" [] []
+          4: TS_TYPE_ANNOTATION@25..33
+            0: COLON@25..27 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@27..33
+              0: STRING_KW@27..33 "string" [] []
+          5: SEMICOLON@33..34 ";" [] []
+      9: R_CURLY@34..36 "}" [Newline("\n")] []
+    1: JS_CLASS_DECLARATION@36..78
+      0: JS_DECORATOR_LIST@36..36
+      1: (empty)
+      2: CLASS_KW@36..43 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@43..45
+        0: IDENT@43..45 "B" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@45..46 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@46..76
+        0: TS_INDEX_SIGNATURE_CLASS_MEMBER@46..76
+          0: TS_INDEX_SIGNATURE_MODIFIER_LIST@46..46
+          1: L_BRACK@46..52 "[" [Newline("\n"), Whitespace("    ")] []
+          2: TS_INDEX_SIGNATURE_PARAMETER@52..65
+            0: JS_IDENTIFIER_BINDING@52..57
+              0: IDENT@52..57 "index" [] []
+            1: TS_TYPE_ANNOTATION@57..65
+              0: COLON@57..59 ":" [] [Whitespace(" ")]
+              1: TS_STRING_TYPE@59..65
+                0: STRING_KW@59..65 "string" [] []
+          3: R_BRACK@65..66 "]" [] []
+          4: TS_TYPE_ANNOTATION@66..76
+            0: COLON@66..68 ":" [] [Whitespace(" ")]
+            1: TS_OBJECT_TYPE@68..76
+              0: L_CURLY@68..70 "{" [] [Whitespace(" ")]
+              1: TS_TYPE_MEMBER_LIST@70..75
+                0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@70..75
+                  0: (empty)
+                  1: JS_LITERAL_MEMBER_NAME@70..75
+                    0: IDENT@70..75 "prop" [] [Whitespace(" ")]
+                  2: (empty)
+                  3: (empty)
+                  4: (empty)
+              2: R_CURLY@75..76 "}" [] []
+          5: (empty)
+      9: R_CURLY@76..78 "}" [Newline("\n")] []
+  4: EOF@78..79 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,117 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+new A<test><test>();
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsBinaryExpression {
+                left: JsBinaryExpression {
+                    left: JsNewExpression {
+                        new_token: NEW_KW@0..4 "new" [] [Whitespace(" ")],
+                        callee: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@4..5 "A" [] [],
+                            },
+                        },
+                        type_arguments: missing (optional),
+                        arguments: missing (optional),
+                    },
+                    operator_token: L_ANGLE@5..6 "<" [] [],
+                    right: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@6..10 "test" [] [],
+                        },
+                    },
+                },
+                operator_token: R_ANGLE@10..11 ">" [] [],
+                right: TsTypeAssertionExpression {
+                    l_angle_token: L_ANGLE@11..12 "<" [] [],
+                    ty: TsReferenceType {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@12..16 "test" [] [],
+                        },
+                        type_arguments: missing (optional),
+                    },
+                    r_angle_token: R_ANGLE@16..17 ">" [] [],
+                    expression: JsParenthesizedExpression {
+                        l_paren_token: L_PAREN@17..18 "(" [] [],
+                        expression: missing (required),
+                        r_paren_token: R_PAREN@18..19 ")" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@19..20 ";" [] [],
+        },
+    ],
+    eof_token: EOF@20..21 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..21
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..20
+    0: JS_EXPRESSION_STATEMENT@0..20
+      0: JS_BINARY_EXPRESSION@0..19
+        0: JS_BINARY_EXPRESSION@0..10
+          0: JS_NEW_EXPRESSION@0..5
+            0: NEW_KW@0..4 "new" [] [Whitespace(" ")]
+            1: JS_IDENTIFIER_EXPRESSION@4..5
+              0: JS_REFERENCE_IDENTIFIER@4..5
+                0: IDENT@4..5 "A" [] []
+            2: (empty)
+            3: (empty)
+          1: L_ANGLE@5..6 "<" [] []
+          2: JS_IDENTIFIER_EXPRESSION@6..10
+            0: JS_REFERENCE_IDENTIFIER@6..10
+              0: IDENT@6..10 "test" [] []
+        1: R_ANGLE@10..11 ">" [] []
+        2: TS_TYPE_ASSERTION_EXPRESSION@11..19
+          0: L_ANGLE@11..12 "<" [] []
+          1: TS_REFERENCE_TYPE@12..16
+            0: JS_REFERENCE_IDENTIFIER@12..16
+              0: IDENT@12..16 "test" [] []
+            1: (empty)
+          2: R_ANGLE@16..17 ">" [] []
+          3: JS_PARENTHESIZED_EXPRESSION@17..19
+            0: L_PAREN@17..18 "(" [] []
+            1: (empty)
+            2: R_PAREN@18..19 ")" [] []
+      1: SEMICOLON@19..20 ";" [] []
+  4: EOF@20..21 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_new_operator.ts:1:19 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parenthesized expression didnt contain anything
+  
+  > 1 │ new A<test><test>();
+      │                   ^
+    2 │ 
+  
+  i Expected an expression here
+  
+```

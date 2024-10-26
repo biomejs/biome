@@ -1,0 +1,540 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+type A = { set a(b: number) }
+type B = { set a(b) }
+// members that look like setters but aren't setters
+type C = { set(a) }
+type D = { set: number }
+type E = { set }
+type F = { set(b: number,) }
+type G = {set a(b,)}
+type H = {set(a, ) }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@9..11 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsSetterSignatureTypeMember {
+                        set_token: SET_KW@11..15 "set" [] [Whitespace(" ")],
+                        name: JsLiteralMemberName {
+                            value: IDENT@15..16 "a" [] [],
+                        },
+                        l_paren_token: L_PAREN@16..17 "(" [] [],
+                        parameter: JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@17..18 "b" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@18..20 ":" [] [Whitespace(" ")],
+                                ty: TsNumberType {
+                                    number_token: NUMBER_KW@20..26 "number" [] [],
+                                },
+                            },
+                            initializer: missing (optional),
+                        },
+                        comma_token: missing (optional),
+                        r_paren_token: R_PAREN@26..28 ")" [] [Whitespace(" ")],
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@28..29 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@29..35 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@35..37 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@37..39 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@39..41 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsSetterSignatureTypeMember {
+                        set_token: SET_KW@41..45 "set" [] [Whitespace(" ")],
+                        name: JsLiteralMemberName {
+                            value: IDENT@45..46 "a" [] [],
+                        },
+                        l_paren_token: L_PAREN@46..47 "(" [] [],
+                        parameter: JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@47..48 "b" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        comma_token: missing (optional),
+                        r_paren_token: R_PAREN@48..50 ")" [] [Whitespace(" ")],
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@50..51 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@51..110 "type" [Newline("\n"), Comments("// members that look  ..."), Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@110..112 "C" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@112..114 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@114..116 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsMethodSignatureTypeMember {
+                        name: JsLiteralMemberName {
+                            value: IDENT@116..119 "set" [] [],
+                        },
+                        optional_token: missing (optional),
+                        type_parameters: missing (optional),
+                        parameters: JsParameters {
+                            l_paren_token: L_PAREN@119..120 "(" [] [],
+                            items: JsParameterList [
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@120..121 "a" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: missing (optional),
+                                    initializer: missing (optional),
+                                },
+                            ],
+                            r_paren_token: R_PAREN@121..123 ")" [] [Whitespace(" ")],
+                        },
+                        return_type_annotation: missing (optional),
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@123..124 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@124..130 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@130..132 "D" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@132..134 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@134..136 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsPropertySignatureTypeMember {
+                        readonly_token: missing (optional),
+                        name: JsLiteralMemberName {
+                            value: IDENT@136..139 "set" [] [],
+                        },
+                        optional_token: missing (optional),
+                        type_annotation: TsTypeAnnotation {
+                            colon_token: COLON@139..141 ":" [] [Whitespace(" ")],
+                            ty: TsNumberType {
+                                number_token: NUMBER_KW@141..148 "number" [] [Whitespace(" ")],
+                            },
+                        },
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@148..149 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@149..155 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@155..157 "E" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@157..159 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@159..161 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsPropertySignatureTypeMember {
+                        readonly_token: missing (optional),
+                        name: JsLiteralMemberName {
+                            value: IDENT@161..165 "set" [] [Whitespace(" ")],
+                        },
+                        optional_token: missing (optional),
+                        type_annotation: missing (optional),
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@165..166 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@166..172 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@172..174 "F" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@174..176 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@176..178 "{" [] [Whitespace(" ")],
+                members: TsTypeMemberList [
+                    TsMethodSignatureTypeMember {
+                        name: JsLiteralMemberName {
+                            value: IDENT@178..181 "set" [] [],
+                        },
+                        optional_token: missing (optional),
+                        type_parameters: missing (optional),
+                        parameters: JsParameters {
+                            l_paren_token: L_PAREN@181..182 "(" [] [],
+                            items: JsParameterList [
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@182..183 "b" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: TsTypeAnnotation {
+                                        colon_token: COLON@183..185 ":" [] [Whitespace(" ")],
+                                        ty: TsNumberType {
+                                            number_token: NUMBER_KW@185..191 "number" [] [],
+                                        },
+                                    },
+                                    initializer: missing (optional),
+                                },
+                                COMMA@191..192 "," [] [],
+                            ],
+                            r_paren_token: R_PAREN@192..194 ")" [] [Whitespace(" ")],
+                        },
+                        return_type_annotation: missing (optional),
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@194..195 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@195..201 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@201..203 "G" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@203..205 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@205..206 "{" [] [],
+                members: TsTypeMemberList [
+                    TsSetterSignatureTypeMember {
+                        set_token: SET_KW@206..210 "set" [] [Whitespace(" ")],
+                        name: JsLiteralMemberName {
+                            value: IDENT@210..211 "a" [] [],
+                        },
+                        l_paren_token: L_PAREN@211..212 "(" [] [],
+                        parameter: JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@212..213 "b" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        comma_token: COMMA@213..214 "," [] [],
+                        r_paren_token: R_PAREN@214..215 ")" [] [],
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@215..216 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@216..222 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@222..224 "H" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@224..226 "=" [] [Whitespace(" ")],
+            ty: TsObjectType {
+                l_curly_token: L_CURLY@226..227 "{" [] [],
+                members: TsTypeMemberList [
+                    TsMethodSignatureTypeMember {
+                        name: JsLiteralMemberName {
+                            value: IDENT@227..230 "set" [] [],
+                        },
+                        optional_token: missing (optional),
+                        type_parameters: missing (optional),
+                        parameters: JsParameters {
+                            l_paren_token: L_PAREN@230..231 "(" [] [],
+                            items: JsParameterList [
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@231..232 "a" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: missing (optional),
+                                    initializer: missing (optional),
+                                },
+                                COMMA@232..234 "," [] [Whitespace(" ")],
+                            ],
+                            r_paren_token: R_PAREN@234..236 ")" [] [Whitespace(" ")],
+                        },
+                        return_type_annotation: missing (optional),
+                        separator_token: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@236..237 "}" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@237..238 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..238
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..237
+    0: TS_TYPE_ALIAS_DECLARATION@0..29
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "A" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@9..29
+        0: L_CURLY@9..11 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@11..28
+          0: TS_SETTER_SIGNATURE_TYPE_MEMBER@11..28
+            0: SET_KW@11..15 "set" [] [Whitespace(" ")]
+            1: JS_LITERAL_MEMBER_NAME@15..16
+              0: IDENT@15..16 "a" [] []
+            2: L_PAREN@16..17 "(" [] []
+            3: JS_FORMAL_PARAMETER@17..26
+              0: JS_DECORATOR_LIST@17..17
+              1: JS_IDENTIFIER_BINDING@17..18
+                0: IDENT@17..18 "b" [] []
+              2: (empty)
+              3: TS_TYPE_ANNOTATION@18..26
+                0: COLON@18..20 ":" [] [Whitespace(" ")]
+                1: TS_NUMBER_TYPE@20..26
+                  0: NUMBER_KW@20..26 "number" [] []
+              4: (empty)
+            4: (empty)
+            5: R_PAREN@26..28 ")" [] [Whitespace(" ")]
+            6: (empty)
+        2: R_CURLY@28..29 "}" [] []
+      5: (empty)
+    1: TS_TYPE_ALIAS_DECLARATION@29..51
+      0: TYPE_KW@29..35 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@35..37
+        0: IDENT@35..37 "B" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@37..39 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@39..51
+        0: L_CURLY@39..41 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@41..50
+          0: TS_SETTER_SIGNATURE_TYPE_MEMBER@41..50
+            0: SET_KW@41..45 "set" [] [Whitespace(" ")]
+            1: JS_LITERAL_MEMBER_NAME@45..46
+              0: IDENT@45..46 "a" [] []
+            2: L_PAREN@46..47 "(" [] []
+            3: JS_FORMAL_PARAMETER@47..48
+              0: JS_DECORATOR_LIST@47..47
+              1: JS_IDENTIFIER_BINDING@47..48
+                0: IDENT@47..48 "b" [] []
+              2: (empty)
+              3: (empty)
+              4: (empty)
+            4: (empty)
+            5: R_PAREN@48..50 ")" [] [Whitespace(" ")]
+            6: (empty)
+        2: R_CURLY@50..51 "}" [] []
+      5: (empty)
+    2: TS_TYPE_ALIAS_DECLARATION@51..124
+      0: TYPE_KW@51..110 "type" [Newline("\n"), Comments("// members that look  ..."), Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@110..112
+        0: IDENT@110..112 "C" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@112..114 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@114..124
+        0: L_CURLY@114..116 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@116..123
+          0: TS_METHOD_SIGNATURE_TYPE_MEMBER@116..123
+            0: JS_LITERAL_MEMBER_NAME@116..119
+              0: IDENT@116..119 "set" [] []
+            1: (empty)
+            2: (empty)
+            3: JS_PARAMETERS@119..123
+              0: L_PAREN@119..120 "(" [] []
+              1: JS_PARAMETER_LIST@120..121
+                0: JS_FORMAL_PARAMETER@120..121
+                  0: JS_DECORATOR_LIST@120..120
+                  1: JS_IDENTIFIER_BINDING@120..121
+                    0: IDENT@120..121 "a" [] []
+                  2: (empty)
+                  3: (empty)
+                  4: (empty)
+              2: R_PAREN@121..123 ")" [] [Whitespace(" ")]
+            4: (empty)
+            5: (empty)
+        2: R_CURLY@123..124 "}" [] []
+      5: (empty)
+    3: TS_TYPE_ALIAS_DECLARATION@124..149
+      0: TYPE_KW@124..130 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@130..132
+        0: IDENT@130..132 "D" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@132..134 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@134..149
+        0: L_CURLY@134..136 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@136..148
+          0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@136..148
+            0: (empty)
+            1: JS_LITERAL_MEMBER_NAME@136..139
+              0: IDENT@136..139 "set" [] []
+            2: (empty)
+            3: TS_TYPE_ANNOTATION@139..148
+              0: COLON@139..141 ":" [] [Whitespace(" ")]
+              1: TS_NUMBER_TYPE@141..148
+                0: NUMBER_KW@141..148 "number" [] [Whitespace(" ")]
+            4: (empty)
+        2: R_CURLY@148..149 "}" [] []
+      5: (empty)
+    4: TS_TYPE_ALIAS_DECLARATION@149..166
+      0: TYPE_KW@149..155 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@155..157
+        0: IDENT@155..157 "E" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@157..159 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@159..166
+        0: L_CURLY@159..161 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@161..165
+          0: TS_PROPERTY_SIGNATURE_TYPE_MEMBER@161..165
+            0: (empty)
+            1: JS_LITERAL_MEMBER_NAME@161..165
+              0: IDENT@161..165 "set" [] [Whitespace(" ")]
+            2: (empty)
+            3: (empty)
+            4: (empty)
+        2: R_CURLY@165..166 "}" [] []
+      5: (empty)
+    5: TS_TYPE_ALIAS_DECLARATION@166..195
+      0: TYPE_KW@166..172 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@172..174
+        0: IDENT@172..174 "F" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@174..176 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@176..195
+        0: L_CURLY@176..178 "{" [] [Whitespace(" ")]
+        1: TS_TYPE_MEMBER_LIST@178..194
+          0: TS_METHOD_SIGNATURE_TYPE_MEMBER@178..194
+            0: JS_LITERAL_MEMBER_NAME@178..181
+              0: IDENT@178..181 "set" [] []
+            1: (empty)
+            2: (empty)
+            3: JS_PARAMETERS@181..194
+              0: L_PAREN@181..182 "(" [] []
+              1: JS_PARAMETER_LIST@182..192
+                0: JS_FORMAL_PARAMETER@182..191
+                  0: JS_DECORATOR_LIST@182..182
+                  1: JS_IDENTIFIER_BINDING@182..183
+                    0: IDENT@182..183 "b" [] []
+                  2: (empty)
+                  3: TS_TYPE_ANNOTATION@183..191
+                    0: COLON@183..185 ":" [] [Whitespace(" ")]
+                    1: TS_NUMBER_TYPE@185..191
+                      0: NUMBER_KW@185..191 "number" [] []
+                  4: (empty)
+                1: COMMA@191..192 "," [] []
+              2: R_PAREN@192..194 ")" [] [Whitespace(" ")]
+            4: (empty)
+            5: (empty)
+        2: R_CURLY@194..195 "}" [] []
+      5: (empty)
+    6: TS_TYPE_ALIAS_DECLARATION@195..216
+      0: TYPE_KW@195..201 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@201..203
+        0: IDENT@201..203 "G" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@203..205 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@205..216
+        0: L_CURLY@205..206 "{" [] []
+        1: TS_TYPE_MEMBER_LIST@206..215
+          0: TS_SETTER_SIGNATURE_TYPE_MEMBER@206..215
+            0: SET_KW@206..210 "set" [] [Whitespace(" ")]
+            1: JS_LITERAL_MEMBER_NAME@210..211
+              0: IDENT@210..211 "a" [] []
+            2: L_PAREN@211..212 "(" [] []
+            3: JS_FORMAL_PARAMETER@212..213
+              0: JS_DECORATOR_LIST@212..212
+              1: JS_IDENTIFIER_BINDING@212..213
+                0: IDENT@212..213 "b" [] []
+              2: (empty)
+              3: (empty)
+              4: (empty)
+            4: COMMA@213..214 "," [] []
+            5: R_PAREN@214..215 ")" [] []
+            6: (empty)
+        2: R_CURLY@215..216 "}" [] []
+      5: (empty)
+    7: TS_TYPE_ALIAS_DECLARATION@216..237
+      0: TYPE_KW@216..222 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@222..224
+        0: IDENT@222..224 "H" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@224..226 "=" [] [Whitespace(" ")]
+      4: TS_OBJECT_TYPE@226..237
+        0: L_CURLY@226..227 "{" [] []
+        1: TS_TYPE_MEMBER_LIST@227..236
+          0: TS_METHOD_SIGNATURE_TYPE_MEMBER@227..236
+            0: JS_LITERAL_MEMBER_NAME@227..230
+              0: IDENT@227..230 "set" [] []
+            1: (empty)
+            2: (empty)
+            3: JS_PARAMETERS@230..236
+              0: L_PAREN@230..231 "(" [] []
+              1: JS_PARAMETER_LIST@231..234
+                0: JS_FORMAL_PARAMETER@231..232
+                  0: JS_DECORATOR_LIST@231..231
+                  1: JS_IDENTIFIER_BINDING@231..232
+                    0: IDENT@231..232 "a" [] []
+                  2: (empty)
+                  3: (empty)
+                  4: (empty)
+                1: COMMA@232..234 "," [] [Whitespace(" ")]
+              2: R_PAREN@234..236 ")" [] [Whitespace(" ")]
+            4: (empty)
+            5: (empty)
+        2: R_CURLY@236..237 "}" [] []
+      5: (empty)
+  4: EOF@237..238 "" [Newline("\n")] []
+
+```

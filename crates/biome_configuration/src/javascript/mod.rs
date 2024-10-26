@@ -63,6 +63,11 @@ pub struct JavascriptParser {
     /// These decorators belong to an old proposal, and they are subject to change.
     #[partial(bpaf(hide))]
     pub unsafe_parameter_decorators_enabled: bool,
+
+    /// Enables parsing of Grit metavariables.
+    /// Defaults to `false`.
+    #[partial(bpaf(hide))]
+    pub grit_metavariables: bool,
 }
 
 /// Indicates the type of runtime or transformation used for interpreting JSX.

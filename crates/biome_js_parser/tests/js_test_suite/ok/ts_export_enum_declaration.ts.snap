@@ -1,0 +1,133 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+export enum A { X, Y }
+export const enum B { X, Y }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: TsEnumDeclaration {
+                const_token: missing (optional),
+                enum_token: ENUM_KW@7..12 "enum" [] [Whitespace(" ")],
+                id: JsIdentifierBinding {
+                    name_token: IDENT@12..14 "A" [] [Whitespace(" ")],
+                },
+                l_curly_token: L_CURLY@14..16 "{" [] [Whitespace(" ")],
+                members: TsEnumMemberList [
+                    TsEnumMember {
+                        name: TsLiteralEnumMemberName {
+                            value: IDENT@16..17 "X" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                    COMMA@17..19 "," [] [Whitespace(" ")],
+                    TsEnumMember {
+                        name: TsLiteralEnumMemberName {
+                            value: IDENT@19..21 "Y" [] [Whitespace(" ")],
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@21..22 "}" [] [],
+            },
+        },
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@22..30 "export" [Newline("\n")] [Whitespace(" ")],
+            export_clause: TsEnumDeclaration {
+                const_token: CONST_KW@30..36 "const" [] [Whitespace(" ")],
+                enum_token: ENUM_KW@36..41 "enum" [] [Whitespace(" ")],
+                id: JsIdentifierBinding {
+                    name_token: IDENT@41..43 "B" [] [Whitespace(" ")],
+                },
+                l_curly_token: L_CURLY@43..45 "{" [] [Whitespace(" ")],
+                members: TsEnumMemberList [
+                    TsEnumMember {
+                        name: TsLiteralEnumMemberName {
+                            value: IDENT@45..46 "X" [] [],
+                        },
+                        initializer: missing (optional),
+                    },
+                    COMMA@46..48 "," [] [Whitespace(" ")],
+                    TsEnumMember {
+                        name: TsLiteralEnumMemberName {
+                            value: IDENT@48..50 "Y" [] [Whitespace(" ")],
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+                r_curly_token: R_CURLY@50..51 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@51..52 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..52
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..51
+    0: JS_EXPORT@0..22
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: TS_ENUM_DECLARATION@7..22
+        0: (empty)
+        1: ENUM_KW@7..12 "enum" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_BINDING@12..14
+          0: IDENT@12..14 "A" [] [Whitespace(" ")]
+        3: L_CURLY@14..16 "{" [] [Whitespace(" ")]
+        4: TS_ENUM_MEMBER_LIST@16..21
+          0: TS_ENUM_MEMBER@16..17
+            0: TS_LITERAL_ENUM_MEMBER_NAME@16..17
+              0: IDENT@16..17 "X" [] []
+            1: (empty)
+          1: COMMA@17..19 "," [] [Whitespace(" ")]
+          2: TS_ENUM_MEMBER@19..21
+            0: TS_LITERAL_ENUM_MEMBER_NAME@19..21
+              0: IDENT@19..21 "Y" [] [Whitespace(" ")]
+            1: (empty)
+        5: R_CURLY@21..22 "}" [] []
+    1: JS_EXPORT@22..51
+      0: JS_DECORATOR_LIST@22..22
+      1: EXPORT_KW@22..30 "export" [Newline("\n")] [Whitespace(" ")]
+      2: TS_ENUM_DECLARATION@30..51
+        0: CONST_KW@30..36 "const" [] [Whitespace(" ")]
+        1: ENUM_KW@36..41 "enum" [] [Whitespace(" ")]
+        2: JS_IDENTIFIER_BINDING@41..43
+          0: IDENT@41..43 "B" [] [Whitespace(" ")]
+        3: L_CURLY@43..45 "{" [] [Whitespace(" ")]
+        4: TS_ENUM_MEMBER_LIST@45..50
+          0: TS_ENUM_MEMBER@45..46
+            0: TS_LITERAL_ENUM_MEMBER_NAME@45..46
+              0: IDENT@45..46 "X" [] []
+            1: (empty)
+          1: COMMA@46..48 "," [] [Whitespace(" ")]
+          2: TS_ENUM_MEMBER@48..50
+            0: TS_LITERAL_ENUM_MEMBER_NAME@48..50
+              0: IDENT@48..50 "Y" [] [Whitespace(" ")]
+            1: (empty)
+        5: R_CURLY@50..51 "}" [] []
+  4: EOF@51..52 "" [Newline("\n")] []
+
+```

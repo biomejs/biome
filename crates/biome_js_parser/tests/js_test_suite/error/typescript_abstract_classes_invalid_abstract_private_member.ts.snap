@@ -1,0 +1,112 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+abstract class A { abstract #name(); };
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")],
+            class_token: CLASS_KW@9..15 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@15..17 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@17..19 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        TsMethodSignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@19..28 "abstract" [] [Whitespace(" ")],
+                            },
+                        ],
+                        JsPrivateClassMemberName {
+                            hash_token: HASH@28..29 "#" [] [],
+                            id_token: IDENT@29..33 "name" [] [],
+                        },
+                        JsParameters {
+                            l_paren_token: L_PAREN@33..34 "(" [] [],
+                            items: JsParameterList [],
+                            r_paren_token: R_PAREN@34..35 ")" [] [],
+                        },
+                        SEMICOLON@35..37 ";" [] [Whitespace(" ")],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@37..38 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@38..39 ";" [] [],
+        },
+    ],
+    eof_token: EOF@39..40 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..40
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..39
+    0: JS_CLASS_DECLARATION@0..38
+      0: JS_DECORATOR_LIST@0..0
+      1: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")]
+      2: CLASS_KW@9..15 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@15..17
+        0: IDENT@15..17 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@17..19 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@19..37
+        0: JS_BOGUS_MEMBER@19..37
+          0: TS_METHOD_SIGNATURE_MODIFIER_LIST@19..28
+            0: TS_ABSTRACT_MODIFIER@19..28
+              0: ABSTRACT_KW@19..28 "abstract" [] [Whitespace(" ")]
+          1: JS_PRIVATE_CLASS_MEMBER_NAME@28..33
+            0: HASH@28..29 "#" [] []
+            1: IDENT@29..33 "name" [] []
+          2: JS_PARAMETERS@33..35
+            0: L_PAREN@33..34 "(" [] []
+            1: JS_PARAMETER_LIST@34..34
+            2: R_PAREN@34..35 ")" [] []
+          3: SEMICOLON@35..37 ";" [] [Whitespace(" ")]
+      9: R_CURLY@37..38 "}" [] []
+    1: JS_EMPTY_STATEMENT@38..39
+      0: SEMICOLON@38..39 ";" [] []
+  4: EOF@39..40 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+typescript_abstract_classes_invalid_abstract_private_member.ts:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'abstract' modifier cannot be used with a private identifier'.
+  
+  > 1 │ abstract class A { abstract #name(); };
+      │                    ^^^^^^^^
+    2 │ 
+  
+```

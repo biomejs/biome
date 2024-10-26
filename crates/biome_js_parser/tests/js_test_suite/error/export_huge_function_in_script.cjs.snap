@@ -1,0 +1,113 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```cjs
+// SCRIPT
+export function A () { return "Kinsmen hot Moria tea serves. Sticky camp spell covering forged they're Oakenshield vines. Admirable relatives march regained wheel Ere eternally on rest parts unhappy? Leave hundreds market's Argonath answered avail grieve doing goodness! Wrong miserable well-wishers wander stood immediately neither Agreed goat poison holes fire? Nobody tosses a Dwarf. Brigands Bilbo Baggins prisoner stinker birthday injuries. Kili's loosened shy spiders till. Gandalf's death was not in vain. Nor would he have you give up hope. Bread kindly ghost Beorn's jelly. Andûril two-faced bitterness biding seemed says drinking splendor feed light unnoticed one! Carven nearest Eärendil fireworks former. Mattress smelling wandering teaching appear taste wise Mithril uprooted winter forebearers wheel. Let's beside Proudfoots succumbed! Excuse Anárion stolen helpless nudge study shown holding form? Changes point Snowbourn material side outer highest eaves flash-flame relic descendant lurking. Thousand death Agreed oppose whole? Glóin head's hurts feasting fight shiny legacy. Thror's broken odds suffice believe well-protected? Rightfully manners begged Maggot's fairer. Unheard-of grog shields sad wondering gardener killed gone Galadriel! Pan Frodo fingers spreads magic parting amount interest idly naked. It's some form of Elvish. I can't read it. Silverwork Wraiths riddled enchantment apple anywhere."; }
+
+```
+
+
+## AST
+
+```
+JsScript {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    statements: JsStatementList [
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                EXPORT_KW@0..17 "export" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")],
+                JsFunctionDeclaration {
+                    async_token: missing (optional),
+                    function_token: FUNCTION_KW@17..26 "function" [] [Whitespace(" ")],
+                    star_token: missing (optional),
+                    id: JsIdentifierBinding {
+                        name_token: IDENT@26..28 "A" [] [Whitespace(" ")],
+                    },
+                    type_parameters: missing (optional),
+                    parameters: JsParameters {
+                        l_paren_token: L_PAREN@28..29 "(" [] [],
+                        items: JsParameterList [],
+                        r_paren_token: R_PAREN@29..31 ")" [] [Whitespace(" ")],
+                    },
+                    return_type_annotation: missing (optional),
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@31..33 "{" [] [Whitespace(" ")],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [
+                            JsReturnStatement {
+                                return_token: RETURN_KW@33..40 "return" [] [Whitespace(" ")],
+                                argument: JsStringLiteralExpression {
+                                    value_token: JS_STRING_LITERAL@40..1438 "\"Kinsmen hot Moria tea serves. Sticky camp spell covering forged they're Oakenshield vines. Admirable relatives march regained wheel Ere eternally on rest parts unhappy? Leave hundreds market's Argonath answered avail grieve doing goodness! Wrong miserable well-wishers wander stood immediately neither Agreed goat poison holes fire? Nobody tosses a Dwarf. Brigands Bilbo Baggins prisoner stinker birthday injuries. Kili's loosened shy spiders till. Gandalf's death was not in vain. Nor would he have you give up hope. Bread kindly ghost Beorn's jelly. Andûril two-faced bitterness biding seemed says drinking splendor feed light unnoticed one! Carven nearest Eärendil fireworks former. Mattress smelling wandering teaching appear taste wise Mithril uprooted winter forebearers wheel. Let's beside Proudfoots succumbed! Excuse Anárion stolen helpless nudge study shown holding form? Changes point Snowbourn material side outer highest eaves flash-flame relic descendant lurking. Thousand death Agreed oppose whole? Glóin head's hurts feasting fight shiny legacy. Thror's broken odds suffice believe well-protected? Rightfully manners begged Maggot's fairer. Unheard-of grog shields sad wondering gardener killed gone Galadriel! Pan Frodo fingers spreads magic parting amount interest idly naked. It's some form of Elvish. I can't read it. Silverwork Wraiths riddled enchantment apple anywhere.\"" [] [],
+                                },
+                                semicolon_token: SEMICOLON@1438..1440 ";" [] [Whitespace(" ")],
+                            },
+                        ],
+                        r_curly_token: R_CURLY@1440..1441 "}" [] [],
+                    },
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@1441..1442 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SCRIPT@0..1442
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..1441
+    0: JS_BOGUS_STATEMENT@0..1441
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..17 "export" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
+      2: JS_FUNCTION_DECLARATION@17..1441
+        0: (empty)
+        1: FUNCTION_KW@17..26 "function" [] [Whitespace(" ")]
+        2: (empty)
+        3: JS_IDENTIFIER_BINDING@26..28
+          0: IDENT@26..28 "A" [] [Whitespace(" ")]
+        4: (empty)
+        5: JS_PARAMETERS@28..31
+          0: L_PAREN@28..29 "(" [] []
+          1: JS_PARAMETER_LIST@29..29
+          2: R_PAREN@29..31 ")" [] [Whitespace(" ")]
+        6: (empty)
+        7: JS_FUNCTION_BODY@31..1441
+          0: L_CURLY@31..33 "{" [] [Whitespace(" ")]
+          1: JS_DIRECTIVE_LIST@33..33
+          2: JS_STATEMENT_LIST@33..1440
+            0: JS_RETURN_STATEMENT@33..1440
+              0: RETURN_KW@33..40 "return" [] [Whitespace(" ")]
+              1: JS_STRING_LITERAL_EXPRESSION@40..1438
+                0: JS_STRING_LITERAL@40..1438 "\"Kinsmen hot Moria tea serves. Sticky camp spell covering forged they're Oakenshield vines. Admirable relatives march regained wheel Ere eternally on rest parts unhappy? Leave hundreds market's Argonath answered avail grieve doing goodness! Wrong miserable well-wishers wander stood immediately neither Agreed goat poison holes fire? Nobody tosses a Dwarf. Brigands Bilbo Baggins prisoner stinker birthday injuries. Kili's loosened shy spiders till. Gandalf's death was not in vain. Nor would he have you give up hope. Bread kindly ghost Beorn's jelly. Andûril two-faced bitterness biding seemed says drinking splendor feed light unnoticed one! Carven nearest Eärendil fireworks former. Mattress smelling wandering teaching appear taste wise Mithril uprooted winter forebearers wheel. Let's beside Proudfoots succumbed! Excuse Anárion stolen helpless nudge study shown holding form? Changes point Snowbourn material side outer highest eaves flash-flame relic descendant lurking. Thousand death Agreed oppose whole? Glóin head's hurts feasting fight shiny legacy. Thror's broken odds suffice believe well-protected? Rightfully manners begged Maggot's fairer. Unheard-of grog shields sad wondering gardener killed gone Galadriel! Pan Frodo fingers spreads magic parting amount interest idly naked. It's some form of Elvish. I can't read it. Silverwork Wraiths riddled enchantment apple anywhere.\"" [] []
+              2: SEMICOLON@1438..1440 ";" [] [Whitespace(" ")]
+          3: R_CURLY@1440..1441 "}" [] []
+  4: EOF@1441..1442 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+export_huge_function_in_script.cjs:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of an export declaration outside of a module
+  
+    1 │ // SCRIPT
+  > 2 │ export function A () { return "Kinsmen hot Moria tea serves. Sticky camp spell covering forged they're Oakenshield vines. Admirable relatives march regained wheel Ere eternally on rest parts unhappy? Leave hundreds market's Argonath answered avail grieve doing goodness! Wrong miserable well-wishers wander stood immediately neither Agreed goat poison holes fire? Nobody tosses a Dwarf. Brigands Bilbo Baggins prisoner stinker birthday injuries. Kili's loosened shy spiders till. Gandalf's death was not in vain. Nor would he have you give up hope. Bread kindly ghost Beorn's jelly. Andûril two-faced bitterness biding seemed says drinking splendor feed light unnoticed one! Carven nearest Eärendil fireworks former. Mattress smelling wandering teaching appear taste wise Mithril uprooted winter forebearers wheel. Let's beside Proudfoots succumbed! Excuse Anárion stolen helpless nudge study shown holding form? Changes point Snowbourn material side outer highest eaves flash-flame relic descendant lurking. Thousand death Agreed oppose whole? Glóin head's hurts feasting fight shiny legacy. Thror's broken odds suffice believe well-protected? Rightfully manners begged Maggot's fairer. Unheard-of grog shields sad wondering gardener killed gone Galadriel! Pan Frodo fingers spreads magic parting amount interest idly naked. It's some form of Elvish. I can't read it. Silverwork Wraiths riddled enchantment apple anywhere."; }
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    3 │ 
+  
+  i not allowed inside scripts
+  
+```

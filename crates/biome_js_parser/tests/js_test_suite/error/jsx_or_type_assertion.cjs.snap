@@ -1,0 +1,491 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```cjs
+// SCRIPT
+function f() {
+    let a = <div>a</div>; // JSX
+    let b = <string>b; // type assertion
+    let c = <string>b<a>d; // type assertion
+    let d = <div>a</div>/; // ambiguous: JSX or "type assertion a less than regex /div>/". Probably JSX.
+    let d = <string>a</string>/;
+}
+
+```
+
+
+## AST
+
+```
+JsScript {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    statements: JsStatementList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..19 "function" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@19..20 "f" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@20..21 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@21..23 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@23..24 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsVariableStatement {
+                        declaration: JsVariableDeclaration {
+                            await_token: missing (optional),
+                            kind: LET_KW@24..33 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            declarators: JsVariableDeclaratorList [
+                                JsVariableDeclarator {
+                                    id: JsIdentifierBinding {
+                                        name_token: IDENT@33..35 "a" [] [Whitespace(" ")],
+                                    },
+                                    variable_annotation: missing (optional),
+                                    initializer: JsInitializerClause {
+                                        eq_token: EQ@35..37 "=" [] [Whitespace(" ")],
+                                        expression: JsBinaryExpression {
+                                            left: JsBogusExpression {
+                                                items: [
+                                                    L_ANGLE@37..38 "<" [] [],
+                                                    TsReferenceType {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@38..41 "div" [] [],
+                                                        },
+                                                        type_arguments: missing (optional),
+                                                    },
+                                                    R_ANGLE@41..42 ">" [] [],
+                                                    JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@42..43 "a" [] [],
+                                                        },
+                                                    },
+                                                ],
+                                            },
+                                            operator_token: L_ANGLE@43..44 "<" [] [],
+                                            right: JsBinaryExpression {
+                                                left: JsRegexLiteralExpression {
+                                                    value_token: JS_REGEX_LITERAL@44..52 "/div>; /" [] [],
+                                                },
+                                                operator_token: SLASH@52..54 "/" [] [Whitespace(" ")],
+                                                right: JsIdentifierExpression {
+                                                    name: JsReferenceIdentifier {
+                                                        value_token: IDENT@54..57 "JSX" [] [],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                    JsVariableStatement {
+                        declaration: JsVariableDeclaration {
+                            await_token: missing (optional),
+                            kind: LET_KW@57..66 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            declarators: JsVariableDeclaratorList [
+                                JsVariableDeclarator {
+                                    id: JsIdentifierBinding {
+                                        name_token: IDENT@66..68 "b" [] [Whitespace(" ")],
+                                    },
+                                    variable_annotation: missing (optional),
+                                    initializer: JsInitializerClause {
+                                        eq_token: EQ@68..70 "=" [] [Whitespace(" ")],
+                                        expression: JsBogusExpression {
+                                            items: [
+                                                L_ANGLE@70..71 "<" [] [],
+                                                TsStringType {
+                                                    string_token: STRING_KW@71..77 "string" [] [],
+                                                },
+                                                R_ANGLE@77..78 ">" [] [],
+                                                JsIdentifierExpression {
+                                                    name: JsReferenceIdentifier {
+                                                        value_token: IDENT@78..79 "b" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        semicolon_token: SEMICOLON@79..98 ";" [] [Whitespace(" "), Comments("// type assertion")],
+                    },
+                    JsVariableStatement {
+                        declaration: JsVariableDeclaration {
+                            await_token: missing (optional),
+                            kind: LET_KW@98..107 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            declarators: JsVariableDeclaratorList [
+                                JsVariableDeclarator {
+                                    id: JsIdentifierBinding {
+                                        name_token: IDENT@107..109 "c" [] [Whitespace(" ")],
+                                    },
+                                    variable_annotation: missing (optional),
+                                    initializer: JsInitializerClause {
+                                        eq_token: EQ@109..111 "=" [] [Whitespace(" ")],
+                                        expression: JsBinaryExpression {
+                                            left: JsBinaryExpression {
+                                                left: JsBogusExpression {
+                                                    items: [
+                                                        L_ANGLE@111..112 "<" [] [],
+                                                        TsStringType {
+                                                            string_token: STRING_KW@112..118 "string" [] [],
+                                                        },
+                                                        R_ANGLE@118..119 ">" [] [],
+                                                        JsIdentifierExpression {
+                                                            name: JsReferenceIdentifier {
+                                                                value_token: IDENT@119..120 "b" [] [],
+                                                            },
+                                                        },
+                                                    ],
+                                                },
+                                                operator_token: L_ANGLE@120..121 "<" [] [],
+                                                right: JsIdentifierExpression {
+                                                    name: JsReferenceIdentifier {
+                                                        value_token: IDENT@121..122 "a" [] [],
+                                                    },
+                                                },
+                                            },
+                                            operator_token: R_ANGLE@122..123 ">" [] [],
+                                            right: JsIdentifierExpression {
+                                                name: JsReferenceIdentifier {
+                                                    value_token: IDENT@123..124 "d" [] [],
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        semicolon_token: SEMICOLON@124..143 ";" [] [Whitespace(" "), Comments("// type assertion")],
+                    },
+                    JsVariableStatement {
+                        declaration: JsVariableDeclaration {
+                            await_token: missing (optional),
+                            kind: LET_KW@143..152 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            declarators: JsVariableDeclaratorList [
+                                JsVariableDeclarator {
+                                    id: JsIdentifierBinding {
+                                        name_token: IDENT@152..154 "d" [] [Whitespace(" ")],
+                                    },
+                                    variable_annotation: missing (optional),
+                                    initializer: JsInitializerClause {
+                                        eq_token: EQ@154..156 "=" [] [Whitespace(" ")],
+                                        expression: JsBinaryExpression {
+                                            left: JsBogusExpression {
+                                                items: [
+                                                    L_ANGLE@156..157 "<" [] [],
+                                                    TsReferenceType {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@157..160 "div" [] [],
+                                                        },
+                                                        type_arguments: missing (optional),
+                                                    },
+                                                    R_ANGLE@160..161 ">" [] [],
+                                                    JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@161..162 "a" [] [],
+                                                        },
+                                                    },
+                                                ],
+                                            },
+                                            operator_token: L_ANGLE@162..163 "<" [] [],
+                                            right: JsRegexLiteralExpression {
+                                                value_token: JS_REGEX_LITERAL@163..169 "/div>/" [] [],
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        semicolon_token: SEMICOLON@169..248 ";" [] [Whitespace(" "), Comments("// ambiguous: JSX or  ...")],
+                    },
+                    JsVariableStatement {
+                        declaration: JsVariableDeclaration {
+                            await_token: missing (optional),
+                            kind: LET_KW@248..257 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            declarators: JsVariableDeclaratorList [
+                                JsVariableDeclarator {
+                                    id: JsIdentifierBinding {
+                                        name_token: IDENT@257..259 "d" [] [Whitespace(" ")],
+                                    },
+                                    variable_annotation: missing (optional),
+                                    initializer: JsInitializerClause {
+                                        eq_token: EQ@259..261 "=" [] [Whitespace(" ")],
+                                        expression: JsBinaryExpression {
+                                            left: JsBogusExpression {
+                                                items: [
+                                                    L_ANGLE@261..262 "<" [] [],
+                                                    TsStringType {
+                                                        string_token: STRING_KW@262..268 "string" [] [],
+                                                    },
+                                                    R_ANGLE@268..269 ">" [] [],
+                                                    JsIdentifierExpression {
+                                                        name: JsReferenceIdentifier {
+                                                            value_token: IDENT@269..270 "a" [] [],
+                                                        },
+                                                    },
+                                                ],
+                                            },
+                                            operator_token: L_ANGLE@270..271 "<" [] [],
+                                            right: JsRegexLiteralExpression {
+                                                value_token: JS_REGEX_LITERAL@271..280 "/string>/" [] [],
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        semicolon_token: SEMICOLON@280..281 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@281..283 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@283..284 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SCRIPT@0..284
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..283
+    0: JS_FUNCTION_DECLARATION@0..283
+      0: (empty)
+      1: FUNCTION_KW@0..19 "function" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@19..20
+        0: IDENT@19..20 "f" [] []
+      4: (empty)
+      5: JS_PARAMETERS@20..23
+        0: L_PAREN@20..21 "(" [] []
+        1: JS_PARAMETER_LIST@21..21
+        2: R_PAREN@21..23 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@23..283
+        0: L_CURLY@23..24 "{" [] []
+        1: JS_DIRECTIVE_LIST@24..24
+        2: JS_STATEMENT_LIST@24..281
+          0: JS_VARIABLE_STATEMENT@24..57
+            0: JS_VARIABLE_DECLARATION@24..57
+              0: (empty)
+              1: LET_KW@24..33 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              2: JS_VARIABLE_DECLARATOR_LIST@33..57
+                0: JS_VARIABLE_DECLARATOR@33..57
+                  0: JS_IDENTIFIER_BINDING@33..35
+                    0: IDENT@33..35 "a" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: JS_INITIALIZER_CLAUSE@35..57
+                    0: EQ@35..37 "=" [] [Whitespace(" ")]
+                    1: JS_BINARY_EXPRESSION@37..57
+                      0: JS_BOGUS_EXPRESSION@37..43
+                        0: L_ANGLE@37..38 "<" [] []
+                        1: TS_REFERENCE_TYPE@38..41
+                          0: JS_REFERENCE_IDENTIFIER@38..41
+                            0: IDENT@38..41 "div" [] []
+                          1: (empty)
+                        2: R_ANGLE@41..42 ">" [] []
+                        3: JS_IDENTIFIER_EXPRESSION@42..43
+                          0: JS_REFERENCE_IDENTIFIER@42..43
+                            0: IDENT@42..43 "a" [] []
+                      1: L_ANGLE@43..44 "<" [] []
+                      2: JS_BINARY_EXPRESSION@44..57
+                        0: JS_REGEX_LITERAL_EXPRESSION@44..52
+                          0: JS_REGEX_LITERAL@44..52 "/div>; /" [] []
+                        1: SLASH@52..54 "/" [] [Whitespace(" ")]
+                        2: JS_IDENTIFIER_EXPRESSION@54..57
+                          0: JS_REFERENCE_IDENTIFIER@54..57
+                            0: IDENT@54..57 "JSX" [] []
+            1: (empty)
+          1: JS_VARIABLE_STATEMENT@57..98
+            0: JS_VARIABLE_DECLARATION@57..79
+              0: (empty)
+              1: LET_KW@57..66 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              2: JS_VARIABLE_DECLARATOR_LIST@66..79
+                0: JS_VARIABLE_DECLARATOR@66..79
+                  0: JS_IDENTIFIER_BINDING@66..68
+                    0: IDENT@66..68 "b" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: JS_INITIALIZER_CLAUSE@68..79
+                    0: EQ@68..70 "=" [] [Whitespace(" ")]
+                    1: JS_BOGUS_EXPRESSION@70..79
+                      0: L_ANGLE@70..71 "<" [] []
+                      1: TS_STRING_TYPE@71..77
+                        0: STRING_KW@71..77 "string" [] []
+                      2: R_ANGLE@77..78 ">" [] []
+                      3: JS_IDENTIFIER_EXPRESSION@78..79
+                        0: JS_REFERENCE_IDENTIFIER@78..79
+                          0: IDENT@78..79 "b" [] []
+            1: SEMICOLON@79..98 ";" [] [Whitespace(" "), Comments("// type assertion")]
+          2: JS_VARIABLE_STATEMENT@98..143
+            0: JS_VARIABLE_DECLARATION@98..124
+              0: (empty)
+              1: LET_KW@98..107 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              2: JS_VARIABLE_DECLARATOR_LIST@107..124
+                0: JS_VARIABLE_DECLARATOR@107..124
+                  0: JS_IDENTIFIER_BINDING@107..109
+                    0: IDENT@107..109 "c" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: JS_INITIALIZER_CLAUSE@109..124
+                    0: EQ@109..111 "=" [] [Whitespace(" ")]
+                    1: JS_BINARY_EXPRESSION@111..124
+                      0: JS_BINARY_EXPRESSION@111..122
+                        0: JS_BOGUS_EXPRESSION@111..120
+                          0: L_ANGLE@111..112 "<" [] []
+                          1: TS_STRING_TYPE@112..118
+                            0: STRING_KW@112..118 "string" [] []
+                          2: R_ANGLE@118..119 ">" [] []
+                          3: JS_IDENTIFIER_EXPRESSION@119..120
+                            0: JS_REFERENCE_IDENTIFIER@119..120
+                              0: IDENT@119..120 "b" [] []
+                        1: L_ANGLE@120..121 "<" [] []
+                        2: JS_IDENTIFIER_EXPRESSION@121..122
+                          0: JS_REFERENCE_IDENTIFIER@121..122
+                            0: IDENT@121..122 "a" [] []
+                      1: R_ANGLE@122..123 ">" [] []
+                      2: JS_IDENTIFIER_EXPRESSION@123..124
+                        0: JS_REFERENCE_IDENTIFIER@123..124
+                          0: IDENT@123..124 "d" [] []
+            1: SEMICOLON@124..143 ";" [] [Whitespace(" "), Comments("// type assertion")]
+          3: JS_VARIABLE_STATEMENT@143..248
+            0: JS_VARIABLE_DECLARATION@143..169
+              0: (empty)
+              1: LET_KW@143..152 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              2: JS_VARIABLE_DECLARATOR_LIST@152..169
+                0: JS_VARIABLE_DECLARATOR@152..169
+                  0: JS_IDENTIFIER_BINDING@152..154
+                    0: IDENT@152..154 "d" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: JS_INITIALIZER_CLAUSE@154..169
+                    0: EQ@154..156 "=" [] [Whitespace(" ")]
+                    1: JS_BINARY_EXPRESSION@156..169
+                      0: JS_BOGUS_EXPRESSION@156..162
+                        0: L_ANGLE@156..157 "<" [] []
+                        1: TS_REFERENCE_TYPE@157..160
+                          0: JS_REFERENCE_IDENTIFIER@157..160
+                            0: IDENT@157..160 "div" [] []
+                          1: (empty)
+                        2: R_ANGLE@160..161 ">" [] []
+                        3: JS_IDENTIFIER_EXPRESSION@161..162
+                          0: JS_REFERENCE_IDENTIFIER@161..162
+                            0: IDENT@161..162 "a" [] []
+                      1: L_ANGLE@162..163 "<" [] []
+                      2: JS_REGEX_LITERAL_EXPRESSION@163..169
+                        0: JS_REGEX_LITERAL@163..169 "/div>/" [] []
+            1: SEMICOLON@169..248 ";" [] [Whitespace(" "), Comments("// ambiguous: JSX or  ...")]
+          4: JS_VARIABLE_STATEMENT@248..281
+            0: JS_VARIABLE_DECLARATION@248..280
+              0: (empty)
+              1: LET_KW@248..257 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              2: JS_VARIABLE_DECLARATOR_LIST@257..280
+                0: JS_VARIABLE_DECLARATOR@257..280
+                  0: JS_IDENTIFIER_BINDING@257..259
+                    0: IDENT@257..259 "d" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: JS_INITIALIZER_CLAUSE@259..280
+                    0: EQ@259..261 "=" [] [Whitespace(" ")]
+                    1: JS_BINARY_EXPRESSION@261..280
+                      0: JS_BOGUS_EXPRESSION@261..270
+                        0: L_ANGLE@261..262 "<" [] []
+                        1: TS_STRING_TYPE@262..268
+                          0: STRING_KW@262..268 "string" [] []
+                        2: R_ANGLE@268..269 ">" [] []
+                        3: JS_IDENTIFIER_EXPRESSION@269..270
+                          0: JS_REFERENCE_IDENTIFIER@269..270
+                            0: IDENT@269..270 "a" [] []
+                      1: L_ANGLE@270..271 "<" [] []
+                      2: JS_REGEX_LITERAL_EXPRESSION@271..280
+                        0: JS_REGEX_LITERAL@271..280 "/string>/" [] []
+            1: SEMICOLON@280..281 ";" [] []
+        3: R_CURLY@281..283 "}" [Newline("\n")] []
+  4: EOF@283..284 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+jsx_or_type_assertion.cjs:3:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    1 │ // SCRIPT
+    2 │ function f() {
+  > 3 │     let a = <div>a</div>; // JSX
+      │             ^^^^^^
+    4 │     let b = <string>b; // type assertion
+    5 │     let c = <string>b<a>d; // type assertion
+  
+  i TypeScript only syntax
+  
+jsx_or_type_assertion.cjs:4:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    2 │ function f() {
+    3 │     let a = <div>a</div>; // JSX
+  > 4 │     let b = <string>b; // type assertion
+      │             ^^^^^^^^^
+    5 │     let c = <string>b<a>d; // type assertion
+    6 │     let d = <div>a</div>/; // ambiguous: JSX or "type assertion a less than regex /div>/". Probably JSX.
+  
+  i TypeScript only syntax
+  
+jsx_or_type_assertion.cjs:5:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    3 │     let a = <div>a</div>; // JSX
+    4 │     let b = <string>b; // type assertion
+  > 5 │     let c = <string>b<a>d; // type assertion
+      │             ^^^^^^^^^
+    6 │     let d = <div>a</div>/; // ambiguous: JSX or "type assertion a less than regex /div>/". Probably JSX.
+    7 │     let d = <string>a</string>/;
+  
+  i TypeScript only syntax
+  
+jsx_or_type_assertion.cjs:6:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    4 │     let b = <string>b; // type assertion
+    5 │     let c = <string>b<a>d; // type assertion
+  > 6 │     let d = <div>a</div>/; // ambiguous: JSX or "type assertion a less than regex /div>/". Probably JSX.
+      │             ^^^^^^
+    7 │     let d = <string>a</string>/;
+    8 │ }
+  
+  i TypeScript only syntax
+  
+jsx_or_type_assertion.cjs:7:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × type assertion are a TypeScript only feature. Convert your file to a TypeScript file or remove the syntax.
+  
+    5 │     let c = <string>b<a>d; // type assertion
+    6 │     let d = <div>a</div>/; // ambiguous: JSX or "type assertion a less than regex /div>/". Probably JSX.
+  > 7 │     let d = <string>a</string>/;
+      │             ^^^^^^^^^
+    8 │ }
+    9 │ 
+  
+  i TypeScript only syntax
+  
+```
