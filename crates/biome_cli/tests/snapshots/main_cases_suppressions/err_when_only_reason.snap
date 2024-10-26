@@ -12,10 +12,13 @@ expression: content
 # Termination Message
 
 ```block
-internalError/io ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × The combination of configuration and arguments is invalid: 
-    `--reason` is only valid when `--suppress` is used.
+  × Unrecognized option --reason.
+  
+  i Type the following command for more information
+  
+  $ biome `--reason` is only valid when `--suppress` is used. --help
   
 
 

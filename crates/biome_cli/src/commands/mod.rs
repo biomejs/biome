@@ -1,8 +1,6 @@
 use crate::changed::{get_changed_files, get_staged_files};
 use crate::cli_options::{cli_options, CliOptions, CliReporter, ColorsArg};
-use crate::diagnostics::{
-    DeprecatedArgument, DeprecatedConfigurationFile, IncompatibleEndConfiguration,
-};
+use crate::diagnostics::{DeprecatedArgument, DeprecatedConfigurationFile};
 use crate::execute::Stdin;
 use crate::logging::LoggingKind;
 use crate::{
@@ -805,10 +803,9 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
     } else if suppress && fix {
         return Err(CliDiagnostic::incompatible_arguments("--suppress", "--fix"));
     } else if !suppress && suppression_reason.is_some() {
-        return Err(CliDiagnostic::IncompatibleEndConfiguration(
-            IncompatibleEndConfiguration {
-                reason: "`--reason` is only valid when `--suppress` is used.".to_string(),
-            },
+        return Err(CliDiagnostic::unexpected_argument(
+            "--reason",
+            "`--reason` is only valid when `--suppress` is used.",
         ));
     };
     Ok(())
