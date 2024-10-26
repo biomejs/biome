@@ -3273,6 +3273,7 @@ export interface PullActionsParams {
 	path: BiomePath;
 	range?: TextRange;
 	skip: RuleCode[];
+	suppression_reason?: string;
 }
 export interface PullActionsResult {
 	actions: CodeAction[];
@@ -3362,6 +3363,7 @@ export interface FixFileParams {
 	rule_categories: RuleCategories;
 	should_format: boolean;
 	skip: RuleCode[];
+	suppression_reason?: string;
 }
 /**
  * Which fixes should be applied during the analyzing phase
