@@ -1339,6 +1339,10 @@ export interface Nursery {
 	 */
 	noUselessEscapeInRegex?: RuleFixConfiguration_for_Null;
 	/**
+	 * Disallow unnecessary length checks within logical expressions.
+	 */
+	noUselessLengthCheck?: RuleFixConfiguration_for_Null;
+	/**
 	 * Disallow unnecessary String.raw function in template string literals without any escape sequence.
 	 */
 	noUselessStringRaw?: RuleConfiguration_for_Null;
@@ -2993,6 +2997,7 @@ export type Category =
 	| "lint/nursery/noUnmatchableAnbSelector"
 	| "lint/nursery/noUnusedFunctionParameters"
 	| "lint/nursery/noUselessEscapeInRegex"
+	| "lint/nursery/noUselessLengthCheck"
 	| "lint/nursery/noUselessStringRaw"
 	| "lint/nursery/noUselessUndefined"
 	| "lint/nursery/noValueAtRule"
