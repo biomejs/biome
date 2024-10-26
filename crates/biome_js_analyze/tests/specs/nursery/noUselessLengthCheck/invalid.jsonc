@@ -7,6 +7,7 @@
   "array.length === 0 || array.every(Boolean)",
   "array.length > 0 && array.some(Boolean)",
   "array.length !== 0 && array.some(Boolean)",
+  "array.length >= 1 && array.some(Boolean)",
   "if ((( array.length > 0 )) && array.some(Boolean));",
   "(array.length === 0 || array.every(Boolean)) || foo",
   "foo || (array.length === 0 || array.every(Boolean))",

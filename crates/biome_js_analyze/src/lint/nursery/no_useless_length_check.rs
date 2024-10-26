@@ -135,26 +135,24 @@ fn get_comparing_length_exp(
     }
     let literal = value_exp.as_any_js_literal_expression()?;
     let literal = literal.as_js_number_literal_expression()?;
-    let number = literal.as_number()?.round();
-    // .length === 0
-    if matches!(function_kind, FunctionKind::Every)
-        && literal.syntax().text_trimmed() == "0"
-        && (operator == JsBinaryOperator::StrictEquality || operator == JsBinaryOperator::LessThan)
-    {
-        return Some(target);
+    match function_kind {
+        FunctionKind::Every => {
+            // .length === 0
+            (literal.syntax().text_trimmed() == "0"
+                && (operator == JsBinaryOperator::StrictEquality
+                    || operator == JsBinaryOperator::LessThan))
+                .then_some(target)
+        }
+        FunctionKind::Some => {
+            // .length !== 0
+            (literal.syntax().text_trimmed() == "0"
+                && (operator == JsBinaryOperator::StrictInequality
+                    || operator == JsBinaryOperator::GreaterThan)
+                || literal.syntax().text_trimmed() == "1"
+                    && operator == JsBinaryOperator::GreaterThanOrEqual)
+                .then_some(target)
+        }
     }
-    // .length !== 0
-    if matches!(function_kind, FunctionKind::Some)
-        && (literal.syntax().text_trimmed() == "0"
-            && (operator == JsBinaryOperator::StrictInequality
-                || operator == JsBinaryOperator::GreaterThan)
-            || number > 0.0 && operator == JsBinaryOperator::StrictEquality
-            || literal.syntax().text_trimmed() == "1"
-                && operator == JsBinaryOperator::LessThanOrEqual)
-    {
-        return Some(target);
-    }
-    None
 }
 
 #[derive(Clone)]

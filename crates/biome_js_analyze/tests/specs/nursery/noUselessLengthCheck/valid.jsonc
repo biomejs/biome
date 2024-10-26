@@ -1,6 +1,7 @@
 [
   "if (array.every(Boolean));",
   "if (array.some(Boolean));",
+  "array.length === 5 && array.some(Boolean)",
   "const isAllTrulyOrEmpty = array.every(Boolean);",
   "if (array.length === 0 || anotherCheck() || array.every(Boolean));",
   "const isNonEmptyAllTrulyArray = array.length > 0 && array.every(Boolean);",

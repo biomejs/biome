@@ -15,6 +15,11 @@ if (array.some(Boolean));
 
 # Input
 ```cjs
+array.length === 5 && array.some(Boolean)
+```
+
+# Input
+```cjs
 const isAllTrulyOrEmpty = array.every(Boolean);
 ```
 

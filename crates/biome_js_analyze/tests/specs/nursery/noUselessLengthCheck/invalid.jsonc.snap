@@ -189,6 +189,29 @@ invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━
 
 # Input
 ```cjs
+array.length >= 1 && array.some(Boolean)
+```
+
+# Diagnostics
+```
+invalid.jsonc:1:1 lint/nursery/noUselessLengthCheck  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This length check is unnecessary.
+  
+  > 1 │ array.length >= 1 && array.some(Boolean)
+      │ ^^^^^^^^^^^^^^^^^
+  
+  i The non-empty check is useless as `Array#some()` returns `false` for an empty array.
+  
+  i Unsafe fix: Remove the length check
+  
+    1 │ array.length·>=·1·&&·array.some(Boolean)
+      │ ---------------------                   
+
+```
+
+# Input
+```cjs
 if ((( array.length > 0 )) && array.some(Boolean));
 ```
 
