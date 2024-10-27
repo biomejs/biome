@@ -218,6 +218,14 @@ pub fn get_reset_to_initial_properties(shorthand_property: &str) -> &'static [&'
     }
 }
 
+/// Returns true if a property can override prior properties in the same block.
+///
+/// Takes a lowercase property name with vendor prefix removed.
+pub fn property_may_override_others(prop: &str) -> bool {
+    !get_longhand_sub_properties(prop).is_empty()
+        || !get_reset_to_initial_properties(prop).is_empty()
+}
+
 fn is_custom_element(prop: &str) -> bool {
     prop.contains('-') && prop.eq(prop.to_lowercase_cow().as_ref())
 }

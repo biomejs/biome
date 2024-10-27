@@ -3440,6 +3440,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_classes:
         Option<RuleFixConfiguration<biome_js_analyze::options::UseSortedClasses>>,
+    #[doc = "Enforce ordering of CSS properties."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_sorted_properties:
+        Option<RuleFixConfiguration<biome_css_analyze::options::UseSortedProperties>>,
     #[doc = "Enforce the use of the directive \"use strict\" in script files."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_strict_mode: Option<RuleFixConfiguration<biome_js_analyze::options::UseStrictMode>>,
@@ -3515,6 +3519,7 @@ impl Nursery {
         "useGuardForIn",
         "useImportRestrictions",
         "useSortedClasses",
+        "useSortedProperties",
         "useStrictMode",
         "useTrimStartEnd",
         "useValidAutocomplete",
@@ -3533,6 +3538,7 @@ impl Nursery {
         "useAriaPropsSupportedByRole",
         "useConsistentMemberAccessibility",
         "useDeprecatedReason",
+        "useSortedProperties",
         "useStrictMode",
     ];
     const RECOMMENDED_RULES_AS_FILTERS: &'static [RuleFilter<'static>] = &[
@@ -3543,6 +3549,8 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[15]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[25]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[30]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
@@ -4329,6 +4337,10 @@ impl Nursery {
                 .map(|conf| (conf.level(), conf.get_options())),
             "useSortedClasses" => self
                 .use_sorted_classes
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useSortedProperties" => self
+                .use_sorted_properties
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "useStrictMode" => self
