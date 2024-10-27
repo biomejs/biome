@@ -211,9 +211,9 @@ GritFiles = 'multifile' '{' files: GritPatternList '}'
 GritPatternContains =
     'contains'
     contains: AnyGritMaybeCurlyPattern
-    until_clause: GritPatternContainsUntilClause?
+    until_clause: GritPatternUntilClause?
 
-GritPatternContainsUntilClause =
+GritPatternUntilClause =
     'until'
     until: AnyGritPattern
 
@@ -242,6 +242,7 @@ GritPatternElseClause =
 GritWithin =
     'within'
     pattern: AnyGritMaybeCurlyPattern
+    until_clause: GritPatternUntilClause?
 
 // $body <: contains bubble($name) `pattern` => with_its_own($name)
 //                         ^^^^^^^

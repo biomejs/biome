@@ -11,7 +11,10 @@ impl WithinCompiler {
         context: &mut NodeCompilationContext,
     ) -> Result<Within<GritQueryContext>, CompileError> {
         let pattern = PatternCompiler::from_maybe_curly_node(&node.pattern()?, context)?;
-        let until = None; // TODO: Update syntax.
+        let until = node
+            .until_clause()
+            .map(|clause| PatternCompiler::from_node(&clause.until()?, context))
+            .transpose()?;
 
         Ok(Within::new(pattern, until))
     }
