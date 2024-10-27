@@ -6,7 +6,6 @@ use crate::{
     DeserializationDiagnostic, DeserializationVisitor,
 };
 use biome_rowan::{TextRange, TokenText};
-use indexmap::{IndexMap, IndexSet};
 use std::{
     collections::{BTreeMap, BTreeSet, HashMap, HashSet},
     hash::{BuildHasher, Hash},
@@ -663,7 +662,8 @@ impl<T: Ord + Deserializable> Deserializable for BTreeSet<T> {
     }
 }
 
-impl<T: Hash + Eq + Deserializable> Deserializable for IndexSet<T> {
+#[cfg(feature = "indexmap")]
+impl<T: Hash + Eq + Deserializable> Deserializable for indexmap::IndexSet<T> {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
@@ -671,7 +671,7 @@ impl<T: Hash + Eq + Deserializable> Deserializable for IndexSet<T> {
     ) -> Option<Self> {
         struct Visitor<T>(PhantomData<T>);
         impl<T: Hash + Eq + Deserializable> DeserializationVisitor for Visitor<T> {
-            type Output = IndexSet<T>;
+            type Output = indexmap::IndexSet<T>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::ARRAY;
             fn visit_array(
                 self,
@@ -763,8 +763,9 @@ impl<K: Ord + Deserializable, V: Deserializable> Deserializable for BTreeMap<K, 
     }
 }
 
+#[cfg(feature = "indexmap")]
 impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher> Deserializable
-    for IndexMap<K, V, S>
+    for indexmap::IndexMap<K, V, S>
 {
     fn deserialize(
         ctx: &mut impl DeserializationContext,
@@ -775,7 +776,7 @@ impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
         impl<K: Hash + Eq + Deserializable, V: Deserializable, S: Default + BuildHasher>
             DeserializationVisitor for Visitor<K, V, S>
         {
-            type Output = IndexMap<K, V, S>;
+            type Output = indexmap::IndexMap<K, V, S>;
             const EXPECTED_TYPE: DeserializableTypes = DeserializableTypes::MAP;
             fn visit_map(
                 self,

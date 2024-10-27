@@ -9,7 +9,6 @@ use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{AnyJsonValue, JsonMemberName, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, TokenText};
 
-#[cfg(feature = "serde")]
 use crate::DeserializableTypes;
 
 /// It attempts to parse and deserialize a source file in JSON. Diagnostics from the parse phase

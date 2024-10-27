@@ -15,7 +15,7 @@ use biome_configuration::{
 use biome_css_formatter::context::CssFormatOptions;
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
-use biome_deserialize::{Merge, StringSet};
+use biome_deserialize::Merge;
 use biome_diagnostics::Category;
 use biome_formatter::{
     AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -591,7 +591,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
             javascript.parser.unsafe_parameter_decorators_enabled;
         language_setting.parser.grit_metavariables = javascript.parser.grit_metavariables;
 
-        language_setting.globals = Some(javascript.globals.into_index_set());
+        language_setting.globals = Some(javascript.globals);
         language_setting.environment = javascript.jsx_runtime.into();
         language_setting.linter.enabled = Some(javascript.linter.enabled);
 
@@ -792,8 +792,8 @@ fn to_file_settings(
         Some(FilesSettings {
             max_size: config.max_size,
             git_ignore,
-            ignored_files: to_matcher(working_directory.clone(), Some(&config.ignore))?,
-            included_files: to_matcher(working_directory, Some(&config.include))?,
+            ignored_files: to_matcher(working_directory.clone(), Some(config.ignore.as_slice()))?,
+            included_files: to_matcher(working_directory, Some(config.include.as_slice()))?,
             ignore_unknown: config.ignore_unknown,
         })
     } else {
@@ -1474,21 +1474,21 @@ impl OverrideSettingPattern {
     fn analyzer_rules_mut(&self, _analyzer_rules: &mut AnalyzerRules) {}
 }
 
-/// Creates a [Matcher] from a [StringSet]
+/// Creates a [Matcher] from a set of strings.
 ///
 /// ## Errors
 ///
 /// It can raise an error if the patterns aren't valid
 pub fn to_matcher(
     working_directory: Option<PathBuf>,
-    string_set: Option<&StringSet>,
+    string_set: Option<&indexmap::set::Slice<String>>,
 ) -> Result<Matcher, WorkspaceError> {
     let mut matcher = Matcher::empty();
     if let Some(working_directory) = working_directory {
         matcher.set_root(working_directory)
     }
     if let Some(string_set) = string_set {
-        for pattern in string_set.iter() {
+        for pattern in string_set {
             matcher.add_pattern(pattern).map_err(|err| {
                 BiomeDiagnostic::new_invalid_ignore_pattern(
                     pattern.to_string(),
@@ -1528,8 +1528,11 @@ pub fn to_organize_imports_settings(
 ) -> Result<OrganizeImportsSettings, WorkspaceError> {
     Ok(OrganizeImportsSettings {
         enabled: organize_imports.enabled,
-        ignored_files: to_matcher(working_directory.clone(), Some(&organize_imports.ignore))?,
-        included_files: to_matcher(working_directory, Some(&organize_imports.include))?,
+        ignored_files: to_matcher(
+            working_directory.clone(),
+            Some(organize_imports.ignore.as_slice()),
+        )?,
+        included_files: to_matcher(working_directory, Some(organize_imports.include.as_slice()))?,
     })
 }
 
@@ -1596,8 +1599,14 @@ pub fn to_override_settings(
             to_graphql_language_settings(graphql, &current_settings.languages.graphql);
 
         let pattern_setting = OverrideSettingPattern {
-            include: to_matcher(working_directory.clone(), pattern.include.as_ref())?,
-            exclude: to_matcher(working_directory.clone(), pattern.ignore.as_ref())?,
+            include: to_matcher(
+                working_directory.clone(),
+                pattern.include.as_ref().map(|x| x.as_slice()),
+            )?,
+            exclude: to_matcher(
+                working_directory.clone(),
+                pattern.ignore.as_ref().map(|x| x.as_slice()),
+            )?,
             formatter,
             linter,
             organize_imports,
@@ -1640,7 +1649,7 @@ fn to_javascript_language_settings(
     let organize_imports = conf.organize_imports;
     if let Some(_organize_imports) = organize_imports {}
 
-    language_setting.globals = conf.globals.map(StringSet::into_index_set);
+    language_setting.globals = conf.globals;
 
     language_setting.environment.jsx_runtime = conf
         .jsx_runtime
@@ -1732,8 +1741,8 @@ pub fn to_format_settings(
         format_with_errors: conf.format_with_errors,
         attribute_position: Some(conf.attribute_position),
         bracket_spacing: Some(conf.bracket_spacing),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory, Some(&conf.include))?,
+        ignored_files: to_matcher(working_directory.clone(), Some(conf.ignore.as_slice()))?,
+        included_files: to_matcher(working_directory, Some(conf.include.as_slice()))?,
     })
 }
 
@@ -1770,8 +1779,8 @@ pub fn to_linter_settings(
     Ok(LinterSettings {
         enabled: conf.enabled,
         rules: Some(conf.rules),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
+        ignored_files: to_matcher(working_directory.clone(), Some(conf.ignore.as_slice()))?,
+        included_files: to_matcher(working_directory.clone(), Some(conf.include.as_slice()))?,
     })
 }
 
@@ -1795,8 +1804,8 @@ pub fn to_assists_settings(
     Ok(AssistsSettings {
         enabled: conf.enabled,
         actions: Some(conf.actions),
-        ignored_files: to_matcher(working_directory.clone(), Some(&conf.ignore))?,
-        included_files: to_matcher(working_directory.clone(), Some(&conf.include))?,
+        ignored_files: to_matcher(working_directory.clone(), Some(conf.ignore.as_slice()))?,
+        included_files: to_matcher(working_directory.clone(), Some(conf.include.as_slice()))?,
     })
 }
 
