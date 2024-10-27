@@ -1,7 +1,6 @@
 #[rustfmt::skip]
 mod rules;
 
-use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 pub use rules::*;
@@ -22,13 +21,13 @@ pub struct LinterConfiguration {
 
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub ignore: indexmap::IndexSet<String>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub include: indexmap::IndexSet<String>,
 }
 
 impl LinterConfiguration {

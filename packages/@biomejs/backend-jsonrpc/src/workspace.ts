@@ -64,7 +64,7 @@ export interface PartialConfiguration {
 	/**
 	 * A list of paths to other JSON files, used to extends the current configuration.
 	 */
-	extends?: StringSet;
+	extends?: string[];
 	/**
 	 * The configuration of the filesystem
 	 */
@@ -118,11 +118,11 @@ export interface PartialAssistsConfiguration {
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 }
 /**
  * Options applied to CSS files
@@ -145,7 +145,6 @@ export interface PartialCssConfiguration {
 	 */
 	parser?: PartialCssParser;
 }
-export type StringSet = string[];
 /**
  * The configuration of the filesystem
  */
@@ -153,7 +152,7 @@ export interface PartialFilesConfiguration {
 	/**
 	 * A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * Tells Biome to not emit diagnostics when handling files that doesn't know
 	 */
@@ -161,7 +160,7 @@ export interface PartialFilesConfiguration {
 	/**
 	 * A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 	/**
 	 * The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB
 	 */
@@ -187,11 +186,11 @@ export interface PartialFormatterConfiguration {
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 	/**
 	 * The indent style.
 	 */
@@ -240,7 +239,7 @@ export interface PartialJavascriptConfiguration {
 
 If defined here, they should not emit diagnostics. 
 	 */
-	globals?: StringSet;
+	globals?: string[];
 	/**
 	 * Indicates the type of runtime or transformation used for interpreting JSX.
 	 */
@@ -284,11 +283,11 @@ export interface PartialLinterConfiguration {
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 	/**
 	 * List of rules
 	 */
@@ -302,11 +301,11 @@ export interface PartialOrganizeImports {
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 }
 export type Overrides = OverridePattern[];
 export type Plugins = PluginConfiguration[];
@@ -643,11 +642,11 @@ export interface OverridePattern {
 	/**
 	 * A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.
 	 */
-	ignore?: StringSet;
+	ignore?: string[];
 	/**
 	 * A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.
 	 */
-	include?: StringSet;
+	include?: string[];
 	/**
 	 * Specific configuration for the JavaScript language
 	 */

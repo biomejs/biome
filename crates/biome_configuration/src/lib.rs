@@ -32,7 +32,7 @@ pub use analyzer::{
     RuleConfiguration, RuleFixConfiguration, RulePlainConfiguration, RuleWithFixOptions,
     RuleWithOptions, Rules,
 };
-use biome_deserialize::{Deserialized, StringSet};
+use biome_deserialize::Deserialized;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use biome_formatter::{IndentStyle, QuoteStyle};
 use bpaf::Bpaf;
@@ -88,8 +88,8 @@ pub struct Configuration {
     pub schema: String,
 
     /// A list of paths to other JSON files, used to extends the current configuration.
-    #[partial(bpaf(hide))]
-    pub extends: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub extends: indexmap::IndexSet<String>,
 
     /// The configuration of the VCS integration
     #[partial(type, bpaf(external(partial_vcs_configuration), optional, hide_usage))]
@@ -341,13 +341,13 @@ pub struct FilesConfiguration {
 
     /// A list of Unix shell style patterns. Biome will ignore files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub ignore: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub ignore: indexmap::IndexSet<String>,
 
     /// A list of Unix shell style patterns. Biome will handle only those files/folders that will
     /// match these patterns.
-    #[partial(bpaf(hide))]
-    pub include: StringSet,
+    #[partial(bpaf(hide, pure(Default::default())))]
+    pub include: indexmap::IndexSet<String>,
 }
 
 impl Default for FilesConfiguration {
