@@ -24,7 +24,9 @@
 		},
 		"extends": {
 			"description": "A list of paths to other JSON files, used to extends the current configuration.",
-			"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+			"type": ["array", "null"],
+			"items": { "type": "string" },
+			"uniqueItems": true
 		},
 		"files": {
 			"description": "The configuration of the filesystem",
@@ -387,11 +389,15 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				}
 			},
 			"additionalProperties": false
@@ -1338,7 +1344,9 @@
 			"properties": {
 				"ignore": {
 					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"ignoreUnknown": {
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
@@ -1346,7 +1354,9 @@
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
@@ -1412,11 +1422,15 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"indentStyle": {
 					"description": "The indent style.",
@@ -1587,7 +1601,9 @@
 				},
 				"globals": {
 					"description": "A list of global bindings that should be ignored by the analyzers\n\nIf defined here, they should not emit diagnostics.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"jsxRuntime": {
 					"description": "Indicates the type of runtime or transformation used for interpreting JSX.",
@@ -1972,11 +1988,15 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"rules": {
 					"description": "List of rules",
@@ -2547,11 +2567,15 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				}
 			},
 			"additionalProperties": false
@@ -2647,11 +2671,15 @@
 				},
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
-					"anyOf": [{ "$ref": "#/definitions/StringSet" }, { "type": "null" }]
+					"type": ["array", "null"],
+					"items": { "type": "string" },
+					"uniqueItems": true
 				},
 				"javascript": {
 					"description": "Specific configuration for the JavaScript language",
@@ -3400,11 +3428,6 @@
 					"minItems": 1
 				}
 			]
-		},
-		"StringSet": {
-			"type": "array",
-			"items": { "type": "string" },
-			"uniqueItems": true
 		},
 		"Style": {
 			"description": "A list of rules that belong to this group",

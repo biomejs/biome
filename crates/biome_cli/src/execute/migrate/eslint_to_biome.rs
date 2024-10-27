@@ -1,5 +1,5 @@
 use biome_configuration::{self as biome_config};
-use biome_deserialize::{Merge, StringSet};
+use biome_deserialize::Merge;
 use biome_js_analyze::lint::style::no_restricted_globals;
 
 use super::{eslint_any_rule_to_biome::migrate_eslint_any_rule, eslint_eslint, eslint_typescript};
@@ -62,7 +62,10 @@ impl eslint_eslint::FlatConfigData {
                 } else {
                     let mut override_pat = biome_config::OverridePattern::default();
                     if let Some(language_options) = flat_config_object.language_options {
-                        let globals = language_options.globals.enabled().collect::<StringSet>();
+                        let globals = language_options
+                            .globals
+                            .enabled()
+                            .collect::<indexmap::IndexSet<_>>();
                         let js_config = biome_config::PartialJavascriptConfiguration {
                             globals: Some(globals),
                             ..Default::default()
@@ -98,7 +101,10 @@ impl eslint_eslint::FlatConfigData {
             biome_config::Rules::default()
         };
         if let Some(language_options) = global_config_object.language_options {
-            let globals = language_options.globals.enabled().collect::<StringSet>();
+            let globals = language_options
+                .globals
+                .enabled()
+                .collect::<indexmap::IndexSet<_>>();
             let js_config = biome_config::PartialJavascriptConfiguration {
                 globals: Some(globals),
                 ..Default::default()
@@ -126,7 +132,7 @@ impl eslint_eslint::LegacyConfigData {
         let mut results = MigrationResults::default();
         let mut biome_config = biome_config::PartialConfiguration::default();
         if !self.globals.is_empty() {
-            let globals = self.globals.enabled().collect::<StringSet>();
+            let globals = self.globals.enabled().collect::<indexmap::IndexSet<_>>();
             let js_config = biome_config::PartialJavascriptConfiguration {
                 globals: Some(globals),
                 ..Default::default()
@@ -142,7 +148,7 @@ impl eslint_eslint::LegacyConfigData {
                 .ignore_patterns
                 .into_iter()
                 .map(|p| p.0)
-                .collect::<StringSet>();
+                .collect::<indexmap::IndexSet<_>>();
             linter.ignore = Some(ignore);
         }
         if !self.overrides.is_empty() {
@@ -150,7 +156,10 @@ impl eslint_eslint::LegacyConfigData {
             for override_elt in self.overrides {
                 let mut override_pattern = biome_config::OverridePattern::default();
                 if !override_elt.globals.is_empty() {
-                    let globals = override_elt.globals.enabled().collect::<StringSet>();
+                    let globals = override_elt
+                        .globals
+                        .enabled()
+                        .collect::<indexmap::IndexSet<_>>();
                     let js_config = biome_config::PartialJavascriptConfiguration {
                         globals: Some(globals),
                         ..Default::default()
