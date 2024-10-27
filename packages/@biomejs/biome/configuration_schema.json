@@ -2395,6 +2395,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGoogleFontPreconnect": {
+					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGuardForIn": {
 					"description": "Require for-in loops to include an if statement.",
 					"anyOf": [
