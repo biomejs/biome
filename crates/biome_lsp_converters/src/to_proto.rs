@@ -1,11 +1,11 @@
-use crate::converters::line_index::LineIndex;
-use crate::converters::PositionEncoding;
+use crate::line_index::LineIndex;
+use crate::PositionEncoding;
 use anyhow::{Context, Result};
 use biome_rowan::{TextRange, TextSize};
 use tower_lsp::lsp_types;
 
 /// The function is used to convert TextSize to a LSP position.
-pub(crate) fn position(
+pub fn position(
     line_index: &LineIndex,
     offset: TextSize,
     position_encoding: PositionEncoding,
@@ -28,7 +28,7 @@ pub(crate) fn position(
 }
 
 /// The function is used to convert TextRange to a LSP range.
-pub(crate) fn range(
+pub fn range(
     line_index: &LineIndex,
     range: TextRange,
     position_encoding: PositionEncoding,
