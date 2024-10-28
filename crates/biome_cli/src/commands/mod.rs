@@ -203,7 +203,7 @@ pub enum BiomeCommand {
         #[bpaf(long("apply-unsafe"), switch, hide_usage)]
         apply_unsafe: bool,
 
-        /// Bulk fix diagnostics with suppression comments if the language supports it.
+        /// Fixes lint rule violations with a comment a suppression instead of using a rule code action (fix)
         #[bpaf(long("suppress"))]
         suppress: bool,
 
