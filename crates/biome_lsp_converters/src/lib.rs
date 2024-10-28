@@ -1,11 +1,11 @@
 use biome_rowan::TextSize;
 use tower_lsp::lsp_types::{ClientCapabilities, PositionEncodingKind};
 
-pub(crate) mod from_proto;
-pub(crate) mod line_index;
-pub(crate) mod to_proto;
+pub mod from_proto;
+pub mod line_index;
+pub mod to_proto;
 
-pub(crate) fn negotiated_encoding(capabilities: &ClientCapabilities) -> PositionEncoding {
+pub fn negotiated_encoding(capabilities: &ClientCapabilities) -> PositionEncoding {
     let client_encodings = match &capabilities.general {
         Some(general) => general.position_encodings.as_deref().unwrap_or_default(),
         None => &[],
@@ -36,11 +36,11 @@ pub enum WideEncoding {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(crate) struct LineCol {
+pub struct LineCol {
     /// Zero-based
-    pub(crate) line: u32,
+    pub line: u32,
     /// Zero-based utf8 offset
-    pub(crate) col: u32,
+    pub col: u32,
 }
 
 /// Deliberately not a generic type and different from `LineCol`.
@@ -53,11 +53,11 @@ pub struct WideLineCol {
 }
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq)]
-pub(crate) struct WideChar {
+pub struct WideChar {
     /// Start offset of a character inside a line, zero-based
-    pub(crate) start: TextSize,
+    pub start: TextSize,
     /// End offset of a character inside a line, zero-based
-    pub(crate) end: TextSize,
+    pub end: TextSize,
 }
 
 impl WideChar {
@@ -84,11 +84,11 @@ impl WideChar {
 
 #[cfg(test)]
 mod tests {
-    use crate::converters::from_proto::offset;
-    use crate::converters::line_index::LineIndex;
-    use crate::converters::to_proto::position;
-    use crate::converters::WideEncoding::{Utf16, Utf32};
-    use crate::converters::{LineCol, PositionEncoding, WideEncoding};
+    use crate::from_proto::offset;
+    use crate::line_index::LineIndex;
+    use crate::to_proto::position;
+    use crate::WideEncoding::{Utf16, Utf32};
+    use crate::{LineCol, PositionEncoding, WideEncoding};
     use biome_rowan::TextSize;
     use tower_lsp::lsp_types::Position;
 

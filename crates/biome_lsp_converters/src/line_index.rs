@@ -3,16 +3,17 @@
 
 use std::mem;
 
-use crate::converters::{LineCol, WideChar, WideEncoding, WideLineCol};
 use biome_rowan::TextSize;
 use rustc_hash::FxHashMap;
 
+use crate::{LineCol, WideChar, WideEncoding, WideLineCol};
+
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct LineIndex {
+pub struct LineIndex {
     /// Offset the beginning of each line, zero-based.
-    pub(crate) newlines: Vec<TextSize>,
+    pub newlines: Vec<TextSize>,
     /// List of non-ASCII characters on each line.
-    pub(crate) line_wide_chars: FxHashMap<u32, Vec<WideChar>>,
+    pub line_wide_chars: FxHashMap<u32, Vec<WideChar>>,
 }
 
 impl LineIndex {
@@ -67,7 +68,7 @@ impl LineIndex {
     }
 
     /// Return the number of lines in the index, clamped to [u32::MAX]
-    pub(crate) fn len(&self) -> u32 {
+    pub fn len(&self) -> u32 {
         self.newlines.len().try_into().unwrap_or(u32::MAX)
     }
 

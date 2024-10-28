@@ -1,9 +1,9 @@
-use crate::converters::from_proto;
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils::text_edit;
 use anyhow::Context;
 use biome_fs::BiomePath;
+use biome_lsp_converters::from_proto;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{

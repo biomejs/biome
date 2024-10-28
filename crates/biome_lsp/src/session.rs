@@ -1,4 +1,4 @@
-use crate::converters::{negotiated_encoding, PositionEncoding, WideEncoding};
+use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use crate::diagnostics::LspError;
 use crate::documents::Document;
 use crate::extension_settings::ExtensionSettings;

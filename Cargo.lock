@@ -964,6 +964,7 @@ dependencies = [
  "biome_deserialize",
  "biome_diagnostics",
  "biome_fs",
+ "biome_lsp_converters",
  "biome_rowan",
  "biome_service",
  "biome_text_edit",
@@ -975,6 +976,17 @@ dependencies = [
  "tower",
  "tower-lsp",
  "tracing",
+]
+
+[[package]]
+name = "biome_lsp_converters"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "biome_rowan",
+ "rustc-hash 1.1.0",
+ "tower",
+ "tower-lsp",
 ]
 
 [[package]]
