@@ -82,6 +82,32 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Enhancements
 
 - `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos
+- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now provides a code fix.
+
+  ```diff
+  - const xs = new Array();
+  + const xs = [];
+  ```
+
+  The code fix is currently marked as unsafe.
+  We plan to make it safe in a future release of Biome.
+
+  Contributed by @Conaclos
+
+#### Bug fixes
+
+- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now reports all expressions using the `Array` constructors.
+
+  Previously, the rule reported only use of the `Array` constructor in expressions statements.
+
+  ```js
+  // This was reported
+  new Array();
+  // This was not reported
+  const xs = new Array();
+  ```
+
+  Contributed by @Conaclos
 
 ### Parser
 
