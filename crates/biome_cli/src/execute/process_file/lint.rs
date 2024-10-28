@@ -44,7 +44,7 @@ pub(crate) fn lint_with_guard<'ctx>(
                 };
             if let Some(fix_mode) = ctx.execution.as_fix_file_mode() {
                 let suppression_explanation = if suppress && suppression_reason.is_none() {
-                    "Ignored using `--suppress`".to_string()
+                    "ignored using `--suppress`".to_string()
                 } else {
                     suppression_reason.unwrap_or("<explanation>".to_string())
                 };
