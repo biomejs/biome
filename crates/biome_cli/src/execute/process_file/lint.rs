@@ -15,7 +15,7 @@ pub(crate) fn lint<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     path: &Path,
     suppress: bool,
-    suppression_reason: Option<String>,
+    suppression_reason: Option<&str>,
 ) -> FileResult {
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
     lint_with_guard(ctx, &mut workspace_file, suppress, suppression_reason)
@@ -25,7 +25,7 @@ pub(crate) fn lint_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
     suppress: bool,
-    suppression_reason: Option<String>,
+    suppression_reason: Option<&str>,
 ) -> FileResult {
     tracing::info_span!("Processes linting", path =? workspace_file.path.display()).in_scope(
         move || {
@@ -39,9 +39,9 @@ pub(crate) fn lint_with_guard<'ctx>(
                 };
             if let Some(fix_mode) = ctx.execution.as_fix_file_mode() {
                 let suppression_explanation = if suppress && suppression_reason.is_none() {
-                    "ignored using `--suppress`".to_string()
+                    "ignored using `--suppress`"
                 } else {
-                    suppression_reason.unwrap_or("<explanation>".to_string())
+                    suppression_reason.unwrap_or("<explanation>")
                 };
 
                 let fix_result = workspace_file
@@ -55,7 +55,7 @@ pub(crate) fn lint_with_guard<'ctx>(
                             .build(),
                         only.clone(),
                         skip.clone(),
-                        Some(suppression_explanation),
+                        Some(suppression_explanation.to_string()),
                     )
                     .with_file_path_and_code(
                         workspace_file.path.display().to_string(),

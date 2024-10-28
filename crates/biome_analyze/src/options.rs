@@ -78,7 +78,7 @@ pub struct AnalyzerOptions {
     /// The file that is being analyzed
     pub file_path: PathBuf,
 
-    /// Suppression reason to be used with `--suppress` and `--reason`
+    /// Suppression reason used when applying a suppression code action
     pub suppression_reason: Option<String>,
 }
 

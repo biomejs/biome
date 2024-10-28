@@ -219,7 +219,7 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
                     shared_context,
                     biome_path,
                     suppress,
-                    suppression_reason.to_owned(),
+                    suppression_reason.as_deref(),
                 )
             }
             TraversalMode::Format { .. } => {
