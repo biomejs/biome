@@ -83,8 +83,8 @@ Available options:
         --apply               Alias for `--write`, writes safe fixes (deprecated, use `--write`)
         --apply-unsafe        Alias for `--write --unsafe`, writes safe and unsafe fixes
                               (deprecated, use `--write --unsafe`)
-        --suppress            Bulk fix diagnostics with suppression comments if the language
-                              supports it.
+        --suppress            Fixes lint rule violations with a comment a suppression instead of
+                              using a rule code action (fix)
         --reason=STRING       Explanation for suppressing diagnostics with `--suppress`
         --only=<GROUP|RULE>   Run only the given rule or group of rules. If the severity level of a
                               rule is `off`, then the severity level of the rule is set to `error`

@@ -9,7 +9,7 @@ use biome_service::DynRef;
 
 const SUPPRESS_BEFORE: &str = "(1 >= -0)";
 const SUPPRESS_AFTER: &str =
-    "// biome-ignore lint/suspicious/noCompareNegZero: Ignored using `--suppress`\n(1 >= -0)";
+    "// biome-ignore lint/suspicious/noCompareNegZero: ignored using `--suppress`\n(1 >= -0)";
 
 const SUPPRESS_WITH_REASON: &str =
     "// biome-ignore lint/suspicious/noCompareNegZero: We love Biome\n(1 >= -0)";
