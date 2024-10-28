@@ -66,7 +66,7 @@ where
             _: &mut BatchMutation<Self::Language>,
             _: ApplySuppression<Self::Language>,
             _: &str,
-            _: String,
+            _: &str,
         ) {
             unreachable!("")
         }

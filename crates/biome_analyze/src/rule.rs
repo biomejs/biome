@@ -881,7 +881,7 @@ pub trait Rule: RuleMeta + Sized {
         ctx: &RuleContext<Self>,
         text_range: &TextRange,
         suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
-        suppression_reason: Option<String>,
+        suppression_reason: Option<&str>,
     ) -> Option<SuppressAction<RuleLanguage<Self>>>
     where
         Self: 'static,
@@ -902,7 +902,7 @@ pub trait Rule: RuleMeta + Sized {
                 mutation: &mut mutation,
                 token_offset: token,
                 diagnostic_text_range: text_range,
-                suppression_reason: suppression_reason.unwrap_or("<explanation>".to_string()),
+                suppression_reason: suppression_reason.unwrap_or("<explanation>"),
             });
 
             Some(SuppressAction {

@@ -78,7 +78,7 @@ pub trait SuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
-        suppression_reason: String,
+        suppression_reason: &str,
     );
 }
 

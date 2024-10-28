@@ -129,7 +129,7 @@ impl SuppressionAction for JsSuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
-        suppression_reason: String,
+        suppression_reason: &str,
     ) {
         let ApplySuppression {
             token_to_apply_suppression,

@@ -409,7 +409,7 @@ where
                     &ctx,
                     &text_range,
                     self.suppression_action,
-                    self.suppression_reason.clone(),
+                    self.suppression_reason.as_deref(),
                 ) {
                     let action = AnalyzerAction {
                         rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
