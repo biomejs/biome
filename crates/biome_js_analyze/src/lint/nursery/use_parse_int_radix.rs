@@ -1,13 +1,16 @@
-use crate::services::semantic::Semantic;
-use biome_analyze::RuleSource;
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use crate::JsRuleAction;
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
+    RuleSource,
+};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::numbers::parse_js_number;
+use biome_js_factory::make;
 use biome_js_syntax::{
-    AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression, JsCallExpression,
+    numbers::parse_js_number, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
+    JsCallArgumentList, JsCallExpression, T,
 };
-use biome_rowan::{AstNode, AstSeparatedList};
+use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use serde::{Deserialize, Serialize};
 
 #[cfg(feature = "schemars")]
@@ -46,11 +49,12 @@ declare_lint_rule! {
         language: "js",
         recommended: true,
         sources: &[RuleSource::Eslint("radix")],
+        fix_kind: FixKind::Unsafe,
     }
 }
 
 impl Rule for UseParseIntRadix {
-    type Query = Semantic<JsCallExpression>;
+    type Query = Ast<JsCallExpression>;
     type State = State;
     type Signals = Option<Self::State>;
     type Options = UseParseIntRadixOptions;
@@ -125,6 +129,50 @@ impl Rule for UseParseIntRadix {
         };
 
         Some(RuleDiagnostic::new(rule_category!(), node.range(), title).note(note))
+    }
+
+    fn action(ctx: &RuleContext<Self>, state: &Self::State) -> Option<JsRuleAction> {
+        let mut mutation = ctx.root().begin();
+        let argument_list = ctx.query().arguments().ok()?.args();
+
+        let (new_args, message) = match state {
+            State::MissingParameters | State::InvalidRadix => return None,
+            State::RedundantRadix => {
+                let first_argument = argument_list.iter().next()?.ok()?;
+                let args = make::js_call_argument_list([first_argument], None);
+
+                (args, markup! { "Remove the radix" })
+            }
+            State::MissingRadix => {
+                let first_argument = argument_list.iter().next()?.ok()?;
+
+                let ten_literal = AnyJsLiteralExpression::JsNumberLiteralExpression(
+                    make::js_number_literal_expression(make::js_number_literal("10")),
+                );
+                let arg = AnyJsCallArgument::AnyJsExpression(
+                    AnyJsExpression::AnyJsLiteralExpression(ten_literal),
+                );
+
+                let args = make::js_call_argument_list(
+                    [first_argument, arg],
+                    Some(
+                        make::token(T![,])
+                            .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+                    ),
+                );
+
+                (args, markup! { "Remove add a radix of 10" })
+            }
+        };
+
+        mutation.replace_node::<JsCallArgumentList>(argument_list, new_args);
+
+        Some(JsRuleAction::new(
+            ActionCategory::QuickFix,
+            ctx.metadata().applicability(),
+            message.to_owned(),
+            mutation,
+        ))
     }
 }
 
