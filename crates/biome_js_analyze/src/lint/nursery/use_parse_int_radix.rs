@@ -7,8 +7,8 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
 use biome_js_syntax::{
-    numbers::parse_js_number, AnyJsCallArgument, AnyJsExpression, AnyJsLiteralExpression,
-    JsCallArgumentList, JsCallExpression, T,
+    global_identifier, numbers::parse_js_number, AnyJsCallArgument, AnyJsExpression,
+    AnyJsLiteralExpression, JsCallArgumentList, JsCallExpression, T,
 };
 use biome_rowan::{AstNode, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 use serde::{Deserialize, Serialize};
@@ -71,6 +71,10 @@ impl Rule for UseParseIntRadix {
 
         let member_name = call_expression.callee().ok()?.get_callee_member_name()?;
         if member_name.text() != "parseInt" {
+            return None;
+        }
+
+        if !is_global_identifier(&call_expression.callee().ok()?) {
             return None;
         }
 
@@ -202,6 +206,22 @@ pub enum Behavior {
     ///
     /// See [eslint/#4048](https://github.com/eslint/eslint/issues/4048) for more info
     Avoid,
+}
+
+fn is_global_identifier(callee: &AnyJsExpression) -> bool {
+    // If the call is a direct reference to `parseInt`
+    if global_identifier(callee).is_some() {
+        return true;
+    }
+
+    // If the call is a reference on `Number`
+    let object = match callee {
+        AnyJsExpression::JsComputedMemberExpression(expression) => expression.object().ok(),
+        AnyJsExpression::JsStaticMemberExpression(expression) => expression.object().ok(),
+        _ => return false,
+    };
+
+    object.and_then(|expr| global_identifier(&expr)).is_some()
 }
 
 /// Checks whether a given node is a valid value of radix or not.
