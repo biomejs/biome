@@ -4534,7 +4534,6 @@ dependencies = [
  "biome_string_case",
  "colored",
  "indicatif",
- "once_cell",
  "pico-args",
  "regex",
  "serde",
