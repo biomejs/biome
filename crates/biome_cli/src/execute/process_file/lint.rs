@@ -15,15 +15,10 @@ pub(crate) fn lint<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     path: &Path,
     suppress: bool,
-    suppression_reason: &Option<String>,
+    suppression_reason: Option<String>,
 ) -> FileResult {
     let mut workspace_file = WorkspaceFile::new(ctx, path)?;
-    lint_with_guard(
-        ctx,
-        &mut workspace_file,
-        suppress,
-        suppression_reason.clone(),
-    )
+    lint_with_guard(ctx, &mut workspace_file, suppress, suppression_reason)
 }
 
 pub(crate) fn lint_with_guard<'ctx>(

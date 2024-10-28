@@ -215,7 +215,12 @@ pub(crate) fn process_file(ctx: &TraversalOptions, biome_path: &BiomePath) -> Fi
                 ..
             } => {
                 // the unsupported case should be handled already at this point
-                lint(shared_context, biome_path, suppress, suppression_reason)
+                lint(
+                    shared_context,
+                    biome_path,
+                    suppress,
+                    suppression_reason.to_owned(),
+                )
             }
             TraversalMode::Format { .. } => {
                 // the unsupported case should be handled already at this point
