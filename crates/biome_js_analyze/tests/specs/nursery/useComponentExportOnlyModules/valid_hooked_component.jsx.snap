@@ -1,13 +1,20 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-assertion_line: 84
+assertion_line: 86
 expression: valid_hooked_component.jsx
 ---
 # Input
 ```jsx
-import { memo } from 'react';
+import React, { memo } from 'react';
 
-const Component = () => <></>
+export const Component = () => <></>;
+export const MemoArrowComponent = memo(() => <></>);
+export const MemoNamedComponent = memo(Component);
+export const MemoFunctionComponent = memo(function () {});
+export const ReactMemoComponent = React.memo(() => <></>);
+export const ReactMemoNamedComponent = React.memo(Component);
+export const ForwardRefArrowComponent = forwardRef(() => <></>);
+export const ForwardRefFunctionComponent = forwardRef(function () {});
+export const ReactForwardRefComponent = React.forwardRef(() => <></>);
 
-export default memo(Component);
 ```

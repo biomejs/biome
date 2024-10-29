@@ -5,7 +5,7 @@ use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     export_ext::{AnyJsExported, ExportedItem},
-    AnyJsBindingPattern, AnyJsCallArgument, AnyJsExpression, AnyJsModuleItem, AnyJsStatement,
+    AnyJsBindingPattern, AnyJsExpression, AnyJsModuleItem, AnyJsStatement, JsCallExpression,
     JsModule,
 };
 use biome_rowan::{AstNode, TextRange};
@@ -61,7 +61,7 @@ declare_lint_rule! {
     ///
     /// ```jsx
     /// import { memo } from 'react';
-    /// const Component = () => <></>
+    /// export const Component = () => <></>
     /// export default memo(Component);
     /// ```
     ///
@@ -289,34 +289,42 @@ impl Rule for UseComponentExportOnlyModules {
 // Function that returns a standard React component
 const REACT_HOOKS: [&str; 2] = ["memo", "forwardRef"];
 
+/// Check if the function is a React Hook
+fn is_hooked_component(f: &JsCallExpression) -> Option<bool> {
+    let fn_name = match f.callee().ok()? {
+        AnyJsExpression::JsIdentifierExpression(fn_name) => fn_name.text(),
+        AnyJsExpression::JsStaticMemberExpression(member) => member.member().ok()?.text(),
+        _ => return None,
+    };
+    if !REACT_HOOKS.contains(&fn_name.as_str()) {
+        return None;
+    }
+    let args = f.arguments().ok()?;
+    let itr = args
+        .args()
+        .into_iter()
+        .filter_map(Result::ok)
+        .collect::<Vec<_>>();
+    if itr.len() != 1 {
+        return None;
+    }
+    match &itr[0].as_any_js_expression()? {
+        AnyJsExpression::JsArrowFunctionExpression(_) => Some(true),
+        AnyJsExpression::JsFunctionExpression(_) => Some(true),
+        AnyJsExpression::JsIdentifierExpression(arg) => {
+            Some(Case::identify(&arg.name().ok()?.text(), false) == Case::Pascal)
+        }
+        _ => None,
+    }
+}
+
+/// Check if the exported item is a React component
 fn is_exported_react_component(any_exported_item: &ExportedItem) -> bool {
     if let Some(AnyJsExported::AnyJsExpression(AnyJsExpression::JsCallExpression(f))) =
         any_exported_item.exported.clone()
     {
-        if let Ok(AnyJsExpression::JsIdentifierExpression(fn_name)) = f.callee() {
-            if !REACT_HOOKS.contains(&fn_name.text().as_str()) {
-                return false;
-            }
-            let Ok(args) = f.arguments() else {
-                return false;
-            };
-            let itr = args
-                .args()
-                .into_iter()
-                .filter_map(Result::ok)
-                .collect::<Vec<_>>();
-            if itr.len() != 1 {
-                return false;
-            }
-            let AnyJsCallArgument::AnyJsExpression(AnyJsExpression::JsIdentifierExpression(arg)) =
-                &itr[0]
-            else {
-                return false;
-            };
-            let Ok(arg_name) = arg.name() else {
-                return false;
-            };
-            return Case::identify(&arg_name.text(), false) == Case::Pascal;
+        if is_hooked_component(&f).unwrap_or(false) {
+            return true;
         }
     }
     let Some(exported_item_id) = any_exported_item.identifier.clone() else {

@@ -1,0 +1,13 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: valid_default_hooked_component.jsx
+---
+# Input
+```jsx
+import { memo } from 'react';
+
+export const Component = () => <></>
+
+export default memo(Component);
+```
