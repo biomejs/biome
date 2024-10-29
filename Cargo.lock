@@ -123,6 +123,7 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_parser",
  "biome_rowan",
  "enumflags2",
  "rustc-hash 2.0.0",
@@ -641,6 +642,7 @@ dependencies = [
 name = "biome_grit_patterns"
 version = "0.0.1"
 dependencies = [
+ "biome_analyze",
  "biome_console",
  "biome_diagnostics",
  "biome_grit_parser",
@@ -739,10 +741,12 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_fs",
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_semantic",
  "biome_js_syntax",
+ "biome_plugin_loader",
  "biome_project",
  "biome_rowan",
  "biome_string_case",
@@ -1081,6 +1085,7 @@ dependencies = [
  "biome_json_parser",
  "biome_parser",
  "biome_rowan",
+ "grit-pattern-matcher",
  "grit-util",
  "insta",
  "serde",
@@ -2108,9 +2113,9 @@ dependencies = [
 
 [[package]]
 name = "grit-pattern-matcher"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8430b130e086a1764789402b34685336f2e3f6ec37cd188535bede892f88e65b"
+checksum = "8e65db0720c4aa28c1ec04f3e979ac58e571caeea354e2f425b8446035b3a4ed"
 dependencies = [
  "elsa",
  "grit-util",
@@ -2121,9 +2126,9 @@ dependencies = [
 
 [[package]]
 name = "grit-util"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99b005c4c15ce0c47022554c41a01fe2441d3622e586a82614a6fe681833d5d4"
+checksum = "a1f2af37c4ecda81d869b65f4eda40e5b2cec4f60525287201f8cdb874c8cb94"
 dependencies = [
  "derive_builder",
  "once_cell",

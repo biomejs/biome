@@ -39,10 +39,12 @@ serde                    = { workspace = true, features = ["derive"] }
 smallvec                 = { workspace = true }
 
 [dev-dependencies]
-biome_js_parser  = { path = "../biome_js_parser", features = ["tests"] }
-biome_test_utils = { path = "../biome_test_utils" }
-insta            = { workspace = true, features = ["glob"] }
-tests_macros     = { path = "../tests_macros" }
+biome_fs            = { workspace = true }
+biome_js_parser     = { path = "../biome_js_parser", features = ["tests"] }
+biome_plugin_loader = { workspace = true }
+biome_test_utils    = { path = "../biome_test_utils" }
+insta               = { workspace = true, features = ["glob"] }
+tests_macros        = { path = "../tests_macros" }
 
 [features]
 schema = ["schemars"]

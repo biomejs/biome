@@ -1,6 +1,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
 use std::borrow::Cow;
+use biome_parser::AnyParse;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
@@ -8,6 +9,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::ops;
 use tracing::trace;
 
+mod analyzer_plugin;
 mod categories;
 pub mod context;
 mod diagnostics;
@@ -25,6 +27,7 @@ mod visitor;
 // Re-exported for use in the `declare_group` macro
 pub use biome_diagnostics::category_concat;
 
+pub use crate::analyzer_plugin::AnalyzerPlugin;
 pub use crate::categories::{
     ActionCategory, OtherActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder,
     RuleCategory, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
@@ -60,10 +63,16 @@ pub use suppression_action::{ApplySuppression, SuppressionAction};
 /// visitor implementing various analysis over this syntax tree to generate
 /// auxiliary data structures as well as emit "query match" events to be
 /// processed by lint rules and in turn emit "analyzer signals" in the form of
-/// diagnostics, code actions or both
+/// diagnostics, code actions or both.
+/// The analyzer also has support for plugins, although do not (as of yet)
+/// support the same visitor pattern. This makes them slower to execute, but
+/// otherwise they act the same for consumers of the analyzer. They respect the
+/// same suppression comments, and report signals in the same format.
 pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     /// List of visitors being run by this instance of the analyzer for each phase
     phases: BTreeMap<Phases, Vec<Box<dyn Visitor<Language = L> + 'analyzer>>>,
+    /// Plugins to be run after the phases for built-in rules.
+    plugins: Vec<Box<dyn AnalyzerPlugin>>,
     /// Holds the metadata for all the rules statically known to the analyzer
     metadata: &'analyzer MetadataRegistry,
     /// Executor for the query matches emitted by the visitors
@@ -85,7 +94,7 @@ pub struct AnalyzerContext<'a, L: Language> {
 
 impl<'analyzer, L, Matcher, Break, Diag> Analyzer<'analyzer, L, Matcher, Break, Diag>
 where
-    L: Language,
+    L: Language + 'static,
     Matcher: QueryMatcher<L>,
     Diag: Diagnostic + Clone + Send + Sync + 'static,
 {
@@ -100,6 +109,7 @@ where
     ) -> Self {
         Self {
             phases: BTreeMap::new(),
+            plugins: Vec::new(),
             metadata,
             query_matcher,
             parse_suppression_comment,
@@ -117,9 +127,15 @@ where
         self.phases.entry(phase).or_default().push(visitor);
     }
 
+    /// Registers an [AnalyzerPlugin] to be executed after the regular phases.
+    pub fn add_plugin(&mut self, plugin: Box<dyn AnalyzerPlugin>) {
+        self.plugins.push(plugin);
+    }
+
     pub fn run(self, mut ctx: AnalyzerContext<L>) -> Option<Break> {
         let Self {
             phases,
+            plugins,
             metadata,
             mut query_matcher,
             parse_suppression_comment,
@@ -171,6 +187,17 @@ where
                     root: &ctx.root,
                     services: &mut ctx.services,
                 });
+            }
+        }
+
+        for plugin in plugins {
+            let root: AnyParse = ctx.root.syntax().as_send().expect("not a root node").into();
+            for diagnostic in plugin.evaluate(root, ctx.options.file_path.clone()) {
+                let signal = DiagnosticSignal::new(|| diagnostic.clone());
+
+                if let ControlFlow::Break(br) = (emit_signal)(&signal) {
+                    return Some(br);
+                }
             }
         }
 

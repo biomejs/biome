@@ -1,8 +1,12 @@
-use biome_analyze::{AnalysisFilter, AnalyzerAction, ControlFlow, Never, RuleFilter};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerAction, AnalyzerPlugin, ControlFlow, Never, RuleFilter,
+};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::{DiagnosticExt, Severity};
+use biome_fs::OsFileSystem;
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::{JsFileSource, JsLanguage, ModuleKind};
+use biome_plugin_loader::AnalyzerGritPlugin;
 use biome_project::PackageType;
 use biome_rowan::AstNode;
 use biome_test_utils::{
@@ -15,6 +19,7 @@ use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 
 tests_macros::gen_tests! {"tests/specs/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_test, "module"}
 tests_macros::gen_tests! {"tests/suppression/**/*.{cjs,cts,js,jsx,tsx,ts,json,jsonc,svelte}", crate::run_suppression_test, "module"}
+tests_macros::gen_tests! {"tests/plugin/*.grit", crate::run_plugin_test, "module"}
 
 fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
     register_leak_checker();
@@ -59,6 +64,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
                 input_file,
                 CheckActionType::Lint,
                 JsParserOptions::default(),
+                Vec::new(),
             );
         }
 
@@ -76,6 +82,7 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             input_file,
             CheckActionType::Lint,
             JsParserOptions::default(),
+            Vec::new(),
         )
     };
 
@@ -101,6 +108,7 @@ pub(crate) fn analyze_and_snap(
     input_file: &Path,
     check_action_type: CheckActionType,
     parser_options: JsParserOptions,
+    plugins: Vec<Box<dyn AnalyzerPlugin>>,
 ) -> usize {
     let mut diagnostics = Vec::new();
     let mut code_fixes = Vec::new();
@@ -120,8 +128,14 @@ pub(crate) fn analyze_and_snap(
     //
     let options = create_analyzer_options(input_file, &mut diagnostics);
 
-    let (_, errors) =
-        biome_js_analyze::analyze(&root, filter, &options, source_type, manifest, |event| {
+    let (_, errors) = biome_js_analyze::analyze(
+        &root,
+        filter,
+        &options,
+        plugins,
+        source_type,
+        manifest,
+        |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {
                     if check_action_type.is_suppression() {
@@ -177,7 +191,8 @@ pub(crate) fn analyze_and_snap(
             }
 
             ControlFlow::<Never>::Continue(())
-        });
+        },
+    );
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));
@@ -266,11 +281,59 @@ pub(crate) fn run_suppression_test(input: &'static str, _: &str, _: &str, _: &st
         input_file,
         CheckActionType::Suppression,
         JsParserOptions::default(),
+        Vec::new(),
     );
 
     insta::with_settings!({
         prepend_module_to_snapshot => false,
         snapshot_path => input_file.parent().unwrap(),
+    }, {
+        insta::assert_snapshot!(file_name, snapshot, file_name);
+    });
+}
+
+fn run_plugin_test(input: &'static str, _: &str, _: &str, _: &str) {
+    register_leak_checker();
+
+    let plugin_path = Path::new(input);
+    let file_name = plugin_path.file_name().and_then(OsStr::to_str).unwrap();
+    let input_path = plugin_path.with_extension("js");
+
+    let plugin = match AnalyzerGritPlugin::load(
+        &OsFileSystem::new(plugin_path.to_owned()),
+        Path::new(plugin_path),
+    ) {
+        Ok(plugin) => plugin,
+        Err(err) => panic!("Cannot load plugin: {err:?}"),
+    };
+
+    let filter = AnalysisFilter {
+        enabled_rules: Some(&[]),
+        ..AnalysisFilter::default()
+    };
+
+    let mut snapshot = String::new();
+
+    let input_code = read_to_string(&input_path)
+        .unwrap_or_else(|err| panic!("failed to read {input_path:?}: {err:?}"));
+    let Ok(source_type) = input_path.as_path().try_into() else {
+        return;
+    };
+    analyze_and_snap(
+        &mut snapshot,
+        &input_code,
+        source_type,
+        filter,
+        file_name,
+        &input_path,
+        CheckActionType::Lint,
+        JsParserOptions::default(),
+        vec![Box::new(plugin)],
+    );
+
+    insta::with_settings!({
+        prepend_module_to_snapshot => false,
+        snapshot_path => plugin_path.parent().unwrap(),
     }, {
         insta::assert_snapshot!(file_name, snapshot, file_name);
     });

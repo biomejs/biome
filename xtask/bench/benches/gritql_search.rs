@@ -52,6 +52,7 @@ pub fn bench_search_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
         "`getEntityNameForExtendingInterface(errorLocation)`",
         Some(Path::new("bench.grit")),
         GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+        Vec::new(),
     )
     .unwrap();
 
@@ -74,9 +75,9 @@ pub fn bench_search_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestC
         &code,
         |b, _| {
             b.iter(|| {
-                let (_results, logs) =
+                let query_result =
                     black_box(query.execute(target_file.clone())).expect("Couldn't execute query");
-                for log in logs.logs() {
+                for log in query_result.logs.logs() {
                     println!("{log}");
                 }
             })
