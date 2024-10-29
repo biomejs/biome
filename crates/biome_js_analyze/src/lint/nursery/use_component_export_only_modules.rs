@@ -320,19 +320,17 @@ fn is_hooked_component(f: &JsCallExpression) -> Option<bool> {
 
 /// Check if the exported item is a React component
 fn is_exported_react_component(any_exported_item: &ExportedItem) -> bool {
-    if let Some(AnyJsExported::AnyJsExpression(AnyJsExpression::JsCallExpression(f))) =
+    if let Some(exported_item_id) = any_exported_item.identifier.clone() {
+        Case::identify(&exported_item_id.text(), false) == Case::Pascal
+            && match any_exported_item.exported.clone() {
+                Some(exported) => !matches!(exported, AnyJsExported::TsEnumDeclaration(_)),
+                None => true,
+            }
+    } else if let Some(AnyJsExported::AnyJsExpression(AnyJsExpression::JsCallExpression(f))) =
         any_exported_item.exported.clone()
     {
-        if is_hooked_component(&f).unwrap_or(false) {
-            return true;
-        }
+        is_hooked_component(&f).unwrap_or(false)
+    } else {
+        false
     }
-    let Some(exported_item_id) = any_exported_item.identifier.clone() else {
-        return false;
-    };
-    Case::identify(&exported_item_id.text(), false) == Case::Pascal
-        && match any_exported_item.exported.clone() {
-            Some(exported) => !matches!(exported, AnyJsExported::TsEnumDeclaration(_)),
-            None => true,
-        }
 }
