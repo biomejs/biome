@@ -1497,6 +1497,12 @@
 			},
 			"additionalProperties": false
 		},
+		"ImportGroup": {
+			"anyOf": [
+				{ "$ref": "#/definitions/PredefinedImportGroup" },
+				{ "$ref": "#/definitions/Regex" }
+			]
+		},
 		"IndentStyle": {
 			"oneOf": [
 				{ "description": "Tab", "type": "string", "enum": ["tab"] },
@@ -2454,6 +2460,18 @@
 			},
 			"additionalProperties": false
 		},
+		"Options": {
+			"type": "object",
+			"properties": {
+				"importGroups": {
+					"default": [],
+					"type": "array",
+					"items": { "$ref": "#/definitions/ImportGroup" }
+				},
+				"legacy": { "default": false, "type": "boolean" }
+			},
+			"additionalProperties": false
+		},
 		"OrganizeImports": {
 			"type": "object",
 			"properties": {
@@ -2658,6 +2676,10 @@
 			},
 			"additionalProperties": false
 		},
+		"PredefinedImportGroup": {
+			"type": "string",
+			"enum": [":blank-line:", ":bun:", ":node:", ":types:"]
+		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -2701,7 +2723,46 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
-		"RuleAssistConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistConfiguration_for_Null": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Null" }
+			]
+		},
+		"RuleAssistConfiguration_for_Options": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Options" }
+			]
+		},
+		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistWithOptions_for_Null": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+				},
+				"options": { "description": "Rule's options", "type": "null" }
+			},
+			"additionalProperties": false
+		},
+		"RuleAssistWithOptions_for_Options": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/Options" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3203,17 +3264,24 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
+				"organizeImports": {
+					"description": "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedAttributes": {
 					"description": "Enforce attribute sorting in JSX elements.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				}

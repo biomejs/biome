@@ -294,8 +294,8 @@ fn generate_for_groups(
                             .#group_idents
                             .as_ref()
                             .and_then(|group| group.get_rule_configuration(rule_name))
-                            .filter(|conf| !matches!(conf, RuleAssistConfiguration::Off))
-                            .map(|conf| conf.into())
+                            .filter(|(level, _)| !matches!(level, RuleAssistPlainConfiguration::Off))
+                            .map(|(level, _)| level.into())
                     )*
                 }
             }
@@ -343,8 +343,8 @@ fn generate_for_groups(
 
     let use_rule_configuration = if kind == RuleCategory::Action {
         quote! {
-            use crate::analyzer::RuleAssistConfiguration;
-            use biome_analyze::RuleFilter;
+            use crate::analyzer::{RuleAssistConfiguration, RuleAssistPlainConfiguration};
+            use biome_analyze::{options::RuleOptions, RuleFilter};
         }
     } else {
         quote! {
@@ -607,10 +607,22 @@ fn generate_for_groups(
                 use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
                 pub fn push_to_analyzer_assists(
-                    _rules: &Actions,
-                    _metadata: &MetadataRegistry,
-                    _analyzer_rules: &mut AnalyzerRules,
-                ) {}
+                    rules: &Actions,
+                    metadata: &MetadataRegistry,
+                    analyzer_rules: &mut AnalyzerRules,
+                ) {
+                    #(
+                        if let Some(rules) = rules.#group_idents.as_ref() {
+                            for rule_name in #group_pascal_idents::GROUP_RULES {
+                                if let Some((_, Some(rule_options))) = rules.get_rule_configuration(rule_name) {
+                                    if let Some(rule_key) = metadata.find_rule(#group_strings, rule_name) {
+                                        analyzer_rules.push_rule(rule_key, rule_options);
+                                    }
+                                }
+                            }
+                        }
+                    )*
+                }
             }
         }
         RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
@@ -650,11 +662,7 @@ fn generate_group_struct(
     let mut rule_disabled_check_line = Vec::new();
     let mut get_rule_configuration_line = Vec::new();
 
-    for (index, (rule, metadata)) in rules
-        .iter()
-        .filter(|(rule, _)| **rule != "organizeImports")
-        .enumerate()
-    {
+    for (index, (rule, metadata)) in rules.iter().enumerate() {
         let summary = {
             let mut docs = String::new();
             let parser = Parser::new(metadata.docs);
@@ -703,10 +711,10 @@ fn generate_group_struct(
         let rule_identifier = quote::format_ident!("{}", Case::Snake.convert(rule));
         let rule_config_type = quote::format_ident!(
             "{}",
-            if metadata.fix_kind != FixKind::None {
-                "RuleFixConfiguration"
-            } else if kind == RuleCategory::Action {
+            if kind == RuleCategory::Action {
                 "RuleAssistConfiguration"
+            } else if metadata.fix_kind != FixKind::None {
+                "RuleFixConfiguration"
             } else {
                 "RuleConfiguration"
             }
@@ -743,7 +751,7 @@ fn generate_group_struct(
             _ => panic!("Language not supported"),
         };
         let rule_option = if kind == RuleCategory::Action {
-            quote! { Option<#rule_config_type> }
+            quote! { Option<#rule_config_type<#rule_option_type>> }
         } else {
             quote! {
                 Option<#rule_config_type<#rule_option_type>>
@@ -778,7 +786,7 @@ fn generate_group_struct(
 
         if kind == RuleCategory::Action {
             get_rule_configuration_line.push(quote! {
-                #rule => self.#rule_identifier.as_ref().copied()
+                #rule => self.#rule_identifier.as_ref().map(|conf| (conf.level(), conf.get_options()))
             });
         } else {
             get_rule_configuration_line.push(quote! {
@@ -791,7 +799,7 @@ fn generate_group_struct(
 
     let get_configuration_function = if kind == RuleCategory::Action {
         quote! {
-            pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<RuleAssistConfiguration> {
+            pub(crate) fn get_rule_configuration(&self, rule_name: &str) -> Option<(RuleAssistPlainConfiguration, Option<RuleOptions>)> {
                 match rule_name {
                     #( #get_rule_configuration_line ),*,
                     _ => None

@@ -682,13 +682,17 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
+	 * Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.
+	 */
+	organizeImports?: RuleAssistConfiguration_for_Options;
+	/**
 	 * Enforce attribute sorting in JSX elements.
 	 */
-	useSortedAttributes?: RuleAssistConfiguration;
+	useSortedAttributes?: RuleAssistConfiguration_for_Null;
 	/**
 	 * Sorts the keys of a JSON object in natural order
 	 */
-	useSortedKeys?: RuleAssistConfiguration;
+	useSortedKeys?: RuleAssistConfiguration_for_Null;
 }
 export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
@@ -2030,7 +2034,12 @@ export interface OverrideOrganizeImportsConfiguration {
 	 */
 	enabled?: boolean;
 }
-export type RuleAssistConfiguration = "on" | "off";
+export type RuleAssistConfiguration_for_Options =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOptions_for_Options;
+export type RuleAssistConfiguration_for_Null =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOptions_for_Null;
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
@@ -2100,6 +2109,27 @@ export type RuleFixConfiguration_for_NoConsoleOptions =
 export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
+export type RuleAssistPlainConfiguration = "on" | "off";
+export interface RuleAssistWithOptions_for_Options {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RuleAssistPlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: Options;
+}
+export interface RuleAssistWithOptions_for_Null {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RuleAssistPlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: null;
+}
 export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
 export interface RuleWithFixOptions_for_Null {
 	/**
@@ -2375,6 +2405,10 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	 */
 	options: NoDoubleEqualsOptions;
 }
+export interface Options {
+	importGroups?: ImportGroup[];
+	legacy?: boolean;
+}
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -2563,6 +2597,7 @@ If `false`, no such exception will be made.
 	 */
 	ignoreNull: boolean;
 }
+export type ImportGroup = PredefinedImportGroup | Regex;
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -2615,6 +2650,11 @@ export type Format =
 	| "CONSTANT_CASE"
 	| "PascalCase"
 	| "snake_case";
+export type PredefinedImportGroup =
+	| ":blank-line:"
+	| ":bun:"
+	| ":node:"
+	| ":types:";
 export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.
