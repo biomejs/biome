@@ -91,8 +91,23 @@ function fn() {
 	};
 }
 
-const x = { prop: () => {} };
-const x = { bar: { prop: () => {} } };
+const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} };
+const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+
+
+// Returning object from function
+interface Behavior {
+  attribute: string;
+  namedFunc: () => string;
+  arrowFunc: () => string;
+}
+
+function getObjectWithFunction(): Behavior {
+  return {
+    namedFunc: function myFunc() { return "value" },
+    arrowFunc: () => {},
+  }
+};
 
 interface Array<Type> {
 	pop(): Type | undefined;

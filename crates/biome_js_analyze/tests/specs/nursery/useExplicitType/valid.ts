@@ -103,6 +103,20 @@ class Accumulator {
 }
 new Accumulator().accumulate(() => 1);
 
+// Returning object from function
+interface Behavior {
+  namedFunc: () => string;
+  arrowFunc: () => string;
+}
+
+function getObjectWithFunction(): Behavior {
+  return {
+    namedFunc: function myFunc(): string { return "value" },
+    arrowFunc: () => {},
+  }
+}
+
+
 interface Array<Type> {
 	pop(): Type | undefined;
 	push(...items: Type[]): number;
