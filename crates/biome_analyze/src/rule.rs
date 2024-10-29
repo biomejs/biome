@@ -972,7 +972,7 @@ pub trait Rule: RuleMeta + Sized {
 }
 
 /// Diagnostic object returned by a single analysis rule
-#[derive(Debug, Diagnostic)]
+#[derive(Clone, Debug, Diagnostic)]
 pub struct RuleDiagnostic {
     #[category]
     pub(crate) category: &'static Category,
@@ -987,7 +987,7 @@ pub struct RuleDiagnostic {
     pub(crate) rule_advice: RuleAdvice,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 /// It contains possible advices to show when printing a diagnostic that belong to the rule
 pub struct RuleAdvice {
     pub(crate) details: Vec<Detail>,
@@ -996,7 +996,7 @@ pub struct RuleAdvice {
     pub(crate) code_suggestion_list: Vec<CodeSuggestionAdvice<MarkupBuf>>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct SuggestionList {
     pub(crate) message: MarkupBuf,
     pub(crate) list: Vec<MarkupBuf>,
@@ -1038,7 +1038,7 @@ impl Advices for RuleAdvice {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Detail {
     pub log_category: LogCategory,
     pub message: MarkupBuf,

@@ -1,12 +1,11 @@
 mod analyzer_grit_plugin;
-mod analyzer_plugin;
 mod diagnostics;
 mod plugin_manifest;
 
 use std::path::Path;
 
-use analyzer_grit_plugin::AnalyzerGritPlugin;
-pub use analyzer_plugin::AnalyzerPlugin;
+pub use analyzer_grit_plugin::AnalyzerGritPlugin;
+use biome_analyze::AnalyzerPlugin;
 use biome_console::markup;
 use biome_deserialize::json::deserialize_from_json_str;
 use biome_diagnostics::adapters::ResolveError;

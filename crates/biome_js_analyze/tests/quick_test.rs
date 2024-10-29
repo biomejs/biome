@@ -72,8 +72,14 @@ fn analyze(
     let options = create_analyzer_options(input_file, &mut diagnostics);
     let manifest = load_manifest(input_file, &mut diagnostics);
 
-    let (_, errors) =
-        biome_js_analyze::analyze(&root, filter, &options, source_type, manifest, |event| {
+    let (_, errors) = biome_js_analyze::analyze(
+        &root,
+        filter,
+        &options,
+        Vec::new(),
+        source_type,
+        manifest,
+        |event| {
             if let Some(mut diag) = event.diagnostic() {
                 for action in event.actions() {
                     diag = diag.add_code_suggestion(CodeSuggestionAdvice::from(action));
@@ -89,7 +95,8 @@ fn analyze(
             }
 
             ControlFlow::<Never>::Continue(())
-        });
+        },
+    );
 
     for error in errors {
         diagnostics.push(diagnostic_to_string(file_name, input_code, error));

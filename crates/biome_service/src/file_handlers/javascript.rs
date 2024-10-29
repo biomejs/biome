@@ -394,6 +394,7 @@ fn debug_control_flow(parse: AnyParse, cursor: TextSize) -> String {
             }
         },
         &options,
+        Vec::new(),
         JsFileSource::default(),
         None,
         |_| ControlFlow::<Never>::Continue(()),
@@ -473,6 +474,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 &tree,
                 filter,
                 analyzer_options,
+                Vec::new(),
                 file_source,
                 params.manifest,
                 |signal| {
@@ -586,6 +588,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 &tree,
                 filter,
                 &analyzer_options,
+                Vec::new(),
                 source_type,
                 manifest,
                 |signal| {
@@ -658,6 +661,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
             &tree,
             filter,
             &analyzer_options,
+            Vec::new(),
             file_source,
             params.manifest.clone(),
             |signal| {
@@ -887,6 +891,7 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
         &tree,
         filter,
         &AnalyzerOptions::default(),
+        Vec::new(),
         JsFileSource::default(),
         None,
         |signal| {
