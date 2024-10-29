@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
 expression: invalid.ts
 ---
 # Input
@@ -97,8 +98,23 @@ function fn() {
   };
 }
 
-const x = { prop: () => {} }
-const x = { bar: { prop: () => {} } }
+const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
+const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+
+
+// Returning object from function
+interface Behavior {
+  attribute: string; 
+  namedFunc: () => string; 
+  arrowFunc: () => string;
+}
+
+function getObjectWithFunction(): Behavior {
+  return {
+    namedFunc: function myFunc() { return "value" },
+    arrowFunc: () => {},
+  }
+}
 ```
 
 # Diagnostics
@@ -532,15 +548,16 @@ invalid.ts:85:2 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:94:19 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:94:29 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
     92 │ }
     93 │ 
-  > 94 │ const x = { prop: () => {} }
-       │                   ^^^^^^^^^
-    95 │ const x = { bar: { prop: () => {} } }
+  > 94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
+       │                             ^^^^^^^^^^^^^^^
+    95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+    96 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -550,13 +567,69 @@ invalid.ts:94:19 lint/nursery/useExplicitType ━━━━━━━━━━━�
 ```
 
 ```
-invalid.ts:95:26 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.ts:94:81 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Missing return type on function.
   
-    94 │ const x = { prop: () => {} }
-  > 95 │ const x = { bar: { prop: () => {} } }
-       │                          ^^^^^^^^^
+    92 │ }
+    93 │ 
+  > 94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
+       │                                                                                 ^^^^^^^^^
+    95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+    96 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:95:36 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
+  > 95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+       │                                    ^^^^^^^^^^^^^^^
+    96 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:95:79 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    94 │ const x = { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} }
+  > 95 │ const x = { bar: { namedFunctions: function alpha () => {}, unNamedFunctions: function () => {} } }
+       │                                                                               ^^^^^^^^^^^^
+    96 │ 
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:107:16 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    105 │ function getObjectWithFunction(): Behavior {
+    106 │   return {
+  > 107 │     namedFunc: function myFunc() { return "value" },
+        │                ^^^^^^^^^^^^^^^
+    108 │     arrowFunc: () => {},
+    109 │   }
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
