@@ -367,25 +367,25 @@ fn is_function_used_in_argument_or_array(func: &AnyJsFunction) -> bool {
 }
 
 /// Check if the function is used in some object
-/// 
+///
 /// # Examples
-/// 
-/// JS_OBJECT: 
-/// 
+///
+/// JS_OBJECT:
+///
 /// interface Behavior {
-///   attribute: string; 
-///   func: () => string; 
+///   attribute: string;
+///   func: () => string;
 ///   arrowFunc: () => string;
 /// }
-/// 
+///
 /// function getObjectWithFunction(): Behavior {
 ///   return {
-///     attribute: 'value', 
+///     attribute: 'value',
 ///     func: function myFunc(): string { return "value" },
 ///     arrowFunc: () => {},
 ///   }
 /// }
-/// 
+///
 fn is_function_used_in_object(func: &AnyJsFunction) -> bool {
     matches!(
         func.syntax().parent().kind(),
