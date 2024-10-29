@@ -1,5 +1,3 @@
-use crate::converters::from_proto;
-use crate::converters::line_index::LineIndex;
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
@@ -7,6 +5,8 @@ use anyhow::{Context, Result};
 use biome_analyze::{ActionCategory, RuleCategoriesBuilder, SourceActionKind};
 use biome_diagnostics::Applicability;
 use biome_fs::BiomePath;
+use biome_lsp_converters::from_proto;
+use biome_lsp_converters::line_index::LineIndex;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{

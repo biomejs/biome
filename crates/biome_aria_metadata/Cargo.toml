@@ -17,7 +17,7 @@ version              = "0.5.7"
 
 [build-dependencies]
 biome_string_case = { workspace = true }
-prettyplease      = "0.2.22"
+prettyplease      = "0.2.25"
 proc-macro2       = { workspace = true, features = ["span-locations"] }
 quote             = { workspace = true }
 serde             = { workspace = true }
