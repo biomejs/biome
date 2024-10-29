@@ -7,6 +7,7 @@ use crate::grit_resolved_pattern::GritResolvedPattern;
 use crate::grit_target_language::GritTargetLanguage;
 use crate::grit_target_node::GritTargetNode;
 use crate::grit_tree::GritTargetTree;
+use biome_analyze::RuleDiagnostic;
 use biome_parser::AnyParse;
 use grit_pattern_matcher::constants::{GLOBAL_VARS_SCOPE_INDEX, NEW_FILES_INDEX};
 use grit_pattern_matcher::context::{ExecContext, QueryContext};
@@ -19,6 +20,7 @@ use grit_util::error::GritPatternError;
 use grit_util::{error::GritResult, AnalysisLogs, FileOrigin, InputRanges, MatchRanges};
 use path_absolutize::Absolutize;
 use std::path::PathBuf;
+use std::sync::Mutex;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct GritQueryContext;
@@ -49,6 +51,18 @@ pub struct GritExecContext<'a> {
     pub functions: &'a [GritFunctionDefinition<GritQueryContext>],
     pub patterns: &'a [PatternDefinition<GritQueryContext>],
     pub predicates: &'a [PredicateDefinition<GritQueryContext>],
+
+    pub diagnostics: Mutex<Vec<RuleDiagnostic>>,
+}
+
+impl<'a> GritExecContext<'a> {
+    pub fn add_diagnostic(&self, diagnostic: RuleDiagnostic) {
+        self.diagnostics.lock().unwrap().push(diagnostic);
+    }
+
+    pub fn into_diagnostics(self) -> Vec<RuleDiagnostic> {
+        self.diagnostics.into_inner().unwrap()
+    }
 }
 
 impl<'a> ExecContext<'a, GritQueryContext> for GritExecContext<'a> {

@@ -1,4 +1,4 @@
-use biome_analyze::RuleDiagnostic;
+use crate::RuleDiagnostic;
 use biome_parser::AnyParse;
 use std::{fmt::Debug, path::PathBuf};
 

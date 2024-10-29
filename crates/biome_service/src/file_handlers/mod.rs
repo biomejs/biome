@@ -27,7 +27,7 @@ use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
 use biome_graphql_syntax::{GraphqlFileSource, GraphqlLanguage};
-use biome_grit_patterns::{GritQuery, GritQueryResult, GritTargetFile};
+use biome_grit_patterns::{GritQuery, GritQueryEffect, GritTargetFile};
 use biome_grit_syntax::file_source::GritFileSource;
 use biome_html_syntax::HtmlFileSource;
 use biome_js_parser::{parse, JsParserOptions};
@@ -686,7 +686,7 @@ pub(crate) fn search(
     query: &GritQuery,
     _settings: WorkspaceSettingsHandle,
 ) -> Result<Vec<TextRange>, WorkspaceError> {
-    let (query_result, _logs) = query
+    let result = query
         .execute(GritTargetFile {
             path: path.to_path_buf(),
             parse,
@@ -695,10 +695,11 @@ pub(crate) fn search(
             WorkspaceError::SearchError(SearchError::QueryError(QueryDiagnostic(err.to_string())))
         })?;
 
-    let matches = query_result
+    let matches = result
+        .effects
         .into_iter()
         .flat_map(|result| match result {
-            GritQueryResult::Match(m) => m.ranges,
+            GritQueryEffect::Match(m) => m.ranges,
             _ => Vec::new(),
         })
         .map(|range| TextRange::new(range.start_byte.into(), range.end_byte.into()))

@@ -21,9 +21,16 @@ mod util;
 mod variables;
 
 pub use errors::*;
-pub use grit_context::GritTargetFile;
-pub use grit_query::{CreateFile, GritQuery, GritQueryResult, Message, OutputFile};
+pub use grit_binding::GritBinding;
+pub use grit_built_in_functions::BuiltInFunction;
+pub use grit_context::{GritExecContext, GritQueryContext, GritTargetFile};
+pub use grit_pattern_matcher::pattern::{Pattern as GritPattern, State as GritQueryState};
+pub use grit_query::{
+    CreateFile, GritQuery, GritQueryEffect, GritQueryResult, Message, OutputFile,
+};
+pub use grit_resolved_pattern::GritResolvedPattern;
 pub use grit_target_language::{GritTargetLanguage, JsTargetLanguage};
+pub use grit_target_node::{GritTargetLanguageNode, GritTargetNode, GritTargetSyntaxKind};
 
 use biome_grit_parser::parse_grit;
 use std::path::Path;
@@ -33,6 +40,7 @@ pub fn compile_pattern(
     source: &str,
     path: Option<&Path>,
     language: GritTargetLanguage,
+    extra_built_ins: Vec<BuiltInFunction>,
 ) -> Result<GritQuery, CompileError> {
     let parsed = parse_grit(source);
     if parsed.has_errors() {
@@ -42,5 +50,5 @@ pub fn compile_pattern(
         ));
     }
 
-    GritQuery::from_node(parsed.tree(), path, language)
+    GritQuery::from_node(parsed.tree(), path, language, extra_built_ins)
 }

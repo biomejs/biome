@@ -820,6 +820,7 @@ impl Workspace for WorkspaceServer {
             &params.pattern,
             None,
             biome_grit_patterns::JsTargetLanguage.into(),
+            Vec::new(),
         )?;
 
         let pattern_id = make_search_pattern_id();
