@@ -1,5 +1,7 @@
 use biome_grit_parser::parse_grit;
-use biome_grit_patterns::{GritQuery, GritTargetFile, GritTargetLanguage, JsTargetLanguage};
+use biome_grit_patterns::{
+    GritQuery, GritQueryResult, GritTargetFile, GritTargetLanguage, JsTargetLanguage,
+};
 use biome_js_parser::{parse, JsParserOptions};
 use biome_js_syntax::JsFileSource;
 
@@ -21,6 +23,7 @@ fn test_query() {
         parse_grit_result.tree(),
         None,
         GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+        Vec::new(),
     )
     .expect("could not construct query");
 
@@ -34,9 +37,10 @@ fn test_query() {
         path: "test.js".into(),
         parse: parse(body, JsFileSource::tsx(), JsParserOptions::default()).into(),
     };
-    let (results, logs) = query.execute(file).expect("could not execute query");
+    let GritQueryResult { effects, logs, .. } =
+        query.execute(file).expect("could not execute query");
 
-    println!("Results: {results:#?}");
+    println!("Effects: {effects:#?}");
 
     if !logs.is_empty() {
         println!(

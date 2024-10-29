@@ -11,7 +11,8 @@ impl WithinCompiler {
         context: &mut NodeCompilationContext,
     ) -> Result<Within<GritQueryContext>, CompileError> {
         let pattern = PatternCompiler::from_maybe_curly_node(&node.pattern()?, context)?;
+        let until = None; // TODO: Update syntax.
 
-        Ok(Within::new(pattern))
+        Ok(Within::new(pattern, until))
     }
 }

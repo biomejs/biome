@@ -207,7 +207,7 @@ pub fn parse_test_path(file: &Path) -> (&str, &str) {
     let mut rule_name = "";
 
     for component in file.iter().rev() {
-        if component == "specs" || component == "suppression" {
+        if component == "specs" || component == "suppression" || component == "plugin" {
             break;
         }
 

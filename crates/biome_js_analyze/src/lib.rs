@@ -2,9 +2,9 @@
 
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerSignal, ControlFlow,
-    InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
-    SuppressionKind,
+    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPlugin, AnalyzerSignal,
+    ControlFlow, InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction,
+    RuleRegistry, SuppressionKind,
 };
 use biome_aria::{AriaProperties, AriaRoles};
 use biome_diagnostics::{category, Error as DiagnosticError};
@@ -44,11 +44,13 @@ pub static METADATA: LazyLock<MetadataRegistry> = LazyLock::new(|| {
 /// Additionally, this function takes a `inspect_matcher` function that can be
 /// used to inspect the "query matches" emitted by the analyzer before they are
 /// processed by the lint rules registry
+#[allow(clippy::too_many_arguments)]
 pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     root: &LanguageRoot<JsLanguage>,
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
+    plugins: Vec<Box<dyn AnalyzerPlugin>>,
     source_type: JsFileSource,
     manifest: Option<PackageJson>,
     mut emit_signal: F,
@@ -120,6 +122,10 @@ where
         &mut emit_signal,
     );
 
+    for plugin in plugins {
+        analyzer.add_plugin(plugin);
+    }
+
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
     }
@@ -146,6 +152,7 @@ pub fn analyze<'a, F, B>(
     root: &LanguageRoot<JsLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
+    plugins: Vec<Box<dyn AnalyzerPlugin>>,
     source_type: JsFileSource,
     manifest: Option<PackageJson>,
     emit_signal: F,
@@ -159,6 +166,7 @@ where
         filter,
         |_| {},
         options,
+        plugins,
         source_type,
         manifest,
         emit_signal,
@@ -206,6 +214,7 @@ let bar = 33;
                 ..AnalysisFilter::default()
             },
             &options,
+            Vec::new(),
             JsFileSource::tsx(),
             Some(PackageJson {
                 dependencies,
@@ -298,6 +307,7 @@ let bar = 33;
             &parsed.tree(),
             AnalysisFilter::default(),
             &options,
+            Vec::new(),
             JsFileSource::js_module(),
             None,
             |signal| {
@@ -367,6 +377,7 @@ let bar = 33;
             &parsed.tree(),
             filter,
             &options,
+            Vec::new(),
             JsFileSource::js_module(),
             None,
             |signal| {
@@ -410,6 +421,7 @@ let bar = 33;
             &parsed.tree(),
             filter,
             &options,
+            Vec::new(),
             JsFileSource::js_module(),
             None,
             |signal| {
@@ -460,6 +472,7 @@ debugger;
             &parsed.tree(),
             filter,
             &options,
+            Vec::new(),
             JsFileSource::js_module(),
             None,
             |signal| {
@@ -507,6 +520,7 @@ debugger;
             &parsed.tree(),
             filter,
             &options,
+            Vec::new(),
             JsFileSource::js_module(),
             None,
             |signal| {
@@ -555,6 +569,7 @@ let bar = 33;
             &parsed.tree(),
             filter,
             &options,
+            Vec::new(),
             JsFileSource::js_module(),
             None,
             |signal| {

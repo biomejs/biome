@@ -193,6 +193,7 @@ impl Analyze {
                     root,
                     filter,
                     &options,
+                    Vec::new(),
                     JsFileSource::default(),
                     None,
                     |event| {
