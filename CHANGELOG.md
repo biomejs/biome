@@ -109,6 +109,13 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @fireairforce
 
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser handle unterminated `JSX_STRING_LITERAL` properly
+
+  ```jsx
+  function Comp() {
+    return (
+        <a rel="
+  ```
 - Fix [#342](https://github.com/biomejs/biome/issues/342), js parser is no longer progressing for an invalid object
   member name:
 
