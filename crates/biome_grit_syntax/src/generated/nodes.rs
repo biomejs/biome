@@ -2024,7 +2024,7 @@ impl GritPatternContains {
     pub fn contains(&self) -> SyntaxResult<AnyGritMaybeCurlyPattern> {
         support::required_node(&self.syntax, 1usize)
     }
-    pub fn until_clause(&self) -> Option<GritPatternContainsUntilClause> {
+    pub fn until_clause(&self) -> Option<GritPatternUntilClause> {
         support::node(&self.syntax, 2usize)
     }
 }
@@ -2040,47 +2040,7 @@ impl Serialize for GritPatternContains {
 pub struct GritPatternContainsFields {
     pub contains_token: SyntaxResult<SyntaxToken>,
     pub contains: SyntaxResult<AnyGritMaybeCurlyPattern>,
-    pub until_clause: Option<GritPatternContainsUntilClause>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritPatternContainsUntilClause {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GritPatternContainsUntilClause {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GritPatternContainsUntilClauseFields {
-        GritPatternContainsUntilClauseFields {
-            until_token: self.until_token(),
-            until: self.until(),
-        }
-    }
-    pub fn until_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn until(&self) -> SyntaxResult<AnyGritPattern> {
-        support::required_node(&self.syntax, 1usize)
-    }
-}
-impl Serialize for GritPatternContainsUntilClause {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct GritPatternContainsUntilClauseFields {
-    pub until_token: SyntaxResult<SyntaxToken>,
-    pub until: SyntaxResult<AnyGritPattern>,
+    pub until_clause: Option<GritPatternUntilClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPatternDefinition {
@@ -2561,6 +2521,46 @@ pub struct GritPatternOrElseFields {
     pub l_curly_token: SyntaxResult<SyntaxToken>,
     pub patterns: GritPatternList,
     pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GritPatternUntilClause {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GritPatternUntilClause {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GritPatternUntilClauseFields {
+        GritPatternUntilClauseFields {
+            until_token: self.until_token(),
+            until: self.until(),
+        }
+    }
+    pub fn until_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn until(&self) -> SyntaxResult<AnyGritPattern> {
+        support::required_node(&self.syntax, 1usize)
+    }
+}
+impl Serialize for GritPatternUntilClause {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GritPatternUntilClauseFields {
+    pub until_token: SyntaxResult<SyntaxToken>,
+    pub until: SyntaxResult<AnyGritPattern>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPatternWhere {
@@ -4185,6 +4185,7 @@ impl GritWithin {
         GritWithinFields {
             within_token: self.within_token(),
             pattern: self.pattern(),
+            until_clause: self.until_clause(),
         }
     }
     pub fn within_token(&self) -> SyntaxResult<SyntaxToken> {
@@ -4192,6 +4193,9 @@ impl GritWithin {
     }
     pub fn pattern(&self) -> SyntaxResult<AnyGritMaybeCurlyPattern> {
         support::required_node(&self.syntax, 1usize)
+    }
+    pub fn until_clause(&self) -> Option<GritPatternUntilClause> {
+        support::node(&self.syntax, 2usize)
     }
 }
 impl Serialize for GritWithin {
@@ -4206,6 +4210,7 @@ impl Serialize for GritWithin {
 pub struct GritWithinFields {
     pub within_token: SyntaxResult<SyntaxToken>,
     pub pattern: SyntaxResult<AnyGritMaybeCurlyPattern>,
+    pub until_clause: Option<GritPatternUntilClause>,
 }
 #[derive(Clone, PartialEq, Eq, Hash, Serialize)]
 pub enum AnyGritCodeSnippetSource {
@@ -7100,48 +7105,6 @@ impl From<GritPatternContains> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritPatternContainsUntilClause {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GritPatternContainsUntilClause {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternContainsUntilClause")
-            .field(
-                "until_token",
-                &support::DebugSyntaxResult(self.until_token()),
-            )
-            .field("until", &support::DebugSyntaxResult(self.until()))
-            .finish()
-    }
-}
-impl From<GritPatternContainsUntilClause> for SyntaxNode {
-    fn from(n: GritPatternContainsUntilClause) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GritPatternContainsUntilClause> for SyntaxElement {
-    fn from(n: GritPatternContainsUntilClause) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for GritPatternDefinition {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7605,6 +7568,48 @@ impl From<GritPatternOrElse> for SyntaxNode {
 }
 impl From<GritPatternOrElse> for SyntaxElement {
     fn from(n: GritPatternOrElse) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for GritPatternUntilClause {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_PATTERN_UNTIL_CLAUSE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_PATTERN_UNTIL_CLAUSE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritPatternUntilClause {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritPatternUntilClause")
+            .field(
+                "until_token",
+                &support::DebugSyntaxResult(self.until_token()),
+            )
+            .field("until", &support::DebugSyntaxResult(self.until()))
+            .finish()
+    }
+}
+impl From<GritPatternUntilClause> for SyntaxNode {
+    fn from(n: GritPatternUntilClause) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritPatternUntilClause> for SyntaxElement {
+    fn from(n: GritPatternUntilClause) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -9233,6 +9238,10 @@ impl std::fmt::Debug for GritWithin {
                 &support::DebugSyntaxResult(self.within_token()),
             )
             .field("pattern", &support::DebugSyntaxResult(self.pattern()))
+            .field(
+                "until_clause",
+                &support::DebugOptionalElement(self.until_clause()),
+            )
             .finish()
     }
 }
@@ -11714,11 +11723,6 @@ impl std::fmt::Display for GritPatternContains {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritPatternContainsUntilClause {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for GritPatternDefinition {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -11765,6 +11769,11 @@ impl std::fmt::Display for GritPatternOr {
     }
 }
 impl std::fmt::Display for GritPatternOrElse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GritPatternUntilClause {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

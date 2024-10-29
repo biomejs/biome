@@ -663,13 +663,13 @@ fn parse_pattern_contains(p: &mut GritParser) -> ParsedSyntax {
             expected_pattern,
         )
         .ok();
-    parse_pattern_contains_until_clause(p).ok();
+    parse_pattern_until_clause(p).ok();
 
     Present(m.complete(p, GRIT_PATTERN_CONTAINS))
 }
 
 #[inline]
-fn parse_pattern_contains_until_clause(p: &mut GritParser) -> ParsedSyntax {
+fn parse_pattern_until_clause(p: &mut GritParser) -> ParsedSyntax {
     if !p.at(UNTIL_KW) {
         return Absent;
     }
@@ -679,7 +679,7 @@ fn parse_pattern_contains_until_clause(p: &mut GritParser) -> ParsedSyntax {
 
     parse_expected_pattern_with_precedence(p, PRECEDENCE_PATTERN);
 
-    Present(m.complete(p, GRIT_PATTERN_CONTAINS_UNTIL_CLAUSE))
+    Present(m.complete(p, GRIT_PATTERN_UNTIL_CLAUSE))
 }
 
 #[inline]
@@ -902,6 +902,7 @@ fn parse_pattern_within(p: &mut GritParser) -> ParsedSyntax {
             expected_pattern,
         )
         .ok();
+    parse_pattern_until_clause(p).ok();
 
     Present(m.complete(p, GRIT_WITHIN))
 }
