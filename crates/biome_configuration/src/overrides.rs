@@ -5,7 +5,6 @@ use crate::{
     partial_css_configuration, partial_graphql_configuration, partial_javascript_configuration,
     partial_json_configuration,
 };
-use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_formatter::{
     AttributePosition, BracketSpacing, IndentStyle, IndentWidth, LineEnding, LineWidth,
@@ -38,14 +37,14 @@ pub struct OverridePattern {
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub ignore: Option<StringSet>,
+    #[bpaf(hide, pure(Default::default()))]
+    pub ignore: Option<indexmap::IndexSet<String>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[bpaf(hide)]
-    pub include: Option<StringSet>,
+    #[bpaf(hide, pure(Default::default()))]
+    pub include: Option<indexmap::IndexSet<String>>,
 
     /// Specific configuration for the JavaScript language
     #[serde(skip_serializing_if = "Option::is_none")]

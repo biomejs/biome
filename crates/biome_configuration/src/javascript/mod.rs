@@ -1,6 +1,5 @@
 mod formatter;
 
-use biome_deserialize::StringSet;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 pub use formatter::{
@@ -34,7 +33,7 @@ pub struct JavascriptConfiguration {
     ///
     /// If defined here, they should not emit diagnostics.
     #[partial(bpaf(pure(Default::default()), hide))]
-    pub globals: StringSet,
+    pub globals: indexmap::IndexSet<String>,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     #[partial(bpaf(pure(Default::default()), hide))]

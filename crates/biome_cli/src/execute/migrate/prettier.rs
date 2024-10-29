@@ -1,7 +1,7 @@
 use crate::diagnostics::MigrationDiagnostic;
 use crate::CliDiagnostic;
 use biome_console::{markup, Console, ConsoleExt};
-use biome_deserialize::{json::deserialize_from_json_str, StringSet};
+use biome_deserialize::json::deserialize_from_json_str;
 use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::{DiagnosticExt, PrintDiagnostic};
 use biome_formatter::{
@@ -268,7 +268,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
     type Error = ParseFormatNumberError;
     fn try_from(Override { files, options }: Override) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::OverridePattern {
-            include: Some(StringSet::new(files.into_iter().collect())),
+            include: Some(files.into_iter().collect()),
             ..Default::default()
         };
         if options.print_width.is_some()
