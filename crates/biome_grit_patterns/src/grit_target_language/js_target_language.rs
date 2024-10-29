@@ -117,6 +117,7 @@ impl GritTargetLanguageImpl for JsTargetLanguage {
             ("<f>", "</f>"),
             ("<f ", " />"),
             ("function GRIT_FN(", ") {}"),
+            ("function GRIT_FN() {", "}"),
             ("var ", ";"),
             ("", " class GRIT_CLASS {}"),
             ("function GRIT_FN(GRIT_ARG:", ") { }"),
