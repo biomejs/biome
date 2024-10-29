@@ -115,6 +115,7 @@ function getObjectWithFunction(): Behavior {
     arrowFunc: () => {},
   }
 }
+
 ```
 
 # Diagnostics
