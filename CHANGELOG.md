@@ -11,6 +11,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+- Fix [#4323](https://github.com/biomejs/biome/issues/4258), where `lint/a11y/useSemanticElement` accidentally showed recommendations for `role="searchbox"` instead of `role="search"`
+
 ### Analyzer
 
 #### Bug fixes
@@ -77,6 +79,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+#### Enhancements
+
+- `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos
+
 ### Parser
 
 #### Bug fixes
@@ -103,6 +109,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @fireairforce
 
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser handle unterminated `JSX_STRING_LITERAL` properly
+
+  ```jsx
+  function Comp() {
+    return (
+        <a rel="
+  ```
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser is no longer progressing for an invalid object
+  member name:
+
+  ```js
+  ({
+    params: { [paramName: string]: number } = {}
+  })
+  ```
+
+  Contributed by @denbezrukov
 
 ## v1.9.4 (2024-10-17)
 

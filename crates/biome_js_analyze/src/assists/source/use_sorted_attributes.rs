@@ -12,7 +12,7 @@ use biome_rowan::{AstNode, BatchMutationExt};
 use crate::JsRuleAction;
 
 declare_source_rule! {
-    /// Enforce props sorting in JSX elements.
+    /// Enforce attribute sorting in JSX elements.
     ///
     /// This rule checks if the JSX props are sorted in a consistent way.
     /// Props are sorted alphabetically.
@@ -25,31 +25,25 @@ declare_source_rule! {
     ///
     /// ## Examples
     ///
-    /// ### Invalid
-    ///
-    /// ```js,expect_diagnostic
+    /// ```js,expect_diff
     /// <Hello lastName="Smith" firstName="John" />;
     /// ```
     ///
-    /// ### Valid
-    ///
-    /// ```js
-    /// <Hello firstName="John" lastName="Smith" />;
-    /// <Hello lastName="Smith" {...this.props} firstName="John" />;
-    /// <Hello tel={5555555} {...this.props} firstName="John"  {...another.props} lastName="Smith" />;
+    /// ```js,expect_diff
+    /// <Hello lastName="Smith" firstName="John" {...this.props} tel="0000" address="111 Main Street"  {...another.props} lastName="Smith" />;
     /// ```
     ///
-    pub SortJsxProps {
-        version: "1.9.0",
-        name: "sortJsxProps",
-        language: "js",
+    pub UseSortedAttributes {
+        version: "2.0.0",
+        name: "useSortedAttributes",
+        language: "jsx",
         recommended: false,
         sources: &[RuleSource::EslintReact("jsx-sort-props")],
         source_kind: RuleSourceKind::SameLogic,
     }
 }
 
-impl Rule for SortJsxProps {
+impl Rule for UseSortedAttributes {
     type Query = Ast<JsxAttributeList>;
     type State = PropGroup;
     type Signals = Box<[Self::State]>;

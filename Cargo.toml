@@ -141,6 +141,7 @@ biome_json_factory           = { version = "0.5.7", path = "./crates/biome_json_
 biome_json_formatter         = { version = "0.5.7", path = "./crates/biome_json_formatter" }
 biome_json_parser            = { version = "0.5.7", path = "./crates/biome_json_parser" }
 biome_json_syntax            = { version = "0.5.7", path = "./crates/biome_json_syntax" }
+biome_lsp_converters         = { version = "0.1.0", path = "./crates/biome_lsp_converters" }
 biome_markdown_factory       = { version = "0.0.1", path = "./crates/biome_markdown_factory" }
 biome_markdown_parser        = { version = "0.0.1", path = "./crates/biome_markdown_parser" }
 biome_markdown_syntax        = { version = "0.0.1", path = "./crates/biome_markdown_syntax" }
@@ -171,7 +172,7 @@ biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-anyhow             = "1.0.90"
+anyhow             = "1.0.91"
 bpaf               = { version = "0.9.15", features = ["derive"] }
 countme            = "3.0.1"
 crossbeam          = "0.8.4"

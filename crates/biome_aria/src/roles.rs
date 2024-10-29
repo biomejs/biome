@@ -1338,7 +1338,7 @@ impl<'a> AriaRoles {
             "row" => &RowRole as &dyn AriaRoleDefinitionWithConcepts,
             "rowgroup" => &RowGroupRole as &dyn AriaRoleDefinitionWithConcepts,
             "rowheader" => &RowHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
-            "search" => &SearchboxRole as &dyn AriaRoleDefinitionWithConcepts,
+            "search" => &SearchRole as &dyn AriaRoleDefinitionWithConcepts,
             "searchbox" => &SearchboxRole as &dyn AriaRoleDefinitionWithConcepts,
             "table" => &TableRole as &dyn AriaRoleDefinitionWithConcepts,
             "term" => &TermRole as &dyn AriaRoleDefinitionWithConcepts,
