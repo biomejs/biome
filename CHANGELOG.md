@@ -116,6 +116,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
     return (
         <a rel="
   ```
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser is no longer progressing for an invalid object
+  member name:
+
+  ```js
+  ({
+    params: { [paramName: string]: number } = {}
+  })
+  ```
+
+  Contributed by @denbezrukov
 
 ## v1.9.4 (2024-10-17)
 
