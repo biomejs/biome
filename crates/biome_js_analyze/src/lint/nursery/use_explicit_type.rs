@@ -246,6 +246,10 @@ impl Rule for UseExplicitType {
                     return None;
                 }
 
+                if is_arrow_func(func) && is_function_used_in_object(func) {
+                    return None;
+                }
+
                 if is_higher_order_function(func) {
                     return None;
                 }
@@ -360,6 +364,38 @@ fn is_function_used_in_argument_or_array(func: &AnyJsFunction) -> bool {
         func.syntax().parent().kind(),
         Some(JsSyntaxKind::JS_CALL_ARGUMENT_LIST | JsSyntaxKind::JS_ARRAY_ELEMENT_LIST)
     )
+}
+
+/// Check if the function is used in some object
+/// 
+/// # Examples
+/// 
+/// JS_OBJECT: 
+/// 
+/// interface Behavior {
+///   attribute: string; 
+///   func: () => string; 
+///   arrowFunc: () => string;
+/// }
+/// 
+/// function getObjectWithFunction(): Behavior {
+///   return {
+///     attribute: 'value', 
+///     func: function myFunc(): string { return "value" },
+///     arrowFunc: () => {},
+///   }
+/// }
+/// 
+fn is_function_used_in_object(func: &AnyJsFunction) -> bool {
+    matches!(
+        func.syntax().parent().kind(),
+        Some(JsSyntaxKind::JS_PROPERTY_OBJECT_MEMBER)
+    )
+}
+
+/// Check if a function is an arrow function
+fn is_arrow_func(func: &AnyJsFunction) -> bool {
+    func.as_js_arrow_function_expression().is_some()
 }
 
 /// Checks if a function is an IIFE (Immediately Invoked Function Expressions)
