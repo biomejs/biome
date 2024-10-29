@@ -79,7 +79,7 @@ impl Rule for UseExportType {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let source_type = ctx.source_type::<JsFileSource>();
-        if !source_type.language().is_typescript() {
+        if !source_type.language().is_typescript() || source_type.language().is_definition_file() {
             return None;
         }
         let export_named_clause = ctx.query();
