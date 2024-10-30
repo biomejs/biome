@@ -179,6 +179,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#4121](https://github.com/biomejs/biome/issues/4121). Respect line width when printing multiline strings. Contributed by @ah-yu
+- Fix [#4384](https://github.com/biomejs/biome/issues/4384). Keep `@charset` dobule quote under any situation for css syntax rule. Contributed by @fireairforce
 
 ### JavaScript APIs
 
