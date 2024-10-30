@@ -1,0 +1,195 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+type A = `abcd`
+type B = `a${A}`
+type C<X extends string> = `c${X}`
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            ty: TsTemplateLiteralType {
+                l_tick_token: BACKTICK@9..10 "`" [] [],
+                elements: TsTemplateElementList [
+                    TsTemplateChunkElement {
+                        template_chunk_token: TEMPLATE_CHUNK@10..14 "abcd" [] [],
+                    },
+                ],
+                r_tick_token: BACKTICK@14..15 "`" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@15..21 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@21..23 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@23..25 "=" [] [Whitespace(" ")],
+            ty: TsTemplateLiteralType {
+                l_tick_token: BACKTICK@25..26 "`" [] [],
+                elements: TsTemplateElementList [
+                    TsTemplateChunkElement {
+                        template_chunk_token: TEMPLATE_CHUNK@26..27 "a" [] [],
+                    },
+                    TsTemplateElement {
+                        dollar_curly_token: DOLLAR_CURLY@27..29 "${" [] [],
+                        ty: TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@29..30 "A" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                        r_curly_token: R_CURLY@30..31 "}" [] [],
+                    },
+                ],
+                r_tick_token: BACKTICK@31..32 "`" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@32..38 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@38..39 "C" [] [],
+            },
+            type_parameters: TsTypeParameters {
+                l_angle_token: L_ANGLE@39..40 "<" [] [],
+                items: TsTypeParameterList [
+                    TsTypeParameter {
+                        modifiers: TsTypeParameterModifierList [],
+                        name: TsTypeParameterName {
+                            ident_token: IDENT@40..42 "X" [] [Whitespace(" ")],
+                        },
+                        constraint: TsTypeConstraintClause {
+                            extends_token: EXTENDS_KW@42..50 "extends" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@50..56 "string" [] [],
+                            },
+                        },
+                        default: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@56..58 ">" [] [Whitespace(" ")],
+            },
+            eq_token: EQ@58..60 "=" [] [Whitespace(" ")],
+            ty: TsTemplateLiteralType {
+                l_tick_token: BACKTICK@60..61 "`" [] [],
+                elements: TsTemplateElementList [
+                    TsTemplateChunkElement {
+                        template_chunk_token: TEMPLATE_CHUNK@61..62 "c" [] [],
+                    },
+                    TsTemplateElement {
+                        dollar_curly_token: DOLLAR_CURLY@62..64 "${" [] [],
+                        ty: TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@64..65 "X" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                        r_curly_token: R_CURLY@65..66 "}" [] [],
+                    },
+                ],
+                r_tick_token: BACKTICK@66..67 "`" [] [],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@67..68 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..68
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..67
+    0: TS_TYPE_ALIAS_DECLARATION@0..15
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "A" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_TEMPLATE_LITERAL_TYPE@9..15
+        0: BACKTICK@9..10 "`" [] []
+        1: TS_TEMPLATE_ELEMENT_LIST@10..14
+          0: TS_TEMPLATE_CHUNK_ELEMENT@10..14
+            0: TEMPLATE_CHUNK@10..14 "abcd" [] []
+        2: BACKTICK@14..15 "`" [] []
+      5: (empty)
+    1: TS_TYPE_ALIAS_DECLARATION@15..32
+      0: TYPE_KW@15..21 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@21..23
+        0: IDENT@21..23 "B" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@23..25 "=" [] [Whitespace(" ")]
+      4: TS_TEMPLATE_LITERAL_TYPE@25..32
+        0: BACKTICK@25..26 "`" [] []
+        1: TS_TEMPLATE_ELEMENT_LIST@26..31
+          0: TS_TEMPLATE_CHUNK_ELEMENT@26..27
+            0: TEMPLATE_CHUNK@26..27 "a" [] []
+          1: TS_TEMPLATE_ELEMENT@27..31
+            0: DOLLAR_CURLY@27..29 "${" [] []
+            1: TS_REFERENCE_TYPE@29..30
+              0: JS_REFERENCE_IDENTIFIER@29..30
+                0: IDENT@29..30 "A" [] []
+              1: (empty)
+            2: R_CURLY@30..31 "}" [] []
+        2: BACKTICK@31..32 "`" [] []
+      5: (empty)
+    2: TS_TYPE_ALIAS_DECLARATION@32..67
+      0: TYPE_KW@32..38 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@38..39
+        0: IDENT@38..39 "C" [] []
+      2: TS_TYPE_PARAMETERS@39..58
+        0: L_ANGLE@39..40 "<" [] []
+        1: TS_TYPE_PARAMETER_LIST@40..56
+          0: TS_TYPE_PARAMETER@40..56
+            0: TS_TYPE_PARAMETER_MODIFIER_LIST@40..40
+            1: TS_TYPE_PARAMETER_NAME@40..42
+              0: IDENT@40..42 "X" [] [Whitespace(" ")]
+            2: TS_TYPE_CONSTRAINT_CLAUSE@42..56
+              0: EXTENDS_KW@42..50 "extends" [] [Whitespace(" ")]
+              1: TS_STRING_TYPE@50..56
+                0: STRING_KW@50..56 "string" [] []
+            3: (empty)
+        2: R_ANGLE@56..58 ">" [] [Whitespace(" ")]
+      3: EQ@58..60 "=" [] [Whitespace(" ")]
+      4: TS_TEMPLATE_LITERAL_TYPE@60..67
+        0: BACKTICK@60..61 "`" [] []
+        1: TS_TEMPLATE_ELEMENT_LIST@61..66
+          0: TS_TEMPLATE_CHUNK_ELEMENT@61..62
+            0: TEMPLATE_CHUNK@61..62 "c" [] []
+          1: TS_TEMPLATE_ELEMENT@62..66
+            0: DOLLAR_CURLY@62..64 "${" [] []
+            1: TS_REFERENCE_TYPE@64..65
+              0: JS_REFERENCE_IDENTIFIER@64..65
+                0: IDENT@64..65 "X" [] []
+              1: (empty)
+            2: R_CURLY@65..66 "}" [] []
+        2: BACKTICK@66..67 "`" [] []
+      5: (empty)
+  4: EOF@67..68 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,128 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+let a = (this: string) => {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+                            expression: JsArrowFunctionExpression {
+                                async_token: missing (optional),
+                                type_parameters: missing (optional),
+                                parameters: JsParameters {
+                                    l_paren_token: L_PAREN@8..9 "(" [] [],
+                                    items: JsParameterList [
+                                        JsBogusParameter {
+                                            items: [
+                                                THIS_KW@9..13 "this" [] [],
+                                                TsTypeAnnotation {
+                                                    colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                                                    ty: TsStringType {
+                                                        string_token: STRING_KW@15..21 "string" [] [],
+                                                    },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@21..23 ")" [] [Whitespace(" ")],
+                                },
+                                return_type_annotation: missing (optional),
+                                fat_arrow_token: FAT_ARROW@23..26 "=>" [] [Whitespace(" ")],
+                                body: JsFunctionBody {
+                                    l_curly_token: L_CURLY@26..27 "{" [] [],
+                                    directives: JsDirectiveList [],
+                                    statements: JsStatementList [],
+                                    r_curly_token: R_CURLY@27..28 "}" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@28..29 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..29
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..28
+    0: JS_VARIABLE_STATEMENT@0..28
+      0: JS_VARIABLE_DECLARATION@0..28
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..28
+          0: JS_VARIABLE_DECLARATOR@4..28
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..28
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_ARROW_FUNCTION_EXPRESSION@8..28
+                0: (empty)
+                1: (empty)
+                2: JS_PARAMETERS@8..23
+                  0: L_PAREN@8..9 "(" [] []
+                  1: JS_PARAMETER_LIST@9..21
+                    0: JS_BOGUS_PARAMETER@9..21
+                      0: THIS_KW@9..13 "this" [] []
+                      1: TS_TYPE_ANNOTATION@13..21
+                        0: COLON@13..15 ":" [] [Whitespace(" ")]
+                        1: TS_STRING_TYPE@15..21
+                          0: STRING_KW@15..21 "string" [] []
+                  2: R_PAREN@21..23 ")" [] [Whitespace(" ")]
+                3: (empty)
+                4: FAT_ARROW@23..26 "=>" [] [Whitespace(" ")]
+                5: JS_FUNCTION_BODY@26..28
+                  0: L_CURLY@26..27 "{" [] []
+                  1: JS_DIRECTIVE_LIST@27..27
+                  2: JS_STATEMENT_LIST@27..27
+                  3: R_CURLY@27..28 "}" [] []
+      1: (empty)
+  4: EOF@28..29 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_arrow_function_this_parameter.ts:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An arrow function cannot have a 'this' parameter.
+  
+  > 1 │ let a = (this: string) => {}
+      │          ^^^^^^^^^^^^
+    2 │ 
+  
+```

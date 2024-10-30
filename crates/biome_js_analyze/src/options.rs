@@ -280,8 +280,6 @@ pub type NoYodaExpression =
     <lint::style::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
 pub type OrganizeImports =
     <assists::source::organize_imports::OrganizeImports as biome_analyze::Rule>::Options;
-pub type SortJsxProps =
-    <assists::source::sort_jsx_props::SortJsxProps as biome_analyze::Rule>::Options;
 pub type UseAdjacentOverloadSignatures = < lint :: nursery :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures as biome_analyze :: Rule > :: Options ;
 pub type UseAltText = <lint::a11y::use_alt_text::UseAltText as biome_analyze::Rule>::Options;
 pub type UseAnchorContent =
@@ -337,6 +335,7 @@ pub type UseGetterReturn =
     <lint::suspicious::use_getter_return::UseGetterReturn as biome_analyze::Rule>::Options;
 pub type UseGoogleFontDisplay =
     <lint::nursery::use_google_font_display::UseGoogleFontDisplay as biome_analyze::Rule>::Options;
+pub type UseGoogleFontPreconnect = < lint :: nursery :: use_google_font_preconnect :: UseGoogleFontPreconnect as biome_analyze :: Rule > :: Options ;
 pub type UseGuardForIn =
     <lint::nursery::use_guard_for_in::UseGuardForIn as biome_analyze::Rule>::Options;
 pub type UseHeadingContent =
@@ -394,6 +393,8 @@ pub type UseSimpleNumberKeys =
 pub type UseSimplifiedLogicExpression = < lint :: complexity :: use_simplified_logic_expression :: UseSimplifiedLogicExpression as biome_analyze :: Rule > :: Options ;
 pub type UseSingleCaseStatement = < lint :: style :: use_single_case_statement :: UseSingleCaseStatement as biome_analyze :: Rule > :: Options ;
 pub type UseSingleVarDeclarator = < lint :: style :: use_single_var_declarator :: UseSingleVarDeclarator as biome_analyze :: Rule > :: Options ;
+pub type UseSortedAttributes =
+    <assists::source::use_sorted_attributes::UseSortedAttributes as biome_analyze::Rule>::Options;
 pub type UseSortedClasses =
     <lint::nursery::use_sorted_classes::UseSortedClasses as biome_analyze::Rule>::Options;
 pub type UseStrictMode =

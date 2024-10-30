@@ -1511,6 +1511,12 @@
 			},
 			"additionalProperties": false
 		},
+		"ImportGroup": {
+			"anyOf": [
+				{ "$ref": "#/definitions/PredefinedImportGroup" },
+				{ "$ref": "#/definitions/Regex" }
+			]
+		},
 		"IndentStyle": {
 			"oneOf": [
 				{ "description": "Tab", "type": "string", "enum": ["tab"] },
@@ -1686,6 +1692,10 @@
 			"description": "Options that changes how the JavaScript parser behaves",
 			"type": "object",
 			"properties": {
+				"gritMetavariables": {
+					"description": "Enables parsing of Grit metavariables. Defaults to `false`.",
+					"type": ["boolean", "null"]
+				},
 				"unsafeParameterDecoratorsEnabled": {
 					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
 					"type": ["boolean", "null"]
@@ -2433,6 +2443,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useGoogleFontPreconnect": {
+					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGuardForIn": {
 					"description": "Require for-in loops to include an if statement.",
 					"anyOf": [
@@ -2444,6 +2461,13 @@
 					"description": "Disallows package private imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamedOperation": {
+					"description": "Enforce specifying the name of GraphQL operations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2475,6 +2499,18 @@
 						{ "type": "null" }
 					]
 				}
+			},
+			"additionalProperties": false
+		},
+		"Options": {
+			"type": "object",
+			"properties": {
+				"importGroups": {
+					"default": [],
+					"type": "array",
+					"items": { "$ref": "#/definitions/ImportGroup" }
+				},
+				"legacy": { "default": false, "type": "boolean" }
 			},
 			"additionalProperties": false
 		},
@@ -2682,6 +2718,10 @@
 			},
 			"additionalProperties": false
 		},
+		"PredefinedImportGroup": {
+			"type": "string",
+			"enum": [":blank-line:", ":bun:", ":node:", ":types:"]
+		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -2725,7 +2765,46 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
-		"RuleAssistConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistConfiguration_for_Null": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Null" }
+			]
+		},
+		"RuleAssistConfiguration_for_Options": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Options" }
+			]
+		},
+		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistWithOptions_for_Null": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+				},
+				"options": { "description": "Rule's options", "type": "null" }
+			},
+			"additionalProperties": false
+		},
+		"RuleAssistWithOptions_for_Options": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/Options" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3242,17 +3321,24 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"sortJsxProps": {
-					"description": "Enforce props sorting in JSX elements.",
+				"organizeImports": {
+					"description": "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedAttributes": {
+					"description": "Enforce attribute sorting in JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				}

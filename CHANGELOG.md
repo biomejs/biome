@@ -11,6 +11,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+- Fix [#4323](https://github.com/biomejs/biome/issues/4258), where `lint/a11y/useSemanticElement` accidentally showed recommendations for `role="searchbox"` instead of `role="search"`
+
 ### Analyzer
 
 #### Bug fixes
@@ -19,6 +21,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#4258](https://github.com/biomejs/biome/issues/4258), where fixed css parse error with @-moz-document url-prefix(). Contributed by @eryue0220
 
 ### CLI
+
+#### Bug fixes
+
+- `biome migrate eslint` now correctly resolves scoped package named `eslint-config` with a path.
+  Contributed by @Conaclos
 
 ### Configuration
 
@@ -77,6 +84,36 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+#### Enhancements
+
+- `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos
+- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now provides a code fix.
+
+  ```diff
+  - const xs = new Array();
+  + const xs = [];
+  ```
+
+  The code fix is currently marked as unsafe.
+  We plan to make it safe in a future release of Biome.
+
+  Contributed by @Conaclos
+
+#### Bug fixes
+
+- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now reports all expressions using the `Array` constructors.
+
+  Previously, the rule reported only use of the `Array` constructor in expressions statements.
+
+  ```js
+  // This was reported
+  new Array();
+  // This was not reported
+  const xs = new Array();
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
 
 #### Bug fixes
@@ -103,6 +140,23 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @fireairforce
 
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser handle unterminated `JSX_STRING_LITERAL` properly
+
+  ```jsx
+  function Comp() {
+    return (
+        <a rel="
+  ```
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser is no longer progressing for an invalid object
+  member name:
+
+  ```js
+  ({
+    params: { [paramName: string]: number } = {}
+  })
+  ```
+
+  Contributed by @denbezrukov
 
 ## v1.9.4 (2024-10-17)
 
@@ -156,6 +210,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#4121](https://github.com/biomejs/biome/issues/4121). Respect line width when printing multiline strings. Contributed by @ah-yu
+- Fix [#4384](https://github.com/biomejs/biome/issues/4384). Keep `@charset` dobule quote under any situation for css syntax rule. Contributed by @fireairforce
 
 ### JavaScript APIs
 

@@ -791,7 +791,7 @@ pub struct SuppressionCommentEmitterPayload<'a, L: Language> {
 type SignalHandler<'a, L, Break> = &'a mut dyn FnMut(&dyn AnalyzerSignal<L>) -> ControlFlow<Break>;
 
 /// Allow filtering a single rule or group of rules by their names
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum RuleFilter<'a> {
     Group(&'a str),
     Rule(&'a str, &'a str),

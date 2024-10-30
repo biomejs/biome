@@ -1,0 +1,161 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<div id={1} />;
+<div className={prefix`none`} />;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@0..1 "<" [] [],
+                    name: JsxName {
+                        value_token: JSX_IDENT@1..5 "div" [] [Whitespace(" ")],
+                    },
+                    type_arguments: missing (optional),
+                    attributes: JsxAttributeList [
+                        JsxAttribute {
+                            name: JsxName {
+                                value_token: JSX_IDENT@5..7 "id" [] [],
+                            },
+                            initializer: JsxAttributeInitializerClause {
+                                eq_token: EQ@7..8 "=" [] [],
+                                value: JsxExpressionAttributeValue {
+                                    l_curly_token: L_CURLY@8..9 "{" [] [],
+                                    expression: JsNumberLiteralExpression {
+                                        value_token: JS_NUMBER_LITERAL@9..10 "1" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@10..12 "}" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@12..13 "/" [] [],
+                    r_angle_token: R_ANGLE@13..14 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@14..15 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@15..17 "<" [Newline("\n")] [],
+                    name: JsxName {
+                        value_token: JSX_IDENT@17..21 "div" [] [Whitespace(" ")],
+                    },
+                    type_arguments: missing (optional),
+                    attributes: JsxAttributeList [
+                        JsxAttribute {
+                            name: JsxName {
+                                value_token: JSX_IDENT@21..30 "className" [] [],
+                            },
+                            initializer: JsxAttributeInitializerClause {
+                                eq_token: EQ@30..31 "=" [] [],
+                                value: JsxExpressionAttributeValue {
+                                    l_curly_token: L_CURLY@31..32 "{" [] [],
+                                    expression: JsTemplateExpression {
+                                        tag: JsIdentifierExpression {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@32..38 "prefix" [] [],
+                                            },
+                                        },
+                                        type_arguments: missing (optional),
+                                        l_tick_token: BACKTICK@38..39 "`" [] [],
+                                        elements: JsTemplateElementList [
+                                            JsTemplateChunkElement {
+                                                template_chunk_token: TEMPLATE_CHUNK@39..43 "none" [] [],
+                                            },
+                                        ],
+                                        r_tick_token: BACKTICK@43..44 "`" [] [],
+                                    },
+                                    r_curly_token: R_CURLY@44..46 "}" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@46..47 "/" [] [],
+                    r_angle_token: R_ANGLE@47..48 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@48..49 ";" [] [],
+        },
+    ],
+    eof_token: EOF@49..50 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..50
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..49
+    0: JS_EXPRESSION_STATEMENT@0..15
+      0: JSX_TAG_EXPRESSION@0..14
+        0: JSX_SELF_CLOSING_ELEMENT@0..14
+          0: L_ANGLE@0..1 "<" [] []
+          1: JSX_NAME@1..5
+            0: JSX_IDENT@1..5 "div" [] [Whitespace(" ")]
+          2: (empty)
+          3: JSX_ATTRIBUTE_LIST@5..12
+            0: JSX_ATTRIBUTE@5..12
+              0: JSX_NAME@5..7
+                0: JSX_IDENT@5..7 "id" [] []
+              1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@7..12
+                0: EQ@7..8 "=" [] []
+                1: JSX_EXPRESSION_ATTRIBUTE_VALUE@8..12
+                  0: L_CURLY@8..9 "{" [] []
+                  1: JS_NUMBER_LITERAL_EXPRESSION@9..10
+                    0: JS_NUMBER_LITERAL@9..10 "1" [] []
+                  2: R_CURLY@10..12 "}" [] [Whitespace(" ")]
+          4: SLASH@12..13 "/" [] []
+          5: R_ANGLE@13..14 ">" [] []
+      1: SEMICOLON@14..15 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@15..49
+      0: JSX_TAG_EXPRESSION@15..48
+        0: JSX_SELF_CLOSING_ELEMENT@15..48
+          0: L_ANGLE@15..17 "<" [Newline("\n")] []
+          1: JSX_NAME@17..21
+            0: JSX_IDENT@17..21 "div" [] [Whitespace(" ")]
+          2: (empty)
+          3: JSX_ATTRIBUTE_LIST@21..46
+            0: JSX_ATTRIBUTE@21..46
+              0: JSX_NAME@21..30
+                0: JSX_IDENT@21..30 "className" [] []
+              1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@30..46
+                0: EQ@30..31 "=" [] []
+                1: JSX_EXPRESSION_ATTRIBUTE_VALUE@31..46
+                  0: L_CURLY@31..32 "{" [] []
+                  1: JS_TEMPLATE_EXPRESSION@32..44
+                    0: JS_IDENTIFIER_EXPRESSION@32..38
+                      0: JS_REFERENCE_IDENTIFIER@32..38
+                        0: IDENT@32..38 "prefix" [] []
+                    1: (empty)
+                    2: BACKTICK@38..39 "`" [] []
+                    3: JS_TEMPLATE_ELEMENT_LIST@39..43
+                      0: JS_TEMPLATE_CHUNK_ELEMENT@39..43
+                        0: TEMPLATE_CHUNK@39..43 "none" [] []
+                    4: BACKTICK@43..44 "`" [] []
+                  2: R_CURLY@44..46 "}" [] [Whitespace(" ")]
+          4: SLASH@46..47 "/" [] []
+          5: R_ANGLE@47..48 ">" [] []
+      1: SEMICOLON@48..49 ";" [] []
+  4: EOF@49..50 "" [Newline("\n")] []
+
+```

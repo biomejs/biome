@@ -1,0 +1,157 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class A {
+  a: string;
+  b?: string = "test";
+  c!: string;
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..9 "{" [] [],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@9..13 "a" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                        ty: TsStringType {
+                            string_token: STRING_KW@15..21 "string" [] [],
+                        },
+                    },
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@21..22 ";" [] [],
+                },
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@22..26 "b" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    property_annotation: TsOptionalPropertyAnnotation {
+                        question_mark_token: QUESTION@26..27 "?" [] [],
+                        type_annotation: TsTypeAnnotation {
+                            colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@29..36 "string" [] [Whitespace(" ")],
+                            },
+                        },
+                    },
+                    value: JsInitializerClause {
+                        eq_token: EQ@36..38 "=" [] [Whitespace(" ")],
+                        expression: JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@38..44 "\"test\"" [] [],
+                        },
+                    },
+                    semicolon_token: SEMICOLON@44..45 ";" [] [],
+                },
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@45..49 "c" [Newline("\n"), Whitespace("  ")] [],
+                    },
+                    property_annotation: TsDefinitePropertyAnnotation {
+                        excl_token: BANG@49..50 "!" [] [],
+                        type_annotation: TsTypeAnnotation {
+                            colon_token: COLON@50..52 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@52..58 "string" [] [],
+                            },
+                        },
+                    },
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@58..59 ";" [] [],
+                },
+            ],
+            r_curly_token: R_CURLY@59..61 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@61..62 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..62
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..61
+    0: JS_CLASS_DECLARATION@0..61
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..9 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@9..59
+        0: JS_PROPERTY_CLASS_MEMBER@9..22
+          0: JS_PROPERTY_MODIFIER_LIST@9..9
+          1: JS_LITERAL_MEMBER_NAME@9..13
+            0: IDENT@9..13 "a" [Newline("\n"), Whitespace("  ")] []
+          2: TS_TYPE_ANNOTATION@13..21
+            0: COLON@13..15 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@15..21
+              0: STRING_KW@15..21 "string" [] []
+          3: (empty)
+          4: SEMICOLON@21..22 ";" [] []
+        1: JS_PROPERTY_CLASS_MEMBER@22..45
+          0: JS_PROPERTY_MODIFIER_LIST@22..22
+          1: JS_LITERAL_MEMBER_NAME@22..26
+            0: IDENT@22..26 "b" [Newline("\n"), Whitespace("  ")] []
+          2: TS_OPTIONAL_PROPERTY_ANNOTATION@26..36
+            0: QUESTION@26..27 "?" [] []
+            1: TS_TYPE_ANNOTATION@27..36
+              0: COLON@27..29 ":" [] [Whitespace(" ")]
+              1: TS_STRING_TYPE@29..36
+                0: STRING_KW@29..36 "string" [] [Whitespace(" ")]
+          3: JS_INITIALIZER_CLAUSE@36..44
+            0: EQ@36..38 "=" [] [Whitespace(" ")]
+            1: JS_STRING_LITERAL_EXPRESSION@38..44
+              0: JS_STRING_LITERAL@38..44 "\"test\"" [] []
+          4: SEMICOLON@44..45 ";" [] []
+        2: JS_PROPERTY_CLASS_MEMBER@45..59
+          0: JS_PROPERTY_MODIFIER_LIST@45..45
+          1: JS_LITERAL_MEMBER_NAME@45..49
+            0: IDENT@45..49 "c" [Newline("\n"), Whitespace("  ")] []
+          2: TS_DEFINITE_PROPERTY_ANNOTATION@49..58
+            0: BANG@49..50 "!" [] []
+            1: TS_TYPE_ANNOTATION@50..58
+              0: COLON@50..52 ":" [] [Whitespace(" ")]
+              1: TS_STRING_TYPE@52..58
+                0: STRING_KW@52..58 "string" [] []
+          3: (empty)
+          4: SEMICOLON@58..59 ";" [] []
+      9: R_CURLY@59..61 "}" [Newline("\n")] []
+  4: EOF@61..62 "" [Newline("\n")] []
+
+```

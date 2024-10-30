@@ -1,0 +1,77 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+abstract class {};
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")],
+            class_token: CLASS_KW@9..15 "class" [] [Whitespace(" ")],
+            id: missing (required),
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@15..16 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@16..17 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@17..18 ";" [] [],
+        },
+    ],
+    eof_token: EOF@18..19 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..19
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..18
+    0: JS_CLASS_DECLARATION@0..17
+      0: JS_DECORATOR_LIST@0..0
+      1: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")]
+      2: CLASS_KW@9..15 "class" [] [Whitespace(" ")]
+      3: (empty)
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@15..16 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@16..16
+      9: R_CURLY@16..17 "}" [] []
+    1: JS_EMPTY_STATEMENT@17..18
+      0: SEMICOLON@17..18 ";" [] []
+  4: EOF@18..19 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+typescript_abstract_classes_incomplete.ts:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × class declarations must have a name
+  
+  > 1 │ abstract class {};
+      │          ^^^^^^
+    2 │ 
+  
+```

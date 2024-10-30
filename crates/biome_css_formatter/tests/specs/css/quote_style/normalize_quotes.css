@@ -19,3 +19,7 @@ div {
     --\eeunquoted: green;
     color: var(--\eeunquoted);
 }
+
+@charset·"UTF-8";
+@charset "iso-8859-15";
+@charset "any-string-is-okay";

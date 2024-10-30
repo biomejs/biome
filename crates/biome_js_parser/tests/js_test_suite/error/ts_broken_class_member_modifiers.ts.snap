@@ -1,0 +1,277 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class C {
+	@decorator
+	}
+class CC {
+	@
+	}
+class @
+class C@
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+                JsIdentifierBinding {
+                    name_token: IDENT@6..8 "C" [] [Whitespace(" ")],
+                },
+                L_CURLY@8..9 "{" [] [],
+                JsBogus {
+                    items: [
+                        JsDecorator {
+                            at_token: AT@9..12 "@" [Newline("\n"), Whitespace("\t")] [],
+                            expression: JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@12..21 "decorator" [] [],
+                                },
+                            },
+                        },
+                    ],
+                },
+                R_CURLY@21..24 "}" [Newline("\n"), Whitespace("\t")] [],
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                CLASS_KW@24..31 "class" [Newline("\n")] [Whitespace(" ")],
+                JsIdentifierBinding {
+                    name_token: IDENT@31..34 "CC" [] [Whitespace(" ")],
+                },
+                L_CURLY@34..35 "{" [] [],
+                JsBogus {
+                    items: [
+                        JsDecorator {
+                            at_token: AT@35..38 "@" [Newline("\n"), Whitespace("\t")] [],
+                            expression: missing (required),
+                        },
+                    ],
+                },
+                R_CURLY@38..41 "}" [Newline("\n"), Whitespace("\t")] [],
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecoratorList [],
+                CLASS_KW@41..48 "class" [Newline("\n")] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        JsDecorator {
+                            at_token: AT@48..49 "@" [] [],
+                            expression: JsBogusExpression {
+                                items: [
+                                    JsDecoratorList [],
+                                    CLASS_KW@49..56 "class" [Newline("\n")] [Whitespace(" ")],
+                                    JsIdentifierBinding {
+                                        name_token: IDENT@56..57 "C" [] [],
+                                    },
+                                    JsBogus {
+                                        items: [
+                                            JsDecorator {
+                                                at_token: AT@57..58 "@" [] [],
+                                                expression: missing (required),
+                                            },
+                                        ],
+                                    },
+                                ],
+                            },
+                        },
+                    ],
+                },
+            ],
+        },
+    ],
+    eof_token: EOF@58..59 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..59
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..58
+    0: JS_BOGUS_STATEMENT@0..24
+      0: JS_DECORATOR_LIST@0..0
+      1: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      2: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "C" [] [Whitespace(" ")]
+      3: L_CURLY@8..9 "{" [] []
+      4: JS_BOGUS@9..21
+        0: JS_DECORATOR@9..21
+          0: AT@9..12 "@" [Newline("\n"), Whitespace("\t")] []
+          1: JS_IDENTIFIER_EXPRESSION@12..21
+            0: JS_REFERENCE_IDENTIFIER@12..21
+              0: IDENT@12..21 "decorator" [] []
+      5: R_CURLY@21..24 "}" [Newline("\n"), Whitespace("\t")] []
+    1: JS_BOGUS_STATEMENT@24..41
+      0: JS_DECORATOR_LIST@24..24
+      1: CLASS_KW@24..31 "class" [Newline("\n")] [Whitespace(" ")]
+      2: JS_IDENTIFIER_BINDING@31..34
+        0: IDENT@31..34 "CC" [] [Whitespace(" ")]
+      3: L_CURLY@34..35 "{" [] []
+      4: JS_BOGUS@35..38
+        0: JS_DECORATOR@35..38
+          0: AT@35..38 "@" [Newline("\n"), Whitespace("\t")] []
+          1: (empty)
+      5: R_CURLY@38..41 "}" [Newline("\n"), Whitespace("\t")] []
+    2: JS_BOGUS_STATEMENT@41..58
+      0: JS_DECORATOR_LIST@41..41
+      1: CLASS_KW@41..48 "class" [Newline("\n")] [Whitespace(" ")]
+      2: JS_BOGUS@48..58
+        0: JS_DECORATOR@48..58
+          0: AT@48..49 "@" [] []
+          1: JS_BOGUS_EXPRESSION@49..58
+            0: JS_DECORATOR_LIST@49..49
+            1: CLASS_KW@49..56 "class" [Newline("\n")] [Whitespace(" ")]
+            2: JS_IDENTIFIER_BINDING@56..57
+              0: IDENT@56..57 "C" [] []
+            3: JS_BOGUS@57..58
+              0: JS_DECORATOR@57..58
+                0: AT@57..58 "@" [] []
+                1: (empty)
+  4: EOF@58..59 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_broken_class_member_modifiers.ts:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found '}'.
+  
+    1 │ class C {
+    2 │ 	@decorator
+  > 3 │ 	}
+      │ 	^
+    4 │ class CC {
+    5 │ 	@
+  
+  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here.
+  
+    1 │ class C {
+    2 │ 	@decorator
+  > 3 │ 	}
+      │ 	^
+    4 │ class CC {
+    5 │ 	@
+  
+ts_broken_class_member_modifiers.ts:6:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '}'.
+  
+    4 │ class CC {
+    5 │ 	@
+  > 6 │ 	}
+      │ 	^
+    7 │ class @
+    8 │ class C@
+  
+  i Expected an expression here.
+  
+    4 │ class CC {
+    5 │ 	@
+  > 6 │ 	}
+      │ 	^
+    7 │ class @
+    8 │ class C@
+  
+ts_broken_class_member_modifiers.ts:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × class declarations must have a name
+  
+    5 │ 	@
+    6 │ 	}
+  > 7 │ class @
+      │ ^^^^^^
+    8 │ class C@
+    9 │ 
+  
+ts_broken_class_member_modifiers.ts:7:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `@`
+  
+    5 │ 	@
+    6 │ 	}
+  > 7 │ class @
+      │       ^
+    8 │ class C@
+    9 │ 
+  
+  i Remove @
+  
+ts_broken_class_member_modifiers.ts:8:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `{` but instead found `@`
+  
+    6 │ 	}
+    7 │ class @
+  > 8 │ class C@
+      │        ^
+    9 │ 
+  
+  i Remove @
+  
+ts_broken_class_member_modifiers.ts:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found the end of the file.
+  
+    7 │ class @
+    8 │ class C@
+  > 9 │ 
+      │ 
+  
+  i Expected an expression here.
+  
+    7 │ class @
+    8 │ class C@
+  > 9 │ 
+      │ 
+  
+ts_broken_class_member_modifiers.ts:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `class C@`
+  
+    6 │ 	}
+    7 │ class @
+  > 8 │ class C@
+      │ ^^^^^^^^
+    9 │ 
+  
+ts_broken_class_member_modifiers.ts:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an identifier, a string literal, a number literal, a private field name, or a computed name but instead found the end of the file.
+  
+    7 │ class @
+    8 │ class C@
+  > 9 │ 
+      │ 
+  
+  i Expected an identifier, a string literal, a number literal, a private field name, or a computed name here.
+  
+    7 │ class @
+    8 │ class C@
+  > 9 │ 
+      │ 
+  
+```

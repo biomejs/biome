@@ -1,0 +1,116 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class BuildError<A, B, C> {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..16 "BuildError" [] [],
+            },
+            type_parameters: TsTypeParameters {
+                l_angle_token: L_ANGLE@16..17 "<" [] [],
+                items: TsTypeParameterList [
+                    TsTypeParameter {
+                        modifiers: TsTypeParameterModifierList [],
+                        name: TsTypeParameterName {
+                            ident_token: IDENT@17..18 "A" [] [],
+                        },
+                        constraint: missing (optional),
+                        default: missing (optional),
+                    },
+                    COMMA@18..20 "," [] [Whitespace(" ")],
+                    TsTypeParameter {
+                        modifiers: TsTypeParameterModifierList [],
+                        name: TsTypeParameterName {
+                            ident_token: IDENT@20..21 "B" [] [],
+                        },
+                        constraint: missing (optional),
+                        default: missing (optional),
+                    },
+                    COMMA@21..23 "," [] [Whitespace(" ")],
+                    TsTypeParameter {
+                        modifiers: TsTypeParameterModifierList [],
+                        name: TsTypeParameterName {
+                            ident_token: IDENT@23..24 "C" [] [],
+                        },
+                        constraint: missing (optional),
+                        default: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@24..26 ">" [] [Whitespace(" ")],
+            },
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@26..27 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@27..28 "}" [] [],
+        },
+    ],
+    eof_token: EOF@28..29 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..29
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..28
+    0: JS_CLASS_DECLARATION@0..28
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..16
+        0: IDENT@6..16 "BuildError" [] []
+      4: TS_TYPE_PARAMETERS@16..26
+        0: L_ANGLE@16..17 "<" [] []
+        1: TS_TYPE_PARAMETER_LIST@17..24
+          0: TS_TYPE_PARAMETER@17..18
+            0: TS_TYPE_PARAMETER_MODIFIER_LIST@17..17
+            1: TS_TYPE_PARAMETER_NAME@17..18
+              0: IDENT@17..18 "A" [] []
+            2: (empty)
+            3: (empty)
+          1: COMMA@18..20 "," [] [Whitespace(" ")]
+          2: TS_TYPE_PARAMETER@20..21
+            0: TS_TYPE_PARAMETER_MODIFIER_LIST@20..20
+            1: TS_TYPE_PARAMETER_NAME@20..21
+              0: IDENT@20..21 "B" [] []
+            2: (empty)
+            3: (empty)
+          3: COMMA@21..23 "," [] [Whitespace(" ")]
+          4: TS_TYPE_PARAMETER@23..24
+            0: TS_TYPE_PARAMETER_MODIFIER_LIST@23..23
+            1: TS_TYPE_PARAMETER_NAME@23..24
+              0: IDENT@23..24 "C" [] []
+            2: (empty)
+            3: (empty)
+        2: R_ANGLE@24..26 ">" [] [Whitespace(" ")]
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@26..27 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@27..27
+      9: R_CURLY@27..28 "}" [] []
+  4: EOF@28..29 "" [Newline("\n")] []
+
+```

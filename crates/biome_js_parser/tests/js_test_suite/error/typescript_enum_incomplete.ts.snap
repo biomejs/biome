@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+enum A {
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsEnumDeclaration {
+            const_token: missing (optional),
+            enum_token: ENUM_KW@0..5 "enum" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@5..7 "A" [] [Whitespace(" ")],
+            },
+            l_curly_token: L_CURLY@7..8 "{" [] [],
+            members: TsEnumMemberList [],
+            r_curly_token: missing (required),
+        },
+    ],
+    eof_token: EOF@8..9 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..9
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..8
+    0: TS_ENUM_DECLARATION@0..8
+      0: (empty)
+      1: ENUM_KW@0..5 "enum" [] [Whitespace(" ")]
+      2: JS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "A" [] [Whitespace(" ")]
+      3: L_CURLY@7..8 "{" [] []
+      4: TS_ENUM_MEMBER_LIST@8..8
+      5: (empty)
+  4: EOF@8..9 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+typescript_enum_incomplete.ts:2:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `}` but instead the file ends
+  
+    1 │ enum A {
+  > 2 │ 
+      │ 
+  
+  i the file ends here
+  
+    1 │ enum A {
+  > 2 │ 
+      │ 
+  
+```

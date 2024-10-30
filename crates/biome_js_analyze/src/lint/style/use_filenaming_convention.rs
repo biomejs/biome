@@ -332,22 +332,18 @@ impl Rule for UseFilenamingConvention {
                         }));
                     }
                 }
-                let suggested_filenames = allowed_cases
+                let mut suggested_filenames = allowed_cases
                     .into_iter()
-                    .filter_map(|case| {
-                        let new_trimmed_name = case.convert(trimmed_name);
-                        // Filter out names that have not an allowed case
-                        if allowed_cases.contains(Case::identify(&new_trimmed_name, options.strict_case)) {
-                            Some(file_name.replacen(trimmed_name, &new_trimmed_name, 1))
-                        } else {
-                            None
-                        }
-                    })
-                    // Deduplicate suggestions
-                    .collect::<rustc_hash::FxHashSet<_>>()
-                    .into_iter()
-                    .collect::<SmallVec<[_; 3]>>()
-                    .join("\n");
+                    .map(|case| case.convert(trimmed_name).into_boxed_str())
+                    .filter(|new_trimmed_name| allowed_cases.contains(Case::identify(new_trimmed_name, options.strict_case)))
+                    .collect::<SmallVec<[_; 4]>>();
+                // We sort and deduplicate the suggested names
+                suggested_filenames.sort();
+                suggested_filenames.dedup();
+                for i in 0..suggested_filenames.len() {
+                    suggested_filenames[i] = file_name.replacen(trimmed_name, &suggested_filenames[i], 1).into_boxed_str();
+                }
+                let suggested_filenames = suggested_filenames.join("\n");
                 let diagnostic = RuleDiagnostic::new(
                     rule_category!(),
                     None as Option<TextRange>,

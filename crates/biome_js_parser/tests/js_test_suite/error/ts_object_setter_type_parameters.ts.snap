@@ -1,0 +1,265 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+({ set a<A>(value: A) {} });
+({ set a<>(value: A) {} });
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@0..1 "(" [] [],
+                expression: JsObjectExpression {
+                    l_curly_token: L_CURLY@1..3 "{" [] [Whitespace(" ")],
+                    members: JsObjectMemberList [
+                        JsBogusMember {
+                            items: [
+                                SET_KW@3..7 "set" [] [Whitespace(" ")],
+                                JsLiteralMemberName {
+                                    value: IDENT@7..8 "a" [] [],
+                                },
+                                TsTypeParameters {
+                                    l_angle_token: L_ANGLE@8..9 "<" [] [],
+                                    items: TsTypeParameterList [
+                                        TsTypeParameter {
+                                            modifiers: TsTypeParameterModifierList [],
+                                            name: TsTypeParameterName {
+                                                ident_token: IDENT@9..10 "A" [] [],
+                                            },
+                                            constraint: missing (optional),
+                                            default: missing (optional),
+                                        },
+                                    ],
+                                    r_angle_token: R_ANGLE@10..11 ">" [] [],
+                                },
+                                L_PAREN@11..12 "(" [] [],
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@12..17 "value" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: TsTypeAnnotation {
+                                        colon_token: COLON@17..19 ":" [] [Whitespace(" ")],
+                                        ty: TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@19..20 "A" [] [],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                    },
+                                    initializer: missing (optional),
+                                },
+                                R_PAREN@20..22 ")" [] [Whitespace(" ")],
+                                JsFunctionBody {
+                                    l_curly_token: L_CURLY@22..23 "{" [] [],
+                                    directives: JsDirectiveList [],
+                                    statements: JsStatementList [],
+                                    r_curly_token: R_CURLY@23..25 "}" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@25..26 "}" [] [],
+                },
+                r_paren_token: R_PAREN@26..27 ")" [] [],
+            },
+            semicolon_token: SEMICOLON@27..28 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsParenthesizedExpression {
+                l_paren_token: L_PAREN@28..30 "(" [Newline("\n")] [],
+                expression: JsObjectExpression {
+                    l_curly_token: L_CURLY@30..32 "{" [] [Whitespace(" ")],
+                    members: JsObjectMemberList [
+                        JsBogusMember {
+                            items: [
+                                SET_KW@32..36 "set" [] [Whitespace(" ")],
+                                JsLiteralMemberName {
+                                    value: IDENT@36..37 "a" [] [],
+                                },
+                                TsTypeParameters {
+                                    l_angle_token: L_ANGLE@37..38 "<" [] [],
+                                    items: TsTypeParameterList [],
+                                    r_angle_token: R_ANGLE@38..39 ">" [] [],
+                                },
+                                L_PAREN@39..40 "(" [] [],
+                                JsFormalParameter {
+                                    decorators: JsDecoratorList [],
+                                    binding: JsIdentifierBinding {
+                                        name_token: IDENT@40..45 "value" [] [],
+                                    },
+                                    question_mark_token: missing (optional),
+                                    type_annotation: TsTypeAnnotation {
+                                        colon_token: COLON@45..47 ":" [] [Whitespace(" ")],
+                                        ty: TsReferenceType {
+                                            name: JsReferenceIdentifier {
+                                                value_token: IDENT@47..48 "A" [] [],
+                                            },
+                                            type_arguments: missing (optional),
+                                        },
+                                    },
+                                    initializer: missing (optional),
+                                },
+                                R_PAREN@48..50 ")" [] [Whitespace(" ")],
+                                JsFunctionBody {
+                                    l_curly_token: L_CURLY@50..51 "{" [] [],
+                                    directives: JsDirectiveList [],
+                                    statements: JsStatementList [],
+                                    r_curly_token: R_CURLY@51..53 "}" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                    ],
+                    r_curly_token: R_CURLY@53..54 "}" [] [],
+                },
+                r_paren_token: R_PAREN@54..55 ")" [] [],
+            },
+            semicolon_token: SEMICOLON@55..56 ";" [] [],
+        },
+    ],
+    eof_token: EOF@56..57 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..57
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..56
+    0: JS_EXPRESSION_STATEMENT@0..28
+      0: JS_PARENTHESIZED_EXPRESSION@0..27
+        0: L_PAREN@0..1 "(" [] []
+        1: JS_OBJECT_EXPRESSION@1..26
+          0: L_CURLY@1..3 "{" [] [Whitespace(" ")]
+          1: JS_OBJECT_MEMBER_LIST@3..25
+            0: JS_BOGUS_MEMBER@3..25
+              0: SET_KW@3..7 "set" [] [Whitespace(" ")]
+              1: JS_LITERAL_MEMBER_NAME@7..8
+                0: IDENT@7..8 "a" [] []
+              2: TS_TYPE_PARAMETERS@8..11
+                0: L_ANGLE@8..9 "<" [] []
+                1: TS_TYPE_PARAMETER_LIST@9..10
+                  0: TS_TYPE_PARAMETER@9..10
+                    0: TS_TYPE_PARAMETER_MODIFIER_LIST@9..9
+                    1: TS_TYPE_PARAMETER_NAME@9..10
+                      0: IDENT@9..10 "A" [] []
+                    2: (empty)
+                    3: (empty)
+                2: R_ANGLE@10..11 ">" [] []
+              3: L_PAREN@11..12 "(" [] []
+              4: JS_FORMAL_PARAMETER@12..20
+                0: JS_DECORATOR_LIST@12..12
+                1: JS_IDENTIFIER_BINDING@12..17
+                  0: IDENT@12..17 "value" [] []
+                2: (empty)
+                3: TS_TYPE_ANNOTATION@17..20
+                  0: COLON@17..19 ":" [] [Whitespace(" ")]
+                  1: TS_REFERENCE_TYPE@19..20
+                    0: JS_REFERENCE_IDENTIFIER@19..20
+                      0: IDENT@19..20 "A" [] []
+                    1: (empty)
+                4: (empty)
+              5: R_PAREN@20..22 ")" [] [Whitespace(" ")]
+              6: JS_FUNCTION_BODY@22..25
+                0: L_CURLY@22..23 "{" [] []
+                1: JS_DIRECTIVE_LIST@23..23
+                2: JS_STATEMENT_LIST@23..23
+                3: R_CURLY@23..25 "}" [] [Whitespace(" ")]
+          2: R_CURLY@25..26 "}" [] []
+        2: R_PAREN@26..27 ")" [] []
+      1: SEMICOLON@27..28 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@28..56
+      0: JS_PARENTHESIZED_EXPRESSION@28..55
+        0: L_PAREN@28..30 "(" [Newline("\n")] []
+        1: JS_OBJECT_EXPRESSION@30..54
+          0: L_CURLY@30..32 "{" [] [Whitespace(" ")]
+          1: JS_OBJECT_MEMBER_LIST@32..53
+            0: JS_BOGUS_MEMBER@32..53
+              0: SET_KW@32..36 "set" [] [Whitespace(" ")]
+              1: JS_LITERAL_MEMBER_NAME@36..37
+                0: IDENT@36..37 "a" [] []
+              2: TS_TYPE_PARAMETERS@37..39
+                0: L_ANGLE@37..38 "<" [] []
+                1: TS_TYPE_PARAMETER_LIST@38..38
+                2: R_ANGLE@38..39 ">" [] []
+              3: L_PAREN@39..40 "(" [] []
+              4: JS_FORMAL_PARAMETER@40..48
+                0: JS_DECORATOR_LIST@40..40
+                1: JS_IDENTIFIER_BINDING@40..45
+                  0: IDENT@40..45 "value" [] []
+                2: (empty)
+                3: TS_TYPE_ANNOTATION@45..48
+                  0: COLON@45..47 ":" [] [Whitespace(" ")]
+                  1: TS_REFERENCE_TYPE@47..48
+                    0: JS_REFERENCE_IDENTIFIER@47..48
+                      0: IDENT@47..48 "A" [] []
+                    1: (empty)
+                4: (empty)
+              5: R_PAREN@48..50 ")" [] [Whitespace(" ")]
+              6: JS_FUNCTION_BODY@50..53
+                0: L_CURLY@50..51 "{" [] []
+                1: JS_DIRECTIVE_LIST@51..51
+                2: JS_STATEMENT_LIST@51..51
+                3: R_CURLY@51..53 "}" [] [Whitespace(" ")]
+          2: R_CURLY@53..54 "}" [] []
+        2: R_PAREN@54..55 ")" [] []
+      1: SEMICOLON@55..56 ";" [] []
+  4: EOF@56..57 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_object_setter_type_parameters.ts:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An accessor cannot have type parameters.
+  
+  > 1 │ ({ set a<A>(value: A) {} });
+      │         ^^^
+    2 │ ({ set a<>(value: A) {} });
+    3 │ 
+  
+ts_object_setter_type_parameters.ts:2:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+    1 │ ({ set a<A>(value: A) {} });
+  > 2 │ ({ set a<>(value: A) {} });
+      │          ^
+    3 │ 
+  
+  i Expected a type parameter here.
+  
+    1 │ ({ set a<A>(value: A) {} });
+  > 2 │ ({ set a<>(value: A) {} });
+      │          ^
+    3 │ 
+  
+ts_object_setter_type_parameters.ts:2:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × An accessor cannot have type parameters.
+  
+    1 │ ({ set a<A>(value: A) {} });
+  > 2 │ ({ set a<>(value: A) {} });
+      │         ^^
+    3 │ 
+  
+```

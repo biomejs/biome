@@ -1,0 +1,247 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<a.b.c.d></a.b.c.d>;
+<a-b.c></a-b.c>;
+<Abcd></Abcd>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@0..1 "<" [] [],
+                        name: JsxMemberName {
+                            object: JsxMemberName {
+                                object: JsxMemberName {
+                                    object: JsxReferenceIdentifier {
+                                        value_token: JSX_IDENT@1..2 "a" [] [],
+                                    },
+                                    dot_token: DOT@2..3 "." [] [],
+                                    member: JsName {
+                                        value_token: IDENT@3..4 "b" [] [],
+                                    },
+                                },
+                                dot_token: DOT@4..5 "." [] [],
+                                member: JsName {
+                                    value_token: IDENT@5..6 "c" [] [],
+                                },
+                            },
+                            dot_token: DOT@6..7 "." [] [],
+                            member: JsName {
+                                value_token: IDENT@7..8 "d" [] [],
+                            },
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@8..9 ">" [] [],
+                    },
+                    children: JsxChildList [],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@9..10 "<" [] [],
+                        slash_token: SLASH@10..11 "/" [] [],
+                        name: JsxMemberName {
+                            object: JsxMemberName {
+                                object: JsxMemberName {
+                                    object: JsxReferenceIdentifier {
+                                        value_token: JSX_IDENT@11..12 "a" [] [],
+                                    },
+                                    dot_token: DOT@12..13 "." [] [],
+                                    member: JsName {
+                                        value_token: IDENT@13..14 "b" [] [],
+                                    },
+                                },
+                                dot_token: DOT@14..15 "." [] [],
+                                member: JsName {
+                                    value_token: IDENT@15..16 "c" [] [],
+                                },
+                            },
+                            dot_token: DOT@16..17 "." [] [],
+                            member: JsName {
+                                value_token: IDENT@17..18 "d" [] [],
+                            },
+                        },
+                        r_angle_token: R_ANGLE@18..19 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@19..20 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@20..22 "<" [Newline("\n")] [],
+                        name: JsxMemberName {
+                            object: JsxReferenceIdentifier {
+                                value_token: JSX_IDENT@22..25 "a-b" [] [],
+                            },
+                            dot_token: DOT@25..26 "." [] [],
+                            member: JsName {
+                                value_token: IDENT@26..27 "c" [] [],
+                            },
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@27..28 ">" [] [],
+                    },
+                    children: JsxChildList [],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@28..29 "<" [] [],
+                        slash_token: SLASH@29..30 "/" [] [],
+                        name: JsxMemberName {
+                            object: JsxReferenceIdentifier {
+                                value_token: JSX_IDENT@30..33 "a-b" [] [],
+                            },
+                            dot_token: DOT@33..34 "." [] [],
+                            member: JsName {
+                                value_token: IDENT@34..35 "c" [] [],
+                            },
+                        },
+                        r_angle_token: R_ANGLE@35..36 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@36..37 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@37..39 "<" [Newline("\n")] [],
+                        name: JsxReferenceIdentifier {
+                            value_token: JSX_IDENT@39..43 "Abcd" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@43..44 ">" [] [],
+                    },
+                    children: JsxChildList [],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@44..45 "<" [] [],
+                        slash_token: SLASH@45..46 "/" [] [],
+                        name: JsxReferenceIdentifier {
+                            value_token: JSX_IDENT@46..50 "Abcd" [] [],
+                        },
+                        r_angle_token: R_ANGLE@50..51 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@51..52 ";" [] [],
+        },
+    ],
+    eof_token: EOF@52..53 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..53
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..52
+    0: JS_EXPRESSION_STATEMENT@0..20
+      0: JSX_TAG_EXPRESSION@0..19
+        0: JSX_ELEMENT@0..19
+          0: JSX_OPENING_ELEMENT@0..9
+            0: L_ANGLE@0..1 "<" [] []
+            1: JSX_MEMBER_NAME@1..8
+              0: JSX_MEMBER_NAME@1..6
+                0: JSX_MEMBER_NAME@1..4
+                  0: JSX_REFERENCE_IDENTIFIER@1..2
+                    0: JSX_IDENT@1..2 "a" [] []
+                  1: DOT@2..3 "." [] []
+                  2: JS_NAME@3..4
+                    0: IDENT@3..4 "b" [] []
+                1: DOT@4..5 "." [] []
+                2: JS_NAME@5..6
+                  0: IDENT@5..6 "c" [] []
+              1: DOT@6..7 "." [] []
+              2: JS_NAME@7..8
+                0: IDENT@7..8 "d" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@8..8
+            4: R_ANGLE@8..9 ">" [] []
+          1: JSX_CHILD_LIST@9..9
+          2: JSX_CLOSING_ELEMENT@9..19
+            0: L_ANGLE@9..10 "<" [] []
+            1: SLASH@10..11 "/" [] []
+            2: JSX_MEMBER_NAME@11..18
+              0: JSX_MEMBER_NAME@11..16
+                0: JSX_MEMBER_NAME@11..14
+                  0: JSX_REFERENCE_IDENTIFIER@11..12
+                    0: JSX_IDENT@11..12 "a" [] []
+                  1: DOT@12..13 "." [] []
+                  2: JS_NAME@13..14
+                    0: IDENT@13..14 "b" [] []
+                1: DOT@14..15 "." [] []
+                2: JS_NAME@15..16
+                  0: IDENT@15..16 "c" [] []
+              1: DOT@16..17 "." [] []
+              2: JS_NAME@17..18
+                0: IDENT@17..18 "d" [] []
+            3: R_ANGLE@18..19 ">" [] []
+      1: SEMICOLON@19..20 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@20..37
+      0: JSX_TAG_EXPRESSION@20..36
+        0: JSX_ELEMENT@20..36
+          0: JSX_OPENING_ELEMENT@20..28
+            0: L_ANGLE@20..22 "<" [Newline("\n")] []
+            1: JSX_MEMBER_NAME@22..27
+              0: JSX_REFERENCE_IDENTIFIER@22..25
+                0: JSX_IDENT@22..25 "a-b" [] []
+              1: DOT@25..26 "." [] []
+              2: JS_NAME@26..27
+                0: IDENT@26..27 "c" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@27..27
+            4: R_ANGLE@27..28 ">" [] []
+          1: JSX_CHILD_LIST@28..28
+          2: JSX_CLOSING_ELEMENT@28..36
+            0: L_ANGLE@28..29 "<" [] []
+            1: SLASH@29..30 "/" [] []
+            2: JSX_MEMBER_NAME@30..35
+              0: JSX_REFERENCE_IDENTIFIER@30..33
+                0: JSX_IDENT@30..33 "a-b" [] []
+              1: DOT@33..34 "." [] []
+              2: JS_NAME@34..35
+                0: IDENT@34..35 "c" [] []
+            3: R_ANGLE@35..36 ">" [] []
+      1: SEMICOLON@36..37 ";" [] []
+    2: JS_EXPRESSION_STATEMENT@37..52
+      0: JSX_TAG_EXPRESSION@37..51
+        0: JSX_ELEMENT@37..51
+          0: JSX_OPENING_ELEMENT@37..44
+            0: L_ANGLE@37..39 "<" [Newline("\n")] []
+            1: JSX_REFERENCE_IDENTIFIER@39..43
+              0: JSX_IDENT@39..43 "Abcd" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@43..43
+            4: R_ANGLE@43..44 ">" [] []
+          1: JSX_CHILD_LIST@44..44
+          2: JSX_CLOSING_ELEMENT@44..51
+            0: L_ANGLE@44..45 "<" [] []
+            1: SLASH@45..46 "/" [] []
+            2: JSX_REFERENCE_IDENTIFIER@46..50
+              0: JSX_IDENT@46..50 "Abcd" [] []
+            3: R_ANGLE@50..51 ">" [] []
+      1: SEMICOLON@51..52 ";" [] []
+  4: EOF@52..53 "" [Newline("\n")] []
+
+```
