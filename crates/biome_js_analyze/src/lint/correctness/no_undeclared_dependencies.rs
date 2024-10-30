@@ -44,7 +44,6 @@ declare_lint_rule! {
     /// ## Options
     ///
     /// **Since v2.0.0**
-    /// **Since v2.0.0**
     ///
     /// This rule supports the following options:
     /// - `devDependencies`: If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
