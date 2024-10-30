@@ -125,7 +125,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_rowan",
  "enumflags2",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "schemars",
  "serde",
  "tracing",
@@ -136,7 +136,7 @@ name = "biome_aria"
 version = "0.5.7"
 dependencies = [
  "biome_aria_metadata",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
 ]
 
 [[package]]
@@ -189,7 +189,7 @@ dependencies = [
  "quick-junit",
  "rayon",
  "regex",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "serde",
  "serde_json",
  "smallvec",
@@ -229,7 +229,7 @@ dependencies = [
  "indexmap 2.6.0",
  "insta",
  "oxc_resolver",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "schemars",
  "serde",
  "serde_ini",
@@ -255,7 +255,7 @@ name = "biome_control_flow"
 version = "0.5.7"
 dependencies = [
  "biome_rowan",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
 ]
 
 [[package]]
@@ -276,7 +276,7 @@ dependencies = [
  "biome_test_utils",
  "insta",
  "regex",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "schemars",
  "serde",
  "tests_macros",
@@ -342,7 +342,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
  "biome_rowan",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
 ]
 
 [[package]]
@@ -451,7 +451,7 @@ dependencies = [
  "drop_bomb",
  "indexmap 2.6.0",
  "insta",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "schemars",
  "serde",
  "tracing",
@@ -490,7 +490,7 @@ dependencies = [
  "oxc_resolver",
  "parking_lot",
  "rayon",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "schemars",
  "serde",
  "serde_json",
@@ -575,7 +575,7 @@ dependencies = [
  "biome_graphql_parser",
  "biome_graphql_syntax",
  "biome_rowan",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
 ]
 
 [[package]]
@@ -658,7 +658,7 @@ dependencies = [
  "path-absolutize",
  "rand 0.8.5",
  "regex",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "serde",
  "tests_macros",
 ]
@@ -756,7 +756,7 @@ dependencies = [
  "natord",
  "regex",
  "roaring",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "schemars",
  "serde",
  "smallvec",
@@ -823,7 +823,7 @@ dependencies = [
  "insta",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "schemars",
  "serde",
  "serde_json",
@@ -842,7 +842,7 @@ dependencies = [
  "biome_js_syntax",
  "biome_rowan",
  "rust-lapper",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "smallvec",
 ]
 
@@ -889,7 +889,7 @@ dependencies = [
  "biome_test_utils",
  "insta",
  "natord",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "tests_macros",
 ]
 
@@ -969,7 +969,7 @@ dependencies = [
  "biome_service",
  "biome_text_edit",
  "futures",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "serde",
  "serde_json",
  "tokio",
@@ -984,7 +984,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "biome_rowan",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "tower",
  "tower-lsp",
 ]
@@ -1049,7 +1049,7 @@ dependencies = [
  "biome_rowan",
  "biome_test_utils",
  "insta",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "tests_macros",
 ]
 
@@ -1081,7 +1081,7 @@ dependencies = [
  "biome_text_size",
  "insta",
  "node-semver",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "serde",
  "tests_macros",
 ]
@@ -1097,7 +1097,7 @@ dependencies = [
  "iai",
  "quickcheck",
  "quickcheck_macros",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "serde",
  "serde_json",
  "tracing",
@@ -1155,7 +1155,7 @@ dependencies = [
  "insta",
  "oxc_resolver",
  "regex",
- "rustc-hash 1.1.0",
+ "rustc-hash 2.0.0",
  "schemars",
  "serde",
  "serde_json",
