@@ -43,6 +43,8 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
+    /// **Since v2.0.0**
+    ///
     /// This rule supports the following options:
     /// - `devDependencies`: If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
     /// - `peerDependencies`: If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
@@ -59,18 +61,21 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// You can also use an array of globs instead of literal booleans:
-    /// ```json
-    /// {
-    ///   "options": {
-    ///     "devDependencies": ["**/*.test.js", "**/*.spec.js"]
-    ///   }
-    /// }
-    /// ```
-    ///
+    /// You can also use an array of globs instead of literal booleans.
     /// When using an array of globs, the setting will be set to `true` (no errors reported)
     /// if the name of the file being linted (i.e. not the imported file/module) matches a single glob
     /// in the array, and `false` otherwise.
+    ///
+    /// In the following example, only test files can use dependencies in `devDependencies` section.
+    /// `dependencies`, `peerDependencies`, and `optionalDependencies` are always available.
+    ///
+    /// ```json
+    /// {
+    ///   "options": {
+    ///     "devDependencies": ["tests/*.test.js", "tests/*.spec.js"]
+    ///   }
+    /// }
+    /// ```
     pub NoUndeclaredDependencies {
         version: "1.6.0",
         name: "noUndeclaredDependencies",
