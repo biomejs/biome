@@ -22,6 +22,11 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- `biome migrate eslint` now correctly resolves scoped package named `eslint-config` with a path.
+  Contributed by @Conaclos
+
 ### Configuration
 
 ### Editors
