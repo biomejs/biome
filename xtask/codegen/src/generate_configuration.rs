@@ -260,7 +260,6 @@ fn generate_for_groups(
             quote! {
                 if let Some(group) = self.#group_ident.as_ref() {
                     enabled_rules.extend(&group.get_enabled_rules());
-                    disabled_rules.extend(&group.get_disabled_rules());
                 }
             }
         });
@@ -418,10 +417,8 @@ fn generate_for_groups(
                 /// The enabled rules are calculated from the difference with the disabled rules.
                 pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                     let mut enabled_rules = FxHashSet::default();
-                    let mut disabled_rules = FxHashSet::default();
                     #( #group_as_default_rules )*
-
-                    enabled_rules.difference(&disabled_rules).copied().collect()
+                    enabled_rules
                 }
             }
 
@@ -838,12 +835,6 @@ fn generate_group_struct(
                 pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                    let mut index_set = FxHashSet::default();
                    #( #rule_enabled_check_line )*
-                   index_set
-                }
-
-                pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
-                   let mut index_set = FxHashSet::default();
-                   #( #rule_disabled_check_line )*
                    index_set
                 }
 

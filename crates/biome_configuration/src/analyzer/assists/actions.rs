@@ -86,12 +86,10 @@ impl Actions {
     #[doc = r" The enabled rules are calculated from the difference with the disabled rules."]
     pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut enabled_rules = FxHashSet::default();
-        let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.source.as_ref() {
             enabled_rules.extend(&group.get_enabled_rules());
-            disabled_rules.extend(&group.get_disabled_rules());
         }
-        enabled_rules.difference(&disabled_rules).copied().collect()
+        enabled_rules
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
@@ -130,25 +128,6 @@ impl Source {
         }
         if let Some(rule) = self.use_sorted_keys.as_ref() {
             if rule.is_enabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
-            }
-        }
-        index_set
-    }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
-        let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.organize_imports.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
-            }
-        }
-        if let Some(rule) = self.use_sorted_attributes.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
-            }
-        }
-        if let Some(rule) = self.use_sorted_keys.as_ref() {
-            if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
