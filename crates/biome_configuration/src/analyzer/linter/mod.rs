@@ -54,6 +54,6 @@ impl PartialLinterConfiguration {
     }
 
     pub fn get_rules(&self) -> Rules {
-        self.rules.as_ref().unwrap_or(&Rules::default()).clone()
+        self.rules.clone().unwrap_or_default()
     }
 }
