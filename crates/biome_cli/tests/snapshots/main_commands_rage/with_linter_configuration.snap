@@ -67,33 +67,33 @@ Linter:
   Recommended:                  false
   All:                          false
   Enabled rules:
-  complexity/noMultipleSpacesInRegularExpressionLiterals
-  complexity/noExcessiveNestedTestSuites
-  complexity/noUselessRename
-  complexity/useArrowFunction
-  complexity/noUselessEmptyExport
-  complexity/noWith
-  complexity/noUselessLoneBlockStatements
-  complexity/useFlatMap
-  complexity/noForEach
-  complexity/noUselessSwitchCase
-  complexity/useOptionalChain
-  complexity/noUselessCatch
   complexity/noBannedTypes
+  complexity/noEmptyTypeParameters
+  complexity/noExcessiveNestedTestSuites
   complexity/noExtraBooleanCast
-  suspicious/noCommentText
-  complexity/noUselessTypeConstraint
-  complexity/useSimpleNumberKeys
+  complexity/noForEach
+  complexity/noMultipleSpacesInRegularExpressionLiterals
+  complexity/noStaticOnlyClass
+  complexity/noThisInStatic
+  complexity/noUselessCatch
+  complexity/noUselessConstructor
+  complexity/noUselessEmptyExport
   complexity/noUselessFragments
   complexity/noUselessLabel
-  complexity/noThisInStatic
-  complexity/noUselessConstructor
-  complexity/noEmptyTypeParameters
-  complexity/noStaticOnlyClass
-  complexity/noUselessThisAlias
+  complexity/noUselessLoneBlockStatements
+  complexity/noUselessRename
+  complexity/noUselessSwitchCase
   complexity/noUselessTernary
+  complexity/noUselessThisAlias
+  complexity/noUselessTypeConstraint
+  complexity/noWith
+  complexity/useArrowFunction
+  complexity/useFlatMap
   complexity/useLiteralKeys
+  complexity/useOptionalChain
   complexity/useRegexLiterals
+  complexity/useSimpleNumberKeys
+  suspicious/noCommentText
 
 Server:
   Version:                      0.0.0
