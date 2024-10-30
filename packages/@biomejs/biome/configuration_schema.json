@@ -910,7 +910,7 @@
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoUndeclaredDependenciesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1210,6 +1210,20 @@
 				"use": { "default": null, "type": ["string", "null"] }
 			},
 			"additionalProperties": false
+		},
+		"DependencyAvailability": {
+			"oneOf": [
+				{
+					"description": "This type of dependency will be always available or unavailable.",
+					"type": "boolean"
+				},
+				{
+					"description": "This type of dependency will be available only if the linted file matches any of the globs.",
+					"type": "array",
+					"items": { "type": "string" },
+					"minItems": 1
+				}
+			]
 		},
 		"DeprecatedHooksConfiguration": {
 			"anyOf": [
@@ -2087,6 +2101,34 @@
 					"type": ["integer", "null"],
 					"format": "uint16",
 					"minimum": 0.0
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUndeclaredDependenciesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUndeclaredDependenciesOptions" }
+			]
+		},
+		"NoUndeclaredDependenciesOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"devDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.",
+					"default": true,
+					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+				},
+				"optionalDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.",
+					"default": true,
+					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+				},
+				"peerDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.",
+					"default": true,
+					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
 				}
 			},
 			"additionalProperties": false
@@ -3007,6 +3049,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoSecretsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUndeclaredDependenciesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUndeclaredDependenciesOptions" }]
 				}
 			},
 			"additionalProperties": false

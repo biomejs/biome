@@ -1108,7 +1108,7 @@ export interface Correctness {
 	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
-	noUndeclaredDependencies?: RuleConfiguration_for_Null;
+	noUndeclaredDependencies?: RuleConfiguration_for_NoUndeclaredDependenciesOptions;
 	/**
 	 * Prevents the usage of variables that haven't been declared inside the document.
 	 */
@@ -2058,6 +2058,9 @@ export type RuleFixConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
+export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUndeclaredDependenciesOptions;
 export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
@@ -2202,6 +2205,16 @@ export interface RuleWithOptions_for_ComplexityOptions {
 	 * Rule's options
 	 */
 	options: ComplexityOptions;
+}
+export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUndeclaredDependenciesOptions;
 }
 export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
 	/**
@@ -2447,6 +2460,23 @@ export interface ComplexityOptions {
 	maxAllowedComplexity?: number;
 }
 /**
+ * Rule's options
+ */
+export interface NoUndeclaredDependenciesOptions {
+	/**
+	 * If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
+	 */
+	devDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
+	 */
+	optionalDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
+	 */
+	peerDependencies?: DependencyAvailability;
+}
+/**
  * Options for the rule `useExhaustiveDependencies`
  */
 export interface UseExhaustiveDependenciesOptions {
@@ -2598,6 +2628,7 @@ If `false`, no such exception will be made.
 	ignoreNull: boolean;
 }
 export type ImportGroup = PredefinedImportGroup | Regex;
+export type DependencyAvailability = boolean | string[];
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
