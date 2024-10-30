@@ -33,6 +33,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+### Bug fixes
+
+- Fix [#4121](https://github.com/biomejs/biome/issues/4326), don't ident a CSS selector when has leading comments. Contributed by @fireairforce
+
 ### JavaScript APIs
 
 ### Linter
