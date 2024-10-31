@@ -728,7 +728,11 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<indexmap::IndexSet<u8>>(source, JsonParserOptions::default(), "");
+        } = deserialize_from_json_str::<indexmap::IndexSet<u8>>(
+            source,
+            JsonParserOptions::default(),
+            "",
+        );
         assert!(diagnostics.is_empty());
         assert_eq!(deserialized.unwrap(), indexmap::IndexSet::from([0, 1]));
 
@@ -736,7 +740,11 @@ mod tests {
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<indexmap::IndexSet<u8>>(source, JsonParserOptions::default(), "");
+        } = deserialize_from_json_str::<indexmap::IndexSet<u8>>(
+            source,
+            JsonParserOptions::default(),
+            "",
+        );
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
