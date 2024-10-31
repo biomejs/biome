@@ -37,4 +37,7 @@ lint = "clippy --workspace --all-targets -- --deny warnings"
 new-crate = "run -p xtask_codegen -- new-crate"
 
 [profile.release]
-lto = true
+codegen-units = 1
+lto           = true
+opt-level     = 3
+strip         = "symbols"
