@@ -1,3 +1,27 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```jsx
+import "foo" assert { type, "json" };
+import "bar" \u{61}ssert { type: "json" };
+import { foo } assert { type: "json" };
+import "lorem"
+assert { type: "json" }
+import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
+import "x" assert;
+import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
+import { a } from "a.json" assert
+
+```
+
+
+## AST
+
+```
 JsModule {
     bom_token: missing (optional),
     interpreter_token: missing (optional),
@@ -358,7 +382,11 @@ JsModule {
     ],
     eof_token: EOF@379..380 "" [Newline("\n")] [],
 }
+```
 
+## CST
+
+```
 0: JS_MODULE@0..380
   0: (empty)
   1: (empty)
@@ -600,7 +628,12 @@ JsModule {
           0: IDENT@373..379 "assert" [] []
       1: (empty)
   4: EOF@379..380 "" [Newline("\n")] []
---
+
+```
+
+## Diagnostics
+
+```
 import_assertion_err.js:1:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -624,7 +657,6 @@ import_assertion_err.js:1:14 parse ━━━━━━━━━━━━━━━
     2 │ import "bar" \u{61}ssert { type: "json" };
     3 │ import { foo } assert { type: "json" };
   
---
 import_assertion_err.js:1:21 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -648,7 +680,6 @@ import_assertion_err.js:1:21 parse ━━━━━━━━━━━━━━━
     2 │ import "bar" \u{61}ssert { type: "json" };
     3 │ import { foo } assert { type: "json" };
   
---
 import_assertion_err.js:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -675,7 +706,6 @@ import_assertion_err.js:2:14 parse ━━━━━━━━━━━━━━━
     3 │ import { foo } assert { type: "json" };
     4 │ import "lorem"
   
---
 import_assertion_err.js:2:26 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -702,7 +732,6 @@ import_assertion_err.js:2:26 parse ━━━━━━━━━━━━━━━
     3 │ import { foo } assert { type: "json" };
     4 │ import "lorem"
   
---
 import_assertion_err.js:3:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `from` but instead found `assert`
@@ -716,7 +745,6 @@ import_assertion_err.js:3:16 parse ━━━━━━━━━━━━━━━
   
   i Remove assert
   
---
 import_assertion_err.js:3:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -746,7 +774,6 @@ import_assertion_err.js:3:23 parse ━━━━━━━━━━━━━━━
     4 │ import "lorem"
     5 │ assert { type: "json" }
   
---
 import_assertion_err.js:5:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -776,7 +803,6 @@ import_assertion_err.js:5:8 parse ━━━━━━━━━━━━━━━�
     6 │ import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
     7 │ import "x" assert;
   
---
 import_assertion_err.js:6:29 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -806,7 +832,6 @@ import_assertion_err.js:6:29 parse ━━━━━━━━━━━━━━━
     7 │ import "x" assert;
     8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
   
---
 import_assertion_err.js:6:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -836,7 +861,6 @@ import_assertion_err.js:6:36 parse ━━━━━━━━━━━━━━━
     7 │ import "x" assert;
     8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
   
---
 import_assertion_err.js:6:44 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -866,7 +890,6 @@ import_assertion_err.js:6:44 parse ━━━━━━━━━━━━━━━
     7 │ import "x" assert;
     8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
   
---
 import_assertion_err.js:6:74 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -896,7 +919,6 @@ import_assertion_err.js:6:74 parse ━━━━━━━━━━━━━━━
     7 │ import "x" assert;
     8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
   
---
 import_assertion_err.js:7:12 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -926,7 +948,6 @@ import_assertion_err.js:7:12 parse ━━━━━━━━━━━━━━━
     8 │ import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
     9 │ import { a } from "a.json" assert
   
---
 import_assertion_err.js:8:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -956,7 +977,6 @@ import_assertion_err.js:8:32 parse ━━━━━━━━━━━━━━━
      9 │ import { a } from "a.json" assert
     10 │ 
   
---
 import_assertion_err.js:8:39 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -986,7 +1006,6 @@ import_assertion_err.js:8:39 parse ━━━━━━━━━━━━━━━
      9 │ import { a } from "a.json" assert
     10 │ 
   
---
 import_assertion_err.js:8:59 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -1016,7 +1035,6 @@ import_assertion_err.js:8:59 parse ━━━━━━━━━━━━━━━
      9 │ import { a } from "a.json" assert
     10 │ 
   
---
 import_assertion_err.js:9:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Expected a semicolon or an implicit semicolon after a statement, but found none
@@ -1043,13 +1061,4 @@ import_assertion_err.js:9:28 parse ━━━━━━━━━━━━━━━
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
     10 │ 
   
---
-import "foo" assert { type, "json" };
-import "bar" \u{61}ssert { type: "json" };
-import { foo } assert { type: "json" };
-import "lorem"
-assert { type: "json" }
-import foo2 from "foo.json" assert { "type": "json", type: "html", "type": "js" };
-import "x" assert;
-import ipsum from "ipsum.json" assert { type: "json", lazy: true, startAtLine: 1 };
-import { a } from "a.json" assert
+```

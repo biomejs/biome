@@ -1,3 +1,24 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```jsx
+import "foo" with { type, "json" };
+import { foo } with { type: "json" };
+import foo2 from "foo.json" with { "type": "json", type: "html", "type": "js" };
+import "x" with;
+import ipsum from "ipsum.json" with { type: "json", lazy: true, startAtLine: 1 };
+import { a } from "a.json" with
+
+```
+
+
+## AST
+
+```
 JsModule {
     bom_token: missing (optional),
     interpreter_token: missing (optional),
@@ -206,7 +227,11 @@ JsModule {
     ],
     eof_token: EOF@285..286 "" [Newline("\n")] [],
 }
+```
 
+## CST
+
+```
 0: JS_MODULE@0..286
   0: (empty)
   1: (empty)
@@ -357,7 +382,12 @@ JsModule {
           3: (empty)
       2: (empty)
   4: EOF@285..286 "" [Newline("\n")] []
---
+
+```
+
+## Diagnostics
+
+```
 import_attribute_err.js:1:25 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `,`
@@ -369,7 +399,6 @@ import_attribute_err.js:1:25 parse ━━━━━━━━━━━━━━━
   
   i Remove ,
   
---
 import_attribute_err.js:1:34 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `}`
@@ -381,7 +410,6 @@ import_attribute_err.js:1:34 parse ━━━━━━━━━━━━━━━
   
   i Remove }
   
---
 import_attribute_err.js:2:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `from` but instead found `with`
@@ -394,7 +422,6 @@ import_attribute_err.js:2:16 parse ━━━━━━━━━━━━━━━
   
   i Remove with
   
---
 import_attribute_err.js:3:36 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Duplicate assertion keys are not allowed
@@ -424,7 +451,6 @@ import_attribute_err.js:3:36 parse ━━━━━━━━━━━━━━━
     4 │ import "x" with;
     5 │ import ipsum from "ipsum.json" with { type: "json", lazy: true, startAtLine: 1 };
   
---
 import_attribute_err.js:4:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead found `;`
@@ -438,7 +464,6 @@ import_attribute_err.js:4:16 parse ━━━━━━━━━━━━━━━
   
   i Remove ;
   
---
 import_attribute_err.js:5:59 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `string literal` but instead found `true`
@@ -452,7 +477,6 @@ import_attribute_err.js:5:59 parse ━━━━━━━━━━━━━━━
   
   i Remove true
   
---
 import_attribute_err.js:5:63 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `:` but instead found `,`
@@ -466,7 +490,6 @@ import_attribute_err.js:5:63 parse ━━━━━━━━━━━━━━━
   
   i Remove ,
   
---
 import_attribute_err.js:5:78 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `string literal` but instead found `1`
@@ -480,7 +503,6 @@ import_attribute_err.js:5:78 parse ━━━━━━━━━━━━━━━
   
   i Remove 1
   
---
 import_attribute_err.js:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × expected `{` but instead the file ends
@@ -497,10 +519,4 @@ import_attribute_err.js:7:1 parse ━━━━━━━━━━━━━━━�
   > 7 │ 
       │ 
   
---
-import "foo" with { type, "json" };
-import { foo } with { type: "json" };
-import foo2 from "foo.json" with { "type": "json", type: "html", "type": "js" };
-import "x" with;
-import ipsum from "ipsum.json" with { type: "json", lazy: true, startAtLine: 1 };
-import { a } from "a.json" with
+```
