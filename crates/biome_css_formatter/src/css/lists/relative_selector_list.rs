@@ -26,8 +26,7 @@ impl FormatRule<CssRelativeSelectorList> for FormatCssRelativeSelectorList {
                 .and_then(|computed_selector| computed_selector.simple_selector())
                 .and_then(|simple_selector| simple_selector.as_css_type_selector().cloned())
                 .and_then(|type_selector| type_selector.ident().ok()?.value_token().ok())
-                .map(|value_token| value_token.has_leading_comments())
-                .unwrap_or_default();
+                .is_some_and(|value_token| value_token.has_leading_comments());
 
             if has_leading_comments {
                 // Computed Selector which contains a leading comments should be formatted without indent.
