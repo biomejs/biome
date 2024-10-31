@@ -26,7 +26,7 @@ use crate::promote_rule::promote_rule;
 use xtask::Mode::Overwrite;
 use xtask_codegen::{
     generate_analyzer, generate_ast, generate_crate, generate_formatters,
-    generate_new_analyzer_rule, generate_parser_tests, generate_tables, task_command, TaskCommand,
+    generate_new_analyzer_rule, generate_tables, task_command, TaskCommand,
 };
 
 fn main() -> Result<()> {
@@ -63,9 +63,6 @@ fn main() -> Result<()> {
         TaskCommand::Grammar(language_list) => {
             generate_ast(Overwrite, language_list)?;
         }
-        TaskCommand::Test => {
-            generate_parser_tests(Overwrite)?;
-        }
         TaskCommand::Unicode => {
             generate_tables()?;
         }
@@ -82,7 +79,6 @@ fn main() -> Result<()> {
         TaskCommand::All => {
             generate_tables()?;
             generate_ast(Overwrite, vec![])?;
-            generate_parser_tests(Overwrite)?;
             generate_formatters();
             generate_analyzer()?;
             #[cfg(feature = "configuration")]
