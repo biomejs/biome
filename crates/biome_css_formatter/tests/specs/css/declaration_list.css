@@ -35,3 +35,19 @@ a {
 a {
     color: red;;;;
 }
+
+.with-comments {
+  /* hello */
+  a,
+  /* world */
+  button {
+    color: blue;
+  }
+}
+  
+.without-comments {
+  a,
+  button {
+    color: blue;
+  }
+}
