@@ -13,21 +13,23 @@ impl FormatRule<CssRelativeSelectorList> for FormatCssRelativeSelectorList {
         let mut joiner = f.join_with(&separator);
 
         for formatted in node.format_separated(",") {
-            let mut has_comments_before = false;
-            if let Some(relative_selector) = formatted.node()?.as_css_relative_selector() {
-                if let Some(computed_selector) =
-                    relative_selector.selector()?.as_css_compound_selector()
-                {
-                    if let Some(simple_selector) = computed_selector.simple_selector() {
-                        if let Some(type_selector) = simple_selector.as_css_type_selector() {
-                            has_comments_before =
-                                type_selector.ident()?.value_token()?.has_leading_comments();
-                        }
-                    }
-                }
-            }
+            let has_leading_comments = formatted
+                .node()?
+                .as_css_relative_selector()
+                .and_then(|relative_selector| {
+                    relative_selector
+                        .selector()
+                        .ok()?
+                        .as_css_compound_selector()
+                        .cloned()
+                })
+                .and_then(|computed_selector| computed_selector.simple_selector())
+                .and_then(|simple_selector| simple_selector.as_css_type_selector().cloned())
+                .and_then(|type_selector| type_selector.ident().ok()?.value_token().ok())
+                .map(|value_token| value_token.has_leading_comments())
+                .unwrap_or_default();
 
-            if has_comments_before {
+            if has_leading_comments {
                 // Computed Selector which contains a leading comments should be formatted without indent.
                 joiner.entry(&group(&formatted));
             } else {
