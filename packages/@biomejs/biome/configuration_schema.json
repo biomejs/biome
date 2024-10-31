@@ -2727,6 +2727,11 @@
 			},
 			"additionalProperties": false
 		},
+		"PluginConfiguration": { "anyOf": [{ "type": "string" }] },
+		"Plugins": {
+			"type": "array",
+			"items": { "$ref": "#/definitions/PluginConfiguration" }
+		},
 		"PredefinedImportGroup": {
 			"type": "string",
 			"enum": [":blank-line:", ":bun:", ":node:", ":types:"]
