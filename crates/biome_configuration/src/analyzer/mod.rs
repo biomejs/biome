@@ -338,7 +338,9 @@ impl<T: Default> Merge for RuleAssistWithOptions<T> {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions<T: Default> {
