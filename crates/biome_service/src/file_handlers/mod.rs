@@ -1071,7 +1071,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
         let enabled_rules = self
             .settings
-            .and_then(|settings| settings.as_assists_rules(self.path))
+            .and_then(|settings| settings.as_assist_actions(self.path))
             .as_ref()
             .map(|rules| rules.as_enabled_rules())
             .unwrap_or_default()
@@ -1179,7 +1179,7 @@ impl<'a, 'b> AnalyzerVisitorBuilder<'a, 'b> {
     }
 
     #[must_use]
-    pub(crate) fn with_assists_rules(
+    pub(crate) fn with_assist_actions(
         mut self,
         only: &'b Vec<RuleSelector>,
         skip: &'b Vec<RuleSelector>,

@@ -16,8 +16,8 @@ mod overrides;
 pub mod plugins;
 pub mod vcs;
 
-use crate::analyzer::assists::{
-    partial_assists_configuration, AssistsConfiguration, PartialAssistsConfiguration,
+use crate::analyzer::assist::{
+    partial_assist_configuration, AssistConfiguration, PartialAssistConfiguration,
 };
 use crate::css::CssLinter;
 pub use crate::diagnostics::BiomeDiagnostic;
@@ -139,8 +139,8 @@ pub struct Configuration {
     pub plugins: Plugins,
 
     /// Specific configuration for assists
-    #[partial(type, bpaf(external(partial_assists_configuration), optional))]
-    pub assists: AssistsConfiguration,
+    #[partial(type, bpaf(external(partial_assist_configuration), optional))]
+    pub assist: AssistConfiguration,
 }
 
 impl PartialConfiguration {

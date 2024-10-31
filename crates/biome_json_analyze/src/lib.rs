@@ -1,4 +1,4 @@
-mod assists;
+mod assist;
 mod lint;
 
 pub mod options;

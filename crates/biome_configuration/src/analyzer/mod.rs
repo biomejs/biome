@@ -1,6 +1,7 @@
-pub mod assists;
+pub mod assist;
 pub mod linter;
 
+use crate::analyzer::assist::Actions;
 pub use crate::analyzer::linter::*;
 use biome_analyze::options::RuleOptions;
 use biome_analyze::{FixKind, RuleFilter};
@@ -381,15 +382,31 @@ impl<T: Default> Merge for RuleWithFixOptions<T> {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum RuleSelector {
-    Group(linter::RuleGroup),
-    Rule(linter::RuleGroup, &'static str),
+    Group(&'static str),
+    Rule(&'static str, &'static str),
+}
+
+impl RuleSelector {
+    /// It retrieves a [RuleSelector] from an LSP filter.
+    ///
+    /// ## Warnings
+    ///
+    /// As for today, this function retrieves filter that belong to the assist
+    pub fn from_lsp_filter(filter: &'static str) -> Option<Self> {
+        filter.strip_prefix("source.").and_then(|filter| {
+            filter
+                .split('.')
+                .last()
+                .map(|action_name| Self::Rule("source", action_name))
+        })
+    }
 }
 
 impl From<RuleSelector> for RuleFilter<'static> {
     fn from(value: RuleSelector) -> Self {
         match value {
-            RuleSelector::Group(group) => RuleFilter::Group(group.as_str()),
-            RuleSelector::Rule(group, name) => RuleFilter::Rule(group.as_str(), name),
+            RuleSelector::Group(group) => RuleFilter::Group(group),
+            RuleSelector::Rule(group, name) => RuleFilter::Rule(group, name),
         }
     }
 }
@@ -397,8 +414,8 @@ impl From<RuleSelector> for RuleFilter<'static> {
 impl<'a> From<&'a RuleSelector> for RuleFilter<'static> {
     fn from(value: &'a RuleSelector) -> Self {
         match value {
-            RuleSelector::Group(group) => RuleFilter::Group(group.as_str()),
-            RuleSelector::Rule(group, name) => RuleFilter::Rule(group.as_str(), name),
+            RuleSelector::Group(group) => RuleFilter::Group(group),
+            RuleSelector::Rule(group, name) => RuleFilter::Rule(group, name),
         }
     }
 }
@@ -406,32 +423,51 @@ impl<'a> From<&'a RuleSelector> for RuleFilter<'static> {
 impl FromStr for RuleSelector {
     type Err = &'static str;
     fn from_str(selector: &str) -> Result<Self, Self::Err> {
-        let selector = selector.strip_prefix("lint/").unwrap_or(selector);
-        if let Some((group_name, rule_name)) = selector.split_once('/') {
-            let group = linter::RuleGroup::from_str(group_name)?;
-            if let Some(rule_name) = Rules::has_rule(group, rule_name) {
-                Ok(RuleSelector::Rule(group, rule_name))
+        let lint_selector = selector.strip_prefix("lint/");
+        if let Some(lint_selector) = lint_selector {
+            if let Some((group_name, rule_name)) = lint_selector.split_once('/') {
+                let group = linter::RuleGroup::from_str(group_name)?;
+                if let Some(rule_name) = Rules::has_rule(group, rule_name) {
+                    return Ok(RuleSelector::Rule(group.as_str(), rule_name));
+                }
             } else {
-                Err("This rule doesn't exist.")
-            }
-        } else {
-            match linter::RuleGroup::from_str(selector) {
-                Ok(group) => Ok(RuleSelector::Group(group)),
-                Err(_) => Err(
-                    "This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.",
-                ),
+                return match linter::RuleGroup::from_str(lint_selector) {
+                    Ok(group) => Ok(RuleSelector::Group(group.as_str())),
+                    Err(_) => Err(
+                        "This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.",
+                    ),
+                };
             }
         }
+
+        let assist_selector = selector.strip_prefix("assist/");
+
+        if let Some(assist_selector) = assist_selector {
+            if let Some((group_name, rule_name)) = assist_selector.split_once('/') {
+                let group = assist::RuleGroup::from_str(group_name)?;
+                if let Some(rule_name) = Actions::has_rule(group, rule_name) {
+                    return Ok(RuleSelector::Rule(group.as_str(), rule_name));
+                }
+            } else {
+                return match assist::RuleGroup::from_str(assist_selector) {
+                    Ok(group) => Ok(RuleSelector::Group(group.as_str())),
+                    Err(_) => Err(
+                        "This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.",
+                    ),
+                };
+            }
+        }
+
+        Err("The rule doesn't exist.")
     }
 }
 
 impl serde::Serialize for RuleSelector {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
         match self {
-            RuleSelector::Group(group) => serializer.serialize_str(group.as_str()),
+            RuleSelector::Group(group) => serializer.serialize_str(group),
             RuleSelector::Rule(group, rule_name) => {
-                let group_name = group.as_str();
-                serializer.serialize_str(&format!("{group_name}/{rule_name}"))
+                serializer.serialize_str(&format!("{group}/{rule_name}"))
             }
         }
     }

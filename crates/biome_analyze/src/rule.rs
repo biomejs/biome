@@ -611,7 +611,7 @@ macro_rules! declare_lint_group {
 /// This macro is used by the codegen script to declare an analyzer rule group,
 /// and implement the [RuleGroup] trait for it
 #[macro_export]
-macro_rules! declare_assists_group {
+macro_rules! declare_assist_group {
     ( $vis:vis $id:ident { name: $name:tt, rules: [ $( $( $rule:ident )::* , )* ] } ) => {
         $vis enum $id {}
 
@@ -636,7 +636,7 @@ macro_rules! declare_assists_group {
         // "lint" prefix, the name of this group, and the rule name argument
         #[allow(unused_macros)]
         macro_rules! group_category {
-            ( $rule_name:tt ) => { $crate::category_concat!( "assists", $name, $rule_name ) };
+            ( $rule_name:tt ) => { $crate::category_concat!( "assist", $name, $rule_name ) };
         }
 
         // Re-export the macro for child modules, so `declare_rule!` can access

@@ -333,8 +333,8 @@ impl WorkspaceServer {
                     &organize_imports.ignored_files,
                 )
             }
-            FeatureKind::Assists => {
-                let assists = &settings.assists;
+            FeatureKind::Assist => {
+                let assists = &settings.assist;
                 (&assists.included_files, &assists.ignored_files)
             }
             // TODO: enable once the configuration is available

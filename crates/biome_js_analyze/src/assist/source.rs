@@ -1,11 +1,11 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use biome_analyze::declare_assists_group;
+use biome_analyze::declare_assist_group;
 
 pub mod organize_imports;
 pub mod use_sorted_attributes;
 
-declare_assists_group! {
+declare_assist_group! {
     pub Source {
         name : "source" ,
         rules : [

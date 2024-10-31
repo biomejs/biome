@@ -449,7 +449,7 @@ pub(crate) fn lint(params: LintParams) -> LintResults {
                 AnalyzerVisitorBuilder::new(params.workspace.settings())
                     .with_syntax_rules()
                     .with_linter_rules(&params.only, &params.skip, params.path.as_path())
-                    .with_assists_rules(&params.only, &params.skip, params.path.as_path())
+                    .with_assist_actions(&params.only, &params.skip, params.path.as_path())
                     .finish();
 
             let filter = AnalysisFilter {
@@ -562,7 +562,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 AnalyzerVisitorBuilder::new(params.workspace.settings())
                     .with_syntax_rules()
                     .with_linter_rules(&only, &skip, params.path.as_path())
-                    .with_assists_rules(&only, &skip, params.path.as_path())
+                    .with_assist_actions(&only, &skip, params.path.as_path())
                     .finish();
 
             let filter = AnalysisFilter {
@@ -630,7 +630,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
         .with_syntax_rules()
         .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
-        .with_assists_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .with_assist_actions(&params.only, &params.skip, params.biome_path.as_path())
         .finish();
 
     let filter = AnalysisFilter {
