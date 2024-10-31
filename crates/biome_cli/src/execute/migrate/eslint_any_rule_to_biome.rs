@@ -32,7 +32,7 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .use_google_font_preconnect
                 .get_or_insert(Default::default());
-            rule.set_level(rule_severity.into());
+            rule.set_level(rule.level().max(rule_severity.into()));
         }
         "@next/no-document-import-in-page" => {
             if !options.include_nursery {
@@ -500,7 +500,7 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group
                 .no_undeclared_dependencies
                 .get_or_insert(Default::default());
-            rule.set_level(rule_severity.into());
+            rule.set_level(rule.level().max(rule_severity.into()));
         }
         "import/no-nodejs-modules" => {
             let group = rules.correctness.get_or_insert_with(Default::default);
