@@ -1,5 +1,5 @@
-use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use biome_analyze::{SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY};
+use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use tower_lsp::lsp_types::{
     ClientCapabilities, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,
     DocumentOnTypeFormattingOptions, OneOf, PositionEncodingKind, ServerCapabilities,

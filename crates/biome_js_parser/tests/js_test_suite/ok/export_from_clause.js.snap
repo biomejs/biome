@@ -1,3 +1,27 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+snapshot_kind: text
+---
+## Input
+
+```jsx
+export {
+    default as a } from "b";
+export { default as a } from "b";
+export * from "a";
+export * as c from "b";
+export * as default from "b"
+export * from "mod" with { type: "json" }
+export type * from "types";
+export type * as types from "types";
+
+```
+
+
+## AST
+
+```
 JsModule {
     bom_token: missing (optional),
     interpreter_token: missing (optional),
@@ -180,7 +204,11 @@ JsModule {
     ],
     eof_token: EOF@250..251 "" [Newline("\n")] [],
 }
+```
 
+## CST
+
+```
 0: JS_MODULE@0..251
   0: (empty)
   1: (empty)
@@ -318,3 +346,5 @@ JsModule {
         5: (empty)
         6: SEMICOLON@249..250 ";" [] []
   4: EOF@250..251 "" [Newline("\n")] []
+
+```
