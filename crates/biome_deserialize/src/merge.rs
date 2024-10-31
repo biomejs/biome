@@ -117,3 +117,4 @@ overwrite_on_merge!(std::num::NonZeroU64);
 overwrite_on_merge!(std::num::NonZeroU8);
 overwrite_on_merge!(std::num::NonZeroUsize);
 overwrite_on_merge!(String);
+overwrite_on_merge!(Box<str>);

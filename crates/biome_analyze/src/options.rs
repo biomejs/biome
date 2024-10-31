@@ -60,7 +60,7 @@ pub struct AnalyzerConfiguration {
     /// A collections of bindings that the analyzers should consider as "external".
     ///
     /// For example, lint rules should ignore them.
-    pub globals: Vec<String>,
+    pub globals: Vec<Box<str>>,
 
     /// Allows to choose a different quote when applying fixes inside the lint rules
     pub preferred_quote: PreferredQuote,
@@ -84,7 +84,7 @@ impl AnalyzerOptions {
         self.configuration
             .globals
             .iter()
-            .map(|global| global.as_str())
+            .map(AsRef::as_ref)
             .collect()
     }
 
