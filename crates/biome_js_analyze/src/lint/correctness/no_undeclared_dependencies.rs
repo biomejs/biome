@@ -2,7 +2,9 @@ use std::path::Path;
 
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_deserialize::{Deserializable, DeserializableType};
+use biome_deserialize::{
+    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
+};
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_rowan::AstNode;
@@ -106,14 +108,14 @@ impl Default for DependencyAvailability {
 
 impl Deserializable for DependencyAvailability {
     fn deserialize(
-        value: &impl biome_deserialize::DeserializableValue,
+        ctx: &mut impl DeserializationContext,
+        value: &impl DeserializableValue,
         name: &str,
-        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
     ) -> Option<Self> {
         Some(if value.visitable_type()? == DeserializableType::Bool {
-            Self::Bool(bool::deserialize(value, name, diagnostics)?)
+            Self::Bool(bool::deserialize(ctx, value, name)?)
         } else {
-            Self::Patterns(Deserializable::deserialize(value, name, diagnostics)?)
+            Self::Patterns(Deserializable::deserialize(ctx, value, name)?)
         })
     }
 }
