@@ -158,6 +158,15 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @denbezrukov
 
+- Fix [#342](https://github.com/biomejs/biome/issues/342), "expected a declaration as guaranteed by is_at_ts_declare_statement" error for declare interface:
+
+  ```ts
+  declare interface
+  ```
+
+  Contributed by @denbezrukov
+
+
 ## v1.9.4 (2024-10-17)
 
 ### Analyzer
