@@ -148,6 +148,7 @@ define_categories! {
     "lint/nursery/noDynamicNamespaceImportAccess": "https://biomejs.dev/linter/rules/no-dynamic-namespace-import-access",
     "lint/nursery/noEnum": "https://biomejs.dev/linter/rules/no-enum",
     "lint/nursery/noExportedImports": "https://biomejs.dev/linter/rules/no-exported-imports",
+    "lint/nursery/noGlobalDirnameFilename": "https://biomejs.dev/linter/rules/no-global-dirname-filename",
     "lint/nursery/noHeadElement": "https://biomejs.dev/linter/rules/no-head-element",
     "lint/nursery/noHeadImportInDocument": "https://biomejs.dev/linter/rules/no-head-import-in-document",
     "lint/nursery/noImgElement": "https://biomejs.dev/linter/rules/no-img-element",

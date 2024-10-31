@@ -2218,6 +2218,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalDirnameFilename": {
+					"description": "Succinct description of the rule.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noHeadElement": {
 					"description": "Prevent usage of \\<head> element in a Next.js project.",
 					"anyOf": [

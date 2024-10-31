@@ -1271,6 +1271,10 @@ export interface Nursery {
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noGlobalDirnameFilename?: RuleConfiguration_for_Null;
+	/**
 	 * Prevent usage of \<head> element in a Next.js project.
 	 */
 	noHeadElement?: RuleConfiguration_for_Null;
@@ -3038,6 +3042,7 @@ export type Category =
 	| "lint/nursery/noDynamicNamespaceImportAccess"
 	| "lint/nursery/noEnum"
 	| "lint/nursery/noExportedImports"
+	| "lint/nursery/noGlobalDirnameFilename"
 	| "lint/nursery/noHeadElement"
 	| "lint/nursery/noHeadImportInDocument"
 	| "lint/nursery/noImgElement"

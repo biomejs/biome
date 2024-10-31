@@ -665,6 +665,7 @@ impl JsSyntaxKind {
             "of" => OF_KW,
             "out" => OUT_KW,
             "using" => USING_KW,
+            "meta" => META,
             _ => return None,
         };
         Some(kw)
@@ -813,6 +814,7 @@ impl JsSyntaxKind {
             OUT_KW => "out",
             USING_KW => "using",
             JS_STRING_LITERAL => "string literal",
+            META => "meta",
             _ => return None,
         };
         Some(tok)

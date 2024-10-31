@@ -107,6 +107,7 @@ pub type NoFunctionAssign =
     <lint::suspicious::no_function_assign::NoFunctionAssign as biome_analyze::Rule>::Options;
 pub type NoGlobalAssign =
     <lint::suspicious::no_global_assign::NoGlobalAssign as biome_analyze::Rule>::Options;
+pub type NoGlobalDirnameFilename = < lint :: nursery :: no_global_dirname_filename :: NoGlobalDirnameFilename as biome_analyze :: Rule > :: Options ;
 pub type NoGlobalEval =
     <lint::security::no_global_eval::NoGlobalEval as biome_analyze::Rule>::Options;
 pub type NoGlobalIsFinite =
