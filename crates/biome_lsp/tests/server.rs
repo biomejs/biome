@@ -2629,3 +2629,123 @@ async fn multiple_projects() -> Result<()> {
 
     Ok(())
 }
+
+#[tokio::test]
+async fn pull_source_assist_action() -> Result<()> {
+    let factory = ServerFactory::default();
+    let mut fs = MemoryFileSystem::default();
+    let config = r#"{
+        "assist": {
+            "enabled": true,
+            "actions": {
+                "source": {
+                    "useSortedKeys": "on"
+                }
+            }
+        }
+    }"#;
+
+    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
+    let (service, client) = factory
+        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
+        .into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let unsafe_fixable = lsp::Diagnostic {
+        range: Range {
+            start: Position {
+                line: 0,
+                character: 6,
+            },
+            end: Position {
+                line: 0,
+                character: 9,
+            },
+        },
+        severity: Some(lsp::DiagnosticSeverity::ERROR),
+        code: Some(lsp::NumberOrString::String(String::from(
+            "lint/suspicious/noDoubleEquals",
+        ))),
+        code_description: None,
+        source: Some(String::from("biome")),
+        message: String::from("Use === instead of ==."),
+        related_information: None,
+        tags: None,
+        data: None,
+    };
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+
+    server
+        .open_named_document(
+            r#"{"zod": true,"lorem": "ipsum","foo": "bar"}"#,
+            url!("file.json"),
+            "json",
+        )
+        .await?;
+
+    let res: lsp::CodeActionResponse = server
+        .request(
+            "textDocument/codeAction",
+            "pull_code_actions",
+            lsp::CodeActionParams {
+                text_document: TextDocumentIdentifier {
+                    uri: url!("file.json"),
+                },
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 6,
+                    },
+                },
+                context: lsp::CodeActionContext {
+                    diagnostics: vec![unsafe_fixable.clone()],
+                    only: Some(vec![lsp::CodeActionKind::new(
+                        "source.biome.json.useSortedKeys",
+                    )]),
+                    ..Default::default()
+                },
+                work_done_progress_params: WorkDoneProgressParams {
+                    work_done_token: None,
+                },
+                partial_result_params: lsp::PartialResultParams {
+                    partial_result_token: None,
+                },
+            },
+        )
+        .await?
+        .context("codeAction returned None")?;
+
+    let expected_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
+        title: String::from("Fix all auto-fixable issues"),
+        kind: Some(lsp::CodeActionKind::new("source.fixAll.biome")),
+        diagnostics: Some(vec![]),
+        edit: Some(lsp::WorkspaceEdit {
+            changes: None,
+            document_changes: None,
+            change_annotations: None,
+        }),
+        command: None,
+        is_preferred: Some(true),
+        disabled: None,
+        data: None,
+    });
+
+    assert_eq!(res, vec![expected_action]);
+
+    server.close_document().await?;
+
+    server.shutdown().await?;
+    reader.abort();
+
+    Ok(())
+}

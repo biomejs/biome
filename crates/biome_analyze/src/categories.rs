@@ -120,7 +120,7 @@ impl ActionCategory {
                 Cow::Borrowed("source.organizeImports.biome")
             }
             ActionCategory::Source(SourceActionKind::Other(tag)) => {
-                Cow::Owned(format!("source.{tag}.biome"))
+                Cow::Owned(format!("source.biome.{tag}"))
             }
 
             ActionCategory::Other(other_action) => match other_action {

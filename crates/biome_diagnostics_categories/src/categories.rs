@@ -330,9 +330,9 @@ define_categories! {
     "lint/suspicious/useNumberToFixedDigitsArgument": "https://biomejs.dev/linter/rules/use-number-to-fixed-digits-argument",
     "lint/suspicious/useValidTypeof": "https://biomejs.dev/linter/rules/use-valid-typeof",
     // end lint rules
-    // start assists rules
-    "assists/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
-    // end assists rules
+    // start assist actions
+    "assist/source/useSortedKeys": "https://biomejs.dev/linter/actions/use-sorted-keys",
+    // end assist actions
     ; // start syntax rules
     "syntax/correctness/noTypeOnlyImportAttributes",
     "syntax/correctness/noSuperWithoutExtends",
@@ -348,7 +348,7 @@ define_categories! {
     "stdin",
     "configuration",
     "organizeImports",
-    "assists",
+    "assist",
     "migrate",
     "deserialize",
     "plugin",

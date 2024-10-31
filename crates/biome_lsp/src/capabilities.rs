@@ -70,6 +70,7 @@ pub(crate) fn server_capabilities(capabilities: &ClientCapabilities) -> ServerCa
                     CodeActionKind::from("refactor.extract.biome"),
                     CodeActionKind::from("refactor.inline.biome"),
                     CodeActionKind::from("refactor.rewrite.biome"),
+                    CodeActionKind::from("source.biome"),
                 ]),
                 ..Default::default()
             }

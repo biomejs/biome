@@ -126,7 +126,7 @@ impl FileFeaturesResult {
         (FeatureKind::Format, SupportKind::FileNotSupported),
         (FeatureKind::OrganizeImports, SupportKind::FileNotSupported),
         (FeatureKind::Search, SupportKind::FileNotSupported),
-        (FeatureKind::Assists, SupportKind::FileNotSupported),
+        (FeatureKind::Assist, SupportKind::FileNotSupported),
         (FeatureKind::Debug, SupportKind::FileNotSupported),
     ];
 
@@ -152,7 +152,7 @@ impl FileFeaturesResult {
 
         if capabilities.analyzer.code_actions.is_some() {
             self.features_supported
-                .insert(FeatureKind::Assists, SupportKind::Supported);
+                .insert(FeatureKind::Assist, SupportKind::Supported);
         }
 
         if capabilities.search.search.is_some() {
@@ -226,14 +226,14 @@ impl FileFeaturesResult {
         }
 
         // assists
-        if let Some(disabled) = settings.override_settings.assists_disabled(path) {
+        if let Some(disabled) = settings.override_settings.assist_disabled(path) {
             if disabled {
                 self.features_supported
-                    .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+                    .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
             }
-        } else if !settings.assists().enabled {
+        } else if !settings.assist().enabled {
             self.features_supported
-                .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+                .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
         }
 
         debug!(
@@ -283,8 +283,8 @@ impl FileFeaturesResult {
         self.supports_for(&FeatureKind::OrganizeImports)
     }
 
-    pub fn supports_assists(&self) -> bool {
-        self.supports_for(&FeatureKind::Assists)
+    pub fn supports_assist(&self) -> bool {
+        self.supports_for(&FeatureKind::Assist)
     }
 
     pub fn supports_search(&self) -> bool {
@@ -416,7 +416,7 @@ pub enum FeatureKind {
     Lint,
     OrganizeImports,
     Search,
-    Assists,
+    Assist,
     Debug,
 }
 
@@ -497,8 +497,8 @@ impl FeaturesBuilder {
         self
     }
 
-    pub fn with_assists(mut self) -> Self {
-        self.0.insert(FeatureKind::Assists);
+    pub fn with_assist(mut self) -> Self {
+        self.0.insert(FeatureKind::Assist);
         self
     }
 
@@ -638,6 +638,7 @@ pub struct PullActionsParams {
     pub range: Option<TextRange>,
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
+    pub additional_actions: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

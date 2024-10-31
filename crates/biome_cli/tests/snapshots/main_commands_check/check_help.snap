@@ -7,7 +7,7 @@ expression: content
 ```block
 Runs formatter, linter and import sorting to the requested files.
 
-Usage: check [--write] [--unsafe] [--assists-enabled=<true|false>] [--staged] [--changed] [--since=
+Usage: check [--write] [--unsafe] [--assist-enabled=<true|false>] [--staged] [--changed] [--since=
 REF] [PATH]...
 
 The configuration that is contained inside the file `biome.json`
@@ -82,7 +82,7 @@ The configuration that is contained inside the file `biome.json`
                               multi-line comma-separated syntactic structures. Defaults to "none".
         --json-linter-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
-        --json-assists-enabled=<true|false>  Control the linter for JSON (and its super languages)
+        --json-assist-enabled=<true|false>  Control the linter for JSON (and its super languages)
                               files.
         --css-formatter-enabled=<true|false>  Control the formatter for CSS (and its super
                               languages) files.
@@ -97,7 +97,7 @@ The configuration that is contained inside the file `biome.json`
         --css-formatter-quote-style=<double|single>  The type of quotes used in CSS code. Defaults
                               to double.
         --css-linter-enabled=<true|false>  Control the linter for CSS files.
-        --css-assists-enabled=<true|false>  Control the assists for CSS files.
+        --css-assist-enabled=<true|false>  Control the assists for CSS files.
         --graphql-formatter-enabled=<true|false>  Control the formatter for GraphQL files.
         --graphql-formatter-indent-style=<tab|space>  The indent style applied to GraphQL files.
         --graphql-formatter-indent-width=NUMBER  The size of the indentation applied to GraphQL
@@ -109,7 +109,7 @@ The configuration that is contained inside the file `biome.json`
         --graphql-formatter-quote-style=<double|single>  The type of quotes used in GraphQL code.
                               Defaults to double.
         --graphql-linter-enabled=<true|false>  Control the formatter for GraphQL files.
-        --assists-enabled=<true|false>  Whether Biome should enable assists via LSP.
+        --assist-enabled=<true|false>  Whether Biome should enable assist via LSP.
 
 Global options applied to all commands
         --colors=<off|force>  Set the formatting mode for markup: "off" prints everything as plain
@@ -155,7 +155,7 @@ Available options:
         --formatter-enabled=<true|false>  Allow to enable or disable the formatter check.
         --linter-enabled=<true|false>  Allow to enable or disable the linter check.
         --organize-imports-enabled=<true|false>  Allow to enable or disable the organize imports.
-        --assists-enabled=<true|false>  Allow to enable or disable the assists.
+        --assist-enabled=<true|false>  Allow to enable or disable the assist.
         --stdin-file-path=PATH  Use this option when you want to format code piped from `stdin`, and
                               print the output to `stdout`.
                               The file doesn't need to exist on disk, what matters is the extension

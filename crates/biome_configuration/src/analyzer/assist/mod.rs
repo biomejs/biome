@@ -1,6 +1,6 @@
 mod actions;
 
-pub use crate::analyzer::assists::actions::*;
+pub use crate::analyzer::assist::actions::*;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};
 use bpaf::Bpaf;
 use serde::{Deserialize, Serialize};
@@ -9,12 +9,12 @@ use serde::{Deserialize, Serialize};
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(deny_unknown_fields, rename_all = "camelCase"))]
-pub struct AssistsConfiguration {
-    /// Whether Biome should enable assists via LSP.
-    #[partial(bpaf(long("assists-enabled"), argument("true|false")))]
+pub struct AssistConfiguration {
+    /// Whether Biome should enable assist via LSP.
+    #[partial(bpaf(long("assist-enabled"), argument("true|false")))]
     pub enabled: bool,
 
-    /// Whether Biome should fail in CLI if the assists were not applied to the code.
+    /// Whether Biome should fail in CLI if the assist were not applied to the code.
     #[partial(bpaf(pure(Default::default()), optional, hide))]
     pub actions: Actions,
 
@@ -29,7 +29,7 @@ pub struct AssistsConfiguration {
     pub include: indexmap::IndexSet<String>,
 }
 
-impl Default for AssistsConfiguration {
+impl Default for AssistConfiguration {
     fn default() -> Self {
         Self {
             enabled: true,

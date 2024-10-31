@@ -95,13 +95,13 @@ impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
     }
 }
 
-// ======= ASSISTS ======
+// ======= ASSIST ======
 #[derive(Default)]
-struct AssistsRulesVisitor {
+struct AssistActionsVisitor {
     groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
 }
 
-impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<JsLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -119,7 +119,7 @@ impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<JsonLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -138,7 +138,7 @@ impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<CssLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -157,7 +157,7 @@ impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -178,20 +178,19 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let linter_config_root = project_root().join("crates/biome_configuration/src/analyzer/linter");
-    let assists_config_root =
-        project_root().join("crates/biome_configuration/src/analyzer/assists");
+    let assist_config_root = project_root().join("crates/biome_configuration/src/analyzer/assist");
     let push_rules_directory = project_root().join("crates/biome_configuration/src/generated");
 
     let mut lint_visitor = LintRulesVisitor::default();
-    let mut assists_visitor = AssistsRulesVisitor::default();
+    let mut assist_visitor = AssistActionsVisitor::default();
     biome_js_analyze::visit_registry(&mut lint_visitor);
-    biome_js_analyze::visit_registry(&mut assists_visitor);
+    biome_js_analyze::visit_registry(&mut assist_visitor);
     biome_json_analyze::visit_registry(&mut lint_visitor);
-    biome_json_analyze::visit_registry(&mut assists_visitor);
+    biome_json_analyze::visit_registry(&mut assist_visitor);
     biome_css_analyze::visit_registry(&mut lint_visitor);
-    biome_css_analyze::visit_registry(&mut assists_visitor);
+    biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
-    biome_graphql_analyze::visit_registry(&mut assists_visitor);
+    biome_graphql_analyze::visit_registry(&mut assist_visitor);
 
     // let LintRulesVisitor { groups } = lint_visitor;
 
@@ -203,8 +202,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         RuleCategory::Lint,
     )?;
     generate_for_groups(
-        assists_visitor.groups,
-        assists_config_root.as_path(),
+        assist_visitor.groups,
+        assist_config_root.as_path(),
         push_rules_directory.as_path(),
         &mode,
         RuleCategory::Action,

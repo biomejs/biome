@@ -49,16 +49,17 @@ pub(crate) fn code_actions(
         path: biome_path,
         features: FeaturesBuilder::new()
             .with_linter()
-            .with_assists()
+            .with_assist()
             .with_organize_imports()
             .build(),
     })?;
 
+    dbg!("here");
     if !file_features.supports_lint()
         && !file_features.supports_organize_imports()
-        && !file_features.supports_assists()
+        && !file_features.supports_assist()
     {
-        info!("Linter, assists and organize imports are disabled");
+        info!("Linter, assist and organize imports are disabled");
         return Ok(Some(Vec::new()));
     }
 
@@ -131,7 +132,6 @@ pub(crate) fn code_actions(
         }
     };
 
-    trace!("Pull actions result: {:?}", result);
     trace!("Filters: {:?}", &filters);
 
     // Generate an additional code action to apply all safe fixes on the
@@ -156,7 +156,6 @@ pub(crate) fn code_actions(
         .actions
         .into_iter()
         .filter_map(|action| {
-            trace!("Processing action: {:?}", &action);
             // Don't apply unsafe fixes when the code action is on-save quick-fixes
             if has_quick_fix && action.suggestion.applicability == Applicability::MaybeIncorrect {
                 return None;
@@ -189,8 +188,7 @@ pub(crate) fn code_actions(
                 return None;
             }
 
-            // Filter out the refactor.* actions when assists are disabled
-            if action.category.matches("source") && !file_features.supports_assists() {
+            if action.category.matches("source.biome") && !file_features.supports_assist() {
                 return None;
             }
             // Remove actions that do not match the categories requested by the

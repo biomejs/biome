@@ -313,7 +313,7 @@ impl Session {
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             features: FeaturesBuilder::new()
                 .with_linter()
-                .with_assists()
+                .with_assist()
                 .with_organize_imports()
                 .build(),
             path: biome_path.clone(),
@@ -321,7 +321,7 @@ impl Session {
 
         if !file_features.supports_lint()
             && !file_features.supports_organize_imports()
-            && !file_features.supports_assists()
+            && !file_features.supports_assist()
         {
             self.client
                 .publish_diagnostics(url, vec![], Some(doc.version))

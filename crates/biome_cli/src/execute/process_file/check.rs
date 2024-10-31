@@ -1,4 +1,4 @@
-use crate::execute::process_file::assists::assists_with_guard;
+use crate::execute::process_file::assist::assist_with_guard;
 use crate::execute::process_file::format::format_with_guard;
 use crate::execute::process_file::lint::lint_with_guard;
 use crate::execute::process_file::organize_imports::organize_imports_with_guard;
@@ -59,9 +59,9 @@ pub(crate) fn check_file<'ctx>(
                 }
             }
 
-            if file_features.supports_assists() {
-                let assists_result = assists_with_guard(ctx, &mut workspace_file);
-                match assists_result {
+            if file_features.supports_assist() {
+                let assist_result = assist_with_guard(ctx, &mut workspace_file);
+                match assist_result {
                     Ok(status) => {
                         if status.is_changed() {
                             changed = true

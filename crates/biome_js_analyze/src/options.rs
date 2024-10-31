@@ -1,6 +1,6 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::assists;
+use crate::assist;
 use crate::lint;
 
 pub type NoAccessKey = <lint::a11y::no_access_key::NoAccessKey as biome_analyze::Rule>::Options;
@@ -279,9 +279,9 @@ pub type NoWith = <lint::complexity::no_with::NoWith as biome_analyze::Rule>::Op
 pub type NoYodaExpression =
     <lint::style::no_yoda_expression::NoYodaExpression as biome_analyze::Rule>::Options;
 pub type OrganizeImports =
-    <assists::source::organize_imports::OrganizeImports as biome_analyze::Rule>::Options;
+    <assist::source::organize_imports::OrganizeImports as biome_analyze::Rule>::Options;
 pub type SortJsxProps =
-    <assists::source::sort_jsx_props::SortJsxProps as biome_analyze::Rule>::Options;
+    <assist::source::sort_jsx_props::SortJsxProps as biome_analyze::Rule>::Options;
 pub type UseAdjacentOverloadSignatures = < lint :: nursery :: use_adjacent_overload_signatures :: UseAdjacentOverloadSignatures as biome_analyze :: Rule > :: Options ;
 pub type UseAltText = <lint::a11y::use_alt_text::UseAltText as biome_analyze::Rule>::Options;
 pub type UseAnchorContent =

@@ -2,7 +2,7 @@ use crate::changed::get_changed_files;
 use crate::cli_options::CliOptions;
 use crate::commands::{CommandRunner, LoadEditorConfig};
 use crate::{CliDiagnostic, Execution};
-use biome_configuration::analyzer::assists::PartialAssistsConfiguration;
+use biome_configuration::analyzer::assist::PartialAssistConfiguration;
 use biome_configuration::{organize_imports::PartialOrganizeImports, PartialConfiguration};
 use biome_configuration::{PartialFormatterConfiguration, PartialLinterConfiguration};
 use biome_console::Console;
@@ -16,7 +16,7 @@ pub(crate) struct CiCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
-    pub(crate) assists_enabled: Option<bool>,
+    pub(crate) assist_enabled: Option<bool>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) configuration: Option<PartialConfiguration>,
     pub(crate) changed: bool,
@@ -76,12 +76,12 @@ impl CommandRunner for CiCommandPayload {
             organize_imports.enabled = self.organize_imports_enabled;
         }
 
-        let assists = fs_configuration
-            .assists
-            .get_or_insert_with(PartialAssistsConfiguration::default);
+        let assist = fs_configuration
+            .assist
+            .get_or_insert_with(PartialAssistConfiguration::default);
 
-        if self.assists_enabled.is_some() {
-            assists.enabled = self.assists_enabled;
+        if self.assist_enabled.is_some() {
+            assist.enabled = self.assist_enabled;
         }
 
         if let Some(mut configuration) = self.configuration.clone() {
