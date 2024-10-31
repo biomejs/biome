@@ -211,15 +211,14 @@ pub enum RuleAssistConfiguration<T: Default> {
 }
 impl<T: Default + Deserializable> Deserializable for RuleAssistConfiguration<T> {
     fn deserialize(
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
-        rule_name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
+        name: &str,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Str {
-            Deserializable::deserialize(value, rule_name, diagnostics).map(Self::Plain)
+            Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
-            Deserializable::deserialize(value, rule_name, diagnostics)
-                .map(|rule| Self::WithOptions(rule))
+            Deserializable::deserialize(ctx, value, name).map(|rule| Self::WithOptions(rule))
         }
     }
 }
