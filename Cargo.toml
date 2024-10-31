@@ -183,8 +183,6 @@ getrandom            = "0.2.15"
 globset              = "0.4.15"
 grit-pattern-matcher = "0.5"
 grit-util            = "0.5"
-grit-pattern-matcher = "0.5"
-grit-util            = "0.5"
 ignore               = "0.4.23"
 indexmap             = { version = "2.6.0", features = ["serde"] }
 insta                = "1.40.0"

@@ -3,7 +3,7 @@ use crate::settings::Settings;
 use crate::{DynRef, WorkspaceError};
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
-use biome_configuration::{push_to_analyzer_assists, VERSION};
+use biome_configuration::{push_to_analyzer_assist, VERSION};
 use biome_configuration::{
     push_to_analyzer_rules, BiomeDiagnostic, ConfigurationPathHint, ConfigurationPayload,
     PartialConfiguration,
@@ -354,11 +354,11 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Path) -> AnalyzerRules {
         push_to_analyzer_rules(rules, json_lint_metadata.deref(), &mut analyzer_rules);
         push_to_analyzer_rules(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
     }
-    if let Some(rules) = settings.assists.actions.as_ref() {
-        push_to_analyzer_assists(rules, js_lint_metadata.deref(), &mut analyzer_rules);
-        push_to_analyzer_assists(rules, css_lint_metadata.deref(), &mut analyzer_rules);
-        push_to_analyzer_assists(rules, json_lint_metadata.deref(), &mut analyzer_rules);
-        push_to_analyzer_assists(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
+    if let Some(rules) = settings.assist.actions.as_ref() {
+        push_to_analyzer_assist(rules, js_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, css_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, json_lint_metadata.deref(), &mut analyzer_rules);
+        push_to_analyzer_assist(rules, graphql_lint_metadata.deref(), &mut analyzer_rules);
     }
     let overrides = &settings.override_settings;
     overrides.override_analyzer_rules(path, analyzer_rules)

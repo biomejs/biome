@@ -1,4 +1,4 @@
-mod actions;
+pub mod actions;
 
 pub use crate::analyzer::assist::actions::*;
 use biome_deserialize_macros::{Deserializable, Merge, Partial};

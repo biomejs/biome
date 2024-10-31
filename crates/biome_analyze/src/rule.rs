@@ -539,7 +539,7 @@ macro_rules! declare_source_rule {
         /// This macro returns the corresponding [ActionCategory] to use inside the [RuleAction]
         #[allow(unused_macros)]
         macro_rules! rule_action_category {
-            () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(concat!($language, ".", $name) )))  };
+            () => { ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed($name)))  };
         }
     };
 }

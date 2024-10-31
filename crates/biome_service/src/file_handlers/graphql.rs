@@ -305,9 +305,9 @@ fn lint(params: LintParams) -> LintResults {
 
             let (enabled_rules, disabled_rules) =
                 AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&params.only, &params.skip, params.path.as_path())
-                    .with_assist_actions(&params.only, &params.skip, params.path.as_path())
+                    .with_only(&params.only)
+                    .with_skip(&params.skip)
+                    .with_path(params.path.as_path())
                     .finish();
             let mut diagnostics = params.parse.into_diagnostics();
 
@@ -405,6 +405,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         language,
         only,
         skip,
+        additional_rules,
     } = params;
     debug_span!("Code actions GraphQL", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
@@ -420,9 +421,10 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let mut actions = Vec::new();
             let (enabled_rules, disabled_rules) =
                 AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&only, &skip, params.path.as_path())
-                    .with_assist_actions(&only, &skip, params.path.as_path())
+                    .with_only(&only)
+                    .with_skip(&skip)
+                    .with_path(path.as_path())
+                    .with_enabled_rules(&additional_rules)
                     .finish();
 
             let filter = AnalysisFilter {
@@ -473,9 +475,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let rules = settings.as_linter_rules(params.biome_path.as_path());
 
     let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
-        .with_syntax_rules()
-        .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
-        .with_assist_actions(&params.only, &params.skip, params.biome_path.as_path())
+        .with_only(&params.only)
+        .with_skip(&params.skip)
+        .with_path(params.biome_path.as_path())
         .finish();
 
     let filter = AnalysisFilter {

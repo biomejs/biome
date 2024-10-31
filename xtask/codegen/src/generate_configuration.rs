@@ -281,7 +281,7 @@ fn generate_for_groups(
                 let mut split_code = category.name().split('/');
 
                 let _lint = split_code.next();
-                debug_assert_eq!(_lint, Some("assists"));
+                debug_assert_eq!(_lint, Some("assist"));
 
                 let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
                 let rule_name = split_code.next()?;
@@ -598,10 +598,10 @@ fn generate_for_groups(
         }
         RuleCategory::Action => {
             quote! {
-                use crate::analyzer::assists::*;
+                use crate::analyzer::assist::*;
                 use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
-                pub fn push_to_analyzer_assists(
+                pub fn push_to_analyzer_assist(
                     rules: &Actions,
                     metadata: &MetadataRegistry,
                     analyzer_rules: &mut AnalyzerRules,
@@ -628,7 +628,7 @@ fn generate_for_groups(
 
     let file_name = match kind {
         RuleCategory::Lint => &push_directory.join("linter.rs"),
-        RuleCategory::Action => &push_directory.join("assists.rs"),
+        RuleCategory::Action => &push_directory.join("assist.rs"),
         RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
     };
 

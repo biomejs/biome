@@ -41,6 +41,7 @@ schemars                 = { workspace = true, features = ["indexmap2"], optiona
 serde                    = { workspace = true, features = ["derive"] }
 serde_ini                = { workspace = true }
 serde_json               = { workspace = true, features = ["raw_value"] }
+log = "0.4.20"
 
 [features]
 schema = [

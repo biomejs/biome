@@ -38,7 +38,8 @@ use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use tracing::{debug_span, error, trace, trace_span};
+use tracing::log::debug;
+use tracing::{debug_span, error, instrument, trace};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -341,9 +342,9 @@ fn lint(params: LintParams) -> LintResults {
 
             let (enabled_rules, disabled_rules) =
                 AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&params.only, &params.skip, params.path.as_path())
-                    .with_assist_actions(&params.only, &params.skip, params.path.as_path())
+                    .with_only(&params.only)
+                    .with_skip(&params.skip)
+                    .with_path(params.path.as_path())
                     .finish();
             let mut diagnostics = params.parse.into_diagnostics();
             // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
@@ -452,57 +453,56 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         language,
         skip,
         only,
+        additional_rules,
     } = params;
 
-    debug_span!("Code actions JSON",  range =? range, path =? path).in_scope(move || {
-        let tree: JsonRoot = parse.tree();
-        trace_span!("Parsed file", tree =? tree).in_scope(move || {
-            let analyzer_options =
-                workspace.analyzer_options::<JsonLanguage>(params.path, &params.language);
-            let mut actions = Vec::new();
-            let (enabled_rules, disabled_rules) =
-                AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&only, &skip, params.path.as_path())
-                    .with_assist_actions(&only, &skip, params.path.as_path())
-                    .finish();
+    let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
+    let tree: JsonRoot = parse.tree();
+    let analyzer_options =
+        workspace.analyzer_options::<JsonLanguage>(params.path, &params.language);
+    let mut actions = Vec::new();
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_only(&only)
+        .with_skip(&skip)
+        .with_path(path.as_path())
+        .with_enabled_rules(&additional_rules)
+        .finish();
 
-            let filter = AnalysisFilter {
-                categories: RuleCategoriesBuilder::default()
-                    .with_syntax()
-                    .with_lint()
-                    .with_action()
-                    .build(),
-                enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: &disabled_rules,
-                range,
-            };
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .with_action()
+            .build(),
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range,
+    };
 
-            let Some(file_source) = language.to_json_file_source() else {
-                error!("Could not determine the file source of the file");
-                return PullActionsResult { actions: vec![] };
-            };
+    let Some(file_source) = language.to_json_file_source() else {
+        error!("Could not determine the file source of the file");
+        return PullActionsResult { actions: vec![] };
+    };
 
-            trace!("JSON runs the analyzer");
-            analyze(&tree, filter, &analyzer_options, file_source, |signal| {
-                actions.extend(signal.actions().into_code_action_iter().map(|item| {
-                    CodeAction {
-                        category: item.category.clone(),
-                        rule_name: item
-                            .rule_name
-                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                        suggestion: item.suggestion,
-                    }
-                }));
+    trace!("JSON runs the analyzer");
+    analyze(&tree, filter, &analyzer_options, file_source, |signal| {
+        actions.extend(signal.actions().into_code_action_iter().map(|item| {
+            CodeAction {
+                category: item.category.clone(),
+                rule_name: item
+                    .rule_name
+                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                suggestion: item.suggestion,
+            }
+        }));
 
-                ControlFlow::<Never>::Continue(())
-            });
+        ControlFlow::<Never>::Continue(())
+    });
 
-            PullActionsResult { actions }
-        })
-    })
+    PullActionsResult { actions }
 }
 
+#[instrument(level = "debug", skip(params))]
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: JsonRoot = params.parse.tree();
     let Some(settings) = params.workspace.settings() else {
@@ -518,9 +518,9 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let rules = settings.as_linter_rules(params.biome_path.as_path());
 
     let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
-        .with_syntax_rules()
-        .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
-        .with_assist_actions(&params.only, &params.skip, params.biome_path.as_path())
+        .with_only(&params.only)
+        .with_skip(&params.skip)
+        .with_path(params.biome_path.as_path())
         .finish();
 
     let filter = AnalysisFilter {

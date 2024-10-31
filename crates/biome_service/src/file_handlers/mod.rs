@@ -477,6 +477,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) language: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) additional_rules: Vec<RuleSelector>,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -830,18 +831,18 @@ struct LintVisitor<'a, 'b> {
     pub(crate) enabled_rules: FxHashSet<RuleFilter<'a>>,
     pub(crate) disabled_rules: FxHashSet<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
-    only: &'b [RuleSelector],
-    skip: &'b [RuleSelector],
+    only: Option<&'b [RuleSelector]>,
+    skip: Option<&'b [RuleSelector]>,
     settings: Option<&'b Settings>,
-    path: &'b Path,
+    path: Option<&'b Path>,
 }
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: &'b [RuleSelector],
-        skip: &'b [RuleSelector],
+        only: Option<&'b [RuleSelector]>,
+        skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
-        path: &'b Path,
+        path: Option<&'b Path>,
     ) -> Self {
         Self {
             enabled_rules: Default::default(),
@@ -854,11 +855,11 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     }
 
     fn finish(mut self) -> (FxHashSet<RuleFilter<'a>>, FxHashSet<RuleFilter<'a>>) {
-        let has_only_filter = !self.only.is_empty();
+        let has_only_filter = self.only.map(|only| !only.is_empty()).unwrap_or(true);
         if !has_only_filter {
             let enabled_rules = self
                 .settings
-                .and_then(|settings| settings.as_linter_rules(self.path))
+                .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")))
                 .as_ref()
                 .map(|rules| rules.as_enabled_rules())
                 .unwrap_or_default();
@@ -874,16 +875,20 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
         // - if a single rule is run.
-        for selector in self.only {
-            let filter = RuleFilter::from(selector);
-            if filter.match_rule::<R>() {
-                self.enabled_rules.insert(filter);
+        if let Some(only) = self.only {
+            for selector in only {
+                let filter = RuleFilter::from(selector);
+                if filter.match_rule::<R>() {
+                    self.enabled_rules.insert(filter);
+                }
             }
         }
-        for selector in self.skip {
-            let filter = RuleFilter::from(selector);
-            if filter.match_rule::<R>() {
-                self.disabled_rules.insert(filter);
+        if let Some(skip) = self.skip {
+            for selector in skip {
+                let filter = RuleFilter::from(selector);
+                if filter.match_rule::<R>() {
+                    self.disabled_rules.insert(filter);
+                }
             }
         }
     }
@@ -897,15 +902,19 @@ impl<'a, 'b> RegistryVisitor<JsLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsLanguage>>(&mut self) {
-        for selector in self.only {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
+        if let Some(only) = self.only {
+            for selector in only {
+                if RuleFilter::from(selector).match_group::<G>() {
+                    G::record_rules(self)
+                }
             }
         }
 
-        for selector in self.skip {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
+        if let Some(skip) = self.skip {
+            for selector in skip {
+                if RuleFilter::from(selector).match_group::<G>() {
+                    G::record_rules(self)
+                }
             }
         }
     }
@@ -925,15 +934,19 @@ impl<'a, 'b> RegistryVisitor<JsonLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = JsonLanguage>>(&mut self) {
-        for selector in self.only {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
+        if let Some(only) = self.only {
+            for selector in only {
+                if RuleFilter::from(selector).match_group::<G>() {
+                    G::record_rules(self)
+                }
             }
         }
 
-        for selector in self.skip {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
+        if let Some(skip) = self.skip {
+            for selector in skip {
+                if RuleFilter::from(selector).match_group::<G>() {
+                    G::record_rules(self)
+                }
             }
         }
     }
@@ -955,15 +968,19 @@ impl<'a, 'b> RegistryVisitor<CssLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = CssLanguage>>(&mut self) {
-        for selector in self.only {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
+        if let Some(only) = self.only {
+            for selector in only {
+                if RuleFilter::from(selector).match_group::<G>() {
+                    G::record_rules(self)
+                }
             }
         }
 
-        for selector in self.skip {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
+        if let Some(skip) = self.skip {
+            for selector in skip {
+                if RuleFilter::from(selector).match_group::<G>() {
+                    G::record_rules(self)
+                }
             }
         }
     }
@@ -985,15 +1002,19 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for LintVisitor<'a, 'b> {
     }
 
     fn record_group<G: RuleGroup<Language = GraphqlLanguage>>(&mut self) {
-        for selector in self.only {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
+        if let Some(only) = self.only {
+            for selector in only {
+                if RuleFilter::from(selector).match_group::<G>() {
+                    G::record_rules(self)
+                }
             }
         }
 
-        for selector in self.skip {
-            if RuleFilter::from(selector).match_group::<G>() {
-                G::record_rules(self)
+        if let Some(skip) = self.skip {
+            for selector in skip {
+                if RuleFilter::from(selector).match_group::<G>() {
+                    G::record_rules(self)
+                }
             }
         }
     }
@@ -1012,17 +1033,17 @@ struct AssistsVisitor<'a, 'b> {
     enabled_rules: Vec<RuleFilter<'a>>,
     disabled_rules: Vec<RuleFilter<'a>>,
     import_sorting: RuleFilter<'a>,
-    path: &'b Path,
-    only: &'b Vec<RuleSelector>,
-    skip: &'b Vec<RuleSelector>,
+    only: Option<&'b [RuleSelector]>,
+    skip: Option<&'b [RuleSelector]>,
+    path: Option<&'b Path>,
 }
 
 impl<'a, 'b> AssistsVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: &'b Vec<RuleSelector>,
-        skip: &'b Vec<RuleSelector>,
+        only: Option<&'b [RuleSelector]>,
+        skip: Option<&'b [RuleSelector]>,
         settings: Option<&'b Settings>,
-        path: &'b Path,
+        path: Option<&'b Path>,
     ) -> Self {
         Self {
             enabled_rules: vec![],
@@ -1054,16 +1075,21 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
         // Do not report unused suppression comment diagnostics if:
         // - it is a syntax-only analyzer pass, or
         // - if a single rule is run.
-        for selector in self.only {
-            let filter = RuleFilter::from(selector);
-            if filter.match_rule::<R>() {
-                self.enabled_rules.push(filter)
+        if let Some(only) = self.only {
+            for selector in only {
+                let filter = RuleFilter::from(selector);
+                if filter.match_rule::<R>() {
+                    self.enabled_rules.push(filter)
+                }
             }
         }
-        for selector in self.skip {
-            let filter = RuleFilter::from(selector);
-            if filter.match_rule::<R>() {
-                self.disabled_rules.push(filter)
+
+        if let Some(skip) = self.skip {
+            for selector in skip {
+                let filter = RuleFilter::from(selector);
+                if filter.match_rule::<R>() {
+                    self.disabled_rules.push(filter)
+                }
             }
         }
     }
@@ -1071,7 +1097,7 @@ impl<'a, 'b> AssistsVisitor<'a, 'b> {
     fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
         let enabled_rules = self
             .settings
-            .and_then(|settings| settings.as_assist_actions(self.path))
+            .and_then(|settings| settings.as_assist_actions(self.path.expect("Path to be set")))
             .as_ref()
             .map(|rules| rules.as_enabled_rules())
             .unwrap_or_default()
@@ -1145,81 +1171,79 @@ impl<'a, 'b> RegistryVisitor<GraphqlLanguage> for AssistsVisitor<'a, 'b> {
     }
 }
 
-pub(crate) struct AnalyzerVisitorBuilder<'a, 'b> {
-    syntax: Option<SyntaxVisitor<'a>>,
-    lint: Option<LintVisitor<'a, 'b>>,
-    assists: Option<AssistsVisitor<'a, 'b>>,
-    settings: Option<&'b Settings>,
+pub(crate) struct AnalyzerVisitorBuilder<'a> {
+    settings: Option<&'a Settings>,
+    only: Option<&'a [RuleSelector]>,
+    skip: Option<&'a [RuleSelector]>,
+    path: Option<&'a Path>,
+    enabled_rules: Option<&'a [RuleSelector]>,
 }
 
-impl<'a, 'b> AnalyzerVisitorBuilder<'a, 'b> {
+impl<'b> AnalyzerVisitorBuilder<'b> {
     pub(crate) fn new(settings: Option<&'b Settings>) -> Self {
         Self {
             settings,
-            syntax: None,
-            lint: None,
-            assists: None,
+            only: None,
+            skip: None,
+            path: None,
+            enabled_rules: None,
         }
     }
-
     #[must_use]
-    pub(crate) fn with_syntax_rules(mut self) -> Self {
-        self.syntax = Some(SyntaxVisitor::default());
-        self
-    }
-    #[must_use]
-    pub(crate) fn with_linter_rules(
-        mut self,
-        only: &'b [RuleSelector],
-        skip: &'b [RuleSelector],
-        path: &'b Path,
-    ) -> Self {
-        self.lint = Some(LintVisitor::new(only, skip, self.settings, path));
+    pub(crate) fn with_only(mut self, only: &'b [RuleSelector]) -> Self {
+        self.only = Some(only);
         self
     }
 
     #[must_use]
-    pub(crate) fn with_assist_actions(
-        mut self,
-        only: &'b Vec<RuleSelector>,
-        skip: &'b Vec<RuleSelector>,
-        path: &'b Path,
-    ) -> Self {
-        self.assists = Some(AssistsVisitor::new(only, skip, self.settings, path));
+    pub(crate) fn with_skip(mut self, skip: &'b [RuleSelector]) -> Self {
+        self.skip = Some(skip);
         self
     }
 
     #[must_use]
-    pub(crate) fn finish(self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+    pub(crate) fn with_path(mut self, path: &'b Path) -> Self {
+        self.path = Some(path);
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn with_enabled_rules(mut self, enabled_rules: &'b [RuleSelector]) -> Self {
+        self.enabled_rules = Some(enabled_rules);
+        self
+    }
+
+    #[must_use]
+    pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>) {
         let mut disabled_rules = vec![];
         let mut enabled_rules = vec![];
-        if let Some(mut syntax) = self.syntax {
-            biome_js_analyze::visit_registry(&mut syntax);
-            biome_css_analyze::visit_registry(&mut syntax);
-            biome_json_analyze::visit_registry(&mut syntax);
-            biome_graphql_analyze::visit_registry(&mut syntax);
-            enabled_rules.extend(syntax.enabled_rules);
-        }
+        let mut syntax = SyntaxVisitor::default();
 
-        if let Some(mut lint) = self.lint {
-            biome_js_analyze::visit_registry(&mut lint);
-            biome_css_analyze::visit_registry(&mut lint);
-            biome_json_analyze::visit_registry(&mut lint);
-            biome_graphql_analyze::visit_registry(&mut lint);
-            let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
-            enabled_rules.extend(linter_enabled_rules);
-            disabled_rules.extend(linter_disabled_rules);
-        }
+        biome_js_analyze::visit_registry(&mut syntax);
+        biome_css_analyze::visit_registry(&mut syntax);
+        biome_json_analyze::visit_registry(&mut syntax);
+        biome_graphql_analyze::visit_registry(&mut syntax);
+        enabled_rules.extend(syntax.enabled_rules);
 
-        if let Some(mut assists) = self.assists {
-            biome_js_analyze::visit_registry(&mut assists);
-            biome_css_analyze::visit_registry(&mut assists);
-            biome_json_analyze::visit_registry(&mut assists);
-            biome_graphql_analyze::visit_registry(&mut assists);
-            let (assists_enabled_rules, assists_disabled_rules) = assists.finish();
-            enabled_rules.extend(assists_enabled_rules);
-            disabled_rules.extend(assists_disabled_rules);
-        }
+        let mut lint = LintVisitor::new(self.only, self.skip, self.settings, self.path);
+
+        biome_js_analyze::visit_registry(&mut lint);
+        biome_css_analyze::visit_registry(&mut lint);
+        biome_json_analyze::visit_registry(&mut lint);
+        biome_graphql_analyze::visit_registry(&mut lint);
+        let (linter_enabled_rules, linter_disabled_rules) = lint.finish();
+        enabled_rules.extend(linter_enabled_rules);
+        disabled_rules.extend(linter_disabled_rules);
+
+        let mut assist = AssistsVisitor::new(self.only, self.skip, self.settings, self.path);
+
+        biome_js_analyze::visit_registry(&mut assist);
+        biome_css_analyze::visit_registry(&mut assist);
+        biome_json_analyze::visit_registry(&mut assist);
+        biome_graphql_analyze::visit_registry(&mut assist);
+        let (assists_enabled_rules, assists_disabled_rules) = assist.finish();
+        enabled_rules.extend(assists_enabled_rules);
+        disabled_rules.extend(assists_disabled_rules);
 
         (enabled_rules, disabled_rules)
     }

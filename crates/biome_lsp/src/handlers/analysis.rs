@@ -5,6 +5,7 @@ use anyhow::{Context, Result};
 use biome_analyze::{
     ActionCategory, RuleCategoriesBuilder, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
 };
+use biome_configuration::analyzer::RuleSelector;
 use biome_diagnostics::Applicability;
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
@@ -23,6 +24,7 @@ use std::ops::Sub;
 use tower_lsp::lsp_types::{
     self as lsp, CodeActionKind, CodeActionOrCommand, CodeActionParams, CodeActionResponse,
 };
+use tracing::field::debug;
 use tracing::{debug, info, trace};
 
 const FIX_ALL_CATEGORY: ActionCategory = ActionCategory::Source(SourceActionKind::FixAll);
@@ -54,7 +56,6 @@ pub(crate) fn code_actions(
             .build(),
     })?;
 
-    dbg!("here");
     if !file_features.supports_lint()
         && !file_features.supports_organize_imports()
         && !file_features.supports_assist()
@@ -114,13 +115,20 @@ pub(crate) fn code_actions(
         cursor_range
     };
 
-    debug!("Cursor range {:?}", &cursor_range);
     let result = match session.workspace.pull_actions(PullActionsParams {
         path: biome_path.clone(),
         range: Some(cursor_range),
         // TODO: compute skip and only based on configuration
         skip: vec![],
         only: vec![],
+        additional_rules: if file_features.supports_assist() {
+            filters
+                .iter()
+                .filter_map(|filter| RuleSelector::from_lsp_filter(*filter))
+                .collect()
+        } else {
+            vec![]
+        },
     }) {
         Ok(result) => result,
         Err(err) => {
@@ -187,7 +195,6 @@ pub(crate) fn code_actions(
             {
                 return None;
             }
-
             // Filter out suppressions if the linter isn't supported
             if (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
                 || action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY))
@@ -195,7 +202,6 @@ pub(crate) fn code_actions(
             {
                 return None;
             }
-
             // Filter out the suppressions if the client is requesting a fix all signal.
             // Fix all should apply only the safe changes.
             if has_fix_all
@@ -204,7 +210,6 @@ pub(crate) fn code_actions(
             {
                 return None;
             }
-
             if action.category.matches("source.biome") && !file_features.supports_assist() {
                 return None;
             }
@@ -212,9 +217,10 @@ pub(crate) fn code_actions(
             // language client
             let matches_filters = filters.iter().any(|filter| {
                 trace!(
-                    "Filter {:?}, category {:?}",
+                    "Filter {:?}, category {:?}, matches {}",
                     filter,
-                    action.category.to_str()
+                    action.category.to_str(),
+                    action.category.matches(filter)
                 );
                 action.category.matches(filter)
             });
@@ -251,7 +257,7 @@ pub(crate) fn code_actions(
         });
     }
 
-    debug!("Suggested actions: \n{:?}", &actions);
+    trace!("Suggested actions: \n{:?}", &actions);
 
     Ok(Some(actions))
 }

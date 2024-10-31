@@ -229,6 +229,7 @@ dependencies = [
  "bpaf",
  "indexmap",
  "insta",
+ "log",
  "oxc_resolver",
  "rustc-hash 2.0.0",
  "schemars",

@@ -638,7 +638,7 @@ pub struct PullActionsParams {
     pub range: Option<TextRange>,
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
-    pub additional_actions: Vec<RuleSelector>,
+    pub additional_rules: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1108,12 +1108,14 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         range: Option<TextRange>,
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
+        additional_rules: Vec<RuleSelector>,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
             range,
             only,
             skip,
+            additional_rules,
         })
     }
 

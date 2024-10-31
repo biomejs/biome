@@ -1,15 +1,13 @@
 //! Implementation of [DeserializableValue] for the JSON data format.
 use crate::{
     diagnostics::DeserializableType, DefaultDeserializationContext, Deserializable,
-    DeserializableValue, DeserializationContext, DeserializationVisitor, Deserialized, Text,
-    TextNumber,
+    DeserializableTypes, DeserializableValue, DeserializationContext, DeserializationVisitor,
+    Deserialized, Text, TextNumber,
 };
 use biome_diagnostics::{DiagnosticExt, Error};
 use biome_json_parser::{parse_json, JsonParserOptions};
 use biome_json_syntax::{AnyJsonValue, JsonMemberName, JsonRoot, T};
 use biome_rowan::{AstNode, AstSeparatedList, TokenText};
-
-use crate::DeserializableTypes;
 
 /// It attempts to parse and deserialize a source file in JSON. Diagnostics from the parse phase
 /// are consumed and joined with the diagnostics emitted during the deserialization.

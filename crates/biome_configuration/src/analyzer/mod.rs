@@ -359,16 +359,36 @@ pub enum RuleSelector {
 impl RuleSelector {
     /// It retrieves a [RuleSelector] from an LSP filter.
     ///
-    /// ## Warnings
+    /// ## Examples
     ///
-    /// As for today, this function retrieves filter that belong to the assist
-    pub fn from_lsp_filter(filter: &'static str) -> Option<Self> {
-        filter.strip_prefix("source.").and_then(|filter| {
-            filter
-                .split('.')
-                .last()
-                .map(|action_name| Self::Rule("source", action_name))
-        })
+    /// ```rust
+    /// use biome_configuration::analyzer::RuleSelector;
+    /// assert_eq!(
+    ///     RuleSelector::from_lsp_filter("source.biome.useSortedKeys"),
+    ///     Some(RuleSelector::Rule("source", "useSortedKeys"))
+    /// );
+    ///
+    /// assert_eq!(
+    ///     RuleSelector::from_lsp_filter("quickfix.biome.style.useConst"),
+    ///     Some(RuleSelector::Rule("style", "useConst"))
+    /// );
+    /// ```
+    pub fn from_lsp_filter(filter: &str) -> Option<Self> {
+        if let Some(_) = filter.strip_prefix("source.biome") {
+            let group = assist::RuleGroup::from_str("source").ok()?;
+            let rule_name = filter.split('.').last()?;
+            let name = Actions::has_rule(group, rule_name);
+            name.map(|action_name| RuleSelector::Rule(group.as_str(), action_name))
+        } else if let Some(filter) = filter.strip_prefix("quickfix.biome.") {
+            let mut iter = filter.split('.');
+            let group_name = iter.next()?;
+            let rule_name = iter.next()?;
+            let group = linter::RuleGroup::from_str(group_name).ok()?;
+            let name = Rules::has_rule(group, rule_name);
+            name.map(|action_name| RuleSelector::Rule(group.as_str(), action_name))
+        } else {
+            None
+        }
     }
 }
 
@@ -469,5 +489,23 @@ impl schemars::JsonSchema for RuleSelector {
     }
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
         String::json_schema(gen)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::analyzer::RuleSelector;
+
+    #[test]
+    fn lsp_filter_to_rule_selector() {
+        assert_eq!(
+            RuleSelector::from_lsp_filter("source.biome.useSortedKeys"),
+            Some(RuleSelector::Rule("source", "useSortedKeys"))
+        );
+
+        assert_eq!(
+            RuleSelector::from_lsp_filter("quickfix.biome.style.useConst"),
+            Some(RuleSelector::Rule("style", "useConst"))
+        );
     }
 }

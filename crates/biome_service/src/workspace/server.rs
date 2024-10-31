@@ -688,6 +688,7 @@ impl Workspace for WorkspaceServer {
             language,
             only: params.only,
             skip: params.skip,
+            additional_rules: params.additional_rules,
         }))
     }
 
