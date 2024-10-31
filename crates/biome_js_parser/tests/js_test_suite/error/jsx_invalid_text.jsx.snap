@@ -1,0 +1,158 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<a> test ></a>;
+<b> invalid }</b>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@0..1 "<" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@1..2 "a" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@2..3 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@3..10 " test >" [] [],
+                        },
+                    ],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@10..11 "<" [] [],
+                        slash_token: SLASH@11..12 "/" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@12..13 "a" [] [],
+                        },
+                        r_angle_token: R_ANGLE@13..14 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@14..15 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxElement {
+                    opening_element: JsxOpeningElement {
+                        l_angle_token: L_ANGLE@15..17 "<" [Newline("\n")] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@17..18 "b" [] [],
+                        },
+                        type_arguments: missing (optional),
+                        attributes: JsxAttributeList [],
+                        r_angle_token: R_ANGLE@18..19 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@19..29 " invalid }" [] [],
+                        },
+                    ],
+                    closing_element: JsxClosingElement {
+                        l_angle_token: L_ANGLE@29..30 "<" [] [],
+                        slash_token: SLASH@30..31 "/" [] [],
+                        name: JsxName {
+                            value_token: JSX_IDENT@31..32 "b" [] [],
+                        },
+                        r_angle_token: R_ANGLE@32..33 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@33..34 ";" [] [],
+        },
+    ],
+    eof_token: EOF@34..35 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..35
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..34
+    0: JS_EXPRESSION_STATEMENT@0..15
+      0: JSX_TAG_EXPRESSION@0..14
+        0: JSX_ELEMENT@0..14
+          0: JSX_OPENING_ELEMENT@0..3
+            0: L_ANGLE@0..1 "<" [] []
+            1: JSX_NAME@1..2
+              0: JSX_IDENT@1..2 "a" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@2..2
+            4: R_ANGLE@2..3 ">" [] []
+          1: JSX_CHILD_LIST@3..10
+            0: JSX_TEXT@3..10
+              0: JSX_TEXT_LITERAL@3..10 " test >" [] []
+          2: JSX_CLOSING_ELEMENT@10..14
+            0: L_ANGLE@10..11 "<" [] []
+            1: SLASH@11..12 "/" [] []
+            2: JSX_NAME@12..13
+              0: JSX_IDENT@12..13 "a" [] []
+            3: R_ANGLE@13..14 ">" [] []
+      1: SEMICOLON@14..15 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@15..34
+      0: JSX_TAG_EXPRESSION@15..33
+        0: JSX_ELEMENT@15..33
+          0: JSX_OPENING_ELEMENT@15..19
+            0: L_ANGLE@15..17 "<" [Newline("\n")] []
+            1: JSX_NAME@17..18
+              0: JSX_IDENT@17..18 "b" [] []
+            2: (empty)
+            3: JSX_ATTRIBUTE_LIST@18..18
+            4: R_ANGLE@18..19 ">" [] []
+          1: JSX_CHILD_LIST@19..29
+            0: JSX_TEXT@19..29
+              0: JSX_TEXT_LITERAL@19..29 " invalid }" [] []
+          2: JSX_CLOSING_ELEMENT@29..33
+            0: L_ANGLE@29..30 "<" [] []
+            1: SLASH@30..31 "/" [] []
+            2: JSX_NAME@31..32
+              0: JSX_IDENT@31..32 "b" [] []
+            3: R_ANGLE@32..33 ">" [] []
+      1: SEMICOLON@33..34 ";" [] []
+  4: EOF@34..35 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+jsx_invalid_text.jsx:1:10 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'>'}` or `&gt;`?
+  
+  > 1 │ <a> test ></a>;
+      │          ^
+    2 │ <b> invalid }</b>;
+    3 │ 
+  
+jsx_invalid_text.jsx:2:13 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    1 │ <a> test ></a>;
+  > 2 │ <b> invalid }</b>;
+      │             ^
+    3 │ 
+  
+```

@@ -1,0 +1,85 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```cjs
+// SCRIPT
+label1: function a() {}
+
+```
+
+
+## AST
+
+```
+JsScript {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    statements: JsStatementList [
+        JsLabeledStatement {
+            label: JsLabel {
+                value_token: IDENT@0..16 "label1" [Comments("// SCRIPT"), Newline("\n")] [],
+            },
+            colon_token: COLON@16..18 ":" [] [Whitespace(" ")],
+            body: JsFunctionDeclaration {
+                async_token: missing (optional),
+                function_token: FUNCTION_KW@18..27 "function" [] [Whitespace(" ")],
+                star_token: missing (optional),
+                id: JsIdentifierBinding {
+                    name_token: IDENT@27..28 "a" [] [],
+                },
+                type_parameters: missing (optional),
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@28..29 "(" [] [],
+                    items: JsParameterList [],
+                    r_paren_token: R_PAREN@29..31 ")" [] [Whitespace(" ")],
+                },
+                return_type_annotation: missing (optional),
+                body: JsFunctionBody {
+                    l_curly_token: L_CURLY@31..32 "{" [] [],
+                    directives: JsDirectiveList [],
+                    statements: JsStatementList [],
+                    r_curly_token: R_CURLY@32..33 "}" [] [],
+                },
+            },
+        },
+    ],
+    eof_token: EOF@33..34 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SCRIPT@0..34
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..33
+    0: JS_LABELED_STATEMENT@0..33
+      0: JS_LABEL@0..16
+        0: IDENT@0..16 "label1" [Comments("// SCRIPT"), Newline("\n")] []
+      1: COLON@16..18 ":" [] [Whitespace(" ")]
+      2: JS_FUNCTION_DECLARATION@18..33
+        0: (empty)
+        1: FUNCTION_KW@18..27 "function" [] [Whitespace(" ")]
+        2: (empty)
+        3: JS_IDENTIFIER_BINDING@27..28
+          0: IDENT@27..28 "a" [] []
+        4: (empty)
+        5: JS_PARAMETERS@28..31
+          0: L_PAREN@28..29 "(" [] []
+          1: JS_PARAMETER_LIST@29..29
+          2: R_PAREN@29..31 ")" [] [Whitespace(" ")]
+        6: (empty)
+        7: JS_FUNCTION_BODY@31..33
+          0: L_CURLY@31..32 "{" [] []
+          1: JS_DIRECTIVE_LIST@32..32
+          2: JS_STATEMENT_LIST@32..32
+          3: R_CURLY@32..33 "}" [] []
+  4: EOF@33..34 "" [Newline("\n")] []
+
+```

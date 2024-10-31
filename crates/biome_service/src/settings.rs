@@ -584,6 +584,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
         language_setting.parser.parse_class_parameter_decorators =
             javascript.parser.unsafe_parameter_decorators_enabled;
+        language_setting.parser.grit_metavariables = javascript.parser.grit_metavariables;
 
         language_setting.globals = Some(javascript.globals);
         language_setting.environment = javascript.jsx_runtime.into();

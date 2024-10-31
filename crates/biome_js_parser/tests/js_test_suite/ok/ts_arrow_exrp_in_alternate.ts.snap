@@ -1,0 +1,98 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+a ? (b) : a => {};
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsConditionalExpression {
+                test: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@0..2 "a" [] [Whitespace(" ")],
+                    },
+                },
+                question_mark_token: QUESTION@2..4 "?" [] [Whitespace(" ")],
+                consequent: JsParenthesizedExpression {
+                    l_paren_token: L_PAREN@4..5 "(" [] [],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@5..6 "b" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@6..8 ")" [] [Whitespace(" ")],
+                },
+                colon_token: COLON@8..10 ":" [] [Whitespace(" ")],
+                alternate: JsArrowFunctionExpression {
+                    async_token: missing (optional),
+                    type_parameters: missing (optional),
+                    parameters: JsIdentifierBinding {
+                        name_token: IDENT@10..12 "a" [] [Whitespace(" ")],
+                    },
+                    return_type_annotation: missing (optional),
+                    fat_arrow_token: FAT_ARROW@12..15 "=>" [] [Whitespace(" ")],
+                    body: JsFunctionBody {
+                        l_curly_token: L_CURLY@15..16 "{" [] [],
+                        directives: JsDirectiveList [],
+                        statements: JsStatementList [],
+                        r_curly_token: R_CURLY@16..17 "}" [] [],
+                    },
+                },
+            },
+            semicolon_token: SEMICOLON@17..18 ";" [] [],
+        },
+    ],
+    eof_token: EOF@18..19 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..19
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..18
+    0: JS_EXPRESSION_STATEMENT@0..18
+      0: JS_CONDITIONAL_EXPRESSION@0..17
+        0: JS_IDENTIFIER_EXPRESSION@0..2
+          0: JS_REFERENCE_IDENTIFIER@0..2
+            0: IDENT@0..2 "a" [] [Whitespace(" ")]
+        1: QUESTION@2..4 "?" [] [Whitespace(" ")]
+        2: JS_PARENTHESIZED_EXPRESSION@4..8
+          0: L_PAREN@4..5 "(" [] []
+          1: JS_IDENTIFIER_EXPRESSION@5..6
+            0: JS_REFERENCE_IDENTIFIER@5..6
+              0: IDENT@5..6 "b" [] []
+          2: R_PAREN@6..8 ")" [] [Whitespace(" ")]
+        3: COLON@8..10 ":" [] [Whitespace(" ")]
+        4: JS_ARROW_FUNCTION_EXPRESSION@10..17
+          0: (empty)
+          1: (empty)
+          2: JS_IDENTIFIER_BINDING@10..12
+            0: IDENT@10..12 "a" [] [Whitespace(" ")]
+          3: (empty)
+          4: FAT_ARROW@12..15 "=>" [] [Whitespace(" ")]
+          5: JS_FUNCTION_BODY@15..17
+            0: L_CURLY@15..16 "{" [] []
+            1: JS_DIRECTIVE_LIST@16..16
+            2: JS_STATEMENT_LIST@16..16
+            3: R_CURLY@16..17 "}" [] []
+      1: SEMICOLON@17..18 ";" [] []
+  4: EOF@18..19 "" [Newline("\n")] []
+
+```

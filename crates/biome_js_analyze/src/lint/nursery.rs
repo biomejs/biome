@@ -34,6 +34,7 @@ pub mod use_consistent_curly_braces;
 pub mod use_consistent_member_accessibility;
 pub mod use_explicit_type;
 pub mod use_google_font_display;
+pub mod use_google_font_preconnect;
 pub mod use_guard_for_in;
 pub mod use_import_restrictions;
 pub mod use_sorted_classes;
@@ -77,6 +78,7 @@ declare_lint_group! {
             self :: use_consistent_member_accessibility :: UseConsistentMemberAccessibility ,
             self :: use_explicit_type :: UseExplicitType ,
             self :: use_google_font_display :: UseGoogleFontDisplay ,
+            self :: use_google_font_preconnect :: UseGoogleFontPreconnect ,
             self :: use_guard_for_in :: UseGuardForIn ,
             self :: use_import_restrictions :: UseImportRestrictions ,
             self :: use_sorted_classes :: UseSortedClasses ,

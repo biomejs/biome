@@ -1,4 +1,4 @@
-use crate::converters::{negotiated_encoding, PositionEncoding, WideEncoding};
+use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use biome_analyze::{SUPPRESSION_INLINE_ACTION_CATEGORY, SUPPRESSION_TOP_LEVEL_ACTION_CATEGORY};
 use tower_lsp::lsp_types::{
     ClientCapabilities, CodeActionKind, CodeActionOptions, CodeActionProviderCapability,

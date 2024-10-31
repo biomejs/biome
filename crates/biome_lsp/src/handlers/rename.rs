@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use crate::converters::from_proto;
 use crate::diagnostics::LspError;
 use crate::{session::Session, utils};
 use anyhow::{Context, Result};
+use biome_lsp_converters::from_proto;
 use tower_lsp::lsp_types::{RenameParams, WorkspaceEdit};
 use tracing::trace;
 

@@ -14,6 +14,18 @@ use std::collections::BTreeSet;
 
 declare_source_rule! {
     /// Sorts the keys of a JSON object in natural order
+    ///
+    /// ## Examples
+    ///
+    /// ```json,expect_diff
+    /// {
+    ///     "vase": "fancy",
+    ///     "nested": {
+    ///         "omega": "bar",
+    ///         "alpha": "foo"
+    ///     }
+    /// }
+    /// ```
     pub UseSortedKeys {
         version: "1.9.0",
         name: "useSortedKeys",

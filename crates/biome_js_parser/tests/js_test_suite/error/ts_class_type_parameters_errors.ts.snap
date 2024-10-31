@@ -1,0 +1,88 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class BuildError<> {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..16 "BuildError" [] [],
+            },
+            type_parameters: TsTypeParameters {
+                l_angle_token: L_ANGLE@16..17 "<" [] [],
+                items: TsTypeParameterList [],
+                r_angle_token: R_ANGLE@17..19 ">" [] [Whitespace(" ")],
+            },
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@19..20 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@20..21 "}" [] [],
+        },
+    ],
+    eof_token: EOF@21..22 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..22
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..21
+    0: JS_CLASS_DECLARATION@0..21
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..16
+        0: IDENT@6..16 "BuildError" [] []
+      4: TS_TYPE_PARAMETERS@16..19
+        0: L_ANGLE@16..17 "<" [] []
+        1: TS_TYPE_PARAMETER_LIST@17..17
+        2: R_ANGLE@17..19 ">" [] [Whitespace(" ")]
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@19..20 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@20..20
+      9: R_CURLY@20..21 "}" [] []
+  4: EOF@21..22 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_class_type_parameters_errors.ts:1:18 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+  > 1 │ class BuildError<> {}
+      │                  ^
+    2 │ 
+  
+  i Expected a type parameter here.
+  
+  > 1 │ class BuildError<> {}
+      │                  ^
+    2 │ 
+  
+```

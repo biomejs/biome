@@ -541,6 +541,10 @@ export interface PartialJavascriptOrganizeImports {}
  */
 export interface PartialJavascriptParser {
 	/**
+	 * Enables parsing of Grit metavariables. Defaults to `false`.
+	 */
+	gritMetavariables?: boolean;
+	/**
 	* It enables the experimental and unsafe parsing of parameter decorators
 
 These decorators belong to an old proposal, and they are subject to change. 
@@ -667,13 +671,17 @@ export type VcsClientKind = "git";
  */
 export interface Source {
 	/**
-	 * Enforce props sorting in JSX elements.
+	 * Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.
 	 */
-	sortJsxProps?: RuleAssistConfiguration;
+	organizeImports?: RuleAssistConfiguration_for_Options;
+	/**
+	 * Enforce attribute sorting in JSX elements.
+	 */
+	useSortedAttributes?: RuleAssistConfiguration_for_Null;
 	/**
 	 * Sorts the keys of a JSON object in natural order
 	 */
-	useSortedKeys?: RuleAssistConfiguration;
+	useSortedKeys?: RuleAssistConfiguration_for_Null;
 }
 export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
@@ -1089,7 +1097,7 @@ export interface Correctness {
 	/**
 	 * Disallow the use of dependencies that aren't specified in the package.json.
 	 */
-	noUndeclaredDependencies?: RuleConfiguration_for_Null;
+	noUndeclaredDependencies?: RuleConfiguration_for_NoUndeclaredDependenciesOptions;
 	/**
 	 * Prevents the usage of variables that haven't been declared inside the document.
 	 */
@@ -1380,6 +1388,10 @@ export interface Nursery {
 	 */
 	useGoogleFontDisplay?: RuleConfiguration_for_Null;
 	/**
+	 * Ensure the preconnect attribute is used when using Google Fonts.
+	 */
+	useGoogleFontPreconnect?: RuleFixConfiguration_for_Null;
+	/**
 	 * Require for-in loops to include an if statement.
 	 */
 	useGuardForIn?: RuleConfiguration_for_Null;
@@ -1387,6 +1399,10 @@ export interface Nursery {
 	 * Disallows package private imports.
 	 */
 	useImportRestrictions?: RuleConfiguration_for_Null;
+	/**
+	 * Enforce specifying the name of GraphQL operations.
+	 */
+	useNamedOperation?: RuleFixConfiguration_for_Null;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -2003,7 +2019,12 @@ export interface OverrideOrganizeImportsConfiguration {
 	 */
 	enabled?: boolean;
 }
-export type RuleAssistConfiguration = "on" | "off";
+export type RuleAssistConfiguration_for_Options =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOptions_for_Options;
+export type RuleAssistConfiguration_for_Null =
+	| RuleAssistPlainConfiguration
+	| RuleAssistWithOptions_for_Null;
 export type RuleFixConfiguration_for_Null =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_Null;
@@ -2022,6 +2043,9 @@ export type RuleFixConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
+export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoUndeclaredDependenciesOptions;
 export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
@@ -2073,6 +2097,27 @@ export type RuleFixConfiguration_for_NoConsoleOptions =
 export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
+export type RuleAssistPlainConfiguration = "on" | "off";
+export interface RuleAssistWithOptions_for_Options {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RuleAssistPlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: Options;
+}
+export interface RuleAssistWithOptions_for_Null {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RuleAssistPlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: null;
+}
 export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
 export interface RuleWithFixOptions_for_Null {
 	/**
@@ -2145,6 +2190,16 @@ export interface RuleWithOptions_for_ComplexityOptions {
 	 * Rule's options
 	 */
 	options: ComplexityOptions;
+}
+export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoUndeclaredDependenciesOptions;
 }
 export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
 	/**
@@ -2348,6 +2403,10 @@ export interface RuleWithFixOptions_for_NoDoubleEqualsOptions {
 	 */
 	options: NoDoubleEqualsOptions;
 }
+export interface Options {
+	importGroups?: ImportGroup[];
+	legacy?: boolean;
+}
 /**
  * Used to identify the kind of code action emitted by a rule
  */
@@ -2384,6 +2443,23 @@ export interface ComplexityOptions {
 	 * The maximum complexity score that we allow. Anything higher is considered excessive.
 	 */
 	maxAllowedComplexity?: number;
+}
+/**
+ * Rule's options
+ */
+export interface NoUndeclaredDependenciesOptions {
+	/**
+	 * If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.
+	 */
+	devDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
+	 */
+	optionalDependencies?: DependencyAvailability;
+	/**
+	 * If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
+	 */
+	peerDependencies?: DependencyAvailability;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`
@@ -2536,6 +2612,8 @@ If `false`, no such exception will be made.
 	 */
 	ignoreNull: boolean;
 }
+export type ImportGroup = PredefinedImportGroup | Regex;
+export type DependencyAvailability = boolean | string[];
 export interface Hook {
 	/**
 	* The "position" of the closure function, starting from zero.
@@ -2588,6 +2666,11 @@ export type Format =
 	| "CONSTANT_CASE"
 	| "PascalCase"
 	| "snake_case";
+export type PredefinedImportGroup =
+	| ":blank-line:"
+	| ":bun:"
+	| ":node:"
+	| ":types:";
 export type StableHookResult = boolean | number[];
 /**
  * Supported cases for file names.
@@ -2989,9 +3072,11 @@ export type Category =
 	| "lint/nursery/useExplicitFunctionReturnType"
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useGoogleFontDisplay"
+	| "lint/nursery/useGoogleFontPreconnect"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"
+	| "lint/nursery/useNamedOperation"
 	| "lint/nursery/useSortedClasses"
 	| "lint/nursery/useStrictMode"
 	| "lint/nursery/useTrimStartEnd"

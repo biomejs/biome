@@ -24,6 +24,16 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@next/google-font-preconnect" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_google_font_preconnect
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@next/no-document-import-in-page" => {
             if !options.include_nursery {
                 return false;
@@ -483,6 +493,13 @@ pub(crate) fn migrate_eslint_any_rule(
         "import/no-default-export" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_default_export.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "import/no-extraneous-dependencies" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group
+                .no_undeclared_dependencies
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "import/no-nodejs-modules" => {

@@ -1,0 +1,437 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+// SCRIPT
+function f() {
+    let a = <div>a</div>; // JSX
+    let b = <string>b; // type assertion
+    let c = <string>b<a>d; // type assertion
+    let d = <div>a</div>/; // ambiguous: JSX or "type assertion a less than regex /div>/". Probably JSX.
+    let d = <string>a</string>/;
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..19 "function" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@19..20 "f" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@20..21 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@21..23 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@23..24 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsVariableStatement {
+                        declaration: JsVariableDeclaration {
+                            await_token: missing (optional),
+                            kind: LET_KW@24..33 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            declarators: JsVariableDeclaratorList [
+                                JsVariableDeclarator {
+                                    id: JsIdentifierBinding {
+                                        name_token: IDENT@33..35 "a" [] [Whitespace(" ")],
+                                    },
+                                    variable_annotation: missing (optional),
+                                    initializer: JsInitializerClause {
+                                        eq_token: EQ@35..37 "=" [] [Whitespace(" ")],
+                                        expression: JsxTagExpression {
+                                            tag: JsxElement {
+                                                opening_element: JsxOpeningElement {
+                                                    l_angle_token: L_ANGLE@37..38 "<" [] [],
+                                                    name: JsxName {
+                                                        value_token: JSX_IDENT@38..41 "div" [] [],
+                                                    },
+                                                    type_arguments: missing (optional),
+                                                    attributes: JsxAttributeList [],
+                                                    r_angle_token: R_ANGLE@41..42 ">" [] [],
+                                                },
+                                                children: JsxChildList [
+                                                    JsxText {
+                                                        value_token: JSX_TEXT_LITERAL@42..43 "a" [] [],
+                                                    },
+                                                ],
+                                                closing_element: JsxClosingElement {
+                                                    l_angle_token: L_ANGLE@43..44 "<" [] [],
+                                                    slash_token: SLASH@44..45 "/" [] [],
+                                                    name: JsxName {
+                                                        value_token: JSX_IDENT@45..48 "div" [] [],
+                                                    },
+                                                    r_angle_token: R_ANGLE@48..49 ">" [] [],
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        semicolon_token: SEMICOLON@49..57 ";" [] [Whitespace(" "), Comments("// JSX")],
+                    },
+                    JsVariableStatement {
+                        declaration: JsVariableDeclaration {
+                            await_token: missing (optional),
+                            kind: LET_KW@57..66 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            declarators: JsVariableDeclaratorList [
+                                JsVariableDeclarator {
+                                    id: JsIdentifierBinding {
+                                        name_token: IDENT@66..68 "b" [] [Whitespace(" ")],
+                                    },
+                                    variable_annotation: missing (optional),
+                                    initializer: JsInitializerClause {
+                                        eq_token: EQ@68..70 "=" [] [Whitespace(" ")],
+                                        expression: JsxTagExpression {
+                                            tag: JsxElement {
+                                                opening_element: JsxOpeningElement {
+                                                    l_angle_token: L_ANGLE@70..71 "<" [] [],
+                                                    name: JsxName {
+                                                        value_token: JSX_IDENT@71..77 "string" [] [],
+                                                    },
+                                                    type_arguments: missing (optional),
+                                                    attributes: JsxAttributeList [],
+                                                    r_angle_token: R_ANGLE@77..78 ">" [] [],
+                                                },
+                                                children: JsxChildList [
+                                                    JsxText {
+                                                        value_token: JSX_TEXT_LITERAL@78..111 "b; // type assertion\n    let c = " [] [],
+                                                    },
+                                                    JsxElement {
+                                                        opening_element: JsxOpeningElement {
+                                                            l_angle_token: L_ANGLE@111..112 "<" [] [],
+                                                            name: JsxName {
+                                                                value_token: JSX_IDENT@112..118 "string" [] [],
+                                                            },
+                                                            type_arguments: missing (optional),
+                                                            attributes: JsxAttributeList [],
+                                                            r_angle_token: R_ANGLE@118..119 ">" [] [],
+                                                        },
+                                                        children: JsxChildList [
+                                                            JsxText {
+                                                                value_token: JSX_TEXT_LITERAL@119..120 "b" [] [],
+                                                            },
+                                                            JsxElement {
+                                                                opening_element: JsxOpeningElement {
+                                                                    l_angle_token: L_ANGLE@120..121 "<" [] [],
+                                                                    name: JsxName {
+                                                                        value_token: JSX_IDENT@121..122 "a" [] [],
+                                                                    },
+                                                                    type_arguments: missing (optional),
+                                                                    attributes: JsxAttributeList [],
+                                                                    r_angle_token: R_ANGLE@122..123 ">" [] [],
+                                                                },
+                                                                children: JsxChildList [
+                                                                    JsxText {
+                                                                        value_token: JSX_TEXT_LITERAL@123..156 "d; // type assertion\n    let d = " [] [],
+                                                                    },
+                                                                    JsxElement {
+                                                                        opening_element: JsxOpeningElement {
+                                                                            l_angle_token: L_ANGLE@156..157 "<" [] [],
+                                                                            name: JsxName {
+                                                                                value_token: JSX_IDENT@157..160 "div" [] [],
+                                                                            },
+                                                                            type_arguments: missing (optional),
+                                                                            attributes: JsxAttributeList [],
+                                                                            r_angle_token: R_ANGLE@160..161 ">" [] [],
+                                                                        },
+                                                                        children: JsxChildList [
+                                                                            JsxText {
+                                                                                value_token: JSX_TEXT_LITERAL@161..162 "a" [] [],
+                                                                            },
+                                                                        ],
+                                                                        closing_element: JsxClosingElement {
+                                                                            l_angle_token: L_ANGLE@162..163 "<" [] [],
+                                                                            slash_token: SLASH@163..164 "/" [] [],
+                                                                            name: JsxName {
+                                                                                value_token: JSX_IDENT@164..167 "div" [] [],
+                                                                            },
+                                                                            r_angle_token: R_ANGLE@167..168 ">" [] [],
+                                                                        },
+                                                                    },
+                                                                    JsxText {
+                                                                        value_token: JSX_TEXT_LITERAL@168..261 "/; // ambiguous: JSX or \"type assertion a less than regex /div>/\". Probably JSX.\n    let d = " [] [],
+                                                                    },
+                                                                    JsxElement {
+                                                                        opening_element: JsxOpeningElement {
+                                                                            l_angle_token: L_ANGLE@261..262 "<" [] [],
+                                                                            name: JsxName {
+                                                                                value_token: JSX_IDENT@262..268 "string" [] [],
+                                                                            },
+                                                                            type_arguments: missing (optional),
+                                                                            attributes: JsxAttributeList [],
+                                                                            r_angle_token: R_ANGLE@268..269 ">" [] [],
+                                                                        },
+                                                                        children: JsxChildList [
+                                                                            JsxText {
+                                                                                value_token: JSX_TEXT_LITERAL@269..270 "a" [] [],
+                                                                            },
+                                                                        ],
+                                                                        closing_element: JsxClosingElement {
+                                                                            l_angle_token: L_ANGLE@270..271 "<" [] [],
+                                                                            slash_token: SLASH@271..272 "/" [] [],
+                                                                            name: JsxName {
+                                                                                value_token: JSX_IDENT@272..278 "string" [] [],
+                                                                            },
+                                                                            r_angle_token: R_ANGLE@278..279 ">" [] [],
+                                                                        },
+                                                                    },
+                                                                    JsxText {
+                                                                        value_token: JSX_TEXT_LITERAL@279..284 "/;\n}\n" [] [],
+                                                                    },
+                                                                ],
+                                                                closing_element: JsxClosingElement {
+                                                                    l_angle_token: missing (required),
+                                                                    slash_token: missing (required),
+                                                                    name: missing (required),
+                                                                    r_angle_token: missing (required),
+                                                                },
+                                                            },
+                                                        ],
+                                                        closing_element: JsxClosingElement {
+                                                            l_angle_token: missing (required),
+                                                            slash_token: missing (required),
+                                                            name: missing (required),
+                                                            r_angle_token: missing (required),
+                                                        },
+                                                    },
+                                                ],
+                                                closing_element: JsxClosingElement {
+                                                    l_angle_token: missing (required),
+                                                    slash_token: missing (required),
+                                                    name: missing (required),
+                                                    r_angle_token: missing (required),
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                        semicolon_token: missing (optional),
+                    },
+                ],
+                r_curly_token: missing (required),
+            },
+        },
+    ],
+    eof_token: EOF@284..284 "" [] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..284
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..284
+    0: JS_FUNCTION_DECLARATION@0..284
+      0: (empty)
+      1: FUNCTION_KW@0..19 "function" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@19..20
+        0: IDENT@19..20 "f" [] []
+      4: (empty)
+      5: JS_PARAMETERS@20..23
+        0: L_PAREN@20..21 "(" [] []
+        1: JS_PARAMETER_LIST@21..21
+        2: R_PAREN@21..23 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@23..284
+        0: L_CURLY@23..24 "{" [] []
+        1: JS_DIRECTIVE_LIST@24..24
+        2: JS_STATEMENT_LIST@24..284
+          0: JS_VARIABLE_STATEMENT@24..57
+            0: JS_VARIABLE_DECLARATION@24..49
+              0: (empty)
+              1: LET_KW@24..33 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              2: JS_VARIABLE_DECLARATOR_LIST@33..49
+                0: JS_VARIABLE_DECLARATOR@33..49
+                  0: JS_IDENTIFIER_BINDING@33..35
+                    0: IDENT@33..35 "a" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: JS_INITIALIZER_CLAUSE@35..49
+                    0: EQ@35..37 "=" [] [Whitespace(" ")]
+                    1: JSX_TAG_EXPRESSION@37..49
+                      0: JSX_ELEMENT@37..49
+                        0: JSX_OPENING_ELEMENT@37..42
+                          0: L_ANGLE@37..38 "<" [] []
+                          1: JSX_NAME@38..41
+                            0: JSX_IDENT@38..41 "div" [] []
+                          2: (empty)
+                          3: JSX_ATTRIBUTE_LIST@41..41
+                          4: R_ANGLE@41..42 ">" [] []
+                        1: JSX_CHILD_LIST@42..43
+                          0: JSX_TEXT@42..43
+                            0: JSX_TEXT_LITERAL@42..43 "a" [] []
+                        2: JSX_CLOSING_ELEMENT@43..49
+                          0: L_ANGLE@43..44 "<" [] []
+                          1: SLASH@44..45 "/" [] []
+                          2: JSX_NAME@45..48
+                            0: JSX_IDENT@45..48 "div" [] []
+                          3: R_ANGLE@48..49 ">" [] []
+            1: SEMICOLON@49..57 ";" [] [Whitespace(" "), Comments("// JSX")]
+          1: JS_VARIABLE_STATEMENT@57..284
+            0: JS_VARIABLE_DECLARATION@57..284
+              0: (empty)
+              1: LET_KW@57..66 "let" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+              2: JS_VARIABLE_DECLARATOR_LIST@66..284
+                0: JS_VARIABLE_DECLARATOR@66..284
+                  0: JS_IDENTIFIER_BINDING@66..68
+                    0: IDENT@66..68 "b" [] [Whitespace(" ")]
+                  1: (empty)
+                  2: JS_INITIALIZER_CLAUSE@68..284
+                    0: EQ@68..70 "=" [] [Whitespace(" ")]
+                    1: JSX_TAG_EXPRESSION@70..284
+                      0: JSX_ELEMENT@70..284
+                        0: JSX_OPENING_ELEMENT@70..78
+                          0: L_ANGLE@70..71 "<" [] []
+                          1: JSX_NAME@71..77
+                            0: JSX_IDENT@71..77 "string" [] []
+                          2: (empty)
+                          3: JSX_ATTRIBUTE_LIST@77..77
+                          4: R_ANGLE@77..78 ">" [] []
+                        1: JSX_CHILD_LIST@78..284
+                          0: JSX_TEXT@78..111
+                            0: JSX_TEXT_LITERAL@78..111 "b; // type assertion\n    let c = " [] []
+                          1: JSX_ELEMENT@111..284
+                            0: JSX_OPENING_ELEMENT@111..119
+                              0: L_ANGLE@111..112 "<" [] []
+                              1: JSX_NAME@112..118
+                                0: JSX_IDENT@112..118 "string" [] []
+                              2: (empty)
+                              3: JSX_ATTRIBUTE_LIST@118..118
+                              4: R_ANGLE@118..119 ">" [] []
+                            1: JSX_CHILD_LIST@119..284
+                              0: JSX_TEXT@119..120
+                                0: JSX_TEXT_LITERAL@119..120 "b" [] []
+                              1: JSX_ELEMENT@120..284
+                                0: JSX_OPENING_ELEMENT@120..123
+                                  0: L_ANGLE@120..121 "<" [] []
+                                  1: JSX_NAME@121..122
+                                    0: JSX_IDENT@121..122 "a" [] []
+                                  2: (empty)
+                                  3: JSX_ATTRIBUTE_LIST@122..122
+                                  4: R_ANGLE@122..123 ">" [] []
+                                1: JSX_CHILD_LIST@123..284
+                                  0: JSX_TEXT@123..156
+                                    0: JSX_TEXT_LITERAL@123..156 "d; // type assertion\n    let d = " [] []
+                                  1: JSX_ELEMENT@156..168
+                                    0: JSX_OPENING_ELEMENT@156..161
+                                      0: L_ANGLE@156..157 "<" [] []
+                                      1: JSX_NAME@157..160
+                                        0: JSX_IDENT@157..160 "div" [] []
+                                      2: (empty)
+                                      3: JSX_ATTRIBUTE_LIST@160..160
+                                      4: R_ANGLE@160..161 ">" [] []
+                                    1: JSX_CHILD_LIST@161..162
+                                      0: JSX_TEXT@161..162
+                                        0: JSX_TEXT_LITERAL@161..162 "a" [] []
+                                    2: JSX_CLOSING_ELEMENT@162..168
+                                      0: L_ANGLE@162..163 "<" [] []
+                                      1: SLASH@163..164 "/" [] []
+                                      2: JSX_NAME@164..167
+                                        0: JSX_IDENT@164..167 "div" [] []
+                                      3: R_ANGLE@167..168 ">" [] []
+                                  2: JSX_TEXT@168..261
+                                    0: JSX_TEXT_LITERAL@168..261 "/; // ambiguous: JSX or \"type assertion a less than regex /div>/\". Probably JSX.\n    let d = " [] []
+                                  3: JSX_ELEMENT@261..279
+                                    0: JSX_OPENING_ELEMENT@261..269
+                                      0: L_ANGLE@261..262 "<" [] []
+                                      1: JSX_NAME@262..268
+                                        0: JSX_IDENT@262..268 "string" [] []
+                                      2: (empty)
+                                      3: JSX_ATTRIBUTE_LIST@268..268
+                                      4: R_ANGLE@268..269 ">" [] []
+                                    1: JSX_CHILD_LIST@269..270
+                                      0: JSX_TEXT@269..270
+                                        0: JSX_TEXT_LITERAL@269..270 "a" [] []
+                                    2: JSX_CLOSING_ELEMENT@270..279
+                                      0: L_ANGLE@270..271 "<" [] []
+                                      1: SLASH@271..272 "/" [] []
+                                      2: JSX_NAME@272..278
+                                        0: JSX_IDENT@272..278 "string" [] []
+                                      3: R_ANGLE@278..279 ">" [] []
+                                  4: JSX_TEXT@279..284
+                                    0: JSX_TEXT_LITERAL@279..284 "/;\n}\n" [] []
+                                2: JSX_CLOSING_ELEMENT@284..284
+                                  0: (empty)
+                                  1: (empty)
+                                  2: (empty)
+                                  3: (empty)
+                            2: JSX_CLOSING_ELEMENT@284..284
+                              0: (empty)
+                              1: (empty)
+                              2: (empty)
+                              3: (empty)
+                        2: JSX_CLOSING_ELEMENT@284..284
+                          0: (empty)
+                          1: (empty)
+                          2: (empty)
+                          3: (empty)
+            1: (empty)
+        3: (empty)
+  4: EOF@284..284 "" [] []
+
+```
+
+## Diagnostics
+
+```
+jsx_or_type_assertion.js:6:87 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'>'}` or `&gt;`?
+  
+    4 │     let b = <string>b; // type assertion
+    5 │     let c = <string>b<a>d; // type assertion
+  > 6 │     let d = <div>a</div>/; // ambiguous: JSX or "type assertion a less than regex /div>/". Probably JSX.
+      │                                                                                       ^
+    7 │     let d = <string>a</string>/;
+    8 │ }
+  
+jsx_or_type_assertion.js:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+  
+    6 │     let d = <div>a</div>/; // ambiguous: JSX or "type assertion a less than regex /div>/". Probably JSX.
+    7 │     let d = <string>a</string>/;
+  > 8 │ }
+      │ ^
+    9 │ 
+  
+jsx_or_type_assertion.js:9:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `<` but instead the file ends
+  
+    7 │     let d = <string>a</string>/;
+    8 │ }
+  > 9 │ 
+      │ 
+  
+  i the file ends here
+  
+    7 │     let d = <string>a</string>/;
+    8 │ }
+  > 9 │ 
+      │ 
+  
+```

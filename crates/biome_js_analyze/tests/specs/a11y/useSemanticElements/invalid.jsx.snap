@@ -585,7 +585,7 @@ invalid.jsx:28:10 lint/a11y/useSemanticElements ━━━━━━━━━━�
 invalid.jsx:29:10 lint/a11y/useSemanticElements ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! The elements with the following roles can be changed to the following elements:
-    <input type="search">
+    <search>
   
   
     27 │     <div role="rowgroup" ></div>

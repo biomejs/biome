@@ -1,0 +1,127 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```cjs
+// SCRIPT
+async function test() {}
+await test();
+
+```
+
+
+## AST
+
+```
+JsScript {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    statements: JsStatementList [
+        JsFunctionDeclaration {
+            async_token: ASYNC_KW@0..16 "async" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")],
+            function_token: FUNCTION_KW@16..25 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@25..29 "test" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@29..30 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@30..32 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@32..33 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [],
+                r_curly_token: R_CURLY@33..34 "}" [] [],
+            },
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    AWAIT_KW@34..41 "await" [Newline("\n")] [Whitespace(" ")],
+                    JsCallExpression {
+                        callee: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@41..45 "test" [] [],
+                            },
+                        },
+                        optional_chain_token: missing (optional),
+                        type_arguments: missing (optional),
+                        arguments: JsCallArguments {
+                            l_paren_token: L_PAREN@45..46 "(" [] [],
+                            args: JsCallArgumentList [],
+                            r_paren_token: R_PAREN@46..47 ")" [] [],
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@47..48 ";" [] [],
+        },
+    ],
+    eof_token: EOF@48..49 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_SCRIPT@0..49
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_STATEMENT_LIST@0..48
+    0: JS_FUNCTION_DECLARATION@0..34
+      0: ASYNC_KW@0..16 "async" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
+      1: FUNCTION_KW@16..25 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@25..29
+        0: IDENT@25..29 "test" [] []
+      4: (empty)
+      5: JS_PARAMETERS@29..32
+        0: L_PAREN@29..30 "(" [] []
+        1: JS_PARAMETER_LIST@30..30
+        2: R_PAREN@30..32 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@32..34
+        0: L_CURLY@32..33 "{" [] []
+        1: JS_DIRECTIVE_LIST@33..33
+        2: JS_STATEMENT_LIST@33..33
+        3: R_CURLY@33..34 "}" [] []
+    1: JS_EXPRESSION_STATEMENT@34..48
+      0: JS_BOGUS_EXPRESSION@34..47
+        0: AWAIT_KW@34..41 "await" [Newline("\n")] [Whitespace(" ")]
+        1: JS_CALL_EXPRESSION@41..47
+          0: JS_IDENTIFIER_EXPRESSION@41..45
+            0: JS_REFERENCE_IDENTIFIER@41..45
+              0: IDENT@41..45 "test" [] []
+          1: (empty)
+          2: (empty)
+          3: JS_CALL_ARGUMENTS@45..47
+            0: L_PAREN@45..46 "(" [] []
+            1: JS_CALL_ARGUMENT_LIST@46..46
+            2: R_PAREN@46..47 ")" [] []
+      1: SEMICOLON@47..48 ";" [] []
+  4: EOF@48..49 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+no_top_level_await_in_scripts.cjs:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × `await` is only allowed within async functions and at the top levels of modules.
+  
+    1 │ // SCRIPT
+    2 │ async function test() {}
+  > 3 │ await test();
+      │ ^^^^^
+    4 │ 
+  
+```

@@ -2,10 +2,10 @@
 use crate::numbers::parse_js_number;
 use crate::static_value::StaticValue;
 use crate::{
-    inner_string_text, AnyJsArrowFunctionParameters, AnyJsCallArgument, AnyJsClassMemberName,
-    AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName, AnyJsObjectMemberName,
-    AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression, JsArrayHole,
-    JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
+    inner_string_text, AnyJsArrayElement, AnyJsArrowFunctionParameters, AnyJsCallArgument,
+    AnyJsClassMemberName, AnyJsExpression, AnyJsFunctionBody, AnyJsLiteralExpression, AnyJsName,
+    AnyJsObjectMemberName, AnyJsTemplateElement, AnyTsEnumMemberName, JsArrayExpression,
+    JsArrayHole, JsAssignmentExpression, JsBinaryExpression, JsCallArgumentList, JsCallArguments,
     JsCallExpression, JsComputedMemberAssignment, JsComputedMemberExpression,
     JsConditionalExpression, JsDoWhileStatement, JsForStatement, JsIfStatement,
     JsLiteralMemberName, JsLogicalExpression, JsNewExpression, JsNumberLiteralExpression,
@@ -40,6 +40,23 @@ impl JsNewOrCallExpression {
         match self {
             JsNewOrCallExpression::JsNewExpression(node) => node.arguments(),
             JsNewOrCallExpression::JsCallExpression(node) => node.arguments().ok(),
+        }
+    }
+}
+impl From<JsNewOrCallExpression> for AnyJsExpression {
+    fn from(value: JsNewOrCallExpression) -> Self {
+        match value {
+            JsNewOrCallExpression::JsNewExpression(expr) => Self::JsNewExpression(expr),
+            JsNewOrCallExpression::JsCallExpression(expr) => Self::JsCallExpression(expr),
+        }
+    }
+}
+
+impl From<AnyJsCallArgument> for AnyJsArrayElement {
+    fn from(value: AnyJsCallArgument) -> Self {
+        match value {
+            AnyJsCallArgument::AnyJsExpression(expr) => Self::AnyJsExpression(expr),
+            AnyJsCallArgument::JsSpread(spread) => Self::JsSpread(spread),
         }
     }
 }

@@ -1,5 +1,3 @@
-use crate::converters::from_proto;
-use crate::converters::line_index::LineIndex;
 use crate::diagnostics::LspError;
 use crate::session::Session;
 use crate::utils;
@@ -9,6 +7,8 @@ use biome_analyze::{
 };
 use biome_diagnostics::Applicability;
 use biome_fs::BiomePath;
+use biome_lsp_converters::from_proto;
+use biome_lsp_converters::line_index::LineIndex;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
@@ -168,6 +168,23 @@ pub(crate) fn code_actions(
             }
             // Filter out quickfix.biome action when lint is not supported.
             if action.category.matches("quickfix.biome") && !file_features.supports_lint() {
+                return None;
+            }
+
+            // Filter out suppressions if the linter isn't supported
+            if (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
+                || action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY))
+                && !file_features.supports_lint()
+            {
+                return None;
+            }
+
+            // Filter out the suppressions if the client is requesting a fix all signal.
+            // Fix all should apply only the safe changes.
+            if has_fix_all
+                && (action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY)
+                    || action.category.matches(SUPPRESSION_INLINE_ACTION_CATEGORY))
+            {
                 return None;
             }
 

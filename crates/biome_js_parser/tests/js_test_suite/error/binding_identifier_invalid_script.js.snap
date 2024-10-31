@@ -1,0 +1,137 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+// SCRIPT
+let let = 5;
+const let = 5;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..14 "let" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsBogusBinding {
+                            items: [
+                                IDENT@14..18 "let" [] [Whitespace(" ")],
+                            ],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@18..20 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@20..21 "5" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@21..22 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: CONST_KW@22..29 "const" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsBogusBinding {
+                            items: [
+                                IDENT@29..33 "let" [] [Whitespace(" ")],
+                            ],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@33..35 "=" [] [Whitespace(" ")],
+                            expression: JsNumberLiteralExpression {
+                                value_token: JS_NUMBER_LITERAL@35..36 "5" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@36..37 ";" [] [],
+        },
+    ],
+    eof_token: EOF@37..38 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..38
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..37
+    0: JS_VARIABLE_STATEMENT@0..22
+      0: JS_VARIABLE_DECLARATION@0..21
+        0: (empty)
+        1: LET_KW@0..14 "let" [Comments("// SCRIPT"), Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@14..21
+          0: JS_VARIABLE_DECLARATOR@14..21
+            0: JS_BOGUS_BINDING@14..18
+              0: IDENT@14..18 "let" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@18..21
+              0: EQ@18..20 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@20..21
+                0: JS_NUMBER_LITERAL@20..21 "5" [] []
+      1: SEMICOLON@21..22 ";" [] []
+    1: JS_VARIABLE_STATEMENT@22..37
+      0: JS_VARIABLE_DECLARATION@22..36
+        0: (empty)
+        1: CONST_KW@22..29 "const" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@29..36
+          0: JS_VARIABLE_DECLARATOR@29..36
+            0: JS_BOGUS_BINDING@29..33
+              0: IDENT@29..33 "let" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@33..36
+              0: EQ@33..35 "=" [] [Whitespace(" ")]
+              1: JS_NUMBER_LITERAL_EXPRESSION@35..36
+                0: JS_NUMBER_LITERAL@35..36 "5" [] []
+      1: SEMICOLON@36..37 ";" [] []
+  4: EOF@37..38 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+binding_identifier_invalid_script.js:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `let` as an identifier in strict mode
+  
+    1 │ // SCRIPT
+  > 2 │ let let = 5;
+      │     ^^^
+    3 │ const let = 5;
+    4 │ 
+  
+binding_identifier_invalid_script.js:3:7 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `let` as an identifier in strict mode
+  
+    1 │ // SCRIPT
+    2 │ let let = 5;
+  > 3 │ const let = 5;
+      │       ^^^
+    4 │ 
+  
+```

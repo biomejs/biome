@@ -627,10 +627,10 @@ pub struct CssDocumentCustomMatcherBuilder {
     name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
     r_paren_token: SyntaxToken,
-    value: Option<CssString>,
+    value: Option<AnyCssUrlValue>,
 }
 impl CssDocumentCustomMatcherBuilder {
-    pub fn with_value(mut self, value: CssString) -> Self {
+    pub fn with_value(mut self, value: AnyCssUrlValue) -> Self {
         self.value = Some(value);
         self
     }
