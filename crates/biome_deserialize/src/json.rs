@@ -279,7 +279,6 @@ mod tests {
 
     use super::*;
     use biome_json_parser::JsonParserOptions;
-    use indexmap::{IndexMap, IndexSet};
 
     #[test]
     fn test_unit() {
@@ -723,20 +722,21 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "indexmap")]
     fn test_index_set() {
         let source = r#"[0, 1]"#;
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<IndexSet<u8>>(source, JsonParserOptions::default(), "");
+        } = deserialize_from_json_str::<indexmap::IndexSet<u8>>(source, JsonParserOptions::default(), "");
         assert!(diagnostics.is_empty());
-        assert_eq!(deserialized.unwrap(), IndexSet::from([0, 1]));
+        assert_eq!(deserialized.unwrap(), indexmap::IndexSet::from([0, 1]));
 
         let source = "0";
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<IndexSet<u8>>(source, JsonParserOptions::default(), "");
+        } = deserialize_from_json_str::<indexmap::IndexSet<u8>>(source, JsonParserOptions::default(), "");
         assert!(!diagnostics.is_empty());
         assert!(deserialized.is_none());
     }
@@ -802,12 +802,13 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "indexmap")]
     fn test_index_map() {
         let source = r#"{ "a": 0, "b": 1 }"#;
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<IndexMap<String, u8>>(
+        } = deserialize_from_json_str::<indexmap::IndexMap<String, u8>>(
             source,
             JsonParserOptions::default(),
             "",
@@ -815,14 +816,14 @@ mod tests {
         assert!(diagnostics.is_empty());
         assert_eq!(
             deserialized.unwrap(),
-            IndexMap::from([("a".to_string(), 0), ("b".to_string(), 1)])
+            indexmap::IndexMap::from([("a".to_string(), 0), ("b".to_string(), 1)])
         );
 
         let source = "0";
         let Deserialized {
             deserialized,
             diagnostics,
-        } = deserialize_from_json_str::<IndexMap<String, u8>>(
+        } = deserialize_from_json_str::<indexmap::IndexMap<String, u8>>(
             source,
             JsonParserOptions::default(),
             "",
