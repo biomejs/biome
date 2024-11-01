@@ -14,6 +14,8 @@ version              = "0.0.1"
 [dependencies]
 biome_analyze        = { workspace = true }
 biome_console        = { workspace = true }
+biome_css_parser     = { workspace = true }
+biome_css_syntax     = { workspace = true }
 biome_diagnostics    = { workspace = true }
 biome_grit_parser    = { workspace = true }
 biome_grit_syntax    = { workspace = true }
