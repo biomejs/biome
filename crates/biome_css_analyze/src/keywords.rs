@@ -1,4 +1,4 @@
-pub const BASIC_KEYWORDS: [&str; 5] = ["initial", "inherit", "revert", "revert-layer", "unset"];
+pub const BASIC_KEYWORDS: [&str; 5] = ["inherit", "initial", "revert", "revert-layer", "unset"];
 
 // https://drafts.csswg.org/css-fonts/#system-family-name-value
 pub const SYSTEM_FAMILY_NAME_KEYWORDS: [&str; 6] = [
@@ -11,74 +11,73 @@ pub const SYSTEM_FAMILY_NAME_KEYWORDS: [&str; 6] = [
 ];
 
 pub const FONT_FAMILY_KEYWORDS: [&str; 10] = [
-    "serif",
-    "sans-serif",
     "cursive",
     "fantasy",
     "monospace",
+    "sans-serif",
+    "serif",
     "system-ui",
-    "ui-serif",
-    "ui-sans-serif",
-    "ui-monospace",
     "ui-rounded",
+    "ui-monospace",
+    "ui-sans-serif",
+    "ui-serif",
 ];
 
 pub const FONT_WEIGHT_ABSOLUTE_KEYWORDS: [&str; 2] = ["normal", "bold"];
 pub const FONT_WEIGHT_NUMERIC_KEYWORDS: [&str; 9] = [
     "100", "200", "300", "400", "500", "600", "700", "800", "900",
 ];
-pub const FONT_STYLE_KEYWORDS: [&str; 3] = ["normal", "italic", "oblique"];
-pub const FONT_VARIANTS_KEYWORDS: [&str; 35] = [
-    "normal",
-    "none",
-    "historical-forms",
-    "none",
-    "common-ligatures",
-    "no-common-ligatures",
-    "discretionary-ligatures",
-    "no-discretionary-ligatures",
-    "historical-ligatures",
-    "no-historical-ligatures",
-    "contextual",
-    "no-contextual",
-    "small-caps",
-    "all-small-caps",
-    "petite-caps",
+pub const FONT_STYLE_KEYWORDS: [&str; 3] = ["italic", "normal", "oblique"];
+pub const FONT_VARIANTS_KEYWORDS: [&str; 34] = [
     "all-petite-caps",
-    "unicase",
-    "titling-caps",
-    "lining-nums",
-    "oldstyle-nums",
-    "proportional-nums",
-    "tabular-nums",
+    "all-small-caps",
+    "common-ligatures",
+    "contextual",
     "diagonal-fractions",
-    "stacked-fractions",
-    "ordinal",
-    "slashed-zero",
+    "discretionary-ligatures",
+    "full-width",
+    "historical-forms",
+    "historical-ligatures",
+    "jis04",
     "jis78",
     "jis83",
     "jis90",
-    "jis04",
-    "simplified",
-    "traditional",
-    "full-width",
+    "lining-nums",
+    "no-common-ligatures",
+    "no-contextual",
+    "no-discretionary-ligatures",
+    "no-historical-ligatures",
+    "none",
+    "normal",
+    "oldstyle-nums",
+    "ordinal",
+    "petite-caps",
+    "proportional-nums",
     "proportional-width",
     "ruby",
+    "simplified",
+    "slashed-zero",
+    "small-caps",
+    "stacked-fractions",
+    "tabular-nums",
+    "titling-caps",
+    "traditional",
+    "unicase",
 ];
 
 pub const FONT_STRETCH_KEYWORDS: [&str; 8] = [
-    "semi-condensed",
     "condensed",
-    "extra-condensed",
-    "ultra-condensed",
-    "semi-expanded",
     "expanded",
+    "extra-condensed",
     "extra-expanded",
+    "semi-condensed",
+    "semi-expanded",
+    "ultra-condensed",
     "ultra-expanded",
 ];
 
 pub const FONT_SIZE_KEYWORDS: [&str; 9] = [
-    "xx-small", "x-small", "small", "medium", "large", "x-large", "xx-large", "larger", "smaller",
+    "large", "larger", "medium", "small", "smaller", "x-large", "x-small", "xx-large", "xx-small",
 ];
 
 pub const LINE_HEIGHT_KEYWORDS: [&str; 1] = ["normal"];
@@ -775,7 +774,7 @@ pub const FUNCTION_KEYWORDS: [&str; 685] = [
 
 // These are the ones that can have single-colon notation
 pub const LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS: [&str; 4] =
-    ["before", "after", "first-line", "first-letter"];
+    ["after", "before", "first-letter", "first-line"];
 
 pub const VENDOR_SPECIFIC_PSEUDO_ELEMENTS: [&str; 66] = [
     "-moz-focus-inner",
@@ -801,10 +800,10 @@ pub const VENDOR_SPECIFIC_PSEUDO_ELEMENTS: [&str; 66] = [
     "-ms-tooltip",
     "-ms-track",
     "-ms-value",
-    "-webkit-color-swatch",
-    "-webkit-color-swatch-wrapper",
     "-webkit-calendar-picker-indicator",
     "-webkit-clear-button",
+    "-webkit-color-swatch",
+    "-webkit-color-swatch-wrapper",
     "-webkit-date-and-time-value",
     "-webkit-datetime-edit",
     "-webkit-datetime-edit-ampm-field",
@@ -871,7 +870,7 @@ pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
 
 pub const VENDOR_PREFIXES: [&str; 4] = ["-webkit-", "-moz-", "-ms-", "-o-"];
 
-pub const AT_RULE_PAGE_PSEUDO_CLASSES: [&str; 4] = ["first", "right", "left", "blank"];
+pub const AT_RULE_PAGE_PSEUDO_CLASSES: [&str; 4] = ["blank", "first", "left", "right"];
 
 pub const WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS: [&str; 7] = [
     "-webkit-resizer",
@@ -912,12 +911,12 @@ pub const LOGICAL_COMBINATIONS_PSEUDO_CLASSES: [&str; 5] = ["has", "is", "matche
 
 /// See https://drafts.csswg.org/selectors/#resource-pseudos
 pub const RESOURCE_STATE_PSEUDO_CLASSES: [&str; 7] = [
-    "playing",
-    "paused",
-    "seeking",
     "buffering",
-    "stalled",
     "muted",
+    "paused",
+    "playing",
+    "seeking",
+    "stalled",
     "volume-locked",
 ];
 
