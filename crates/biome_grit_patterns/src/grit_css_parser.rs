@@ -2,15 +2,15 @@ use crate::{
     grit_analysis_ext::GritAnalysisExt, grit_target_language::GritTargetParser,
     grit_tree::GritTargetTree,
 };
-use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::{JsFileSource, JsLanguage};
+use biome_css_parser::{parse_css, CssParserOptions};
+use biome_css_syntax::CssLanguage;
 use biome_parser::AnyParse;
 use grit_util::{AnalysisLogs, FileOrigin, Parser, SnippetTree};
 use std::path::Path;
 
-pub struct GritJsParser;
+pub struct GritCssParser;
 
-impl GritTargetParser for GritJsParser {
+impl GritTargetParser for GritCssParser {
     fn from_cached_parse_result(
         &self,
         parse: &AnyParse,
@@ -21,23 +21,15 @@ impl GritTargetParser for GritJsParser {
             logs.push(diagnostic.to_log(path));
         }
 
-        Some(GritTargetTree::new(parse.syntax::<JsLanguage>().into()))
+        Some(GritTargetTree::new(parse.syntax::<CssLanguage>().into()))
     }
 
-    fn parse_with_path(&self, source: &str, path: &Path) -> AnyParse {
-        let source_type = match path.extension().and_then(|ext| ext.to_str()) {
-            Some("d.ts") => JsFileSource::d_ts(),
-            Some("js") => JsFileSource::js_module(),
-            Some("jsx") => JsFileSource::jsx(),
-            Some("tsx") => JsFileSource::tsx(),
-            _ => JsFileSource::ts(),
-        };
-
-        parse(source, source_type, JsParserOptions::default()).into()
+    fn parse_with_path(&self, source: &str, _path: &Path) -> AnyParse {
+        parse_css(source, CssParserOptions::default()).into()
     }
 }
 
-impl Parser for GritJsParser {
+impl Parser for GritCssParser {
     type Tree = GritTargetTree;
 
     fn parse_file(
@@ -47,11 +39,7 @@ impl Parser for GritJsParser {
         logs: &mut AnalysisLogs,
         _old_tree: FileOrigin<'_, GritTargetTree>,
     ) -> Option<GritTargetTree> {
-        let parse_result = parse(
-            body,
-            JsFileSource::tsx(),
-            JsParserOptions::default().with_metavariables(),
-        );
+        let parse_result = parse_css(body, CssParserOptions::default().allow_metavariables());
 
         for diagnostic in parse_result.diagnostics() {
             logs.push(diagnostic.to_log(path));
@@ -74,11 +62,7 @@ impl Parser for GritJsParser {
             |src: &str| src.len() as u32
         };
 
-        let parse_result = parse(
-            &context,
-            JsFileSource::tsx(),
-            JsParserOptions::default().with_metavariables(),
-        );
+        let parse_result = parse_css(&context, CssParserOptions::default().allow_metavariables());
 
         SnippetTree {
             tree: GritTargetTree::new(parse_result.syntax().into()),

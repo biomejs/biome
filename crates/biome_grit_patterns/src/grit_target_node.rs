@@ -1,5 +1,6 @@
 use crate::grit_tree::GritTargetTree;
 use crate::util::TextRangeGritExt;
+use biome_css_syntax::{CssSyntaxKind, CssSyntaxNode, CssSyntaxToken};
 use biome_js_syntax::{JsSyntaxKind, JsSyntaxNode, JsSyntaxToken};
 use biome_rowan::{NodeOrToken, SyntaxKind, SyntaxSlot, TextRange};
 use grit_util::{error::GritResult, AstCursor, AstNode as GritAstNode, ByteRange, CodeRange};
@@ -57,13 +58,6 @@ macro_rules! generate_target_node {
         })+
 
         impl GritTargetLanguageNode {
-            pub fn descendants(&self) -> Option<impl Iterator<Item = Self>> {
-                match self {
-                    $(Self::$lang(Node(node)) => Some(node.descendants().map(Into::into))),+,
-                    _ => None
-                }
-            }
-
             pub fn first_child(&self) -> Option<Self> {
                 match self {
                     $(Self::$lang(Node(node)) => node.first_child().map(Into::into)),+,
@@ -129,13 +123,17 @@ macro_rules! generate_target_node {
                 }
             }
 
-            pub fn slots<'a>(&self, tree: &'a GritTargetTree) -> Option<impl Iterator<Item = GritSyntaxSlot<'a>>> {
+            pub fn slots<'a>(&self, tree: &'a GritTargetTree) -> Option<Vec<GritSyntaxSlot<'a>>> {
                 match self {
-                    $(Self::$lang(Node(node)) => Some(node.slots().map(|slot| match slot {
-                        SyntaxSlot::Node(node) => GritSyntaxSlot::Node(GritTargetNode::new(node.into(), tree)),
-                        SyntaxSlot::Token(token) => GritSyntaxSlot::Node(GritTargetNode::new(token.into(), tree)),
-                        SyntaxSlot::Empty { index } => GritSyntaxSlot::Empty { index }
-                    }))),+,
+                    $(Self::$lang(Node(node)) => Some(
+                        node.slots()
+                            .map(|slot| match slot {
+                                SyntaxSlot::Node(node) => GritSyntaxSlot::Node(GritTargetNode::new(node.into(), tree)),
+                                SyntaxSlot::Token(token) => GritSyntaxSlot::Node(GritTargetNode::new(token.into(), tree)),
+                                SyntaxSlot::Empty { index } => GritSyntaxSlot::Empty { index }
+                            })
+                            .collect()
+                    )),+,
                     $(Self::$lang(Token(_token)) => None),+
                 }
             }
@@ -184,6 +182,7 @@ macro_rules! generate_target_node {
 }
 
 generate_target_node! {
+    [CssLanguage, CssSyntaxNode, CssSyntaxToken, CssSyntaxKind],
     [JsLanguage, JsSyntaxNode, JsSyntaxToken, JsSyntaxKind]
 }
 
@@ -207,13 +206,8 @@ impl<'a> GritTargetNode<'a> {
             })
     }
 
-    pub fn descendants(&'a self) -> Option<impl Iterator<Item = Self>> {
-        self.node.descendants().map(|descendants| {
-            descendants.map(|node| Self {
-                node,
-                tree: self.tree,
-            })
-        })
+    pub fn descendants(&'a self) -> impl Iterator<Item = Self> {
+        DescendantsIterator::new(self)
     }
 
     pub fn named_children(&self) -> impl Iterator<Item = Self> + Clone {
@@ -244,7 +238,7 @@ impl<'a> GritTargetNode<'a> {
 
     #[inline]
     pub fn slots(&self) -> Option<impl Iterator<Item = GritSyntaxSlot<'a>>> {
-        self.node.slots(self.tree)
+        SlotIterator::new(self)
     }
 
     #[inline]
@@ -394,9 +388,17 @@ impl<'a> GritAstNode for GritTargetNode<'a> {
 }
 
 impl GritTargetSyntaxKind {
+    pub fn as_css_kind(&self) -> Option<CssSyntaxKind> {
+        match self {
+            Self::CssSyntaxKind(kind) => Some(*kind),
+            _ => None,
+        }
+    }
+
     pub fn as_js_kind(&self) -> Option<JsSyntaxKind> {
         match self {
             Self::JsSyntaxKind(kind) => Some(*kind),
+            _ => None,
         }
     }
 }
@@ -474,6 +476,43 @@ impl<'a> Iterator for ChildrenIterator<'a> {
 }
 
 #[derive(Clone, Debug)]
+pub struct DescendantsIterator<'a> {
+    cursor: Option<GritTargetNodeCursor<'a>>,
+}
+
+impl<'a> DescendantsIterator<'a> {
+    fn new(node: &GritTargetNode<'a>) -> Self {
+        let mut cursor = GritTargetNodeCursor::new(node);
+        Self {
+            cursor: cursor.goto_first_child().then_some(cursor),
+        }
+    }
+}
+
+impl<'a> Iterator for DescendantsIterator<'a> {
+    type Item = GritTargetNode<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let c = self.cursor.as_mut()?;
+        let node = c.node();
+        if c.goto_first_child() || c.goto_next_sibling() {
+            // Good.
+        } else {
+            loop {
+                if !c.goto_parent() {
+                    self.cursor = None;
+                    break;
+                }
+                if c.goto_next_sibling() {
+                    break;
+                }
+            }
+        }
+        Some(node)
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct NamedChildrenIterator<'a> {
     cursor: Option<GritTargetNodeCursor<'a>>,
 }
@@ -511,6 +550,31 @@ impl<'a> Iterator for NamedChildrenIterator<'a> {
             self.cursor = None;
         }
         Some(node)
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct SlotIterator<'a> {
+    // We collect slots in a vector to avoid type issues that would result from
+    // language-specific slot iterators. The vector is reversed so we can
+    // cheaply pop elements.
+    slots: Vec<GritSyntaxSlot<'a>>,
+}
+
+impl<'a> SlotIterator<'a> {
+    fn new(node: &GritTargetNode<'a>) -> Option<Self> {
+        node.node.slots(node.tree).map(|mut slots| {
+            slots.reverse();
+            Self { slots }
+        })
+    }
+}
+
+impl<'a> Iterator for SlotIterator<'a> {
+    type Item = GritSyntaxSlot<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.slots.pop()
     }
 }
 
