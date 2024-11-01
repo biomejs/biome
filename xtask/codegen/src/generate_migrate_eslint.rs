@@ -45,7 +45,7 @@ pub(crate) fn generate_migrate_eslint(mode: Mode) -> Result<()> {
                 #check_nursery
                 let group = rules.#group_ident.get_or_insert_with(Default::default);
                 let rule = group.#name_ident.get_or_insert(Default::default());
-                rule.set_level(rule_severity.into());
+                rule.set_level(rule.level().max(rule_severity.into()));
             }
         });
     }

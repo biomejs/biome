@@ -38,13 +38,13 @@ pub struct OverridePattern {
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide, pure(Default::default()))]
-    pub ignore: Option<indexmap::IndexSet<String>>,
+    pub ignore: Option<Vec<Box<str>>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[bpaf(hide, pure(Default::default()))]
-    pub include: Option<indexmap::IndexSet<String>>,
+    pub include: Option<Vec<Box<str>>>,
 
     /// Specific configuration for the JavaScript language
     #[serde(skip_serializing_if = "Option::is_none")]

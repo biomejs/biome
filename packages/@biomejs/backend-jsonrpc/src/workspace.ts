@@ -2104,7 +2104,7 @@ export type RuleFixConfiguration_for_NoConsoleOptions =
 export type RuleFixConfiguration_for_NoDoubleEqualsOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_NoDoubleEqualsOptions;
-export type RuleAssistPlainConfiguration = "on" | "off";
+export type RuleAssistPlainConfiguration = "off" | "on";
 export interface RuleAssistWithOptions_for_Options {
 	/**
 	 * The severity of the emitted diagnostics by the rule
@@ -2125,7 +2125,7 @@ export interface RuleAssistWithOptions_for_Null {
 	 */
 	options: null;
 }
-export type RulePlainConfiguration = "warn" | "error" | "info" | "off";
+export type RulePlainConfiguration = "off" | "info" | "warn" | "error";
 export interface RuleWithFixOptions_for_Null {
 	/**
 	 * The kind of the code actions emitted by the rule

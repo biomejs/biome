@@ -268,7 +268,7 @@ impl TryFrom<Override> for biome_configuration::OverridePattern {
     type Error = ParseFormatNumberError;
     fn try_from(Override { files, options }: Override) -> Result<Self, Self::Error> {
         let mut result = biome_configuration::OverridePattern {
-            include: Some(files.into_iter().collect()),
+            include: Some(files.into_iter().map(String::into_boxed_str).collect()),
             ..Default::default()
         };
         if options.print_width.is_some()

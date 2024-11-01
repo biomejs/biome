@@ -184,7 +184,7 @@ globset              = "0.4.15"
 grit-pattern-matcher = "0.5"
 grit-util            = "0.5"
 ignore               = "0.4.23"
-indexmap             = { version = "2.6.0", features = ["serde"] }
+indexmap             = { version = "2.6.0" }
 insta                = "1.41.1"
 natord               = "1.0.9"
 oxc_resolver         = "1.12.0"

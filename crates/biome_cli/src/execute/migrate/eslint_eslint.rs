@@ -4,7 +4,6 @@ use biome_deserialize::{
 };
 use biome_deserialize_macros::Deserializable;
 use biome_rowan::TextRange;
-use indexmap::IndexSet;
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
@@ -43,9 +42,9 @@ pub(crate) struct FlatConfigData(pub(crate) Vec<FlatConfigObject>);
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct FlatConfigObject {
-    pub(crate) files: Vec<String>,
+    pub(crate) files: Vec<Box<str>>,
     /// The glob patterns that ignore to lint.
-    pub(crate) ignores: Vec<String>,
+    pub(crate) ignores: Vec<Box<str>>,
     // using `Option` is important to distinguish a global ignores from a config objerct
     pub(crate) language_options: Option<FlatLanguageOptions>,
     // using `Option` is important to distinguish a global ignores from a config objerct
@@ -116,9 +115,9 @@ impl Merge for LegacyConfigData {
 }
 
 #[derive(Debug, Default)]
-pub(crate) struct IgnorePattern(pub(crate) String);
+pub(crate) struct IgnorePattern(pub(crate) Box<str>);
 impl Deref for IgnorePattern {
-    type Target = String;
+    type Target = Box<str>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -131,7 +130,7 @@ impl biome_deserialize::Deserializable for IgnorePattern {
     ) -> Option<Self> {
         let s = biome_deserialize::Text::deserialize(ctx, value, name)?;
         match ignorefile::convert_pattern(s.text()) {
-            Ok(pattern) => Some(Self(pattern)),
+            Ok(pattern) => Some(Self(pattern.into_boxed_str())),
             Err(msg) => {
                 ctx.report(DeserializationDiagnostic::new(msg).with_range(value.range()));
                 None
@@ -149,16 +148,16 @@ pub(crate) struct PluginExport {
 }
 
 #[derive(Debug, Default, Deserializable)]
-pub(crate) struct Globals(pub(crate) FxHashMap<String, GlobalConf>);
+pub(crate) struct Globals(pub(crate) FxHashMap<Box<str>, GlobalConf>);
 impl Globals {
-    pub(crate) fn enabled(self) -> impl Iterator<Item = String> {
+    pub(crate) fn enabled(self) -> impl Iterator<Item = Box<str>> {
         self.0.into_iter().filter_map(|(global_name, global_conf)| {
             global_conf.is_enabled().then_some(global_name)
         })
     }
 }
 impl Deref for Globals {
-    type Target = FxHashMap<String, GlobalConf>;
+    type Target = FxHashMap<Box<str>, GlobalConf>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -208,12 +207,12 @@ pub(crate) enum GlobalConfQualifier {
 #[derive(Debug, Default, Deserializable)]
 #[deserializable(unknown_fields = "allow")]
 pub(crate) struct OverrideConfigData {
-    pub(crate) extends: ShorthandVec<String>,
+    pub(crate) extends: ShorthandVec<Box<str>>,
     pub(crate) globals: Globals,
     /// The glob patterns for excluded files.
-    pub(crate) excluded_files: ShorthandVec<String>,
+    pub(crate) excluded_files: ShorthandVec<Box<str>>,
     /// The glob patterns for target files.
-    pub(crate) files: ShorthandVec<String>,
+    pub(crate) files: ShorthandVec<Box<str>>,
     pub(crate) rules: Rules,
 }
 
@@ -430,20 +429,14 @@ impl Deserializable for NumberOrString {
 }
 
 #[derive(Debug, Default)]
-pub(crate) struct Rules(
-    // We use `IndexSet` instead of `HashSet` to preserve the order.
-    // Keeping the order is important because several ESLint rules can have
-    // the same equivalent Biome rule.
-    // The severity level of the last one is thus used.
-    pub(crate) IndexSet<Rule>,
-);
+pub(crate) struct Rules(pub(crate) rustc_hash::FxHashSet<Rule>);
 impl Merge for Rules {
     fn merge_with(&mut self, other: Self) {
         self.0.extend(other.0);
     }
 }
 impl Deref for Rules {
-    type Target = IndexSet<Rule>;
+    type Target = rustc_hash::FxHashSet<Rule>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
@@ -471,7 +464,7 @@ impl Deserializable for Rules {
                 name: &str,
             ) -> Option<Self::Output> {
                 use biome_deserialize::Text;
-                let mut result = IndexSet::default();
+                let mut result = rustc_hash::FxHashSet::default();
                 for (key, value) in members.flatten() {
                     let Some(rule_name) = Text::deserialize(ctx, &key, "") else {
                         continue;
