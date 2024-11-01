@@ -33,7 +33,7 @@ pub struct JavascriptConfiguration {
     ///
     /// If defined here, they should not emit diagnostics.
     #[partial(bpaf(pure(Default::default()), hide))]
-    pub globals: indexmap::IndexSet<String>,
+    pub globals: rustc_hash::FxHashSet<Box<str>>,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
     #[partial(bpaf(pure(Default::default()), hide))]

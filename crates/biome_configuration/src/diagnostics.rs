@@ -88,15 +88,14 @@ impl BiomeDiagnostic {
     }
 
     pub fn new_invalid_ignore_pattern_with_path(
-        pattern: impl Into<String>,
-        reason: impl Into<String>,
+        pattern: impl std::fmt::Display,
+        reason: impl std::fmt::Display,
         file_path: Option<impl Into<String>>,
     ) -> Self {
         Self::InvalidIgnorePattern(InvalidIgnorePattern {
             message: format!(
                 "Couldn't parse the pattern \"{}\". Reason: {}",
-                pattern.into(),
-                reason.into()
+                pattern, reason,
             ),
             file_path: file_path.map(|f| f.into()),
         })

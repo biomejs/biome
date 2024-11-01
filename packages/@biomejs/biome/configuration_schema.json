@@ -25,8 +25,7 @@
 		"extends": {
 			"description": "A list of paths to other JSON files, used to extends the current configuration.",
 			"type": ["array", "null"],
-			"items": { "type": "string" },
-			"uniqueItems": true
+			"items": { "type": "string" }
 		},
 		"files": {
 			"description": "The configuration of the filesystem",
@@ -390,14 +389,12 @@
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -1313,8 +1310,7 @@
 				"ignore": {
 					"description": "A list of Unix shell style patterns. Biome will ignore files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"ignoreUnknown": {
 					"description": "Tells Biome to not emit diagnostics when handling files that doesn't know",
@@ -1323,8 +1319,7 @@
 				"include": {
 					"description": "A list of Unix shell style patterns. Biome will handle only those files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"maxSize": {
 					"description": "The maximum allowed size for source code files in bytes. Files above this limit will be ignored for performance reasons. Defaults to 1 MiB",
@@ -1391,14 +1386,12 @@
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"indentStyle": {
 					"description": "The indent style.",
@@ -1957,14 +1950,12 @@
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"rules": {
 					"description": "List of rules",
@@ -2529,14 +2520,12 @@
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				}
 			},
 			"additionalProperties": false
@@ -2633,14 +2622,12 @@
 				"ignore": {
 					"description": "A list of Unix shell style patterns. The formatter will ignore files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"include": {
 					"description": "A list of Unix shell style patterns. The formatter will include files/folders that will match these patterns.",
 					"type": ["array", "null"],
-					"items": { "type": "string" },
-					"uniqueItems": true
+					"items": { "type": "string" }
 				},
 				"javascript": {
 					"description": "Specific configuration for the JavaScript language",
@@ -2791,7 +2778,7 @@
 				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Options" }
 			]
 		},
-		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["off", "on"] },
 		"RuleAssistWithOptions_for_Null": {
 			"type": "object",
 			"required": ["level", "options"],
@@ -2833,7 +2820,7 @@
 		},
 		"RulePlainConfiguration": {
 			"type": "string",
-			"enum": ["warn", "error", "info", "off"]
+			"enum": ["off", "info", "warn", "error"]
 		},
 		"RuleWithAllowDomainOptions": {
 			"type": "object",
