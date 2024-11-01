@@ -641,6 +641,8 @@ version = "0.0.1"
 dependencies = [
  "biome_analyze",
  "biome_console",
+ "biome_css_parser",
+ "biome_css_syntax",
  "biome_diagnostics",
  "biome_grit_parser",
  "biome_grit_syntax",

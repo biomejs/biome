@@ -1,7 +1,10 @@
+mod css_target_language;
 mod js_target_language;
 
+pub use css_target_language::CssTargetLanguage;
 pub use js_target_language::JsTargetLanguage;
 
+use crate::grit_css_parser::GritCssParser;
 use crate::grit_js_parser::GritJsParser;
 use crate::grit_target_node::{GritTargetNode, GritTargetSyntaxKind};
 use crate::grit_tree::GritTargetTree;
@@ -147,6 +150,7 @@ macro_rules! generate_target_language {
 }
 
 generate_target_language! {
+    [CssTargetLanguage, GritCssParser],
     [JsTargetLanguage, GritJsParser]
 }
 
@@ -154,6 +158,7 @@ impl GritTargetLanguage {
     /// Returns the target language to use for the given file extension.
     pub fn from_extension(extension: &str) -> Option<Self> {
         match extension {
+            "css" => Some(Self::CssTargetLanguage(CssTargetLanguage)),
             "cjs" | "js" | "jsx" | "mjs" | "ts" | "tsx" => {
                 Some(Self::JsTargetLanguage(JsTargetLanguage))
             }
@@ -196,9 +201,7 @@ impl GritTargetLanguage {
                 .tree
                 .root_node()
                 .descendants()
-                .map_or(false, |mut descendants| {
-                    descendants.any(|descendant| descendant.kind().is_bogus())
-                });
+                .any(|descendant| descendant.kind().is_bogus());
             if has_errors {
                 continue;
             }
@@ -349,6 +352,8 @@ pub trait GritTargetParser: Parser<Tree = GritTargetTree> {
         path: Option<&Path>,
         logs: &mut AnalysisLogs,
     ) -> Option<GritTargetTree>;
+
+    fn parse_with_path(&self, source: &str, path: &Path) -> AnyParse;
 }
 
 #[derive(Clone, Debug)]

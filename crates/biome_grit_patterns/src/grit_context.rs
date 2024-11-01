@@ -316,3 +316,12 @@ pub struct GritTargetFile {
     pub path: PathBuf,
     pub parse: AnyParse,
 }
+
+impl GritTargetFile {
+    pub fn parse(source: &str, path: PathBuf, target_language: GritTargetLanguage) -> Self {
+        let parser = target_language.get_parser();
+        let parse = parser.parse_with_path(source, &path);
+
+        Self { parse, path }
+    }
+}

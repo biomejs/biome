@@ -5,6 +5,7 @@ mod grit_binding;
 mod grit_built_in_functions;
 mod grit_code_snippet;
 mod grit_context;
+mod grit_css_parser;
 mod grit_definitions;
 mod grit_file;
 mod grit_js_parser;
