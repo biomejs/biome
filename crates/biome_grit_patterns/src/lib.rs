@@ -21,6 +21,7 @@ mod source_location_ext;
 mod util;
 mod variables;
 
+use biome_grit_syntax::AnyGritLanguageDeclaration;
 pub use errors::*;
 pub use grit_binding::GritBinding;
 pub use grit_built_in_functions::BuiltInFunction;
@@ -36,12 +37,15 @@ pub use grit_target_node::{GritTargetLanguageNode, GritTargetNode, GritTargetSyn
 use biome_grit_parser::parse_grit;
 use std::path::Path;
 
-/// Compiles a Grit pattern from the given source string.
-pub fn compile_pattern(
+/// Compiles a Grit pattern from the given source string with default options.
+pub fn compile_pattern(source: &str) -> Result<GritQuery, CompileError> {
+    compile_pattern_with_options(source, CompilePatternOptions::default())
+}
+
+/// Compiles a Grit pattern from the given source string with the given options.
+pub fn compile_pattern_with_options(
     source: &str,
-    path: Option<&Path>,
-    language: GritTargetLanguage,
-    extra_built_ins: Vec<BuiltInFunction>,
+    options: CompilePatternOptions,
 ) -> Result<GritQuery, CompileError> {
     let parsed = parse_grit(source);
     if parsed.has_errors() {
@@ -51,5 +55,42 @@ pub fn compile_pattern(
         ));
     }
 
-    GritQuery::from_node(parsed.tree(), path, language, extra_built_ins)
+    let language = parsed
+        .tree()
+        .language()
+        .as_ref()
+        .and_then(AnyGritLanguageDeclaration::as_grit_language_declaration)
+        .and_then(GritTargetLanguage::from_declaration)
+        .unwrap_or(options.default_language);
+
+    GritQuery::from_node(
+        parsed.tree(),
+        options.path,
+        language,
+        options.extra_built_ins,
+    )
+}
+
+#[derive(Default)]
+pub struct CompilePatternOptions<'a> {
+    default_language: GritTargetLanguage,
+    extra_built_ins: Vec<BuiltInFunction>,
+    path: Option<&'a Path>,
+}
+
+impl<'a> CompilePatternOptions<'a> {
+    pub fn with_default_language(mut self, default_language: GritTargetLanguage) -> Self {
+        self.default_language = default_language;
+        self
+    }
+
+    pub fn with_extra_built_ins(mut self, built_ins: Vec<BuiltInFunction>) -> Self {
+        self.extra_built_ins = built_ins;
+        self
+    }
+
+    pub fn with_path(mut self, path: &'a Path) -> Self {
+        self.path = Some(path);
+        self
+    }
 }

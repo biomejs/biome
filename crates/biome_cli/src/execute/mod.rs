@@ -21,6 +21,7 @@ use biome_console::{markup, ConsoleExt};
 use biome_diagnostics::adapters::SerdeJsonError;
 use biome_diagnostics::{category, Category};
 use biome_fs::BiomePath;
+use biome_grit_patterns::GritTargetLanguage;
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
 };
@@ -196,6 +197,15 @@ pub enum TraversalMode {
         ///
         /// Note that the search command does not support rewrites.
         pattern: PatternId,
+
+        /// The language to query for.
+        ///
+        /// Grit queries are specific to the grammar of the language they
+        /// target, so we currently do not support writing queries that apply
+        /// to multiple languages at once.
+        ///
+        /// If none given, the default language is JavaScript.
+        language: Option<GritTargetLanguage>,
 
         /// An optional tuple.
         /// 1. The virtual path to the file

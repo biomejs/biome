@@ -195,6 +195,14 @@ impl GritQuery {
             variable_locations,
         })
     }
+
+    pub fn supports_css(&self) -> bool {
+        matches!(self.language, GritTargetLanguage::CssTargetLanguage(_))
+    }
+
+    pub fn supports_js(&self) -> bool {
+        matches!(self.language, GritTargetLanguage::JsTargetLanguage(_))
+    }
 }
 
 #[derive(Debug)]

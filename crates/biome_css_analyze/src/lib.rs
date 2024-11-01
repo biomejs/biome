@@ -9,8 +9,8 @@ mod utils;
 pub use crate::registry::visit_registry;
 use crate::suppression_action::CssSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleRegistry, SuppressionKind,
+    AnalysisFilter, AnalyzerOptions, AnalyzerPlugin, AnalyzerSignal, ControlFlow, LanguageRoot,
+    MatchQueryParams, MetadataRegistry, RuleRegistry, SuppressionKind,
 };
 use biome_css_syntax::{CssLanguage, CssSyntaxToken, TextSize};
 use biome_diagnostics::{category, Error};
@@ -31,13 +31,14 @@ pub fn analyze<'a, F, B>(
     root: &LanguageRoot<CssLanguage>,
     filter: AnalysisFilter,
     options: &'a AnalyzerOptions,
+    plugins: Vec<Box<dyn AnalyzerPlugin>>,
     emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
     F: FnMut(&dyn AnalyzerSignal<CssLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    analyze_with_inspect_matcher(root, filter, |_| {}, options, emit_signal)
+    analyze_with_inspect_matcher(root, filter, |_| {}, options, plugins, emit_signal)
 }
 
 /// Run the analyzer on the provided `root`: this process will use the given `filter`
@@ -51,6 +52,7 @@ pub fn analyze_with_inspect_matcher<'a, V, F, B>(
     filter: AnalysisFilter,
     inspect_matcher: V,
     options: &'a AnalyzerOptions,
+    plugins: Vec<Box<dyn AnalyzerPlugin>>,
     mut emit_signal: F,
 ) -> (Option<B>, Vec<Error>)
 where
@@ -118,6 +120,12 @@ where
         Box::new(CssSuppressionAction),
         &mut emit_signal,
     );
+
+    for plugin in plugins {
+        if plugin.supports_css() {
+            analyzer.add_plugin(plugin);
+        }
+    }
 
     for ((phase, _), visitor) in visitors {
         analyzer.add_visitor(phase, visitor);
@@ -193,6 +201,7 @@ mod tests {
                 ..AnalysisFilter::default()
             },
             &options,
+            Vec::new(),
             |signal| {
                 if let Some(diag) = signal.diagnostic() {
                     error_ranges.push(diag.location().span.unwrap());
@@ -237,7 +246,7 @@ mod tests {
         };
 
         let options = AnalyzerOptions::default();
-        analyze(&parsed.tree(), filter, &options, |signal| {
+        analyze(&parsed.tree(), filter, &options, Vec::new(), |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
                     .with_file_path("dummyFile")
@@ -277,7 +286,7 @@ a {
         };
 
         let options = AnalyzerOptions::default();
-        analyze(&parsed.tree(), filter, &options, |signal| {
+        analyze(&parsed.tree(), filter, &options, Vec::new(), |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
                     .with_file_path("dummyFile")
@@ -313,7 +322,7 @@ a {
         };
 
         let options = AnalyzerOptions::default();
-        analyze(&parsed.tree(), filter, &options, |signal| {
+        analyze(&parsed.tree(), filter, &options, Vec::new(), |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let error = diag
                     .with_file_path("dummyFile")
@@ -346,7 +355,7 @@ a {
         };
 
         let options = AnalyzerOptions::default();
-        analyze(&parsed.tree(), filter, &options, |signal| {
+        analyze(&parsed.tree(), filter, &options, Vec::new(), |signal| {
             if let Some(diag) = signal.diagnostic() {
                 let code = diag.category().unwrap();
                 if code != category!("suppressions/unused") {

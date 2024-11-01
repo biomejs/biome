@@ -212,7 +212,7 @@ impl Analyze {
                     ..AnalysisFilter::default()
                 };
                 let options = AnalyzerOptions::default();
-                biome_css_analyze::analyze(root, filter, &options, |event| {
+                biome_css_analyze::analyze(root, filter, &options, Vec::new(), |event| {
                     black_box(event.diagnostic());
                     black_box(event.actions());
                     ControlFlow::<Never>::Continue(())

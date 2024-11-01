@@ -34,10 +34,6 @@ pub struct JsTargetLanguage;
 impl GritTargetLanguageImpl for JsTargetLanguage {
     type Kind = JsSyntaxKind;
 
-    fn language_name(&self) -> &'static str {
-        "JavaScript"
-    }
-
     /// Returns the syntax kind for a node by name.
     ///
     /// For compatibility with existing Grit snippets (as well as the online

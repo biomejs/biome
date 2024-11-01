@@ -3488,6 +3488,26 @@ export interface RenameResult {
 	 */
 	range: TextRange;
 }
+export interface ParsePatternParams {
+	defaultLanguage: GritTargetLanguage;
+	pattern: string;
+}
+export type GritTargetLanguage = "CSS" | "JavaScript";
+export interface ParsePatternResult {
+	patternId: PatternId;
+}
+export type PatternId = string;
+export interface SearchPatternParams {
+	path: BiomePath;
+	pattern: PatternId;
+}
+export interface SearchResults {
+	file: BiomePath;
+	matches: TextRange[];
+}
+export interface DropPatternParams {
+	pattern: PatternId;
+}
 export type Configuration = PartialConfiguration;
 export interface Workspace {
 	fileFeatures(params: SupportsFeatureParams): Promise<FileFeaturesResult>;
@@ -3515,6 +3535,9 @@ export interface Workspace {
 	formatOnType(params: FormatOnTypeParams): Promise<Printed>;
 	fixFile(params: FixFileParams): Promise<FixFileResult>;
 	rename(params: RenameParams): Promise<RenameResult>;
+	parsePattern(params: ParsePatternParams): Promise<ParsePatternResult>;
+	searchPattern(params: SearchPatternParams): Promise<SearchResults>;
+	dropPattern(params: DropPatternParams): Promise<void>;
 	destroy(): void;
 }
 export function createWorkspace(transport: Transport): Workspace {
@@ -3575,6 +3598,15 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		rename(params) {
 			return transport.request("biome/rename", params);
+		},
+		parsePattern(params) {
+			return transport.request("biome/parse_pattern", params);
+		},
+		searchPattern(params) {
+			return transport.request("biome/search_pattern", params);
+		},
+		dropPattern(params) {
+			return transport.request("biome/drop_pattern", params);
 		},
 		destroy() {
 			transport.destroy();
