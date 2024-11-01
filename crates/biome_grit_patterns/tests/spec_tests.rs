@@ -4,8 +4,6 @@ use biome_grit_patterns::{
     GritQuery, GritQueryEffect, GritTargetFile, GritTargetLanguage, JsTargetLanguage, Message,
     OutputFile,
 };
-use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::JsFileSource;
 use biome_test_utils::register_leak_checker;
 use grit_util::Range;
 use std::{fs::read_to_string, path::Path};
@@ -45,8 +43,13 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
             );
         }
 
-        GritQuery::from_node(parse_grit_result.tree(), None, target_lang, Vec::new())
-            .unwrap_or_else(|err| panic!("cannot compile query from {query_path:?}: {err:?}"))
+        GritQuery::from_node(
+            parse_grit_result.tree(),
+            None,
+            target_lang.clone(),
+            Vec::new(),
+        )
+        .unwrap_or_else(|err| panic!("cannot compile query from {query_path:?}: {err:?}"))
     };
 
     let target_file = {
@@ -54,17 +57,8 @@ fn run_test(input: &'static str, _: &str, _: &str, _: &str) {
         let target_path = Path::new(&target_path);
         let target_code = read_to_string(target_path)
             .unwrap_or_else(|err| panic!("failed to read code from {target_path:?}: {err:?}"));
-        // TODO: We should generalize this when we have more target languages.
-        let target_parse = parse(
-            &target_code,
-            JsFileSource::tsx(),
-            JsParserOptions::default(),
-        );
 
-        GritTargetFile {
-            path: target_path.into(),
-            parse: target_parse.into(),
-        }
+        GritTargetFile::parse(&target_code, target_path.into(), target_lang)
     };
 
     let result = query

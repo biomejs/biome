@@ -1,6 +1,4 @@
 use biome_grit_patterns::{compile_pattern, GritTargetFile, GritTargetLanguage, JsTargetLanguage};
-use biome_js_parser::{parse, JsParserOptions};
-use biome_js_syntax::JsFileSource;
 use criterion::measurement::WallTime;
 use std::collections::HashMap;
 use std::path::Path;
@@ -48,25 +46,18 @@ fn bench_gritql_search(criterion: &mut Criterion) {
 }
 
 pub fn bench_search_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase) {
+    let target_language = GritTargetLanguage::JsTargetLanguage(JsTargetLanguage);
+
     let query = compile_pattern(
         "`getEntityNameForExtendingInterface(errorLocation)`",
         Some(Path::new("bench.grit")),
-        GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
+        target_language.clone(),
         Vec::new(),
     )
     .unwrap();
 
     let code = test_case.code();
-    let source_type = if test_case.extension() == "d.ts" {
-        JsFileSource::d_ts()
-    } else {
-        JsFileSource::ts()
-    };
-
-    let target_file = GritTargetFile {
-        parse: parse(code, source_type, JsParserOptions::default()).into(),
-        path: test_case.path().to_owned(),
-    };
+    let target_file = GritTargetFile::parse(code, test_case.path().to_owned(), target_language);
 
     group.throughput(Throughput::Bytes(code.len() as u64));
     group.sample_size(10);
