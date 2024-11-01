@@ -49,7 +49,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoInvalidGridAreas {
-        version: "1.9.9",
+        version: "1.9.0",
         name: "noInvalidGridAreas",
         language: "css",
         recommended: true,

@@ -1,6 +1,6 @@
-use crate::{services::semantic::Semantic, JsRuleAction};
+use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -113,7 +113,7 @@ pub struct RuleState {
 }
 
 impl Rule for NoMisleadingCharacterClass {
-    type Query = Semantic<AnyRegexExpression>;
+    type Query = Ast<AnyRegexExpression>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();

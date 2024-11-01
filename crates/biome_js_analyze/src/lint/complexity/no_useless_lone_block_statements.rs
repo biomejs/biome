@@ -1,7 +1,6 @@
-use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
     RuleSource,
 };
 use biome_console::markup;
@@ -54,7 +53,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoUselessLoneBlockStatements {
-    type Query = Semantic<JsBlockStatement>;
+    type Query = Ast<JsBlockStatement>;
     type State = ();
     type Signals = Option<Self::State>;
     type Options = ();

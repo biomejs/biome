@@ -1,6 +1,5 @@
-use crate::services::semantic::Semantic;
-use biome_analyze::RuleSource;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, RuleSource};
 use biome_console::{markup, MarkupBuf};
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
@@ -129,7 +128,7 @@ impl RuleState {
     }
 }
 impl Rule for NoThenProperty {
-    type Query = Semantic<NoThenPropertyQuery>;
+    type Query = Ast<NoThenPropertyQuery>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = ();
