@@ -11,10 +11,9 @@ use biome_deserialize_macros::Deserializable;
 use biome_diagnostics::Severity;
 #[cfg(feature = "schema")]
 use schemars::JsonSchema;
-use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleConfiguration<T: Default> {
@@ -81,11 +80,11 @@ impl<T: Clone + Default + 'static> RuleConfiguration<T> {
 }
 impl<T: Default> Default for RuleConfiguration<T> {
     fn default() -> Self {
-        Self::Plain(RulePlainConfiguration::Error)
+        Self::Plain(RulePlainConfiguration::Off)
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleFixConfiguration<T: Default> {
@@ -94,7 +93,7 @@ pub enum RuleFixConfiguration<T: Default> {
 }
 impl<T: Default> Default for RuleFixConfiguration<T> {
     fn default() -> Self {
-        Self::Plain(RulePlainConfiguration::Error)
+        Self::Plain(RulePlainConfiguration::Off)
     }
 }
 impl<T: Default + Deserializable> Deserializable for RuleFixConfiguration<T> {
@@ -191,18 +190,31 @@ impl From<RuleAssistPlainConfiguration> for Severity {
     }
 }
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserializable,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde::Deserialize,
+    serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RulePlainConfiguration {
     #[default]
+    Off,
+    Info,
     Warn,
     Error,
-    Info,
-    Off,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Eq, PartialEq, serde::Deserialize, serde::Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, untagged)]
 pub enum RuleAssistConfiguration<T: Default> {
@@ -272,14 +284,26 @@ impl<T: Default> Default for RuleAssistConfiguration<T> {
         Self::Plain(RuleAssistPlainConfiguration::Off)
     }
 }
-
-#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Deserializable,
+    Eq,
+    Hash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    serde::Deserialize,
+    serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase")]
 pub enum RuleAssistPlainConfiguration {
     #[default]
-    On,
     Off,
+    On,
 }
 impl RuleAssistPlainConfiguration {
     pub const fn is_enabled(&self) -> bool {
@@ -296,7 +320,9 @@ impl Merge for RuleAssistPlainConfiguration {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleAssistWithOptions<T: Default> {
@@ -312,7 +338,9 @@ impl<T: Default> Merge for RuleAssistWithOptions<T> {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithOptions<T: Default> {
@@ -328,7 +356,9 @@ impl<T: Default> Merge for RuleWithOptions<T> {
     }
 }
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct RuleWithFixOptions<T: Default> {

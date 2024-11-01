@@ -323,10 +323,11 @@ pub fn create_config(
         let schema_path = Path::new("./node_modules/@biomejs/biome/configuration_schema.json");
         let options = OpenOptions::default().read(true);
         if fs.open_with_options(schema_path, options).is_ok() {
-            configuration.schema = schema_path.to_str().map(String::from);
+            configuration.schema = schema_path.to_str().map(Into::into);
         }
     } else {
-        configuration.schema = Some(format!("https://biomejs.dev/schemas/{VERSION}/schema.json"));
+        configuration.schema =
+            Some(format!("https://biomejs.dev/schemas/{VERSION}/schema.json").into());
     }
 
     let contents = serde_json::to_string_pretty(&configuration)
@@ -450,7 +451,7 @@ impl PartialConfigurationExt for PartialConfiguration {
 
         let mut deserialized_configurations = vec![];
         for extend_entry in extends.iter() {
-            let extend_entry_as_path = Path::new(extend_entry);
+            let extend_entry_as_path = Path::new(extend_entry.as_ref());
 
             let extend_configuration_file_path = if extend_entry_as_path.starts_with(".")
                 // TODO: Remove extension in Biome 2.0
@@ -458,9 +459,9 @@ impl PartialConfigurationExt for PartialConfiguration {
                     extend_entry_as_path.extension().map(OsStr::as_encoded_bytes),
                     Some(b"json" | b"jsonc")
                 ) {
-                relative_resolution_base_path.join(extend_entry)
+                relative_resolution_base_path.join(extend_entry.as_ref())
             } else {
-                fs.resolve_configuration(extend_entry.as_str(), external_resolution_base_path)
+                fs.resolve_configuration(extend_entry.as_ref(), external_resolution_base_path)
                     .map_err(|error| {
                         BiomeDiagnostic::cant_resolve(
                             external_resolution_base_path.display().to_string(),

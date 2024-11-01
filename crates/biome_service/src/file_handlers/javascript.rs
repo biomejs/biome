@@ -244,10 +244,10 @@ impl ServiceLanguage for JsLanguage {
                         "defineSlots",
                         "withDefaults",
                     ]
-                    .map(str::to_string),
+                    .map(Into::into),
                 );
             } else if filename.ends_with(b".astro") {
-                globals.extend(["Astro"].map(str::to_string));
+                globals.extend(["Astro"].map(Into::into));
             } else if filename.ends_with(b".svelte")
                 || filename.ends_with(b".svelte.js")
                 || filename.ends_with(b".svelte.ts")
@@ -263,7 +263,7 @@ impl ServiceLanguage for JsLanguage {
                         "$props",
                         "$state",
                     ]
-                    .map(str::to_string),
+                    .map(Into::into),
                 );
             }
         }

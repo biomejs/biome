@@ -62,7 +62,7 @@ indexmap                 = { workspace = true, features = ["serde"] }
 oxc_resolver             = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
-schemars                 = { workspace = true, features = ["indexmap2"], optional = true }
+schemars                 = { workspace = true, optional = true }
 serde                    = { workspace = true, features = ["derive"] }
 serde_json               = { workspace = true, features = ["raw_value"] }
 slotmap                  = { workspace = true, features = ["serde"] }

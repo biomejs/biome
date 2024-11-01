@@ -52,12 +52,12 @@ pub struct FormatterConfiguration {
     /// A list of Unix shell style patterns. The formatter will ignore files/folders that will
     /// match these patterns.
     #[partial(bpaf(hide, pure(Default::default())))]
-    pub ignore: indexmap::IndexSet<String>,
+    pub ignore: Vec<Box<str>>,
 
     /// A list of Unix shell style patterns. The formatter will include files/folders that will
     /// match these patterns.
     #[partial(bpaf(hide, pure(Default::default())))]
-    pub include: indexmap::IndexSet<String>,
+    pub include: Vec<Box<str>>,
 }
 
 impl PartialFormatterConfiguration {

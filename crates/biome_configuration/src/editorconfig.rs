@@ -54,15 +54,19 @@ impl EditorConfig {
             .into_iter()
             .map(|(k, v)| {
                 let patterns = match expand_unknown_glob_patterns(&k) {
-                    Ok(patterns) => patterns.into_iter().map(hack_convert_double_star).collect(),
+                    Ok(patterns) => patterns
+                        .into_iter()
+                        .map(hack_convert_double_star)
+                        .map(String::into_boxed_str)
+                        .collect(),
                     Err(err) => {
                         errors.push(err);
-                        vec![k]
+                        vec![k.into_boxed_str()]
                     }
                 };
 
                 OverridePattern {
-                    include: Some(patterns.into_iter().collect()),
+                    include: Some(patterns),
                     formatter: Some(v.to_biome_override()),
                     ..Default::default()
                 }
@@ -194,7 +198,7 @@ where
 /// Turn an unknown glob pattern into a list of known glob patterns. This is part of a hack to support all editorconfig patterns.
 ///
 /// TODO: remove in biome 2.0
-fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConfigDiagnostic> {
+fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<Box<str>>, EditorConfigDiagnostic> {
     struct Variants {
         /// index of the { character
         start: usize,
@@ -300,24 +304,24 @@ fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConf
     }
 
     if all_variants.is_empty() {
-        return Ok(vec![pattern.to_string()]);
+        return Ok(vec![pattern.to_string().into_boxed_str()]);
     }
 
-    let mut expanded_patterns = vec![];
+    let mut expanded_patterns = Vec::new();
     for variants in all_variants.iter().rev() {
         if expanded_patterns.is_empty() {
             for variant in &variants.variants() {
                 let mut pattern = pattern.to_string();
                 pattern.replace_range(variants.start..=variants.end, variant);
-                expanded_patterns.push(pattern);
+                expanded_patterns.push(pattern.into_boxed_str());
             }
         } else {
-            let mut new_patterns = vec![];
+            let mut new_patterns = Vec::new();
             for existing in &expanded_patterns {
                 for variant in &variants.variants() {
-                    let mut pattern = existing.clone();
+                    let mut pattern = existing.to_string();
                     pattern.replace_range(variants.start..=variants.end, variant);
-                    new_patterns.push(pattern);
+                    new_patterns.push(pattern.into_boxed_str());
                 }
             }
             expanded_patterns = new_patterns;
@@ -328,9 +332,9 @@ fn expand_unknown_glob_patterns(pattern: &str) -> Result<Vec<String>, EditorConf
 }
 
 /// The EditorConfig spec allows for patterns like `**.yml`, which is not supported by biome. This function corrects such patterns so that they can be parsed by biome's glob parser.
-fn hack_convert_double_star(pattern: impl Into<String>) -> String {
+fn hack_convert_double_star(pattern: impl AsRef<str>) -> String {
     pattern
-        .into()
+        .as_ref()
         .split('/')
         .map(|component| {
             if component == "**" {
@@ -483,13 +487,13 @@ max_line_length = off
         let mut expanded =
             expand_unknown_glob_patterns(pattern).expect("Failed to expand glob pattern");
         expanded.sort();
-        assert_eq!(expanded, vec!["package.json"]);
+        assert_eq!(expanded, ["package.json".into()]);
 
         let pattern = "{package.json,.travis.yml}";
         let mut expanded =
             expand_unknown_glob_patterns(pattern).expect("Failed to expand glob pattern");
         expanded.sort();
-        assert_eq!(expanded, vec![".travis.yml", "package.json"]);
+        assert_eq!(expanded, [".travis.yml".into(), "package.json".into()]);
     }
 
     #[test]
@@ -500,11 +504,11 @@ max_line_length = off
         expanded.sort();
         assert_eq!(
             expanded,
-            vec![
-                "**/bar.spec.js",
-                "**/bar.test.js",
-                "**/foo.spec.js",
-                "**/foo.test.js",
+            [
+                "**/bar.spec.js".into(),
+                "**/bar.test.js".into(),
+                "**/foo.spec.js".into(),
+                "**/foo.test.js".into(),
             ]
         );
     }
@@ -517,7 +521,12 @@ max_line_length = off
         expanded.sort();
         assert_eq!(
             expanded,
-            vec!["**/bar.1.js", "**/bar.2.js", "**/bar.3.js", "**/bar.4.js",]
+            [
+                "**/bar.1.js".into(),
+                "**/bar.2.js".into(),
+                "**/bar.3.js".into(),
+                "**/bar.4.js".into()
+            ]
         );
     }
 

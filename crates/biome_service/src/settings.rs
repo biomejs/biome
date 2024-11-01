@@ -35,7 +35,6 @@ use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
 use biome_project::{NodeJsProject, PackageJson};
 use ignore::gitignore::{Gitignore, GitignoreBuilder};
-use indexmap::IndexSet;
 use rustc_hash::FxHashMap;
 use std::borrow::Cow;
 use std::ops::Deref;
@@ -722,7 +721,7 @@ pub struct LanguageSettings<L: ServiceLanguage> {
     pub linter: L::LinterSettings,
 
     /// Globals variables/bindings that can be found in a file
-    pub globals: Option<IndexSet<String>>,
+    pub globals: Option<rustc_hash::FxHashSet<Box<str>>>,
 
     /// Organize imports settings for this language
     pub organize_imports: L::OrganizeImportsSettings,
@@ -930,8 +929,8 @@ impl OverrideSettings {
     pub fn override_js_globals(
         &self,
         path: &BiomePath,
-        base_set: &Option<IndexSet<String>>,
-    ) -> IndexSet<String> {
+        base_set: &Option<rustc_hash::FxHashSet<Box<str>>>,
+    ) -> rustc_hash::FxHashSet<Box<str>> {
         self.patterns
             .iter()
             // Reverse the traversal as only the last override takes effect
@@ -1481,13 +1480,13 @@ impl OverrideSettingPattern {
 /// It can raise an error if the patterns aren't valid
 pub fn to_matcher(
     working_directory: Option<PathBuf>,
-    string_set: Option<&indexmap::set::Slice<String>>,
+    globs: Option<&[Box<str>]>,
 ) -> Result<Matcher, WorkspaceError> {
     let mut matcher = Matcher::empty();
     if let Some(working_directory) = working_directory {
         matcher.set_root(working_directory)
     }
-    if let Some(string_set) = string_set {
+    if let Some(string_set) = globs {
         for pattern in string_set {
             matcher.add_pattern(pattern).map_err(|err| {
                 BiomeDiagnostic::new_invalid_ignore_pattern(
@@ -1599,14 +1598,8 @@ pub fn to_override_settings(
             to_graphql_language_settings(graphql, &current_settings.languages.graphql);
 
         let pattern_setting = OverrideSettingPattern {
-            include: to_matcher(
-                working_directory.clone(),
-                pattern.include.as_ref().map(|x| x.as_slice()),
-            )?,
-            exclude: to_matcher(
-                working_directory.clone(),
-                pattern.ignore.as_ref().map(|x| x.as_slice()),
-            )?,
+            include: to_matcher(working_directory.clone(), pattern.include.as_deref())?,
+            exclude: to_matcher(working_directory.clone(), pattern.ignore.as_deref())?,
             formatter,
             linter,
             organize_imports,
