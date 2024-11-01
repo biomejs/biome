@@ -23,7 +23,6 @@ mod generate_crate;
 mod html_kinds_src;
 mod kind_src;
 mod language_kind;
-mod parser_tests;
 pub mod promote_rule;
 mod termcolorful;
 mod unicode;
@@ -39,7 +38,6 @@ pub use self::formatter::generate_formatters;
 pub use self::generate_analyzer::generate_analyzer;
 pub use self::generate_crate::generate_crate;
 pub use self::generate_new_analyzer_rule::{generate_new_analyzer_rule, LanguageKind};
-pub use self::parser_tests::generate_parser_tests;
 pub use self::unicode::generate_tables;
 
 pub enum UpdateResult {
@@ -105,9 +103,6 @@ pub enum TaskCommand {
     /// Transforms ungram files into AST
     #[bpaf(command)]
     Grammar(Vec<String>),
-    /// Extracts parser inline comments into test files
-    #[bpaf(command)]
-    Test,
     /// Generates unicode table inside lexer
     #[bpaf(command)]
     Unicode,
