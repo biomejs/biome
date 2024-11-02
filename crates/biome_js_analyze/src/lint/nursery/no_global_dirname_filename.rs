@@ -7,8 +7,8 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, AnyJsName, AnyJsObjectMember, JsIdentifierExpression,
-    JsObjectExpression, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken,
+    global_identifier, AnyJsExpression, AnyJsName, AnyJsObjectMember, JsObjectExpression,
+    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator,
 };
 use biome_rowan::{declare_node_union, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 
@@ -58,14 +58,14 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub AnyGlobalDirnameFileNameExpression =
-        JsIdentifierExpression
+    pub AnyGlobalDirnameFileName =
+        JsVariableDeclarator
         | JsObjectExpression
         | JsStaticMemberExpression
 }
 
 impl Rule for NoGlobalDirnameFilename {
-    type Query = Semantic<AnyGlobalDirnameFileNameExpression>;
+    type Query = Semantic<AnyGlobalDirnameFileName>;
     type State = (JsSyntaxToken, String);
     type Signals = Vec<Self::State>;
     type Options = ();
@@ -77,20 +77,18 @@ impl Rule for NoGlobalDirnameFilename {
 
         match node {
             // const dirname = __dirname;
-            AnyGlobalDirnameFileNameExpression::JsIdentifierExpression(
-                js_identifier_expression,
-            ) => {
-                let expr =
-                    AnyJsExpression::JsIdentifierExpression(js_identifier_expression.clone());
-                if let Some(state) = validate_dirname_filename(&expr, model) {
-                    signals.push(state);
+            AnyGlobalDirnameFileName::JsVariableDeclarator(declarator) => {
+                if let Some(initializer) = declarator.initializer() {
+                    if let Ok(expr) = initializer.expression() {
+                        if let Some(state) = validate_dirname_filename(&expr, model) {
+                            signals.push(state);
+                        }
+                    }
                 }
             }
             // `if (__dirname.startsWith("/project/src"))`
-            AnyGlobalDirnameFileNameExpression::JsStaticMemberExpression(
-                js_static_member_expression,
-            ) => {
-                if let Ok(expr) = js_static_member_expression.object() {
+            AnyGlobalDirnameFileName::JsStaticMemberExpression(member_expr) => {
+                if let Ok(expr) = member_expr.object() {
                     if let Some(expr) = expr.as_js_identifier_expression() {
                         let expr = AnyJsExpression::JsIdentifierExpression(expr.clone());
                         if let Some(state) = validate_dirname_filename(&expr, model) {
@@ -100,8 +98,8 @@ impl Rule for NoGlobalDirnameFilename {
                 }
             }
             // const dirname = { __dirname };
-            AnyGlobalDirnameFileNameExpression::JsObjectExpression(js_object_expression) => {
-                for member in js_object_expression.members().iter().flatten() {
+            AnyGlobalDirnameFileName::JsObjectExpression(object_expr) => {
+                for member in object_expr.members().iter().flatten() {
                     if let Some(member) = member.as_js_shorthand_property_object_member() {
                         if let Ok(token) = member.name().and_then(|name| name.value_token()) {
                             if let Some(text) = maybe_text(&token) {
@@ -138,18 +136,16 @@ impl Rule for NoGlobalDirnameFilename {
         let dirname_or_filename = state.1.as_str();
 
         match node {
-            AnyGlobalDirnameFileNameExpression::JsIdentifierExpression(
-                js_identifier_expression,
-            ) => {
+            AnyGlobalDirnameFileName::JsVariableDeclarator(declarator) => {
                 mutation.replace_node(
-                    AnyJsExpression::JsIdentifierExpression(js_identifier_expression.clone()),
+                    declarator.initializer()?.expression().ok()?,
                     AnyJsExpression::JsStaticMemberExpression(make_import_meta(
                         dirname_or_filename,
                     )),
                 );
             }
-            AnyGlobalDirnameFileNameExpression::JsObjectExpression(js_object_expression) => {
-                for member in js_object_expression.members().iter().flatten() {
+            AnyGlobalDirnameFileName::JsObjectExpression(object_expr) => {
+                for member in object_expr.members().iter().flatten() {
                     if let Some(shorthand_property_member) =
                         member.as_js_shorthand_property_object_member()
                     {
@@ -176,11 +172,9 @@ impl Rule for NoGlobalDirnameFilename {
                     }
                 }
             }
-            AnyGlobalDirnameFileNameExpression::JsStaticMemberExpression(
-                js_static_member_expression,
-            ) => {
+            AnyGlobalDirnameFileName::JsStaticMemberExpression(member_expr) => {
                 mutation.replace_node(
-                    js_static_member_expression.object().ok()?,
+                    member_expr.object().ok()?,
                     AnyJsExpression::JsStaticMemberExpression(make_import_meta(
                         dirname_or_filename,
                     )),

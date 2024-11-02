@@ -130,55 +130,6 @@ invalid.js:6:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━
 ```
 
 ```
-invalid.js:6:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use __dirname.
-  
-    4 │ const filename_ = { __filename };
-    5 │ 
-  > 6 │ if (__dirname.startsWith("/project/src/")) {}
-      │     ^^^^^^^^^
-    7 │ if (__filename.endsWith(".js")) {}
-    8 │ 
-  
-  i __dirname is not available in ES modules.
-  
-  i Safe fix: Replace __dirname with import.meta.dirname.
-  
-    4 4 │   const filename_ = { __filename };
-    5 5 │   
-    6   │ - if·(__dirname.startsWith("/project/src/"))·{}
-      6 │ + if·(import.meta.dirname.startsWith("/project/src/"))·{}
-    7 7 │   if (__filename.endsWith(".js")) {}
-    8 8 │   
-  
-
-```
-
-```
-invalid.js:7:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Don't use __filename.
-  
-    6 │ if (__dirname.startsWith("/project/src/")) {}
-  > 7 │ if (__filename.endsWith(".js")) {}
-      │     ^^^^^^^^^^
-    8 │ 
-  
-  i __filename is not available in ES modules.
-  
-  i Safe fix: Replace __filename with import.meta.filename.
-  
-    5 5 │   
-    6 6 │   if (__dirname.startsWith("/project/src/")) {}
-    7   │ - if·(__filename.endsWith(".js"))·{}
-      7 │ + if·(import.meta.filename.endsWith(".js"))·{}
-    8 8 │   
-  
-
-```
-
-```
 invalid.js:7:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use __filename.
