@@ -8,7 +8,8 @@ use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     global_identifier, AnyJsExpression, AnyJsName, AnyJsObjectMember, JsObjectExpression,
-    JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator,
+    JsPropertyObjectMember, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken,
+    JsVariableDeclarator,
 };
 use biome_rowan::{declare_node_union, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 
@@ -100,13 +101,23 @@ impl Rule for NoGlobalDirnameFilename {
             // const dirname = { __dirname };
             AnyGlobalDirnameFileName::JsObjectExpression(object_expr) => {
                 for member in object_expr.members().iter().flatten() {
-                    if let Some(member) = member.as_js_shorthand_property_object_member() {
-                        if let Ok(token) = member.name().and_then(|name| name.value_token()) {
-                            if let Some(text) = maybe_text(&token) {
-                                signals.push((token, text));
+                    match member {
+                        AnyJsObjectMember::JsPropertyObjectMember(member) => {
+                            if let Ok(expr) = member.value() {
+                                if let Some(state) = validate_dirname_filename(&expr, model) {
+                                    signals.push(state);
+                                }
                             }
                         }
-                    };
+                        AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
+                            if let Ok(token) = member.name().and_then(|name| name.value_token()) {
+                                if let Some(text) = maybe_text(&token) {
+                                    signals.push((token, text));
+                                }
+                            }
+                        }
+                        _ => continue,
+                    }
                 }
             }
         };
@@ -146,29 +157,33 @@ impl Rule for NoGlobalDirnameFilename {
             }
             AnyGlobalDirnameFileName::JsObjectExpression(object_expr) => {
                 for member in object_expr.members().iter().flatten() {
-                    if let Some(shorthand_property_member) =
-                        member.as_js_shorthand_property_object_member()
-                    {
-                        let id = shorthand_property_member.name().ok()?.value_token().ok()?;
-                        if &id == syntax_token {
-                            let property_member = make::js_property_object_member(
-                                biome_js_syntax::AnyJsObjectMemberName::JsLiteralMemberName(
-                                    make::js_literal_member_name(make::ident(id.text_trimmed())),
-                                ),
-                                make::token(JsSyntaxKind::COLON)
-                                    .with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
-                                AnyJsExpression::JsStaticMemberExpression(make_import_meta(
-                                    dirname_or_filename,
-                                )),
-                            );
-                            mutation.replace_node(
-                                AnyJsObjectMember::JsShorthandPropertyObjectMember(
-                                    shorthand_property_member.clone(),
-                                ),
-                                AnyJsObjectMember::JsPropertyObjectMember(property_member),
-                            );
-                            break;
-                        };
+                    match member {
+                        AnyJsObjectMember::JsPropertyObjectMember(member) => {
+                            let expr = member.value().ok()?;
+                            let expr = expr.as_js_identifier_expression()?;
+                            let id = expr.name().ok()?.value_token().ok()?;
+                            if &id == syntax_token {
+                                let property_member =
+                                    make_property_object_member(&id, dirname_or_filename);
+                                mutation.replace_node(member.clone(), property_member);
+                                break;
+                            };
+                        }
+                        AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
+                            let id = member.name().ok()?.value_token().ok()?;
+                            if &id == syntax_token {
+                                let property_member =
+                                    make_property_object_member(&id, dirname_or_filename);
+                                mutation.replace_node(
+                                    AnyJsObjectMember::JsShorthandPropertyObjectMember(
+                                        member.clone(),
+                                    ),
+                                    AnyJsObjectMember::JsPropertyObjectMember(property_member),
+                                );
+                                break;
+                            };
+                        }
+                        _ => continue,
                     }
                 }
             }
@@ -221,5 +236,18 @@ fn make_import_meta(dirname_or_filename: &str) -> JsStaticMemberExpression {
         )),
         make::token(JsSyntaxKind::DOT),
         AnyJsName::JsName(make::js_name(make::ident(dirname_or_filename))),
+    )
+}
+
+fn make_property_object_member(
+    id: &JsSyntaxToken,
+    import_meta_property: &str,
+) -> JsPropertyObjectMember {
+    make::js_property_object_member(
+        biome_js_syntax::AnyJsObjectMemberName::JsLiteralMemberName(make::js_literal_member_name(
+            make::ident(id.text_trimmed()),
+        )),
+        make::token(JsSyntaxKind::COLON).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
+        AnyJsExpression::JsStaticMemberExpression(make_import_meta(import_meta_property)),
     )
 }
