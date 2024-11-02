@@ -1271,9 +1271,9 @@ export interface Nursery {
 	 */
 	noExportedImports?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow the use of __dirname and __filename in the global scope.
 	 */
-	noGlobalDirnameFilename?: RuleConfiguration_for_Null;
+	noGlobalDirnameFilename?: RuleFixConfiguration_for_Null;
 	/**
 	 * Prevent usage of \<head> element in a Next.js project.
 	 */

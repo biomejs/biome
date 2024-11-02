@@ -2219,9 +2219,9 @@
 					]
 				},
 				"noGlobalDirnameFilename": {
-					"description": "Succinct description of the rule.",
+					"description": "Disallow the use of __dirname and __filename in the global scope.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
