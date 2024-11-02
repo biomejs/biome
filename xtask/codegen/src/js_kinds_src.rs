@@ -155,6 +155,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "of",
         "out",
         "using",
+        "meta",
     ],
     literals: &[
         "JS_NUMBER_LITERAL",
