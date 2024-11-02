@@ -631,6 +631,9 @@ impl ServerFactory {
         workspace_method!(builder, fix_file);
         workspace_method!(builder, rename);
         workspace_method!(builder, organize_imports);
+        workspace_method!(builder, parse_pattern);
+        workspace_method!(builder, search_pattern);
+        workspace_method!(builder, drop_pattern);
 
         let (service, socket) = builder.finish();
         ServerConnection { socket, service }

@@ -168,6 +168,7 @@ dependencies = [
  "biome_flags",
  "biome_formatter",
  "biome_fs",
+ "biome_grit_patterns",
  "biome_js_analyze",
  "biome_js_formatter",
  "biome_json_formatter",
@@ -269,6 +270,8 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_fs",
+ "biome_plugin_loader",
  "biome_rowan",
  "biome_string_case",
  "biome_suppression",
@@ -659,7 +662,9 @@ dependencies = [
  "rand 0.8.5",
  "regex",
  "rustc-hash 2.0.0",
+ "schemars",
  "serde",
+ "serde_json",
  "tests_macros",
 ]
 

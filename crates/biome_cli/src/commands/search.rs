@@ -7,6 +7,7 @@ use biome_configuration::{
 use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
+use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::workspace::ParsePatternParams;
 use biome_service::{DynRef, Workspace, WorkspaceError};
@@ -16,6 +17,7 @@ pub(crate) struct SearchCommandPayload {
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) pattern: String,
+    pub(crate) language: Option<GritTargetLanguage>,
     pub(crate) stdin_file_path: Option<String>,
     pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
 }
@@ -59,17 +61,19 @@ impl CommandRunner for SearchCommandPayload {
     fn get_execution(
         &self,
         cli_options: &CliOptions,
-        _console: &mut dyn Console,
+        console: &mut dyn Console,
         workspace: &dyn Workspace,
     ) -> Result<Execution, CliDiagnostic> {
         let pattern = workspace
             .parse_pattern(ParsePatternParams {
                 pattern: self.pattern.clone(),
+                default_language: self.language.clone().unwrap_or_default(),
             })?
             .pattern_id;
         Ok(Execution::new(TraversalMode::Search {
             pattern,
-            stdin: self.get_stdin(_console)?,
+            language: self.language.clone(),
+            stdin: self.get_stdin(console)?,
         })
         .set_report(cli_options))
     }
