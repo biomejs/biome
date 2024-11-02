@@ -217,7 +217,7 @@ fn make_import_meta(dirname_or_filename: &str) -> JsStaticMemberExpression {
         AnyJsExpression::from(make::js_import_meta_expression(
             make::token(JsSyntaxKind::IMPORT_KW),
             make::token(JsSyntaxKind::DOT),
-            make::token(JsSyntaxKind::META),
+            make::token(JsSyntaxKind::META_KW),
         )),
         make::token(JsSyntaxKind::DOT),
         AnyJsName::JsName(make::js_name(make::ident(dirname_or_filename))),
