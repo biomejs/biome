@@ -64,6 +64,7 @@ use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
 use biome_fs::BiomePath;
+use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
 use core::str;
@@ -821,6 +822,7 @@ impl RageEntry {
 #[serde(rename_all = "camelCase")]
 pub struct ParsePatternParams {
     pub pattern: String,
+    pub default_language: GritTargetLanguage,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]

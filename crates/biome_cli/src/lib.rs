@@ -249,6 +249,7 @@ impl<'app> CliSession<'app> {
                 files_configuration,
                 paths,
                 pattern,
+                language,
                 stdin_file_path,
                 vcs_configuration,
             } => run_command(
@@ -258,6 +259,7 @@ impl<'app> CliSession<'app> {
                     files_configuration,
                     paths,
                     pattern,
+                    language,
                     stdin_file_path,
                     vcs_configuration,
                 },
