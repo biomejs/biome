@@ -30,12 +30,17 @@ path-absolutize      = { version = "3.1.1", optional = false, features = ["use_u
 rand                 = { version = "0.8.5" }
 regex                = { workspace = true }
 rustc-hash           = { workspace = true }
+schemars             = { workspace = true, optional = true }
 serde                = { workspace = true, features = ["derive"] }
+serde_json           = { workspace = true, optional = true }
 
 [dev-dependencies]
 biome_test_utils = { path = "../biome_test_utils" }
 insta            = { workspace = true }
 tests_macros     = { path = "../tests_macros" }
+
+[features]
+schema = ["dep:schemars", "dep:serde_json"]
 
 [lints]
 workspace = true

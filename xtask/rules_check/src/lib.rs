@@ -501,7 +501,7 @@ fn assert_lint(
 
                 let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
 
-                biome_css_analyze::analyze(&root, filter, &options, |signal| {
+                biome_css_analyze::analyze(&root, filter, &options, Vec::new(), |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
                         let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(

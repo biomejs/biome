@@ -1,6 +1,6 @@
 use super::{
-    is_diagnostic_error, AnalyzerVisitorBuilder, CodeActionsParams, ExtensionHandler, FixAllParams,
-    LintParams, LintResults, ParseResult, SearchCapabilities,
+    is_diagnostic_error, search, AnalyzerVisitorBuilder, CodeActionsParams, ExtensionHandler,
+    FixAllParams, LintParams, LintResults, ParseResult, SearchCapabilities,
 };
 use crate::configuration::to_analyzer_rules;
 use crate::file_handlers::DebugCapabilities;
@@ -181,7 +181,9 @@ impl ExtensionHandler for CssFileHandler {
                 format_range: Some(format_range),
                 format_on_type: Some(format_on_type),
             },
-            search: SearchCapabilities { search: None },
+            search: SearchCapabilities {
+                search: Some(search),
+            },
         }
     }
 }
@@ -355,51 +357,52 @@ fn lint(params: LintParams) -> LintResults {
                 .count();
 
             info!("Analyze file {}", params.path.display());
-            let (_, analyze_diagnostics) = analyze(&tree, filter, &analyzer_options, |signal| {
-                if let Some(mut diagnostic) = signal.diagnostic() {
-                    // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                    if ignores_suppression_comment
-                        && diagnostic.category() == Some(category!("suppressions/unused"))
-                    {
-                        return ControlFlow::<Never>::Continue(());
-                    }
-
-                    diagnostic_count += 1;
-
-                    // We do now check if the severity of the diagnostics should be changed.
-                    // The configuration allows to change the severity of the diagnostics emitted by rules.
-                    let severity = diagnostic
-                        .category()
-                        .filter(|category| category.name().starts_with("lint/"))
-                        .map_or_else(
-                            || diagnostic.severity(),
-                            |category| {
-                                rules
-                                    .as_ref()
-                                    .and_then(|rules| rules.get_severity_from_code(category))
-                                    .unwrap_or(Severity::Warning)
-                            },
-                        );
-
-                    if severity >= Severity::Error {
-                        errors += 1;
-                    }
-
-                    if diagnostic_count <= params.max_diagnostics {
-                        for action in signal.actions() {
-                            if !action.is_suppression() {
-                                diagnostic = diagnostic.add_code_suggestion(action.into());
-                            }
+            let (_, analyze_diagnostics) =
+                analyze(&tree, filter, &analyzer_options, Vec::new(), |signal| {
+                    if let Some(mut diagnostic) = signal.diagnostic() {
+                        // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
+                        if ignores_suppression_comment
+                            && diagnostic.category() == Some(category!("suppressions/unused"))
+                        {
+                            return ControlFlow::<Never>::Continue(());
                         }
 
-                        let error = diagnostic.with_severity(severity);
+                        diagnostic_count += 1;
 
-                        diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                        // We do now check if the severity of the diagnostics should be changed.
+                        // The configuration allows to change the severity of the diagnostics emitted by rules.
+                        let severity = diagnostic
+                            .category()
+                            .filter(|category| category.name().starts_with("lint/"))
+                            .map_or_else(
+                                || diagnostic.severity(),
+                                |category| {
+                                    rules
+                                        .as_ref()
+                                        .and_then(|rules| rules.get_severity_from_code(category))
+                                        .unwrap_or(Severity::Warning)
+                                },
+                            );
+
+                        if severity >= Severity::Error {
+                            errors += 1;
+                        }
+
+                        if diagnostic_count <= params.max_diagnostics {
+                            for action in signal.actions() {
+                                if !action.is_suppression() {
+                                    diagnostic = diagnostic.add_code_suggestion(action.into());
+                                }
+                            }
+
+                            let error = diagnostic.with_severity(severity);
+
+                            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                        }
                     }
-                }
 
-                ControlFlow::<Never>::Continue(())
-            });
+                    ControlFlow::<Never>::Continue(())
+                });
 
             diagnostics.extend(
                 analyze_diagnostics
@@ -470,7 +473,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
 
             info!("CSS runs the analyzer");
 
-            analyze(&tree, filter, &analyzer_options, |signal| {
+            analyze(&tree, filter, &analyzer_options, Vec::new(), |signal| {
                 actions.extend(signal.actions().into_code_action_iter().map(|item| {
                     CodeAction {
                         category: item.category.clone(),
@@ -528,7 +531,7 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
         params.suppression_reason,
     );
     loop {
-        let (action, _) = analyze(&tree, filter, &analyzer_options, |signal| {
+        let (action, _) = analyze(&tree, filter, &analyzer_options, Vec::new(), |signal| {
             let current_diagnostic = signal.diagnostic();
 
             if let Some(diagnostic) = current_diagnostic.as_ref() {

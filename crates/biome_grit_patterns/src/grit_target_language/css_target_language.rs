@@ -28,10 +28,6 @@ pub struct CssTargetLanguage;
 impl GritTargetLanguageImpl for CssTargetLanguage {
     type Kind = CssSyntaxKind;
 
-    fn language_name(&self) -> &'static str {
-        "CSS"
-    }
-
     /// Returns the syntax kind for a node by name.
     ///
     /// For compatibility with existing Grit snippets (as well as the online

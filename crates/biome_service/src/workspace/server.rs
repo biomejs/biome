@@ -25,7 +25,7 @@ use biome_diagnostics::{
 };
 use biome_formatter::Printed;
 use biome_fs::{BiomePath, ConfigName};
-use biome_grit_patterns::GritQuery;
+use biome_grit_patterns::{compile_pattern_with_options, CompilePatternOptions, GritQuery};
 use biome_js_syntax::ModuleKind;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
 use biome_json_syntax::JsonFileSource;
@@ -819,12 +819,9 @@ impl Workspace for WorkspaceServer {
         &self,
         params: ParsePatternParams,
     ) -> Result<ParsePatternResult, WorkspaceError> {
-        let pattern = biome_grit_patterns::compile_pattern(
-            &params.pattern,
-            None,
-            biome_grit_patterns::JsTargetLanguage.into(),
-            Vec::new(),
-        )?;
+        let options =
+            CompilePatternOptions::default().with_default_language(params.default_language);
+        let pattern = compile_pattern_with_options(&params.pattern, options)?;
 
         let pattern_id = make_search_pattern_id();
         self.patterns.insert(pattern_id.clone(), pattern);

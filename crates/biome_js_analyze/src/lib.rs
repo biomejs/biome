@@ -123,7 +123,9 @@ where
     );
 
     for plugin in plugins {
-        analyzer.add_plugin(plugin);
+        if plugin.supports_js() {
+            analyzer.add_plugin(plugin);
+        }
     }
 
     for ((phase, _), visitor) in visitors {

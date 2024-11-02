@@ -10,9 +10,9 @@ use biome_console::markup;
 use biome_diagnostics::category;
 use biome_fs::FileSystem;
 use biome_grit_patterns::{
-    compile_pattern, BuiltInFunction, GritBinding, GritExecContext, GritPattern, GritQuery,
-    GritQueryContext, GritQueryState, GritResolvedPattern, GritTargetFile, GritTargetLanguage,
-    JsTargetLanguage,
+    compile_pattern_with_options, BuiltInFunction, CompilePatternOptions, GritBinding,
+    GritExecContext, GritPattern, GritQuery, GritQueryContext, GritQueryState, GritResolvedPattern,
+    GritTargetFile,
 };
 use biome_parser::AnyParse;
 use biome_rowan::TextRange;
@@ -30,12 +30,8 @@ pub struct AnalyzerGritPlugin {
 impl AnalyzerGritPlugin {
     pub fn load(fs: &dyn FileSystem, path: &Path) -> Result<Self, PluginDiagnostic> {
         let source = fs.read_file_from_path(path)?;
-        let query = compile_pattern(
-            &source,
-            Some(path),
-            // TODO: Target language should be determined dynamically.
-            GritTargetLanguage::JsTargetLanguage(JsTargetLanguage),
-            vec![BuiltInFunction::new(
+        let options = CompilePatternOptions::default()
+            .with_extra_built_ins(vec![BuiltInFunction::new(
                 "register_diagnostic",
                 &[
                     "span",
@@ -46,8 +42,9 @@ impl AnalyzerGritPlugin {
                 ],
                 Box::new(register_diagnostic),
             )
-            .as_predicate()],
-        )?;
+            .as_predicate()])
+            .with_path(path);
+        let query = compile_pattern_with_options(&source, options)?;
 
         Ok(Self {
             grit_query: Rc::new(query),
@@ -80,6 +77,14 @@ impl AnalyzerPlugin for AnalyzerGritPlugin {
                 markup!(<Emphasis>{name}</Emphasis>" errored: "<Error>{error.to_string()}</Error>),
             )],
         }
+    }
+
+    fn supports_css(&self) -> bool {
+        self.grit_query.supports_css()
+    }
+
+    fn supports_js(&self) -> bool {
+        self.grit_query.supports_js()
     }
 }
 

@@ -1,4 +1,7 @@
-use biome_grit_patterns::{compile_pattern, GritTargetFile, GritTargetLanguage, JsTargetLanguage};
+use biome_grit_patterns::{
+    compile_pattern_with_options, CompilePatternOptions, GritTargetFile, GritTargetLanguage,
+    JsTargetLanguage,
+};
 use criterion::measurement::WallTime;
 use std::collections::HashMap;
 use std::path::Path;
@@ -48,11 +51,9 @@ fn bench_gritql_search(criterion: &mut Criterion) {
 pub fn bench_search_group(group: &mut BenchmarkGroup<WallTime>, test_case: TestCase) {
     let target_language = GritTargetLanguage::JsTargetLanguage(JsTargetLanguage);
 
-    let query = compile_pattern(
+    let query = compile_pattern_with_options(
         "`getEntityNameForExtendingInterface(errorLocation)`",
-        Some(Path::new("bench.grit")),
-        target_language.clone(),
-        Vec::new(),
+        CompilePatternOptions::default().with_path(Path::new("bench.grit")),
     )
     .unwrap();
 

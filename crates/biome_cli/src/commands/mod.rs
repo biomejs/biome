@@ -23,6 +23,7 @@ use biome_configuration::{BiomeDiagnostic, PartialConfiguration};
 use biome_console::{markup, Console, ConsoleExt};
 use biome_diagnostics::PrintDiagnostic;
 use biome_fs::{BiomePath, FileSystem};
+use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::{
     load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
 };
@@ -443,6 +444,16 @@ pub enum BiomeCommand {
         /// Example: `echo 'let a;' | biome search '`let $var`' --stdin-file-path=file.js`
         #[bpaf(long("stdin-file-path"), argument("PATH"), hide_usage)]
         stdin_file_path: Option<String>,
+
+        /// The language to which the pattern applies.
+        ///
+        /// Grit queries are specific to the grammar of the language they
+        /// target, so we currently do not support writing queries that apply
+        /// to multiple languages at once.
+        ///
+        /// If none given, the default language is JavaScript.
+        #[bpaf(long("language"), short('l'))]
+        language: Option<GritTargetLanguage>,
 
         /// The GritQL pattern to search for.
         ///
