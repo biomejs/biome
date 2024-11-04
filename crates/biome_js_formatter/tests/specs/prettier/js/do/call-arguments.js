@@ -39,3 +39,7 @@ expect(
     bar;
   }
 ).toThrow(ReferenceError);
+
+useImperativeHandle(ref, () => {
+  return;
+}, []);
