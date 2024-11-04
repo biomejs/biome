@@ -1,13 +1,13 @@
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
-use biome_console::markup;
+use biome_console::{markup, MarkupBuf};
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsCallExpression,
     JsFileSource, JsFormalParameter, JsInitializerClause, JsLanguage, JsObjectExpression,
-    JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember, JsStatementList,
-    JsSyntaxKind, JsVariableDeclarator,
+    JsParameters, JsParenthesizedExpression, JsPropertyClassMember, JsPropertyObjectMember,
+    JsStatementList, JsSyntaxKind, JsVariableDeclarator,
 };
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
@@ -16,16 +16,16 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange};
 
 declare_lint_rule! {
-    /// Require explicit return types on functions and class methods.
+    /// Require explicit argument and return types on functions and class methods.
     ///
     /// Functions in TypeScript often don't need to be given an explicit return type annotation.
     /// Leaving off the return type is less code to read or write and allows the compiler to infer it from the contents of the function.
     ///
-    /// However, explicit return types do make it visually more clear what type is returned by a function.
+    /// However, explicit argument and return types make it visually more clear what types a function accepts and returns.
     /// They can also speed up TypeScript type checking performance in large codebases with many large functions.
-    /// Explicit return types also reduce the chance of bugs by asserting the return type, and it avoids surprising "action at a distance," where changing the body of one function may cause failures inside another function.
+    /// Explicit types also reduce the chance of bugs by asserting both input and output types, and it avoids surprising "action at a distance," where changing the body of one function may cause failures inside another function.
     ///
-    /// This rule enforces that functions do have an explicit return type annotation.
+    /// This rule enforces that functions have explicit type annotations for both their arguments and return type.
     ///
     /// ## Examples
     ///
@@ -105,6 +105,32 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// The following pattern is considered incorrect code for missing an argument type on an function:
+    ///
+    /// ```ts,expect_diagnostic
+    /// export function test(a: number, b): void {
+    ///   return;
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// export const test = (a): void => {
+    ///   return;
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// export default function test(a): void {
+    ///   return;
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// export default (a): void => {
+    ///   return;
+    /// }
+    /// ```
+    ///
     /// ### Valid
     /// ```ts
     /// // No return value should be expected (void)
@@ -115,8 +141,8 @@ declare_lint_rule! {
     ///
     /// ```ts
     /// // A return value of type number
-    /// var fn = function (): number {
-    ///   return 1;
+    /// var fn = function (a: number): number {
+    ///   return a + 1;
     /// }
     /// ```
     ///
@@ -202,22 +228,87 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// The following pattern is considered correct code because it includes both a return type and an argument type on an function:
+    ///
+    /// ```ts
+    /// export function test(a: number, b: number): void {
+    ///   return;
+    /// }
+    /// ```
+    ///
+    /// ```ts
+    /// export default function test(obj: {a: string}): void {
+    ///   return;
+    /// }
+    /// ```
+    ///
+    /// ```ts
+    /// export default (a: SomeType): void => {
+    ///   return;
+    /// }
+    /// ```
+    ///
     pub UseExplicitType {
         version: "1.9.3",
         name: "useExplicitType",
         language: "ts",
         recommended: false,
-        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type")],
+        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type"), RuleSource::EslintTypeScript("explicit-module-boundary-types")],
     }
 }
 
 declare_node_union! {
-    pub AnyJsFunctionWithReturnType = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember | JsGetterClassMember | JsGetterObjectMember
+    pub AnyJsFunctionWithReturnTypeOrJsParameters = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember | JsGetterClassMember | JsGetterObjectMember | JsParameters
+}
+
+pub struct UseExplicitTypeState {
+    range: TextRange,
+    cause: UseExplicitTypeCause,
+}
+
+enum UseExplicitTypeCause {
+    MissingReturnType,
+    MissingArgumentnType(String),
+}
+
+impl UseExplicitTypeState {
+    fn title(&self) -> MarkupBuf {
+        match &self.cause {
+            UseExplicitTypeCause::MissingReturnType => {
+                (markup! {"Missing return type on function."}).to_owned()
+            }
+            UseExplicitTypeCause::MissingArgumentnType(name) => {
+                (markup! {"Argument '"{name}"' should be typed."}).to_owned()
+            }
+        }
+    }
+
+    fn note_reason(&self) -> MarkupBuf {
+        match &self.cause {
+            UseExplicitTypeCause::MissingReturnType => {
+                (markup! {"Declaring the return type makes the code self-documenting and can speed up TypeScript type checking."}).to_owned()
+            }
+            UseExplicitTypeCause::MissingArgumentnType(_) => {
+                (markup! {"Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking."}).to_owned()
+            }
+        }
+    }
+
+    fn note_action(&self) -> MarkupBuf {
+        match &self.cause {
+            UseExplicitTypeCause::MissingReturnType => {
+                (markup! {"Add a return type annotation."}).to_owned()
+            }
+            UseExplicitTypeCause::MissingArgumentnType(_) => {
+                (markup! {"Add type annotations to the function arguments."}).to_owned()
+            }
+        }
+    }
 }
 
 impl Rule for UseExplicitType {
-    type Query = Ast<AnyJsFunctionWithReturnType>;
-    type State = TextRange;
+    type Query = Ast<AnyJsFunctionWithReturnTypeOrJsParameters>;
+    type State = UseExplicitTypeState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -229,7 +320,7 @@ impl Rule for UseExplicitType {
 
         let node = ctx.query();
         match node {
-            AnyJsFunctionWithReturnType::AnyJsFunction(func) => {
+            AnyJsFunctionWithReturnTypeOrJsParameters::AnyJsFunction(func) => {
                 if func.return_type_annotation().is_some() {
                     return None;
                 }
@@ -256,60 +347,71 @@ impl Rule for UseExplicitType {
 
                 let func_range = func.syntax().text_range();
                 if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
-                    return Some(TextRange::new(
-                        func_range.start(),
-                        id.syntax().text_range().end(),
-                    ));
+                    return Some(UseExplicitTypeState {
+                        range: TextRange::new(func_range.start(), id.syntax().text_range().end()),
+                        cause: UseExplicitTypeCause::MissingReturnType,
+                    });
                 }
 
-                Some(func_range)
+                Some(UseExplicitTypeState {
+                    range: func_range,
+                    cause: UseExplicitTypeCause::MissingReturnType,
+                })
             }
-            AnyJsFunctionWithReturnType::JsMethodClassMember(method) => {
+            AnyJsFunctionWithReturnTypeOrJsParameters::JsMethodClassMember(method) => {
                 if method.return_type_annotation().is_some() {
                     return None;
                 }
 
-                Some(method.node_text_range())
+                Some(UseExplicitTypeState {
+                    range: method.node_text_range(),
+                    cause: UseExplicitTypeCause::MissingReturnType,
+                })
             }
-            AnyJsFunctionWithReturnType::JsGetterClassMember(getter) => {
+            AnyJsFunctionWithReturnTypeOrJsParameters::JsGetterClassMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
-                Some(getter.node_text_range())
+                Some(UseExplicitTypeState {
+                    range: getter.node_text_range(),
+                    cause: UseExplicitTypeCause::MissingReturnType,
+                })
             }
-            AnyJsFunctionWithReturnType::JsMethodObjectMember(method) => {
+            AnyJsFunctionWithReturnTypeOrJsParameters::JsMethodObjectMember(method) => {
                 if method.return_type_annotation().is_some() {
                     return None;
                 }
 
-                Some(method.node_text_range())
+                Some(UseExplicitTypeState {
+                    range: method.node_text_range(),
+                    cause: UseExplicitTypeCause::MissingReturnType,
+                })
             }
-            AnyJsFunctionWithReturnType::JsGetterObjectMember(getter) => {
+            AnyJsFunctionWithReturnTypeOrJsParameters::JsGetterObjectMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
-                Some(getter.node_text_range())
+                Some(UseExplicitTypeState {
+                    range: getter.node_text_range(),
+                    cause: UseExplicitTypeCause::MissingReturnType,
+                })
+            }
+            AnyJsFunctionWithReturnTypeOrJsParameters::JsParameters(params) => {
+                if let Some(params_diagnostic) = check_function_parameters_type(params) {
+                    return Some(params_diagnostic);
+                }
+                None
             }
         }
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state,
-                markup! {
-                    "Missing return type on function."
-                },
-            )
-            .note(markup! {
-                "Declaring the return type makes the code self-documenting and can speed up TypeScript type checking."
-            })
-            .note(markup! {
-                "Add a return type annotation."
-            }),
+            RuleDiagnostic::new(rule_category!(), state.range, state.title())
+                .note(state.note_reason())
+                .note(state.note_action()),
         )
     }
 }
@@ -549,4 +651,33 @@ fn is_type_assertion(syntax: &SyntaxNode<JsLanguage>) -> bool {
             is_assertion_kind(parent.kind())
         }
     })
+}
+
+/// Checks if all parameters in a function have explicit type annotations.
+///
+/// This function iterates over the provided function parameters and examines each one
+/// to determine if it has a type annotation. If any parameter is missing a type annotation,
+/// the function returns a `Some(UseExplicitTypeState)` indicating the range of the parameter
+/// and the cause of the issue. If all parameters have type annotations, it returns `None`.
+///
+/// # Arguments
+///
+/// * `parameters` - A reference to a `JsParameters` object representing the parameters of a function.
+///
+/// # Returns
+///
+/// * `Option<UseExplicitTypeState>` - `Some(UseExplicitTypeState)` if a parameter is missing a type annotation,
+///   or `None` if all parameters have explicit type annotations.
+fn check_function_parameters_type(parameters: &JsParameters) -> Option<UseExplicitTypeState> {
+    for p in parameters.items() {
+        let param = p.ok()?;
+        let formal_param = param.as_any_js_formal_parameter()?;
+        if formal_param.type_annotation().is_none() {
+            return Some(UseExplicitTypeState {
+                range: formal_param.range(),
+                cause: UseExplicitTypeCause::MissingArgumentnType(formal_param.text()),
+            });
+        }
+    }
+    None
 }

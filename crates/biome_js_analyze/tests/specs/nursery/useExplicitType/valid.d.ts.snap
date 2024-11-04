@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: valid.d.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -53,4 +54,10 @@ declare var fn: () => number;
 
 declare var arrowFn: () => string;
 
+export default function test(obj: {a: string}): void {
+  return;
+}
+export function add(a: number, b: number): number {
+	return a + b;
+}
 ```

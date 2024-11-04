@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.ts
+snapshot_kind: text
 ---
 # Input
 ```ts
@@ -99,6 +100,18 @@ function fn() {
 
 const x = { prop: () => {} }
 const x = { bar: { prop: () => {} } }
+
+export default (a): void => {
+  return;
+}
+export function test(a: number, b) {
+  return;
+}
+export class Test {
+  method(a): void {
+    return;
+  }
+}
 ```
 
 # Diagnostics
@@ -541,6 +554,7 @@ invalid.ts:94:19 lint/nursery/useExplicitType ━━━━━━━━━━━�
   > 94 │ const x = { prop: () => {} }
        │                   ^^^^^^^^^
     95 │ const x = { bar: { prop: () => {} } }
+    96 │ 
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
@@ -557,10 +571,88 @@ invalid.ts:95:26 lint/nursery/useExplicitType ━━━━━━━━━━━�
     94 │ const x = { prop: () => {} }
   > 95 │ const x = { bar: { prop: () => {} } }
        │                          ^^^^^^^^^
+    96 │ 
+    97 │ export default (a): void => {
   
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
   i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:97:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'a' should be typed.
+  
+    95 │ const x = { bar: { prop: () => {} } }
+    96 │ 
+  > 97 │ export default (a): void => {
+       │                 ^
+    98 │   return;
+    99 │ }
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:100:8 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+     98 │   return;
+     99 │ }
+  > 100 │ export function test(a: number, b) {
+        │        ^^^^^^^^^^^^^
+    101 │   return;
+    102 │ }
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:100:33 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'b' should be typed.
+  
+     98 │   return;
+     99 │ }
+  > 100 │ export function test(a: number, b) {
+        │                                 ^
+    101 │   return;
+    102 │ }
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:104:10 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'a' should be typed.
+  
+    102 │ }
+    103 │ export class Test {
+  > 104 │   method(a): void {
+        │          ^
+    105 │     return;
+    106 │   }
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
   
 
 ```

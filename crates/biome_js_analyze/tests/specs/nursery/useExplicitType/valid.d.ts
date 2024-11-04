@@ -46,3 +46,10 @@ declare function test(): void;
 declare var fn: () => number;
 
 declare var arrowFn: () => string;
+
+export default function test(obj: {a: string}): void {
+  return;
+}
+export function add(a: number, b: number): number {
+	return a + b;
+}

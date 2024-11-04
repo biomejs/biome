@@ -93,3 +93,15 @@ function fn() {
 
 const x = { prop: () => {} }
 const x = { bar: { prop: () => {} } }
+
+export default (a): void => {
+  return;
+}
+export function test(a: number, b) {
+  return;
+}
+export class Test {
+  method(a): void {
+    return;
+  }
+}
