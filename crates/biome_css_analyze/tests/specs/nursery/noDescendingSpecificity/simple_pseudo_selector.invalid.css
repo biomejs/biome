@@ -1,0 +1,7 @@
+a:hover #b {
+    color: red;
+}
+
+a #b {
+    color: red;
+}

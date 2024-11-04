@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+export default abstract class {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExport {
+            decorators: JsDecoratorList [],
+            export_token: EXPORT_KW@0..7 "export" [] [Whitespace(" ")],
+            export_clause: JsExportDefaultDeclarationClause {
+                default_token: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")],
+                declaration: JsClassExportDefaultDeclaration {
+                    decorators: JsDecoratorList [],
+                    abstract_token: ABSTRACT_KW@15..24 "abstract" [] [Whitespace(" ")],
+                    class_token: CLASS_KW@24..30 "class" [] [Whitespace(" ")],
+                    id: missing (optional),
+                    type_parameters: missing (optional),
+                    extends_clause: missing (optional),
+                    implements_clause: missing (optional),
+                    l_curly_token: L_CURLY@30..31 "{" [] [],
+                    members: JsClassMemberList [],
+                    r_curly_token: R_CURLY@31..32 "}" [] [],
+                },
+                semicolon_token: missing (optional),
+            },
+        },
+    ],
+    eof_token: EOF@32..33 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..33
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..32
+    0: JS_EXPORT@0..32
+      0: JS_DECORATOR_LIST@0..0
+      1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
+      2: JS_EXPORT_DEFAULT_DECLARATION_CLAUSE@7..32
+        0: DEFAULT_KW@7..15 "default" [] [Whitespace(" ")]
+        1: JS_CLASS_EXPORT_DEFAULT_DECLARATION@15..32
+          0: JS_DECORATOR_LIST@15..15
+          1: ABSTRACT_KW@15..24 "abstract" [] [Whitespace(" ")]
+          2: CLASS_KW@24..30 "class" [] [Whitespace(" ")]
+          3: (empty)
+          4: (empty)
+          5: (empty)
+          6: (empty)
+          7: L_CURLY@30..31 "{" [] []
+          8: JS_CLASS_MEMBER_LIST@31..31
+          9: R_CURLY@31..32 "}" [] []
+        2: (empty)
+  4: EOF@32..33 "" [Newline("\n")] []
+
+```

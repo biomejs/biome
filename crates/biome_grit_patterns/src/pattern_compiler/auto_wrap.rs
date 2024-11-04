@@ -8,7 +8,6 @@ use grit_pattern_matcher::pattern::{
     Where,
 };
 use grit_util::FileRange;
-use std::collections::BTreeMap;
 
 pub fn auto_wrap_pattern<Q: QueryContext>(
     pattern: Pattern<Q>,
@@ -56,10 +55,7 @@ pub fn auto_wrap_pattern<Q: QueryContext>(
         } else {
             second_wrap
         };
-        wrap_pattern_in_before_and_after_each_file(
-            third_wrap,
-            &context.compilation.pattern_definition_info,
-        )?
+        wrap_pattern_in_before_and_after_each_file(third_wrap, context)?
     } else {
         pattern
     };
@@ -79,10 +75,10 @@ fn is_sequential<Q: QueryContext>(
         Pattern::Where(w) => is_sequential(&w.pattern, pattern_definitions),
         Pattern::Maybe(m) => is_sequential(&m.pattern, pattern_definitions),
         Pattern::Rewrite(r) => is_sequential(&r.left, pattern_definitions),
-        Pattern::Bubble(b) => is_sequential(&b.pattern_def.pattern, pattern_definitions),
+        Pattern::Bubble(b) => is_sequential(b.pattern_def.pattern(), pattern_definitions),
         Pattern::Limit(l) => is_sequential(&l.pattern, pattern_definitions),
         Pattern::Call(call) => is_sequential(
-            &pattern_definitions[call.index].pattern,
+            pattern_definitions[call.index].pattern(),
             pattern_definitions,
         ),
         Pattern::AstNode(_)
@@ -96,6 +92,7 @@ fn is_sequential<Q: QueryContext>(
         | Pattern::CallBuiltIn(_)
         | Pattern::CallFunction(_)
         | Pattern::CallForeignFunction(_)
+        | Pattern::CallbackPattern(_)
         | Pattern::Assignment(_)
         | Pattern::Accumulate(_)
         | Pattern::And(_)
@@ -145,10 +142,10 @@ pub(crate) fn should_autowrap<Q: QueryContext>(
         Pattern::Where(w) => should_autowrap(&w.pattern, pattern_definitions),
         Pattern::Maybe(m) => should_autowrap(&m.pattern, pattern_definitions),
         Pattern::Rewrite(r) => should_autowrap(&r.left, pattern_definitions),
-        Pattern::Bubble(b) => should_autowrap(&b.pattern_def.pattern, pattern_definitions),
+        Pattern::Bubble(b) => should_autowrap(b.pattern_def.pattern(), pattern_definitions),
         Pattern::Limit(l) => should_autowrap(&l.pattern, pattern_definitions),
         Pattern::Call(call) => should_autowrap(
-            &pattern_definitions[call.index].pattern,
+            pattern_definitions[call.index].pattern(),
             pattern_definitions,
         ),
         Pattern::AstNode(_)
@@ -161,6 +158,7 @@ pub(crate) fn should_autowrap<Q: QueryContext>(
         | Pattern::CallBuiltIn(_)
         | Pattern::CallFunction(_)
         | Pattern::CallForeignFunction(_)
+        | Pattern::CallbackPattern(_)
         | Pattern::Assignment(_)
         | Pattern::Accumulate(_)
         | Pattern::And(_)
@@ -220,26 +218,26 @@ fn extract_limit_pattern<Q: QueryContext>(
                 Pattern::Rewrite(Box::new(Rewrite::new(extracted.0, r.right, r.annotation)));
             (pattern, extracted.1)
         }
-        Pattern::Bubble(b) => {
-            let extracted = extract_limit_pattern(b.pattern_def.pattern, pattern_definitions);
+        Pattern::Bubble(bubble) => {
+            let extracted =
+                extract_limit_pattern(bubble.pattern_def.pattern().clone(), pattern_definitions);
             let pattern = Pattern::Bubble(Box::new(Bubble::new(
                 PatternDefinition::new(
-                    b.pattern_def.name.clone(),
-                    b.pattern_def.scope,
-                    b.pattern_def.params.clone(),
-                    b.pattern_def.local_vars.clone(),
+                    bubble.pattern_def.name.clone(),
+                    bubble.pattern_def.try_scope().unwrap(),
+                    bubble.pattern_def.params().clone(),
                     extracted.0,
                 ),
-                b.args.into_iter().flatten().collect(),
+                bubble.args.into_iter().flatten().collect(),
             )));
             (pattern, extracted.1)
         }
         Pattern::Call(call) => {
             let (new_pattern, extracted_limit) = extract_limit_pattern(
-                pattern_definitions[call.index].pattern.clone(),
+                pattern_definitions[call.index].pattern().clone(),
                 pattern_definitions,
             );
-            pattern_definitions[call.index].pattern = new_pattern;
+            pattern_definitions[call.index].replace_pattern(new_pattern);
             (Pattern::Call(call), extracted_limit)
         }
         Pattern::AstNode(_)
@@ -255,6 +253,7 @@ fn extract_limit_pattern<Q: QueryContext>(
         | Pattern::CallBuiltIn(_)
         | Pattern::CallFunction(_)
         | Pattern::CallForeignFunction(_)
+        | Pattern::CallbackPattern(_)
         | Pattern::Assignment(_)
         | Pattern::Accumulate(_)
         | Pattern::And(_)
@@ -303,10 +302,10 @@ fn should_wrap_in_file<Q: QueryContext>(
         Pattern::Where(w) => should_wrap_in_file(&w.pattern, pattern_definitions),
         Pattern::Maybe(m) => should_wrap_in_file(&m.pattern, pattern_definitions),
         Pattern::Rewrite(r) => should_wrap_in_file(&r.left, pattern_definitions),
-        Pattern::Bubble(b) => should_wrap_in_file(&b.pattern_def.pattern, pattern_definitions),
+        Pattern::Bubble(b) => should_wrap_in_file(b.pattern_def.pattern(), pattern_definitions),
         Pattern::Limit(l) => should_wrap_in_file(&l.pattern, pattern_definitions),
         Pattern::Call(call) => should_wrap_in_file(
-            &pattern_definitions[call.index].pattern,
+            pattern_definitions[call.index].pattern(),
             pattern_definitions,
         ),
         Pattern::AstNode(_)
@@ -319,6 +318,7 @@ fn should_wrap_in_file<Q: QueryContext>(
         | Pattern::CallBuiltIn(_)
         | Pattern::CallFunction(_)
         | Pattern::CallForeignFunction(_)
+        | Pattern::CallbackPattern(_)
         | Pattern::Assignment(_)
         | Pattern::Accumulate(_)
         | Pattern::And(_)
@@ -368,7 +368,7 @@ fn wrap_pattern_in_range<Q: QueryContext>(
         let range = file_range.range.clone();
         let range = Range::from(range);
         let range_match = Predicate::Match(Box::new(Match::new(
-            Container::Variable(var),
+            Container::Variable(var.clone()),
             Some(Pattern::Range(range)),
         )));
         let file_match = Predicate::Match(Box::new(Match::new(
@@ -389,7 +389,7 @@ fn wrap_pattern_in_range<Q: QueryContext>(
         Predicate::Or(Box::new(PrOr::new(predicates))),
     )));
     let pattern = Pattern::Where(Box::new(Where::new(
-        Pattern::Variable(var),
+        Pattern::Variable(var.clone()),
         Predicate::Match(Box::new(Match::new(
             Container::Variable(var),
             Some(pattern),
@@ -405,19 +405,14 @@ fn wrap_pattern_in_contains<Q: QueryContext>(
 ) -> Result<Pattern<Q>, CompileError> {
     let var = context.variable_from_name(var_name);
     let pattern = Pattern::Where(Box::new(Where::new(
-        Pattern::Variable(var),
+        Pattern::Variable(var.clone()),
         Predicate::Match(Box::new(Match::new(
             Container::Variable(var),
             Some(pattern),
         ))),
     )));
-    let pattern_definition = PatternDefinition::new(
-        "<bubble>".to_string(),
-        context.scope_index,
-        vec![],
-        context.vars.values().copied().collect(),
-        pattern,
-    );
+    let pattern_definition =
+        PatternDefinition::new("<bubble>".to_string(), context.scope_index, vec![], pattern);
     let bubble = Pattern::Bubble(Box::new(Bubble::new(pattern_definition, vec![])));
     Ok(Pattern::Contains(Box::new(Contains::new(bubble, None))))
 }
@@ -429,7 +424,7 @@ fn wrap_pattern_in_file<Q: QueryContext>(pattern: Pattern<Q>) -> Result<Pattern<
 
 pub(crate) fn wrap_pattern_in_before_and_after_each_file<Q: QueryContext>(
     pattern: Pattern<Q>,
-    pattern_definition_info: &BTreeMap<String, DefinitionInfo>,
+    context: &mut NodeCompilationContext<'_>,
 ) -> Result<Pattern<Q>, CompileError> {
     let before_each_file = "before_each_file";
     let after_each_file = "after_each_file";
@@ -437,7 +432,7 @@ pub(crate) fn wrap_pattern_in_before_and_after_each_file<Q: QueryContext>(
     if let Some(DefinitionInfo {
         index,
         parameters: _,
-    }) = pattern_definition_info.get(before_each_file)
+    }) = context.get_pattern_definition(before_each_file)
     {
         all_steps.push(Pattern::Call(Box::new(Call::new(*index, vec![]))));
     }
@@ -446,7 +441,7 @@ pub(crate) fn wrap_pattern_in_before_and_after_each_file<Q: QueryContext>(
     if let Some(DefinitionInfo {
         index,
         parameters: _,
-    }) = pattern_definition_info.get(after_each_file)
+    }) = context.get_pattern_definition(after_each_file)
     {
         all_steps.push(Pattern::Call(Box::new(Call::new(*index, vec![]))));
     }

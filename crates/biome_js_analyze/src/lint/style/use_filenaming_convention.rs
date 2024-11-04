@@ -1,40 +1,41 @@
-use crate::services::semantic::SemanticServices;
+use crate::{services::semantic::SemanticServices, utils::restricted_regex::RestrictedRegex};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource, RuleSourceKind,
 };
 use biome_console::markup;
+use biome_deserialize::DeserializableValidator;
 use biome_deserialize_macros::Deserializable;
-use biome_rowan::TextRange;
+use biome_js_syntax::{
+    binding_ext::AnyJsIdentifierBinding, AnyJsIdentifierUsage, JsExportNamedSpecifier,
+};
+use biome_rowan::{AstNode, TextRange};
 use biome_string_case::{Case, Cases};
-use rustc_hash::FxHashSet;
-use serde::{Deserialize, Serialize};
-use std::{hash::Hash, str::FromStr};
-
-use biome_deserialize::{DeserializableValue, DeserializationDiagnostic};
-#[cfg(feature = "schemars")]
-use schemars::JsonSchema;
 use smallvec::SmallVec;
+use std::{hash::Hash, str::FromStr};
 
 declare_lint_rule! {
     /// Enforce naming conventions for JavaScript and TypeScript filenames.
     ///
     /// Enforcing [naming conventions](https://en.wikipedia.org/wiki/Naming_convention_(programming)) helps to keep the codebase consistent.
     ///
-    /// A filename consists of two parts: a name and a set of consecutive extension.
+    /// A filename consists of two parts: a name and a set of consecutive extensions.
     /// For instance, `my-filename.test.js` has `my-filename` as name, and two consecutive extensions: `.test` and `.js`.
     ///
-    /// The filename can start with a dot or a plus sign, be prefixed and suffixed by underscores `_`.
-    /// For example, `.filename.js`, `+filename.js`, `__filename__.js`, or even `.__filename__.js`.
-    ///
-    /// The convention of prefixing a filename with a plus sign is used by
-    /// [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
-    ///
-    /// Also, the rule supports dynamic route syntaxes of [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments), [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index), [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route), and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters).
-    /// For example `[...slug].js` and `[[...slug]].js` are valid filenames.
-    ///
-    /// By default, the rule ensures that the filename is either in [`camelCase`], [`kebab-case`], [`snake_case`],
+    /// By default, the rule ensures that the name is either in [`camelCase`], [`kebab-case`], [`snake_case`],
     /// or equal to the name of one export in the file.
     /// By default, the rule ensures that the extensions are either in [`camelCase`], [`kebab-case`], or [`snake_case`].
+    ///
+    /// The rule supports the following exceptions:
+    ///
+    /// - The name of the file can start with a dot or a plus sign, be prefixed and suffixed by underscores `_`.
+    ///   For example, `.filename.js`, `+filename.js`, `__filename__.js`, or even `.__filename__.js`.
+    ///
+    ///   The convention of prefixing a filename with a plus sign is used by [Sveltekit](https://kit.svelte.dev/docs/routing#page) and [Vike](https://vike.dev/route).
+    ///
+    /// - Also, the rule supports dynamic route syntaxes of [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments), [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index), [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route), and [Astro](https://docs.astro.build/en/guides/routing/#rest-parameters).
+    ///   For example `[...slug].js` and `[[...slug]].js` are valid filenames.
+    ///
+    /// Note that if you specify the `match' option, the previous exceptions will no longer be handled.
     ///
     /// ## Ignoring some files
     ///
@@ -64,12 +65,13 @@ declare_lint_rule! {
     ///
     /// The rule provides several options that are detailed in the following subsections.
     ///
-    /// ```json
+    /// ```json5
     /// {
     ///     "//": "...",
     ///     "options": {
     ///         "strictCase": false,
     ///         "requireAscii": true,
+    ///         "match": "%?(.+?)[.](.+)", // Since v2.0.0
     ///         "filenameCases": ["camelCase", "export"]
     ///     }
     /// }
@@ -97,6 +99,31 @@ declare_lint_rule! {
     /// Default: `false`
     ///
     /// **This option will be turned on by default in Biome 2.0.**
+    ///
+    /// ### match (Since v2.0.0)
+    ///
+    /// `match` defines a regular expression that the filename must match.
+    /// If the regex has capturing groups, then the first capture is considered as the filename
+    /// and the second one as file extensions separated by dots.
+    ///
+    /// For example, given the regular expression `%?(.+?)\.(.+)` and the filename `%index.d.ts`,
+    /// the filename matches the regular expression with two captures: `index` and `d.ts`.
+    /// The captures are checked against `filenameCases`.
+    /// Note that we use the non-greedy quantifier `+?` to stop capturing as soon as we met the next character (`.`).
+    /// If we use the greedy quantifier `+` instead, then the captures could be `index.d` and `ts`.
+    ///
+    /// The regular expression supports the following syntaxes:
+    ///
+    /// - Greedy quantifiers `*`, `?`, `+`, `{n}`, `{n,m}`, `{n,}`, `{m}`
+    /// - Non-greedy quantifiers `*?`, `??`, `+?`, `{n}?`, `{n,m}?`, `{n,}?`, `{m}?`
+    /// - Any character matcher `.`
+    /// - Character classes `[a-z]`, `[xyz]`, `[^a-z]`
+    /// - Alternations `|`
+    /// - Capturing groups `()`
+    /// - Non-capturing groups `(?:)`
+    /// - Case-insensitive groups `(?i:)` and case-sensitive groups `(?-i:)`
+    /// - A limited set of escaped characters including all special characters
+    ///   and regular string escape characters `\f`, `\n`, `\r`, `\t`, `\v`
     ///
     /// ### filenameCases
     ///
@@ -136,7 +163,23 @@ impl Rule for UseFilenamingConvention {
             return Some(FileNamingConventionState::Ascii);
         }
         let first_char = file_name.bytes().next()?;
-        let (name, mut extensions) = if matches!(first_char, b'(' | b'[') {
+        let (name, mut extensions) = if let Some(matching) = &options.matching {
+            let Some(captures) = matching.captures(file_name) else {
+                return Some(FileNamingConventionState::Match);
+            };
+            let mut captures = captures.iter().skip(1).flatten();
+            let Some(first_capture) = captures.next() else {
+                // Match without any capture implies a valid case
+                return None;
+            };
+            let name = first_capture.as_str();
+            if name.is_empty() {
+                // Empty string are always valid.
+                return None;
+            }
+            let split = captures.next().map_or("", |x| x.as_str()).split('.');
+            (name, split)
+        } else if matches!(first_char, b'(' | b'[') {
             // Support [Next.js](https://nextjs.org/docs/pages/building-your-application/routing/dynamic-routes#catch-all-segments),
             // [SolidStart](https://docs.solidjs.com/solid-start/building-your-application/routing#renaming-index),
             // [Nuxt](https://nuxt.com/docs/guide/directory-structure/server#catch-all-route),
@@ -189,7 +232,7 @@ impl Rule for UseFilenamingConvention {
             };
             (name, split)
         };
-        let allowed_cases = options.filename_cases.cases();
+        let allowed_cases = options.filename_cases.cases;
         let allowed_extension_cases = allowed_cases | Case::Lower;
         // Check extension case
         if extensions.any(|extension| {
@@ -208,15 +251,22 @@ impl Rule for UseFilenamingConvention {
                 return None;
             }
         }
-        if options.filename_cases.0.contains(&FilenameCase::Export) {
+        if options.filename_cases.allow_export {
             // If no exported binding has the file name, then reports the filename
-            let model = ctx.model();
-            model
-                .all_bindings()
-                .map(|binding| binding.tree())
-                .filter(|binding| model.is_exported(binding))
-                .filter_map(|exported_binding| exported_binding.name_token().ok())
-                .all(|exported_name_token| exported_name_token.text_trimmed() != name)
+            ctx.model()
+                .all_exported_bindings()
+                .all(|exported_binding| {
+                    exported_binding
+                        .exports()
+                        .filter_map(|export| match AnyJsIdentifierBinding::try_cast(export) {
+                            Ok(id) => id.name_token().ok(),
+                            Err(export) => match JsExportNamedSpecifier::cast(export.parent()?) {
+                                Some(specifier) => specifier.exported_name().ok()?.value().ok(),
+                                None => AnyJsIdentifierUsage::cast(export)?.value_token().ok(),
+                            },
+                        })
+                        .all(|exported_name_token| exported_name_token.text_trimmed() != name)
+                })
                 .then_some(FileNamingConventionState::Filename)
         } else {
             Some(FileNamingConventionState::Filename)
@@ -239,9 +289,9 @@ impl Rule for UseFilenamingConvention {
                 }))
             },
             FileNamingConventionState::Filename => {
-                let allowed_cases = options.filename_cases.cases();
+                let allowed_cases = options.filename_cases.cases;
                 let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
-                let allowed_case_names = if options.filename_cases.0.contains(&FilenameCase::Export) {
+                let allowed_case_names = if options.filename_cases.allow_export {
                     allowed_case_names
                         .chain(["equal to the name of an export".to_string()])
                         .collect::<SmallVec<[_; 4]>>()
@@ -267,7 +317,7 @@ impl Rule for UseFilenamingConvention {
                 } else {
                     markup! {""}.to_owned()
                 };
-                if options.strict_case && options.filename_cases.0.contains(&FilenameCase::Camel) {
+                if options.strict_case && options.filename_cases.cases.contains(Case::Camel) {
                     let case_type = Case::identify(trimmed_name, false);
                     let case_strict = Case::identify(trimmed_name, true);
                     if case_type == Case::Camel && case_strict == Case::Unknown {
@@ -282,22 +332,18 @@ impl Rule for UseFilenamingConvention {
                         }));
                     }
                 }
-                let suggested_filenames = allowed_cases
+                let mut suggested_filenames = allowed_cases
                     .into_iter()
-                    .filter_map(|case| {
-                        let new_trimmed_name = case.convert(trimmed_name);
-                        // Filter out names that have not an allowed case
-                        if allowed_cases.contains(Case::identify(&new_trimmed_name, options.strict_case)) {
-                            Some(file_name.replacen(trimmed_name, &new_trimmed_name, 1))
-                        } else {
-                            None
-                        }
-                    })
-                    // Deduplicate suggestions
-                    .collect::<FxHashSet<_>>()
-                    .into_iter()
-                    .collect::<SmallVec<[_; 3]>>()
-                    .join("\n");
+                    .map(|case| case.convert(trimmed_name).into_boxed_str())
+                    .filter(|new_trimmed_name| allowed_cases.contains(Case::identify(new_trimmed_name, options.strict_case)))
+                    .collect::<SmallVec<[_; 4]>>();
+                // We sort and deduplicate the suggested names
+                suggested_filenames.sort();
+                suggested_filenames.dedup();
+                for i in 0..suggested_filenames.len() {
+                    suggested_filenames[i] = file_name.replacen(trimmed_name, &suggested_filenames[i], 1).into_boxed_str();
+                }
+                let suggested_filenames = suggested_filenames.join("\n");
                 let diagnostic = RuleDiagnostic::new(
                     rule_category!(),
                     None as Option<TextRange>,
@@ -313,7 +359,7 @@ impl Rule for UseFilenamingConvention {
                 }))
             },
             FileNamingConventionState::Extension => {
-                let allowed_cases = options.filename_cases.cases() | Case::Lower;
+                let allowed_cases = options.filename_cases.cases | Case::Lower;
                 let allowed_case_names = allowed_cases.into_iter().map(|case| case.to_string());
                 let allowed_case_names = allowed_case_names.collect::<SmallVec<[_; 4]>>().join(" or ");
                 Some(RuleDiagnostic::new(
@@ -324,6 +370,16 @@ impl Rule for UseFilenamingConvention {
                     },
                 ))
             },
+            FileNamingConventionState::Match => {
+                let matching = options.matching.as_ref()?.as_str();
+                Some(RuleDiagnostic::new(
+                    rule_category!(),
+                    None as Option<TextRange>,
+                    markup! {
+                        "This filename should match the following regex "<Emphasis>"/"{matching}"/"</Emphasis>"."
+                    },
+                ))
+            }
         }
     }
 }
@@ -336,24 +392,30 @@ pub enum FileNamingConventionState {
     Filename,
     /// An extension is not in lowercase
     Extension,
+    /// The filename doesn't match the provided regex
+    Match,
 }
 
 /// Rule's options.
-#[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[derive(Clone, Debug, serde::Deserialize, Deserializable, Eq, PartialEq, serde::Serialize)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct FilenamingConventionOptions {
     /// If `false`, then consecutive uppercase are allowed in _camel_ and _pascal_ cases.
     /// This does not affect other [Case].
-    #[serde(default = "enabled", skip_serializing_if = "is_enabled")]
+    #[serde(default = "enabled", skip_serializing_if = "bool::clone")]
     pub strict_case: bool,
 
     /// If `false`, then non-ASCII characters are allowed.
     #[serde(default, skip_serializing_if = "is_default")]
     pub require_ascii: bool,
 
+    /// Regular expression to enforce
+    #[serde(default, rename = "match", skip_serializing_if = "Option::is_none")]
+    pub matching: Option<RestrictedRegex>,
+
     /// Allowed cases for file names.
-    #[serde(default, skip_serializing_if = "is_default_filename_cases")]
+    #[serde(default, skip_serializing_if = "is_default")]
     pub filename_cases: FilenameCases,
 }
 
@@ -361,16 +423,8 @@ const fn enabled() -> bool {
     true
 }
 
-const fn is_enabled(value: &bool) -> bool {
-    *value
-}
-
 fn is_default<T: Default + Eq>(value: &T) -> bool {
     value == &T::default()
-}
-
-fn is_default_filename_cases(value: &FilenameCases) -> bool {
-    value.0.len() == 4 && !value.0.contains(&FilenameCase::Pascal)
 }
 
 impl Default for FilenamingConventionOptions {
@@ -378,65 +432,104 @@ impl Default for FilenamingConventionOptions {
         Self {
             strict_case: true,
             require_ascii: false,
+            matching: None,
             filename_cases: FilenameCases::default(),
         }
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-pub struct FilenameCases(FxHashSet<FilenameCase>);
-
-impl FilenameCases {
-    fn cases(&self) -> Cases {
-        self.0
-            .iter()
-            .filter_map(|case| Case::try_from(*case).ok())
-            .fold(Cases::empty(), |acc, case| acc | case)
+#[derive(
+    Clone, Copy, Debug, Deserializable, Eq, Hash, PartialEq, serde::Deserialize, serde::Serialize,
+)]
+#[serde(
+    from = "SmallVec<[FilenameCase; 5]>",
+    into = "SmallVec<[FilenameCase; 5]>"
+)]
+#[deserializable(with_validator)]
+pub struct FilenameCases {
+    cases: Cases,
+    /// `true` is the filename can be equal to the name of an export.
+    allow_export: bool,
+}
+impl From<SmallVec<[FilenameCase; 5]>> for FilenameCases {
+    fn from(values: SmallVec<[FilenameCase; 5]>) -> Self {
+        Self::from_iter(values)
     }
 }
-
 impl FromIterator<FilenameCase> for FilenameCases {
-    fn from_iter<T: IntoIterator<Item = FilenameCase>>(iter: T) -> Self {
-        Self(FxHashSet::from_iter(iter))
+    fn from_iter<T: IntoIterator<Item = FilenameCase>>(values: T) -> Self {
+        let mut result = Self {
+            cases: Cases::empty(),
+            allow_export: false,
+        };
+        for filename_case in values {
+            if let Ok(case) = Case::try_from(filename_case) {
+                result.cases |= case;
+            } else {
+                result.allow_export = true;
+            }
+        }
+        result
     }
 }
-
+impl From<FilenameCases> for SmallVec<[FilenameCase; 5]> {
+    fn from(value: FilenameCases) -> Self {
+        let maybe_export = if value.allow_export {
+            &[FilenameCase::Export][..]
+        } else {
+            &[]
+        };
+        value
+            .cases
+            .into_iter()
+            .filter_map(|case| FilenameCase::try_from(case).ok())
+            .chain(maybe_export.iter().copied())
+            .collect()
+    }
+}
+#[cfg(feature = "schemars")]
+impl schemars::JsonSchema for FilenameCases {
+    fn schema_name() -> String {
+        "FilenameCases".to_string()
+    }
+    fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
+        <std::collections::HashSet<FilenameCase>>::json_schema(gen)
+    }
+}
 impl Default for FilenameCases {
     fn default() -> Self {
-        Self(FxHashSet::from_iter([
-            FilenameCase::Camel,
-            FilenameCase::Export,
-            FilenameCase::Kebab,
-            FilenameCase::Snake,
-        ]))
+        Self {
+            cases: Case::Camel | Case::Kebab | Case::Snake,
+            allow_export: true,
+        }
     }
 }
-
-impl biome_deserialize::Deserializable for FilenameCases {
-    fn deserialize(
-        value: &impl DeserializableValue,
+impl DeserializableValidator for FilenameCases {
+    fn validate(
+        &mut self,
         name: &str,
-        diagnostics: &mut Vec<DeserializationDiagnostic>,
-    ) -> Option<Self> {
-        let cases: FxHashSet<_> =
-            biome_deserialize::Deserializable::deserialize(value, name, diagnostics)?;
-        if cases.is_empty() {
+        range: TextRange,
+        diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
+    ) -> bool {
+        if !self.allow_export && self.cases.is_empty() {
             diagnostics.push(
-                DeserializationDiagnostic::new(markup! {
+                biome_deserialize::DeserializationDiagnostic::new(markup! {
                     ""<Emphasis>{name}</Emphasis>" cannot be an empty array."
                 })
-                .with_range(value.range()),
+                .with_range(range),
             );
-            return None;
+            false
+        } else {
+            true
         }
-        Some(Self(cases))
     }
 }
 
 /// Supported cases for file names.
-#[derive(Clone, Copy, Debug, Deserialize, Deserializable, Eq, Hash, PartialEq, Serialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[derive(
+    Clone, Copy, Debug, serde::Deserialize, Deserializable, Eq, Hash, PartialEq, serde::Serialize,
+)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 pub enum FilenameCase {
     /// camelCase
     #[serde(rename = "camelCase")]
@@ -458,7 +551,6 @@ pub enum FilenameCase {
     #[serde(rename = "snake_case")]
     Snake,
 }
-
 impl FilenameCase {
     pub const ALLOWED_VARIANTS: &'static [&'static str] = &[
         "camelCase",
@@ -468,7 +560,6 @@ impl FilenameCase {
         "snake_case",
     ];
 }
-
 impl FromStr for FilenameCase {
     type Err = &'static str;
 
@@ -483,7 +574,6 @@ impl FromStr for FilenameCase {
         }
     }
 }
-
 impl TryFrom<FilenameCase> for Case {
     type Error = &'static str;
 
@@ -494,6 +584,25 @@ impl TryFrom<FilenameCase> for Case {
             FilenameCase::Kebab => Ok(Self::Kebab),
             FilenameCase::Pascal => Ok(Self::Pascal),
             FilenameCase::Snake => Ok(Self::Snake),
+        }
+    }
+}
+impl TryFrom<Case> for FilenameCase {
+    type Error = &'static str;
+
+    fn try_from(value: Case) -> Result<Self, Self::Error> {
+        match value {
+            Case::Camel => Ok(FilenameCase::Camel),
+            Case::Kebab => Ok(FilenameCase::Kebab),
+            Case::Pascal => Ok(FilenameCase::Pascal),
+            Case::Snake => Ok(FilenameCase::Snake),
+            Case::Constant
+            | Case::Lower
+            | Case::Number
+            | Case::NumberableCapital
+            | Case::Uni
+            | Case::Upper
+            | Case::Unknown => Err("Unsupported case"),
         }
     }
 }

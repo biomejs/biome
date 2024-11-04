@@ -92,7 +92,7 @@ declare_lint_rule! {
 impl Rule for NoDuplicateCase {
     type Query = Ast<JsSwitchStatement>;
     type State = (TextRange, TextRange);
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -113,7 +113,7 @@ impl Rule for NoDuplicateCase {
                 }
             }
         }
-        signals
+        signals.into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

@@ -7,7 +7,7 @@ use biome_js_analyze::lint::a11y::use_valid_aria_role;
 
 #[derive(Debug, Default, Deserializable)]
 pub(crate) struct AriaRoleOptions {
-    allowed_invalid_roles: Vec<String>,
+    allowed_invalid_roles: Box<[Box<str>]>,
     #[deserializable(rename = "ignoreNonDOM")]
     ignore_non_dom: bool,
 }

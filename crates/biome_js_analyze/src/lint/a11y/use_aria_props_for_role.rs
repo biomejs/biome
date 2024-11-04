@@ -49,7 +49,7 @@ declare_lint_rule! {
 
 #[derive(Default, Debug)]
 pub struct UseAriaPropsForRoleState {
-    missing_aria_props: Vec<String>,
+    missing_aria_props: Box<[String]>,
     attribute: Option<(JsxAttribute, String)>,
 }
 
@@ -121,7 +121,7 @@ impl Rule for UseAriaPropsForRole {
             if !missing_aria_props.is_empty() {
                 return Some(UseAriaPropsForRoleState {
                     attribute: Some((role_attribute, name.text().to_string())),
-                    missing_aria_props,
+                    missing_aria_props: missing_aria_props.into_boxed_slice(),
                 });
             }
         }

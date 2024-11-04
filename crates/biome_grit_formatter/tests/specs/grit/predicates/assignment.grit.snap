@@ -1,0 +1,39 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/predicates/assignment.grit
+---
+# Input
+
+```grit
+`console.log($message)` as $log where{
+$new_log_call=`logger.log($message)`}
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+`console.log($message)` as $log where {
+	$new_log_call = `logger.log($message)`
+}
+```
+
+
+
+## Unimplemented nodes/tokens
+
+"`console.log($message)` as $log " => 0..32
+"\t$new_log_call" => 40..54
+" `logger.log($message)" => 56..78

@@ -1,0 +1,38 @@
+name: Needs reproduction
+
+on:
+  issues:
+    types: [ labeled ]
+
+permissions:
+  issues: write
+
+jobs:
+  reply-labeled:
+    if: github.repository == 'biomejs/biome'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove triaging label
+        if: contains(github.event.issue.labels.*.name, 'S-Bug-confirmed') && contains(github.event.issue.labels.*.name, 'S-Needs triage')
+        uses: actions-cool/issues-helper@a610082f8ac0cf03e357eb8dd0d5e2ba075e017e # v3.6.0
+        with:
+          actions: "remove-labels"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          labels: "S-Needs triage"
+
+      - name: Needs reproduction
+        if: github.event.label.name == 'S-Needs repro'
+        uses: actions-cool/issues-helper@a610082f8ac0cf03e357eb8dd0d5e2ba075e017e # v3.6.0
+        with:
+          actions: "create-comment, remove-labels"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Hello @${{ github.event.issue.user.login }}, please provide a minimal reproduction. You can use one of the following options:
+
+            - Provide a link to [our playground](https://biomejs.dev/playground), if it's applicable.
+            - Provide a link to GitHub repository. To easily create a reproduction, you can use our interactive CLI via `npm create @biomejs/biome-reproduction`
+
+            Issues marked with `S-Needs repro` will be **closed** if they have **no activity within 3 days**.
+          labels: "S-Needs triage"

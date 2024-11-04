@@ -77,18 +77,18 @@ declare_node_union! {
 impl Rule for NoUnusedPrivateClassMembers {
     type Query = Ast<JsClassDeclaration>;
     type State = AnyMember;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let private_members: FxHashSet<AnyMember> = get_all_declared_private_members(node);
-
         if private_members.is_empty() {
-            return vec![];
+            Vec::new()
+        } else {
+            traverse_members_usage(node.syntax(), private_members)
         }
-
-        traverse_members_usage(node.syntax(), private_members)
+        .into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

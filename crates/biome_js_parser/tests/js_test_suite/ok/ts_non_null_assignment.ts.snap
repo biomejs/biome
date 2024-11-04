@@ -1,0 +1,184 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+let a;
+a! &= 2;
+let b = { a: null };
+b.a! &= 5
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..5 "a" [] [],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@5..6 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: TsNonNullAssertionAssignment {
+                    assignment: JsIdentifierAssignment {
+                        name_token: IDENT@6..8 "a" [Newline("\n")] [],
+                    },
+                    excl_token: BANG@8..10 "!" [] [Whitespace(" ")],
+                },
+                operator_token: AMPEQ@10..13 "&=" [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@13..14 "2" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@14..15 ";" [] [],
+        },
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@15..20 "let" [Newline("\n")] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@20..22 "b" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@22..24 "=" [] [Whitespace(" ")],
+                            expression: JsObjectExpression {
+                                l_curly_token: L_CURLY@24..26 "{" [] [Whitespace(" ")],
+                                members: JsObjectMemberList [
+                                    JsPropertyObjectMember {
+                                        name: JsLiteralMemberName {
+                                            value: IDENT@26..27 "a" [] [],
+                                        },
+                                        colon_token: COLON@27..29 ":" [] [Whitespace(" ")],
+                                        value: JsNullLiteralExpression {
+                                            value_token: NULL_KW@29..34 "null" [] [Whitespace(" ")],
+                                        },
+                                    },
+                                ],
+                                r_curly_token: R_CURLY@34..35 "}" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@35..36 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsAssignmentExpression {
+                left: TsNonNullAssertionAssignment {
+                    assignment: JsStaticMemberAssignment {
+                        object: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@36..38 "b" [Newline("\n")] [],
+                            },
+                        },
+                        dot_token: DOT@38..39 "." [] [],
+                        member: JsName {
+                            value_token: IDENT@39..40 "a" [] [],
+                        },
+                    },
+                    excl_token: BANG@40..42 "!" [] [Whitespace(" ")],
+                },
+                operator_token: AMPEQ@42..45 "&=" [] [Whitespace(" ")],
+                right: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@45..46 "5" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@46..47 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..47
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..46
+    0: JS_VARIABLE_STATEMENT@0..6
+      0: JS_VARIABLE_DECLARATION@0..5
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..5
+          0: JS_VARIABLE_DECLARATOR@4..5
+            0: JS_IDENTIFIER_BINDING@4..5
+              0: IDENT@4..5 "a" [] []
+            1: (empty)
+            2: (empty)
+      1: SEMICOLON@5..6 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@6..15
+      0: JS_ASSIGNMENT_EXPRESSION@6..14
+        0: TS_NON_NULL_ASSERTION_ASSIGNMENT@6..10
+          0: JS_IDENTIFIER_ASSIGNMENT@6..8
+            0: IDENT@6..8 "a" [Newline("\n")] []
+          1: BANG@8..10 "!" [] [Whitespace(" ")]
+        1: AMPEQ@10..13 "&=" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@13..14
+          0: JS_NUMBER_LITERAL@13..14 "2" [] []
+      1: SEMICOLON@14..15 ";" [] []
+    2: JS_VARIABLE_STATEMENT@15..36
+      0: JS_VARIABLE_DECLARATION@15..35
+        0: (empty)
+        1: LET_KW@15..20 "let" [Newline("\n")] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@20..35
+          0: JS_VARIABLE_DECLARATOR@20..35
+            0: JS_IDENTIFIER_BINDING@20..22
+              0: IDENT@20..22 "b" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@22..35
+              0: EQ@22..24 "=" [] [Whitespace(" ")]
+              1: JS_OBJECT_EXPRESSION@24..35
+                0: L_CURLY@24..26 "{" [] [Whitespace(" ")]
+                1: JS_OBJECT_MEMBER_LIST@26..34
+                  0: JS_PROPERTY_OBJECT_MEMBER@26..34
+                    0: JS_LITERAL_MEMBER_NAME@26..27
+                      0: IDENT@26..27 "a" [] []
+                    1: COLON@27..29 ":" [] [Whitespace(" ")]
+                    2: JS_NULL_LITERAL_EXPRESSION@29..34
+                      0: NULL_KW@29..34 "null" [] [Whitespace(" ")]
+                2: R_CURLY@34..35 "}" [] []
+      1: SEMICOLON@35..36 ";" [] []
+    3: JS_EXPRESSION_STATEMENT@36..46
+      0: JS_ASSIGNMENT_EXPRESSION@36..46
+        0: TS_NON_NULL_ASSERTION_ASSIGNMENT@36..42
+          0: JS_STATIC_MEMBER_ASSIGNMENT@36..40
+            0: JS_IDENTIFIER_EXPRESSION@36..38
+              0: JS_REFERENCE_IDENTIFIER@36..38
+                0: IDENT@36..38 "b" [Newline("\n")] []
+            1: DOT@38..39 "." [] []
+            2: JS_NAME@39..40
+              0: IDENT@39..40 "a" [] []
+          1: BANG@40..42 "!" [] [Whitespace(" ")]
+        1: AMPEQ@42..45 "&=" [] [Whitespace(" ")]
+        2: JS_NUMBER_LITERAL_EXPRESSION@45..46
+          0: JS_NUMBER_LITERAL@45..46 "5" [] []
+      1: (empty)
+  4: EOF@46..47 "" [Newline("\n")] []
+
+```

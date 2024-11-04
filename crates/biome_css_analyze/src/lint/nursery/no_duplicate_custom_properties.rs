@@ -1,9 +1,10 @@
+use std::collections::hash_map::Entry;
+
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_css_semantic::model::CssProperty;
 use biome_css_syntax::CssDeclarationOrRuleList;
 use biome_rowan::{AstNode, TextRange};
-use rustc_hash::FxHashSet;
+use rustc_hash::FxHashMap;
 
 use crate::services::semantic::Semantic;
 
@@ -45,7 +46,7 @@ declare_lint_rule! {
 
 impl Rule for NoDuplicateCustomProperties {
     type Query = Semantic<CssDeclarationOrRuleList>;
-    type State = TextRange;
+    type State = (TextRange, (TextRange, String));
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -55,42 +56,48 @@ impl Rule for NoDuplicateCustomProperties {
 
         let rule = model.get_rule_by_range(node.range())?;
 
-        let properties = rule
-            .declarations
-            .iter()
-            .map(|d| d.property.clone())
-            .collect::<Vec<_>>();
+        let mut seen: FxHashMap<&str, TextRange> = FxHashMap::default();
 
-        if let Some(range) = check_duplicate_custom_properties(properties) {
-            return Some(range);
+        for declaration in rule.declarations.iter() {
+            let prop = &declaration.property;
+            let prop_name = prop.name.as_str();
+            let prop_range = prop.range;
+
+            let is_custom_property = prop_name.starts_with("--");
+
+            if !is_custom_property {
+                continue;
+            }
+
+            match seen.entry(prop_name) {
+                Entry::Occupied(entry) => {
+                    return Some((*entry.get(), (prop_range, prop_name.to_string())));
+                }
+                Entry::Vacant(_) => {
+                    seen.insert(prop_name, prop_range);
+                }
+            }
         }
+
         None
     }
 
-    fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let (first_occurrence_range, (duplicate_range, duplicate_property_name)) = state;
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
-                range,
+                duplicate_range,
                 markup! {
-                    "Duplicate custom properties are not allowed."
+                    "Duplicate custom properties can lead to unexpected behavior and may override previous declarations unintentionally."
                 },
             )
+            .detail(first_occurrence_range, markup! {
+                <Emphasis>{duplicate_property_name}</Emphasis> " is already defined here."
+            })
             .note(markup! {
-                    "Consider removing the duplicate custom property."
+                "Remove or rename the duplicate custom property to ensure consistent styling."
             }),
         )
     }
-}
-
-fn check_duplicate_custom_properties(properties: Vec<CssProperty>) -> Option<TextRange> {
-    let mut seen = FxHashSet::default();
-
-    for property in properties {
-        if !seen.insert(property.name) {
-            return Some(property.range);
-        }
-    }
-
-    None
 }

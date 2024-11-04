@@ -50,18 +50,6 @@ macro_rules! define_role {
         }
 
         impl AriaRoleDefinitionWithConcepts for $id {
-            fn concepts_by_element_name<'a>(
-                &self,
-                element_name: &str,
-            ) -> ElementsAndAttributes<'a> {
-                for (concept_name, _attributes) in Self::CONCEPTS {
-                    if *concept_name == element_name {
-                        return Some(Self::CONCEPTS.iter());
-                    }
-                }
-                None
-            }
-
             fn concepts_by_role<'a>(&self) -> ElementsAndAttributes<'a> {
                 Some(Self::CONCEPTS.iter())
             }

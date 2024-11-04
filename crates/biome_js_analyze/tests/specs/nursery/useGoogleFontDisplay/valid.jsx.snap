@@ -1,0 +1,26 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
+expression: valid.jsx
+---
+# Input
+```jsx
+<>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Krona+One&display=optional"
+		rel="stylesheet"
+	/>
+	<link
+		href={"https://fonts.googleapis.com/css2?family=Krona+One&display=optional"}
+		rel="stylesheet"
+	/>
+	<link
+		href={`https://fonts.googleapis.com/css2?family=Krona+One&display=optional`}
+		rel="stylesheet"
+	/>
+	<link href="https://fonts.googleapis.com/css2?display=unknown" rel="stylesheet" />
+	<link href={"https://fonts.googleapis.com/css2?display=unknown"} rel="stylesheet" />
+	<link href={`https://fonts.googleapis.com/css2?display=unknown`} rel="stylesheet" />
+	<link rel="stylesheet" />
+</>
+```

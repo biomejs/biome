@@ -498,6 +498,16 @@ impl Deserializable for String {
     }
 }
 
+impl Deserializable for Box<str> {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        String::deserialize(value, name, diagnostics).map(|s| s.into_boxed_str())
+    }
+}
+
 impl Deserializable for PathBuf {
     fn deserialize(
         value: &impl DeserializableValue,
@@ -553,6 +563,16 @@ impl<T: Deserializable> Deserializable for Vec<T> {
             }
         }
         value.deserialize(Visitor(PhantomData), name, diagnostics)
+    }
+}
+
+impl<T: Deserializable> Deserializable for Box<[T]> {
+    fn deserialize(
+        value: &impl DeserializableValue,
+        name: &str,
+        diagnostics: &mut Vec<DeserializationDiagnostic>,
+    ) -> Option<Self> {
+        Deserializable::deserialize(value, name, diagnostics).map(Vec::into_boxed_slice)
     }
 }
 

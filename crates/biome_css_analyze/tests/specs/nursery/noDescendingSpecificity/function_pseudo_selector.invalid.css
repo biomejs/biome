@@ -1,0 +1,15 @@
+:is(#a, a) f {
+    color: red;
+}
+
+:is(a, b, c, d) f {
+    color: red;
+}
+
+:is(#fake#fake#fake#fake#fake#fake, *) g {
+    color: red;
+}
+
+:where(*) g {
+    color: red;
+}

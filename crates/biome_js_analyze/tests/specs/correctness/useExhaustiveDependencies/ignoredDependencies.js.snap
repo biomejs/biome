@@ -57,7 +57,7 @@ ignoredDependencies.js:8:5 lint/correctness/useExhaustiveDependencies ━━━�
 ```
 ignoredDependencies.js:16:5 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Suppression comment is not being used
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
   
     14 │ function IgnoredDependencies2() {
     15 │     let a = 1;

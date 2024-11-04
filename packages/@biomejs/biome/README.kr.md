@@ -14,7 +14,7 @@
 [![VSCode version][vscode-badge]][vscode-url]
 [![Open VSX version][open-vsx-badge]][open-vsx-url]
 [![Polar bounties][polar-badge]][polar-url]
-
+  
 [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
 [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
 [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa

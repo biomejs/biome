@@ -1,9 +1,10 @@
+use biome_console::fmt::MarkupElements;
+use biome_console::{
+    fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode, Padding,
+};
+use biome_text_edit::TextEdit;
 use std::path::Path;
 use std::{env, io, iter};
-
-use biome_console::fmt::MarkupElements;
-use biome_console::{fmt, markup, HorizontalLine, Markup, MarkupBuf, MarkupElement, MarkupNode};
-use biome_text_edit::TextEdit;
 use unicode_width::UnicodeWidthStr;
 
 mod backtrace;
@@ -465,6 +466,61 @@ impl Visit for PrintAdvices<'_, '_> {
         let mut fmt = IndentWriter::wrap(self.0, &mut slot, true, "  ");
         let mut visitor = PrintAdvices(&mut fmt);
         advice.record(&mut visitor)
+    }
+
+    fn record_table(
+        &mut self,
+        padding: usize,
+        headers: &[MarkupBuf],
+        columns: &[&[MarkupBuf]],
+    ) -> io::Result<()> {
+        debug_assert_eq!(
+            headers.len(),
+            columns.len(),
+            "headers and columns must have the same number length"
+        );
+
+        if columns.is_empty() {
+            return Ok(());
+        }
+
+        let mut headers_iter = headers.iter().enumerate();
+        let rows_number = columns[0].len();
+        let columns_number = columns.len();
+
+        let mut longest_cell = 0;
+        for current_row_index in 0..rows_number {
+            for current_column_index in 0..columns_number {
+                let cell = columns
+                    .get(current_column_index)
+                    .and_then(|c| c.get(current_row_index));
+                if let Some(cell) = cell {
+                    if current_column_index == 0 && current_row_index == 0 {
+                        longest_cell = cell.text_len();
+                        for (index, header_cell) in headers_iter.by_ref() {
+                            self.0.write_markup(markup!({ header_cell }))?;
+                            if index < headers.len() - 1 {
+                                self.0.write_markup(
+                                    markup! {{Padding::new(padding + longest_cell - header_cell.text_len())}},
+                                )?;
+                            }
+                        }
+
+                        self.0.write_markup(markup! {"\n\n"})?;
+                    }
+                    let extra_padding = longest_cell.saturating_sub(cell.text_len());
+
+                    self.0.write_markup(markup!({ cell }))?;
+                    if columns_number != current_column_index + 1 {
+                        self.0
+                            .write_markup(markup! {{Padding::new(padding + extra_padding)}})?;
+                    }
+                }
+            }
+            self.0.write_markup(markup!("\n"))?;
+        }
+
+        Ok(())
     }
 }
 

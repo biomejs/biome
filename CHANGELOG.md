@@ -11,7 +11,397 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ## Unreleased
 
+- Fix [#4323](https://github.com/biomejs/biome/issues/4258), where `lint/a11y/useSemanticElement` accidentally showed recommendations for `role="searchbox"` instead of `role="search"`
+
 ### Analyzer
+
+#### Bug fixes
+
+- Fix CSS parser case error, `@-moz-document url-prefix(https://example.com)` and `@-moz-document domain(example.com)` are now valid. Contributed by @eryue0220
+- Fix [#4258](https://github.com/biomejs/biome/issues/4258), where fixed css parse error with @-moz-document url-prefix(). Contributed by @eryue0220
+
+### CLI
+
+#### Bug fixes
+
+- `biome migrate eslint` now correctly resolves scoped package named `eslint-config` with a path.
+  Contributed by @Conaclos
+
+### Configuration
+
+### Editors
+
+### Formatter
+
+### Bug fixes
+
+- Fix [#4121](https://github.com/biomejs/biome/issues/4326), don't ident a CSS selector when has leading comments. Contributed by @fireairforce
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add [noUselessUndefined](https://biomejs.dev/linter/rules/no-useless-undefined/). Contributed by @unvalley
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) accepts a new option `match` ([#4105](https://github.com/biomejs/biome/issues/4105)).
+
+  You can now validate filenames with a regular expression.
+  For instance, you can allow filenames to start with `%`:
+
+  ```json
+  {
+    "linter": {
+      "rules": {
+        "style": {
+          "useFilenamingConvention": {
+            "level": "warn",
+            "options": {
+                "match": "%?(.+?)[.](.+)",
+                "filenameCases": ["camelCase"]
+            }
+          }
+        }
+      }
+    }
+  }
+  ```
+
+  If the regular expression captures strings, the first capture is considered to be the name of the file, and the second one to be the extensions (dot-separated values).
+  The name of the file and the extensions are checked against `filenameCases`.
+  Given the previous configuration, the filename `%index.d.ts` is valid because the first capture `index` is in `camelCase` and the second capture `d.ts` include dot-separated values in `lowercase`.
+  On the other hand, `%Index.d.ts` is not valid because the first capture `Index` is in `PascalCase`.
+
+  Note that specifying `match` disallows any exceptions that are handled by the rule by default.
+  For example, the previous configuration doesn't allow filenames to be prefixed with underscores,
+  a period or a plus sign.
+  You need to include them in the regular expression if you still want to allow these exceptions.
+
+  Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) and [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention) `match` options now accept case-insensitive and case-sensitive groups.
+
+  By default, the regular expression in `match` is case-sensitive.
+  You can now make it case-insensitive by using a case-insensitive group `(?i:)`.
+  For example, the regular expression `(?i:a)` matches `a` and `A`.
+
+  Contributed by @Conaclos
+
+#### Enhancements
+
+- `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos
+- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now provides a code fix.
+
+  ```diff
+  - const xs = new Array();
+  + const xs = [];
+  ```
+
+  The code fix is currently marked as unsafe.
+  We plan to make it safe in a future release of Biome.
+
+  Contributed by @Conaclos
+
+#### Bug fixes
+
+- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now reports all expressions using the `Array` constructors.
+
+  Previously, the rule reported only use of the `Array` constructor in expressions statements.
+
+  ```js
+  // This was reported
+  new Array();
+  // This was not reported
+  const xs = new Array();
+  ```
+
+  Contributed by @Conaclos
+
+### Parser
+
+#### Bug fixes
+
+- Fix [#4317](https://github.com/biomejs/biome/issues/4317), setter parameter can contain a trailing comma, the following example will now parsed correctly:
+
+  ```js
+  export class DummyClass {
+    set input(
+      value: string,
+    ) {}
+  }
+  ```
+
+  Contributed by @fireairforce
+
+- Fix [#3836](https://github.com/biomejs/biome/issues/3836), css parser allow multiple semicolons after a declaration, the following example will now parsed correctly:
+
+  ```css
+  .foo {
+    color: red;;
+  }
+  ```
+
+  Contributed by @fireairforce
+
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser handle unterminated `JSX_STRING_LITERAL` properly
+
+  ```jsx
+  function Comp() {
+    return (
+        <a rel="
+  ```
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser is no longer progressing for an invalid object
+  member name:
+
+  ```js
+  ({
+    params: { [paramName: string]: number } = {}
+  })
+  ```
+
+  Contributed by @denbezrukov
+
+- Fix [#342](https://github.com/biomejs/biome/issues/342), "expected a declaration as guaranteed by is_at_ts_declare_statement" error for declare interface:
+
+  ```ts
+  declare interface
+  ```
+
+  Contributed by @denbezrukov
+
+
+## v1.9.4 (2024-10-17)
+
+### Analyzer
+
+#### Bug fixes
+
+- Implement [GraphQL suppression action](https://github.com/biomejs/biome/pull/4312). Contributed by @vohoanglong0107
+
+- Improved the message for unused suppression comments. Contributed by @dyc3
+
+- Fix [#4228](https://github.com/biomejs/biome/issues/4228), where the rule `a11y/noInteractiveElementToNoninteractiveRole` incorrectly reports a `role` for non-interactive elements. Contributed by @eryue0220
+
+- `noSuspiciousSemicolonInJsx` now catches suspicious semicolons in React fragments. Contributed by @vasucp1207
+
+- The syntax rule `noTypeOnlyImportAttributes` now ignores `.cts` files ([#4361](https://github.com/biomejs/biome/issues/4361)).
+
+  Since TypeScript 5.3, type-only imports can be associated to an import attribute in CommonJS-enabled files.
+  See the [TypeScript docs](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-3.html#stable-support-resolution-mode-in-import-types).
+
+  The following code is no longer reported as a syntax error:
+
+  ```cts
+  import type { TypeFromRequire } from "pkg" with {
+      "resolution-mode": "require"
+  };
+  ```
+
+  Note that this is only allowed in files ending with the `cts` extension.
+
+  Contributed by @Conaclos
+
+### CLI
+
+#### Enhancements
+
+- The `--summary` reporter now reports parsing diagnostics too. Contributed by @ematipico
+
+- Improved performance of GritQL queries by roughly 25-30%. Contributed by @arendjr
+
+### Configuration
+
+#### Bug fixes
+
+- Fix an issue where the JSON schema marked lint rules options as mandatory. Contributed by @ematipico
+
+### Editors
+
+### Formatter
+
+#### Bug fixes
+
+- Fix [#4121](https://github.com/biomejs/biome/issues/4121). Respect line width when printing multiline strings. Contributed by @ah-yu
+- Fix [#4384](https://github.com/biomejs/biome/issues/4384). Keep `@charset` dobule quote under any situation for css syntax rule. Contributed by @fireairforce
+
+### JavaScript APIs
+
+### Linter
+
+#### New features
+
+- Add [useGuardForIn](https://biomejs.dev/linter/rules/use-guard-for-in/). Contributed by @fireairforce
+- Add [noDocumentCookie](https://biomejs.dev/linter/rules/no-document-cookie/). Contributed by @tunamaguro
+- Add [noDocumentImportInPage](https://biomejs.dev/linter/rules/no-document-import-in-page/). Contributed by @kaioduarte
+- Add [noDuplicateProperties](https://biomejs.dev/linter/rules/no-duplicate-properties/). Contributed by @togami2864
+- Add [noHeadElement](https://biomejs.dev/linter/rules/no-head-element/). Contributed by @kaioduarte
+- Add [noHeadImportInDocument](https://biomejs.dev/linter/rules/no-head-import-in-document/). Contributed by @kaioduarte
+- Add [noImgElement](https://biomejs.dev/linter/rules/no-img-element/). Contributed by @kaioduarte
+- Add [noUnknownTypeSelector](https://biomejs.dev/linter/rules/no-unknown-type-selector/). Contributed by @Kazuhiro-Mimaki
+- Add [useAtIndex](https://biomejs.dev/linter/rules/use-at-index/). Contributed by @GunseiKPaseri
+- Add [noUselessStringRaw](https://biomejs.dev/linter/rules/no-useless-string-raw/). Contributed by @fireairforce
+- Add [nursery/useCollapsedIf](https://biomejs.dev/linter/rules/use-collapsed-if/). Contributed by @siketyan
+- Add [useGoogleFontDisplay](https://biomejs.dev/linter/rules/use-google-font-display/). Contributed by @kaioduarte
+
+#### Bug Fixes
+
+- Biome no longer crashes when it encounters a string that contain a multibyte character ([#4181](https://github.com/biomejs/biome/issues/4181)).
+
+  This fixes a regression introduced in Biome 1.9.3
+  The regression affected the following linter rules:
+
+  - `nursery/useSortedClasses`
+  - `nursery/useTrimStartEnd`
+  - `style/useTemplate`
+  - `suspicious/noMisleadingCharacterClass`
+
+  Contributed by @Conaclos
+
+- Fix [#4190](https://github.com/biomejs/biome/issues/4190), where the rule `noMissingVarFunction` wrongly reported a variable as missing when used inside a `var()`  function that was a newline. Contributed by @ematipico
+
+- Fix [#4041](https://github.com/biomejs/biome/issues/4041). Now the rule `useSortedClasses` won't be triggered if `className` is composed only by inlined variables. Contributed by @ematipico
+
+- [useImportType](https://biomejs.dev/linter/rules/use-import-type/) and [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now report useless inline type qualifiers ([#4178](https://github.com/biomejs/biome/issues/4178)).
+
+  The following fix is now proposed:
+
+  ```diff
+  - import type { type A, B } from "";
+  + import type { A, B } from "";
+
+  - export type { type C, D };
+  + export type { C, D };
+  ```
+
+  Contributed by @Conaclos
+
+- [useExportType](https://biomejs.dev/linter/rules/use-export-type/) now reports ungrouped `export from`.
+
+  The following fix is now proposed:
+
+  ```diff
+  - export { type A, type B } from "";
+  + export type { A, B } from "";
+  ```
+
+  Contributed by @Conaclos
+
+- [noVoidTypeReturn](https://biomejs.dev/linter/rules/no-void-type-return/) now accepts `void` expressions in return position ([#4173](https://github.com/biomejs/biome/issues/4173)).
+
+  The following code is now accepted:
+
+  ```ts
+  function f(): void {
+    return void 0;
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [noUselessFragments](https://biomejs.dev/linter/rules/no-useless-fragments/) now correctly handles fragments containing HTML escapes (e.g. `&nbsp;`) inside expression escapes `{ ... }` ([#4059](https://github.com/biomejs/biome/issues/4059)).
+
+  The following code is no longer reported:
+
+  ```jsx
+  function Component() {
+    return (
+      <div key={index}>{line || <>&nbsp;</>}</div>
+    )
+  }
+  ```
+
+  Contributed by @fireairforce
+
+- [noUnusedFunctionParameters](https://biomejs.dev/linter/rules/no-unused-function-parameters/) and [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer reports a parameter as unused when another parameter has a constructor type with the same parameter name ([#4227](https://github.com/biomejs/biome/issues/4227)).
+
+  In the following code, the `name` parameter is no longer reported as unused.
+
+  ```ts
+  export class Foo {
+    bar(name: string, _class: new (name: string) => any) {
+      return name
+    }
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- [noUndeclaredDependencies](https://biomejs.dev/linter/rules/no-undeclared-dependencies/) now accepts dependency names with dots. Contributed by @Conaclos
+
+- [useFilenamingConvention](https://biomejs.dev/linter/rules/use-filenaming-convention) now correctly handles renamed exports ([#4254](https://github.com/biomejs/biome/issues/4254)).
+
+  The rule allows the filename to be named as one of the exports of the module.
+  For instance, the file containing the following export can be named `Button`.
+
+  ```js
+  class Button {}
+  export { Button }
+  ```
+
+  The rule now correctly handles the renaming of an export.
+  For example, the file containing the following export can only be named `Button`.
+  Previously the rule expected the file to be named `A`.
+
+  ```js
+  class A {}
+  export { A as Button }
+  ```
+
+  Contributed by @Conaclos
+
+- [useConsistentMemberAccessibility](https://biomejs.dev/linter/rules/use-consistent-member-accessibility/) now ignore private class members such as `#property` ([#4276](https://github.com/biomejs/biome/issues/4276)). Contributed by @Conaclos
+
+- [noUnknownFunction](https://biomejs.dev/linter/rules/no-unknown-function/) correctly handles `calc-size` function ([#4212](https://github.com/biomejs/biome/issues/4212)).
+
+   The following code `calc-size` is no longer reported as unknown:
+
+   ```css
+   .a { height: calc-size(0px); }
+   ```
+
+   Contributed by @fireairforce
+
+ - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) now allows configuring conventions for readonly index signatures.
+
+  Contributed by @sepruko
+
+- [noDuplicateCustomProperties](https://biomejs.dev/linter/rules/no-duplicate-custom-properties/) now correctly handles custom properties and ignores non-custom properties.
+  Previously, the rule incorrectly reported duplicates for all properties, including non-custom ones. Contributed by @togami2864
+
+### Parser
+
+#### Bug Fixes
+
+- The CSS parser now accepts more emoji in identifiers ([#3627](https://github.com/biomejs/biome/issues/3627#issuecomment-2392388022)).
+
+  Browsers accept more emoji than the standard allows.
+  Biome now accepts these additional emojis.
+
+  The following code is now correctly parsed:
+
+  ```css
+  p {
+    --✨-color: red;
+    color: var(--✨-color);
+  }
+  ```
+
+  Contributed by @Conaclos
+
+- Add support for parsing typescript's `resolution-mode` in Import Types([#2115](https://github.com/biomejs/biome/issues/2115))
+
+  ```ts
+  export type Fs = typeof import('fs', { with: { 'resolution-mode': 'import' } });
+  export type TypeFromRequire =
+    import("pkg", { with: { "resolution-mode": "require" } }).TypeFromRequire;
+  export type TypeFromImport =
+    import("pkg", { with: { "resolution-mode": "import" } }).TypeFromImport;
+  ```
+
+  Contributed by @fireairforce
+
+## v1.9.3 (2024-10-01)
 
 ### CLI
 
@@ -35,15 +425,27 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Configuration
 
+#### Bug fixes
+- Fix [#4125](https://github.com/biomejs/biome/issues/4125), where `noLabelWithoutControl` options where incorrectly marked as mandatory. Contributed by @ematipico
+
 ### Editors
 
 - Fix a case where CSS files weren't correctly linted using the default configuration. Contributed by @ematipico
+
+#### Bug fixes
+
+- Fix [#4116](https://github.com/biomejs/biome/issues/4116). Unify LSP code action kinds. Contributed by @vitallium
 
 ### Formatter
 
 #### Bug fixes
 
 - Fix [#3924](https://github.com/biomejs/biome/issues/3924) where GraphQL formatter panics in block comments with empty line. Contributed by @vohoanglong0107
+- Fix [#3364](https://github.com/biomejs/biome/issues/3364) where the `useSelfClosingElements` rule forces the `script` tag to be self-closing. Previously, this rule applies to all elements and cannot be disabled for native HTML elements.
+
+  Now, this rule accepts a `ignoreHtmlElements` option, which when set to `true`, ignores native HTML elements and allows them to be non-self-closing.
+
+  Contributed by @abidjappie
 
 - Fix a case where raw values inside `url()` functions weren't properly trimmed.
   ```diff
@@ -69,14 +471,35 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### JavaScript API
 
+#### Bug fixes
+
+- Fix [#3881](https://github.com/biomejs/biome/issues/3881), by updating the APIs to use the latest WASM changes. Contributed by @ematipico
+
 ### Linter
 
 #### New features
 
+- Add [noDescendingSpecificity](https://biomejs.dev/linter/rules/no-descending-specificity/). Contributed by @tunamaguro
+
+- Add [noNestedTernary](https://biomejs.dev/linter/rules/no-nested-ternary/). Contributed by @kaykdm
+
 - Add [noTemplateCurlyInString](https://biomejs.dev/linter/rules/no-template-curly-in-string/). Contributed by @fireairforce
-- Add [NoOctalEscape](https://biomejs.dev/linter/rules/no-octal-escape/). Contributed by @fireairforce
+
+- Add [noOctalEscape](https://biomejs.dev/linter/rules/no-octal-escape/). Contributed by @fireairforce
+
+#### Enhancements
+
+- Add an option `reportUnnecessaryDependencies` to [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/).
+
+  Defaults to true. When set to false, errors will be suppressed for React hooks that declare dependencies but do not use them.
+
+  Contributed by @simon-paris
+
+- Add an option `reportMissingDependenciesArray` to [useExhaustiveDependencies](https://biomejs.dev/linter/rules/use-exhaustive-dependencies/). Contributed by @simon-paris
 
 #### Bug fixes
+
+- [noControlCharactersInRegex](https://www.biomejs.dev/linter/rules/no-control-characters-in-regex) no longer panics on regexes with incomplete escape sequences. Contributed by @Conaclos
 
 - [noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class/) no longer reports issues outside of character classes.
 
@@ -97,6 +520,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @Conaclos
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer panics when suggesting the renaming of a variable at the start of a file ([#4114](https://github.com/biomejs/biome/issues/4114)). Contributed by @Conaclos
 
 - [noUselessEscapeInRegex](https://biomejs.dev/linter/rules/no-useless-escape-in-regex/) no longer panics on regexes that start with an empty character class. Contributed by @Conaclos
 

@@ -13,18 +13,16 @@ use crate::pattern_compiler::{
 };
 use crate::variables::{VarRegistry, VariableLocations};
 use crate::CompileError;
-use anyhow::bail;
-use anyhow::Result;
 use biome_grit_syntax::{GritRoot, GritRootExt};
 use grit_pattern_matcher::constants::{
     ABSOLUTE_PATH_INDEX, FILENAME_INDEX, NEW_FILES_INDEX, PROGRAM_INDEX,
 };
 use grit_pattern_matcher::file_owners::{FileOwner, FileOwners};
 use grit_pattern_matcher::pattern::{
-    FilePtr, FileRegistry, Matcher, Pattern, ResolvedPattern, State, VariableSourceLocations,
+    FilePtr, FileRegistry, Matcher, Pattern, ResolvedPattern, State, VariableSource,
 };
+use grit_util::error::{GritPatternError, GritResult};
 use grit_util::{AnalysisLogs, Ast, ByteRange, InputRanges, Range, VariableMatch};
-use im::Vector;
 use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
@@ -64,7 +62,10 @@ pub struct GritQuery {
 }
 
 impl GritQuery {
-    pub fn execute(&self, file: GritTargetFile) -> Result<(Vec<GritQueryResult>, AnalysisLogs)> {
+    pub fn execute(
+        &self,
+        file: GritTargetFile,
+    ) -> GritResult<(Vec<GritQueryResult>, AnalysisLogs)> {
         let file_owners = FileOwners::new();
         let files = vec![file];
         let file_ptr = FilePtr::new(0, 0);
@@ -125,14 +126,14 @@ impl GritQuery {
 
         let mut vars_array = vec![GLOBAL_VARS
             .iter()
-            .map(|global_var| VariableSourceLocations {
+            .map(|global_var| VariableSource::Compiled {
                 name: global_var.0.to_string(),
                 file: source_path
                     .map(Path::to_string_lossy)
                     .map_or_else(|| "unnamed".to_owned(), |p| p.to_string()),
                 locations: BTreeSet::new(),
             })
-            .collect::<Vec<VariableSourceLocations>>()];
+            .collect::<Vec<VariableSource>>()];
         let mut global_vars: BTreeMap<String, usize> = GLOBAL_VARS
             .iter()
             .map(|(global_var, index)| ((*global_var).to_string(), *index))
@@ -193,9 +194,9 @@ pub enum GritQueryResult {
 }
 
 impl GritQueryResult {
-    pub fn from_file(file: &Vector<&FileOwner<GritTargetTree>>) -> anyhow::Result<Option<Self>> {
+    pub fn from_file(file: &[&FileOwner<GritTargetTree>]) -> GritResult<Option<Self>> {
         if file.is_empty() {
-            bail!("cannot have file with no versions")
+            return Err(GritPatternError::new("cannot have file with no versions"));
         }
 
         let result = if file.len() == 1 {
@@ -218,8 +219,8 @@ impl GritQueryResult {
             }
         } else {
             Some(GritQueryResult::Rewrite(Rewrite::from_file(
-                file.front().unwrap(),
-                file.back().unwrap(),
+                file.first().unwrap(),
+                file.last().unwrap(),
             )?))
         };
 
@@ -296,11 +297,11 @@ impl Rewrite {
     fn from_file(
         initial: &FileOwner<GritTargetTree>,
         rewritten_file: &FileOwner<GritTargetTree>,
-    ) -> anyhow::Result<Self> {
+    ) -> GritResult<Self> {
         let original = if let Some(ranges) = &initial.matches.borrow().input_matches {
             Match::from_file_ranges(ranges, &initial.name)
         } else {
-            bail!("cannot have rewrite without matches")
+            return Err(GritPatternError::new("cannot have rewrite without matches"));
         };
         let rewritten = OutputFile::from_file(rewritten_file);
         Ok(Rewrite::new(original, rewritten))

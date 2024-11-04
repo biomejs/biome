@@ -28,7 +28,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoOctalEscape {
-        version: "next",
+        version: "1.9.3",
         name: "noOctalEscape",
         language: "js",
         sources: &[RuleSource::Eslint("no-octal-escape")],

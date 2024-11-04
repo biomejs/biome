@@ -37,7 +37,7 @@ declare_lint_rule! {
 impl Rule for UseValidAriaProps {
     type Query = Aria<AnyJsxElement>;
     type State = JsxAttribute;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -64,11 +64,11 @@ impl Rule for UseValidAriaProps {
                     }
                 })
                 .collect();
-
             attributes
         } else {
-            vec![]
+            Vec::new()
         }
+        .into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, attribute: &Self::State) -> Option<RuleDiagnostic> {

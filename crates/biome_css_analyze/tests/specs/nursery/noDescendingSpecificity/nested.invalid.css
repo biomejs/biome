@@ -1,0 +1,9 @@
+a {
+    & > b {
+        color: red;
+    }
+}
+
+b {
+    color: red;
+}

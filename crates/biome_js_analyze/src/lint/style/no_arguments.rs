@@ -36,12 +36,11 @@ declare_lint_rule! {
 impl Rule for NoArguments {
     type Query = SemanticServices;
     type State = TextRange;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let model = ctx.query();
-
         let mut found_arguments = vec![];
 
         for unresolved_reference in model.all_unresolved_references() {
@@ -51,7 +50,7 @@ impl Rule for NoArguments {
             }
         }
 
-        found_arguments
+        found_arguments.into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {

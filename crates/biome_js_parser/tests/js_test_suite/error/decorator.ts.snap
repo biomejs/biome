@@ -1,0 +1,1843 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+@'dsads' class MyClass {}
+@1 class MyClass {}
+@++1 class MyClass {}
+@[] in 1 class MyClass {}
+@[] class MyClass {}
+@() => {} class MyClass {}
+@1 == 2 ? true : false class MyClass {}
+@await fn class MyClass {}
+@function(){} class MyClass {}
+@obj instanceof Object class MyClass {}
+@1 === 2 class MyClass {}
+@new Object() class MyClass {}
+@{} class MyClass {}
+@a++ class MyClass {}
+@a,b class MyClass {}
+@`${d}foo` class MyClass {}
+@obj as MyType class MyClass {}
+@<MyType>obj class MyClass {}
+@obj satisfies MyType class MyClass {}
+@obj! class MyClass {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [
+                JsDecorator {
+                    at_token: AT@0..1 "@" [] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            JS_STRING_LITERAL@1..9 "'dsads'" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+            ],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@9..15 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@15..23 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@23..24 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@24..25 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [
+                JsDecorator {
+                    at_token: AT@25..27 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            JS_NUMBER_LITERAL@27..29 "1" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+            ],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@29..35 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@35..43 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@43..44 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@44..45 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@45..47 "@" [Newline("\n")] [],
+                    expression: missing (required),
+                },
+            ],
+        },
+        JsExpressionStatement {
+            expression: JsPreUpdateExpression {
+                operator_token: PLUS2@47..49 "++" [] [],
+                operand: JsBogusAssignment {
+                    items: [
+                        JS_NUMBER_LITERAL@49..51 "1" [] [Whitespace(" ")],
+                    ],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@51..57 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@57..65 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@65..66 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@66..67 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@67..69 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            L_BRACK@69..70 "[" [] [],
+                            JsArrayElementList [],
+                            R_BRACK@70..72 "]" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                IN_KW@72..75 "in" [] [Whitespace(" ")],
+                JS_NUMBER_LITERAL@75..77 "1" [] [Whitespace(" ")],
+            ],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@77..83 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@83..91 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@91..92 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@92..93 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [
+                JsDecorator {
+                    at_token: AT@93..95 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            L_BRACK@95..96 "[" [] [],
+                            JsArrayElementList [],
+                            R_BRACK@96..98 "]" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+            ],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@98..104 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@104..112 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@112..113 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@113..114 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@114..116 "@" [Newline("\n")] [],
+                    expression: JsParenthesizedExpression {
+                        l_paren_token: L_PAREN@116..117 "(" [] [],
+                        expression: missing (required),
+                        r_paren_token: R_PAREN@117..119 ")" [] [Whitespace(" ")],
+                    },
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                FAT_ARROW@119..122 "=>" [] [Whitespace(" ")],
+            ],
+        },
+        JsBlockStatement {
+            l_curly_token: L_CURLY@122..123 "{" [] [],
+            statements: JsStatementList [],
+            r_curly_token: R_CURLY@123..125 "}" [] [Whitespace(" ")],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@125..131 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@131..139 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@139..140 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@140..141 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@141..143 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            JS_NUMBER_LITERAL@143..145 "1" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                EQ2@145..148 "==" [] [Whitespace(" ")],
+                JS_NUMBER_LITERAL@148..150 "2" [] [Whitespace(" ")],
+                QUESTION@150..152 "?" [] [Whitespace(" ")],
+                TRUE_KW@152..157 "true" [] [Whitespace(" ")],
+                COLON@157..159 ":" [] [Whitespace(" ")],
+                FALSE_KW@159..165 "false" [] [Whitespace(" ")],
+            ],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@165..171 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@171..179 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@179..180 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@180..181 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@181..183 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            JsBogus {
+                                items: [
+                                    IDENT@183..189 "await" [] [Whitespace(" ")],
+                                ],
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@189..192 "fn" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@192..198 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@198..206 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@206..207 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@207..208 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [
+                JsDecorator {
+                    at_token: AT@208..210 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            FUNCTION_KW@210..218 "function" [] [],
+                            JsParameters {
+                                l_paren_token: L_PAREN@218..219 "(" [] [],
+                                items: JsParameterList [],
+                                r_paren_token: R_PAREN@219..220 ")" [] [],
+                            },
+                            JsFunctionBody {
+                                l_curly_token: L_CURLY@220..221 "{" [] [],
+                                directives: JsDirectiveList [],
+                                statements: JsStatementList [],
+                                r_curly_token: R_CURLY@221..223 "}" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                },
+            ],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@223..229 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@229..237 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@237..238 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@238..239 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@239..241 "@" [Newline("\n")] [],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@241..245 "obj" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                INSTANCEOF_KW@245..256 "instanceof" [] [Whitespace(" ")],
+                IDENT@256..263 "Object" [] [Whitespace(" ")],
+            ],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@263..269 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@269..277 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@277..278 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@278..279 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@279..281 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            JS_NUMBER_LITERAL@281..283 "1" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                EQ3@283..287 "===" [] [Whitespace(" ")],
+                JS_NUMBER_LITERAL@287..289 "2" [] [Whitespace(" ")],
+            ],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@289..295 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@295..303 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@303..304 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@304..305 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [
+                JsDecorator {
+                    at_token: AT@305..307 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            NEW_KW@307..311 "new" [] [Whitespace(" ")],
+                            JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@311..317 "Object" [] [],
+                                },
+                            },
+                            JsCallArguments {
+                                l_paren_token: L_PAREN@317..318 "(" [] [],
+                                args: JsCallArgumentList [],
+                                r_paren_token: R_PAREN@318..320 ")" [] [Whitespace(" ")],
+                            },
+                        ],
+                    },
+                },
+            ],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@320..326 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@326..334 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@334..335 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@335..336 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [
+                JsDecorator {
+                    at_token: AT@336..338 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            L_CURLY@338..339 "{" [] [],
+                            JsObjectMemberList [],
+                            R_CURLY@339..341 "}" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+            ],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@341..347 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@347..355 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@355..356 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@356..357 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@357..359 "@" [Newline("\n")] [],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@359..360 "a" [] [],
+                        },
+                    },
+                },
+            ],
+        },
+        JsExpressionStatement {
+            expression: JsPreUpdateExpression {
+                operator_token: PLUS2@360..363 "++" [] [Whitespace(" ")],
+                operand: JsBogusAssignment {
+                    items: [
+                        JsDecoratorList [],
+                        CLASS_KW@363..369 "class" [] [Whitespace(" ")],
+                        JsIdentifierBinding {
+                            name_token: IDENT@369..377 "MyClass" [] [Whitespace(" ")],
+                        },
+                        L_CURLY@377..378 "{" [] [],
+                        JsClassMemberList [],
+                        R_CURLY@378..379 "}" [] [],
+                    ],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@379..381 "@" [Newline("\n")] [],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@381..382 "a" [] [],
+                        },
+                    },
+                },
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                COMMA@382..383 "," [] [],
+                IDENT@383..385 "b" [] [Whitespace(" ")],
+            ],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@385..391 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@391..399 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@399..400 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@400..401 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [
+                JsDecorator {
+                    at_token: AT@401..403 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            BACKTICK@403..404 "`" [] [],
+                            JsTemplateElementList [
+                                JsTemplateElement {
+                                    dollar_curly_token: DOLLAR_CURLY@404..406 "${" [] [],
+                                    expression: JsIdentifierExpression {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@406..407 "d" [] [],
+                                        },
+                                    },
+                                    r_curly_token: R_CURLY@407..408 "}" [] [],
+                                },
+                                JsTemplateChunkElement {
+                                    template_chunk_token: TEMPLATE_CHUNK@408..411 "foo" [] [],
+                                },
+                            ],
+                            BACKTICK@411..413 "`" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+            ],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@413..419 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@419..427 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@427..428 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@428..429 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@429..431 "@" [Newline("\n")] [],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@431..435 "obj" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@435..438 "as" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@438..445 "MyType" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@445..451 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@451..459 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@459..460 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@460..461 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@461..463 "@" [Newline("\n")] [],
+                    expression: missing (required),
+                },
+            ],
+        },
+        JsExpressionStatement {
+            expression: TsTypeAssertionExpression {
+                l_angle_token: L_ANGLE@463..464 "<" [] [],
+                ty: TsReferenceType {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@464..470 "MyType" [] [],
+                    },
+                    type_arguments: missing (optional),
+                },
+                r_angle_token: R_ANGLE@470..471 ">" [] [],
+                expression: JsIdentifierExpression {
+                    name: JsReferenceIdentifier {
+                        value_token: IDENT@471..475 "obj" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@475..481 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@481..489 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@489..490 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@490..491 "}" [] [],
+        },
+        JsBogusStatement {
+            items: [
+                JsDecorator {
+                    at_token: AT@491..493 "@" [Newline("\n")] [],
+                    expression: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@493..497 "obj" [] [Whitespace(" ")],
+                        },
+                    },
+                },
+            ],
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@497..507 "satisfies" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@507..514 "MyType" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@514..520 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@520..528 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@528..529 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@529..530 "}" [] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [
+                JsDecorator {
+                    at_token: AT@530..532 "@" [Newline("\n")] [],
+                    expression: JsBogusExpression {
+                        items: [
+                            JsIdentifierExpression {
+                                name: JsReferenceIdentifier {
+                                    value_token: IDENT@532..535 "obj" [] [],
+                                },
+                            },
+                            BANG@535..537 "!" [] [Whitespace(" ")],
+                        ],
+                    },
+                },
+            ],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@537..543 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@543..551 "MyClass" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@551..552 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@552..553 "}" [] [],
+        },
+    ],
+    eof_token: EOF@553..554 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..554
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..553
+    0: JS_CLASS_DECLARATION@0..25
+      0: JS_DECORATOR_LIST@0..9
+        0: JS_DECORATOR@0..9
+          0: AT@0..1 "@" [] []
+          1: JS_BOGUS_EXPRESSION@1..9
+            0: JS_STRING_LITERAL@1..9 "'dsads'" [] [Whitespace(" ")]
+      1: (empty)
+      2: CLASS_KW@9..15 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@15..23
+        0: IDENT@15..23 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@23..24 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@24..24
+      9: R_CURLY@24..25 "}" [] []
+    1: JS_CLASS_DECLARATION@25..45
+      0: JS_DECORATOR_LIST@25..29
+        0: JS_DECORATOR@25..29
+          0: AT@25..27 "@" [Newline("\n")] []
+          1: JS_BOGUS_EXPRESSION@27..29
+            0: JS_NUMBER_LITERAL@27..29 "1" [] [Whitespace(" ")]
+      1: (empty)
+      2: CLASS_KW@29..35 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@35..43
+        0: IDENT@35..43 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@43..44 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@44..44
+      9: R_CURLY@44..45 "}" [] []
+    2: JS_BOGUS_STATEMENT@45..47
+      0: JS_DECORATOR@45..47
+        0: AT@45..47 "@" [Newline("\n")] []
+        1: (empty)
+    3: JS_EXPRESSION_STATEMENT@47..51
+      0: JS_PRE_UPDATE_EXPRESSION@47..51
+        0: PLUS2@47..49 "++" [] []
+        1: JS_BOGUS_ASSIGNMENT@49..51
+          0: JS_NUMBER_LITERAL@49..51 "1" [] [Whitespace(" ")]
+      1: (empty)
+    4: JS_CLASS_DECLARATION@51..67
+      0: JS_DECORATOR_LIST@51..51
+      1: (empty)
+      2: CLASS_KW@51..57 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@57..65
+        0: IDENT@57..65 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@65..66 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@66..66
+      9: R_CURLY@66..67 "}" [] []
+    5: JS_BOGUS_STATEMENT@67..72
+      0: JS_DECORATOR@67..72
+        0: AT@67..69 "@" [Newline("\n")] []
+        1: JS_BOGUS_EXPRESSION@69..72
+          0: L_BRACK@69..70 "[" [] []
+          1: JS_ARRAY_ELEMENT_LIST@70..70
+          2: R_BRACK@70..72 "]" [] [Whitespace(" ")]
+    6: JS_BOGUS_STATEMENT@72..77
+      0: IN_KW@72..75 "in" [] [Whitespace(" ")]
+      1: JS_NUMBER_LITERAL@75..77 "1" [] [Whitespace(" ")]
+    7: JS_CLASS_DECLARATION@77..93
+      0: JS_DECORATOR_LIST@77..77
+      1: (empty)
+      2: CLASS_KW@77..83 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@83..91
+        0: IDENT@83..91 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@91..92 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@92..92
+      9: R_CURLY@92..93 "}" [] []
+    8: JS_CLASS_DECLARATION@93..114
+      0: JS_DECORATOR_LIST@93..98
+        0: JS_DECORATOR@93..98
+          0: AT@93..95 "@" [Newline("\n")] []
+          1: JS_BOGUS_EXPRESSION@95..98
+            0: L_BRACK@95..96 "[" [] []
+            1: JS_ARRAY_ELEMENT_LIST@96..96
+            2: R_BRACK@96..98 "]" [] [Whitespace(" ")]
+      1: (empty)
+      2: CLASS_KW@98..104 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@104..112
+        0: IDENT@104..112 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@112..113 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@113..113
+      9: R_CURLY@113..114 "}" [] []
+    9: JS_BOGUS_STATEMENT@114..119
+      0: JS_DECORATOR@114..119
+        0: AT@114..116 "@" [Newline("\n")] []
+        1: JS_PARENTHESIZED_EXPRESSION@116..119
+          0: L_PAREN@116..117 "(" [] []
+          1: (empty)
+          2: R_PAREN@117..119 ")" [] [Whitespace(" ")]
+    10: JS_BOGUS_STATEMENT@119..122
+      0: FAT_ARROW@119..122 "=>" [] [Whitespace(" ")]
+    11: JS_BLOCK_STATEMENT@122..125
+      0: L_CURLY@122..123 "{" [] []
+      1: JS_STATEMENT_LIST@123..123
+      2: R_CURLY@123..125 "}" [] [Whitespace(" ")]
+    12: JS_CLASS_DECLARATION@125..141
+      0: JS_DECORATOR_LIST@125..125
+      1: (empty)
+      2: CLASS_KW@125..131 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@131..139
+        0: IDENT@131..139 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@139..140 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@140..140
+      9: R_CURLY@140..141 "}" [] []
+    13: JS_BOGUS_STATEMENT@141..145
+      0: JS_DECORATOR@141..145
+        0: AT@141..143 "@" [Newline("\n")] []
+        1: JS_BOGUS_EXPRESSION@143..145
+          0: JS_NUMBER_LITERAL@143..145 "1" [] [Whitespace(" ")]
+    14: JS_BOGUS_STATEMENT@145..165
+      0: EQ2@145..148 "==" [] [Whitespace(" ")]
+      1: JS_NUMBER_LITERAL@148..150 "2" [] [Whitespace(" ")]
+      2: QUESTION@150..152 "?" [] [Whitespace(" ")]
+      3: TRUE_KW@152..157 "true" [] [Whitespace(" ")]
+      4: COLON@157..159 ":" [] [Whitespace(" ")]
+      5: FALSE_KW@159..165 "false" [] [Whitespace(" ")]
+    15: JS_CLASS_DECLARATION@165..181
+      0: JS_DECORATOR_LIST@165..165
+      1: (empty)
+      2: CLASS_KW@165..171 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@171..179
+        0: IDENT@171..179 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@179..180 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@180..180
+      9: R_CURLY@180..181 "}" [] []
+    16: JS_BOGUS_STATEMENT@181..189
+      0: JS_DECORATOR@181..189
+        0: AT@181..183 "@" [Newline("\n")] []
+        1: JS_BOGUS_EXPRESSION@183..189
+          0: JS_BOGUS@183..189
+            0: IDENT@183..189 "await" [] [Whitespace(" ")]
+    17: JS_EXPRESSION_STATEMENT@189..192
+      0: JS_IDENTIFIER_EXPRESSION@189..192
+        0: JS_REFERENCE_IDENTIFIER@189..192
+          0: IDENT@189..192 "fn" [] [Whitespace(" ")]
+      1: (empty)
+    18: JS_CLASS_DECLARATION@192..208
+      0: JS_DECORATOR_LIST@192..192
+      1: (empty)
+      2: CLASS_KW@192..198 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@198..206
+        0: IDENT@198..206 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@206..207 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@207..207
+      9: R_CURLY@207..208 "}" [] []
+    19: JS_CLASS_DECLARATION@208..239
+      0: JS_DECORATOR_LIST@208..223
+        0: JS_DECORATOR@208..223
+          0: AT@208..210 "@" [Newline("\n")] []
+          1: JS_BOGUS_EXPRESSION@210..223
+            0: FUNCTION_KW@210..218 "function" [] []
+            1: JS_PARAMETERS@218..220
+              0: L_PAREN@218..219 "(" [] []
+              1: JS_PARAMETER_LIST@219..219
+              2: R_PAREN@219..220 ")" [] []
+            2: JS_FUNCTION_BODY@220..223
+              0: L_CURLY@220..221 "{" [] []
+              1: JS_DIRECTIVE_LIST@221..221
+              2: JS_STATEMENT_LIST@221..221
+              3: R_CURLY@221..223 "}" [] [Whitespace(" ")]
+      1: (empty)
+      2: CLASS_KW@223..229 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@229..237
+        0: IDENT@229..237 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@237..238 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@238..238
+      9: R_CURLY@238..239 "}" [] []
+    20: JS_BOGUS_STATEMENT@239..245
+      0: JS_DECORATOR@239..245
+        0: AT@239..241 "@" [Newline("\n")] []
+        1: JS_IDENTIFIER_EXPRESSION@241..245
+          0: JS_REFERENCE_IDENTIFIER@241..245
+            0: IDENT@241..245 "obj" [] [Whitespace(" ")]
+    21: JS_BOGUS_STATEMENT@245..263
+      0: INSTANCEOF_KW@245..256 "instanceof" [] [Whitespace(" ")]
+      1: IDENT@256..263 "Object" [] [Whitespace(" ")]
+    22: JS_CLASS_DECLARATION@263..279
+      0: JS_DECORATOR_LIST@263..263
+      1: (empty)
+      2: CLASS_KW@263..269 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@269..277
+        0: IDENT@269..277 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@277..278 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@278..278
+      9: R_CURLY@278..279 "}" [] []
+    23: JS_BOGUS_STATEMENT@279..283
+      0: JS_DECORATOR@279..283
+        0: AT@279..281 "@" [Newline("\n")] []
+        1: JS_BOGUS_EXPRESSION@281..283
+          0: JS_NUMBER_LITERAL@281..283 "1" [] [Whitespace(" ")]
+    24: JS_BOGUS_STATEMENT@283..289
+      0: EQ3@283..287 "===" [] [Whitespace(" ")]
+      1: JS_NUMBER_LITERAL@287..289 "2" [] [Whitespace(" ")]
+    25: JS_CLASS_DECLARATION@289..305
+      0: JS_DECORATOR_LIST@289..289
+      1: (empty)
+      2: CLASS_KW@289..295 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@295..303
+        0: IDENT@295..303 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@303..304 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@304..304
+      9: R_CURLY@304..305 "}" [] []
+    26: JS_CLASS_DECLARATION@305..336
+      0: JS_DECORATOR_LIST@305..320
+        0: JS_DECORATOR@305..320
+          0: AT@305..307 "@" [Newline("\n")] []
+          1: JS_BOGUS_EXPRESSION@307..320
+            0: NEW_KW@307..311 "new" [] [Whitespace(" ")]
+            1: JS_IDENTIFIER_EXPRESSION@311..317
+              0: JS_REFERENCE_IDENTIFIER@311..317
+                0: IDENT@311..317 "Object" [] []
+            2: JS_CALL_ARGUMENTS@317..320
+              0: L_PAREN@317..318 "(" [] []
+              1: JS_CALL_ARGUMENT_LIST@318..318
+              2: R_PAREN@318..320 ")" [] [Whitespace(" ")]
+      1: (empty)
+      2: CLASS_KW@320..326 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@326..334
+        0: IDENT@326..334 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@334..335 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@335..335
+      9: R_CURLY@335..336 "}" [] []
+    27: JS_CLASS_DECLARATION@336..357
+      0: JS_DECORATOR_LIST@336..341
+        0: JS_DECORATOR@336..341
+          0: AT@336..338 "@" [Newline("\n")] []
+          1: JS_BOGUS_EXPRESSION@338..341
+            0: L_CURLY@338..339 "{" [] []
+            1: JS_OBJECT_MEMBER_LIST@339..339
+            2: R_CURLY@339..341 "}" [] [Whitespace(" ")]
+      1: (empty)
+      2: CLASS_KW@341..347 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@347..355
+        0: IDENT@347..355 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@355..356 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@356..356
+      9: R_CURLY@356..357 "}" [] []
+    28: JS_BOGUS_STATEMENT@357..360
+      0: JS_DECORATOR@357..360
+        0: AT@357..359 "@" [Newline("\n")] []
+        1: JS_IDENTIFIER_EXPRESSION@359..360
+          0: JS_REFERENCE_IDENTIFIER@359..360
+            0: IDENT@359..360 "a" [] []
+    29: JS_EXPRESSION_STATEMENT@360..379
+      0: JS_PRE_UPDATE_EXPRESSION@360..379
+        0: PLUS2@360..363 "++" [] [Whitespace(" ")]
+        1: JS_BOGUS_ASSIGNMENT@363..379
+          0: JS_DECORATOR_LIST@363..363
+          1: CLASS_KW@363..369 "class" [] [Whitespace(" ")]
+          2: JS_IDENTIFIER_BINDING@369..377
+            0: IDENT@369..377 "MyClass" [] [Whitespace(" ")]
+          3: L_CURLY@377..378 "{" [] []
+          4: JS_CLASS_MEMBER_LIST@378..378
+          5: R_CURLY@378..379 "}" [] []
+      1: (empty)
+    30: JS_BOGUS_STATEMENT@379..382
+      0: JS_DECORATOR@379..382
+        0: AT@379..381 "@" [Newline("\n")] []
+        1: JS_IDENTIFIER_EXPRESSION@381..382
+          0: JS_REFERENCE_IDENTIFIER@381..382
+            0: IDENT@381..382 "a" [] []
+    31: JS_BOGUS_STATEMENT@382..385
+      0: COMMA@382..383 "," [] []
+      1: IDENT@383..385 "b" [] [Whitespace(" ")]
+    32: JS_CLASS_DECLARATION@385..401
+      0: JS_DECORATOR_LIST@385..385
+      1: (empty)
+      2: CLASS_KW@385..391 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@391..399
+        0: IDENT@391..399 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@399..400 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@400..400
+      9: R_CURLY@400..401 "}" [] []
+    33: JS_CLASS_DECLARATION@401..429
+      0: JS_DECORATOR_LIST@401..413
+        0: JS_DECORATOR@401..413
+          0: AT@401..403 "@" [Newline("\n")] []
+          1: JS_BOGUS_EXPRESSION@403..413
+            0: BACKTICK@403..404 "`" [] []
+            1: JS_TEMPLATE_ELEMENT_LIST@404..411
+              0: JS_TEMPLATE_ELEMENT@404..408
+                0: DOLLAR_CURLY@404..406 "${" [] []
+                1: JS_IDENTIFIER_EXPRESSION@406..407
+                  0: JS_REFERENCE_IDENTIFIER@406..407
+                    0: IDENT@406..407 "d" [] []
+                2: R_CURLY@407..408 "}" [] []
+              1: JS_TEMPLATE_CHUNK_ELEMENT@408..411
+                0: TEMPLATE_CHUNK@408..411 "foo" [] []
+            2: BACKTICK@411..413 "`" [] [Whitespace(" ")]
+      1: (empty)
+      2: CLASS_KW@413..419 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@419..427
+        0: IDENT@419..427 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@427..428 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@428..428
+      9: R_CURLY@428..429 "}" [] []
+    34: JS_BOGUS_STATEMENT@429..435
+      0: JS_DECORATOR@429..435
+        0: AT@429..431 "@" [Newline("\n")] []
+        1: JS_IDENTIFIER_EXPRESSION@431..435
+          0: JS_REFERENCE_IDENTIFIER@431..435
+            0: IDENT@431..435 "obj" [] [Whitespace(" ")]
+    35: JS_EXPRESSION_STATEMENT@435..438
+      0: JS_IDENTIFIER_EXPRESSION@435..438
+        0: JS_REFERENCE_IDENTIFIER@435..438
+          0: IDENT@435..438 "as" [] [Whitespace(" ")]
+      1: (empty)
+    36: JS_EXPRESSION_STATEMENT@438..445
+      0: JS_IDENTIFIER_EXPRESSION@438..445
+        0: JS_REFERENCE_IDENTIFIER@438..445
+          0: IDENT@438..445 "MyType" [] [Whitespace(" ")]
+      1: (empty)
+    37: JS_CLASS_DECLARATION@445..461
+      0: JS_DECORATOR_LIST@445..445
+      1: (empty)
+      2: CLASS_KW@445..451 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@451..459
+        0: IDENT@451..459 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@459..460 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@460..460
+      9: R_CURLY@460..461 "}" [] []
+    38: JS_BOGUS_STATEMENT@461..463
+      0: JS_DECORATOR@461..463
+        0: AT@461..463 "@" [Newline("\n")] []
+        1: (empty)
+    39: JS_EXPRESSION_STATEMENT@463..475
+      0: TS_TYPE_ASSERTION_EXPRESSION@463..475
+        0: L_ANGLE@463..464 "<" [] []
+        1: TS_REFERENCE_TYPE@464..470
+          0: JS_REFERENCE_IDENTIFIER@464..470
+            0: IDENT@464..470 "MyType" [] []
+          1: (empty)
+        2: R_ANGLE@470..471 ">" [] []
+        3: JS_IDENTIFIER_EXPRESSION@471..475
+          0: JS_REFERENCE_IDENTIFIER@471..475
+            0: IDENT@471..475 "obj" [] [Whitespace(" ")]
+      1: (empty)
+    40: JS_CLASS_DECLARATION@475..491
+      0: JS_DECORATOR_LIST@475..475
+      1: (empty)
+      2: CLASS_KW@475..481 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@481..489
+        0: IDENT@481..489 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@489..490 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@490..490
+      9: R_CURLY@490..491 "}" [] []
+    41: JS_BOGUS_STATEMENT@491..497
+      0: JS_DECORATOR@491..497
+        0: AT@491..493 "@" [Newline("\n")] []
+        1: JS_IDENTIFIER_EXPRESSION@493..497
+          0: JS_REFERENCE_IDENTIFIER@493..497
+            0: IDENT@493..497 "obj" [] [Whitespace(" ")]
+    42: JS_EXPRESSION_STATEMENT@497..507
+      0: JS_IDENTIFIER_EXPRESSION@497..507
+        0: JS_REFERENCE_IDENTIFIER@497..507
+          0: IDENT@497..507 "satisfies" [] [Whitespace(" ")]
+      1: (empty)
+    43: JS_EXPRESSION_STATEMENT@507..514
+      0: JS_IDENTIFIER_EXPRESSION@507..514
+        0: JS_REFERENCE_IDENTIFIER@507..514
+          0: IDENT@507..514 "MyType" [] [Whitespace(" ")]
+      1: (empty)
+    44: JS_CLASS_DECLARATION@514..530
+      0: JS_DECORATOR_LIST@514..514
+      1: (empty)
+      2: CLASS_KW@514..520 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@520..528
+        0: IDENT@520..528 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@528..529 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@529..529
+      9: R_CURLY@529..530 "}" [] []
+    45: JS_CLASS_DECLARATION@530..553
+      0: JS_DECORATOR_LIST@530..537
+        0: JS_DECORATOR@530..537
+          0: AT@530..532 "@" [Newline("\n")] []
+          1: JS_BOGUS_EXPRESSION@532..537
+            0: JS_IDENTIFIER_EXPRESSION@532..535
+              0: JS_REFERENCE_IDENTIFIER@532..535
+                0: IDENT@532..535 "obj" [] []
+            1: BANG@535..537 "!" [] [Whitespace(" ")]
+      1: (empty)
+      2: CLASS_KW@537..543 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@543..551
+        0: IDENT@543..551 "MyClass" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@551..552 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@552..552
+      9: R_CURLY@552..553 "}" [] []
+  4: EOF@553..554 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+decorator.ts:1:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `'dsads'`
+  
+  > 1 │ @'dsads' class MyClass {}
+      │  ^^^^^^^
+    2 │ @1 class MyClass {}
+    3 │ @++1 class MyClass {}
+  
+decorator.ts:2:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `1`
+  
+    1 │ @'dsads' class MyClass {}
+  > 2 │ @1 class MyClass {}
+      │  ^
+    3 │ @++1 class MyClass {}
+    4 │ @[] in 1 class MyClass {}
+  
+decorator.ts:3:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '++'.
+  
+    1 │ @'dsads' class MyClass {}
+    2 │ @1 class MyClass {}
+  > 3 │ @++1 class MyClass {}
+      │  ^^
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  
+  i Expected an expression here.
+  
+    1 │ @'dsads' class MyClass {}
+    2 │ @1 class MyClass {}
+  > 3 │ @++1 class MyClass {}
+      │  ^^
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  
+decorator.ts:3:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    1 │ @'dsads' class MyClass {}
+    2 │ @1 class MyClass {}
+  > 3 │ @++1 class MyClass {}
+      │ ^
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:3:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `1`
+  
+    1 │ @'dsads' class MyClass {}
+    2 │ @1 class MyClass {}
+  > 3 │ @++1 class MyClass {}
+      │    ^
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  
+  i This expression cannot be assigned to
+  
+decorator.ts:3:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    1 │ @'dsads' class MyClass {}
+    2 │ @1 class MyClass {}
+  > 3 │ @++1 class MyClass {}
+      │      ^^^^^
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    1 │ @'dsads' class MyClass {}
+    2 │ @1 class MyClass {}
+  > 3 │ @++1 class MyClass {}
+      │      ^^^^^
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  
+  i ...Which is required to end this statement
+  
+    1 │ @'dsads' class MyClass {}
+    2 │ @1 class MyClass {}
+  > 3 │ @++1 class MyClass {}
+      │  ^^^^^^^^^
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  
+decorator.ts:4:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `[]`
+  
+    2 │ @1 class MyClass {}
+    3 │ @++1 class MyClass {}
+  > 4 │ @[] in 1 class MyClass {}
+      │  ^^
+    5 │ @[] class MyClass {}
+    6 │ @() => {} class MyClass {}
+  
+decorator.ts:4:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    2 │ @1 class MyClass {}
+    3 │ @++1 class MyClass {}
+  > 4 │ @[] in 1 class MyClass {}
+      │ ^^^
+    5 │ @[] class MyClass {}
+    6 │ @() => {} class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:4:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found 'in 1'.
+  
+    2 │ @1 class MyClass {}
+    3 │ @++1 class MyClass {}
+  > 4 │ @[] in 1 class MyClass {}
+      │     ^^^^
+    5 │ @[] class MyClass {}
+    6 │ @() => {} class MyClass {}
+  
+  i Expected a statement here.
+  
+    2 │ @1 class MyClass {}
+    3 │ @++1 class MyClass {}
+  > 4 │ @[] in 1 class MyClass {}
+      │     ^^^^
+    5 │ @[] class MyClass {}
+    6 │ @() => {} class MyClass {}
+  
+decorator.ts:5:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `[]`
+  
+    3 │ @++1 class MyClass {}
+    4 │ @[] in 1 class MyClass {}
+  > 5 │ @[] class MyClass {}
+      │  ^^
+    6 │ @() => {} class MyClass {}
+    7 │ @1 == 2 ? true : false class MyClass {}
+  
+decorator.ts:6:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Parenthesized expression didnt contain anything
+  
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  > 6 │ @() => {} class MyClass {}
+      │   ^
+    7 │ @1 == 2 ? true : false class MyClass {}
+    8 │ @await fn class MyClass {}
+  
+  i Expected an expression here
+  
+decorator.ts:6:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  > 6 │ @() => {} class MyClass {}
+      │ ^^^
+    7 │ @1 == 2 ? true : false class MyClass {}
+    8 │ @await fn class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '=>'.
+  
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  > 6 │ @() => {} class MyClass {}
+      │     ^^
+    7 │ @1 == 2 ? true : false class MyClass {}
+    8 │ @await fn class MyClass {}
+  
+  i Expected a statement here.
+  
+    4 │ @[] in 1 class MyClass {}
+    5 │ @[] class MyClass {}
+  > 6 │ @() => {} class MyClass {}
+      │     ^^
+    7 │ @1 == 2 ? true : false class MyClass {}
+    8 │ @await fn class MyClass {}
+  
+decorator.ts:7:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `1`
+  
+    5 │ @[] class MyClass {}
+    6 │ @() => {} class MyClass {}
+  > 7 │ @1 == 2 ? true : false class MyClass {}
+      │  ^
+    8 │ @await fn class MyClass {}
+    9 │ @function(){} class MyClass {}
+  
+decorator.ts:7:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    5 │ @[] class MyClass {}
+    6 │ @() => {} class MyClass {}
+  > 7 │ @1 == 2 ? true : false class MyClass {}
+      │ ^^
+    8 │ @await fn class MyClass {}
+    9 │ @function(){} class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:7:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '== 2 ? true : false'.
+  
+    5 │ @[] class MyClass {}
+    6 │ @() => {} class MyClass {}
+  > 7 │ @1 == 2 ? true : false class MyClass {}
+      │    ^^^^^^^^^^^^^^^^^^^
+    8 │ @await fn class MyClass {}
+    9 │ @function(){} class MyClass {}
+  
+  i Expected a statement here.
+  
+    5 │ @[] class MyClass {}
+    6 │ @() => {} class MyClass {}
+  > 7 │ @1 == 2 ? true : false class MyClass {}
+      │    ^^^^^^^^^^^^^^^^^^^
+    8 │ @await fn class MyClass {}
+    9 │ @function(){} class MyClass {}
+  
+decorator.ts:8:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of `await` as an identifier in an async context
+  
+     6 │ @() => {} class MyClass {}
+     7 │ @1 == 2 ? true : false class MyClass {}
+   > 8 │ @await fn class MyClass {}
+       │  ^^^^^
+     9 │ @function(){} class MyClass {}
+    10 │ @obj instanceof Object class MyClass {}
+  
+decorator.ts:8:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+     6 │ @() => {} class MyClass {}
+     7 │ @1 == 2 ? true : false class MyClass {}
+   > 8 │ @await fn class MyClass {}
+       │ ^^^^^^
+     9 │ @function(){} class MyClass {}
+    10 │ @obj instanceof Object class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:8:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+     6 │ @() => {} class MyClass {}
+     7 │ @1 == 2 ? true : false class MyClass {}
+   > 8 │ @await fn class MyClass {}
+       │           ^^^^^
+     9 │ @function(){} class MyClass {}
+    10 │ @obj instanceof Object class MyClass {}
+  
+  i An explicit or implicit semicolon is expected here...
+  
+     6 │ @() => {} class MyClass {}
+     7 │ @1 == 2 ? true : false class MyClass {}
+   > 8 │ @await fn class MyClass {}
+       │           ^^^^^
+     9 │ @function(){} class MyClass {}
+    10 │ @obj instanceof Object class MyClass {}
+  
+  i ...Which is required to end this statement
+  
+     6 │ @() => {} class MyClass {}
+     7 │ @1 == 2 ? true : false class MyClass {}
+   > 8 │ @await fn class MyClass {}
+       │        ^^^^^^^^
+     9 │ @function(){} class MyClass {}
+    10 │ @obj instanceof Object class MyClass {}
+  
+decorator.ts:9:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `function(){}`
+  
+     7 │ @1 == 2 ? true : false class MyClass {}
+     8 │ @await fn class MyClass {}
+   > 9 │ @function(){} class MyClass {}
+       │  ^^^^^^^^^^^^
+    10 │ @obj instanceof Object class MyClass {}
+    11 │ @1 === 2 class MyClass {}
+  
+decorator.ts:10:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+     8 │ @await fn class MyClass {}
+     9 │ @function(){} class MyClass {}
+  > 10 │ @obj instanceof Object class MyClass {}
+       │ ^^^^
+    11 │ @1 === 2 class MyClass {}
+    12 │ @new Object() class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:10:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found 'instanceof Object'.
+  
+     8 │ @await fn class MyClass {}
+     9 │ @function(){} class MyClass {}
+  > 10 │ @obj instanceof Object class MyClass {}
+       │      ^^^^^^^^^^^^^^^^^
+    11 │ @1 === 2 class MyClass {}
+    12 │ @new Object() class MyClass {}
+  
+  i Expected a statement here.
+  
+     8 │ @await fn class MyClass {}
+     9 │ @function(){} class MyClass {}
+  > 10 │ @obj instanceof Object class MyClass {}
+       │      ^^^^^^^^^^^^^^^^^
+    11 │ @1 === 2 class MyClass {}
+    12 │ @new Object() class MyClass {}
+  
+decorator.ts:11:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `1`
+  
+     9 │ @function(){} class MyClass {}
+    10 │ @obj instanceof Object class MyClass {}
+  > 11 │ @1 === 2 class MyClass {}
+       │  ^
+    12 │ @new Object() class MyClass {}
+    13 │ @{} class MyClass {}
+  
+decorator.ts:11:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+     9 │ @function(){} class MyClass {}
+    10 │ @obj instanceof Object class MyClass {}
+  > 11 │ @1 === 2 class MyClass {}
+       │ ^^
+    12 │ @new Object() class MyClass {}
+    13 │ @{} class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:11:4 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '=== 2'.
+  
+     9 │ @function(){} class MyClass {}
+    10 │ @obj instanceof Object class MyClass {}
+  > 11 │ @1 === 2 class MyClass {}
+       │    ^^^^^
+    12 │ @new Object() class MyClass {}
+    13 │ @{} class MyClass {}
+  
+  i Expected a statement here.
+  
+     9 │ @function(){} class MyClass {}
+    10 │ @obj instanceof Object class MyClass {}
+  > 11 │ @1 === 2 class MyClass {}
+       │    ^^^^^
+    12 │ @new Object() class MyClass {}
+    13 │ @{} class MyClass {}
+  
+decorator.ts:12:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `new Object()`
+  
+    10 │ @obj instanceof Object class MyClass {}
+    11 │ @1 === 2 class MyClass {}
+  > 12 │ @new Object() class MyClass {}
+       │  ^^^^^^^^^^^^
+    13 │ @{} class MyClass {}
+    14 │ @a++ class MyClass {}
+  
+decorator.ts:13:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `{}`
+  
+    11 │ @1 === 2 class MyClass {}
+    12 │ @new Object() class MyClass {}
+  > 13 │ @{} class MyClass {}
+       │  ^^
+    14 │ @a++ class MyClass {}
+    15 │ @a,b class MyClass {}
+  
+decorator.ts:14:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    12 │ @new Object() class MyClass {}
+    13 │ @{} class MyClass {}
+  > 14 │ @a++ class MyClass {}
+       │ ^^
+    15 │ @a,b class MyClass {}
+    16 │ @`${d}foo` class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:14:6 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid assignment to `class MyClass {}`
+  
+    12 │ @new Object() class MyClass {}
+    13 │ @{} class MyClass {}
+  > 14 │ @a++ class MyClass {}
+       │      ^^^^^^^^^^^^^^^^
+    15 │ @a,b class MyClass {}
+    16 │ @`${d}foo` class MyClass {}
+  
+  i This expression cannot be assigned to
+  
+decorator.ts:15:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    13 │ @{} class MyClass {}
+    14 │ @a++ class MyClass {}
+  > 15 │ @a,b class MyClass {}
+       │ ^^
+    16 │ @`${d}foo` class MyClass {}
+    17 │ @obj as MyType class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:15:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found ',b'.
+  
+    13 │ @{} class MyClass {}
+    14 │ @a++ class MyClass {}
+  > 15 │ @a,b class MyClass {}
+       │   ^^
+    16 │ @`${d}foo` class MyClass {}
+    17 │ @obj as MyType class MyClass {}
+  
+  i Expected a statement here.
+  
+    13 │ @{} class MyClass {}
+    14 │ @a++ class MyClass {}
+  > 15 │ @a,b class MyClass {}
+       │   ^^
+    16 │ @`${d}foo` class MyClass {}
+    17 │ @obj as MyType class MyClass {}
+  
+decorator.ts:16:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator ``${d}foo``
+  
+    14 │ @a++ class MyClass {}
+    15 │ @a,b class MyClass {}
+  > 16 │ @`${d}foo` class MyClass {}
+       │  ^^^^^^^^^
+    17 │ @obj as MyType class MyClass {}
+    18 │ @<MyType>obj class MyClass {}
+  
+decorator.ts:17:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    15 │ @a,b class MyClass {}
+    16 │ @`${d}foo` class MyClass {}
+  > 17 │ @obj as MyType class MyClass {}
+       │ ^^^^
+    18 │ @<MyType>obj class MyClass {}
+    19 │ @obj satisfies MyType class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:17:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    15 │ @a,b class MyClass {}
+    16 │ @`${d}foo` class MyClass {}
+  > 17 │ @obj as MyType class MyClass {}
+       │         ^^^^^^
+    18 │ @<MyType>obj class MyClass {}
+    19 │ @obj satisfies MyType class MyClass {}
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    15 │ @a,b class MyClass {}
+    16 │ @`${d}foo` class MyClass {}
+  > 17 │ @obj as MyType class MyClass {}
+       │         ^^^^^^
+    18 │ @<MyType>obj class MyClass {}
+    19 │ @obj satisfies MyType class MyClass {}
+  
+  i ...Which is required to end this statement
+  
+    15 │ @a,b class MyClass {}
+    16 │ @`${d}foo` class MyClass {}
+  > 17 │ @obj as MyType class MyClass {}
+       │      ^^^^^^^^^
+    18 │ @<MyType>obj class MyClass {}
+    19 │ @obj satisfies MyType class MyClass {}
+  
+decorator.ts:17:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    15 │ @a,b class MyClass {}
+    16 │ @`${d}foo` class MyClass {}
+  > 17 │ @obj as MyType class MyClass {}
+       │                ^^^^^
+    18 │ @<MyType>obj class MyClass {}
+    19 │ @obj satisfies MyType class MyClass {}
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    15 │ @a,b class MyClass {}
+    16 │ @`${d}foo` class MyClass {}
+  > 17 │ @obj as MyType class MyClass {}
+       │                ^^^^^
+    18 │ @<MyType>obj class MyClass {}
+    19 │ @obj satisfies MyType class MyClass {}
+  
+  i ...Which is required to end this statement
+  
+    15 │ @a,b class MyClass {}
+    16 │ @`${d}foo` class MyClass {}
+  > 17 │ @obj as MyType class MyClass {}
+       │         ^^^^^^^^^^^^
+    18 │ @<MyType>obj class MyClass {}
+    19 │ @obj satisfies MyType class MyClass {}
+  
+decorator.ts:18:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found '<'.
+  
+    16 │ @`${d}foo` class MyClass {}
+    17 │ @obj as MyType class MyClass {}
+  > 18 │ @<MyType>obj class MyClass {}
+       │  ^
+    19 │ @obj satisfies MyType class MyClass {}
+    20 │ @obj! class MyClass {}
+  
+  i Expected an expression here.
+  
+    16 │ @`${d}foo` class MyClass {}
+    17 │ @obj as MyType class MyClass {}
+  > 18 │ @<MyType>obj class MyClass {}
+       │  ^
+    19 │ @obj satisfies MyType class MyClass {}
+    20 │ @obj! class MyClass {}
+  
+decorator.ts:18:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    16 │ @`${d}foo` class MyClass {}
+    17 │ @obj as MyType class MyClass {}
+  > 18 │ @<MyType>obj class MyClass {}
+       │ ^
+    19 │ @obj satisfies MyType class MyClass {}
+    20 │ @obj! class MyClass {}
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:18:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    16 │ @`${d}foo` class MyClass {}
+    17 │ @obj as MyType class MyClass {}
+  > 18 │ @<MyType>obj class MyClass {}
+       │              ^^^^^
+    19 │ @obj satisfies MyType class MyClass {}
+    20 │ @obj! class MyClass {}
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    16 │ @`${d}foo` class MyClass {}
+    17 │ @obj as MyType class MyClass {}
+  > 18 │ @<MyType>obj class MyClass {}
+       │              ^^^^^
+    19 │ @obj satisfies MyType class MyClass {}
+    20 │ @obj! class MyClass {}
+  
+  i ...Which is required to end this statement
+  
+    16 │ @`${d}foo` class MyClass {}
+    17 │ @obj as MyType class MyClass {}
+  > 18 │ @<MyType>obj class MyClass {}
+       │  ^^^^^^^^^^^^^^^^^
+    19 │ @obj satisfies MyType class MyClass {}
+    20 │ @obj! class MyClass {}
+  
+decorator.ts:19:1 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    17 │ @obj as MyType class MyClass {}
+    18 │ @<MyType>obj class MyClass {}
+  > 19 │ @obj satisfies MyType class MyClass {}
+       │ ^^^^
+    20 │ @obj! class MyClass {}
+    21 │ 
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+decorator.ts:19:16 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    17 │ @obj as MyType class MyClass {}
+    18 │ @<MyType>obj class MyClass {}
+  > 19 │ @obj satisfies MyType class MyClass {}
+       │                ^^^^^^
+    20 │ @obj! class MyClass {}
+    21 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    17 │ @obj as MyType class MyClass {}
+    18 │ @<MyType>obj class MyClass {}
+  > 19 │ @obj satisfies MyType class MyClass {}
+       │                ^^^^^^
+    20 │ @obj! class MyClass {}
+    21 │ 
+  
+  i ...Which is required to end this statement
+  
+    17 │ @obj as MyType class MyClass {}
+    18 │ @<MyType>obj class MyClass {}
+  > 19 │ @obj satisfies MyType class MyClass {}
+       │      ^^^^^^^^^^^^^^^^
+    20 │ @obj! class MyClass {}
+    21 │ 
+  
+decorator.ts:19:23 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+    17 │ @obj as MyType class MyClass {}
+    18 │ @<MyType>obj class MyClass {}
+  > 19 │ @obj satisfies MyType class MyClass {}
+       │                       ^^^^^
+    20 │ @obj! class MyClass {}
+    21 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+    17 │ @obj as MyType class MyClass {}
+    18 │ @<MyType>obj class MyClass {}
+  > 19 │ @obj satisfies MyType class MyClass {}
+       │                       ^^^^^
+    20 │ @obj! class MyClass {}
+    21 │ 
+  
+  i ...Which is required to end this statement
+  
+    17 │ @obj as MyType class MyClass {}
+    18 │ @<MyType>obj class MyClass {}
+  > 19 │ @obj satisfies MyType class MyClass {}
+       │                ^^^^^^^^^^^^
+    20 │ @obj! class MyClass {}
+    21 │ 
+  
+decorator.ts:20:2 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Invalid decorator `obj!`
+  
+    18 │ @<MyType>obj class MyClass {}
+    19 │ @obj satisfies MyType class MyClass {}
+  > 20 │ @obj! class MyClass {}
+       │  ^^^^
+    21 │ 
+  
+```

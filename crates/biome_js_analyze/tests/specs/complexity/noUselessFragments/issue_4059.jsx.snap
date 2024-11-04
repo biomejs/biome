@@ -1,0 +1,24 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: issue_4059.jsx
+---
+# Input
+```jsx
+function MyComponent() {
+    return (
+        <div key={index}>{line || <>&nbsp;</>}</div>
+    )
+}
+
+function MyComponent2() {
+    return (
+        <div key={index}>{<>&nbsp;</>}</div>
+    )
+}
+
+function MyComponent3() {
+    return (
+        <div key={index}>{value ?? <>&nbsp;</>}</div>
+    )
+}
+```

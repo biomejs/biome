@@ -1,0 +1,107 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: useDeprecatedReason.graphql
+---
+# Input
+```graphql
+query {
+  member @deprecated {
+		id
+	}
+}
+
+query {
+  member @deprecated()
+}
+
+query {
+  member
+  @deprecated(abc: 123)
+}
+
+query {
+  # biome-ignore lint/nursery/useDeprecatedReason: testing
+  member @deprecated()
+}
+
+
+```
+
+# Diagnostics
+```
+useDeprecatedReason.graphql:2:10 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The directive `@deprecated` should have a `reason` argument.
+  
+    1 │ query {
+  > 2 │   member @deprecated {
+      │          ^^^^^^^^^^^
+    3 │ 		id
+    4 │ 	}
+  
+  i Add a `reason` argument to the directive.
+  
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason
+  
+     1  1 │   query {
+     2    │ - ··member·@deprecated·{
+        2 │ + ··#·biome-ignore·lint/nursery/useDeprecatedReason:·<explanation>
+        3 │ + ··member··@deprecated·{
+     3  4 │   		id
+     4  5 │   	}
+  
+
+```
+
+```
+useDeprecatedReason.graphql:8:10 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The directive `@deprecated` should have a `reason` argument.
+  
+     7 │ query {
+   > 8 │   member @deprecated()
+       │          ^^^^^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+  i Add a `reason` argument to the directive.
+  
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason
+  
+     6  6 │   
+     7  7 │   query {
+     8    │ - ··member·@deprecated()
+        8 │ + ··#·biome-ignore·lint/nursery/useDeprecatedReason:·<explanation>
+        9 │ + ··member··@deprecated()
+     9 10 │   }
+    10 11 │   
+  
+
+```
+
+```
+useDeprecatedReason.graphql:13:3 lint/nursery/useDeprecatedReason  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! The directive `@deprecated` should have a `reason` argument.
+  
+    11 │ query {
+    12 │   member
+  > 13 │   @deprecated(abc: 123)
+       │   ^^^^^^^^^^^^^^^^^^^^^
+    14 │ }
+    15 │ 
+  
+  i Add a `reason` argument to the directive.
+  
+  i Safe fix: Suppress rule lint/nursery/useDeprecatedReason
+  
+    11 11 │   query {
+    12 12 │     member
+    13    │ - ··@deprecated(abc:·123)
+       13 │ + ··#·biome-ignore·lint/nursery/useDeprecatedReason:·<explanation>
+       14 │ + ··@deprecated(abc:·123)
+    14 15 │   }
+    15 16 │   
+  
+
+```

@@ -370,7 +370,7 @@ pub struct ComplexityScore {
 /// Options for the rule `noExcessiveCognitiveComplexity`.
 #[derive(Clone, Debug, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct ComplexityOptions {
     /// The maximum complexity score that we allow. Anything higher is considered excessive.
     pub max_allowed_complexity: NonZeroU8,

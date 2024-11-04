@@ -104,7 +104,7 @@ declare_lint_rule! {
 
 pub struct State {
     id: JsIdentifierBinding,
-    all_writes: Vec<Reference>,
+    all_writes: Box<[Reference]>,
 }
 
 impl Rule for NoFunctionAssign {
@@ -126,7 +126,7 @@ impl Rule for NoFunctionAssign {
         } else {
             Some(State {
                 id: id.clone(),
-                all_writes,
+                all_writes: all_writes.into_boxed_slice(),
             })
         }
     }

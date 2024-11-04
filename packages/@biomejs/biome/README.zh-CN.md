@@ -15,7 +15,7 @@
 [![Open VSX version][open-vsx-badge]][open-vsx-url]
 
 [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=green
-[discord-url]: https://discord.gg/BypW39g6Yc
+[discord-url]: https://biomejs.dev/chat
 [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
 [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
 [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=green&label=%40biomejs%2Fbiome

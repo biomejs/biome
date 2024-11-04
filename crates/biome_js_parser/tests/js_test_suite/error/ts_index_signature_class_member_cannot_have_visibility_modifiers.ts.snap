@@ -1,0 +1,309 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class A {
+    public  [a: number]: string;
+}
+class B {
+    private  [a: number]: string;
+}
+class C {
+    protected  [a: number]: string;
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..9 "{" [] [],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        JsBogus {
+                            items: [
+                                TsAccessibilityModifier {
+                                    modifier_token: PUBLIC_KW@9..22 "public" [Newline("\n"), Whitespace("    ")] [Whitespace("  ")],
+                                },
+                            ],
+                        },
+                        L_BRACK@22..23 "[" [] [],
+                        TsIndexSignatureParameter {
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@23..24 "a" [] [],
+                            },
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@24..26 ":" [] [Whitespace(" ")],
+                                ty: TsNumberType {
+                                    number_token: NUMBER_KW@26..32 "number" [] [],
+                                },
+                            },
+                        },
+                        R_BRACK@32..33 "]" [] [],
+                        TsTypeAnnotation {
+                            colon_token: COLON@33..35 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@35..41 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@41..42 ";" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@42..44 "}" [Newline("\n")] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@44..51 "class" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@51..53 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@53..54 "{" [] [],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        JsBogus {
+                            items: [
+                                TsAccessibilityModifier {
+                                    modifier_token: PRIVATE_KW@54..68 "private" [Newline("\n"), Whitespace("    ")] [Whitespace("  ")],
+                                },
+                            ],
+                        },
+                        L_BRACK@68..69 "[" [] [],
+                        TsIndexSignatureParameter {
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@69..70 "a" [] [],
+                            },
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@70..72 ":" [] [Whitespace(" ")],
+                                ty: TsNumberType {
+                                    number_token: NUMBER_KW@72..78 "number" [] [],
+                                },
+                            },
+                        },
+                        R_BRACK@78..79 "]" [] [],
+                        TsTypeAnnotation {
+                            colon_token: COLON@79..81 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@81..87 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@87..88 ";" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@88..90 "}" [Newline("\n")] [],
+        },
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@90..97 "class" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@97..99 "C" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@99..100 "{" [] [],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        JsBogus {
+                            items: [
+                                TsAccessibilityModifier {
+                                    modifier_token: PROTECTED_KW@100..116 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace("  ")],
+                                },
+                            ],
+                        },
+                        L_BRACK@116..117 "[" [] [],
+                        TsIndexSignatureParameter {
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@117..118 "a" [] [],
+                            },
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@118..120 ":" [] [Whitespace(" ")],
+                                ty: TsNumberType {
+                                    number_token: NUMBER_KW@120..126 "number" [] [],
+                                },
+                            },
+                        },
+                        R_BRACK@126..127 "]" [] [],
+                        TsTypeAnnotation {
+                            colon_token: COLON@127..129 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@129..135 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@135..136 ";" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@136..138 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@138..139 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..139
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..138
+    0: JS_CLASS_DECLARATION@0..44
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..9 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@9..42
+        0: JS_BOGUS_MEMBER@9..42
+          0: JS_BOGUS@9..22
+            0: TS_ACCESSIBILITY_MODIFIER@9..22
+              0: PUBLIC_KW@9..22 "public" [Newline("\n"), Whitespace("    ")] [Whitespace("  ")]
+          1: L_BRACK@22..23 "[" [] []
+          2: TS_INDEX_SIGNATURE_PARAMETER@23..32
+            0: JS_IDENTIFIER_BINDING@23..24
+              0: IDENT@23..24 "a" [] []
+            1: TS_TYPE_ANNOTATION@24..32
+              0: COLON@24..26 ":" [] [Whitespace(" ")]
+              1: TS_NUMBER_TYPE@26..32
+                0: NUMBER_KW@26..32 "number" [] []
+          3: R_BRACK@32..33 "]" [] []
+          4: TS_TYPE_ANNOTATION@33..41
+            0: COLON@33..35 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@35..41
+              0: STRING_KW@35..41 "string" [] []
+          5: SEMICOLON@41..42 ";" [] []
+      9: R_CURLY@42..44 "}" [Newline("\n")] []
+    1: JS_CLASS_DECLARATION@44..90
+      0: JS_DECORATOR_LIST@44..44
+      1: (empty)
+      2: CLASS_KW@44..51 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@51..53
+        0: IDENT@51..53 "B" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@53..54 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@54..88
+        0: JS_BOGUS_MEMBER@54..88
+          0: JS_BOGUS@54..68
+            0: TS_ACCESSIBILITY_MODIFIER@54..68
+              0: PRIVATE_KW@54..68 "private" [Newline("\n"), Whitespace("    ")] [Whitespace("  ")]
+          1: L_BRACK@68..69 "[" [] []
+          2: TS_INDEX_SIGNATURE_PARAMETER@69..78
+            0: JS_IDENTIFIER_BINDING@69..70
+              0: IDENT@69..70 "a" [] []
+            1: TS_TYPE_ANNOTATION@70..78
+              0: COLON@70..72 ":" [] [Whitespace(" ")]
+              1: TS_NUMBER_TYPE@72..78
+                0: NUMBER_KW@72..78 "number" [] []
+          3: R_BRACK@78..79 "]" [] []
+          4: TS_TYPE_ANNOTATION@79..87
+            0: COLON@79..81 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@81..87
+              0: STRING_KW@81..87 "string" [] []
+          5: SEMICOLON@87..88 ";" [] []
+      9: R_CURLY@88..90 "}" [Newline("\n")] []
+    2: JS_CLASS_DECLARATION@90..138
+      0: JS_DECORATOR_LIST@90..90
+      1: (empty)
+      2: CLASS_KW@90..97 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@97..99
+        0: IDENT@97..99 "C" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@99..100 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@100..136
+        0: JS_BOGUS_MEMBER@100..136
+          0: JS_BOGUS@100..116
+            0: TS_ACCESSIBILITY_MODIFIER@100..116
+              0: PROTECTED_KW@100..116 "protected" [Newline("\n"), Whitespace("    ")] [Whitespace("  ")]
+          1: L_BRACK@116..117 "[" [] []
+          2: TS_INDEX_SIGNATURE_PARAMETER@117..126
+            0: JS_IDENTIFIER_BINDING@117..118
+              0: IDENT@117..118 "a" [] []
+            1: TS_TYPE_ANNOTATION@118..126
+              0: COLON@118..120 ":" [] [Whitespace(" ")]
+              1: TS_NUMBER_TYPE@120..126
+                0: NUMBER_KW@120..126 "number" [] []
+          3: R_BRACK@126..127 "]" [] []
+          4: TS_TYPE_ANNOTATION@127..135
+            0: COLON@127..129 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@129..135
+              0: STRING_KW@129..135 "string" [] []
+          5: SEMICOLON@135..136 ";" [] []
+      9: R_CURLY@136..138 "}" [Newline("\n")] []
+  4: EOF@138..139 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_index_signature_class_member_cannot_have_visibility_modifiers.ts:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'public' modifier cannot appear on an index signature.
+  
+    1 │ class A {
+  > 2 │     public  [a: number]: string;
+      │     ^^^^^^
+    3 │ }
+    4 │ class B {
+  
+ts_index_signature_class_member_cannot_have_visibility_modifiers.ts:5:5 parse ━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'private' modifier cannot appear on an index signature.
+  
+    3 │ }
+    4 │ class B {
+  > 5 │     private  [a: number]: string;
+      │     ^^^^^^^
+    6 │ }
+    7 │ class C {
+  
+ts_index_signature_class_member_cannot_have_visibility_modifiers.ts:8:5 parse ━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'protected' modifier cannot appear on an index signature.
+  
+     6 │ }
+     7 │ class C {
+   > 8 │     protected  [a: number]: string;
+       │     ^^^^^^^^^
+     9 │ }
+    10 │ 
+  
+```

@@ -39,11 +39,11 @@ declare_lint_rule! {
 /// Options for the rule `noRestrictedImports`.
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct RestrictedImportsOptions {
     /// A list of names that should trigger the rule
     #[serde(skip_serializing_if = "FxHashMap::is_empty")]
-    paths: FxHashMap<String, String>,
+    paths: FxHashMap<Box<str>, Box<str>>,
 }
 
 impl Rule for NoRestrictedImports {

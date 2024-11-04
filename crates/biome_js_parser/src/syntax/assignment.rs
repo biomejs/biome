@@ -16,6 +16,7 @@ use crate::JsParser;
 use crate::ParsedSyntax::{Absent, Present};
 use biome_js_syntax::{JsSyntaxKind::*, *};
 use biome_parser::diagnostic::expected_any;
+use biome_parser::parse_recovery::ParseRecoveryTokenSet;
 use biome_rowan::AstNode;
 
 use super::metavariable::is_at_metavariable;
@@ -302,7 +303,17 @@ impl ParseObjectPattern for ObjectAssignmentPattern {
             .or_add_diagnostic(p, expected_identifier);
             JS_OBJECT_ASSIGNMENT_PATTERN_SHORTHAND_PROPERTY
         } else if is_at_object_member_name(p) || p.at(T![:]) || p.nth_at(1, T![:]) {
-            parse_object_member_name(p).or_add_diagnostic(p, expected_object_member_name);
+            // If the parser is at an object member name, parse it and look for the colon token next.
+            // If `p.nth_at(1, T![:])` is true, it indicates an invalid object member name before the colon,
+            // such as `{%: 1}`. In this case, attempt to recover by finding the next colon token.
+            parse_object_member_name(p)
+                .or_recover_with_token_set(
+                    p,
+                    &ParseRecoveryTokenSet::new(JS_BOGUS, token_set![T![:]])
+                        .enable_recovery_on_line_break(),
+                    expected_object_member_name,
+                )
+                .ok();
             p.expect(T![:]);
             parse_assignment_pattern(p).or_add_diagnostic(p, expected_assignment_target);
             JS_OBJECT_ASSIGNMENT_PATTERN_PROPERTY

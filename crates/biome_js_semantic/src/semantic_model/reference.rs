@@ -58,9 +58,12 @@ impl Reference {
 
     /// Returns the scope of this reference
     pub fn scope(&self) -> Scope {
-        let id = self
-            .data
-            .scope(TextRange::new(self.range_start(), self.range_start()));
+        let start = self.range_start();
+        let id = self.data.scope(TextRange::new(
+            start,
+            // SAFETY: A reference name has at least a length of 1 byte.
+            start + TextSize::from(1),
+        ));
         Scope {
             data: self.data.clone(),
             id,

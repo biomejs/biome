@@ -1,6 +1,6 @@
 #!/usr/bin/node
-import * as util from "node:util";
 import * as process from "node:process";
+import * as util from "node:util";
 import { Browser, BrowserErrorCaptureEnum } from "happy-dom";
 
 function parseAriaSpec(doc, { url, version }) {
@@ -174,7 +174,7 @@ function parseNamesFrom(node) {
 			.map((name) => name.trim())
 			.filter(
 				(name) =>
-					name == "author" || name == "contents" || name == "prohibited",
+					name === "author" || name === "contents" || name === "prohibited",
 			) ?? []
 	);
 }
@@ -262,7 +262,7 @@ function parseConcept(spacedText, version) {
 			module: module.toLowerCase(),
 		});
 	}
-	if (result.length == 0) {
+	if (result.length === 0) {
 		if (text.includes(" ")) {
 			result.push({
 				type: "text",

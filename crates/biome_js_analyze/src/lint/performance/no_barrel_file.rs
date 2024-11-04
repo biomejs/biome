@@ -20,17 +20,17 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```ts,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// export * from "foo";
     /// export * from "bar";
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// export { foo } from "foo";
     /// export { bar } from "bar";
     /// ```
     ///
-    /// ```ts,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// export { default as module1 } from "./module1";
     /// ```
     ///
@@ -44,7 +44,7 @@ declare_lint_rule! {
     pub NoBarrelFile {
         version: "1.6.0",
         name: "noBarrelFile",
-        language: "ts",
+        language: "js",
         recommended: false,
         sources: &[RuleSource::EslintBarrelFiles("avoid-barrel-files")],
         source_kind: RuleSourceKind::Inspired,

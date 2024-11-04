@@ -1,6 +1,6 @@
 use std::{collections::BTreeMap, rc::Rc};
 
-use biome_css_syntax::CssRoot;
+use biome_css_syntax::{AnyCssSelector, CssRoot};
 use biome_rowan::{TextRange, TextSize};
 use rustc_hash::FxHashMap;
 
@@ -108,6 +108,9 @@ pub struct Rule {
     pub child_ids: Vec<RuleId>,
     /// The text range of this rule in the source document.
     pub range: TextRange,
+    /// Specificity context of this rule  
+    /// See https://drafts.csswg.org/selectors-4/#specificity-rules
+    pub specificity: Specificity,
 }
 
 /// Represents a CSS selector.
@@ -123,6 +126,7 @@ pub struct Selector {
     pub name: String,
     /// The text range of the selector in the source document.
     pub range: TextRange,
+    pub original: AnyCssSelector,
     /// The specificity of the selector.
     pub specificity: Specificity,
 }
@@ -134,6 +138,46 @@ pub struct Selector {
 /// More details https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Default)]
 pub struct Specificity(pub u32, pub u32, pub u32);
+
+/// In CSS, when selectors are combined (e.g., in a compound selector), their specificities are summed.
+/// This implementation mirrors that behavior by adding the ID, class, and type selector counts separately.
+///
+/// Consider the following selector.
+/// ```css
+/// #id .class {}
+/// ```
+///
+/// The specificity of each component is as follows:
+/// - `#id` has a specificity of `Specificity(1, 0, 0)`
+/// - `.class` has a specificity of `Specificity(0, 1, 0)`
+///
+/// Therefore, the combined selector `#id .class` has a specificity of:
+/// - `Specificity(1 + 0, 0 + 1, 0 + 0) = Specificity(1, 1, 0)`
+///
+/// More details https://drafts.csswg.org/selectors/#example-d97bd125
+impl std::ops::Add for Specificity {
+    type Output = Specificity;
+    fn add(self, rhs: Self) -> Self::Output {
+        Self(self.0 + rhs.0, self.1 + rhs.1, self.2 + rhs.2)
+    }
+}
+
+impl std::ops::AddAssign for Specificity {
+    fn add_assign(&mut self, rhs: Self) {
+        self.0 = rhs.0;
+        self.1 = rhs.1;
+        self.2 = rhs.2;
+    }
+}
+
+/// Formats the `Specificity` instance to match the notation used in the official CSS specification.
+///
+/// More details https://www.w3.org/TR/selectors-4/#specificity-rules
+impl std::fmt::Display for Specificity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {}, {})", self.0, self.1, self.2)
+    }
+}
 
 /// Represents a CSS declaration (property-value pair).
 /// ```css

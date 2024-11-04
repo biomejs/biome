@@ -1,0 +1,98 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class A {
+  public static { }
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..9 "{" [] [],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        TsAccessibilityModifier {
+                            modifier_token: PUBLIC_KW@9..19 "public" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        STATIC_KW@19..26 "static" [] [Whitespace(" ")],
+                        L_CURLY@26..28 "{" [] [Whitespace(" ")],
+                        JsStatementList [],
+                        R_CURLY@28..29 "}" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@29..31 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@31..32 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..32
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..31
+    0: JS_CLASS_DECLARATION@0..31
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..9 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@9..29
+        0: JS_BOGUS_MEMBER@9..29
+          0: TS_ACCESSIBILITY_MODIFIER@9..19
+            0: PUBLIC_KW@9..19 "public" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+          1: STATIC_KW@19..26 "static" [] [Whitespace(" ")]
+          2: L_CURLY@26..28 "{" [] [Whitespace(" ")]
+          3: JS_STATEMENT_LIST@28..28
+          4: R_CURLY@28..29 "}" [] []
+      9: R_CURLY@29..31 "}" [Newline("\n")] []
+  4: EOF@31..32 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_class_initializer_with_modifiers.ts:2:3 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Static class blocks cannot have any modifier.
+  
+    1 │ class A {
+  > 2 │   public static { }
+      │   ^^^^^^
+    3 │ }
+    4 │ 
+  
+```

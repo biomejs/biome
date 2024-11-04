@@ -99,7 +99,7 @@ impl Rule for UseSemanticElements {
                 "The elements with the following roles can be changed to the following elements:\n",
             )
         } else {
-            String::from("The element with this role can be changed to a DOM element that already this role.")
+            String::from("The element with this role can be changed to a DOM element that already has this role.")
         };
 
         for (element, attribute) in result_elements.iter().zip(result_attributes.iter()) {

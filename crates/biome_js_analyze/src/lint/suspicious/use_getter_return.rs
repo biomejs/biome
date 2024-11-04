@@ -69,7 +69,7 @@ declare_lint_rule! {
 impl Rule for UseGetterReturn {
     type Query = ControlFlowGraph;
     type State = InvalidGetterReturn;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -78,7 +78,7 @@ impl Rule for UseGetterReturn {
         let mut invalid_returns = Vec::new();
         if !JsGetterClassMember::can_cast(node_kind) && !JsGetterObjectMember::can_cast(node_kind) {
             // The node is not a getter.
-            return invalid_returns;
+            return invalid_returns.into_boxed_slice();
         }
         // stack of blocks to process
         let mut block_stack = vec![ROOT_BLOCK_ID];
@@ -130,7 +130,7 @@ impl Rule for UseGetterReturn {
                 }
             }
         }
-        invalid_returns
+        invalid_returns.into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, invalid_return: &Self::State) -> Option<RuleDiagnostic> {

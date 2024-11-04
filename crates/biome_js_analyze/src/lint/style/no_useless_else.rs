@@ -101,15 +101,15 @@ declare_lint_rule! {
 impl Rule for NoUselessElse {
     type Query = Ast<JsIfStatement>;
     type State = JsIfStatement;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let mut result = vec![];
+        let mut result = Vec::new();
         let if_stmt = ctx.query();
         // Check an `if` statement only once.
         if if_stmt.syntax().parent().kind() == Some(JsSyntaxKind::JS_ELSE_CLAUSE) {
-            return result;
+            return result.into_boxed_slice();
         }
         let mut if_stmt = Cow::Borrowed(if_stmt);
         while let (Ok(if_consequent), Some(else_clause)) =
@@ -131,7 +131,7 @@ impl Rule for NoUselessElse {
             };
             if_stmt = Cow::Owned(stmt);
         }
-        result
+        result.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, if_stmt: &Self::State) -> Option<RuleDiagnostic> {

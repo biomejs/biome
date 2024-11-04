@@ -1,0 +1,161 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+function f() {
+    return <div string_literal= ></div>;
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsFunctionDeclaration {
+            async_token: missing (optional),
+            function_token: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")],
+            star_token: missing (optional),
+            id: JsIdentifierBinding {
+                name_token: IDENT@9..10 "f" [] [],
+            },
+            type_parameters: missing (optional),
+            parameters: JsParameters {
+                l_paren_token: L_PAREN@10..11 "(" [] [],
+                items: JsParameterList [],
+                r_paren_token: R_PAREN@11..13 ")" [] [Whitespace(" ")],
+            },
+            return_type_annotation: missing (optional),
+            body: JsFunctionBody {
+                l_curly_token: L_CURLY@13..14 "{" [] [],
+                directives: JsDirectiveList [],
+                statements: JsStatementList [
+                    JsReturnStatement {
+                        return_token: RETURN_KW@14..26 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                        argument: JsxTagExpression {
+                            tag: JsxElement {
+                                opening_element: JsxOpeningElement {
+                                    l_angle_token: L_ANGLE@26..27 "<" [] [],
+                                    name: JsxName {
+                                        value_token: JSX_IDENT@27..31 "div" [] [Whitespace(" ")],
+                                    },
+                                    type_arguments: missing (optional),
+                                    attributes: JsxAttributeList [
+                                        JsxAttribute {
+                                            name: JsxName {
+                                                value_token: JSX_IDENT@31..45 "string_literal" [] [],
+                                            },
+                                            initializer: JsxAttributeInitializerClause {
+                                                eq_token: EQ@45..47 "=" [] [Whitespace(" ")],
+                                                value: missing (required),
+                                            },
+                                        },
+                                    ],
+                                    r_angle_token: R_ANGLE@47..48 ">" [] [],
+                                },
+                                children: JsxChildList [],
+                                closing_element: JsxClosingElement {
+                                    l_angle_token: L_ANGLE@48..49 "<" [] [],
+                                    slash_token: SLASH@49..50 "/" [] [],
+                                    name: JsxName {
+                                        value_token: JSX_IDENT@50..53 "div" [] [],
+                                    },
+                                    r_angle_token: R_ANGLE@53..54 ">" [] [],
+                                },
+                            },
+                        },
+                        semicolon_token: SEMICOLON@54..55 ";" [] [],
+                    },
+                ],
+                r_curly_token: R_CURLY@55..57 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@57..58 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..58
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..57
+    0: JS_FUNCTION_DECLARATION@0..57
+      0: (empty)
+      1: FUNCTION_KW@0..9 "function" [] [Whitespace(" ")]
+      2: (empty)
+      3: JS_IDENTIFIER_BINDING@9..10
+        0: IDENT@9..10 "f" [] []
+      4: (empty)
+      5: JS_PARAMETERS@10..13
+        0: L_PAREN@10..11 "(" [] []
+        1: JS_PARAMETER_LIST@11..11
+        2: R_PAREN@11..13 ")" [] [Whitespace(" ")]
+      6: (empty)
+      7: JS_FUNCTION_BODY@13..57
+        0: L_CURLY@13..14 "{" [] []
+        1: JS_DIRECTIVE_LIST@14..14
+        2: JS_STATEMENT_LIST@14..55
+          0: JS_RETURN_STATEMENT@14..55
+            0: RETURN_KW@14..26 "return" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JSX_TAG_EXPRESSION@26..54
+              0: JSX_ELEMENT@26..54
+                0: JSX_OPENING_ELEMENT@26..48
+                  0: L_ANGLE@26..27 "<" [] []
+                  1: JSX_NAME@27..31
+                    0: JSX_IDENT@27..31 "div" [] [Whitespace(" ")]
+                  2: (empty)
+                  3: JSX_ATTRIBUTE_LIST@31..47
+                    0: JSX_ATTRIBUTE@31..47
+                      0: JSX_NAME@31..45
+                        0: JSX_IDENT@31..45 "string_literal" [] []
+                      1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@45..47
+                        0: EQ@45..47 "=" [] [Whitespace(" ")]
+                        1: (empty)
+                  4: R_ANGLE@47..48 ">" [] []
+                1: JSX_CHILD_LIST@48..48
+                2: JSX_CLOSING_ELEMENT@48..54
+                  0: L_ANGLE@48..49 "<" [] []
+                  1: SLASH@49..50 "/" [] []
+                  2: JSX_NAME@50..53
+                    0: JSX_IDENT@50..53 "div" [] []
+                  3: R_ANGLE@53..54 ">" [] []
+            2: SEMICOLON@54..55 ";" [] []
+        3: R_CURLY@55..57 "}" [Newline("\n")] []
+  4: EOF@57..58 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+jsx_element_attribute_missing_value.jsx:2:33 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a JSX attribute value but instead found '>'.
+  
+    1 │ function f() {
+  > 2 │     return <div string_literal= ></div>;
+      │                                 ^
+    3 │ }
+    4 │ 
+  
+  i Expected a JSX attribute value here.
+  
+    1 │ function f() {
+  > 2 │     return <div string_literal= ></div>;
+      │                                 ^
+    3 │ }
+    4 │ 
+  
+```

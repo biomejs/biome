@@ -13,7 +13,7 @@ use biome_formatter::{
     Format, FormatResult,
 };
 use biome_rowan::SyntaxToken;
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 use crate::{prelude::CssFormatContext, AsFormat, CssFormatter};
 
@@ -43,17 +43,29 @@ impl Format<CssFormatContext> for FormatTokenAsLowercase {
     }
 }
 
+#[derive(Eq, PartialEq, Debug)]
+pub(crate) enum StringLiteralParentKind {
+    /// Variants to track tokens that are inside a CssCharasetRule
+    /// @charset must always have double quotes: https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding
+    CharsetAtRule,
+    /// other types, will add more later
+    Others,
+}
+
 /// Data structure of convenience to format string literals. This is copied
 /// from the JS formatter, but should eventually have the logic made generic
 /// and reusable since many languages will have the same needs.
 pub(crate) struct FormatLiteralStringToken<'token> {
     /// The current token
     token: &'token CssSyntaxToken,
+
+    // The parent that holds the token
+    parent_kind: StringLiteralParentKind,
 }
 
 impl<'token> FormatLiteralStringToken<'token> {
-    pub fn new(token: &'token CssSyntaxToken) -> Self {
-        Self { token }
+    pub fn new(token: &'token CssSyntaxToken, parent_kind: StringLiteralParentKind) -> Self {
+        Self { token, parent_kind }
     }
 
     fn token(&self) -> &'token CssSyntaxToken {
@@ -204,18 +216,28 @@ impl<'token> LiteralStringNormaliser<'token> {
     }
 
     fn normalise_text(&mut self) -> Cow<'token, str> {
-        let string_information = self
-            .token
-            .compute_string_information(self.chosen_quote_style);
+        match self.token.parent_kind {
+            StringLiteralParentKind::CharsetAtRule => {
+                let string_information = StringInformation {
+                    preferred_quote: QuoteStyle::Double,
+                };
+                self.normalise_tokens(string_information)
+            }
+            StringLiteralParentKind::Others => {
+                let string_information = self
+                    .token
+                    .compute_string_information(self.chosen_quote_style);
 
-        // Normalize string token and non-string token.
-        //
-        // Add the chosen quotes to any non-string tokensto normalize them into strings.
-        //
-        // CSS has various places where "string-like" tokens can be used without quotes, but the
-        // semantics aren't affected by whether they are present or not. This function lets those
-        // tokens become string literals by safely adding quotes around them.
-        self.normalise_tokens(string_information)
+                // Normalize string token and non-string token.
+                //
+                // Add the chosen quotes to any non-string tokensto normalize them into strings.
+                //
+                // CSS has various places where "string-like" tokens can be used without quotes, but the
+                // semantics aren't affected by whether they are present or not. This function lets those
+                // tokens become string literals by safely adding quotes around them.
+                self.normalise_tokens(string_information)
+            }
+        }
     }
 
     fn get_token(&self) -> &'token CssSyntaxToken {

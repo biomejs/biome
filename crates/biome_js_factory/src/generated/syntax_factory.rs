@@ -4580,7 +4580,7 @@ impl SyntaxFactory for JsSyntaxFactory {
             }
             JS_SETTER_CLASS_MEMBER => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<8usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if JsMethodModifierList::can_cast(element.kind()) {
@@ -4618,6 +4618,13 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
+                    if element.kind() == T ! [,] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
                     if element.kind() == T![')'] {
                         slots.mark_present();
                         current_element = elements.next();
@@ -4641,7 +4648,7 @@ impl SyntaxFactory for JsSyntaxFactory {
             }
             JS_SETTER_OBJECT_MEMBER => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T![set] {
@@ -4666,6 +4673,13 @@ impl SyntaxFactory for JsSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyJsFormalParameter::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [,] {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -7507,7 +7521,7 @@ impl SyntaxFactory for JsSyntaxFactory {
             }
             TS_IMPORT_TYPE => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<5usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T![typeof] {
@@ -7524,21 +7538,7 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
-                    if element.kind() == T!['('] {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == JS_STRING_LITERAL {
-                        slots.mark_present();
-                        current_element = elements.next();
-                    }
-                }
-                slots.next_slot();
-                if let Some(element) = &current_element {
-                    if element.kind() == T![')'] {
+                    if JsCallArguments::can_cast(element.kind()) {
                         slots.mark_present();
                         current_element = elements.next();
                     }
@@ -9100,7 +9100,7 @@ impl SyntaxFactory for JsSyntaxFactory {
             }
             TS_SETTER_SIGNATURE_CLASS_MEMBER => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<8usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if TsMethodSignatureModifierList::can_cast(element.kind()) {
@@ -9138,6 +9138,13 @@ impl SyntaxFactory for JsSyntaxFactory {
                 }
                 slots.next_slot();
                 if let Some(element) = &current_element {
+                    if element.kind() == T ! [,] {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
                     if element.kind() == T![')'] {
                         slots.mark_present();
                         current_element = elements.next();
@@ -9161,7 +9168,7 @@ impl SyntaxFactory for JsSyntaxFactory {
             }
             TS_SETTER_SIGNATURE_TYPE_MEMBER => {
                 let mut elements = (&children).into_iter();
-                let mut slots: RawNodeSlots<6usize> = RawNodeSlots::default();
+                let mut slots: RawNodeSlots<7usize> = RawNodeSlots::default();
                 let mut current_element = elements.next();
                 if let Some(element) = &current_element {
                     if element.kind() == T![set] {
@@ -9186,6 +9193,13 @@ impl SyntaxFactory for JsSyntaxFactory {
                 slots.next_slot();
                 if let Some(element) = &current_element {
                     if AnyJsFormalParameter::can_cast(element.kind()) {
+                        slots.mark_present();
+                        current_element = elements.next();
+                    }
+                }
+                slots.next_slot();
+                if let Some(element) = &current_element {
+                    if element.kind() == T ! [,] {
                         slots.mark_present();
                         current_element = elements.next();
                     }

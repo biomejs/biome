@@ -50,8 +50,20 @@ impl IsEmpty for String {
     }
 }
 
+impl IsEmpty for Box<str> {
+    fn is_empty(&self) -> bool {
+        str::is_empty(self)
+    }
+}
+
 impl<T> IsEmpty for Vec<T> {
     fn is_empty(&self) -> bool {
         Vec::is_empty(self)
+    }
+}
+
+impl<T> IsEmpty for Box<[T]> {
+    fn is_empty(&self) -> bool {
+        <[_]>::is_empty(self)
     }
 }

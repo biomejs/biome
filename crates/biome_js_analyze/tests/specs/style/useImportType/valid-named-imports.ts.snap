@@ -20,6 +20,11 @@ export type { C };
 import { D } from "";
 let a: D = new D();
 
+import { type E, F } from "";
+export type { E };
+export { F };
+
+import type { G } from "";
+export type { G };
+
 ```
-
-

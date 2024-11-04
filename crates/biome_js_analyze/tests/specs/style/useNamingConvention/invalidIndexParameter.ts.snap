@@ -11,6 +11,14 @@ export interface X {
 
     [snake_case: symbol]: unknown
 }
+
+export interface Y {
+    readonly [PascalCase: string]: unknown
+
+    readonly [CONSTANT_CASE: number]: unknown
+
+    readonly [snake_case: symbol]: unknown
+}
 ```
 
 # Diagnostics
@@ -27,11 +35,11 @@ invalidIndexParameter.ts:2:6 lint/style/useNamingConvention  FIXABLE  ━━━�
   
   i Safe fix: Rename this symbol in camelCase.
   
-    1 1 │   export interface X {
-    2   │ - ····[PascalCase:·string]:·unknown
-      2 │ + ····[pascalCase:·string]:·unknown
-    3 3 │   
-    4 4 │       [CONSTANT_CASE: number]: unknown
+     1  1 │   export interface X {
+     2    │ - ····[PascalCase:·string]:·unknown
+        2 │ + ····[pascalCase:·string]:·unknown
+     3  3 │   
+     4  4 │       [CONSTANT_CASE: number]: unknown
   
 
 ```
@@ -50,12 +58,12 @@ invalidIndexParameter.ts:4:6 lint/style/useNamingConvention  FIXABLE  ━━━�
   
   i Safe fix: Rename this symbol in camelCase.
   
-    2 2 │       [PascalCase: string]: unknown
-    3 3 │   
-    4   │ - ····[CONSTANT_CASE:·number]:·unknown
-      4 │ + ····[constantCase:·number]:·unknown
-    5 5 │   
-    6 6 │       [snake_case: symbol]: unknown
+     2  2 │       [PascalCase: string]: unknown
+     3  3 │   
+     4    │ - ····[CONSTANT_CASE:·number]:·unknown
+        4 │ + ····[constantCase:·number]:·unknown
+     5  5 │   
+     6  6 │       [snake_case: symbol]: unknown
   
 
 ```
@@ -70,14 +78,85 @@ invalidIndexParameter.ts:6:6 lint/style/useNamingConvention  FIXABLE  ━━━�
   > 6 │     [snake_case: symbol]: unknown
       │      ^^^^^^^^^^
     7 │ }
+    8 │ 
   
   i Safe fix: Rename this symbol in camelCase.
   
-    4 4 │       [CONSTANT_CASE: number]: unknown
-    5 5 │   
-    6   │ - ····[snake_case:·symbol]:·unknown
-      6 │ + ····[snakeCase:·symbol]:·unknown
-    7 7 │   }
+     4  4 │       [CONSTANT_CASE: number]: unknown
+     5  5 │   
+     6    │ - ····[snake_case:·symbol]:·unknown
+        6 │ + ····[snakeCase:·symbol]:·unknown
+     7  7 │   }
+     8  8 │   
+  
+
+```
+
+```
+invalidIndexParameter.ts:10:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This index parameter name should be in camelCase.
+  
+     9 │ export interface Y {
+  > 10 │     readonly [PascalCase: string]: unknown
+       │               ^^^^^^^^^^
+    11 │ 
+    12 │     readonly [CONSTANT_CASE: number]: unknown
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+     8  8 │   
+     9  9 │   export interface Y {
+    10    │ - ····readonly·[PascalCase:·string]:·unknown
+       10 │ + ····readonly·[pascalCase:·string]:·unknown
+    11 11 │   
+    12 12 │       readonly [CONSTANT_CASE: number]: unknown
+  
+
+```
+
+```
+invalidIndexParameter.ts:12:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This index parameter name should be in camelCase.
+  
+    10 │     readonly [PascalCase: string]: unknown
+    11 │ 
+  > 12 │     readonly [CONSTANT_CASE: number]: unknown
+       │               ^^^^^^^^^^^^^
+    13 │ 
+    14 │     readonly [snake_case: symbol]: unknown
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    10 10 │       readonly [PascalCase: string]: unknown
+    11 11 │   
+    12    │ - ····readonly·[CONSTANT_CASE:·number]:·unknown
+       12 │ + ····readonly·[constantCase:·number]:·unknown
+    13 13 │   
+    14 14 │       readonly [snake_case: symbol]: unknown
+  
+
+```
+
+```
+invalidIndexParameter.ts:14:15 lint/style/useNamingConvention  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This index parameter name should be in camelCase.
+  
+    12 │     readonly [CONSTANT_CASE: number]: unknown
+    13 │ 
+  > 14 │     readonly [snake_case: symbol]: unknown
+       │               ^^^^^^^^^^
+    15 │ }
+  
+  i Safe fix: Rename this symbol in camelCase.
+  
+    12 12 │       readonly [CONSTANT_CASE: number]: unknown
+    13 13 │   
+    14    │ - ····readonly·[snake_case:·symbol]:·unknown
+       14 │ + ····readonly·[snakeCase:·symbol]:·unknown
+    15 15 │   }
   
 
 ```

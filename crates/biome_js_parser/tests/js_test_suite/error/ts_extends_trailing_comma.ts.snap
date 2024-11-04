@@ -1,0 +1,111 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+interface A {}
+interface B extends A, {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsInterfaceDeclaration {
+            interface_token: INTERFACE_KW@0..10 "interface" [] [Whitespace(" ")],
+            id: TsIdentifierBinding {
+                name_token: IDENT@10..12 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            l_curly_token: L_CURLY@12..13 "{" [] [],
+            members: TsTypeMemberList [],
+            r_curly_token: R_CURLY@13..14 "}" [] [],
+        },
+        TsInterfaceDeclaration {
+            interface_token: INTERFACE_KW@14..25 "interface" [Newline("\n")] [Whitespace(" ")],
+            id: TsIdentifierBinding {
+                name_token: IDENT@25..27 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: TsExtendsClause {
+                extends_token: EXTENDS_KW@27..35 "extends" [] [Whitespace(" ")],
+                types: TsTypeList [
+                    TsReferenceType {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@35..36 "A" [] [],
+                        },
+                        type_arguments: missing (optional),
+                    },
+                    COMMA@36..38 "," [] [Whitespace(" ")],
+                    missing element,
+                ],
+            },
+            l_curly_token: L_CURLY@38..39 "{" [] [],
+            members: TsTypeMemberList [],
+            r_curly_token: R_CURLY@39..40 "}" [] [],
+        },
+    ],
+    eof_token: EOF@40..41 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..41
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..40
+    0: TS_INTERFACE_DECLARATION@0..14
+      0: INTERFACE_KW@0..10 "interface" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@10..12
+        0: IDENT@10..12 "A" [] [Whitespace(" ")]
+      2: (empty)
+      3: (empty)
+      4: L_CURLY@12..13 "{" [] []
+      5: TS_TYPE_MEMBER_LIST@13..13
+      6: R_CURLY@13..14 "}" [] []
+    1: TS_INTERFACE_DECLARATION@14..40
+      0: INTERFACE_KW@14..25 "interface" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@25..27
+        0: IDENT@25..27 "B" [] [Whitespace(" ")]
+      2: (empty)
+      3: TS_EXTENDS_CLAUSE@27..38
+        0: EXTENDS_KW@27..35 "extends" [] [Whitespace(" ")]
+        1: TS_TYPE_LIST@35..38
+          0: TS_REFERENCE_TYPE@35..36
+            0: JS_REFERENCE_IDENTIFIER@35..36
+              0: IDENT@35..36 "A" [] []
+            1: (empty)
+          1: COMMA@36..38 "," [] [Whitespace(" ")]
+          2: (empty)
+      4: L_CURLY@38..39 "{" [] []
+      5: TS_TYPE_MEMBER_LIST@39..39
+      6: R_CURLY@39..40 "}" [] []
+  4: EOF@40..41 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_extends_trailing_comma.ts:2:22 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Trailing comma not allowed.
+  
+    1 │ interface A {}
+  > 2 │ interface B extends A, {}
+      │                      ^
+    3 │ 
+  
+```

@@ -11,7 +11,7 @@ use biome_js_factory::make::{
 use biome_js_syntax::{
     AnyJsxChild, AnyJsxElementName, AnyJsxTag, JsLanguage, JsLogicalExpression,
     JsParenthesizedExpression, JsSyntaxKind, JsxChildList, JsxElement, JsxExpressionAttributeValue,
-    JsxFragment, JsxTagExpression, JsxText, T,
+    JsxExpressionChild, JsxFragment, JsxTagExpression, JsxText, T,
 };
 use biome_rowan::{declare_node_union, AstNode, AstNodeList, BatchMutation, BatchMutationExt};
 
@@ -124,6 +124,7 @@ impl Rule for NoUselessFragments {
         let model = ctx.model();
         let mut in_jsx_attr_expr = false;
         let mut in_js_logical_expr = false;
+        let mut in_jsx_expr = false;
         match node {
             NoUselessFragmentsQuery::JsxFragment(fragment) => {
                 let parents_where_fragments_must_be_preserved = node.syntax().parent().map_or(
@@ -138,6 +139,9 @@ impl Rule for NoUselessFragments {
                                 }
                                 if JsLogicalExpression::can_cast(parent.kind()) {
                                     in_js_logical_expr = true;
+                                }
+                                if JsxExpressionChild::can_cast(parent.kind()) {
+                                    in_jsx_expr = true;
                                 }
                                 match JsParenthesizedExpression::try_cast(parent) {
                                     Ok(parenthesized_expression) => {
@@ -190,7 +194,19 @@ impl Rule for NoUselessFragments {
                                 }
                             }
                             JsSyntaxKind::JSX_TEXT => {
-                                if !child.syntax().text().to_string().trim().is_empty() {
+                                // We need to whitespaces and newlines from the original string.
+                                // Since in the JSX newlines aren't trivia, we require to allocate a string to trim from those characters.
+                                let original_text = child.text();
+                                let child_text = original_text.trim();
+
+                                if (in_jsx_expr || in_js_logical_expr)
+                                    && contains_html_character_references(child_text)
+                                {
+                                    children_where_fragments_must_preserved = true;
+                                    break;
+                                }
+
+                                if !child_text.is_empty() {
                                     significant_children += 1;
                                     if first_significant_child.is_none() {
                                         first_significant_child = Some(child);
@@ -400,4 +416,10 @@ impl Rule for NoUselessFragments {
             "A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed "<Hyperlink href="https://legacy.reactjs.org/docs/fragments.html#keyed-fragments">"fragment"</Hyperlink>"."
         }))
     }
+}
+
+fn contains_html_character_references(s: &str) -> bool {
+    let and = s.find('&');
+    let semi = s.find(';');
+    matches!((and, semi), (Some(and), Some(semi)) if and < semi)
 }

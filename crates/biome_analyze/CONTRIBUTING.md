@@ -170,7 +170,7 @@ use biome_deserialize_macros::Deserializable;
 pub struct MyRuleOptions {
     behavior: Behavior,
     threshold: u8,
-    behavior_exceptions: Vec<String>
+    behavior_exceptions: Box<[Box<str>]>
 }
 
 #[derive(Clone, Debug, Default, Deserializable)]
@@ -181,6 +181,9 @@ pub enum Behavior {
     C,
 }
 ```
+
+Note that we use a boxed slice `Box<[Box<str>]>` instead of `Vec<String>`.
+This allows saving memory: [boxed slices and boxed str use 2 words instead of three words](https://nnethercote.github.io/perf-book/type-sizes.html#boxed-slices).
 
 To allow deserializing instances of the types `MyRuleOptions` and `Behavior`,
 they have to implement the `Deserializable` trait from the `biome_deserialize` crate.
@@ -207,12 +210,18 @@ let options = ctx.options();
 
 The compiler should warn you that `MyRuleOptions` does not implement some required types.
 We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
+
+Also, we use other `serde` macros to adjust the JSON configuration:
+- `rename_all = "camelCase"`: it renames all fields in camel-case, so they are in line with the naming style of the `biome.json`.
+- `deny_unknown_fields`: it raises an error if the configuration contains extraneous fields.
+- `default`: it uses the `Default` value when the field is missing from `biome.json`. This macro makes the field optional.
+
 You can simply use a derive macros:
 
 ```rust
 #[derive(Debug, Default, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct MyRuleOptions {
     #[serde(default, skip_serializing_if = "is_default")]
     main_behavior: Behavior,
@@ -426,8 +435,10 @@ impl Rule for ForLoopCountReferences {
 #### Multiple signals
 
 Some rules require you to find all possible cases upfront in `run` function.
-To achieve that you can change Signals type from `Option<()>` to `Vec<()>`.
-This will call the diagnostic/action function for every item of the vec.
+To achieve that you can change Signals type from `Option<Self::State>` to an iterable data structure such as `Vec<Self::State>` or `Box<[Self::State]>`.
+This will call the diagnostic/action function for every item of the data structure.
+We prefer to use `Box<[_]>` over `Vec<_>` because it takes less memory.
+You can easily convert a `Vec<_>` into a `Box<[_]>` using the `Vec::into_boxed_slice()` method.
 
 Taking previous example and modifying it a bit we can apply diagnostic for each item easily.
 
@@ -435,7 +446,7 @@ Taking previous example and modifying it a bit we can apply diagnostic for each 
 impl Rule for ForLoopCountReferences {
     type Query = Semantic<JsForStatement>;
     type State = TextRange;
-    type Signals = Vec<Self::State>; // Replaced Option with Vec
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -456,7 +467,7 @@ impl Rule for ForLoopCountReferences {
             Some(range)
         }).collect::<Vec<_>>();
 
-        write_ranges
+        write_ranges.into_boxed_slice()
     }
 
     fn diagnostic(_: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {

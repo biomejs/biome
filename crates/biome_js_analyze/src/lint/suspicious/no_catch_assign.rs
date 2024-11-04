@@ -52,13 +52,12 @@ impl Rule for NoCatchAssign {
     // The first element of `State` is the reassignment of catch parameter,
     // the second element of `State` is the declaration of catch clause.
     type State = (TextRange, TextRange);
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Vec<Self::State> {
+    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let catch_clause = ctx.query();
         let model = ctx.model();
-
         catch_clause
             .declaration()
             .and_then(|decl| {
@@ -69,7 +68,7 @@ impl Rule for NoCatchAssign {
                     .as_any_js_binding()?
                     .as_js_identifier_binding()?;
                 let catch_binding_syntax = catch_binding.syntax();
-                let mut invalid_assignment = vec![];
+                let mut invalid_assignment = Vec::new();
                 for reference in identifier_binding.all_writes(model) {
                     invalid_assignment.push((
                         reference.syntax().text_trimmed_range(),
@@ -80,6 +79,7 @@ impl Rule for NoCatchAssign {
                 Some(invalid_assignment)
             })
             .unwrap_or_default()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

@@ -2,20 +2,20 @@ use crate::keywords::{
     AT_RULE_PAGE_PSEUDO_CLASSES, A_NPLUS_BNOTATION_PSEUDO_CLASSES,
     A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES, BASIC_KEYWORDS, FONT_FAMILY_KEYWORDS, FONT_SIZE_KEYWORDS,
     FONT_STRETCH_KEYWORDS, FONT_STYLE_KEYWORDS, FONT_VARIANTS_KEYWORDS,
-    FONT_WEIGHT_ABSOLUTE_KEYWORDS, FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS,
+    FONT_WEIGHT_ABSOLUTE_KEYWORDS, FONT_WEIGHT_NUMERIC_KEYWORDS, FUNCTION_KEYWORDS, HTML_TAGS,
     KNOWN_CHROME_PROPERTIES, KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES,
     KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES, KNOWN_SAFARI_PROPERTIES,
     KNOWN_SAMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
     LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS, LINE_HEIGHT_KEYWORDS, LINGUISTIC_PSEUDO_CLASSES,
     LOGICAL_COMBINATIONS_PSEUDO_CLASSES, LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES,
-    MEDIA_FEATURE_NAMES, OTHER_PSEUDO_CLASSES, OTHER_PSEUDO_ELEMENTS,
+    MATH_ML_TAGS, MEDIA_FEATURE_NAMES, OTHER_PSEUDO_CLASSES, OTHER_PSEUDO_ELEMENTS,
     RESET_TO_INITIAL_PROPERTIES_BY_BORDER, RESET_TO_INITIAL_PROPERTIES_BY_FONT,
-    RESOURCE_STATE_PSEUDO_CLASSES, SHADOW_TREE_PSEUDO_ELEMENTS, SHORTHAND_PROPERTIES,
+    RESOURCE_STATE_PSEUDO_CLASSES, SHADOW_TREE_PSEUDO_ELEMENTS, SHORTHAND_PROPERTIES, SVG_TAGS,
     SYSTEM_FAMILY_NAME_KEYWORDS, VENDOR_PREFIXES, VENDOR_SPECIFIC_PSEUDO_ELEMENTS,
 };
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericComponentValueList};
 use biome_rowan::{AstNode, SyntaxNodeCast};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 pub fn is_font_family_keyword(value: &str) -> bool {
     BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)
@@ -39,7 +39,7 @@ pub fn is_font_shorthand_keyword(value: &str) -> bool {
 }
 
 pub fn is_css_variable(value: &str) -> bool {
-    value.to_lowercase_cow().starts_with("var(")
+    value.to_ascii_lowercase_cow().starts_with("var(")
 }
 
 /// Get the font-families within a `font` shorthand property value.
@@ -47,7 +47,7 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
     let mut font_families: Vec<AnyCssValue> = Vec::new();
     for v in value {
         let value = v.text();
-        let lower_case_value = value.to_lowercase_cow();
+        let lower_case_value = value.to_ascii_lowercase_cow();
 
         // Ignore CSS variables
         if is_css_variable(&lower_case_value) {
@@ -112,7 +112,7 @@ pub fn find_font_family(value: CssGenericComponentValueList) -> Vec<AnyCssValue>
 /// Check if the value is a known CSS value function.
 pub fn is_function_keyword(value: &str) -> bool {
     FUNCTION_KEYWORDS
-        .binary_search(&value.to_lowercase_cow().as_ref())
+        .binary_search(&value.to_ascii_lowercase_cow().as_ref())
         .is_ok()
 }
 
@@ -122,13 +122,13 @@ pub fn is_custom_function(value: &str) -> bool {
 }
 
 // Returns the vendor prefix extracted from an input string.
-pub fn vender_prefix(prop: &str) -> String {
+pub fn vender_prefix(prop: &str) -> &str {
     for prefix in VENDOR_PREFIXES.iter() {
         if prop.starts_with(prefix) {
-            return (*prefix).to_string();
+            return prefix;
         }
     }
-    String::new()
+    ""
 }
 
 pub fn is_pseudo_elements(prop: &str) -> bool {
@@ -138,7 +138,7 @@ pub fn is_pseudo_elements(prop: &str) -> bool {
         || OTHER_PSEUDO_ELEMENTS.contains(&prop)
 }
 
-/// Check if the input string is custom selector  
+/// Check if the input string is custom selector
 /// See https://drafts.csswg.org/css-extensions/#custom-selectors for more details
 pub fn is_custom_selector(prop: &str) -> bool {
     prop.starts_with("--")
@@ -180,7 +180,7 @@ pub fn vendor_prefixed(props: &str) -> bool {
 
 /// Check if the input string is a media feature name.
 pub fn is_media_feature_name(prop: &str) -> bool {
-    let input = prop.to_lowercase_cow();
+    let input = prop.to_ascii_lowercase_cow();
     let count = MEDIA_FEATURE_NAMES.binary_search(&input.as_ref());
     if count.is_ok() {
         return true;
@@ -216,4 +216,17 @@ pub fn get_reset_to_initial_properties(shorthand_property: &str) -> &'static [&'
         "font" => &RESET_TO_INITIAL_PROPERTIES_BY_FONT,
         _ => &[],
     }
+}
+
+fn is_custom_element(prop: &str) -> bool {
+    prop.contains('-') && prop.eq(prop.to_lowercase_cow().as_ref())
+}
+
+/// Check if the input string is a known type selector.
+pub fn is_known_type_selector(prop: &str) -> bool {
+    let input = prop.to_ascii_lowercase_cow();
+    HTML_TAGS.binary_search(&input.as_ref()).is_ok()
+        || SVG_TAGS.binary_search(&prop).is_ok()
+        || MATH_ML_TAGS.binary_search(&input.as_ref()).is_ok()
+        || is_custom_element(prop)
 }

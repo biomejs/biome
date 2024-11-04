@@ -440,8 +440,11 @@ impl<'src> JsLexer<'src> {
 
         match chr {
             b'\'' | b'"' => {
-                self.consume_str_literal(true);
-                JSX_STRING_LITERAL
+                if self.consume_str_literal(true) {
+                    JSX_STRING_LITERAL
+                } else {
+                    ERROR_TOKEN
+                }
             }
             _ => self.lex_token(),
         }
@@ -571,8 +574,8 @@ impl<'src> JsLexer<'src> {
             // We should not yield diagnostics on a unicode char boundary. That wont make codespan panic
             // but it may cause a panic for other crates which just consume the diagnostics
             let invalid = self.current_char_unchecked();
-            let err = ParseDiagnostic::new(  "expected hex digits for a unicode code point escape, but encountered an invalid character",
-                                             self.position..self.position + invalid.len_utf8() );
+            let err = ParseDiagnostic::new("expected hex digits for a unicode code point escape, but encountered an invalid character",
+                                           self.position..self.position + invalid.len_utf8());
             self.push_diagnostic(err);
             self.position -= 1;
             return Err(());
@@ -1894,8 +1897,8 @@ impl<'src> JsLexer<'src> {
                                 self.current_flags |= TokenFlags::UNICODE_ESCAPE;
                                 self.resolve_identifier(chr)
                             } else {
-                                let err = ParseDiagnostic::new(  "unexpected unicode escape",
-                                                                 start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
+                                let err = ParseDiagnostic::new("unexpected unicode escape",
+                                                               start..self.position).with_hint("this escape is unexpected, as it does not designate the start of an identifier");
                                 self.push_diagnostic(err);
                                 self.next_byte();
                                 JsSyntaxKind::ERROR_TOKEN

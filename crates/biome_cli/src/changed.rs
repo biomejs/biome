@@ -7,14 +7,14 @@ use std::ffi::OsString;
 pub(crate) fn get_changed_files(
     fs: &DynRef<'_, dyn FileSystem>,
     configuration: &PartialConfiguration,
-    since: Option<String>,
+    since: Option<&str>,
 ) -> Result<Vec<OsString>, CliDiagnostic> {
     let default_branch = configuration
         .vcs
         .as_ref()
         .and_then(|v| v.default_branch.as_ref());
 
-    let base = match (since.as_ref(), default_branch) {
+    let base = match (since, default_branch) {
         (Some(since), Some(_)) => since,
         (Some(since), None) => since,
         (None, Some(branch)) => branch,

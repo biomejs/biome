@@ -6,7 +6,7 @@ use rustc_hash::FxHashMap;
 
 use super::model::{
     CssDeclaration, CssGlobalCustomVariable, Rule, RuleId, Selector, SemanticModel,
-    SemanticModelData,
+    SemanticModelData, Specificity,
 };
 use crate::events::SemanticEvent;
 
@@ -66,6 +66,7 @@ impl SemanticModelBuilder {
                     range,
                     parent_id,
                     child_ids: Vec::new(),
+                    specificity: Specificity::default(),
                 };
 
                 if let Some(&parent_id) = self.current_rule_stack.last() {
@@ -95,15 +96,28 @@ impl SemanticModelBuilder {
             SemanticEvent::SelectorDeclaration {
                 name,
                 range,
+                original,
                 specificity,
             } => {
-                if let Some(current_rule) = self.current_rule_stack.last_mut() {
+                let parent_specificity = self
+                    .current_rule_stack
+                    .last()
+                    .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                    .and_then(|rule| rule.parent_id)
+                    .and_then(|parent_id| self.rules_by_id.get(&parent_id))
+                    .map(|parent| parent.specificity.clone())
+                    .unwrap_or_default();
+
+                if let Some(current_rule) = self.current_rule_stack.last() {
                     let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
                     current_rule.selectors.push(Selector {
                         name,
                         range,
-                        specificity,
+                        original,
+                        specificity: parent_specificity + specificity.clone(),
                     });
+
+                    current_rule.specificity += specificity;
                 }
             }
             SemanticEvent::PropertyDeclaration {

@@ -37,7 +37,7 @@ declare_lint_rule! {
 impl Rule for NoDuplicateObjectKeys {
     type Query = Ast<JsonObjectValue>;
     type State = (JsonMemberName, Vec<TextRange>);
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -62,10 +62,8 @@ impl Rule for NoDuplicateObjectKeys {
                 }
             }
         }
-
         let duplicated_keys: Vec<_> = names.into_iter().collect();
-
-        duplicated_keys
+        duplicated_keys.into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

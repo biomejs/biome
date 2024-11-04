@@ -138,7 +138,7 @@ pub struct SignalEntry<'phase, L: Language> {
     /// Unique identifier for the rule that emitted this signal
     pub rule: RuleKey,
     /// Optional rule instances being suppressed
-    pub instances: Vec<String>,
+    pub instances: Box<[Box<str>]>,
     /// Text range in the document this signal covers
     pub text_range: TextRange,
 }
@@ -379,6 +379,7 @@ mod tests {
                 &self,
                 _: &mut BatchMutation<Self::Language>,
                 _: ApplySuppression<Self::Language>,
+                _: &str,
                 _: &str,
             ) {
                 unreachable!("")

@@ -1,0 +1,127 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<><test>abcd</test more content follows here</>
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxFragment {
+                    opening_fragment: JsxOpeningFragment {
+                        l_angle_token: L_ANGLE@0..1 "<" [] [],
+                        r_angle_token: R_ANGLE@1..2 ">" [] [],
+                    },
+                    children: JsxChildList [
+                        JsxElement {
+                            opening_element: JsxOpeningElement {
+                                l_angle_token: L_ANGLE@2..3 "<" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@3..7 "test" [] [],
+                                },
+                                type_arguments: missing (optional),
+                                attributes: JsxAttributeList [],
+                                r_angle_token: R_ANGLE@7..8 ">" [] [],
+                            },
+                            children: JsxChildList [
+                                JsxText {
+                                    value_token: JSX_TEXT_LITERAL@8..12 "abcd" [] [],
+                                },
+                            ],
+                            closing_element: JsxClosingElement {
+                                l_angle_token: L_ANGLE@12..13 "<" [] [],
+                                slash_token: SLASH@13..14 "/" [] [],
+                                name: JsxName {
+                                    value_token: JSX_IDENT@14..19 "test" [] [Whitespace(" ")],
+                                },
+                                r_angle_token: missing (required),
+                            },
+                        },
+                        JsxText {
+                            value_token: JSX_TEXT_LITERAL@19..44 "more content follows here" [] [],
+                        },
+                    ],
+                    closing_fragment: JsxClosingFragment {
+                        l_angle_token: L_ANGLE@44..45 "<" [] [],
+                        slash_token: SLASH@45..46 "/" [] [],
+                        r_angle_token: R_ANGLE@46..47 ">" [] [],
+                    },
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@47..48 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..48
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..47
+    0: JS_EXPRESSION_STATEMENT@0..47
+      0: JSX_TAG_EXPRESSION@0..47
+        0: JSX_FRAGMENT@0..47
+          0: JSX_OPENING_FRAGMENT@0..2
+            0: L_ANGLE@0..1 "<" [] []
+            1: R_ANGLE@1..2 ">" [] []
+          1: JSX_CHILD_LIST@2..44
+            0: JSX_ELEMENT@2..19
+              0: JSX_OPENING_ELEMENT@2..8
+                0: L_ANGLE@2..3 "<" [] []
+                1: JSX_NAME@3..7
+                  0: JSX_IDENT@3..7 "test" [] []
+                2: (empty)
+                3: JSX_ATTRIBUTE_LIST@7..7
+                4: R_ANGLE@7..8 ">" [] []
+              1: JSX_CHILD_LIST@8..12
+                0: JSX_TEXT@8..12
+                  0: JSX_TEXT_LITERAL@8..12 "abcd" [] []
+              2: JSX_CLOSING_ELEMENT@12..19
+                0: L_ANGLE@12..13 "<" [] []
+                1: SLASH@13..14 "/" [] []
+                2: JSX_NAME@14..19
+                  0: JSX_IDENT@14..19 "test" [] [Whitespace(" ")]
+                3: (empty)
+            1: JSX_TEXT@19..44
+              0: JSX_TEXT_LITERAL@19..44 "more content follows here" [] []
+          2: JSX_CLOSING_FRAGMENT@44..47
+            0: L_ANGLE@44..45 "<" [] []
+            1: SLASH@45..46 "/" [] []
+            2: R_ANGLE@46..47 ">" [] []
+      1: (empty)
+  4: EOF@47..48 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+jsx_closing_missing_r_angle.jsx:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × expected `>` but instead found `more`
+  
+  > 1 │ <><test>abcd</test more content follows here</>
+      │                    ^^^^
+    2 │ 
+  
+  i Remove more
+  
+```

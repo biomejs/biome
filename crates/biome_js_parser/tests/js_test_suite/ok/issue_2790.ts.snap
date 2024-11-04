@@ -1,0 +1,129 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+var x: {
+  readonly [A in keyof B]?: any;
+};
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: VAR_KW@0..4 "var" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..5 "x" [] [],
+                        },
+                        variable_annotation: TsTypeAnnotation {
+                            colon_token: COLON@5..7 ":" [] [Whitespace(" ")],
+                            ty: TsMappedType {
+                                l_curly_token: L_CURLY@7..8 "{" [] [],
+                                readonly_modifier: TsMappedTypeReadonlyModifierClause {
+                                    operator_token: missing (optional),
+                                    readonly_token: READONLY_KW@8..20 "readonly" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                                },
+                                l_brack_token: L_BRACK@20..21 "[" [] [],
+                                property_name: TsTypeParameterName {
+                                    ident_token: IDENT@21..23 "A" [] [Whitespace(" ")],
+                                },
+                                in_token: IN_KW@23..26 "in" [] [Whitespace(" ")],
+                                keys_type: TsTypeOperatorType {
+                                    operator_token: KEYOF_KW@26..32 "keyof" [] [Whitespace(" ")],
+                                    ty: TsReferenceType {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@32..33 "B" [] [],
+                                        },
+                                        type_arguments: missing (optional),
+                                    },
+                                },
+                                as_clause: missing (optional),
+                                r_brack_token: R_BRACK@33..34 "]" [] [],
+                                optional_modifier: TsMappedTypeOptionalModifierClause {
+                                    operator_token: missing (optional),
+                                    question_mark_token: QUESTION@34..35 "?" [] [],
+                                },
+                                mapped_type: TsTypeAnnotation {
+                                    colon_token: COLON@35..37 ":" [] [Whitespace(" ")],
+                                    ty: TsAnyType {
+                                        any_token: ANY_KW@37..40 "any" [] [],
+                                    },
+                                },
+                                semicolon_token: SEMICOLON@40..41 ";" [] [],
+                                r_curly_token: R_CURLY@41..43 "}" [Newline("\n")] [],
+                            },
+                        },
+                        initializer: missing (optional),
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@43..44 ";" [] [],
+        },
+    ],
+    eof_token: EOF@44..45 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..45
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..44
+    0: JS_VARIABLE_STATEMENT@0..44
+      0: JS_VARIABLE_DECLARATION@0..43
+        0: (empty)
+        1: VAR_KW@0..4 "var" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..43
+          0: JS_VARIABLE_DECLARATOR@4..43
+            0: JS_IDENTIFIER_BINDING@4..5
+              0: IDENT@4..5 "x" [] []
+            1: TS_TYPE_ANNOTATION@5..43
+              0: COLON@5..7 ":" [] [Whitespace(" ")]
+              1: TS_MAPPED_TYPE@7..43
+                0: L_CURLY@7..8 "{" [] []
+                1: TS_MAPPED_TYPE_READONLY_MODIFIER_CLAUSE@8..20
+                  0: (empty)
+                  1: READONLY_KW@8..20 "readonly" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+                2: L_BRACK@20..21 "[" [] []
+                3: TS_TYPE_PARAMETER_NAME@21..23
+                  0: IDENT@21..23 "A" [] [Whitespace(" ")]
+                4: IN_KW@23..26 "in" [] [Whitespace(" ")]
+                5: TS_TYPE_OPERATOR_TYPE@26..33
+                  0: KEYOF_KW@26..32 "keyof" [] [Whitespace(" ")]
+                  1: TS_REFERENCE_TYPE@32..33
+                    0: JS_REFERENCE_IDENTIFIER@32..33
+                      0: IDENT@32..33 "B" [] []
+                    1: (empty)
+                6: (empty)
+                7: R_BRACK@33..34 "]" [] []
+                8: TS_MAPPED_TYPE_OPTIONAL_MODIFIER_CLAUSE@34..35
+                  0: (empty)
+                  1: QUESTION@34..35 "?" [] []
+                9: TS_TYPE_ANNOTATION@35..40
+                  0: COLON@35..37 ":" [] [Whitespace(" ")]
+                  1: TS_ANY_TYPE@37..40
+                    0: ANY_KW@37..40 "any" [] []
+                10: SEMICOLON@40..41 ";" [] []
+                11: R_CURLY@41..43 "}" [Newline("\n")] []
+            2: (empty)
+      1: SEMICOLON@43..44 ";" [] []
+  4: EOF@44..45 "" [Newline("\n")] []
+
+```

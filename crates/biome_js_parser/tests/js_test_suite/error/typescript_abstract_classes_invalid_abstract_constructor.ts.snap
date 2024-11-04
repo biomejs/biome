@@ -1,0 +1,112 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+abstract class A { abstract constructor();};
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")],
+            class_token: CLASS_KW@9..15 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@15..17 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@17..19 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        JsBogus {
+                            items: [
+                                TsAbstractModifier {
+                                    modifier_token: ABSTRACT_KW@19..28 "abstract" [] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        JsLiteralMemberName {
+                            value: IDENT@28..39 "constructor" [] [],
+                        },
+                        JsConstructorParameters {
+                            l_paren_token: L_PAREN@39..40 "(" [] [],
+                            parameters: JsConstructorParameterList [],
+                            r_paren_token: R_PAREN@40..41 ")" [] [],
+                        },
+                        SEMICOLON@41..42 ";" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@42..43 "}" [] [],
+        },
+        JsEmptyStatement {
+            semicolon_token: SEMICOLON@43..44 ";" [] [],
+        },
+    ],
+    eof_token: EOF@44..45 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..45
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..44
+    0: JS_CLASS_DECLARATION@0..43
+      0: JS_DECORATOR_LIST@0..0
+      1: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")]
+      2: CLASS_KW@9..15 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@15..17
+        0: IDENT@15..17 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@17..19 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@19..42
+        0: JS_BOGUS_MEMBER@19..42
+          0: JS_BOGUS@19..28
+            0: TS_ABSTRACT_MODIFIER@19..28
+              0: ABSTRACT_KW@19..28 "abstract" [] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@28..39
+            0: IDENT@28..39 "constructor" [] []
+          2: JS_CONSTRUCTOR_PARAMETERS@39..41
+            0: L_PAREN@39..40 "(" [] []
+            1: JS_CONSTRUCTOR_PARAMETER_LIST@40..40
+            2: R_PAREN@40..41 ")" [] []
+          3: SEMICOLON@41..42 ";" [] []
+      9: R_CURLY@42..43 "}" [] []
+    1: JS_EMPTY_STATEMENT@43..44
+      0: SEMICOLON@43..44 ";" [] []
+  4: EOF@44..45 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+typescript_abstract_classes_invalid_abstract_constructor.ts:1:20 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'abstract' cannot appear on a constructor declaration.
+  
+  > 1 │ abstract class A { abstract constructor();};
+      │                    ^^^^^^^^
+    2 │ 
+  
+```

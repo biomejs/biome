@@ -137,10 +137,10 @@ const BILLING_AND_SHIPPING_ADDRESS: &[&str; 11] = &[
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseValidAutocompleteOptions {
     /// `input` like custom components that should be checked.
-    pub input_components: Vec<String>,
+    pub input_components: Box<[Box<str>]>,
 }
 
 impl Rule for UseValidAutocomplete {
@@ -156,7 +156,9 @@ impl Rule for UseValidAutocomplete {
             UseValidAutocompleteQuery::JsxOpeningElement(elem) => {
                 let elem_name = elem.name().ok()?.name_value_token()?;
                 let elem_name = elem_name.text_trimmed();
-                if !(elem_name == "input" || input_components.contains(&elem_name.to_string())) {
+                if !(elem_name == "input"
+                    || input_components.iter().any(|x| x.as_ref() == elem_name))
+                {
                     return None;
                 }
                 let attributes = elem.attributes();
@@ -183,7 +185,9 @@ impl Rule for UseValidAutocomplete {
             UseValidAutocompleteQuery::JsxSelfClosingElement(elem) => {
                 let elem_name = elem.name().ok()?.name_value_token()?;
                 let elem_name = elem_name.text_trimmed();
-                if !(elem_name == "input" || input_components.contains(&elem_name.to_string())) {
+                if !(elem_name == "input"
+                    || input_components.iter().any(|x| x.as_ref() == elem_name))
+                {
                     return None;
                 }
                 let attributes = elem.attributes();

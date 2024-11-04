@@ -71,7 +71,7 @@ declare_lint_rule! {
 impl Rule for NoUselessSwitchCase {
     type Query = Ast<JsDefaultClause>;
     type State = JsCaseClause;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -107,10 +107,11 @@ impl Rule for NoUselessSwitchCase {
                     .filter_map(JsCaseClause::cast)
                     .find(|case| !case.consequent().is_empty()),
             )
-            .collect()
+            .collect::<Vec<_>>()
         } else {
-            it.collect()
+            it.collect::<Vec<_>>()
         }
+        .into_boxed_slice()
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, useless_case: &Self::State) -> Option<RuleDiagnostic> {

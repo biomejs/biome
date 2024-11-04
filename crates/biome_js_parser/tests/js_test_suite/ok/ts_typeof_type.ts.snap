@@ -1,0 +1,229 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+let a = "test";
+type B = typeof a;
+type T21 = typeof Array<string>;
+type A<U> = InstanceType<typeof Array<U>>;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..6 "a" [] [Whitespace(" ")],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: JsInitializerClause {
+                            eq_token: EQ@6..8 "=" [] [Whitespace(" ")],
+                            expression: JsStringLiteralExpression {
+                                value_token: JS_STRING_LITERAL@8..14 "\"test\"" [] [],
+                            },
+                        },
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@14..15 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@15..21 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@21..23 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@23..25 "=" [] [Whitespace(" ")],
+            ty: TsTypeofType {
+                typeof_token: TYPEOF_KW@25..32 "typeof" [] [Whitespace(" ")],
+                expression_name: JsReferenceIdentifier {
+                    value_token: IDENT@32..33 "a" [] [],
+                },
+                type_arguments: missing (optional),
+            },
+            semicolon_token: SEMICOLON@33..34 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@34..40 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@40..44 "T21" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@44..46 "=" [] [Whitespace(" ")],
+            ty: TsTypeofType {
+                typeof_token: TYPEOF_KW@46..53 "typeof" [] [Whitespace(" ")],
+                expression_name: JsReferenceIdentifier {
+                    value_token: IDENT@53..58 "Array" [] [],
+                },
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@58..59 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsStringType {
+                            string_token: STRING_KW@59..65 "string" [] [],
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@65..66 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@66..67 ";" [] [],
+        },
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@67..73 "type" [Newline("\n")] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@73..74 "A" [] [],
+            },
+            type_parameters: TsTypeParameters {
+                l_angle_token: L_ANGLE@74..75 "<" [] [],
+                items: TsTypeParameterList [
+                    TsTypeParameter {
+                        modifiers: TsTypeParameterModifierList [],
+                        name: TsTypeParameterName {
+                            ident_token: IDENT@75..76 "U" [] [],
+                        },
+                        constraint: missing (optional),
+                        default: missing (optional),
+                    },
+                ],
+                r_angle_token: R_ANGLE@76..78 ">" [] [Whitespace(" ")],
+            },
+            eq_token: EQ@78..80 "=" [] [Whitespace(" ")],
+            ty: TsReferenceType {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@80..92 "InstanceType" [] [],
+                },
+                type_arguments: TsTypeArguments {
+                    l_angle_token: L_ANGLE@92..93 "<" [] [],
+                    ts_type_argument_list: TsTypeArgumentList [
+                        TsTypeofType {
+                            typeof_token: TYPEOF_KW@93..100 "typeof" [] [Whitespace(" ")],
+                            expression_name: JsReferenceIdentifier {
+                                value_token: IDENT@100..105 "Array" [] [],
+                            },
+                            type_arguments: TsTypeArguments {
+                                l_angle_token: L_ANGLE@105..106 "<" [] [],
+                                ts_type_argument_list: TsTypeArgumentList [
+                                    TsReferenceType {
+                                        name: JsReferenceIdentifier {
+                                            value_token: IDENT@106..107 "U" [] [],
+                                        },
+                                        type_arguments: missing (optional),
+                                    },
+                                ],
+                                r_angle_token: R_ANGLE@107..108 ">" [] [],
+                            },
+                        },
+                    ],
+                    r_angle_token: R_ANGLE@108..109 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@109..110 ";" [] [],
+        },
+    ],
+    eof_token: EOF@110..111 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..111
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..110
+    0: JS_VARIABLE_STATEMENT@0..15
+      0: JS_VARIABLE_DECLARATION@0..14
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..14
+          0: JS_VARIABLE_DECLARATOR@4..14
+            0: JS_IDENTIFIER_BINDING@4..6
+              0: IDENT@4..6 "a" [] [Whitespace(" ")]
+            1: (empty)
+            2: JS_INITIALIZER_CLAUSE@6..14
+              0: EQ@6..8 "=" [] [Whitespace(" ")]
+              1: JS_STRING_LITERAL_EXPRESSION@8..14
+                0: JS_STRING_LITERAL@8..14 "\"test\"" [] []
+      1: SEMICOLON@14..15 ";" [] []
+    1: TS_TYPE_ALIAS_DECLARATION@15..34
+      0: TYPE_KW@15..21 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@21..23
+        0: IDENT@21..23 "B" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@23..25 "=" [] [Whitespace(" ")]
+      4: TS_TYPEOF_TYPE@25..33
+        0: TYPEOF_KW@25..32 "typeof" [] [Whitespace(" ")]
+        1: JS_REFERENCE_IDENTIFIER@32..33
+          0: IDENT@32..33 "a" [] []
+        2: (empty)
+      5: SEMICOLON@33..34 ";" [] []
+    2: TS_TYPE_ALIAS_DECLARATION@34..67
+      0: TYPE_KW@34..40 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@40..44
+        0: IDENT@40..44 "T21" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@44..46 "=" [] [Whitespace(" ")]
+      4: TS_TYPEOF_TYPE@46..66
+        0: TYPEOF_KW@46..53 "typeof" [] [Whitespace(" ")]
+        1: JS_REFERENCE_IDENTIFIER@53..58
+          0: IDENT@53..58 "Array" [] []
+        2: TS_TYPE_ARGUMENTS@58..66
+          0: L_ANGLE@58..59 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@59..65
+            0: TS_STRING_TYPE@59..65
+              0: STRING_KW@59..65 "string" [] []
+          2: R_ANGLE@65..66 ">" [] []
+      5: SEMICOLON@66..67 ";" [] []
+    3: TS_TYPE_ALIAS_DECLARATION@67..110
+      0: TYPE_KW@67..73 "type" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@73..74
+        0: IDENT@73..74 "A" [] []
+      2: TS_TYPE_PARAMETERS@74..78
+        0: L_ANGLE@74..75 "<" [] []
+        1: TS_TYPE_PARAMETER_LIST@75..76
+          0: TS_TYPE_PARAMETER@75..76
+            0: TS_TYPE_PARAMETER_MODIFIER_LIST@75..75
+            1: TS_TYPE_PARAMETER_NAME@75..76
+              0: IDENT@75..76 "U" [] []
+            2: (empty)
+            3: (empty)
+        2: R_ANGLE@76..78 ">" [] [Whitespace(" ")]
+      3: EQ@78..80 "=" [] [Whitespace(" ")]
+      4: TS_REFERENCE_TYPE@80..109
+        0: JS_REFERENCE_IDENTIFIER@80..92
+          0: IDENT@80..92 "InstanceType" [] []
+        1: TS_TYPE_ARGUMENTS@92..109
+          0: L_ANGLE@92..93 "<" [] []
+          1: TS_TYPE_ARGUMENT_LIST@93..108
+            0: TS_TYPEOF_TYPE@93..108
+              0: TYPEOF_KW@93..100 "typeof" [] [Whitespace(" ")]
+              1: JS_REFERENCE_IDENTIFIER@100..105
+                0: IDENT@100..105 "Array" [] []
+              2: TS_TYPE_ARGUMENTS@105..108
+                0: L_ANGLE@105..106 "<" [] []
+                1: TS_TYPE_ARGUMENT_LIST@106..107
+                  0: TS_REFERENCE_TYPE@106..107
+                    0: JS_REFERENCE_IDENTIFIER@106..107
+                      0: IDENT@106..107 "U" [] []
+                    1: (empty)
+                2: R_ANGLE@107..108 ">" [] []
+          2: R_ANGLE@108..109 ">" [] []
+      5: SEMICOLON@109..110 ";" [] []
+  4: EOF@110..111 "" [Newline("\n")] []
+
+```

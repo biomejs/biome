@@ -273,7 +273,7 @@ fn generate_deserializable_enum(
                 name: &str,
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self> {
-                let result = match biome_deserialize::Text::deserialize(value, name, diagnostics)?.text() {
+                let mut result = match biome_deserialize::Text::deserialize(value, name, diagnostics)?.text() {
                     #(#deserialize_variants),*,
                     unknown_variant => {
                         const ALLOWED_VARIANTS: &[&str] = &[#(#allowed_variants),*];
@@ -317,7 +317,7 @@ fn generate_deserializable_newtype(
                 name: &str,
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self> {
-                let result = biome_deserialize::Deserializable::deserialize(value, name, diagnostics).map(Self)?;
+                let mut result = biome_deserialize::Deserializable::deserialize(value, name, diagnostics).map(Self)?;
                 #validator
                 Some(result)
             }
@@ -529,7 +529,7 @@ fn generate_deserializable_from(
     let from = data.from;
     let validator = if data.with_validator {
         quote! {
-            if !biome_deserialize::DeserializableValidator::validate(&result, name, range, diagnostics) {
+            if !biome_deserialize::DeserializableValidator::validate(&mut result, name, value.range(), diagnostics) {
                 return None;
             }
         }
@@ -544,7 +544,7 @@ fn generate_deserializable_from(
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self> {
                 let result: #from = biome_deserialize::Deserializable::deserialize(value, name, diagnostics)?;
-                let result: Self = result.into();
+                let mut result: Self = result.into();
                 #validator
                 Some(result)
             }
@@ -562,7 +562,7 @@ fn generate_deserializable_try_from(
     let try_from = data.try_from;
     let validator = if data.with_validator {
         quote! {
-            if !biome_deserialize::DeserializableValidator::validate(&result, name, range, diagnostics) {
+            if !biome_deserialize::DeserializableValidator::validate(&mut result, name, value.range(), diagnostics) {
                 return None;
             }
         }
@@ -576,7 +576,7 @@ fn generate_deserializable_try_from(
                 name: &str,
                 diagnostics: &mut Vec<biome_deserialize::DeserializationDiagnostic>,
             ) -> Option<Self> {
-                let result: #try_from = biome_deserialize::Deserializable::deserialize(value, name, diagnostics)?;
+                let mut result: #try_from = biome_deserialize::Deserializable::deserialize(value, name, diagnostics)?;
                 match result.try_into() {
                     Ok(result) => {
                         #validator

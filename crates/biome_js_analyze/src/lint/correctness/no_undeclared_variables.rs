@@ -41,8 +41,8 @@ declare_lint_rule! {
 
 impl Rule for NoUndeclaredVariables {
     type Query = SemanticServices;
-    type State = (TextRange, String);
-    type Signals = Vec<Self::State>;
+    type State = (TextRange, Box<str>);
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -88,10 +88,11 @@ impl Rule for NoUndeclaredVariables {
                 }
 
                 let span = token.text_trimmed_range();
-                let text = text.to_string();
+                let text = text.to_string().into_boxed_str();
                 Some((span, text))
             })
-            .collect()
+            .collect::<Vec<_>>()
+            .into_boxed_slice()
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, (span, name): &Self::State) -> Option<RuleDiagnostic> {
@@ -99,7 +100,7 @@ impl Rule for NoUndeclaredVariables {
             rule_category!(),
             *span,
             markup! {
-                "The "<Emphasis>{name}</Emphasis>" variable is undeclared."
+                "The "<Emphasis>{name.as_ref()}</Emphasis>" variable is undeclared."
             },
         ).note(markup! {
             "By default, Biome recognizes browser and Node.js globals.\nYou can ignore more globals using the "<Hyperlink href="https://biomejs.dev/reference/configuration/#javascriptglobals">"javascript.globals"</Hyperlink>" configuration."

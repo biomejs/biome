@@ -537,7 +537,7 @@ impl Deserializable for Rules {
 #[derive(Debug, Default, Deserializable)]
 pub struct NoConsoleOptions {
     /// Allowed calls on the console object.
-    pub allow: Vec<String>,
+    pub allow: Box<[Box<str>]>,
 }
 impl From<NoConsoleOptions> for biome_js_analyze::lint::suspicious::no_console::NoConsoleOptions {
     fn from(val: NoConsoleOptions) -> Self {

@@ -52,37 +52,3 @@ class ValidExplicit9 {
 }
 
 ```
-
-# Diagnostics
-```
-validExplicit.ts:44:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing accessibility modifier on this member.
-  
-    43 │ class ValidExplicit9 {
-  > 44 │   #foo = 1;
-       │   ^^^^^^^^^
-    45 │   #bar() {}
-    46 │ }
-  
-  i Use public to explicitly make a member public.
-  
-
-```
-
-```
-validExplicit.ts:45:3 lint/nursery/useConsistentMemberAccessibility ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing accessibility modifier on this member.
-  
-    43 │ class ValidExplicit9 {
-    44 │   #foo = 1;
-  > 45 │   #bar() {}
-       │   ^^^^^^^^^
-    46 │ }
-    47 │ 
-  
-  i Use public to explicitly make a member public.
-  
-
-```

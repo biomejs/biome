@@ -71,26 +71,26 @@ pub enum FixSuggestionKind {
 pub struct RuleState {
     kind: FixSuggestionKind,
     diagnostics_text_range: TextRange,
-    replace_from: String,
-    replace_to: String,
+    replace_from: Box<str>,
+    replace_to: Box<str>,
     replace_string_range: Range<usize>,
 }
 
 impl Rule for NoNonoctalDecimalEscape {
     type Query = Ast<JsStringLiteralExpression>;
     type State = RuleState;
-    type Signals = Vec<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let mut signals: Self::Signals = Vec::new();
+        let mut result = Vec::new();
         let Some(token) = node.value_token().ok() else {
-            return signals;
+            return result.into_boxed_slice();
         };
         let text = token.text();
         if !is_octal_escape_sequence(text) {
-            return signals;
+            return result.into_boxed_slice();
         }
         let matches = lex_escape_sequences(text);
 
@@ -133,11 +133,11 @@ impl Rule for NoNonoctalDecimalEscape {
                             previous_escape_range_start..*decimal_escape_string_end;
 
                         // \0\8 -> \u00008
-                        signals.push(RuleState {
+                        result.push(RuleState {
                             kind: FixSuggestionKind::Refactor,
                             diagnostics_text_range: unicode_escape_text_range,
-                            replace_from: format!("{previous_escape}{decimal_escape}"),
-                            replace_to: format!("{unicode_escape}{decimal_char}"),
+                            replace_from: format!("{previous_escape}{decimal_escape}").into(),
+                            replace_to: format!("{unicode_escape}{decimal_char}").into(),
                             replace_string_range,
                         });
                     }
@@ -147,20 +147,20 @@ impl Rule for NoNonoctalDecimalEscape {
                         continue;
                     };
                     // \8 -> \u0038
-                    signals.push(RuleState {
+                    result.push(RuleState {
                         kind: FixSuggestionKind::Refactor,
                         diagnostics_text_range: decimal_escape_range,
-                        replace_from: decimal_escape.to_string(),
-                        replace_to: decimal_char_unicode_escaped,
+                        replace_from: decimal_escape.clone().into_boxed_str(),
+                        replace_to: decimal_char_unicode_escaped.into_boxed_str(),
                         replace_string_range,
                     });
                 } else {
                     // \8 -> 8
-                    signals.push(RuleState {
+                    result.push(RuleState {
                         kind: FixSuggestionKind::Refactor,
                         diagnostics_text_range: decimal_escape_range,
-                        replace_from: decimal_escape.to_string(),
-                        replace_to: decimal_char.to_string(),
+                        replace_from: decimal_escape.clone().into_boxed_str(),
+                        replace_to: decimal_char.to_string().into_boxed_str(),
                         replace_string_range,
                     })
                 }
@@ -168,8 +168,8 @@ impl Rule for NoNonoctalDecimalEscape {
         }
 
         let mut seen = FxHashSet::default();
-        signals.retain(|rule_state| seen.insert(rule_state.diagnostics_text_range));
-        signals
+        result.retain(|rule_state| seen.insert(rule_state.diagnostics_text_range));
+        result.into_boxed_slice()
     }
 
     fn diagnostic(
@@ -220,7 +220,7 @@ impl Rule for NoNonoctalDecimalEscape {
             ctx.metadata().applicability(),
              match kind {
 				FixSuggestionKind::Refactor => {
-					markup! ("Replace "<Emphasis>{replace_from}</Emphasis>" with "<Emphasis>{replace_to}</Emphasis>". This maintains the current functionality.").to_owned()
+					markup! ("Replace "<Emphasis>{replace_from.as_ref()}</Emphasis>" with "<Emphasis>{replace_to.as_ref()}</Emphasis>". This maintains the current functionality.").to_owned()
 				}
 			},
             mutation,

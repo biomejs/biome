@@ -31,7 +31,7 @@ pub fn escape<'a>(
             iter.next();
         } else {
             for candidate in needs_escaping {
-                if unescaped_string[idx..].starts_with(candidate) {
+                if unescaped_string.as_bytes()[idx..].starts_with(candidate.as_bytes()) {
                     if escaped.is_empty() {
                         escaped = String::with_capacity(unescaped_string.len() * 2 - idx);
                     }
@@ -70,6 +70,7 @@ mod tests {
             escape("abc ${} ${} bca", &["${"], b'\\'),
             r"abc \${} \${} bca"
         );
+        assert_eq!(escape("€", &["'"], b'\\'), "€");
 
         assert_eq!(escape(r"\`", &["`"], b'\\'), r"\`");
         assert_eq!(escape(r"\${}", &["${"], b'\\'), r"\${}");
@@ -77,6 +78,8 @@ mod tests {
         assert_eq!(escape(r"\\${}", &["${"], b'\\'), r"\\\${}");
         assert_eq!(escape(r"\\\`", &["`"], b'\\'), r"\\\`");
         assert_eq!(escape(r"\\\${}", &["${"], b'\\'), r"\\\${}");
+        assert_eq!(escape("€", &["€"], b'\\'), r"\€");
+        assert_eq!(escape("😀€", &["€"], b'\\'), r"😀\€");
 
         assert_eq!(escape("abc", &["${", "`"], b'\\'), "abc");
         assert_eq!(escape("${} `", &["${", "`"], b'\\'), r"\${} \`");

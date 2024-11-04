@@ -1,0 +1,9 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: Valid_Renamed_Export.js
+---
+# Input
+```jsx
+class A {}
+export { A as Valid_Renamed_Export }
+```

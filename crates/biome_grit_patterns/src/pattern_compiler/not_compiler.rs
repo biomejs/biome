@@ -5,7 +5,10 @@ use super::{
 use crate::{diagnostics::CompilerDiagnostic, grit_context::GritQueryContext, CompileError};
 use biome_grit_syntax::{GritPatternNot, GritPredicateNot};
 use biome_rowan::AstNode;
-use grit_pattern_matcher::pattern::{Not, Pattern, PatternOrPredicate, PrNot, Predicate};
+use grit_pattern_matcher::{
+    context::StaticDefinitions,
+    pattern::{Not, Pattern, PatternOrPredicate, PrNot, Predicate},
+};
 
 pub(crate) struct NotCompiler;
 
@@ -15,7 +18,7 @@ impl NotCompiler {
         context: &mut NodeCompilationContext,
     ) -> Result<Not<GritQueryContext>, CompileError> {
         let pattern = PatternCompiler::from_node(&node.pattern()?, context)?;
-        if pattern.iter().any(|p| {
+        if pattern.iter(&StaticDefinitions::default()).any(|p| {
             matches!(
                 p,
                 PatternOrPredicate::Pattern(Pattern::Rewrite(_))
@@ -40,7 +43,7 @@ impl PrNotCompiler {
         context: &mut NodeCompilationContext,
     ) -> Result<PrNot<GritQueryContext>, CompileError> {
         let predicate = PredicateCompiler::from_node(&node.predicate()?, context)?;
-        if predicate.iter().any(|p| {
+        if predicate.iter(&StaticDefinitions::default()).any(|p| {
             matches!(
                 p,
                 PatternOrPredicate::Pattern(Pattern::Rewrite(_))

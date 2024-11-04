@@ -1,0 +1,353 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+abstract class AbstractMembers {
+    abstract constructor() { }
+    abstract display(): void { }
+    abstract get my_name() { }
+    abstract set my_name(name) { }
+    abstract #private_name() { }
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")],
+            class_token: CLASS_KW@9..15 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@15..31 "AbstractMembers" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@31..32 "{" [] [],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        JsBogus {
+                            items: [
+                                TsAbstractModifier {
+                                    modifier_token: ABSTRACT_KW@32..46 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                                },
+                            ],
+                        },
+                        JsLiteralMemberName {
+                            value: IDENT@46..57 "constructor" [] [],
+                        },
+                        JsConstructorParameters {
+                            l_paren_token: L_PAREN@57..58 "(" [] [],
+                            parameters: JsConstructorParameterList [],
+                            r_paren_token: R_PAREN@58..60 ")" [] [Whitespace(" ")],
+                        },
+                        JsFunctionBody {
+                            l_curly_token: L_CURLY@60..62 "{" [] [Whitespace(" ")],
+                            directives: JsDirectiveList [],
+                            statements: JsStatementList [],
+                            r_curly_token: R_CURLY@62..63 "}" [] [],
+                        },
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        TsMethodSignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@63..77 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                        ],
+                        JsLiteralMemberName {
+                            value: IDENT@77..84 "display" [] [],
+                        },
+                        JsParameters {
+                            l_paren_token: L_PAREN@84..85 "(" [] [],
+                            items: JsParameterList [],
+                            r_paren_token: R_PAREN@85..86 ")" [] [],
+                        },
+                        TsReturnTypeAnnotation {
+                            colon_token: COLON@86..88 ":" [] [Whitespace(" ")],
+                            ty: TsVoidType {
+                                void_token: VOID_KW@88..93 "void" [] [Whitespace(" ")],
+                            },
+                        },
+                        JsFunctionBody {
+                            l_curly_token: L_CURLY@93..95 "{" [] [Whitespace(" ")],
+                            directives: JsDirectiveList [],
+                            statements: JsStatementList [],
+                            r_curly_token: R_CURLY@95..96 "}" [] [],
+                        },
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        TsMethodSignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@96..110 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                        ],
+                        GET_KW@110..114 "get" [] [Whitespace(" ")],
+                        JsLiteralMemberName {
+                            value: IDENT@114..121 "my_name" [] [],
+                        },
+                        L_PAREN@121..122 "(" [] [],
+                        R_PAREN@122..124 ")" [] [Whitespace(" ")],
+                        JsFunctionBody {
+                            l_curly_token: L_CURLY@124..126 "{" [] [Whitespace(" ")],
+                            directives: JsDirectiveList [],
+                            statements: JsStatementList [],
+                            r_curly_token: R_CURLY@126..127 "}" [] [],
+                        },
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        TsMethodSignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@127..141 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                        ],
+                        SET_KW@141..145 "set" [] [Whitespace(" ")],
+                        JsLiteralMemberName {
+                            value: IDENT@145..152 "my_name" [] [],
+                        },
+                        L_PAREN@152..153 "(" [] [],
+                        JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@153..157 "name" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: missing (optional),
+                            initializer: missing (optional),
+                        },
+                        R_PAREN@157..159 ")" [] [Whitespace(" ")],
+                        JsFunctionBody {
+                            l_curly_token: L_CURLY@159..161 "{" [] [Whitespace(" ")],
+                            directives: JsDirectiveList [],
+                            statements: JsStatementList [],
+                            r_curly_token: R_CURLY@161..162 "}" [] [],
+                        },
+                    ],
+                },
+                JsBogusMember {
+                    items: [
+                        TsMethodSignatureModifierList [
+                            TsAbstractModifier {
+                                modifier_token: ABSTRACT_KW@162..176 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                        ],
+                        JsPrivateClassMemberName {
+                            hash_token: HASH@176..177 "#" [] [],
+                            id_token: IDENT@177..189 "private_name" [] [],
+                        },
+                        JsParameters {
+                            l_paren_token: L_PAREN@189..190 "(" [] [],
+                            items: JsParameterList [],
+                            r_paren_token: R_PAREN@190..192 ")" [] [Whitespace(" ")],
+                        },
+                        JsFunctionBody {
+                            l_curly_token: L_CURLY@192..194 "{" [] [Whitespace(" ")],
+                            directives: JsDirectiveList [],
+                            statements: JsStatementList [],
+                            r_curly_token: R_CURLY@194..195 "}" [] [],
+                        },
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@195..197 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@197..198 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..198
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..197
+    0: JS_CLASS_DECLARATION@0..197
+      0: JS_DECORATOR_LIST@0..0
+      1: ABSTRACT_KW@0..9 "abstract" [] [Whitespace(" ")]
+      2: CLASS_KW@9..15 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@15..31
+        0: IDENT@15..31 "AbstractMembers" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@31..32 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@32..195
+        0: JS_BOGUS_MEMBER@32..63
+          0: JS_BOGUS@32..46
+            0: TS_ABSTRACT_MODIFIER@32..46
+              0: ABSTRACT_KW@32..46 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@46..57
+            0: IDENT@46..57 "constructor" [] []
+          2: JS_CONSTRUCTOR_PARAMETERS@57..60
+            0: L_PAREN@57..58 "(" [] []
+            1: JS_CONSTRUCTOR_PARAMETER_LIST@58..58
+            2: R_PAREN@58..60 ")" [] [Whitespace(" ")]
+          3: JS_FUNCTION_BODY@60..63
+            0: L_CURLY@60..62 "{" [] [Whitespace(" ")]
+            1: JS_DIRECTIVE_LIST@62..62
+            2: JS_STATEMENT_LIST@62..62
+            3: R_CURLY@62..63 "}" [] []
+        1: JS_BOGUS_MEMBER@63..96
+          0: TS_METHOD_SIGNATURE_MODIFIER_LIST@63..77
+            0: TS_ABSTRACT_MODIFIER@63..77
+              0: ABSTRACT_KW@63..77 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: JS_LITERAL_MEMBER_NAME@77..84
+            0: IDENT@77..84 "display" [] []
+          2: JS_PARAMETERS@84..86
+            0: L_PAREN@84..85 "(" [] []
+            1: JS_PARAMETER_LIST@85..85
+            2: R_PAREN@85..86 ")" [] []
+          3: TS_RETURN_TYPE_ANNOTATION@86..93
+            0: COLON@86..88 ":" [] [Whitespace(" ")]
+            1: TS_VOID_TYPE@88..93
+              0: VOID_KW@88..93 "void" [] [Whitespace(" ")]
+          4: JS_FUNCTION_BODY@93..96
+            0: L_CURLY@93..95 "{" [] [Whitespace(" ")]
+            1: JS_DIRECTIVE_LIST@95..95
+            2: JS_STATEMENT_LIST@95..95
+            3: R_CURLY@95..96 "}" [] []
+        2: JS_BOGUS_MEMBER@96..127
+          0: TS_METHOD_SIGNATURE_MODIFIER_LIST@96..110
+            0: TS_ABSTRACT_MODIFIER@96..110
+              0: ABSTRACT_KW@96..110 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: GET_KW@110..114 "get" [] [Whitespace(" ")]
+          2: JS_LITERAL_MEMBER_NAME@114..121
+            0: IDENT@114..121 "my_name" [] []
+          3: L_PAREN@121..122 "(" [] []
+          4: R_PAREN@122..124 ")" [] [Whitespace(" ")]
+          5: JS_FUNCTION_BODY@124..127
+            0: L_CURLY@124..126 "{" [] [Whitespace(" ")]
+            1: JS_DIRECTIVE_LIST@126..126
+            2: JS_STATEMENT_LIST@126..126
+            3: R_CURLY@126..127 "}" [] []
+        3: JS_BOGUS_MEMBER@127..162
+          0: TS_METHOD_SIGNATURE_MODIFIER_LIST@127..141
+            0: TS_ABSTRACT_MODIFIER@127..141
+              0: ABSTRACT_KW@127..141 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: SET_KW@141..145 "set" [] [Whitespace(" ")]
+          2: JS_LITERAL_MEMBER_NAME@145..152
+            0: IDENT@145..152 "my_name" [] []
+          3: L_PAREN@152..153 "(" [] []
+          4: JS_FORMAL_PARAMETER@153..157
+            0: JS_DECORATOR_LIST@153..153
+            1: JS_IDENTIFIER_BINDING@153..157
+              0: IDENT@153..157 "name" [] []
+            2: (empty)
+            3: (empty)
+            4: (empty)
+          5: R_PAREN@157..159 ")" [] [Whitespace(" ")]
+          6: JS_FUNCTION_BODY@159..162
+            0: L_CURLY@159..161 "{" [] [Whitespace(" ")]
+            1: JS_DIRECTIVE_LIST@161..161
+            2: JS_STATEMENT_LIST@161..161
+            3: R_CURLY@161..162 "}" [] []
+        4: JS_BOGUS_MEMBER@162..195
+          0: TS_METHOD_SIGNATURE_MODIFIER_LIST@162..176
+            0: TS_ABSTRACT_MODIFIER@162..176
+              0: ABSTRACT_KW@162..176 "abstract" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+          1: JS_PRIVATE_CLASS_MEMBER_NAME@176..189
+            0: HASH@176..177 "#" [] []
+            1: IDENT@177..189 "private_name" [] []
+          2: JS_PARAMETERS@189..192
+            0: L_PAREN@189..190 "(" [] []
+            1: JS_PARAMETER_LIST@190..190
+            2: R_PAREN@190..192 ")" [] [Whitespace(" ")]
+          3: JS_FUNCTION_BODY@192..195
+            0: L_CURLY@192..194 "{" [] [Whitespace(" ")]
+            1: JS_DIRECTIVE_LIST@194..194
+            2: JS_STATEMENT_LIST@194..194
+            3: R_CURLY@194..195 "}" [] []
+      9: R_CURLY@195..197 "}" [Newline("\n")] []
+  4: EOF@197..198 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+typescript_abstract_class_member_should_not_have_body.ts:2:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'abstract' cannot appear on a constructor declaration.
+  
+    1 │ abstract class AbstractMembers {
+  > 2 │     abstract constructor() { }
+      │     ^^^^^^^^
+    3 │     abstract display(): void { }
+    4 │     abstract get my_name() { }
+  
+typescript_abstract_class_member_should_not_have_body.ts:3:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × abstract members should not have a body
+  
+    1 │ abstract class AbstractMembers {
+    2 │     abstract constructor() { }
+  > 3 │     abstract display(): void { }
+      │                              ^^^
+    4 │     abstract get my_name() { }
+    5 │     abstract set my_name(name) { }
+  
+typescript_abstract_class_member_should_not_have_body.ts:4:28 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × abstract members should not have a body
+  
+    2 │     abstract constructor() { }
+    3 │     abstract display(): void { }
+  > 4 │     abstract get my_name() { }
+      │                            ^^^
+    5 │     abstract set my_name(name) { }
+    6 │     abstract #private_name() { }
+  
+typescript_abstract_class_member_should_not_have_body.ts:5:32 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × abstract members should not have a body
+  
+    3 │     abstract display(): void { }
+    4 │     abstract get my_name() { }
+  > 5 │     abstract set my_name(name) { }
+      │                                ^^^
+    6 │     abstract #private_name() { }
+    7 │ }
+  
+typescript_abstract_class_member_should_not_have_body.ts:6:30 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × abstract members should not have a body
+  
+    4 │     abstract get my_name() { }
+    5 │     abstract set my_name(name) { }
+  > 6 │     abstract #private_name() { }
+      │                              ^^^
+    7 │ }
+    8 │ 
+  
+typescript_abstract_class_member_should_not_have_body.ts:6:5 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'abstract' modifier cannot be used with a private identifier'.
+  
+    4 │     abstract get my_name() { }
+    5 │     abstract set my_name(name) { }
+  > 6 │     abstract #private_name() { }
+      │     ^^^^^^^^
+    7 │ }
+    8 │ 
+  
+```

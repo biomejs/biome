@@ -1,20 +1,18 @@
 use crate::cli_options::CliOptions;
-use crate::commands::{get_stdin, resolve_manifest, validate_configuration_diagnostics};
-use crate::{
-    execute_mode, setup_cli_subscriber, CliDiagnostic, CliSession, Execution, TraversalMode,
+use crate::commands::CommandRunner;
+use crate::{CliDiagnostic, Execution, TraversalMode};
+use biome_configuration::{
+    vcs::PartialVcsConfiguration, PartialConfiguration, PartialFilesConfiguration,
 };
-use biome_configuration::{vcs::PartialVcsConfiguration, PartialFilesConfiguration};
+use biome_console::Console;
 use biome_deserialize::Merge;
-use biome_service::configuration::{
-    load_configuration, LoadedConfiguration, PartialConfigurationExt,
-};
-use biome_service::workspace::{
-    ParsePatternParams, RegisterProjectFolderParams, UpdateSettingsParams,
-};
+use biome_fs::FileSystem;
+use biome_service::configuration::LoadedConfiguration;
+use biome_service::workspace::ParsePatternParams;
+use biome_service::{DynRef, Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct SearchCommandPayload {
-    pub(crate) cli_options: CliOptions,
     pub(crate) files_configuration: Option<PartialFilesConfiguration>,
     pub(crate) paths: Vec<OsString>,
     pub(crate) pattern: String,
@@ -22,80 +20,57 @@ pub(crate) struct SearchCommandPayload {
     pub(crate) vcs_configuration: Option<PartialVcsConfiguration>,
 }
 
-/// Handler for the "search" command of the Biome CLI
-pub(crate) fn search(
-    session: CliSession,
-    payload: SearchCommandPayload,
-) -> Result<(), CliDiagnostic> {
-    let SearchCommandPayload {
-        cli_options,
-        files_configuration,
-        paths,
-        pattern,
-        stdin_file_path,
-        vcs_configuration,
-    } = payload;
-    setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
+impl CommandRunner for SearchCommandPayload {
+    const COMMAND_NAME: &'static str = "search";
 
-    let loaded_configuration =
-        load_configuration(&session.app.fs, cli_options.as_configuration_path_hint())?;
-    validate_configuration_diagnostics(
-        &loaded_configuration,
-        session.app.console,
-        cli_options.verbose,
-    )?;
+    fn merge_configuration(
+        &mut self,
+        loaded_configuration: LoadedConfiguration,
+        _fs: &DynRef<'_, dyn FileSystem>,
+        _console: &mut dyn Console,
+    ) -> Result<PartialConfiguration, WorkspaceError> {
+        let LoadedConfiguration {
+            mut configuration, ..
+        } = loaded_configuration;
+        configuration
+            .files
+            .merge_with(self.files_configuration.clone());
+        configuration.vcs.merge_with(self.vcs_configuration.clone());
 
-    let LoadedConfiguration {
-        mut configuration,
-        directory_path: configuration_path,
-        ..
-    } = loaded_configuration;
-
-    configuration.files.merge_with(files_configuration);
-    configuration.vcs.merge_with(vcs_configuration);
-
-    // check if support for git ignore files is enabled
-    let vcs_base_path = configuration_path.or(session.app.fs.working_directory());
-    let (vcs_base_path, gitignore_matches) =
-        configuration.retrieve_gitignore_matches(&session.app.fs, vcs_base_path.as_deref())?;
-
-    session
-        .app
-        .workspace
-        .register_project_folder(RegisterProjectFolderParams {
-            path: session.app.fs.working_directory(),
-            set_as_current_workspace: true,
-        })?;
-    let manifest_data = resolve_manifest(&session.app.fs)?;
-
-    if let Some(manifest_data) = manifest_data {
-        session
-            .app
-            .workspace
-            .set_manifest_for_project(manifest_data.into())?;
+        Ok(configuration)
     }
 
-    session
-        .app
-        .workspace
-        .update_settings(UpdateSettingsParams {
-            workspace_directory: session.app.fs.working_directory(),
-            configuration,
-            vcs_base_path,
-            gitignore_matches,
-        })?;
+    fn get_files_to_process(
+        &self,
+        _fs: &DynRef<'_, dyn FileSystem>,
+        _configuration: &PartialConfiguration,
+    ) -> Result<Vec<OsString>, CliDiagnostic> {
+        Ok(self.paths.clone())
+    }
 
-    let console = &mut *session.app.console;
-    let stdin = get_stdin(stdin_file_path, console, "search")?;
+    fn get_stdin_file_path(&self) -> Option<&str> {
+        self.stdin_file_path.as_deref()
+    }
 
-    let pattern = session
-        .app
-        .workspace
-        .parse_pattern(ParsePatternParams { pattern })?
-        .pattern_id;
+    fn should_write(&self) -> bool {
+        false
+    }
 
-    let execution =
-        Execution::new(TraversalMode::Search { pattern, stdin }).set_report(&cli_options);
-
-    execute_mode(execution, session, &cli_options, paths)
+    fn get_execution(
+        &self,
+        cli_options: &CliOptions,
+        _console: &mut dyn Console,
+        workspace: &dyn Workspace,
+    ) -> Result<Execution, CliDiagnostic> {
+        let pattern = workspace
+            .parse_pattern(ParsePatternParams {
+                pattern: self.pattern.clone(),
+            })?
+            .pattern_id;
+        Ok(Execution::new(TraversalMode::Search {
+            pattern,
+            stdin: self.get_stdin(_console)?,
+        })
+        .set_report(cli_options))
+    }
 }

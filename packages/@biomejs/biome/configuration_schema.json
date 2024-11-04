@@ -360,7 +360,6 @@
 		},
 		"AllowDomainOptions": {
 			"type": "object",
-			"required": ["allowDomains"],
 			"properties": {
 				"allowDomains": {
 					"description": "List of domains to allow `target=\"_blank\"` without `rel=\"noreferrer\"`",
@@ -643,10 +642,10 @@
 		"ComplexityOptions": {
 			"description": "Options for the rule `noExcessiveCognitiveComplexity`.",
 			"type": "object",
-			"required": ["maxAllowedComplexity"],
 			"properties": {
 				"maxAllowedComplexity": {
 					"description": "The maximum complexity score that we allow. Anything higher is considered excessive.",
+					"default": 15,
 					"type": "integer",
 					"format": "uint8",
 					"minimum": 1.0
@@ -676,9 +675,11 @@
 		},
 		"ConsistentArrayTypeOptions": {
 			"type": "object",
-			"required": ["syntax"],
 			"properties": {
-				"syntax": { "$ref": "#/definitions/ConsistentArrayType" }
+				"syntax": {
+					"default": "shorthand",
+					"allOf": [{ "$ref": "#/definitions/ConsistentArrayType" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -690,9 +691,11 @@
 		},
 		"ConsistentMemberAccessibilityOptions": {
 			"type": "object",
-			"required": ["accessibility"],
 			"properties": {
-				"accessibility": { "$ref": "#/definitions/Accessibility" }
+				"accessibility": {
+					"default": "noPublic",
+					"allOf": [{ "$ref": "#/definitions/Accessibility" }]
+				}
 			},
 			"additionalProperties": false
 		},
@@ -907,7 +910,7 @@
 				"noUndeclaredDependencies": {
 					"description": "Disallow the use of dependencies that aren't specified in the package.json.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoUndeclaredDependenciesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1051,7 +1054,7 @@
 				"useExhaustiveDependencies": {
 					"description": "Enforce all dependencies are correctly specified in a React hook.",
 					"anyOf": [
-						{ "$ref": "#/definitions/HooksConfiguration" },
+						{ "$ref": "#/definitions/UseExhaustiveDependenciesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1202,12 +1205,25 @@
 		},
 		"CustomRestrictedTypeOptions": {
 			"type": "object",
-			"required": ["message"],
 			"properties": {
-				"message": { "type": "string" },
-				"use": { "type": ["string", "null"] }
+				"message": { "default": "", "type": "string" },
+				"use": { "default": null, "type": ["string", "null"] }
 			},
 			"additionalProperties": false
+		},
+		"DependencyAvailability": {
+			"oneOf": [
+				{
+					"description": "This type of dependency will be always available or unavailable.",
+					"type": "boolean"
+				},
+				{
+					"description": "This type of dependency will be available only if the linted file matches any of the globs.",
+					"type": "array",
+					"items": { "type": "string" },
+					"minItems": 1
+				}
+			]
 		},
 		"DeprecatedHooksConfiguration": {
 			"anyOf": [
@@ -1264,6 +1280,10 @@
 				"filenameCases": {
 					"description": "Allowed cases for file names.",
 					"allOf": [{ "$ref": "#/definitions/FilenameCases" }]
+				},
+				"match": {
+					"description": "Regular expression to enforce",
+					"anyOf": [{ "$ref": "#/definitions/Regex" }, { "type": "null" }]
 				},
 				"requireAscii": {
 					"description": "If `false`, then non-ASCII characters are allowed.",
@@ -1460,23 +1480,29 @@
 		},
 		"Hook": {
 			"type": "object",
-			"required": ["name"],
 			"properties": {
 				"closureIndex": {
 					"description": "The \"position\" of the closure function, starting from zero.\n\nFor example, for React's `useEffect()` hook, the closure index is 0.",
+					"default": null,
 					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				},
 				"dependenciesIndex": {
 					"description": "The \"position\" of the array of dependencies, starting from zero.\n\nFor example, for React's `useEffect()` hook, the dependencies index is 1.",
+					"default": null,
 					"type": ["integer", "null"],
 					"format": "uint8",
 					"minimum": 0.0
 				},
-				"name": { "description": "The name of the hook.", "type": "string" },
+				"name": {
+					"description": "The name of the hook.",
+					"default": "",
+					"type": "string"
+				},
 				"stableResult": {
 					"description": "Whether the result of the hook is stable.\n\nSet to `true` to mark the identity of the hook's return value as stable, or use a number/an array of numbers to mark the \"positions\" in the return array as stable.\n\nFor example, for React's `useRef()` hook the value would be `true`, while for `useState()` it would be `[1]`.",
+					"default": null,
 					"anyOf": [
 						{ "$ref": "#/definitions/StableHookResult" },
 						{ "type": "null" }
@@ -1485,24 +1511,11 @@
 			},
 			"additionalProperties": false
 		},
-		"HooksConfiguration": {
+		"ImportGroup": {
 			"anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithHooksOptions" }
+				{ "$ref": "#/definitions/PredefinedImportGroup" },
+				{ "$ref": "#/definitions/Regex" }
 			]
-		},
-		"HooksOptions": {
-			"description": "Options for the rule `useExhaustiveDependencies`",
-			"type": "object",
-			"required": ["hooks"],
-			"properties": {
-				"hooks": {
-					"description": "List of hooks of which the dependencies should be validated.",
-					"type": "array",
-					"items": { "$ref": "#/definitions/Hook" }
-				}
-			},
-			"additionalProperties": false
 		},
 		"IndentStyle": {
 			"oneOf": [
@@ -1679,6 +1692,10 @@
 			"description": "Options that changes how the JavaScript parser behaves",
 			"type": "object",
 			"properties": {
+				"gritMetavariables": {
+					"description": "Enables parsing of Grit metavariables. Defaults to `false`.",
+					"type": ["boolean", "null"]
+				},
 				"unsafeParameterDecoratorsEnabled": {
 					"description": "It enables the experimental and unsafe parsing of parameter decorators\n\nThese decorators belong to an old proposal, and they are subject to change.",
 					"type": ["boolean", "null"]
@@ -2029,20 +2046,22 @@
 		},
 		"NoLabelWithoutControlOptions": {
 			"type": "object",
-			"required": ["inputComponents", "labelAttributes", "labelComponents"],
 			"properties": {
 				"inputComponents": {
 					"description": "Array of component names that should be considered the same as an `input` element.",
+					"default": [],
 					"type": "array",
 					"items": { "type": "string" }
 				},
 				"labelAttributes": {
 					"description": "Array of attributes that should be treated as the `label` accessible text content.",
+					"default": [],
 					"type": "array",
 					"items": { "type": "string" }
 				},
 				"labelComponents": {
 					"description": "Array of component names that should be considered the same as a `label` element.",
+					"default": [],
 					"type": "array",
 					"items": { "type": "string" }
 				}
@@ -2057,13 +2076,59 @@
 		},
 		"NoRestrictedTypesOptions": {
 			"type": "object",
-			"required": ["types"],
 			"properties": {
 				"types": {
+					"default": {},
 					"type": "object",
 					"additionalProperties": {
 						"$ref": "#/definitions/CustomRestrictedType"
 					}
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoSecretsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoSecretsOptions" }
+			]
+		},
+		"NoSecretsOptions": {
+			"type": "object",
+			"properties": {
+				"entropyThreshold": {
+					"description": "Set entropy threshold (default is 41).",
+					"type": ["integer", "null"],
+					"format": "uint16",
+					"minimum": 0.0
+				}
+			},
+			"additionalProperties": false
+		},
+		"NoUndeclaredDependenciesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoUndeclaredDependenciesOptions" }
+			]
+		},
+		"NoUndeclaredDependenciesOptions": {
+			"description": "Rule's options",
+			"type": "object",
+			"properties": {
+				"devDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `devDependencies` are imported. Defaults to `true`.",
+					"default": true,
+					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+				},
+				"optionalDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.",
+					"default": true,
+					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
+				},
+				"peerDependencies": {
+					"description": "If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.",
+					"default": true,
+					"allOf": [{ "$ref": "#/definitions/DependencyAvailability" }]
 				}
 			},
 			"additionalProperties": false
@@ -2083,6 +2148,27 @@
 						{ "type": "null" }
 					]
 				},
+				"noDescendingSpecificity": {
+					"description": "Disallow a lower specificity selector from coming after a higher specificity selector.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDocumentCookie": {
+					"description": "Disallow direct assignments to document.cookie.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDocumentImportInPage": {
+					"description": "Prevents importing next/document outside of pages/_document.jsx in Next.js projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noDuplicateCustomProperties": {
 					"description": "Disallow duplicate custom properties within declaration blocks.",
 					"anyOf": [
@@ -2092,6 +2178,13 @@
 				},
 				"noDuplicateElseIf": {
 					"description": "Disallow duplicate conditions in if-else-if chains",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noDuplicateProperties": {
+					"description": "Disallow duplicate properties within declaration blocks.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2120,6 +2213,27 @@
 				},
 				"noExportedImports": {
 					"description": "Disallow exporting an imported variable.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noHeadElement": {
+					"description": "Prevent usage of \\<head> element in a Next.js project.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noHeadImportInDocument": {
+					"description": "Prevent using the next/head module in pages/_document.js on Next.js projects.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noImgElement": {
+					"description": "Prevent usage of \\<img> element in a Next.js project.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2177,7 +2291,7 @@
 				"noSecrets": {
 					"description": "Disallow usage of sensitive data such as API keys and tokens.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoSecretsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2216,8 +2330,29 @@
 						{ "type": "null" }
 					]
 				},
+				"noUnknownTypeSelector": {
+					"description": "Disallow unknown type selectors.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noUselessEscapeInRegex": {
 					"description": "Disallow unnecessary escape sequence in regular expression literals.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessStringRaw": {
+					"description": "Disallow unnecessary String.raw function in template string literals without any escape sequence.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"noUselessUndefined": {
+					"description": "Disallow the use of useless undefined.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
@@ -2245,6 +2380,20 @@
 					"description": "Enforce that ARIA properties are valid for the roles that are supported by the element.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useAtIndex": {
+					"description": "Use at() instead of integer index access.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useCollapsedIf": {
+					"description": "Enforce using single if instead of nested if clauses.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2280,8 +2429,29 @@
 						{ "type": "null" }
 					]
 				},
-				"useExplicitFunctionReturnType": {
+				"useExplicitType": {
 					"description": "Require explicit return types on functions and class methods.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGoogleFontDisplay": {
+					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGoogleFontPreconnect": {
+					"description": "Ensure the preconnect attribute is used when using Google Fonts.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useGuardForIn": {
+					"description": "Require for-in loops to include an if statement.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2291,6 +2461,13 @@
 					"description": "Disallows package private imports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamedOperation": {
+					"description": "Enforce specifying the name of GraphQL operations.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2322,6 +2499,18 @@
 						{ "type": "null" }
 					]
 				}
+			},
+			"additionalProperties": false
+		},
+		"Options": {
+			"type": "object",
+			"properties": {
+				"importGroups": {
+					"default": [],
+					"type": "array",
+					"items": { "$ref": "#/definitions/ImportGroup" }
+				},
+				"legacy": { "default": false, "type": "boolean" }
 			},
 			"additionalProperties": false
 		},
@@ -2529,6 +2718,10 @@
 			},
 			"additionalProperties": false
 		},
+		"PredefinedImportGroup": {
+			"type": "string",
+			"enum": [":blank-line:", ":bun:", ":node:", ":types:"]
+		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
 		"Regex": { "type": "string" },
@@ -2541,7 +2734,6 @@
 		"RestrictedGlobalsOptions": {
 			"description": "Options for the rule `noRestrictedGlobals`.",
 			"type": "object",
-			"required": ["deniedGlobals"],
 			"properties": {
 				"deniedGlobals": {
 					"description": "A list of names that should trigger the rule",
@@ -2560,7 +2752,6 @@
 		"RestrictedImportsOptions": {
 			"description": "Options for the rule `noRestrictedImports`.",
 			"type": "object",
-			"required": ["paths"],
 			"properties": {
 				"paths": {
 					"description": "A list of names that should trigger the rule",
@@ -2574,7 +2765,46 @@
 			"type": "string",
 			"enum": ["abstract", "private", "protected", "readonly", "static"]
 		},
-		"RuleAssistConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistConfiguration_for_Null": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Null" }
+			]
+		},
+		"RuleAssistConfiguration_for_Options": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RuleAssistPlainConfiguration" },
+				{ "$ref": "#/definitions/RuleAssistWithOptions_for_Options" }
+			]
+		},
+		"RuleAssistPlainConfiguration": { "type": "string", "enum": ["on", "off"] },
+		"RuleAssistWithOptions_for_Null": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+				},
+				"options": { "description": "Rule's options", "type": "null" }
+			},
+			"additionalProperties": false
+		},
+		"RuleAssistWithOptions_for_Options": {
+			"type": "object",
+			"required": ["level", "options"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RuleAssistPlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/Options" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2706,21 +2936,6 @@
 			},
 			"additionalProperties": false
 		},
-		"RuleWithHooksOptions": {
-			"type": "object",
-			"required": ["level"],
-			"properties": {
-				"level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-				"options": {
-					"description": "Rule's options",
-					"allOf": [{ "$ref": "#/definitions/HooksOptions" }]
-				}
-			},
-			"additionalProperties": false
-		},
 		"RuleWithNamingConventionOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -2823,6 +3038,36 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithNoSecretsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoSecretsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoUndeclaredDependenciesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoUndeclaredDependenciesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithRestrictedGlobalsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -2870,6 +3115,23 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUseExhaustiveDependenciesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [
+						{ "$ref": "#/definitions/UseExhaustiveDependenciesOptions" }
+					]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseImportExtensionsOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -2885,6 +3147,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/UseImportExtensionsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithUseSelfClosingElementsOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UseSelfClosingElementsOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -3040,17 +3321,24 @@
 			"description": "A list of rules that belong to this group",
 			"type": "object",
 			"properties": {
-				"sortJsxProps": {
-					"description": "Enforce props sorting in JSX elements.",
+				"organizeImports": {
+					"description": "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Options" },
+						{ "type": "null" }
+					]
+				},
+				"useSortedAttributes": {
+					"description": "Enforce attribute sorting in JSX elements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				},
 				"useSortedKeys": {
 					"description": "Sorts the keys of a JSON object in natural order",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleAssistConfiguration" },
+						{ "$ref": "#/definitions/RuleAssistConfiguration_for_Null" },
 						{ "type": "null" }
 					]
 				}
@@ -3376,7 +3664,7 @@
 				"useSelfClosingElements": {
 					"description": "Prevent extra closing tags for components without children",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "$ref": "#/definitions/UseSelfClosingElementsConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3448,14 +3736,15 @@
 		},
 		"SuggestedExtensionMapping": {
 			"type": "object",
-			"required": ["component", "module"],
 			"properties": {
 				"component": {
 					"description": "Extension that should be used for component file imports",
+					"default": "",
 					"type": "string"
 				},
 				"module": {
 					"description": "Extension that should be used for module imports",
+					"default": "",
 					"type": "string"
 				}
 			},
@@ -3794,7 +4083,7 @@
 				"noPrototypeBuiltins": {
 					"description": "Disallow direct use of Object.prototype builtins.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -4001,6 +4290,35 @@
 			},
 			"additionalProperties": false
 		},
+		"UseExhaustiveDependenciesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseExhaustiveDependenciesOptions" }
+			]
+		},
+		"UseExhaustiveDependenciesOptions": {
+			"description": "Options for the rule `useExhaustiveDependencies`",
+			"type": "object",
+			"properties": {
+				"hooks": {
+					"description": "List of hooks of which the dependencies should be validated.",
+					"default": [],
+					"type": "array",
+					"items": { "$ref": "#/definitions/Hook" }
+				},
+				"reportMissingDependenciesArray": {
+					"description": "Whether to report an error when a hook has no dependencies array.",
+					"default": false,
+					"type": "boolean"
+				},
+				"reportUnnecessaryDependencies": {
+					"description": "Whether to report an error when a dependency is listed in the dependencies array but isn't used. Defaults to true.",
+					"default": true,
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"UseImportExtensionsConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -4009,15 +4327,29 @@
 		},
 		"UseImportExtensionsOptions": {
 			"type": "object",
-			"required": ["suggestedExtensions"],
 			"properties": {
 				"suggestedExtensions": {
 					"description": "A map of custom import extension mappings, where the key is the inspected file extension, and the value is a pair of `module` extension and `component` import extension",
+					"default": {},
 					"type": "object",
 					"additionalProperties": {
 						"$ref": "#/definitions/SuggestedExtensionMapping"
 					}
 				}
+			},
+			"additionalProperties": false
+		},
+		"UseSelfClosingElementsConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUseSelfClosingElementsOptions" }
+			]
+		},
+		"UseSelfClosingElementsOptions": {
+			"description": "Options for the `useSelfClosingElements` rule.",
+			"type": "object",
+			"properties": {
+				"ignoreHtmlElements": { "default": false, "type": "boolean" }
 			},
 			"additionalProperties": false
 		},
@@ -4029,10 +4361,10 @@
 		},
 		"UseValidAutocompleteOptions": {
 			"type": "object",
-			"required": ["inputComponents"],
 			"properties": {
 				"inputComponents": {
 					"description": "`input` like custom components that should be checked.",
+					"default": [],
 					"type": "array",
 					"items": { "type": "string" }
 				}
@@ -4069,10 +4401,13 @@
 		},
 		"ValidAriaRoleOptions": {
 			"type": "object",
-			"required": ["allowInvalidRoles", "ignoreNonDom"],
 			"properties": {
-				"allowInvalidRoles": { "type": "array", "items": { "type": "string" } },
-				"ignoreNonDom": { "type": "boolean" }
+				"allowInvalidRoles": {
+					"default": [],
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"ignoreNonDom": { "default": false, "type": "boolean" }
 			},
 			"additionalProperties": false
 		},

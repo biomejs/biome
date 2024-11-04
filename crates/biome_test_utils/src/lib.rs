@@ -204,13 +204,19 @@ pub fn code_fix_to_string<L: ServiceLanguage>(source: &str, action: AnalyzerActi
 /// corresponding to the directory name. E.g., `style/useWhile/test.js`
 /// will be analyzed with just the `style/useWhile` rule.
 pub fn parse_test_path(file: &Path) -> (&str, &str) {
-    let rule_folder = file.parent().unwrap();
-    let rule_name = rule_folder.file_name().unwrap();
+    let mut group_name = "";
+    let mut rule_name = "";
 
-    let group_folder = rule_folder.parent().unwrap();
-    let group_name = group_folder.file_name().unwrap();
+    for component in file.iter().rev() {
+        if component == "specs" || component == "suppression" {
+            break;
+        }
 
-    (group_name.to_str().unwrap(), rule_name.to_str().unwrap())
+        rule_name = group_name;
+        group_name = component.to_str().unwrap_or_default();
+    }
+
+    (group_name, rule_name)
 }
 
 /// This check is used in the parser test to ensure it doesn't emit

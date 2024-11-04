@@ -1,0 +1,2 @@
+`console.log($message)` as $log where{
+$new_log_call=`logger.log($message)`}

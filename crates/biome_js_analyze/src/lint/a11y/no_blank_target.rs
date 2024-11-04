@@ -221,7 +221,7 @@ impl Rule for NoBlankTarget {
 
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct AllowDomainOptions {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     /// List of domains to allow `target="_blank"` without `rel="noreferrer"`
