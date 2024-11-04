@@ -197,7 +197,7 @@ impl Rule for UseArrowFunction {
     }
 }
 
-/// Returns `true` if `function_expr` needs parenthesis when turned into an arrow function.
+/// Returns `true` if `function_expression` needs parenthesis when turned into an arrow function.
 fn needs_parentheses(function_expression: &JsFunctionExpression) -> bool {
     function_expression.syntax().parent().is_some_and(|parent| {
         // Copied from the implementation of `NeedsParentheses` for `JsArrowFunctionExpression`
@@ -308,8 +308,7 @@ impl Visitor for AnyThisScopeVisitor {
                         scope,
                         has_this: false,
                     });
-                }
-                if matches!(
+                } else if matches!(
                     node.kind(),
                     JsSyntaxKind::JS_THIS_EXPRESSION | JsSyntaxKind::JS_NEW_TARGET_EXPRESSION
                 ) {
@@ -321,11 +320,9 @@ impl Visitor for AnyThisScopeVisitor {
                 }
             }
             WalkEvent::Leave(node) => {
-                if let Some(exit_scope) = AnyThisScope::cast_ref(node) {
+                if AnyThisScope::can_cast(node.kind()) {
                     if let Some(scope_metadata) = self.stack.pop() {
-                        if scope_metadata.scope == exit_scope {
-                            ctx.match_query(ActualThisScope(scope_metadata));
-                        }
+                        ctx.match_query(ActualThisScope(scope_metadata));
                     }
                 }
             }
