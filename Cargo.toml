@@ -193,7 +193,7 @@ rayon              = "1.10.0"
 regex              = "1.11.0"
 rustc-hash         = "2.0.0"
 schemars           = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
-serde              = { version = "1.0.210", features = ["derive"] }
+serde              = { version = "1.0.214", features = ["derive"] }
 serde_ini          = "0.2.0"
 serde_json         = "1.0.132"
 similar            = "2.6.0"
