@@ -158,6 +158,11 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@typescript-eslint/no-array-constructor" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group.use_array_literals.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@typescript-eslint/no-dupe-class-members" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
