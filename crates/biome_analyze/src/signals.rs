@@ -326,7 +326,6 @@ where
         suppression_action: &'phase dyn SuppressionAction<
             Language = <<R as Rule>::Query as Queryable>::Language,
         >,
-
         options: &'phase AnalyzerOptions,
     ) -> Self {
         Self {
@@ -402,9 +401,12 @@ where
                 });
             };
             if let Some(text_range) = R::text_range(&ctx, &self.state) {
-                if let Some(suppression_action) =
-                    R::suppress(&ctx, &text_range, self.suppression_action)
-                {
+                if let Some(suppression_action) = R::suppress(
+                    &ctx,
+                    &text_range,
+                    self.suppression_action,
+                    self.options.suppression_reason.as_deref(),
+                ) {
                     let action = AnalyzerAction {
                         rule_name: Some((<R::Group as RuleGroup>::NAME, R::METADATA.name)),
                         category: ActionCategory::Other(Cow::Borrowed(SUPPRESSION_ACTION_CATEGORY)),

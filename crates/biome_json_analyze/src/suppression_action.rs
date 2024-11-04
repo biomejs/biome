@@ -20,6 +20,7 @@ impl SuppressionAction for JsonSuppressionAction {
         _mutation: &mut BatchMutation<Self::Language>,
         _apply_suppression: ApplySuppression<Self::Language>,
         _suppression_text: &str,
+        _suppression_reason: &str,
     ) {
         unreachable!("find_token_to_apply_suppression return None")
     }

@@ -786,6 +786,8 @@ pub struct SuppressionCommentEmitterPayload<'a, L: Language> {
     pub suppression_text: &'a str,
     /// The original range of the diagnostic where the rule was triggered
     pub diagnostic_text_range: &'a TextRange,
+    /// Explanation for the suppression to be used with `--suppress` and `--reason`
+    pub suppression_reason: &'a str,
 }
 
 type SignalHandler<'a, L, Break> = &'a mut dyn FnMut(&dyn AnalyzerSignal<L>) -> ControlFlow<Break>;

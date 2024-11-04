@@ -129,6 +129,7 @@ impl SuppressionAction for JsSuppressionAction {
         mutation: &mut BatchMutation<Self::Language>,
         apply_suppression: ApplySuppression<Self::Language>,
         suppression_text: &str,
+        suppression_reason: &str,
     ) {
         let ApplySuppression {
             token_to_apply_suppression,
@@ -156,7 +157,7 @@ impl SuppressionAction for JsSuppressionAction {
                 let jsx_comment = jsx_expression_child(
                     token(T!['{']).with_trailing_trivia([(
                         TriviaPieceKind::SingleLineComment,
-                        format!("/* {suppression_text}: <explanation> */").as_str(),
+                        format!("/* {suppression_text}: {suppression_reason} */").as_str(),
                     )]),
                     token(T!['}']),
                 )
@@ -193,7 +194,7 @@ impl SuppressionAction for JsSuppressionAction {
                         (TriviaPieceKind::Newline, "\n"),
                         (
                             TriviaPieceKind::SingleLineComment,
-                            format!("// {suppression_text}: <explanation>").as_str(),
+                            format!("// {suppression_text}: {suppression_reason}").as_str(),
                         ),
                         (TriviaPieceKind::Newline, "\n"),
                     ])
@@ -201,7 +202,7 @@ impl SuppressionAction for JsSuppressionAction {
                     new_token = new_token.with_leading_trivia([
                         (
                             TriviaPieceKind::SingleLineComment,
-                            format!("// {suppression_text}: <explanation>").as_str(),
+                            format!("// {suppression_text}: {suppression_reason}").as_str(),
                         ),
                         (TriviaPieceKind::Newline, "\n"),
                     ])
@@ -216,7 +217,7 @@ impl SuppressionAction for JsSuppressionAction {
                         (TriviaPieceKind::Newline, "\n"),
                         (
                             TriviaPieceKind::SingleLineComment,
-                            format!("// {suppression_text}: <explanation>").as_str(),
+                            format!("// {suppression_text}: {suppression_reason}").as_str(),
                         ),
                         (TriviaPieceKind::Newline, "\n"),
                     ])
@@ -225,7 +226,7 @@ impl SuppressionAction for JsSuppressionAction {
                         (TriviaPieceKind::Newline, "\n"),
                         (
                             TriviaPieceKind::SingleLineComment,
-                            format!("// {suppression_text}: <explanation>").as_str(),
+                            format!("// {suppression_text}: {suppression_reason}").as_str(),
                         ),
                         (TriviaPieceKind::Newline, "\n"),
                     ])
@@ -234,12 +235,12 @@ impl SuppressionAction for JsSuppressionAction {
                 new_token = new_token.with_trailing_trivia([
                     (
                         TriviaPieceKind::SingleLineComment,
-                        format!("// {suppression_text}: <explanation>").as_str(),
+                        format!("// {suppression_text}: {suppression_reason}").as_str(),
                     ),
                     (TriviaPieceKind::Newline, "\n"),
                 ])
             } else {
-                let comment = format!("// {suppression_text}: <explanation>");
+                let comment = format!("// {suppression_text}: {suppression_reason}");
                 let mut trivia = vec![
                     (TriviaPieceKind::SingleLineComment, comment.as_str()),
                     (TriviaPieceKind::Newline, "\n"),

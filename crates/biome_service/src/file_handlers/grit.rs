@@ -95,10 +95,12 @@ impl ServiceLanguage for GritLanguage {
         _language: Option<&Self::LinterSettings>,
         path: &biome_fs::BiomePath,
         _file_source: &super::DocumentFileSource,
+        suppression_reason: Option<String>,
     ) -> biome_analyze::AnalyzerOptions {
         AnalyzerOptions {
             configuration: AnalyzerConfiguration::default(),
             file_path: path.to_path_buf(),
+            suppression_reason,
         }
     }
 }
