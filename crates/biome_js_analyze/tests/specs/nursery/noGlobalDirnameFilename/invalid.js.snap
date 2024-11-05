@@ -124,7 +124,7 @@ invalid.js:5:30 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
      3  3 │   const dirname_ = { __dirname };
      4  4 │   const filename_ = { __filename };
      5    │ - const·dirname__·=·{·dirname:·__dirname,·foo:·"foo"·};
-        5 │ + const·dirname__·=·{·__dirname:·import.meta.dirname,·foo:·"foo"·};
+        5 │ + const·dirname__·=·{·dirname:·import.meta.dirname,·foo:·"foo"·};
      6  6 │   const filename__ = { filename: __filename, foo: "foo" };
      7  7 │   
   
@@ -150,7 +150,7 @@ invalid.js:6:32 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
      4  4 │   const filename_ = { __filename };
      5  5 │   const dirname__ = { dirname: __dirname, foo: "foo" };
      6    │ - const·filename__·=·{·filename:·__filename,·foo:·"foo"·};
-        6 │ + const·filename__·=·{·__filename:·import.meta.filename,·foo:·"foo"·};
+        6 │ + const·filename__·=·{·filename:·import.meta.filename,·foo:·"foo"·};
      7  7 │   
      8  8 │   if (__dirname.startsWith("/project/src/")) {}
   

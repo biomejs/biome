@@ -163,17 +163,21 @@ impl Rule for NoGlobalDirnameFilename {
                             let expr = expr.as_js_identifier_expression()?;
                             let id = expr.name().ok()?.value_token().ok()?;
                             if &id == syntax_token {
-                                let property_member =
-                                    make_property_object_member(&id, dirname_or_filename);
+                                let key = member.name().ok()?;
+                                let key = key.as_js_literal_member_name()?;
+                                let property_member = make_property_object_member(
+                                    &key.value().ok()?,
+                                    dirname_or_filename,
+                                );
                                 mutation.replace_node(member.clone(), property_member);
                                 break;
                             };
                         }
                         AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
-                            let id = member.name().ok()?.value_token().ok()?;
-                            if &id == syntax_token {
+                            let key = member.name().ok()?.value_token().ok()?;
+                            if &key == syntax_token {
                                 let property_member =
-                                    make_property_object_member(&id, dirname_or_filename);
+                                    make_property_object_member(&key, dirname_or_filename);
                                 mutation.replace_node(
                                     AnyJsObjectMember::JsShorthandPropertyObjectMember(
                                         member.clone(),
@@ -240,12 +244,12 @@ fn make_import_meta(dirname_or_filename: &str) -> JsStaticMemberExpression {
 }
 
 fn make_property_object_member(
-    id: &JsSyntaxToken,
+    key: &JsSyntaxToken,
     import_meta_property: &str,
 ) -> JsPropertyObjectMember {
     make::js_property_object_member(
         biome_js_syntax::AnyJsObjectMemberName::JsLiteralMemberName(make::js_literal_member_name(
-            make::ident(id.text_trimmed()),
+            make::ident(key.text_trimmed()),
         )),
         make::token(JsSyntaxKind::COLON).with_trailing_trivia([(TriviaPieceKind::Whitespace, " ")]),
         AnyJsExpression::JsStaticMemberExpression(make_import_meta(import_meta_property)),
