@@ -1,7 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::*;
@@ -83,7 +81,7 @@ impl Rule for NoDistractingElements {
         mutation.remove_node(element.clone());
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the '"{name.text_trimmed()}"' element." }.to_owned(),
             mutation,

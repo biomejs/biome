@@ -1,7 +1,7 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -289,7 +289,7 @@ impl Rule for UseExportType {
                     }
                 }
                 JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Use "<Emphasis>"export type"</Emphasis>"." }.to_owned(),
                     mutation,
@@ -312,7 +312,7 @@ impl Rule for UseExportType {
                     );
                 }
                 JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Add inline "<Emphasis>"type"</Emphasis>" keywords." }.to_owned(),
                     mutation,
@@ -323,7 +323,7 @@ impl Rule for UseExportType {
                     mutation.remove_token(type_token.clone());
                 }
                 JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     markup! { "Remove useless inline "<Emphasis>"type"</Emphasis>" keywords." }
                         .to_owned(),

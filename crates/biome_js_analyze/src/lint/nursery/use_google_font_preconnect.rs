@@ -1,6 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -133,7 +133,7 @@ impl Rule for UseGoogleFontPreconnect {
         mutation.replace_node(node.attributes(), make::jsx_attribute_list(attributes));
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Add the "<Emphasis>"rel=\"preconnect\""</Emphasis>" attribute." }.to_owned(),
             mutation,

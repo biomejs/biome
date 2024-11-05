@@ -1,7 +1,6 @@
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make::{
@@ -125,7 +124,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         mutation.replace_node(old_attribute_list, jsx_attribute_list(new_attribute_list));
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Add the tabIndex attribute." }.to_owned(),
             mutation,

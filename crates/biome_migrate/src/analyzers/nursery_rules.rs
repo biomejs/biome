@@ -1,6 +1,6 @@
 use crate::{declare_migration, MigrationAction};
 use biome_analyze::context::RuleContext;
-use biome_analyze::{ActionCategory, Ast, FixKind, Rule, RuleDiagnostic};
+use biome_analyze::{Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_json_factory::make::{
@@ -374,7 +374,7 @@ impl Rule for NurseryRules {
         };
 
         Some(MigrationAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             if rule_already_exists {
                 markup! {

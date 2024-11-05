@@ -2,7 +2,7 @@ use crate::react::{ReactApiCall, ReactCreateElementCall};
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::{markup, MarkupBuf};
 use biome_js_factory::make::{jsx_attribute_list, jsx_self_closing_element};
 use biome_js_syntax::{
@@ -393,7 +393,7 @@ impl Rule for NoVoidElementsWithChildren {
         }
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             state.action_message(),
             mutation,

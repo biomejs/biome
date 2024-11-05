@@ -7,6 +7,7 @@ use biome_json_analyze::utils::matches_path;
 use biome_json_factory::make::{ident, json_member_name};
 use biome_json_syntax::JsonMemberName;
 use biome_rowan::{AstNode, BatchMutationExt};
+use std::borrow::Cow;
 
 declare_migration! {
     pub(crate) IndentSize {
@@ -54,7 +55,7 @@ impl Rule for IndentSize {
         mutation.replace_node(node.clone(), new_node);
 
         Some(RuleAction::new(
-            ActionCategory::QuickFix,
+            ActionCategory::Other(Cow::Borrowed("migrate")),
             Applicability::Always,
             markup! {
                 "Use the property "<Emphasis>"formatter.indentWidth"</Emphasis>" instead."

@@ -1,7 +1,5 @@
 use biome_analyze::RuleSource;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
@@ -143,7 +141,7 @@ impl Rule for NoDoubleEquals {
         mutation.replace_token(op.clone(), make::token(suggestion));
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             // SAFETY: `suggestion` can only be JsSyntaxKind::EQ3 or JsSyntaxKind::NEQ2,
             // the implementation of `to_string` for these two variants always returns Some
