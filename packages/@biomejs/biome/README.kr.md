@@ -18,7 +18,7 @@
 [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
 [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
 [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
-[discord-url]: https://discord.gg/BypW39g6Yc
+[discord-url]: https://biomejs.dev/chat
 [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
 [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
 [vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=60a5fa
@@ -39,10 +39,9 @@
 
 </div>
 
-
 **Biome**은 웹 프로젝트를 위한 고성능 툴체인으로, 프로젝트의 품질을 유지하기 위한 개발자 도구를 제공하는 것을 목표로 합니다.
 
-**Biome**은 _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ 및 *GraphQL*을 위한 **[고속 포매터](./benchmark#formatting)**로, **[*Prettier*와 97%의 호환성](https://console.algora.io/challenges/prettier)**을 자랑합니다.
+**Biome**은 _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ 및 *GraphQL*을 위한 **[고속 포매터](https://github.com/biomejs/biome/tree/main/benchmark#formatting)**로, **[*Prettier*와 97%의 호환성](https://console.algora.io/challenges/prettier)**을 자랑합니다.
 
 **Biome**은 _JavaScript_, _TypeScript_, _JSX_, _CSS_ 및 *GraphQL*을 위한 **[고성능 린터](https://github.com/biomejs/biome/tree/main/benchmark#linting)**로, ESLint, typescript-eslint 등 [다양한 소스](https://github.com/biomejs/biome/discussions/3)에서 가져온 **[270개 이상의 규칙](https://biomejs.dev/linter/rules/)**을 제공합니다. **맥락을 고려한 상세한 진단 정보**를 제공하여 코드 품질 향상과 개발 실력 향상에 도움을 줍니다!
 
@@ -106,8 +105,6 @@ Biome은 기업이 다양한 개발자들 사이에서 인지도를 얻을 수 �
 ### 이슈 후원
 
 [Polar.sh](https://polar.sh/biomejs)를 통해 구현되었으면 하는 기능들에 투표하고 개발을 지원할 수 있습니다. 백로그를 확인하고 도움을 주세요:
-
-<a href="https://polar.sh/biomejs"><img src="https://polar.sh/embed/fund-our-backlog.svg?org=biomejs" /></a>
 
 ## 스폰서
 

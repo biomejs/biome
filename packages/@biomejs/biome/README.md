@@ -108,7 +108,6 @@ Biome offers a simple sponsorship program that allows companies to get visibilit
 
 We use [Polar.sh](https://polar.sh/biomejs) to up-vote and promote specific features that you would like to see and implement. Check our backlog and help us:
 
-
 ## Sponsors
 
 ### Silver Sponsors
