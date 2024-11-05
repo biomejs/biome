@@ -47,10 +47,6 @@ expect(
   }
 ).toThrow(ReferenceError);
 
-useImperativeHandle(ref, () => {
-  return;
-}, []);
-
 ```
 
 
@@ -108,7 +104,7 @@ useImperativeHandle(ref, () => {
    var bar = "foo";
    bar;
  };
-@@ -28,9 +40,9 @@
+@@ -28,6 +40,6 @@
      () => {
        var bar = "foo";
      };
@@ -118,9 +114,6 @@ useImperativeHandle(ref, () => {
 +bar;
 +}
 +).toThrow(ReferenceError)
- 
- useImperativeHandle(ref, () => {
-   return;
 ```
 
 # Output
@@ -171,10 +164,6 @@ expect(
 bar;
 }
 ).toThrow(ReferenceError)
-
-useImperativeHandle(ref, () => {
-  return;
-}, []);
 ```
 
 # Errors
@@ -405,7 +394,6 @@ call-arguments.js:40:3 parse ━━━━━━━━━━━━━━━━━
   > 41 │ ).toThrow(ReferenceError);
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ 
-    43 │ useImperativeHandle(ref, () => {
   
   i Expected a statement here.
   
@@ -416,7 +404,6 @@ call-arguments.js:40:3 parse ━━━━━━━━━━━━━━━━━
   > 41 │ ).toThrow(ReferenceError);
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
     42 │ 
-    43 │ useImperativeHandle(ref, () => {
   
 
 ```
