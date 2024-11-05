@@ -1,0 +1,146 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+`throw new Error($err)` as $thrown => `throw new CustomError($err);` where {
+  $err <: maybe string(fragment=$fun) => `{ message: $err }`
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritRewrite {
+                left: GritPatternAs {
+                    pattern: GritCodeSnippet {
+                        source: GritBacktickSnippetLiteral {
+                            value_token: GRIT_BACKTICK_SNIPPET@0..24 "`throw new Error($err)`" [] [Whitespace(" ")],
+                        },
+                    },
+                    as_token: AS_KW@24..27 "as" [] [Whitespace(" ")],
+                    variable: GritVariable {
+                        value_token: GRIT_VARIABLE@27..35 "$thrown" [] [Whitespace(" ")],
+                    },
+                },
+                annotation: missing (optional),
+                fat_arrow_token: FAT_ARROW@35..38 "=>" [] [Whitespace(" ")],
+                right: GritCodeSnippet {
+                    source: GritBacktickSnippetLiteral {
+                        value_token: GRIT_BACKTICK_SNIPPET@38..69 "`throw new CustomError($err);`" [] [Whitespace(" ")],
+                    },
+                },
+            },
+            where_token: WHERE_KW@69..75 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@75..76 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateMatch {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@76..84 "$err" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        match_token: MATCH@84..87 "<:" [] [Whitespace(" ")],
+                        right: GritPatternMaybe {
+                            maybe_token: MAYBE_KW@87..93 "maybe" [] [Whitespace(" ")],
+                            pattern: GritRewrite {
+                                left: GritNodeLike {
+                                    name: GritName {
+                                        value_token: GRIT_NAME@93..99 "string" [] [],
+                                    },
+                                    l_paren_token: L_PAREN@99..100 "(" [] [],
+                                    named_args: GritNamedArgList [
+                                        GritNamedArg {
+                                            name: GritName {
+                                                value_token: GRIT_NAME@100..108 "fragment" [] [],
+                                            },
+                                            eq_token: EQ@108..109 "=" [] [],
+                                            pattern: GritVariable {
+                                                value_token: GRIT_VARIABLE@109..113 "$fun" [] [],
+                                            },
+                                        },
+                                    ],
+                                    r_paren_token: R_PAREN@113..115 ")" [] [Whitespace(" ")],
+                                },
+                                annotation: missing (optional),
+                                fat_arrow_token: FAT_ARROW@115..118 "=>" [] [Whitespace(" ")],
+                                right: GritCodeSnippet {
+                                    source: GritBacktickSnippetLiteral {
+                                        value_token: GRIT_BACKTICK_SNIPPET@118..137 "`{ message: $err }`" [] [],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@137..139 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@139..140 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..140
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..139
+    0: GRIT_PATTERN_WHERE@0..139
+      0: GRIT_REWRITE@0..69
+        0: GRIT_PATTERN_AS@0..35
+          0: GRIT_CODE_SNIPPET@0..24
+            0: GRIT_BACKTICK_SNIPPET_LITERAL@0..24
+              0: GRIT_BACKTICK_SNIPPET@0..24 "`throw new Error($err)`" [] [Whitespace(" ")]
+          1: AS_KW@24..27 "as" [] [Whitespace(" ")]
+          2: GRIT_VARIABLE@27..35
+            0: GRIT_VARIABLE@27..35 "$thrown" [] [Whitespace(" ")]
+        1: (empty)
+        2: FAT_ARROW@35..38 "=>" [] [Whitespace(" ")]
+        3: GRIT_CODE_SNIPPET@38..69
+          0: GRIT_BACKTICK_SNIPPET_LITERAL@38..69
+            0: GRIT_BACKTICK_SNIPPET@38..69 "`throw new CustomError($err);`" [] [Whitespace(" ")]
+      1: WHERE_KW@69..75 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@75..139
+        0: (empty)
+        1: L_CURLY@75..76 "{" [] []
+        2: GRIT_PREDICATE_LIST@76..137
+          0: GRIT_PREDICATE_MATCH@76..137
+            0: GRIT_VARIABLE@76..84
+              0: GRIT_VARIABLE@76..84 "$err" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: MATCH@84..87 "<:" [] [Whitespace(" ")]
+            2: GRIT_PATTERN_MAYBE@87..137
+              0: MAYBE_KW@87..93 "maybe" [] [Whitespace(" ")]
+              1: GRIT_REWRITE@93..137
+                0: GRIT_NODE_LIKE@93..115
+                  0: GRIT_NAME@93..99
+                    0: GRIT_NAME@93..99 "string" [] []
+                  1: L_PAREN@99..100 "(" [] []
+                  2: GRIT_NAMED_ARG_LIST@100..113
+                    0: GRIT_NAMED_ARG@100..113
+                      0: GRIT_NAME@100..108
+                        0: GRIT_NAME@100..108 "fragment" [] []
+                      1: EQ@108..109 "=" [] []
+                      2: GRIT_VARIABLE@109..113
+                        0: GRIT_VARIABLE@109..113 "$fun" [] []
+                  3: R_PAREN@113..115 ")" [] [Whitespace(" ")]
+                1: (empty)
+                2: FAT_ARROW@115..118 "=>" [] [Whitespace(" ")]
+                3: GRIT_CODE_SNIPPET@118..137
+                  0: GRIT_BACKTICK_SNIPPET_LITERAL@118..137
+                    0: GRIT_BACKTICK_SNIPPET@118..137 "`{ message: $err }`" [] []
+        3: R_CURLY@137..139 "}" [Newline("\n")] []
+  4: EOF@139..140 "" [Newline("\n")] []
+
+```

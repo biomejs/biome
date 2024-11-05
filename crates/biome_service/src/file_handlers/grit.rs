@@ -1,3 +1,8 @@
+use super::{
+    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
+    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+};
+use crate::workspace::GetSyntaxTreeResult;
 use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     WorkspaceError,
@@ -7,14 +12,9 @@ use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};
 use biome_grit_parser::parse_grit_with_cache;
-use biome_grit_syntax::GritLanguage;
+use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
-
-use super::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
-    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
-};
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -113,9 +113,9 @@ impl ExtensionHandler for GritFileHandler {
         Capabilities {
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
-                debug_syntax_tree: None,
+                debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
-                debug_formatter_ir: None,
+                debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
                 lint: None,
@@ -147,6 +147,30 @@ fn parse(
         any_parse: parse.into(),
         language: Some(file_source),
     }
+}
+
+fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+    let syntax: GritSyntaxNode = parse.syntax();
+    let tree: GritRoot = parse.tree();
+    GetSyntaxTreeResult {
+        cst: format!("{syntax:#?}"),
+        ast: format!("{tree:#?}"),
+    }
+}
+
+fn debug_formatter_ir(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+) -> Result<String, WorkspaceError> {
+    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+
+    let root_element = formatted.into_document();
+    Ok(root_element.to_string())
 }
 
 #[tracing::instrument(level = "debug", skip(parse, settings))]

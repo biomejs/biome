@@ -42,6 +42,5 @@ Attribute Position: Auto
 "\t$" => 77..79
 " " => 83..84
 "\t$new_file_nam" => 87..101
-" `$functionName.test.js" => 104..127
 "\t$new_file" => 130..140
 " file(name = $new_file_name, body = $f" => 144..182
