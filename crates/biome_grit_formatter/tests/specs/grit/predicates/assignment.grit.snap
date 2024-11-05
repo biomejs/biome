@@ -36,4 +36,3 @@ Attribute Position: Auto
 
 "`console.log($message)` as $log " => 0..32
 "\t$new_log_call" => 40..54
-" `logger.log($message)" => 56..78
