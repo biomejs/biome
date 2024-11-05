@@ -1112,7 +1112,7 @@ export interface Correctness {
 	/**
 	 * Prevents the usage of variables that haven't been declared inside the document.
 	 */
-	noUndeclaredVariables?: RuleConfiguration_for_Null;
+	noUndeclaredVariables?: RuleConfiguration_for_UndeclaredVariablesOptions;
 	/**
 	 * Disallow unknown CSS value functions.
 	 */
@@ -2061,6 +2061,9 @@ export type RuleConfiguration_for_ComplexityOptions =
 export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUndeclaredDependenciesOptions;
+export type RuleConfiguration_for_UndeclaredVariablesOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_UndeclaredVariablesOptions;
 export type RuleConfiguration_for_UseExhaustiveDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_UseExhaustiveDependenciesOptions;
@@ -2215,6 +2218,16 @@ export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
 	 * Rule's options
 	 */
 	options: NoUndeclaredDependenciesOptions;
+}
+export interface RuleWithOptions_for_UndeclaredVariablesOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: UndeclaredVariablesOptions;
 }
 export interface RuleWithOptions_for_UseExhaustiveDependenciesOptions {
 	/**
@@ -2475,6 +2488,12 @@ export interface NoUndeclaredDependenciesOptions {
 	 * If set to `false`, then the rule will show an error when `peerDependencies` are imported. Defaults to `true`.
 	 */
 	peerDependencies?: DependencyAvailability;
+}
+export interface UndeclaredVariablesOptions {
+	/**
+	 * Check undeclared types.
+	 */
+	checkTypes?: boolean;
 }
 /**
  * Options for the rule `useExhaustiveDependencies`

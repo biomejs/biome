@@ -88,6 +88,48 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now provides the `checkTypes` option ([#3998](https://github.com/biomejs/biome/issues/3998)).
+
+  `noUndeclaredVariables` is inspired by the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef). It reports all references that are not bound to any declarations within a module.
+  Node.js, JavaScript and TypeScript globals are ignored.
+  Bioem provides the `javascript.globals` option to list additional globals that should be ignored by the rule.
+
+  In TypeScript projects, developers often use global declaration files to declare global types.
+  Biome is currently unable to detect these global types.
+  This creates many false positives for `noUndeclaredVariables`.
+
+  TypeScript is better suited to perform this kind of check.
+  As proof of this, TypeScript ESLint doesn't provide any rule that extends the `no-undef` ESLint rule.
+
+  This is why we introduce today a new option `checkTypes` which, when it is set to `false`, ignores undeclared type references.
+  Given the following configuration...
+
+  ```json
+  {
+      "linter": {
+          "rules": {
+              "correctness": {
+                  "noUndeclaredVariables": {
+                      "level": "error",
+                      "options": { "checkTypes": false }
+                  }
+              }
+          }
+      }
+  }
+  ```
+
+  ... `UndeclaredType` is not reported by the rule.
+
+  ```ts
+  export default function(): UndeclaredType {}
+  ```
+
+  We plan to turn off the option by default in Biome 2.0
+  Also, this will bring the Biome rule closer to the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef).
+
+  Contributed by @Conaclos
+
 #### Enhancements
 
 - `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos
