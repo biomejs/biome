@@ -1205,14 +1205,21 @@ fn is_multiline_template_only_args(arguments: &JsCallArguments) -> bool {
 /// useMemo(() => {}, [])
 /// ```
 fn is_react_hook_with_deps_array(arguments: &JsCallArguments, comments: &JsComments) -> bool {
+    if arguments.args().len() > 3 || arguments.args().len() < 2 {
+        return false;
+    };
+
     use AnyJsExpression::*;
     let mut args = arguments.args().iter();
+    if arguments.args().len() == 3 {
+        args.next();
+    }
 
     match (args.next(), args.next()) {
         (
             Some(Ok(AnyJsCallArgument::AnyJsExpression(JsArrowFunctionExpression(callback)))),
             Some(Ok(AnyJsCallArgument::AnyJsExpression(JsArrayExpression(deps)))),
-        ) if arguments.args().len() == 2 => {
+        ) => {
             if comments.has_comments(callback.syntax()) || comments.has_comments(deps.syntax()) {
                 return false;
             }
