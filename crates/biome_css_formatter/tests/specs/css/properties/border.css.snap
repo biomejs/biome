@@ -1,5 +1,6 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
+assertion_line: 212
 info: css/properties/border.css
 ---
 # Input
@@ -69,7 +70,9 @@ div {
 	border: inherit;
 
 	border: zzz-unknown-value;
-	border: a, value list;
+	border:
+		a,
+		value list;
 
 	/* <line-style> */
 	border: SOLID;
