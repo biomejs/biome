@@ -12,8 +12,8 @@ use biome_lsp_converters::line_index::LineIndex;
 use biome_rowan::{TextRange, TextSize};
 use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileHandler};
 use biome_service::workspace::{
-    FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams, PullActionsParams,
-    SupportsFeatureParams,
+    CheckFileSizeParams, FeaturesBuilder, FixFileMode, FixFileParams, GetFileContentParams,
+    PullActionsParams, SupportsFeatureParams,
 };
 use biome_service::WorkspaceError;
 use std::borrow::Cow;
@@ -46,7 +46,7 @@ pub(crate) fn code_actions(
     let biome_path = session.file_path(&url)?;
 
     let file_features = &session.workspace.file_features(SupportsFeatureParams {
-        path: biome_path,
+        path: biome_path.clone(),
         features: FeaturesBuilder::new()
             .with_linter()
             .with_assists()
@@ -60,6 +60,13 @@ pub(crate) fn code_actions(
     {
         info!("Linter, assists and organize imports are disabled");
         return Ok(Some(Vec::new()));
+    }
+
+    let size_limit_result = session
+        .workspace
+        .check_file_size(CheckFileSizeParams { path: biome_path })?;
+    if size_limit_result.is_too_large() {
+        return Ok(None);
     }
 
     let mut has_fix_all = false;
@@ -259,6 +266,13 @@ fn fix_all(
             features: FeaturesBuilder::new().with_formatter().build(),
         })?
         .supports_format();
+    let size_limit_result = session.workspace.check_file_size(CheckFileSizeParams {
+        path: biome_path.clone(),
+    })?;
+    if size_limit_result.is_too_large() {
+        return Ok(None);
+    }
+
     let fixed = session.workspace.fix_file(FixFileParams {
         path: biome_path,
         fix_file_mode: FixFileMode::SafeFixes,
