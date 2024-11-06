@@ -7,9 +7,9 @@ use biome_console::markup;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
-    global_identifier, AnyJsExpression, AnyJsName, AnyJsObjectMember, JsObjectExpression,
-    JsPropertyObjectMember, JsStaticMemberExpression, JsSyntaxKind, JsSyntaxToken,
-    JsVariableDeclarator,
+    global_identifier, AnyJsExpression, AnyJsName, AnyJsObjectMember, JsFileSource,
+    JsObjectExpression, JsPropertyObjectMember, JsStaticMemberExpression, JsSyntaxKind,
+    JsSyntaxToken, JsVariableDeclarator,
 };
 use biome_rowan::{declare_node_union, AstSeparatedList, BatchMutationExt, TriviaPieceKind};
 
@@ -23,19 +23,19 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```js,expect_diagnostic
+    /// ```cjs,expect_diagnostic
     /// const dirname = __dirname;
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```cjs,expect_diagnostic
     /// const filename = __filename;
     /// ```
     ///
-    /// ``` js,expect_diagnostic
+    /// ``` cjs,expect_diagnostic
     /// const foo = { __filename }
     /// ```
     ///
-    /// ```js,expect_diagnostic
+    /// ```cjs,expect_diagnostic
     /// if (__dirname.startsWith("/project/src/")) {}
     /// ```
     ///
@@ -68,60 +68,50 @@ declare_node_union! {
 impl Rule for NoGlobalDirnameFilename {
     type Query = Semantic<AnyGlobalDirnameFileName>;
     type State = (JsSyntaxToken, String);
-    type Signals = Vec<Self::State>;
+    type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let model = ctx.model();
-        let mut signals = vec![];
+        let file_source = ctx.source_type::<JsFileSource>();
+        if !file_source.is_script() {
+            return None;
+        };
 
         match node {
             // const dirname = __dirname;
             AnyGlobalDirnameFileName::JsVariableDeclarator(declarator) => {
-                if let Some(initializer) = declarator.initializer() {
-                    if let Ok(expr) = initializer.expression() {
-                        if let Some(state) = validate_dirname_filename(&expr, model) {
-                            signals.push(state);
-                        }
-                    }
-                }
+                let init = declarator.initializer()?;
+                let expr = init.expression().ok()?;
+                validate_dirname_filename(&expr, model)
             }
             // `if (__dirname.startsWith("/project/src"))`
             AnyGlobalDirnameFileName::JsStaticMemberExpression(member_expr) => {
-                if let Ok(expr) = member_expr.object() {
-                    if let Some(expr) = expr.as_js_identifier_expression() {
-                        let expr = AnyJsExpression::JsIdentifierExpression(expr.clone());
-                        if let Some(state) = validate_dirname_filename(&expr, model) {
-                            signals.push(state);
-                        }
-                    }
-                }
+                let expr = member_expr.object().ok()?;
+                let expr = expr.as_js_identifier_expression()?;
+                let expr = AnyJsExpression::JsIdentifierExpression(expr.clone());
+                validate_dirname_filename(&expr, model)
             }
             // const dirname = { __dirname };
             AnyGlobalDirnameFileName::JsObjectExpression(object_expr) => {
                 for member in object_expr.members().iter().flatten() {
                     match member {
                         AnyJsObjectMember::JsPropertyObjectMember(member) => {
-                            if let Ok(expr) = member.value() {
-                                if let Some(state) = validate_dirname_filename(&expr, model) {
-                                    signals.push(state);
-                                }
-                            }
+                            let expr = member.value().ok()?;
+                            return validate_dirname_filename(&expr, model);
                         }
                         AnyJsObjectMember::JsShorthandPropertyObjectMember(member) => {
-                            if let Ok(token) = member.name().and_then(|name| name.value_token()) {
-                                if let Some(text) = maybe_text(&token) {
-                                    signals.push((token, text));
-                                }
-                            }
+                            let token = member.name().and_then(|name| name.value_token()).ok()?;
+                            let text = maybe_text(&token)?;
+                            return Some((token, text));
                         }
                         _ => continue,
                     }
                 }
+                None
             }
-        };
-        signals
+        }
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {

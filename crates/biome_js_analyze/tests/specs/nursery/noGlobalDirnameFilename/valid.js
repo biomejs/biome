@@ -1,10 +1,9 @@
-/* should not generate diagnostics */
-const __filename = 1;
-const foo = __filename;
+const dirname = import.meta.dirname;
+const filename = import.meta.filename;
+const dirname_ = { __dirname: import.meta.dirname };
+const filename_ = { __filename: import.meta.filename };
+const dirname__ = { dirname: import.meta.dirname, foo: "foo" };
+const filename__ = { filename: import.meta.filename, foo: "foo" };
 
-const __dirname = 1;
-const bar = __dirname;
-
-import {__filename as filename} from "foo.mjs"
-const baz = 1;
-export {foo as __dirname}
+if (import.meta.dirname.startsWith("/project/src/")) {}
+if (import.meta.filename.endsWith(".js")) {}
