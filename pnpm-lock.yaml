@@ -67,7 +67,7 @@ importers:
         version: 5.4.10(@types/node@20.17.6)
       vitest:
         specifier: 1.6.0
-        version: 1.6.0(@types/node@20.17.6)(happy-dom@15.10.1)
+        version: 1.6.0(@types/node@20.17.6)(happy-dom@15.10.2)
 
   packages/@biomejs/biome:
     optionalDependencies:
@@ -131,7 +131,7 @@ importers:
         version: 5.4.10(@types/node@20.17.6)
       vitest:
         specifier: 1.6.0
-        version: 1.6.0(@types/node@20.17.6)(happy-dom@15.10.1)
+        version: 1.6.0(@types/node@20.17.6)(happy-dom@15.10.2)
 
   packages/@biomejs/wasm-bundler: {}
 
@@ -143,7 +143,7 @@ importers:
     dependencies:
       happy-dom:
         specifier: ^15.8.3
-        version: 15.10.1
+        version: 15.10.2
 
   packages/tailwindcss-config-analyzer:
     dependencies:
@@ -1026,8 +1026,8 @@ packages:
   graphemer@1.4.0:
     resolution: {integrity: sha512-EtKwoO6kxCL9WO5xipiHTZlSzBm7WLT627TqC/uVRd0HKmq8NXyebnNYxDoBi7wt8eTWrUrKXCOVaFq9x1kgag==}
 
-  happy-dom@15.10.1:
-    resolution: {integrity: sha512-FuGnj/qIB4QnBL6fWmD7Wnh6STxevLgOVWB6+nopDGgWG1+t9CXkNB2ldZ+iqwD2UKxD2D0SU8el8A6AX6Q1+g==}
+  happy-dom@15.10.2:
+    resolution: {integrity: sha512-NbA5XrSovenJIIcfixCREX3ZnV7yHP4phhbfuxxf4CPn+LZpz/jIM9EqJ2DrPwgVDSMoAKH3pZwQvkbsSiCrUw==}
     engines: {node: '>=18.0.0'}
 
   has-flag@3.0.0:
@@ -2490,7 +2490,7 @@ snapshots:
 
   graphemer@1.4.0: {}
 
-  happy-dom@15.10.1:
+  happy-dom@15.10.2:
     dependencies:
       entities: 4.5.0
       webidl-conversions: 7.0.0
@@ -3040,7 +3040,7 @@ snapshots:
       '@types/node': 20.17.6
       fsevents: 2.3.3
 
-  vitest@1.6.0(@types/node@20.17.6)(happy-dom@15.10.1):
+  vitest@1.6.0(@types/node@20.17.6)(happy-dom@15.10.2):
     dependencies:
       '@vitest/expect': 1.6.0
       '@vitest/runner': 1.6.0
@@ -3064,7 +3064,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.17.6
-      happy-dom: 15.10.1
+      happy-dom: 15.10.2
     transitivePeerDependencies:
       - less
       - lightningcss
