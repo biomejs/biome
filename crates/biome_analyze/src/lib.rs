@@ -1,5 +1,6 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
@@ -677,7 +678,7 @@ fn create_suppression_comment_action<L: Language>(
     Some(AnalyzerAction {
         mutation,
         applicability: Applicability::MaybeIncorrect,
-        category: ActionCategory::QuickFix,
+        category: ActionCategory::QuickFix(Cow::Borrowed("")),
         message: markup! {
             "Use // biome-ignore instead"
         }
@@ -766,7 +767,7 @@ fn update_suppression<L: Language>(
 
     Some(AnalyzerAction {
         rule_name: None,
-        category: ActionCategory::QuickFix,
+        category: ActionCategory::QuickFix(Cow::Borrowed("")),
         applicability: Applicability::Always,
         message: markup! {
             "Rewrite suppression to use the newer syntax"

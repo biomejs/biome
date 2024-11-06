@@ -3374,7 +3374,7 @@ export interface CodeAction {
 [CodeActionKind]: https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#codeActionKind 
 	 */
 export type ActionCategory =
-	| "QuickFix"
+	| { QuickFix: string }
 	| { Refactor: RefactorKind }
 	| { Source: SourceActionKind }
 	| { Other: string };

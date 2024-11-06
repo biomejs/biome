@@ -922,7 +922,9 @@ async fn pull_quick_fixes() -> Result<()> {
 
     let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Replace -0 with 0"),
-        kind: Some(lsp::CodeActionKind::new("quickfix.biome")),
+        kind: Some(lsp::CodeActionKind::new(
+            "quickfix.biome.suspicious.noCompareNegZero",
+        )),
         diagnostics: Some(vec![fixable_diagnostic(0)?]),
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(changes),
@@ -1097,7 +1099,9 @@ async fn pull_biome_quick_fixes() -> Result<()> {
                 },
                 context: lsp::CodeActionContext {
                     diagnostics: vec![fixable_diagnostic(0)?],
-                    only: Some(vec![lsp::CodeActionKind::new("quickfix.biome")]),
+                    only: Some(vec![lsp::CodeActionKind::new(
+                        "quickfix.biome.suspicious.noCompareNegZero",
+                    )]),
                     ..Default::default()
                 },
                 work_done_progress_params: WorkDoneProgressParams {
@@ -1131,7 +1135,9 @@ async fn pull_biome_quick_fixes() -> Result<()> {
 
     let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Replace -0 with 0"),
-        kind: Some(lsp::CodeActionKind::new("quickfix.biome")),
+        kind: Some(lsp::CodeActionKind::new(
+            "quickfix.biome.suspicious.noCompareNegZero",
+        )),
         diagnostics: Some(vec![fixable_diagnostic(0)?]),
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(changes),
@@ -1246,7 +1252,9 @@ async fn pull_quick_fixes_include_unsafe() -> Result<()> {
 
     let expected_code_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("Use ==="),
-        kind: Some(lsp::CodeActionKind::new("quickfix.biome")),
+        kind: Some(lsp::CodeActionKind::new(
+            "quickfix.biome.suspicious.noDoubleEquals",
+        )),
         diagnostics: Some(vec![unsafe_fixable.clone()]),
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(changes),
@@ -1726,17 +1734,8 @@ if(a === -0) {}
 #[tokio::test]
 async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Result<()> {
     let factory = ServerFactory::default();
-    let (service, client) = factory.create(None).into_inner();
-    let (stream, sink) = client.split();
-    let mut server = Server::new(service);
-
-    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
-    let reader = tokio::spawn(client_handler(stream, sink, sender));
-
-    server.initialize().await?;
-    server.initialized().await?;
-
-    let incorrect_config = r#"{
+    let mut fs = MemoryFileSystem::default();
+    let config = r#"{
     "$schema": "https://biomejs.dev/schemas/1.7.3/schema.json",
     "organizeImports": { "enabled": false },
     "linter": {
@@ -1761,10 +1760,22 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
         }
     ]
 }"#;
-    server
-        .open_named_document(incorrect_config, url!("biome.json"), "json")
-        .await?;
 
+    fs.insert(url!("biome.json").to_file_path().unwrap(), config);
+    let (service, client) = factory
+        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
+        .into_inner();
+    let (stream, sink) = client.split();
+    let mut server = Server::new(service);
+
+    let (sender, _) = channel(CHANNEL_BUFFER_SIZE);
+    let reader = tokio::spawn(client_handler(stream, sink, sender));
+
+    server.initialize().await?;
+    server.initialized().await?;
+    server
+        .open_named_document(config, url!("biome.json"), "json")
+        .await?;
     server
         .open_named_document(
             r#"enum X {
