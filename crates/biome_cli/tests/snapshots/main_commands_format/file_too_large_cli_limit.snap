@@ -25,8 +25,8 @@ internalError/io ━━━━━━━━━━━━━━━━━━━━━
 ```block
 format.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  i Size of the file is 27 B which exceeds configured maximum of 16 B for this project.
-    Use the `files.maxSize` configuration to change the maximum size of files processed.
+  i The size of the file is 27 B, which exceeds the configured maximum of 16 B for this project.
+    Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file.
   
 
 ```

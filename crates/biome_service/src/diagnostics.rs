@@ -262,8 +262,8 @@ impl Diagnostic for FileTooLarge {
     fn message(&self, fmt: &mut biome_console::fmt::Formatter<'_>) -> std::io::Result<()> {
         fmt.write_markup(
             markup!{
-                "Size of the file is "{Bytes(self.size)}" which exceeds configured maximum of "{Bytes(self.limit)}" for this project.
-Use the `files.maxSize` configuration to change the maximum size of files processed."
+                "The size of the file is "{Bytes(self.size)}", which exceeds the configured maximum of "{Bytes(self.limit)}" for this project.
+Use the `files.maxSize` configuration to change the maximum size of files processed, or `files.ignore` to ignore the file."
             }
         )
     }
