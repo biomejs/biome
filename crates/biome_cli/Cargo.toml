@@ -78,7 +78,6 @@ tokio                = { workspace = true, features = ["io-util"] }
 
 [features]
 docgen            = ["bpaf/docgen"]
-experimental-grit = ["biome_service/experimental-grit"]
 experimental-html = ["biome_service/experimental-html"]
 
 [lints]
