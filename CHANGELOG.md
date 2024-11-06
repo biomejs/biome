@@ -88,6 +88,48 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now provides the `checkTypes` option ([#3998](https://github.com/biomejs/biome/issues/3998)).
+
+  `noUndeclaredVariables` is inspired by the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef). It reports all references that are not bound to any declarations within a module.
+  Node.js, JavaScript and TypeScript globals are ignored.
+  Bioem provides the `javascript.globals` option to list additional globals that should be ignored by the rule.
+
+  In TypeScript projects, developers often use global declaration files to declare global types.
+  Biome is currently unable to detect these global types.
+  This creates many false positives for `noUndeclaredVariables`.
+
+  TypeScript is better suited to perform this kind of check.
+  As proof of this, TypeScript ESLint doesn't provide any rule that extends the `no-undef` ESLint rule.
+
+  This is why we introduce today a new option `checkTypes` which, when it is set to `false`, ignores undeclared type references.
+  Given the following configuration...
+
+  ```json
+  {
+      "linter": {
+          "rules": {
+              "correctness": {
+                  "noUndeclaredVariables": {
+                      "level": "error",
+                      "options": { "checkTypes": false }
+                  }
+              }
+          }
+      }
+  }
+  ```
+
+  ... `UndeclaredType` is not reported by the rule.
+
+  ```ts
+  export default function(): UndeclaredType {}
+  ```
+
+  We plan to turn off the option by default in Biome 2.0
+  Also, this will bring the Biome rule closer to the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef).
+
+  Contributed by @Conaclos
+  
 - Add [noGlobalDirnameFilename](https://biomejs.dev/linter/rules/no-global-dirname-filename/). Contributed by @unvalley
 
 #### Enhancements
@@ -102,6 +144,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   The code fix is currently marked as unsafe.
   We plan to make it safe in a future release of Biome.
+
+  Contributed by @Conaclos
+
+- `noUnusedImports` now reports empty named imports and suggests its removal ([#3574](https://github.com/biomejs/biome/issues/3574)).
+
+  The rule now suggests the removal of empty named imports such as:
+
+  ```diff
+  - import {} from "mod";
+  ```
 
   Contributed by @Conaclos
 

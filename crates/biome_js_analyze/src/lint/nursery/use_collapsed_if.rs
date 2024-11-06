@@ -1,6 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -193,7 +192,7 @@ impl Rule for UseCollapsedIf {
         mutation.replace_node(parent_consequent, child_consequent);
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use collapsed "<Emphasis>"if"</Emphasis>" instead." }.to_owned(),
             mutation,

@@ -1,8 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::RuleSource;
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
     AnyJsExpression, AnyTsPropertyAnnotation, AnyTsVariableAnnotation, JsFormalParameter,
@@ -198,7 +196,7 @@ impl Rule for NoInferrableTypes {
         mutation.replace_token_discard_trivia(next_token, new_next_token);
         mutation.remove_node(annotation.clone());
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the type annotation." }.to_owned(),
             mutation,

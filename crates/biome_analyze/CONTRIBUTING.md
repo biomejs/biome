@@ -101,7 +101,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
        fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
          let mut mutation = ctx.root().mutation();
          Some(JsRuleAction::new(
-           ActionCategory::QuickFix,
+           ctx.action_category(ctx.category(), ctx.group()),
            ctx.metadata().applicability(),
            markup! { "<MESSAGE>" }.to_owned(),
            mutation,
@@ -120,7 +120,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    }
    ```
    When returning a code action, you must pass the `category` and the `applicability` fields.
-   `category` must be `ActionCategory::QuickFix`.
+   `category` must be `ctx.action_category(ctx.category(), ctx.group())`.
    `applicability` is derived from the metadata [`fix_kind`](#code-action).
    In other words, the code transformation should always result in code that doesn't change the behavior of the logic.
    In the case of `noVar`, it is not always safe to turn `var` to `const` or `let`.
@@ -509,7 +509,7 @@ impl Rule for ExampleRule {
       let mut mutation = ctx.root().begin();
 
       Some(JsRuleAction::new(
-        ActionCategory::QuickFix,
+        ctx.action_category(ctx.category(), ctx.group()),
         ctx.metadata().applicability(),
         markup! { "Remove the '"{name.text_trimmed()}"' element." }.to_owned(),
         mutation,

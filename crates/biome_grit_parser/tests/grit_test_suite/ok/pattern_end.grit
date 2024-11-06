@@ -1,0 +1,3 @@
+`var $x = [$names]` => `var coolPeople = [$names]` where {
+  $names <: every and {`"andrew"`, `"alex"`}
+}

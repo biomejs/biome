@@ -37,7 +37,7 @@ pub enum ActionCategory {
     /// Base kind for quickfix actions: 'quickfix'.
     ///
     /// This action provides a fix to the diagnostic emitted by the same signal
-    QuickFix,
+    QuickFix(Cow<'static, str>),
     /// Base kind for refactoring actions: 'refactor'.
     ///
     /// This action provides an optional refactor opportunity
@@ -57,10 +57,10 @@ impl ActionCategory {
     /// ## Examples
     ///
     /// ```
+    /// use std::borrow::Cow;
     /// use biome_analyze::{ActionCategory, RefactorKind};
     ///
-    /// assert!(ActionCategory::QuickFix.matches("quickfix"));
-    /// assert!(!ActionCategory::QuickFix.matches("refactor"));
+    /// assert!(ActionCategory::QuickFix(Cow::from("quickfix")).matches("quickfix"));
     ///
     /// assert!(ActionCategory::Refactor(RefactorKind::None).matches("refactor"));
     /// assert!(!ActionCategory::Refactor(RefactorKind::None).matches("refactor.extract"));
@@ -75,7 +75,13 @@ impl ActionCategory {
     /// Returns the representation of this [ActionCategory] as a `CodeActionKind` string
     pub fn to_str(&self) -> Cow<'static, str> {
         match self {
-            ActionCategory::QuickFix => Cow::Borrowed("quickfix.biome"),
+            ActionCategory::QuickFix(tag) => {
+                if tag.is_empty() {
+                    Cow::Borrowed("quickfix.biome")
+                } else {
+                    Cow::Owned(format!("quickfix.biome.{tag}"))
+                }
+            }
 
             ActionCategory::Refactor(RefactorKind::None) => Cow::Borrowed("refactor.biome"),
             ActionCategory::Refactor(RefactorKind::Extract) => {

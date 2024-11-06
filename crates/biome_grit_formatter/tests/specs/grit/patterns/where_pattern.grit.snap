@@ -30,9 +30,3 @@ Attribute Position: Auto
 `$method('$message')` where {
 }
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-"`$method('$message')`" => 0..21

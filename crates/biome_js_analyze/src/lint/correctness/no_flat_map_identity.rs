@@ -1,6 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make::{ident, js_call_argument_list, js_call_arguments, js_name, token};
@@ -172,7 +171,7 @@ impl Rule for NoFlatMapIdentity {
         );
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Replace unnecessary "<Emphasis>"flatMap"</Emphasis>" call to "<Emphasis>"flat"</Emphasis>" instead."}.to_owned(),
             mutation,

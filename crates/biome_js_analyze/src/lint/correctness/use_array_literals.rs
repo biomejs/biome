@@ -1,6 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -51,7 +50,7 @@ declare_lint_rule! {
         version: "1.7.2",
         name: "useArrayLiterals",
         language: "js",
-        sources: &[RuleSource::Eslint("no-array-constructor")],
+        sources: &[RuleSource::Eslint("no-array-constructor"), RuleSource::EslintTypeScript("no-array-constructor")],
         recommended: false,
         fix_kind: FixKind::Unsafe,
     }
@@ -148,7 +147,7 @@ impl Rule for UseArrayLiterals {
         };
         mutation.replace_node::<AnyJsExpression>(node.clone().into(), new_node.into());
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use an array literal." }.to_owned(),
             mutation,

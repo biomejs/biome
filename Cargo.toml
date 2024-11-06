@@ -172,7 +172,7 @@ biome_ungrammar      = { path = "./crates/biome_ungrammar" }
 tests_macros         = { path = "./crates/tests_macros" }
 
 # Crates needed in the workspace
-anyhow             = "1.0.91"
+anyhow             = "1.0.92"
 bpaf               = { version = "0.9.15", features = ["derive"] }
 countme            = "3.0.1"
 crossbeam          = "0.8.4"
@@ -190,10 +190,10 @@ quickcheck         = "1.0.3"
 quickcheck_macros  = "1.0.0"
 quote              = "1.0.37"
 rayon              = "1.10.0"
-regex              = "1.11.0"
+regex              = "1.11.1"
 rustc-hash         = "2.0.0"
 schemars           = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
-serde              = { version = "1.0.210", features = ["derive"] }
+serde              = { version = "1.0.214", features = ["derive"] }
 serde_ini          = "0.2.0"
 serde_json         = "1.0.132"
 similar            = "2.6.0"

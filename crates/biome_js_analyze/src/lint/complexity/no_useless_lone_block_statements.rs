@@ -1,7 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -130,7 +129,7 @@ impl Rule for NoUselessLoneBlockStatements {
         mutation.replace_node_discard_trivia(stmts_list, new_stmts_list);
 
         return Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove redundant block." }.to_owned(),
             mutation,

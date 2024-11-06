@@ -160,8 +160,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-
-        #[cfg(feature = "experimental-grit")]
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -192,7 +190,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "experimental-grit")]
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
@@ -350,9 +347,9 @@ impl DocumentFileSource {
             },
             DocumentFileSource::Css(_)
             | DocumentFileSource::Graphql(_)
-            | DocumentFileSource::Json(_) => true,
+            | DocumentFileSource::Json(_)
+            | DocumentFileSource::Grit(_) => true,
             DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
-            DocumentFileSource::Grit(_) => cfg!(feature = "experimental-grit"),
             DocumentFileSource::Unknown => false,
         }
     }
@@ -403,6 +400,7 @@ pub struct FixAllParams<'a> {
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) rule_categories: RuleCategories,
+    pub(crate) suppression_reason: Option<String>,
 }
 
 #[derive(Default)]
@@ -460,6 +458,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
+    pub(crate) suppression_reason: Option<String>,
 }
 
 pub(crate) struct LintResults {
@@ -477,6 +476,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) language: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) suppression_reason: Option<String>,
 }
 
 type Lint = fn(LintParams) -> LintResults;

@@ -917,7 +917,7 @@
 				"noUndeclaredVariables": {
 					"description": "Prevents the usage of variables that haven't been declared inside the document.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/UndeclaredVariablesConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -3105,6 +3105,21 @@
 			},
 			"additionalProperties": false
 		},
+		"RuleWithUndeclaredVariablesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/UndeclaredVariablesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
 		"RuleWithUseComponentExportOnlyModulesOptions": {
 			"type": "object",
 			"required": ["level"],
@@ -4274,6 +4289,22 @@
 					"enum": ["all"]
 				}
 			]
+		},
+		"UndeclaredVariablesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithUndeclaredVariablesOptions" }
+			]
+		},
+		"UndeclaredVariablesOptions": {
+			"type": "object",
+			"properties": {
+				"checkTypes": {
+					"description": "Check undeclared types.",
+					"default": true,
+					"type": "boolean"
+				}
+			}
 		},
 		"UseComponentExportOnlyModulesConfiguration": {
 			"anyOf": [
