@@ -224,21 +224,21 @@ impl Rule for NoUnusedImports {
                 if let Some(blank_line_pos) = blank_line_pos {
                     // keep all leading trivia until the last blank line.
                     leading_trivia_pieces.truncate(blank_line_pos + 1);
-                    if let Some(next_sibling) = parent.next_sibling() {
-                        let new_next_sibling = next_sibling
-                            .clone()
-                            .prepend_trivia_pieces(leading_trivia_pieces)?;
-                        mutation.replace_element_discard_trivia(
-                            next_sibling.into(),
-                            new_next_sibling.into(),
-                        );
-                    } else if let Some(prev_sibling) = parent.prev_sibling() {
+                    if let Some(prev_sibling) = parent.prev_sibling() {
                         let new_prev_sibling = prev_sibling
                             .clone()
                             .append_trivia_pieces(leading_trivia_pieces)?;
                         mutation.replace_element_discard_trivia(
                             prev_sibling.into(),
                             new_prev_sibling.into(),
+                        );
+                    } else if let Some(next_sibling) = parent.next_sibling() {
+                        let new_next_sibling = next_sibling
+                            .clone()
+                            .prepend_trivia_pieces(leading_trivia_pieces)?;
+                        mutation.replace_element_discard_trivia(
+                            next_sibling.into(),
+                            new_next_sibling.into(),
                         );
                     }
                 }

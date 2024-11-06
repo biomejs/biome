@@ -76,14 +76,13 @@ invalid.ts:5:18 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   i Safe fix: Remove the unused imports.
   
      1  1 │   // Header comment
-     2  2 │   import type A from "mod";
-     3    │ - 
+     2    │ - import·type·A·from·"mod";
+        2 │ + import·type·A·from·"mod";
+     3  3 │   
      4    │ - //·Header·comment
      5    │ - import·type·*·as·B·from·"mod";·//·Import·comment
-     6  3 │   
-        4 │ + 
+     6  4 │   
      7  5 │   // Header comment
-     8  6 │   import type { C } from "mod"; // Import comment
   
 
 ```
@@ -103,15 +102,15 @@ invalid.ts:8:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused imports.
   
+     3  3 │   
      4  4 │   // Header comment
-     5  5 │   import type * as B from "mod"; // Import comment
-     6    │ - 
+     5    │ - import·type·*·as·B·from·"mod";·//·Import·comment
+        5 │ + import·type·*·as·B·from·"mod";·//·Import·comment
+     6  6 │   
      7    │ - //·Header·comment
      8    │ - import·type·{·C·}·from·"mod";·//·Import·comment
-     9  6 │   
-        7 │ + 
+     9  7 │   
     10  8 │   // Orphan comment
-    11  9 │   
   
 
 ```
@@ -131,19 +130,19 @@ invalid.ts:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the unused imports.
   
+     6  6 │   
      7  7 │   // Header comment
-     8  8 │   import type { C } from "mod"; // Import comment
-     9    │ - 
+     8    │ - import·type·{·C·}·from·"mod";·//·Import·comment
+        8 │ + import·type·{·C·}·from·"mod";·//·Import·comment
+        9 │ + 
+       10 │ + //·Orphan·comment
+     9 11 │   
     10    │ - //·Orphan·comment
     11    │ - 
     12    │ - //·Header·comment
     13    │ - import·/*a*/·D·/*b*/,·/*c*/{·type·E·}/*d*/·from·"mod";·//·Import·comment
-    14  9 │   
-       10 │ + //·Orphan·comment
-       11 │ + 
-       12 │ + 
+    14 12 │   
     15 13 │   import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
-    16 14 │   
   
 
 ```
@@ -164,14 +163,14 @@ invalid.ts:15:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the unused imports.
   
+    11 11 │   
     12 12 │   // Header comment
-    13 13 │   import /*a*/ D /*b*/, /*c*/{ type E }/*d*/ from "mod"; // Import comment
-    14    │ - 
+    13    │ - import·/*a*/·D·/*b*/,·/*c*/{·type·E·}/*d*/·from·"mod";·//·Import·comment
+       13 │ + import·/*a*/·D·/*b*/,·/*c*/{·type·E·}/*d*/·from·"mod";·//·Import·comment
+    14 14 │   
     15    │ - import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
-    16 14 │   
-       15 │ + 
+    16 15 │   
     17 16 │   import {
-    18 17 │       // Comment
   
 
 ```
@@ -197,18 +196,18 @@ invalid.ts:17:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused imports.
   
+    13 13 │   import /*a*/ D /*b*/, /*c*/{ type E }/*d*/ from "mod"; // Import comment
     14 14 │   
-    15 15 │   import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
-    16    │ - 
+    15    │ - import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
+       15 │ + import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
+    16 16 │   
     17    │ - import·{
     18    │ - ····//·Comment
     19    │ - ····type·H,
     20    │ - ····type·I,
     21    │ - }·from·"mod";
-    22 16 │   
-       17 │ + 
+    22 17 │   
     23 18 │   import {/*a*/type J/*b*/, /*c*/type K/*d*/} from "mod";
-    24 19 │   
   
 
 ```
@@ -229,14 +228,14 @@ invalid.ts:23:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused imports.
   
+    19 19 │       type H,
     20 20 │       type I,
-    21 21 │   } from "mod";
-    22    │ - 
+    21    │ - }·from·"mod";
+       21 │ + }·from·"mod";
+    22 22 │   
     23    │ - import·{/*a*/type·J/*b*/,·/*c*/type·K/*d*/}·from·"mod";
-    24 22 │   
-       23 │ + 
+    24 23 │   
     25 24 │   // Header comment
-    26 25 │   import type { L as M, } from "mod"; // Import comment
   
 
 ```

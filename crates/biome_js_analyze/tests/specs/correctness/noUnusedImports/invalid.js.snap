@@ -81,14 +81,13 @@ invalid.js:5:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   i Safe fix: Remove the unused imports.
   
      1  1 │   // Header comment
-     2  2 │   import A from "mod";
-     3    │ - 
+     2    │ - import·A·from·"mod";
+        2 │ + import·A·from·"mod";
+     3  3 │   
      4    │ - //·Header·comment
      5    │ - import·*·as·B·from·"mod";·//·Import·comment
-     6  3 │   
-        4 │ + 
+     6  4 │   
      7  5 │   // Header comment
-     8  6 │   import { C } from "mod"; // Import comment
   
 
 ```
@@ -108,15 +107,15 @@ invalid.js:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━�
   
   i Safe fix: Remove the unused imports.
   
+     3  3 │   
      4  4 │   // Header comment
-     5  5 │   import * as B from "mod"; // Import comment
-     6    │ - 
+     5    │ - import·*·as·B·from·"mod";·//·Import·comment
+        5 │ + import·*·as·B·from·"mod";·//·Import·comment
+     6  6 │   
      7    │ - //·Header·comment
      8    │ - import·{·C·}·from·"mod";·//·Import·comment
-     9  6 │   
-        7 │ + 
+     9  7 │   
     10  8 │   // Header comment
-    11  9 │   import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
   
 
 ```
@@ -136,15 +135,15 @@ invalid.js:11:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the unused imports.
   
+     6  6 │   
      7  7 │   // Header comment
-     8  8 │   import { C } from "mod"; // Import comment
-     9    │ - 
+     8    │ - import·{·C·}·from·"mod";·//·Import·comment
+        8 │ + import·{·C·}·from·"mod";·//·Import·comment
+     9  9 │   
     10    │ - //·Header·comment
     11    │ - import·/*a*/·D·/*b*/,·/*c*/{·E·}/*d*/·from·"mod";·//·Import·comment
-    12  9 │   
-       10 │ + 
+    12 10 │   
     13 11 │   import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
-    14 12 │   
   
 
 ```
@@ -165,14 +164,14 @@ invalid.js:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the unused imports.
   
+     9  9 │   
     10 10 │   // Header comment
-    11 11 │   import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
-    12    │ - 
+    11    │ - import·/*a*/·D·/*b*/,·/*c*/{·E·}/*d*/·from·"mod";·//·Import·comment
+       11 │ + import·/*a*/·D·/*b*/,·/*c*/{·E·}/*d*/·from·"mod";·//·Import·comment
+    12 12 │   
     13    │ - import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
-    14 12 │   
-       13 │ + 
+    14 13 │   
     15 14 │   import {
-    16 15 │       // Comment
   
 
 ```
@@ -198,18 +197,18 @@ invalid.js:15:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused imports.
   
+    11 11 │   import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
     12 12 │   
-    13 13 │   import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
-    14    │ - 
+    13    │ - import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
+       13 │ + import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
+    14 14 │   
     15    │ - import·{
     16    │ - ····//·Comment
     17    │ - ····H,
     18    │ - ····I,
     19    │ - }·from·"mod";
-    20 14 │   
-       15 │ + 
+    20 15 │   
     21 16 │   import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
-    22 17 │   
   
 
 ```
@@ -230,14 +229,14 @@ invalid.js:21:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused imports.
   
+    17 17 │       H,
     18 18 │       I,
-    19 19 │   } from "mod";
-    20    │ - 
+    19    │ - }·from·"mod";
+       19 │ + }·from·"mod";
+    20 20 │   
     21    │ - import·{/*a*/J/*b*/,·/*c*/K/*d*/}·from·"mod";
-    22 20 │   
-       21 │ + 
+    22 21 │   
     23 22 │   // Header comment
-    24 23 │   import { L as M, } from "mod"; // Import comment
   
 
 ```
@@ -257,15 +256,15 @@ invalid.js:24:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused imports.
   
+    19 19 │   } from "mod";
     20 20 │   
-    21 21 │   import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
-    22    │ - 
+    21    │ - import·{/*a*/J/*b*/,·/*c*/K/*d*/}·from·"mod";
+       21 │ + import·{/*a*/J/*b*/,·/*c*/K/*d*/}·from·"mod";
+    22 22 │   
     23    │ - //·Header·comment
     24    │ - import·{·L·as·M,·}·from·"mod";·//·Import·comment
-    25 22 │   
-       23 │ + 
+    25 23 │   
     26 24 │   // See https://github.com/biomejs/biome/issues/653
-    27 25 │   import {a} from 'a'
   
 
 ```
