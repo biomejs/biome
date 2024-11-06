@@ -1,7 +1,7 @@
 use crate::services::aria::Aria;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::{AstNode, BatchMutationExt, TextRange};
@@ -116,7 +116,7 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
         let mut mutation = ctx.root().begin();
         mutation.remove_node(role_attribute);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
             mutation,

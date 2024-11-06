@@ -1,7 +1,6 @@
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttributeValue, AnyNumberLikeExpression};
@@ -141,7 +140,7 @@ impl Rule for NoAriaHiddenOnFocusable {
         let aria_hidden_attr = node.find_attribute_by_name("aria-hidden")?;
         mutation.remove_node(aria_hidden_attr);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the aria-hidden attribute from the element." }.to_owned(),
             mutation,

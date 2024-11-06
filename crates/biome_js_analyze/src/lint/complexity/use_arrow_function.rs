@@ -1,8 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, AddVisitor, FixKind, Phases,
-    QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
-    VisitorContext,
+    context::RuleContext, declare_lint_rule, AddVisitor, FixKind, Phases, QueryMatch, Queryable,
+    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -189,7 +188,7 @@ impl Rule for UseArrowFunction {
             arrow_function,
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use an "<Emphasis>"arrow function"</Emphasis>" instead." }.to_owned(),
             mutation,

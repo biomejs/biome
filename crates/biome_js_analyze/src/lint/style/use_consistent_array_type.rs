@@ -1,7 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_deserialize_macros::Deserializable;
@@ -181,7 +180,7 @@ impl Rule for UseConsistentArrayType {
                 mutation.replace_node(AnyTsType::TsReferenceType(ty.clone()), state.clone());
                 if let Some(kind) = get_array_kind_by_reference(ty) {
                     return Some(JsRuleAction::new(
-                        ActionCategory::QuickFix,
+                        ctx.metadata().action_category(ctx.category(), ctx.group()),
                         ctx.metadata().applicability(),
                         get_action_message(kind),
                         mutation,
@@ -196,7 +195,7 @@ impl Rule for UseConsistentArrayType {
 
                 if let Some(kind) = get_array_kind_by_any_type(&ty) {
                     return Some(JsRuleAction::new(
-                        ActionCategory::QuickFix,
+                        ctx.metadata().action_category(ctx.category(), ctx.group()),
                         ctx.metadata().applicability(),
                         get_action_message(kind),
                         mutation,
@@ -210,7 +209,7 @@ impl Rule for UseConsistentArrayType {
             {
                 mutation.replace_node(AnyTsType::TsArrayType(ty.clone()), state.clone());
                 Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                     get_action_message(TsArrayKind::Shorthand),
                     mutation,

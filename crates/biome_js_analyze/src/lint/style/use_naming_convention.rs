@@ -9,8 +9,8 @@ use crate::{
     JsRuleAction,
 };
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_deserialize::{DeserializableValidator, DeserializationDiagnostic};
@@ -843,7 +843,7 @@ impl Rule for UseNamingConvention {
             let renamed = mutation.rename_any_renamable_node(model, &renamable, &new_name[..]);
             if renamed {
                 return Some(JsRuleAction::new(
-                    ActionCategory::QuickFix,
+                    ctx.metadata().action_category(ctx.category(), ctx.group()),
                     ctx.metadata().applicability(),
                      markup! { "Rename this symbol in "<Emphasis>{preferred_case.to_string()}</Emphasis>"." }.to_owned(),
                     mutation,

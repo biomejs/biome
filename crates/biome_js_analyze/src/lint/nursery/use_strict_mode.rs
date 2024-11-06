@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, options::PreferredQuote, ActionCategory, Ast, FixKind,
-    Rule, RuleDiagnostic,
+    context::RuleContext, declare_lint_rule, options::PreferredQuote, Ast, FixKind, Rule,
+    RuleDiagnostic,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -102,7 +102,7 @@ impl Rule for UseStrictMode {
         let new_node = node.clone().with_directives(directives);
         mutation.replace_node(node, new_node);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup!("Insert a top level"<Emphasis>"\"use strict\" "</Emphasis>".").to_owned(),
             mutation,

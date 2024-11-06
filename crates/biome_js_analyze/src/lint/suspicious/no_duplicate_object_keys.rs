@@ -309,7 +309,7 @@ impl Rule for NoDuplicateObjectKeys {
         let mut batch = ctx.root().begin();
         batch.remove_js_object_member(member_definition.node());
         Some(JsRuleAction::new(
-            biome_analyze::ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             // The property initialization could contain side effects
             ctx.metadata().applicability(),
             markup!("Remove this " {member_definition.to_string()}).to_owned(),
