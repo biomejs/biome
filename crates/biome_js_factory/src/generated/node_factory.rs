@@ -5020,7 +5020,7 @@ impl TsImportEqualsDeclarationBuilder {
 }
 pub fn ts_import_type(
     import_token: SyntaxToken,
-    arguments: JsCallArguments,
+    arguments: TsImportTypeArguments,
 ) -> TsImportTypeBuilder {
     TsImportTypeBuilder {
         import_token,
@@ -5032,7 +5032,7 @@ pub fn ts_import_type(
 }
 pub struct TsImportTypeBuilder {
     import_token: SyntaxToken,
-    arguments: JsCallArguments,
+    arguments: TsImportTypeArguments,
     typeof_token: Option<SyntaxToken>,
     qualifier_clause: Option<TsImportTypeQualifier>,
     type_arguments: Option<TsTypeArguments>,
@@ -5064,6 +5064,84 @@ impl TsImportTypeBuilder {
             ],
         ))
     }
+}
+pub fn ts_import_type_arguments(
+    l_paren_token: SyntaxToken,
+    argument: AnyTsType,
+    r_paren_token: SyntaxToken,
+) -> TsImportTypeArgumentsBuilder {
+    TsImportTypeArgumentsBuilder {
+        l_paren_token,
+        argument,
+        r_paren_token,
+        comma_token: None,
+        ts_import_type_assertion_block: None,
+    }
+}
+pub struct TsImportTypeArgumentsBuilder {
+    l_paren_token: SyntaxToken,
+    argument: AnyTsType,
+    r_paren_token: SyntaxToken,
+    comma_token: Option<SyntaxToken>,
+    ts_import_type_assertion_block: Option<TsImportTypeAssertionBlock>,
+}
+impl TsImportTypeArgumentsBuilder {
+    pub fn with_comma_token(mut self, comma_token: SyntaxToken) -> Self {
+        self.comma_token = Some(comma_token);
+        self
+    }
+    pub fn with_ts_import_type_assertion_block(
+        mut self,
+        ts_import_type_assertion_block: TsImportTypeAssertionBlock,
+    ) -> Self {
+        self.ts_import_type_assertion_block = Some(ts_import_type_assertion_block);
+        self
+    }
+    pub fn build(self) -> TsImportTypeArguments {
+        TsImportTypeArguments::unwrap_cast(SyntaxNode::new_detached(
+            JsSyntaxKind::TS_IMPORT_TYPE_ARGUMENTS,
+            [
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                Some(SyntaxElement::Node(self.argument.into_syntax())),
+                self.comma_token.map(|token| SyntaxElement::Token(token)),
+                self.ts_import_type_assertion_block
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn ts_import_type_assertion(
+    assertion_kind_token: SyntaxToken,
+    colon_token: SyntaxToken,
+    l_curly_token: SyntaxToken,
+    assertions: JsImportAssertionEntryList,
+    r_curly_token: SyntaxToken,
+) -> TsImportTypeAssertion {
+    TsImportTypeAssertion::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION,
+        [
+            Some(SyntaxElement::Token(assertion_kind_token)),
+            Some(SyntaxElement::Token(colon_token)),
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(assertions.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
+pub fn ts_import_type_assertion_block(
+    l_curly_token: SyntaxToken,
+    type_assertion: TsImportTypeAssertion,
+    r_curly_token: SyntaxToken,
+) -> TsImportTypeAssertionBlock {
+    TsImportTypeAssertionBlock::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION_BLOCK,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(type_assertion.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
 }
 pub fn ts_import_type_qualifier(dot_token: SyntaxToken, right: AnyTsName) -> TsImportTypeQualifier {
     TsImportTypeQualifier::unwrap_cast(SyntaxNode::new_detached(
