@@ -12,15 +12,9 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
             value,
         } = node.as_fields();
 
-        let is_dash_identity = name
-            .clone()
-            .unwrap()
-            .as_css_dashed_identifier()
-            .is_some();
+        let is_dash_identity = name.clone().unwrap().as_css_dashed_identifier().is_some();
 
-        let has_comma = value
-            .iter()
-            .any(|v| v.text().eq(","));
+        let has_comma = value.iter().any(|v| v.text().eq(","));
 
         if has_comma && !is_dash_identity {
             write!(
@@ -38,16 +32,14 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
 
                             if v.text().eq(",") {
                                 write!(f, [v.format(), hard_line_break()])?;
-                            } else {
-                                if let Some(next) = value.iter().nth(idx + 1) {
-                                    if next.text().eq(",") || v == last {
-                                        write!(f, [v.format()])?;
-                                    } else {
-                                        write!(f, [v.format(), space()])?;
-                                    }
-                                } else {
+                            } else if let Some(next) = value.iter().nth(idx + 1) {
+                                if next.text().eq(",") || v == last {
                                     write!(f, [v.format()])?;
+                                } else {
+                                    write!(f, [v.format(), space()])?;
                                 }
+                            } else {
+                                write!(f, [v.format()])?;
                             }
                         }
 
