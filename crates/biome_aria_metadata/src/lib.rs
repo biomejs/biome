@@ -31,41 +31,71 @@ pub const ISO_LANGUAGES: [&str; 150] = [
     "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
 ];
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
-pub enum AriaPropertyTypeEnum {
-    /// true/false
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum AriaValueType {
+    /// `false`/`true`
     Boolean,
-    /// Id reference
-    Id,
-    /// List of Id references
-    Idlist,
+    IdReference,
+    IdReferenceList,
     Integer,
     Number,
+    /// `undefined`/`false`/`true`
+    OptionalBoolean,
+    /// Non-empty string
     String,
-    /// Value among a set of allowed terms
-    Token,
-    /// List of values among a set of allowed terms
-    Tokenlist,
-    /// true/false/mixed
-    /// FIXME: Also true/false/undefined?
+    /// A token among the given slice of tokens
+    Token(&'static [&'static str]),
+    /// A list of tokens among the given slice of tokens
+    TokenList(&'static [&'static str]),
+    /// `false`/`true`/`mixed`
     Tristate,
 }
-
-// TODO: to remove once the code that depends on that is refactored.
-impl std::str::FromStr for AriaPropertyTypeEnum {
-    type Err = &'static str;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "boolean" => Ok(AriaPropertyTypeEnum::Boolean),
-            "id" => Ok(AriaPropertyTypeEnum::Id),
-            "idlist" => Ok(AriaPropertyTypeEnum::Idlist),
-            "integer" => Ok(AriaPropertyTypeEnum::Integer),
-            "number" => Ok(AriaPropertyTypeEnum::Number),
-            "string" => Ok(AriaPropertyTypeEnum::String),
-            "token" => Ok(AriaPropertyTypeEnum::Token),
-            "tokenlist" => Ok(AriaPropertyTypeEnum::Tokenlist),
-            "tristate" => Ok(AriaPropertyTypeEnum::Tristate),
-            _ => Err("aria property type not implemented"),
+impl AriaValueType {
+    /// It checks if `value` is valid for the `self` type.
+    ///
+    /// [Source](https://www.w3.org/TR/wai-aria-1.2/#propcharacteristic_value)
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_aria_metadata::AriaAttribute;
+    ///
+    /// assert!(AriaAttribute::AriaCurrent.value_type().contains("true"));
+    /// assert!(AriaAttribute::AriaCurrent.value_type().contains("step"));
+    ///
+    /// assert!(!AriaAttribute::AriaCurrent.value_type().contains("something_not_allowed"));
+    /// ```
+    pub fn contains(&self, value: &str) -> bool {
+        if value.is_empty() {
+            return false;
+        }
+        match self {
+            Self::String => true,
+            Self::IdReference => is_valid_html_id(value),
+            Self::IdReferenceList => value.split_ascii_whitespace().all(is_valid_html_id),
+            Self::Integer => value.parse::<u32>().is_ok(),
+            Self::Number => value.parse::<f32>().is_ok(),
+            Self::Boolean => matches!(value, "false" | "true"),
+            Self::OptionalBoolean => matches!(value, "undefined" | "false" | "true"),
+            Self::Token(tokens) => tokens.iter().any(|allowed_token| *allowed_token == value),
+            Self::TokenList(tokens) => value.split_ascii_whitespace().all(|input_token| {
+                tokens
+                    .iter()
+                    .any(|allowed_token| allowed_token.trim() == input_token)
+            }),
+            Self::Tristate => matches!(value, "false" | "true" | "mixed"),
         }
     }
+}
+
+/// Is `id` a valid HTML identifier?
+///
+/// Browsers allows arbitrary sequence of characters for identifiers.
+/// However, it is commonly accepted that an identifier should not contain
+/// characters recognized as whitespaces by HTML.
+/// Whitespaces are usedd to separate two identifier in a list of identifiers.
+///
+/// See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id#syntax
+fn is_valid_html_id(id: &str) -> bool {
+    !id.is_empty() && !id.bytes().any(|b| b.is_ascii_whitespace())
 }

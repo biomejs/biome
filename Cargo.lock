@@ -734,6 +734,7 @@ version = "0.5.7"
 dependencies = [
  "biome_analyze",
  "biome_aria",
+ "biome_aria_metadata",
  "biome_console",
  "biome_control_flow",
  "biome_deserialize",

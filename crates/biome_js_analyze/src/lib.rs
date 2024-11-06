@@ -6,7 +6,7 @@ use biome_analyze::{
     InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
     SuppressionKind,
 };
-use biome_aria::{AriaProperties, AriaRoles};
+use biome_aria::AriaRoles;
 use biome_diagnostics::{category, Error as DiagnosticError};
 use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_project::PackageJson;
@@ -122,7 +122,6 @@ where
     }
 
     services.insert_service(Arc::new(AriaRoles));
-    services.insert_service(Arc::new(AriaProperties));
     services.insert_service(Arc::new(manifest));
     services.insert_service(source_type);
     (
