@@ -103,6 +103,16 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- `noUnusedImports` now reports empty named imports and suggests its removal ([#3574](https://github.com/biomejs/biome/issues/3574)).
+
+  The rule now suggests the removal of empty named imports such as:
+
+  ```diff
+  - import {} from "mod";
+  ```
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now reports all expressions using the `Array` constructors.
