@@ -155,6 +155,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- `noUnusedImports` now keeps comments separated from the import with a blank line ([#3401](https://github.com/biomejs/biome/issues/3401)).
+
+  Here is an example:
+
+  ```diff
+    // Orphan comment
+
+  - // Header comment
+  - import {} from "mod";
+  ```
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now reports all expressions using the `Array` constructors.

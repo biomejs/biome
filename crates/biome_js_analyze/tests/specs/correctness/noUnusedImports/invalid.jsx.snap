@@ -110,12 +110,14 @@ invalid.jsx:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused imports.
   
+     1  1 │   import X from "react"
      2  2 │   import * as X from "react"
-     3  3 │   import { default as X } from "react"
-     4    │ - 
+     3    │ - import·{·default·as·X·}·from·"react"
+        3 │ + import·{·default·as·X·}·from·"react"
+     4  4 │   
      5    │ - import·React·from·"x"
-     6  4 │   import * as React from "x"
-     7  5 │   import { default as React } from "x"
+     6  5 │   import * as React from "x"
+     7  6 │   import { default as React } from "x"
   
 
 ```
@@ -209,13 +211,15 @@ invalid.jsx:11:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the unused imports.
   
+     6  6 │   import * as React from "x"
      7  7 │   import { default as React } from "x"
-     8  8 │   import React, { useEffect } from "x"
-     9    │ - 
+     8    │ - import·React,·{·useEffect·}·from·"x"
+        8 │ + import·React,·{·useEffect·}·from·"x"
+     9  9 │   
     10    │ - //·unsupported·patterns
     11    │ - import·X,·{·default·as·React·}·from·"react"
-    12  9 │   import X, * as React from "react"
-    13 10 │   
+    12 10 │   import X, * as React from "react"
+    13 11 │   
   
 
 ```
@@ -260,13 +264,15 @@ invalid.jsx:15:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
   
   i Safe fix: Remove the unused imports.
   
+    10 10 │   // unsupported patterns
     11 11 │   import X, { default as React } from "react"
-    12 12 │   import X, * as React from "react"
-    13    │ - 
+    12    │ - import·X,·*·as·React·from·"react"
+       12 │ + import·X,·*·as·React·from·"react"
+    13 13 │   
     14    │ - //·React·import·(no·exception)
     15    │ - import·React·from·"react"
-    16 13 │   import * as React from "react"
-    17 14 │   import { default as React } from "react"
+    16 14 │   import * as React from "react"
+    17 15 │   import { default as React } from "react"
   
 
 ```

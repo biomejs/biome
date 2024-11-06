@@ -100,12 +100,14 @@ invalid-unused-react.jsx:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━�
   
   i Safe fix: Remove the unused imports.
   
+    1 1 │   import X from "react"
     2 2 │   import * as X from "react"
-    3 3 │   import { default as X } from "react"
-    4   │ - 
+    3   │ - import·{·default·as·X·}·from·"react"
+      3 │ + import·{·default·as·X·}·from·"react"
+    4 4 │   
     5   │ - import·React·from·"x"
-    6 4 │   import * as React from "x"
-    7 5 │   import { default as React } from "x"
+    6 5 │   import * as React from "x"
+    7 6 │   import { default as React } from "x"
   
 
 ```
