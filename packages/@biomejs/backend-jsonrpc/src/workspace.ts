@@ -2858,6 +2858,13 @@ export interface GetSyntaxTreeResult {
 	ast: string;
 	cst: string;
 }
+export interface CheckFileSizeParams {
+	path: BiomePath;
+}
+export interface CheckFileSizeResult {
+	fileSize: number;
+	limit: number;
+}
 export interface OrganizeImportsParams {
 	path: BiomePath;
 }
@@ -3546,6 +3553,7 @@ export interface Workspace {
 	changeFile(params: ChangeFileParams): Promise<void>;
 	closeFile(params: CloseFileParams): Promise<void>;
 	getSyntaxTree(params: GetSyntaxTreeParams): Promise<GetSyntaxTreeResult>;
+	checkFileSize(params: CheckFileSizeParams): Promise<CheckFileSizeResult>;
 	organizeImports(
 		params: OrganizeImportsParams,
 	): Promise<OrganizeImportsResult>;
@@ -3591,6 +3599,9 @@ export function createWorkspace(transport: Transport): Workspace {
 		},
 		getSyntaxTree(params) {
 			return transport.request("biome/get_syntax_tree", params);
+		},
+		checkFileSize(params) {
+			return transport.request("biome/check_file_size", params);
 		},
 		organizeImports(params) {
 			return transport.request("biome/organize_imports", params);

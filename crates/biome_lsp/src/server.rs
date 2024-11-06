@@ -621,6 +621,7 @@ impl ServerFactory {
         workspace_method!(builder, get_control_flow_graph);
         workspace_method!(builder, get_formatter_ir);
         workspace_method!(builder, change_file);
+        workspace_method!(builder, check_file_size);
         workspace_method!(builder, get_file_content);
         workspace_method!(builder, close_file);
         workspace_method!(builder, pull_diagnostics);
