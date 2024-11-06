@@ -161,7 +161,6 @@ impl DocumentFileSource {
             return Ok(file_source.into());
         }
 
-        #[cfg(feature = "experimental-grit")]
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -192,7 +191,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "experimental-grit")]
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
@@ -350,9 +348,9 @@ impl DocumentFileSource {
             },
             DocumentFileSource::Css(_)
             | DocumentFileSource::Graphql(_)
-            | DocumentFileSource::Json(_) => true,
+            | DocumentFileSource::Json(_)
+            | DocumentFileSource::Grit(_) => true,
             DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
-            DocumentFileSource::Grit(_) => cfg!(feature = "experimental-grit"),
             DocumentFileSource::Unknown => false,
         }
     }

@@ -248,4 +248,28 @@ type User {
         let diagnostics = result.unwrap().diagnostics;
         assert_eq!(diagnostics.len(), 1)
     }
+
+    #[test]
+    fn pull_grit_debug_info() {
+        let workspace = create_server();
+
+        let grit_file = FileGuard::open(
+            workspace.as_ref(),
+            OpenFileParams {
+                path: BiomePath::new("file.grit"),
+                content: r#"`function ($args) { $body }` where {
+  $args <: contains `x`
+}"#
+                .into(),
+                version: 0,
+                document_file_source: None,
+            },
+        )
+        .unwrap();
+        let result = grit_file.get_syntax_tree();
+        assert!(result.is_ok());
+        let syntax = result.unwrap().ast;
+
+        assert!(syntax.starts_with("GritRoot"))
+    }
 }
