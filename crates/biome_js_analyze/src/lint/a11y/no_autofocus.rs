@@ -12,6 +12,8 @@ declare_lint_rule! {
     /// Enforce that autoFocus prop is not used on elements.
     ///
     /// Autofocusing elements can cause usability issues for sighted and non-sighted users, alike.
+    /// But the autofocus attribute should be added to the element the user is expected to
+    /// interact with immediately upon opening a modal dialog or popover.
     ///
     /// ## Examples
     ///
@@ -66,6 +68,7 @@ declare_lint_rule! {
     ///
     /// - [WHATWG HTML Standard, The autofocus attribute](https://html.spec.whatwg.org/multipage/interaction.html#attr-fe-autofocus)
     /// - [The accessibility of HTML 5 autofocus](https://brucelawson.co.uk/2009/the-accessibility-of-html-5-autofocus/)
+    /// - [MDN Web Docs, HTMLElement: autofocus property](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/autofocus)
     ///
     pub NoAutofocus {
         version: "1.0.0",
