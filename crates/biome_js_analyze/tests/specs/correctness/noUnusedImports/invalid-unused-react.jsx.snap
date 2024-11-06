@@ -104,8 +104,9 @@ invalid-unused-react.jsx:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━�
     3 3 │   import { default as X } from "react"
     4   │ - 
     5   │ - import·React·from·"x"
-    6 4 │   import * as React from "x"
-    7 5 │   import { default as React } from "x"
+      4 │ + 
+    6 5 │   import * as React from "x"
+    7 6 │   import { default as React } from "x"
   
 
 ```

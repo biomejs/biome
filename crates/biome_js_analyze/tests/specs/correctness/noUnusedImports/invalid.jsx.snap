@@ -114,8 +114,9 @@ invalid.jsx:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
      3  3 │   import { default as X } from "react"
      4    │ - 
      5    │ - import·React·from·"x"
-     6  4 │   import * as React from "x"
-     7  5 │   import { default as React } from "x"
+        4 │ + 
+     6  5 │   import * as React from "x"
+     7  6 │   import { default as React } from "x"
   
 
 ```
@@ -214,8 +215,9 @@ invalid.jsx:11:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
      9    │ - 
     10    │ - //·unsupported·patterns
     11    │ - import·X,·{·default·as·React·}·from·"react"
-    12  9 │   import X, * as React from "react"
-    13 10 │   
+        9 │ + 
+    12 10 │   import X, * as React from "react"
+    13 11 │   
   
 
 ```
@@ -265,8 +267,9 @@ invalid.jsx:15:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
     13    │ - 
     14    │ - //·React·import·(no·exception)
     15    │ - import·React·from·"react"
-    16 13 │   import * as React from "react"
-    17 14 │   import { default as React } from "react"
+       13 │ + 
+    16 14 │   import * as React from "react"
+    17 15 │   import { default as React } from "react"
   
 
 ```

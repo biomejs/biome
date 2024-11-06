@@ -86,7 +86,9 @@ invalid.js:5:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
      4    │ - //·Header·comment
      5    │ - import·*·as·B·from·"mod";·//·Import·comment
      6  3 │   
-     7  4 │   // Header comment
+        4 │ + 
+     7  5 │   // Header comment
+     8  6 │   import { C } from "mod"; // Import comment
   
 
 ```
@@ -112,7 +114,9 @@ invalid.js:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━�
      7    │ - //·Header·comment
      8    │ - import·{·C·}·from·"mod";·//·Import·comment
      9  6 │   
-    10  7 │   // Header comment
+        7 │ + 
+    10  8 │   // Header comment
+    11  9 │   import /*a*/ D /*b*/, /*c*/{ E }/*d*/ from "mod"; // Import comment
   
 
 ```
@@ -138,7 +142,9 @@ invalid.js:11:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
     10    │ - //·Header·comment
     11    │ - import·/*a*/·D·/*b*/,·/*c*/{·E·}/*d*/·from·"mod";·//·Import·comment
     12  9 │   
-    13 10 │   import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
+       10 │ + 
+    13 11 │   import /*a*/ F /*b*/, /*c*/ * as G /*d*/ from "mod";
+    14 12 │   
   
 
 ```
@@ -164,7 +170,9 @@ invalid.js:13:14 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━�
     12    │ - 
     13    │ - import·/*a*/·F·/*b*/,·/*c*/·*·as·G·/*d*/·from·"mod";
     14 12 │   
-    15 13 │   import {
+       13 │ + 
+    15 14 │   import {
+    16 15 │       // Comment
   
 
 ```
@@ -199,7 +207,9 @@ invalid.js:15:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
     18    │ - ····I,
     19    │ - }·from·"mod";
     20 14 │   
-    21 15 │   import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
+       15 │ + 
+    21 16 │   import {/*a*/J/*b*/, /*c*/K/*d*/} from "mod";
+    22 17 │   
   
 
 ```
@@ -225,7 +235,9 @@ invalid.js:21:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
     20    │ - 
     21    │ - import·{/*a*/J/*b*/,·/*c*/K/*d*/}·from·"mod";
     22 20 │   
-    23 21 │   // Header comment
+       21 │ + 
+    23 22 │   // Header comment
+    24 23 │   import { L as M, } from "mod"; // Import comment
   
 
 ```
@@ -251,7 +263,9 @@ invalid.js:24:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
     23    │ - //·Header·comment
     24    │ - import·{·L·as·M,·}·from·"mod";·//·Import·comment
     25 22 │   
-    26 23 │   // See https://github.com/biomejs/biome/issues/653
+       23 │ + 
+    26 24 │   // See https://github.com/biomejs/biome/issues/653
+    27 25 │   import {a} from 'a'
   
 
 ```
@@ -296,11 +310,13 @@ invalid.js:32:9 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━
   
   i Safe fix: Remove the unused imports.
   
+    28 28 │   import {d} from 'd'
     29 29 │   import {b} from 'b'
-    30 30 │   export const bb = a + b
-    31    │ - 
+    30    │ - export·const·bb·=·a·+·b
+       30 │ + export·const·bb·=·a·+·b
+    31 31 │   
     32    │ - import·{}·from·"mod"
-    33 31 │   
+    33 32 │   
   
 
 ```

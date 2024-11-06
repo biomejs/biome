@@ -216,6 +216,32 @@ impl Rule for NoUnusedImports {
         match state {
             Unused::EmptyStatement(_) | Unused::AllImports(_) => {
                 let parent = node.syntax().parent()?;
+                let leading_trivia = parent.first_leading_trivia()?;
+                let mut leading_trivia_pieces = leading_trivia.pieces().collect::<Vec<_>>();
+                let blank_line_pos = leading_trivia_pieces
+                    .windows(2)
+                    .rposition(|window| window[0].is_newline() && window[1].is_newline());
+                if let Some(blank_line_pos) = blank_line_pos {
+                    // keep all leading trivia until the last blank line.
+                    leading_trivia_pieces.truncate(blank_line_pos + 1);
+                    if let Some(next_sibling) = parent.next_sibling() {
+                        let new_next_sibling = next_sibling
+                            .clone()
+                            .prepend_trivia_pieces(leading_trivia_pieces)?;
+                        mutation.replace_element_discard_trivia(
+                            next_sibling.into(),
+                            new_next_sibling.into(),
+                        );
+                    } else if let Some(prev_sibling) = parent.prev_sibling() {
+                        let new_prev_sibling = prev_sibling
+                            .clone()
+                            .append_trivia_pieces(leading_trivia_pieces)?;
+                        mutation.replace_element_discard_trivia(
+                            prev_sibling.into(),
+                            new_prev_sibling.into(),
+                        );
+                    }
+                }
                 mutation.remove_element(parent.into());
             }
             Unused::DefaultImport(_) => {
