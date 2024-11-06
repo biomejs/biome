@@ -12,11 +12,17 @@ impl FormatNodeRule<CssGenericProperty> for FormatCssGenericProperty {
             value,
         } = node.as_fields();
 
+        let is_dash_identity = name
+            .clone()
+            .unwrap()
+            .as_css_dashed_identifier()
+            .is_some();
+
         let has_comma = value
             .iter()
             .any(|v| v.text().eq(","));
 
-        if has_comma {
+        if has_comma && !is_dash_identity {
             write!(
                 f,
                 [
