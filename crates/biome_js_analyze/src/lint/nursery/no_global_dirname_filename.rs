@@ -76,7 +76,7 @@ impl Rule for NoGlobalDirnameFilename {
         let node = ctx.query();
         let model = ctx.model();
         let file_source = ctx.source_type::<JsFileSource>();
-        if !file_source.is_script() {
+        if file_source.is_script() {
             return None;
         };
 

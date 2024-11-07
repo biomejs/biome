@@ -1,9 +1,9 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalid.cjs
+expression: invalid.js
 ---
 # Input
-```cjs
+```jsx
 const dirname = __dirname;
 const filename = __filename;
 const dirname_ = { __dirname };
@@ -18,7 +18,7 @@ if (__filename.endsWith(".js")) {}
 
 # Diagnostics
 ```
-invalid.cjs:1:17 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:1:17 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use __dirname.
   
@@ -40,7 +40,7 @@ invalid.cjs:1:17 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.cjs:2:18 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:18 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use __filename.
   
@@ -64,7 +64,7 @@ invalid.cjs:2:18 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.cjs:3:20 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:3:20 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use __dirname.
   
@@ -85,7 +85,7 @@ invalid.cjs:3:20 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.cjs:4:21 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:4:21 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use __filename.
   
@@ -106,7 +106,7 @@ invalid.cjs:4:21 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.cjs:5:30 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:30 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use __dirname.
   
@@ -132,7 +132,7 @@ invalid.cjs:5:30 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.cjs:6:32 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:6:32 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use __filename.
   
@@ -158,7 +158,7 @@ invalid.cjs:6:32 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.cjs:8:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use __dirname.
   
@@ -184,7 +184,7 @@ invalid.cjs:8:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━�
 ```
 
 ```
-invalid.cjs:9:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:9:5 lint/nursery/noGlobalDirnameFilename  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Don't use __filename.
   
