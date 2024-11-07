@@ -18,7 +18,6 @@ impl FormatNodeRule<TsImportTypeAssertion> for FormatTsImportTypeAssertion {
         write!(
             f,
             [
-                space(),
                 assertion_kind.format(),
                 colon_token.format(),
                 space(),

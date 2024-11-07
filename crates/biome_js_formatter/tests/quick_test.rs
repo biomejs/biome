@@ -14,16 +14,13 @@ mod language {
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
     let src = r#"
-type InstanceID = string;
-type MaybeCardWithAttachment = string;
-function outerFunctionToForceIndent() {
-    const cardWithAttachment: (id: InstanceID) => MaybeCardWithAttachment = (
-        id
-    ) => {
-        return `${id}test`;
-    };
-}
+export let shim: typeof import("./foo2") = {
+    Bar: Bar2
+};
 
+export interface Foo {
+    bar: import('immutable').Map<string, int>;
+}
     "#;
     let source_type = JsFileSource::tsx();
     let tree = parse(
@@ -31,6 +28,7 @@ function outerFunctionToForceIndent() {
         source_type,
         JsParserOptions::default().with_parse_class_parameter_decorators(),
     );
+    eprintln!("tree: {:?}", tree.tree());
     let options = JsFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())

@@ -1710,7 +1710,8 @@ fn parse_ts_import_type_assertion_block(p: &mut JsParser) -> ParsedSyntax {
     let m = p.start();
 
     if p.at(T!['{']) {
-        if p.nth_at(1, T!['}']) {
+        p.bump(T!['{']);
+        if p.at(T!['}']) {
             p.error(
                 p.err_builder(
                     "Missing import type assertion keyword 'with'",
@@ -1718,12 +1719,8 @@ fn parse_ts_import_type_assertion_block(p: &mut JsParser) -> ParsedSyntax {
                 )
                 .with_detail(p.cur_range(), "'with' expected."),
             );
-        } else {
-            p.bump(T!['{']);
         }
     }
-
-    // p.expect(T!['{']);
 
     parse_ts_import_type_assertion(p).ok();
 

@@ -175,12 +175,16 @@ pub fn run(test_case: &str, _snapshot_name: &str, test_directory: &str, outcome_
 #[test]
 pub fn quick_test() {
     let code = r#"
-function name() {
-    return "string";
+export let shim: typeof import("./foo2") = {
+    Bar: Bar2
+};
+
+export interface Foo {
+    bar: import('immutable').Map<string, int>;
 }
     "#;
 
-    let root = parse(code, JsFileSource::default(), JsParserOptions::default());
+    let root = parse(code, JsFileSource::ts(), JsParserOptions::default());
     let syntax = root.syntax();
     dbg!(&syntax, root.diagnostics(), root.has_errors());
     if has_bogus_nodes_or_empty_slots(&syntax) {
