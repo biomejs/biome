@@ -1,6 +1,5 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
-use std::borrow::Cow;
 use biome_parser::AnyParse;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::cmp::Ordering;
@@ -700,55 +699,6 @@ where
             }
         }
     }
-}
-
-fn create_suppression_comment_action<L: Language>(
-    token: &SyntaxToken<L>,
-) -> Option<AnalyzerAction<L>> {
-    let first_node = token.parent()?;
-    let mut new_leading_trivia = vec![];
-    let mut token_text = String::new();
-    let mut new_trailing_trivia = vec![];
-    let mut mutation = BatchMutation::new(first_node);
-
-    for piece in token.leading_trivia().pieces() {
-        if !piece.is_comments() {
-            new_leading_trivia.push(TriviaPiece::new(piece.kind(), piece.text_len()));
-            token_text.push_str(piece.text());
-        }
-
-        if piece.text().contains("rome-ignore") {
-            let new_text = piece.text().replace("rome-ignore", "biome-ignore");
-            new_leading_trivia.push(TriviaPiece::new(piece.kind(), new_text.text_len()));
-            token_text.push_str(&new_text);
-        }
-    }
-
-    token_text.push_str(token.text_trimmed());
-
-    for piece in token.trailing_trivia().pieces() {
-        new_trailing_trivia.push(TriviaPiece::new(piece.kind(), piece.text_len()));
-        token_text.push_str(piece.text());
-    }
-
-    let new_token = SyntaxToken::new_detached(
-        token.kind(),
-        &token_text,
-        new_leading_trivia,
-        new_trailing_trivia,
-    );
-
-    mutation.replace_token_discard_trivia(token.clone(), new_token);
-    Some(AnalyzerAction {
-        mutation,
-        applicability: Applicability::MaybeIncorrect,
-        category: ActionCategory::QuickFix(Cow::Borrowed("")),
-        message: markup! {
-            "Use // biome-ignore instead"
-        }
-        .to_owned(),
-        rule_name: None,
-    })
 }
 
 fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {

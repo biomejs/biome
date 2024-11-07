@@ -253,8 +253,8 @@ impl Rule for NoUnusedImports {
                             prev_clause.from_token().ok()?,
                             prev_clause.source().ok()?,
                         );
-                        if let Some(attributes) = prev_clause.assertion() {
-                            new_clause.with_assertion(attributes)
+                        if let Some(attributes) = prev_clause.attribute() {
+                            new_clause.with_attribute(attributes)
                         } else {
                             new_clause
                         }
@@ -267,8 +267,8 @@ impl Rule for NoUnusedImports {
                             prev_clause.from_token().ok()?,
                             prev_clause.source().ok()?,
                         );
-                        if let Some(attributes) = prev_clause.assertion() {
-                            new_clause.with_assertion(attributes)
+                        if let Some(attributes) = prev_clause.attribute() {
+                            new_clause.with_attribute(attributes)
                         } else {
                             new_clause
                         }
@@ -285,8 +285,8 @@ impl Rule for NoUnusedImports {
                     prev_clause.from_token().ok()?,
                     prev_clause.source().ok()?,
                 );
-                let new_clause = if let Some(attributes) = prev_clause.assertion() {
-                    new_clause.with_assertion(attributes)
+                let new_clause = if let Some(attributes) = prev_clause.attribute() {
+                    new_clause.with_attribute(attributes)
                 } else {
                     new_clause
                 }
@@ -325,8 +325,8 @@ impl Rule for NoUnusedImports {
                     prev_clause.from_token().ok()?,
                     prev_clause.source().ok()?,
                 );
-                let new_clause = if let Some(attributes) = prev_clause.assertion() {
-                    new_clause.with_assertion(attributes)
+                let new_clause = if let Some(attributes) = prev_clause.attribute() {
+                    new_clause.with_attribute(attributes)
                 } else {
                     new_clause
                 }
