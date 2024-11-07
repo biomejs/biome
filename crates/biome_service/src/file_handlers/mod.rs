@@ -160,7 +160,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }

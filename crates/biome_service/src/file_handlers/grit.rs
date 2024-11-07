@@ -1,6 +1,7 @@
 use super::{
     AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
-    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
+    FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities,
+    SearchCapabilities,
 };
 use crate::workspace::GetSyntaxTreeResult;
 use crate::{
@@ -8,6 +9,7 @@ use crate::{
     WorkspaceError,
 };
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
+use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};
@@ -15,6 +17,7 @@ use biome_grit_parser::parse_grit_with_cache;
 use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
+use tracing::debug_span;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -118,7 +121,7 @@ impl ExtensionHandler for GritFileHandler {
                 debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
+                lint: Some(lint),
                 code_actions: None,
                 rename: None,
                 fix_all: None,
@@ -190,5 +193,25 @@ fn format(
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
+    }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+fn lint(params: LintParams) -> LintResults {
+    let _ = debug_span!("Linting Grit file", path =? params.path, language =? params.language)
+        .entered();
+    let diagnostics = params.parse.into_diagnostics();
+
+    let diagnostic_count = diagnostics.len() as u32;
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+    let errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() <= Severity::Error)
+        .count();
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
     }
 }

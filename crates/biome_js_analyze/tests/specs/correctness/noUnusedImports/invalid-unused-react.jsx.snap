@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid-unused-react.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -28,7 +29,7 @@ invalid-unused-react.jsx:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
     1 │ import·X·from·"react"
       │ ---------------------
@@ -48,7 +49,7 @@ invalid-unused-react.jsx:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
     1 1 │   import X from "react"
     2   │ - import·*·as·X·from·"react"
@@ -59,20 +60,20 @@ invalid-unused-react.jsx:2:13 lint/correctness/noUnusedImports  FIXABLE  ━━�
 ```
 
 ```
-invalid-unused-react.jsx:3:21 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-unused-react.jsx:3:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
     1 │ import X from "react"
     2 │ import * as X from "react"
   > 3 │ import { default as X } from "react"
-      │                     ^
+      │        ^^^^^^^^^^^^^^^^
     4 │ 
     5 │ import React from "x"
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
     1 1 │   import X from "react"
     2 2 │   import * as X from "react"
@@ -97,14 +98,16 @@ invalid-unused-react.jsx:5:8 lint/correctness/noUnusedImports  FIXABLE  ━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
+    1 1 │   import X from "react"
     2 2 │   import * as X from "react"
-    3 3 │   import { default as X } from "react"
-    4   │ - 
+    3   │ - import·{·default·as·X·}·from·"react"
+      3 │ + import·{·default·as·X·}·from·"react"
+    4 4 │   
     5   │ - import·React·from·"x"
-    6 4 │   import * as React from "x"
-    7 5 │   import { default as React } from "x"
+    6 5 │   import * as React from "x"
+    7 6 │   import { default as React } from "x"
   
 
 ```
@@ -122,7 +125,7 @@ invalid-unused-react.jsx:6:13 lint/correctness/noUnusedImports  FIXABLE  ━━�
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
     4 4 │   
     5 5 │   import React from "x"
@@ -134,20 +137,20 @@ invalid-unused-react.jsx:6:13 lint/correctness/noUnusedImports  FIXABLE  ━━�
 ```
 
 ```
-invalid-unused-react.jsx:7:21 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid-unused-react.jsx:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! This import is unused.
   
     5 │ import React from "x"
     6 │ import * as React from "x"
   > 7 │ import { default as React } from "x"
-      │                     ^^^^^
+      │        ^^^^^^^^^^^^^^^^^^^^
     8 │ import React, { useEffect } from "x"
     9 │ 
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
     5 5 │   import React from "x"
     6 6 │   import * as React from "x"
@@ -161,39 +164,22 @@ invalid-unused-react.jsx:7:21 lint/correctness/noUnusedImports  FIXABLE  ━━�
 ```
 invalid-unused-react.jsx:8:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! This import is unused.
+  ! These imports are unused.
   
     6 │ import * as React from "x"
     7 │ import { default as React } from "x"
   > 8 │ import React, { useEffect } from "x"
-      │        ^^^^^
+      │        ^^^^^^^^^^^^^^^^^^^^
     9 │ 
   
   i Unused imports might be the result of an incomplete refactoring.
   
-  i Safe fix: Remove the unused import.
+  i Safe fix: Remove the unused imports.
   
-    8 │ import·React,·{·useEffect·}·from·"x"
-      │        -------                      
-
-```
-
-```
-invalid-unused-react.jsx:8:17 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! This import is unused.
+    6 6 │   import * as React from "x"
+    7 7 │   import { default as React } from "x"
+    8   │ - import·React,·{·useEffect·}·from·"x"
+    9 8 │   
   
-    6 │ import * as React from "x"
-    7 │ import { default as React } from "x"
-  > 8 │ import React, { useEffect } from "x"
-      │                 ^^^^^^^^^
-    9 │ 
-  
-  i Unused imports might be the result of an incomplete refactoring.
-  
-  i Safe fix: Remove the unused import.
-  
-    8 │ import·React,·{·useEffect·}·from·"x"
-      │             ---------------         
 
 ```
