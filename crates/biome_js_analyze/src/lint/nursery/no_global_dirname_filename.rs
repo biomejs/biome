@@ -1,7 +1,7 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -54,6 +54,7 @@ declare_lint_rule! {
         language: "js",
         recommended: false,
         sources: &[RuleSource::EslintUnicorn("prefer-module")],
+        source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Safe,
     }
 }
@@ -192,7 +193,7 @@ impl Rule for NoGlobalDirnameFilename {
         }
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {
                 "Replace "{syntax_token.text_trimmed()}" with "<Emphasis>{format!("import.meta.{}", dirname_or_filename)}</Emphasis>"."
