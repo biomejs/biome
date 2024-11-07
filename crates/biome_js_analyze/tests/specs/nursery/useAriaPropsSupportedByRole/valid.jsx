@@ -89,6 +89,7 @@
 <h2 role="presentation" aria-level={null} />
 <h2 role="presentation" aria-level={undefined} />
 <button aria-pressed />
+<button role="tab" aria-selected="true"/>
 <form aria-hidden />
 <meter aria-atomic />
 <progress aria-atomic />

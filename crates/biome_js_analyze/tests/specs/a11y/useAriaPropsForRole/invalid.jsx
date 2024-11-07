@@ -1,9 +1,6 @@
 var a = <span role="checkbox"></span>;
 var a = <span role="switch"></span>;
 var a = <span role="spinbutton"></span>;
-var a = <span role="spinbutton" aria-valuemax="100"></span>;
-var a = <span role="spinbutton" aria-valuemin="0"></span>;
-var a = <span role="spinbutton" aria-valuemin="0" aria-valuemax="100"></span>;
 var a = <span role="slider" aria-valuemin="0"></span>;
 var a = <span role="slider" aria-valuemax="100"></span>;
 var a = <span role="slider" aria-valuemin="0" aria-valuemax="100"></span>;
@@ -18,4 +15,3 @@ var a = <span role="combobox"></span>;
 var a = <span role="combobox" aria-expanded="true"></span>;
 var a = <span role="combobox" aria-controls="true"></span>;
 var a = <span role="menuitemcheckbox" ></span>;
-var a = <span role="menuitemradio" ></span>;

@@ -31,13 +31,13 @@ pub const ISO_LANGUAGES: [&str; 150] = [
     "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
 ];
 
-#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum AriaAttributeKind {
     Property,
     State,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum AriaValueType {
     /// `false`/`true`
     Boolean,
@@ -104,4 +104,91 @@ impl AriaValueType {
 /// See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id#syntax
 fn is_valid_html_id(id: &str) -> bool {
     !id.is_empty() && !id.bytes().any(|b| b.is_ascii_whitespace())
+}
+
+impl AriaRole {
+    /// Returns `true` if the given role inherits of `AriaAbstractRole::Widget`.
+    ///
+    /// This corresponds to a role that defines a user interface widget (slider, tree control, ...)
+    pub fn is_interactive(self) -> bool {
+        self.inherited_abstract_roles()
+            .contains(&AriaAbstractRole::Widget)
+    }
+
+    /// Returns `true` if the given role inherits of `AriaAbstractRole::Structure`.
+    ///
+    /// This corresponds to a role that defines the page structure (section, navigation, ...).
+    pub fn is_presentational(self) -> bool {
+        self.inherited_abstract_roles()
+            .contains(&AriaAbstractRole::Structure)
+    }
+
+    /// Returns `true` if the given role inherits of `AriaAbstractRole::Composite`.
+    pub fn is_composite(self) -> bool {
+        self.inherited_abstract_roles()
+            .contains(&AriaAbstractRole::Composite)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct AriaAttributes(&'static [AriaAttribute]);
+impl AriaAttributes {
+    // Same as `Self::default`, but usable in `const` context.
+    pub const fn empty() -> Self {
+        Self(&[])
+    }
+
+    pub fn contains(self, value: &AriaAttribute) -> bool {
+        self.0.contains(value)
+    }
+
+    pub fn iter(self) -> impl Iterator<Item = AriaAttribute> {
+        self.0.iter().copied()
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct AriaAbstractRoles(&'static [AriaAbstractRole]);
+impl AriaAbstractRoles {
+    // Same as `Self::default`, but usable in `const` context.
+    pub const fn empty() -> Self {
+        Self(&[])
+    }
+
+    pub fn contains(self, value: &AriaAbstractRole) -> bool {
+        self.0.contains(value)
+    }
+
+    pub fn iter(self) -> impl Iterator<Item = AriaAbstractRole> {
+        self.0.iter().copied()
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct AriaRoles(&'static [AriaRole]);
+impl AriaRoles {
+    // Same as `Self::default`, but usable in `const` context.
+    pub const fn empty() -> Self {
+        Self(&[])
+    }
+
+    pub fn contains(self, value: &AriaRole) -> bool {
+        self.0.contains(value)
+    }
+
+    pub fn iter(self) -> impl Iterator<Item = AriaRole> {
+        self.0.iter().copied()
+    }
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct HtmlElementInstance {
+    element: HtmlElement,
+    attributes: &'static [HtmlAttributeInstance],
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct HtmlAttributeInstance {
+    attribute: HtmlAttribute,
+    value: &'static str,
 }

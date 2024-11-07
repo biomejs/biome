@@ -1194,16 +1194,6 @@ impl<'a> AriaRoles {
         Some(result)
     }
 
-    /// Given a role, it returns whether this role is interactive
-    pub fn is_role_interactive(&self, role: &str) -> bool {
-        let role = self.get_role(role);
-        if let Some(role) = role {
-            role.is_interactive()
-        } else {
-            false
-        }
-    }
-
     /// Given the name of element, the function tells whether it's interactive
     pub fn is_not_interactive_element(
         &self,

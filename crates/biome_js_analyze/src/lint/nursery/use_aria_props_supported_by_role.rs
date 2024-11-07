@@ -1,5 +1,9 @@
+use std::str::FromStr;
+
 use crate::services::aria::Aria;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_aria::AriaAttribute;
+use biome_aria_metadata::{AriaAttributes, AriaRole};
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_rowan::AstNode;
@@ -55,11 +59,19 @@ impl Rule for UseAriaPropsSupportedByRole {
         let attributes = ctx.convert_all_attribute_values(attributes);
 
         if let Some(attributes) = &attributes {
-            let role_name = aria_roles.get_role_by_element_name(element_name, attributes)?;
+            let role_attributes = attributes
+                .get("role")
+                .and_then(|roles| roles.first())
+                .and_then(|role| AriaRole::from_str(role).ok())
+                .map_or(AriaAttributes::empty(), |role| role.attributes());
+            let implicit_role = aria_roles.get_implicit_role(element_name, attributes)?;
             for attribute in attributes.keys() {
-                if attribute.starts_with("aria-")
+                let Ok(aria_attribute) = AriaAttribute::from_str(attribute) else {
+                    continue;
+                };
+                if !role_attributes.contains(&aria_attribute)
                     && !is_valid_aria_props_supported_by_role(
-                        role_name.type_name(),
+                        implicit_role.type_name(),
                         attribute.as_str(),
                     )
                 {

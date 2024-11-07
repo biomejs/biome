@@ -2,7 +2,7 @@
 
 use biome_string_case::Case;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
-use quote::quote;
+use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 use std::{env, fs, io};
@@ -45,21 +45,18 @@ struct Aria {
 }
 
 impl Aria {
-    fn inherits_role(&self, role_name: &str, candidate_role_name: &str) -> Result<bool, String> {
-        if !self.roles.contains_key(candidate_role_name) {
-            return Err(format!("The role '{candidate_role_name}' doesn't exist"));
-        }
+    /// Retuurns direct and indirect superclass roles.
+    fn superclass_roles(&self, role_name: &str) -> Result<BTreeSet<String>, String> {
+        let mut result = BTreeSet::new();
         let mut stack = vec![role_name];
         while let Some(role_name) = stack.pop() {
             let Some(role) = self.roles.get(role_name) else {
                 return Err(format!("The role '{role_name}' doesn't exist"));
             };
-            if role.superclass_roles.contains(candidate_role_name) {
-                return Ok(true);
-            }
             stack.extend(role.superclass_roles.iter().map(String::as_str));
+            result.extend(role.superclass_roles.iter().map(Clone::clone));
         }
-        Ok(false)
+        Ok(result)
     }
 }
 
@@ -83,6 +80,15 @@ struct AriaRole {
     is_accessible_name_required: bool,
     has_presentational_children: bool,
     implicit_values_for_role: BTreeMap<String, String>,
+}
+impl AriaRole {
+    fn all_attributes(&self) -> BTreeSet<&AriaAttributeReference> {
+        self.supported_attributes
+            .iter()
+            .chain(self.required_attributes.iter())
+            .chain(self.inherited_attributes.iter())
+            .collect()
+    }
 }
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd, serde::Deserialize)]
@@ -134,6 +140,11 @@ enum ConceptModule {
     Svg,
     Xforms,
     Xhtml,
+}
+impl ConceptModule {
+    const fn is_html_like(self) -> bool {
+        matches!(self, Self::Dom | Self::Html | Self::Xhtml)
+    }
 }
 
 #[derive(Debug, Eq, Ord, PartialEq, PartialOrd, serde::Deserialize)]
@@ -234,33 +245,45 @@ fn main() -> io::Result<()> {
     let data: Aria = serde_json::from_str(&text)?;
 
     let aria_attributes = generate_aria_attributes(&data.attributes);
+    let aria_roles = generate_aria_roles(&data);
 
     let iso_countries = generate_enums(ISO_COUNTRIES, "IsoCountries");
     let iso_languages = generate_enums(ISO_LANGUAGES, "IsoLanguages");
 
     let tokens = quote! {
         #aria_attributes
+        #aria_roles
         #iso_countries
         #iso_languages
     };
     let ast = tokens.to_string();
 
-    // Format code
-    let ast = syn::parse_file(&ast).unwrap();
-    let ast = prettyplease::unparse(&ast);
+    // Try to parse and then format code
+    let ast = if let Ok(parsed) = syn::parse_file(&ast) {
+        prettyplease::unparse(&parsed)
+    } else {
+        ast
+    };
 
+    // We print the code even if it cannot be parsed,
+    // this allows to debug the code by directly looking at it.
     let out_dir = env::var("OUT_DIR").unwrap();
     fs::write(PathBuf::from(out_dir).join("roles_and_properties.rs"), ast)?;
 
     Ok(())
 }
 
-fn generate_enums(array: &[&str], enum_name: &str) -> TokenStream {
+fn generate_enums(
+    array: impl IntoIterator<Item = impl AsRef<str>>,
+    enum_name: &str,
+) -> TokenStream {
+    let iter = array.into_iter();
     let enum_name = Ident::new(enum_name, Span::call_site());
-    let mut enum_metadata = Vec::with_capacity(array.len());
-    let mut from_enum_metadata = Vec::with_capacity(array.len());
-    let mut from_string_metadata = Vec::with_capacity(array.len());
-    for property in array {
+    let mut enum_metadata = Vec::with_capacity(iter.size_hint().0);
+    let mut from_enum_metadata = Vec::with_capacity(iter.size_hint().0);
+    let mut from_string_metadata = Vec::with_capacity(iter.size_hint().0);
+    for property in iter {
+        let property = property.as_ref();
         let name = Ident::new(&Case::Pascal.convert(property), Span::call_site());
         let property = Literal::string(property);
         from_enum_metadata.push(quote! {
@@ -277,12 +300,12 @@ fn generate_enums(array: &[&str], enum_name: &str) -> TokenStream {
     });
 
     quote! {
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+        #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
         pub enum #enum_name {
             #( #enum_metadata ),*
         }
         impl #enum_name {
-            pub fn as_str(self) -> &'static str {
+            pub const fn as_str(self) -> &'static str {
                 match self {
                     #( #from_enum_metadata ),*
                 }
@@ -305,8 +328,7 @@ fn generate_enums(array: &[&str], enum_name: &str) -> TokenStream {
 }
 
 fn generate_aria_attributes(attributes: &BTreeMap<String, AriaAttribute>) -> TokenStream {
-    let aria_attribute_names: Vec<_> = attributes.keys().map(|name| name.as_str()).collect();
-    let aria_attribute_enum = generate_enums(&aria_attribute_names, "AriaAttribute");
+    let aria_attribute_enum = generate_enums(attributes.keys(), "AriaAttribute");
     let mut deprecated_variants = Vec::new();
     let mut kind_match_lines = Vec::with_capacity(attributes.len());
     let mut value_type_match_lines = Vec::with_capacity(attributes.len());
@@ -379,6 +401,270 @@ fn generate_aria_attributes(attributes: &BTreeMap<String, AriaAttribute>) -> Tok
             pub fn value_type(&self) -> AriaValueType {
                 match self {
                     #( #value_type_match_lines ),*,
+                }
+            }
+        }
+    }
+}
+
+fn generate_aria_roles(aria: &Aria) -> TokenStream {
+    let aria_abstract_role_names = aria
+        .roles
+        .iter()
+        .filter(|(_, data)| data.is_abstract)
+        .map(|(name, _)| name);
+    let aria_abstarct_role_enum = generate_enums(aria_abstract_role_names, "AriaAbstractRole");
+    let aria_concrete_role_names = aria
+        .roles
+        .iter()
+        .filter(|(_, data)| !data.is_abstract)
+        .map(|(name, _)| name);
+    let aria_concrete_role_enum = generate_enums(aria_concrete_role_names, "AriaRole");
+    let mut html_element_names = BTreeSet::new();
+    let mut html_attributes_names = BTreeSet::new();
+    let mut deprecated_variants = Vec::new();
+    let mut base_concepts_match_lines = Vec::new();
+    let mut related_concepts_match_lines = Vec::new();
+    let mut inherited_abstract_role_variants = Vec::new();
+    let mut inherited_concrete_role_variants = Vec::new();
+    let mut required_parent_roles_match_lines = Vec::new();
+    let mut required_attributes_match_lines = Vec::new();
+    let mut prohibited_attributes_match_lines = Vec::new();
+    let mut attributes_match_lines = Vec::with_capacity(aria.roles.len());
+    let mut variants = Vec::new();
+    for (name, data) in &aria.roles {
+        if data.is_abstract {
+            continue;
+        }
+        let superclass_roles = aria.superclass_roles(name).expect("All roles exist");
+        let name = Ident::new(&Case::Pascal.convert(name), Span::call_site());
+        variants.clear();
+        for name in &superclass_roles {
+            let role_data = aria
+                .roles
+                .get(name)
+                .unwrap_or_else(|| panic!("The role '{name}' doesn't exist."));
+            if role_data.is_abstract {
+                let variant_name = Ident::new(&Case::Pascal.convert(name), Span::call_site());
+                variants.push(variant_name);
+            }
+        }
+        if !variants.is_empty() {
+            inherited_abstract_role_variants.push(quote! {
+                Self::#name => AriaAbstractRoles(&[
+                    #( AriaAbstractRole::#variants ),*
+                ])
+            });
+        }
+        variants.clear();
+        for name in &superclass_roles {
+            let role_data = aria
+                .roles
+                .get(name)
+                .unwrap_or_else(|| panic!("The role '{name}' doesn't exist."));
+            if !role_data.is_abstract {
+                let variant_name = Ident::new(&Case::Pascal.convert(name), Span::call_site());
+                variants.push(variant_name);
+            }
+        }
+        if !variants.is_empty() {
+            inherited_concrete_role_variants.push(quote! {
+                Self::#name => AriaRoles(&[
+                    #( AriaRole::#variants ),*
+                ])
+            });
+        }
+        if data.deprecated_in_version.is_some() {
+            deprecated_variants.push(name.clone());
+        }
+        let mut element_instances = Vec::new();
+        for concept in &data.base_concepts {
+            if let Concept::Element {
+                name: elt_name,
+                attributes,
+                module,
+            } = concept
+            {
+                if module.is_html_like() {
+                    html_element_names.insert(elt_name.as_str());
+                    variants.clear();
+                    let mut attribute_instances = Vec::new();
+                    for (attribute_name, value) in attributes {
+                        html_attributes_names.insert(attribute_name.as_str());
+                        let attribute_name =
+                            format_ident!("{}", Case::Pascal.convert(attribute_name));
+                        attribute_instances.push(quote! {
+                            HtmlAttributeInstance {
+                                attribute: HtmlAttribute::#attribute_name,
+                                value: #value,
+                            }
+                        });
+                    }
+                    let elt_name = format_ident!("{}", Case::Pascal.convert(elt_name));
+                    element_instances.push(quote! {
+                        HtmlElementInstance {
+                            element: HtmlElement::#elt_name,
+                            attributes: &[ #( #attribute_instances ),* ],
+                        }
+                    });
+                }
+            }
+        }
+        if !element_instances.is_empty() {
+            base_concepts_match_lines.push(quote! {
+                Self::#name => &[ #( #element_instances ),* ]
+            });
+        }
+        element_instances.clear();
+        for concept in &data.related_concepts {
+            if let Concept::Element {
+                name: elt_name,
+                attributes,
+                module,
+            } = concept
+            {
+                if module.is_html_like() {
+                    html_element_names.insert(elt_name.as_str());
+                    variants.clear();
+                    let mut attribute_instances = Vec::new();
+                    for (attribute_name, value) in attributes {
+                        html_attributes_names.insert(attribute_name.as_str());
+                        let attribute_name =
+                            format_ident!("{}", Case::Pascal.convert(attribute_name));
+                        attribute_instances.push(quote! {
+                            HtmlAttributeInstance {
+                                attribute: HtmlAttribute::#attribute_name,
+                                value: #value,
+                            }
+                        });
+                    }
+                    let elt_name = format_ident!("{}", Case::Pascal.convert(elt_name));
+                    element_instances.push(quote! {
+                        HtmlElementInstance {
+                            element: HtmlElement::#elt_name,
+                            attributes: &[ #( #attribute_instances ),* ],
+                        }
+                    });
+                }
+            }
+        }
+        if !element_instances.is_empty() {
+            related_concepts_match_lines.push(quote! {
+                Self::#name => &[ #( #element_instances ),* ]
+            });
+        }
+        variants.clear();
+        for name in &data.required_parent_roles {
+            let variant_name = Ident::new(&Case::Pascal.convert(name), Span::call_site());
+            variants.push(variant_name);
+        }
+        if !variants.is_empty() {
+            required_parent_roles_match_lines.push(quote! {
+                Self::#name => AriaRoles(&[
+                    #( AriaRole::#variants ),*
+                ])
+            });
+        }
+        variants.clear();
+        for attribute in &data.required_attributes {
+            // Ignore deprecated attributes
+            if attribute.deprecated_in_version.is_none() {
+                let variant = Ident::new(&Case::Pascal.convert(&attribute.name), Span::call_site());
+                variants.push(variant);
+            }
+        }
+        if !variants.is_empty() {
+            required_attributes_match_lines.push(quote! {
+                Self::#name => AriaAttributes(&[
+                    #( AriaAttribute::#variants ),*
+                ])
+            });
+        }
+        variants.clear();
+        for attribute in &data.prohibited_attributes {
+            let variant = Ident::new(&Case::Pascal.convert(&attribute.name), Span::call_site());
+            variants.push(variant);
+        }
+        if !variants.is_empty() {
+            prohibited_attributes_match_lines.push(quote! {
+                Self::#name => AriaAttributes(&[
+                    #( AriaAttribute::#variants ),*
+                ])
+            });
+        }
+        variants.clear();
+        for attribute in data.all_attributes() {
+            let variant = Ident::new(&Case::Pascal.convert(&attribute.name), Span::call_site());
+            variants.push(variant);
+        }
+        if !variants.is_empty() {
+            attributes_match_lines.push(quote! {
+                Self::#name => AriaAttributes(&[
+                    #( AriaAttribute::#variants ),*
+                ])
+            });
+        }
+    }
+    let html_element_enum = generate_enums(&html_element_names, "HtmlElement");
+    let html_attribute_enum = generate_enums(&html_attributes_names, "HtmlAttribute");
+    quote! {
+        #html_element_enum
+        #html_attribute_enum
+        #aria_abstarct_role_enum
+        #aria_concrete_role_enum
+        impl AriaRole {
+            pub fn is_deprecated(self) -> bool {
+                matches!(
+                    self,
+                    #( Self::#deprecated_variants )|*
+                )
+            }
+            pub const fn base_html_elements(self) -> &'static [HtmlElementInstance] {
+                match self {
+                    #( #base_concepts_match_lines, )*
+                    _ => &[],
+                }
+            }
+            pub const fn related_html_elements(self) -> &'static [HtmlElementInstance] {
+                match self {
+                    #( #related_concepts_match_lines, )*
+                    _ => &[],
+                }
+            }
+            pub const fn inherited_abstract_roles(self) -> AriaAbstractRoles {
+                match self {
+                    #( #inherited_abstract_role_variants, )*
+                    _ => AriaAbstractRoles::empty(),
+                }
+            }
+            pub const fn inherited_roles(self) -> AriaRoles {
+                match self {
+                    #( #inherited_concrete_role_variants, )*
+                    _ => AriaRoles::empty(),
+                }
+            }
+            pub const fn required_parent_roles(self) -> AriaRoles {
+                match self {
+                    #( #required_parent_roles_match_lines, )*
+                    _ => AriaRoles::empty(),
+                }
+            }
+            pub const fn required_attributes(self) -> AriaAttributes {
+                match self {
+                    #( #required_attributes_match_lines, )*
+                    _ => AriaAttributes::empty(),
+                }
+            }
+            pub const fn attributes(self) -> AriaAttributes {
+                match self {
+                    #( #attributes_match_lines, )*
+                    _ => AriaAttributes::empty(),
+                }
+            }
+            pub const fn prohibited_attributes(self) -> AriaAttributes {
+                match self {
+                    #( #prohibited_attributes_match_lines, )*
+                    _ => AriaAttributes::empty(),
                 }
             }
         }
