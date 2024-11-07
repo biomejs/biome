@@ -233,43 +233,13 @@ fn main() -> io::Result<()> {
     let text = std::fs::read_to_string("aria-data.json")?;
     let data: Aria = serde_json::from_str(&text)?;
 
-    let abstract_aria_roles: BTreeMap<_, _> = data
-        .roles
-        .iter()
-        .filter(|(_, role)| role.is_abstract)
-        .collect();
-    let abstract_aria_role_names: Vec<_> = abstract_aria_roles
-        .keys()
-        .map(|name| name.as_str())
-        .collect();
-    let structure_aria_roles: Vec<_> = data
-        .roles
-        .keys()
-        .filter(|name| data.inherits_role(name, "structure").is_ok_and(|b| b))
-        .map(|name| name.as_str())
-        .collect();
-    let widget_aria_roles: Vec<_> = data
-        .roles
-        .keys()
-        .filter(|name| data.inherits_role(name, "widget").is_ok_and(|b| b))
-        .map(|name| name.as_str())
-        .collect();
-
-    let aria_properties = generate_aria_properties(&data.attributes);
-
-    let abstract_roles = generate_enums(&abstract_aria_role_names[..], "AriaAbstractRolesEnum");
-    let structure_roles =
-        generate_enums(&structure_aria_roles[..], "AriaDocumentStructureRolesEnum");
-    let widget_roles = generate_enums(&widget_aria_roles[..], "AriaWidgetRolesEnum");
+    let aria_attributes = generate_aria_attributes(&data.attributes);
 
     let iso_countries = generate_enums(ISO_COUNTRIES, "IsoCountries");
     let iso_languages = generate_enums(ISO_LANGUAGES, "IsoLanguages");
 
     let tokens = quote! {
-        #aria_properties
-        #abstract_roles
-        #structure_roles
-        #widget_roles
+        #aria_attributes
         #iso_countries
         #iso_languages
     };
@@ -303,7 +273,7 @@ fn generate_enums(array: &[&str], enum_name: &str) -> TokenStream {
     }
 
     from_string_metadata.push(quote! {
-        _ => Err("aria property not implemented".to_string())
+        _ => Err(())
     });
 
     quote! {
@@ -311,38 +281,48 @@ fn generate_enums(array: &[&str], enum_name: &str) -> TokenStream {
         pub enum #enum_name {
             #( #enum_metadata ),*
         }
-
+        impl #enum_name {
+            pub fn as_str(self) -> &'static str {
+                match self {
+                    #( #from_enum_metadata ),*
+                }
+            }
+        }
         impl std::str::FromStr for #enum_name {
-            type Err = String;
+            type Err = ();
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 match s {
                     #( #from_string_metadata ),*
                 }
             }
         }
-
-        impl #enum_name {
-            pub fn as_str(&self) -> &str {
-                match self {
-                    #( #from_enum_metadata ),*
-                }
+        impl std::fmt::Display for #enum_name {
+            fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+                fmt.write_str(self.as_str())
             }
         }
     }
 }
 
-fn generate_aria_properties(attributes: &BTreeMap<String, AriaAttribute>) -> TokenStream {
+fn generate_aria_attributes(attributes: &BTreeMap<String, AriaAttribute>) -> TokenStream {
     let aria_attribute_names: Vec<_> = attributes.keys().map(|name| name.as_str()).collect();
-    let enum_name = "AriaAttribute";
-    let aria_properties_enum = generate_enums(&aria_attribute_names, enum_name);
-    let mut deprecated = Vec::with_capacity(attributes.len());
-    let mut value_types = Vec::with_capacity(attributes.len());
+    let aria_attribute_enum = generate_enums(&aria_attribute_names, "AriaAttribute");
+    let mut deprecated_variants = Vec::new();
+    let mut kind_match_lines = Vec::with_capacity(attributes.len());
+    let mut value_type_match_lines = Vec::with_capacity(attributes.len());
     for (name, data) in attributes {
         let name = Ident::new(&Case::Pascal.convert(name), Span::call_site());
         if data.deprecated_in_version.is_some() {
-            deprecated.push(quote! { Self::#name });
+            deprecated_variants.push(name.clone());
         }
-        let variant_name = match data.value_type {
+        let kind_variant_name = match data.r#type {
+            AriaAttributeType::Property => quote! { Property },
+            AriaAttributeType::State => quote! { State },
+        };
+        kind_match_lines.push(quote! {
+            Self::#name => AriaAttributeKind::#kind_variant_name
+        });
+        let value_type_variant_name = match data.value_type {
             AriaValueType::Boolean => quote! { Boolean },
             AriaValueType::IdReference => quote! { IdReference },
             AriaValueType::IdReferenceList => quote! { IdReferenceList },
@@ -376,27 +356,29 @@ fn generate_aria_properties(attributes: &BTreeMap<String, AriaAttribute>) -> Tok
                 ])
             }
         } else {
-            quote! {}
+            Default::default()
         };
-        value_types.push(quote! {
-            Self::#name => AriaValueType::#variant_name #params
+        value_type_match_lines.push(quote! {
+            Self::#name => AriaValueType::#value_type_variant_name #params
         });
     }
-    let enum_name = Ident::new(enum_name, Span::call_site());
     quote! {
-        #aria_properties_enum
-
-        impl #enum_name {
+        #aria_attribute_enum
+        impl AriaAttribute {
             pub fn is_deprecated(&self) -> bool {
                 matches!(
                     self,
-                    #( #deprecated )|*,
+                    #( Self::#deprecated_variants )|*
                 )
             }
-
+            pub fn kind(self) -> AriaAttributeKind {
+                match self {
+                    #( #kind_match_lines ),*,
+                }
+            }
             pub fn value_type(&self) -> AriaValueType {
                 match self {
-                    #( #value_types ),*,
+                    #( #value_type_match_lines ),*,
                 }
             }
         }

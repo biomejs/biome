@@ -31,6 +31,12 @@ pub const ISO_LANGUAGES: [&str; 150] = [
     "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
 ];
 
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+pub enum AriaAttributeKind {
+    Property,
+    State,
+}
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum AriaValueType {
     /// `false`/`true`
