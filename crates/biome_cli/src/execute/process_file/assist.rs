@@ -15,8 +15,7 @@ pub(crate) fn assist_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
 ) -> FileResult {
-    let _ =
-        tracing::info_span!("Process assist", path =? workspace_file.path.display()).entered();
+    let _ = tracing::info_span!("Process assist", path =? workspace_file.path.display()).entered();
     let input = workspace_file.input()?;
 
     let only = Vec::new();

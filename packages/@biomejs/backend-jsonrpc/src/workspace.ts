@@ -24,7 +24,7 @@ export type FeatureKind =
 	| "lint"
 	| "organizeImports"
 	| "search"
-	| "assists"
+	| "assist"
 	| "debug";
 export type FileKind = FileKind2[];
 /**
@@ -56,7 +56,7 @@ export interface PartialConfiguration {
 	/**
 	 * Specific configuration for assists
 	 */
-	assists?: PartialAssistsConfiguration;
+	assist?: PartialAssistConfiguration;
 	/**
 	 * Specific configuration for the Css language
 	 */
@@ -106,13 +106,13 @@ export interface PartialConfiguration {
 	 */
 	vcs?: PartialVcsConfiguration;
 }
-export interface PartialAssistsConfiguration {
+export interface PartialAssistConfiguration {
 	/**
-	 * Whether Biome should fail in CLI if the assists were not applied to the code.
+	 * Whether Biome should fail in CLI if the assist were not applied to the code.
 	 */
 	actions?: Actions;
 	/**
-	 * Whether Biome should enable assists via LSP.
+	 * Whether Biome should enable assist via LSP.
 	 */
 	enabled?: boolean;
 	/**
@@ -129,9 +129,9 @@ export interface PartialAssistsConfiguration {
  */
 export interface PartialCssConfiguration {
 	/**
-	 * CSS assists options
+	 * CSS assist options
 	 */
-	assists?: PartialCssAssists;
+	assist?: PartialCssAssist;
 	/**
 	 * CSS formatter options
 	 */
@@ -261,7 +261,7 @@ export interface PartialJsonConfiguration {
 	/**
 	 * Assists options
 	 */
-	assists?: PartialJsonAssists;
+	assists?: PartialJsonAssist;
 	/**
 	 * Formatting options
 	 */
@@ -342,7 +342,7 @@ export interface Actions {
 /**
  * Options that changes how the CSS assists behaves
  */
-export interface PartialCssAssists {
+export interface PartialCssAssist {
 	/**
 	 * Control the assists for CSS files.
 	 */
@@ -554,7 +554,7 @@ These decorators belong to an old proposal, and they are subject to change.
 /**
  * Linter options specific to the JSON linter
  */
-export interface PartialJsonAssists {
+export interface PartialJsonAssist {
 	/**
 	 * Control the linter for JSON (and its super languages) files.
 	 */
@@ -3232,7 +3232,7 @@ export type Category =
 	| "lint/suspicious/useNamespaceKeyword"
 	| "lint/suspicious/useNumberToFixedDigitsArgument"
 	| "lint/suspicious/useValidTypeof"
-	| "assists/source/useSortedKeys"
+	| "assist/source/useSortedKeys"
 	| "syntax/correctness/noTypeOnlyImportAttributes"
 	| "syntax/correctness/noSuperWithoutExtends"
 	| "syntax/correctness/noInitializerWithDefinite"
@@ -3244,7 +3244,7 @@ export type Category =
 	| "stdin"
 	| "configuration"
 	| "organizeImports"
-	| "assists"
+	| "assist"
 	| "migrate"
 	| "deserialize"
 	| "plugin"
@@ -3366,6 +3366,7 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
+	additionalRules: RuleCode[];
 	only: RuleCode[];
 	path: BiomePath;
 	range?: TextRange;
