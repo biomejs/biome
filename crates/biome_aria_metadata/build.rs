@@ -184,7 +184,7 @@ struct AriaAttribute {
     values: BTreeMap<String, ValueDefinition>,
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, Ord, PartialEq, PartialOrd, serde::Deserialize)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize)]
 enum AriaValueType {
     #[default]
     #[serde(rename = "true/false")]
@@ -233,7 +233,6 @@ fn main() -> io::Result<()> {
     let text = std::fs::read_to_string("aria-data.json")?;
     let data: Aria = serde_json::from_str(&text)?;
 
-    let aria_attribute_names: Vec<_> = data.attributes.keys().map(|name| name.as_str()).collect();
     let abstract_aria_roles: BTreeMap<_, _> = data
         .roles
         .iter()
@@ -256,7 +255,7 @@ fn main() -> io::Result<()> {
         .map(|name| name.as_str())
         .collect();
 
-    let aria_properties = generate_enums(&aria_attribute_names[..], "AriaPropertiesEnum");
+    let aria_properties = generate_aria_properties(&data.attributes);
 
     let abstract_roles = generate_enums(&abstract_aria_role_names[..], "AriaAbstractRolesEnum");
     let structure_roles =
@@ -295,7 +294,7 @@ fn generate_enums(array: &[&str], enum_name: &str) -> TokenStream {
         let name = Ident::new(&Case::Pascal.convert(property), Span::call_site());
         let property = Literal::string(property);
         from_enum_metadata.push(quote! {
-            #enum_name::#name => #property
+            Self::#name => #property
         });
         from_string_metadata.push(quote! {
             #property => Ok(#enum_name::#name)
@@ -326,6 +325,78 @@ fn generate_enums(array: &[&str], enum_name: &str) -> TokenStream {
             pub fn as_str(&self) -> &str {
                 match self {
                     #( #from_enum_metadata ),*
+                }
+            }
+        }
+    }
+}
+
+fn generate_aria_properties(attributes: &BTreeMap<String, AriaAttribute>) -> TokenStream {
+    let aria_attribute_names: Vec<_> = attributes.keys().map(|name| name.as_str()).collect();
+    let enum_name = "AriaAttribute";
+    let aria_properties_enum = generate_enums(&aria_attribute_names, enum_name);
+    let mut deprecated = Vec::with_capacity(attributes.len());
+    let mut value_types = Vec::with_capacity(attributes.len());
+    for (name, data) in attributes {
+        let name = Ident::new(&Case::Pascal.convert(name), Span::call_site());
+        if data.deprecated_in_version.is_some() {
+            deprecated.push(quote! { Self::#name });
+        }
+        let variant_name = match data.value_type {
+            AriaValueType::Boolean => quote! { Boolean },
+            AriaValueType::IdReference => quote! { IdReference },
+            AriaValueType::IdReferenceList => quote! { IdReferenceList },
+            AriaValueType::Integer => quote! { Integer },
+            AriaValueType::Number => quote! { Number },
+            AriaValueType::OptionalBoolean => quote! { OptionalBoolean },
+            AriaValueType::String => quote! { String },
+            AriaValueType::Token => quote! { Token },
+            AriaValueType::TokenList => quote! { TokenList },
+            AriaValueType::Tristate => quote! { Tristate },
+        };
+        let params = if !data.values.is_empty()
+            && matches!(
+                data.value_type,
+                AriaValueType::Token | AriaValueType::TokenList
+            ) {
+            let default_value = data
+                .values
+                .iter()
+                .find(|(_, data)| data.is_default)
+                .map(|(name, _)| name);
+            let other_values = data
+                .values
+                .iter()
+                .filter(|(_, data)| !data.is_default)
+                .map(|(name, _)| name);
+            let values = default_value.into_iter().chain(other_values);
+            quote! {
+                (&[
+                    #( #values ),*
+                ])
+            }
+        } else {
+            quote! {}
+        };
+        value_types.push(quote! {
+            Self::#name => AriaValueType::#variant_name #params
+        });
+    }
+    let enum_name = Ident::new(enum_name, Span::call_site());
+    quote! {
+        #aria_properties_enum
+
+        impl #enum_name {
+            pub fn is_deprecated(&self) -> bool {
+                matches!(
+                    self,
+                    #( #deprecated )|*,
+                )
+            }
+
+            pub fn value_type(&self) -> AriaValueType {
+                match self {
+                    #( #value_types ),*,
                 }
             }
         }

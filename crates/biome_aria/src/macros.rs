@@ -56,30 +56,3 @@ macro_rules! define_role {
         }
     };
 }
-
-#[macro_export]
-macro_rules! define_property {
-    ( $id:ident {
-        PROPERTY_TYPE: $property_type:literal,
-        VALUES: $values:expr,
-    }) => {
-        #[derive(Debug)]
-        struct $id;
-
-        impl $id {
-            const PROPERTY_TYPE: &'static str = &$property_type;
-            const VALUES: &'static [&'static str] = &$values;
-        }
-
-        impl AriaPropertyDefinition for $id {
-            fn values(&self) -> Iter<&'static str> {
-                $id::VALUES.iter()
-            }
-
-            fn property_type(&self) -> $crate::AriaPropertyTypeEnum {
-                // SAFETY: PROPERTY_TYPE is internal and should not contain extraneous properties
-                $crate::AriaPropertyTypeEnum::from_str($id::PROPERTY_TYPE).unwrap()
-            }
-        }
-    };
-}
