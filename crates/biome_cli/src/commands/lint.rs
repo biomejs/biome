@@ -134,8 +134,8 @@ impl CommandRunner for LintCommandPayload {
             fix: self.fix,
             unsafe_: self.unsafe_,
             suppress: self.suppress,
-        suppression_reason: self.suppression_reason.clone(),
-            })?;
+            suppression_reason: self.suppression_reason.clone(),
+        })?;
         Ok(Execution::new(TraversalMode::Lint {
             fix_file_mode,
             stdin: self.get_stdin(console)?,

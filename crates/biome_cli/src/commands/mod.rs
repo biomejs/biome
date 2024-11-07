@@ -729,7 +729,8 @@ fn check_fix_incompatible_arguments(options: FixFileModeOptions) -> Result<(), C
     let FixFileModeOptions {
         write,
         suppress,
-       suppression_reason, fix,
+        suppression_reason,
+        fix,
         ..
     } = options;
     if write && fix {
@@ -936,22 +937,24 @@ mod tests {
             write: true,
             fix: true,
             unsafe_: false,
-            suppress: false
+            suppress: false,
+            suppression_reason: None
         })
         .is_err());
     }
 
     #[test]
     fn safe_fixes() {
-        for (write, fix, unsafe_, suppress) in [
-            (true, false, false, false), // --write
-            (false, true, false, false), // --fix
+        for (write, suppress, suppression_reason, fix, unsafe_) in [
+            (true, false, None, false, false), // --write
+            (false, false, None, true, false), // --fix
         ] {
             assert_eq!(
                 determine_fix_file_mode(FixFileModeOptions {
                     write,
                     suppress,
-                    suppression_reason,fix,
+                    suppression_reason,
+                    fix,
                     unsafe_
                 },)
                 .unwrap(),
@@ -962,15 +965,16 @@ mod tests {
 
     #[test]
     fn safe_and_unsafe_fixes() {
-        for (write, fix, unsafe_, suppress) in [
-            (true, false, true, false), // --write --unsafe
-            (false, true, true, false), // --fix --unsafe
+        for (write, fix, unsafe_, suppress, suppression_reason) in [
+            (true, false, true, false, None), // --write --unsafe
+            (false, true, true, false, None), // --fix --unsafe
         ] {
             assert_eq!(
                 determine_fix_file_mode(FixFileModeOptions {
                     write,
                     suppress,
-                    suppression_reason,fix,
+                    suppression_reason,
+                    fix,
                     unsafe_
                 },)
                 .unwrap(),
@@ -981,12 +985,14 @@ mod tests {
 
     #[test]
     fn no_fix() {
-        let (write, suppress, fix, unsafe_) = (false, false, false, false);
+        let (write, suppress, suppression_reason, fix, unsafe_) =
+            (false, false, None, false, false);
         assert_eq!(
             determine_fix_file_mode(FixFileModeOptions {
                 write,
                 suppress,
-                suppression_reason,fix,
+                suppression_reason,
+                fix,
                 unsafe_
             },)
             .unwrap(),
