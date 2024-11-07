@@ -23,19 +23,19 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// ```cjs,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// const dirname = __dirname;
     /// ```
     ///
-    /// ```cjs,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// const filename = __filename;
     /// ```
     ///
-    /// ``` cjs,expect_diagnostic
+    /// ``` js,expect_diagnostic
     /// const foo = { __filename }
     /// ```
     ///
-    /// ```cjs,expect_diagnostic
+    /// ```js,expect_diagnostic
     /// if (__dirname.startsWith("/project/src/")) {}
     /// ```
     ///
