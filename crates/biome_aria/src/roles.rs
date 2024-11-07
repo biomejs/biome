@@ -7,18 +7,6 @@ use std::str::FromStr;
 
 pub trait AriaRoleDefinition: Debug {
     /// It returns an iterator over the properties of the current role
-    ///
-    /// ## Examples
-    ///
-    /// ```
-    /// use biome_aria::AriaRoles;
-    /// let roles = AriaRoles::default();
-    ///
-    /// let checkbox_role = roles.get_role("checkbox").unwrap();
-    ///
-    /// let properties = checkbox_role.properties();
-    /// assert_eq!(properties.len(), 2);
-    /// ```
     fn properties(&self) -> Iter<(&str, bool)>;
 
     /// It returns an iterator over the possible roles of this definition
@@ -76,25 +64,6 @@ define_role! {
 }
 
 #[derive(Debug)]
-/// https://www.w3.org/TR/wai-aria-1.1/#switch
-struct SwitchRole;
-
-impl SwitchRole {
-    const PROPS: &'static [(&'static str, bool)] = &[("aria-checked", true)];
-    const ROLES: &'static [&'static str] = &["checkbox", "widget"];
-}
-
-impl AriaRoleDefinition for SwitchRole {
-    fn properties(&self) -> Iter<(&str, bool)> {
-        Self::PROPS.iter()
-    }
-
-    fn roles(&self) -> Iter<&str> {
-        Self::ROLES.iter()
-    }
-}
-
-#[derive(Debug)]
 /// https://www.w3.org/TR/wai-aria-1.1/#option
 struct OptionRole;
 
@@ -137,29 +106,7 @@ define_role! {
         CONCEPTS: &[("h1", &[]), ("h2", &[]), ("h3", &[]), ("h4", &[]), ("h5", &[]), ("h6", &[])],
     }
 }
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#spinbutton
-    SpinButtonRole {
-        PROPS:  [
-            ("aria-valuemax", true),
-            ("aria-valuemin", true),
-            ("aria-valuenow", true),
-        ],
-        ROLES: ["composite", "input", "range", "widget"],
-        CONCEPTS: &[("hr", &[])],
-    }
-}
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#checkbox
-    SliderRole {
-        PROPS:  [
-            ("aria-valuemax", true),
-            ("aria-valuemin", true),
-            ("aria-valuenow", true),
-        ],
-        ROLES: ["input", "range", "widget"],
-    }
-}
+
 define_role! {
     /// https://www.w3.org/TR/wai-aria-1.1/#separator
     SeparatorRole {
@@ -170,20 +117,6 @@ define_role! {
         ],
         ROLES: ["structure", "widget"],
         CONCEPTS: &[("hr", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#scrollbar
-    ScollbarRole {
-        PROPS:  [
-            ("aria-valuemax", true),
-            ("aria-valuemin", true),
-            ("aria-valuenow", true),
-            ("aria-orientation", true),
-            ("aria-controls", true),
-        ],
-        ROLES: ["range", "widget"],
     }
 }
 
@@ -202,36 +135,6 @@ define_role! {
         PROPS: [("aria-label", false), ("aria-labelledby", false)],
         ROLES: ["window"],
         CONCEPTS: &[("dialog", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#alert
-    AlertRole {
-        PROPS: [],
-        ROLES: ["section"],
-    }
-}
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#alertdialog
-    AlertDialogRole {
-        PROPS: [],
-        ROLES: ["structure"],
-    }
-}
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#application
-    ApplicationRole {
-        PROPS: [],
-        ROLES: ["alert", "dialog"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#banner
-    BannerRole {
-        PROPS: [],
-        ROLES: ["landmark"],
     }
 }
 
@@ -264,14 +167,6 @@ define_role! {
         PROPS: [("aria-labelledby", false)],
         ROLES: ["section"],
         CONCEPTS: &[("dd", &[]), ("dfn", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#feed
-    FeedRole {
-        PROPS: [("aria-labelledby", false), ("aria-setsize", false)],
-        ROLES: ["section"],
     }
 }
 
@@ -366,14 +261,6 @@ define_role! {
 }
 
 define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#log
-    LogRole {
-        PROPS: [],
-        ROLES: ["section"],
-    }
-}
-
-define_role! {
     /// https://w3c.github.io/aria/#main
     MainRole {
         PROPS: [],
@@ -383,74 +270,11 @@ define_role! {
 }
 
 define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#menubar
-    MenubarRole {
-        PROPS: [],
-        ROLES: ["toolbar"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#menu
-    MenuRole {
-        PROPS: [("aria-posinset", false), ("aria-setsize", false)],
-        ROLES: ["select"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#menuitem
-    MenuItemRole {
-        PROPS: [("aria-posinset", false), ("aria-setsize", false)],
-        ROLES: ["command", "widget"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#menuitemcheckbox
-    MenuItemCheckboxRole {
-        PROPS: [("aria-checked", true)],
-        ROLES: ["checkbox", "menuitem", "widget"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#menuitemradio
-    MenuItemRadioRole {
-        PROPS: [("aria-checked", true)],
-        ROLES: ["radio", "menuitemcheckbox", "widget"],
-    }
-}
-
-define_role! {
     /// https://www.w3.org/TR/wai-aria-1.1/#navigation
     NavigationRole {
         PROPS: [],
         ROLES: ["landmark"],
         CONCEPTS: &[("nav", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#note
-    NoteRole {
-        PROPS: [],
-        ROLES: ["section"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#progressbar
-    ProgressBarRole {
-        PROPS: [("aria-valuenow", true), ("aria-valuemin", true), ("aria-valuemax", true)],
-        ROLES: ["range", "widget"],
-    }
-}
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#radiogroup
-    RadiogroupRole {
-        PROPS: [("aria-readonly", false), ("aria-required", false)],
-        ROLES: ["range"],
     }
 }
 
@@ -507,35 +331,11 @@ define_role! {
 }
 
 define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#tab
-    TabRole {
-        PROPS: [("aria-posinset", false), ("aria-selected", false), ("aria-setsize", false)],
-        ROLES: ["sectionhead", "widget"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#tablist
-    TabListRole {
-        PROPS: [("aria-multiselectable", false), ("aria-orientation", false)],
-        ROLES: ["composite"],
-    }
-}
-
-define_role! {
     /// https://www.w3.org/TR/wai-aria-1.1/#table
     TableRole {
         PROPS: [("aria-colcount", false), ("aria-rowcount", false)],
         ROLES: ["section"],
         CONCEPTS: &[("table", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#tabpanel
-    TabPanelRole {
-        PROPS: [],
-        ROLES: ["section"],
     }
 }
 
@@ -561,46 +361,6 @@ define_role! {
         ],
         ROLES: ["input", "widget"],
         CONCEPTS: &[("textarea", &[]), ("input", &[("type", "search")])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#toolbar
-    ToolbarRole {
-        PROPS: [("aria-orientation", false)],
-        ROLES: ["group"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#tooltip
-    TooltipRole {
-        PROPS: [],
-        ROLES: ["section"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#tree
-    TreeRole {
-        PROPS: [("aria-multiselectable", false), ("aria-required", false)],
-        ROLES: ["select"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#treegrid
-    TreeGridRole {
-        PROPS: [],
-        ROLES: ["grid", "tree"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.1/#treeitem
-    TreeItemRole {
-        PROPS: [("aria-expanded", false), ("aria-haspopup", false)],
-        ROLES: ["listitem", "option"],
     }
 }
 
@@ -641,93 +401,6 @@ define_role! {
 }
 
 define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#code
-    CodeRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("code", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#deletion
-    DeletionRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("del", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#directory
-    DirectoryRole {
-        PROPS: [],
-        ROLES: ["list"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#document
-    DocumentRole {
-        PROPS: [],
-        ROLES: ["structure"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#emphasis
-    EmphasisRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("em", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#insertion
-    InsertionRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("ins", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#math
-    MathRole {
-        PROPS: [],
-        ROLES: ["section"],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#strong
-    StrongRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("strong", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#subscript
-    SubScriptRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("sub", &[]), ("sup", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#superscript
-    SuperScriptRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("sub", &[]), ("sup", &[])],
-    }
-}
-
-define_role! {
     /// https://w3c.github.io/graphics-aria/#graphics-document
     GraphicsDocumentRole {
         PROPS: [],
@@ -746,27 +419,11 @@ define_role! {
 }
 
 define_role! {
-    /// https://w3c.github.io/graphics-aria/#graphics-symbol
-    GraphicsSymbolRole {
-        PROPS: [],
-        ROLES: ["img"],
-    }
-}
-
-define_role! {
     /// https://www.w3.org/TR/wai-aria-1.2/#time
     TimeRole {
         PROPS: [],
         ROLES: ["section"],
         CONCEPTS: &[("time", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#timer
-    TimerRole {
-        PROPS: [],
-        ROLES: ["status"],
     }
 }
 
@@ -789,46 +446,11 @@ define_role! {
 }
 
 define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#meter
-    MeterRole {
-        PROPS: [],
-        ROLES: ["range"],
-        CONCEPTS: &[("meter", &[])],
-    }
-}
-
-define_role! {
-    /// https://www.w3.org/TR/wai-aria-1.2/#presentation
-    PresentationRole {
-        PROPS: [],
-        ROLES: ["structure"],
-    }
-}
-
-define_role! {
     /// https://www.w3.org/TR/wai-aria-1.2/#region
     RegionRole {
         PROPS: [],
         ROLES: ["landmark"],
         CONCEPTS: &[("section", &[])],
-    }
-}
-
-define_role! {
-    /// https://w3c.github.io/aria/#mark
-    MarkRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("mark", &[])],
-    }
-}
-
-define_role! {
-    /// https://w3c.github.io/aria/#marquee
-    MarqueeRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("marquee", &[])],
     }
 }
 
@@ -899,114 +521,6 @@ impl<'a> AriaRoles {
         "graphics-object",
         "graphics-symbol",
     ];
-
-    /// It returns the metadata of a role, if it exits.
-    /// These roles don't include abstract roles.
-    ///
-    /// ## Examples
-    ///
-    /// ```
-    /// use biome_aria::AriaRoles;
-    /// let roles = AriaRoles::default();
-    ///
-    ///
-    /// let button_role = roles.get_role("button");
-    /// let made_up_role = roles.get_role("made-up");
-    ///
-    /// assert!(button_role.is_some());
-    /// assert!(made_up_role.is_none());
-    /// ```
-    pub fn get_role(&self, role: &str) -> Option<&'static dyn AriaRoleDefinition> {
-        let result = match role {
-            "alert" => &AlertRole as &dyn AriaRoleDefinition,
-            "alertdialog" => &AlertDialogRole as &dyn AriaRoleDefinition,
-            "application" => &ApplicationRole as &dyn AriaRoleDefinition,
-            "article" => &ArticleRole as &dyn AriaRoleDefinition,
-            "banner" => &BannerRole as &dyn AriaRoleDefinition,
-            "blockquote" => &BlockQuoteRole as &dyn AriaRoleDefinition,
-            "button" => &ButtonRole as &dyn AriaRoleDefinition,
-            "caption" => &CaptionRole as &dyn AriaRoleDefinition,
-            "cell" => &CellRole as &dyn AriaRoleDefinition,
-            "checkbox" => &CheckboxRole as &dyn AriaRoleDefinition,
-            "code" => &CodeRole as &dyn AriaRoleDefinition,
-            "columnheader" => &ColumnHeaderRole as &dyn AriaRoleDefinition,
-            "combobox" => &ComboBoxRole as &dyn AriaRoleDefinition,
-            "complementary" => &ComplementaryRole as &dyn AriaRoleDefinition,
-            "contentinfo" => &ContentInfoRole as &dyn AriaRoleDefinition,
-            "definition" => &DefinitionRole as &dyn AriaRoleDefinition,
-            "delete" => &DeletionRole as &dyn AriaRoleDefinition,
-            "dialog" => &DialogRole as &dyn AriaRoleDefinition,
-            "directory" => &DirectoryRole as &dyn AriaRoleDefinition,
-            "document" => &DocumentRole as &dyn AriaRoleDefinition,
-            "emphasis" => &EmphasisRole as &dyn AriaRoleDefinition,
-            "feed" => &FeedRole as &dyn AriaRoleDefinition,
-            "figure" => &FigureRole as &dyn AriaRoleDefinition,
-            "form" => &FormRole as &dyn AriaRoleDefinition,
-            "generic" => &GenericRole as &dyn AriaRoleDefinition,
-            "graphics-document" => &GraphicsDocumentRole as &dyn AriaRoleDefinition,
-            "graphics-object" => &GraphicsObjectRole as &dyn AriaRoleDefinition,
-            "graphics-symbol" => &GraphicsSymbolRole as &dyn AriaRoleDefinition,
-            "grid" => &GridRole as &dyn AriaRoleDefinition,
-            "gridcell" => &GridCellRole as &dyn AriaRoleDefinition,
-            "group" => &GroupRole as &dyn AriaRoleDefinition,
-            "heading" => &HeadingRole as &dyn AriaRoleDefinition,
-            "img" => &ImgRole as &dyn AriaRoleDefinition,
-            "insertion" => &InsertionRole as &dyn AriaRoleDefinition,
-            "link" => &LinkRole as &dyn AriaRoleDefinition,
-            "list" => &ListRole as &dyn AriaRoleDefinition,
-            "listbox" => &ListBoxRole as &dyn AriaRoleDefinition,
-            "listitem" => &ListItemRole as &dyn AriaRoleDefinition,
-            "log" => &LogRole as &dyn AriaRoleDefinition,
-            "main" => &MainRole as &dyn AriaRoleDefinition,
-            "mark" => &MarkRole as &dyn AriaRoleDefinition,
-            "marquee" => &MarqueeRole as &dyn AriaRoleDefinition,
-            "math" => &MathRole as &dyn AriaRoleDefinition,
-            "menu" => &MenuRole as &dyn AriaRoleDefinition,
-            "menubar" => &MenubarRole as &dyn AriaRoleDefinition,
-            "menuitem" => &MenuItemRole as &dyn AriaRoleDefinition,
-            "menuitemcheckbox" => &MenuItemCheckboxRole as &dyn AriaRoleDefinition,
-            "menuitemradio" => &MenuItemRadioRole as &dyn AriaRoleDefinition,
-            "meter" => &MeterRole as &dyn AriaRoleDefinition,
-            "navigation" => &NavigationRole as &dyn AriaRoleDefinition,
-            "note" => &NoteRole as &dyn AriaRoleDefinition,
-            "option" => &OptionRole as &dyn AriaRoleDefinition,
-            "paragraph" => &ParagraphRole as &dyn AriaRoleDefinition,
-            "presentation" => &PresentationRole as &dyn AriaRoleDefinition,
-            "progressbar" => &ProgressBarRole as &dyn AriaRoleDefinition,
-            "radio" => &RadioRole as &dyn AriaRoleDefinition,
-            "radiogroup" => &RadiogroupRole as &dyn AriaRoleDefinition,
-            "region" => &RegionRole as &dyn AriaRoleDefinition,
-            "row" => &RowRole as &dyn AriaRoleDefinition,
-            "rowgroup" => &RowGroupRole as &dyn AriaRoleDefinition,
-            "rowheader" => &RowHeaderRole as &dyn AriaRoleDefinition,
-            "search" => &SearchRole as &dyn AriaRoleDefinition,
-            "searchbox" => &SearchboxRole as &dyn AriaRoleDefinition,
-            "separator" => &SeparatorRole as &dyn AriaRoleDefinition,
-            "slider" => &SliderRole as &dyn AriaRoleDefinition,
-            "spinbutton" => &SpinButtonRole as &dyn AriaRoleDefinition,
-            "scrollbar" => &ScollbarRole as &dyn AriaRoleDefinition,
-            "status" => &StatusRole as &dyn AriaRoleDefinition,
-            "strong" => &StrongRole as &dyn AriaRoleDefinition,
-            "subscript" => &SubScriptRole as &dyn AriaRoleDefinition,
-            "superscript" => &SuperScriptRole as &dyn AriaRoleDefinition,
-            "switch" => &SwitchRole as &dyn AriaRoleDefinition,
-            "tab" => &TabRole as &dyn AriaRoleDefinition,
-            "table" => &TableRole as &dyn AriaRoleDefinition,
-            "tablist" => &TabListRole as &dyn AriaRoleDefinition,
-            "tabpanel" => &TabPanelRole as &dyn AriaRoleDefinition,
-            "term" => &TermRole as &dyn AriaRoleDefinition,
-            "textbox" => &TextboxRole as &dyn AriaRoleDefinition,
-            "time" => &TimeRole as &dyn AriaRoleDefinition,
-            "timer" => &TimerRole as &dyn AriaRoleDefinition,
-            "toolbar" => &ToolbarRole as &dyn AriaRoleDefinition,
-            "tooltip" => &TooltipRole as &dyn AriaRoleDefinition,
-            "tree" => &TreeRole as &dyn AriaRoleDefinition,
-            "treegrid" => &TreeGridRole as &dyn AriaRoleDefinition,
-            "treeitem" => &TreeItemRole as &dyn AriaRoleDefinition,
-            _ => return None,
-        };
-        Some(result)
-    }
 
     /// Given a element and attributes, it returns the metadata of the element's implicit role.
     ///
