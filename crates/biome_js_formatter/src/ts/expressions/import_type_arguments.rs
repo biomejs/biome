@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use biome_formatter::write;
-use biome_formatter::FormatError::SyntaxError;
 use biome_js_syntax::{TsImportTypeArguments, TsImportTypeArgumentsFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatTsImportTypeArguments;
