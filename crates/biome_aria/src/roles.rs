@@ -1,5 +1,5 @@
-use crate::{define_role, is_aria_property_valid};
-use biome_aria_metadata::AriaAttribute;
+use crate::define_role;
+use biome_aria_metadata::AriaRole;
 use rustc_hash::FxHashMap;
 use std::fmt::Debug;
 use std::slice::Iter;
@@ -24,47 +24,9 @@ pub trait AriaRoleDefinition: Debug {
     /// It returns an iterator over the possible roles of this definition
     fn roles(&self) -> Iter<&str>;
 
-    /// Given a [aria property](ARIA_PROPERTIES) as input, it checks if it's required
-    /// for the current role.
-    ///
-    /// If the property doesn't exist for the current role, [false] is returned.
-    ///
-    /// ## Examples
-    ///
-    /// ```
-    ///
-    /// use biome_aria::AriaRoles;
-    /// let roles = AriaRoles::default();
-    ///
-    /// let checkbox_role = roles.get_role("checkbox").unwrap();
-    ///
-    /// assert_eq!(checkbox_role.is_property_required("aria-readonly"), false);
-    /// assert_eq!(checkbox_role.is_property_required("aria-checked"), true);
-    ///
-    /// ```
-    fn is_property_required(&self, property_to_check: &str) -> bool {
-        if is_aria_property_valid(property_to_check) {
-            let property_to_check = AriaAttribute::from_str(property_to_check);
-            if let Ok(property_to_check) = property_to_check {
-                for (property, required) in self.properties() {
-                    let property = AriaAttribute::from_str(property).unwrap();
-                    if property == property_to_check {
-                        return *required;
-                    }
-                }
-            }
-        }
-        false
-    }
-
     /// Whether the current role is interactive
     fn is_interactive(&self) -> bool {
         self.roles().any(|role| *role == "widget")
-    }
-
-    /// Returns a concrete type name.
-    fn type_name(&self) -> &'static str {
-        std::any::type_name::<Self>()
     }
 }
 
@@ -1054,112 +1016,109 @@ impl<'a> AriaRoles {
         element: &str,
         // To generate `attributes`, you can use `biome_js_analyze::services::aria::AriaServices::extract_defined_attributes`
         attributes: &FxHashMap<String, Vec<String>>,
-    ) -> Option<&'static dyn AriaRoleDefinition> {
-        let result = match element {
-            "article" => &ArticleRole as &dyn AriaRoleDefinition,
-            "aside" => &ComplementaryRole as &dyn AriaRoleDefinition,
-            "blockquote" => &BlockQuoteRole as &dyn AriaRoleDefinition,
-            "button" => &ButtonRole as &dyn AriaRoleDefinition,
-            "caption" => &CaptionRole as &dyn AriaRoleDefinition,
-            "code" => &CodeRole as &dyn AriaRoleDefinition,
-            "datalist" => &ListBoxRole as &dyn AriaRoleDefinition,
-            "del" => &DeletionRole as &dyn AriaRoleDefinition,
-            "dd" => &DefinitionRole as &dyn AriaRoleDefinition,
-            "dt" => &TermRole as &dyn AriaRoleDefinition,
-            "dfn" => &TermRole as &dyn AriaRoleDefinition,
-            "mark" => &MarkRole as &dyn AriaRoleDefinition,
-            "dialog" => &DialogRole as &dyn AriaRoleDefinition,
-            "em" => &EmphasisRole as &dyn AriaRoleDefinition,
-            "figure" => &FigureRole as &dyn AriaRoleDefinition,
-            "form" => &FormRole as &dyn AriaRoleDefinition,
-            "hr" => &SeparatorRole as &dyn AriaRoleDefinition,
-            "html" => &DocumentRole as &dyn AriaRoleDefinition,
-            "ins" => &InsertionRole as &dyn AriaRoleDefinition,
-            "main" => &MainRole as &dyn AriaRoleDefinition,
-            "marquee" => &MarqueeRole as &dyn AriaRoleDefinition,
-            "math" => &MathRole as &dyn AriaRoleDefinition,
-            "menu" => &ListRole as &dyn AriaRoleDefinition,
+    ) -> Option<AriaRole> {
+        Some(match element {
+            "article" => AriaRole::Article,
+            "aside" => AriaRole::Complementary,
+            "blockquote" => AriaRole::Blockquote,
+            "button" => AriaRole::Button,
+            "caption" => AriaRole::Caption,
+            "code" => AriaRole::Code,
+            "datalist" => AriaRole::Listbox,
+            "del" => AriaRole::Deletion,
+            "dd" => AriaRole::Definition,
+            "dt" => AriaRole::Term,
+            "dfn" => AriaRole::Term,
+            "mark" => AriaRole::Mark,
+            "dialog" => AriaRole::Dialog,
+            "em" => AriaRole::Emphasis,
+            "figure" => AriaRole::Figure,
+            "form" => AriaRole::Form,
+            "hr" => AriaRole::Separator,
+            "html" => AriaRole::Document,
+            "ins" => AriaRole::Insertion,
+            "main" => AriaRole::Main,
+            "marquee" => AriaRole::Marquee,
+            "math" => AriaRole::Math,
+            "menu" => AriaRole::List,
             "menuitem" => {
                 let type_values = attributes.get("type")?;
                 match type_values.first()?.as_str() {
-                    "checkbox" => &MenuItemCheckboxRole as &dyn AriaRoleDefinition,
-                    "radio" => &MenuItemRadioRole as &dyn AriaRoleDefinition,
-                    _ => &MenuItemRole as &dyn AriaRoleDefinition,
+                    "checkbox" => AriaRole::Menuitemcheckbox,
+                    "radio" => AriaRole::Menuitemradio,
+                    _ => AriaRole::Menuitem,
                 }
             }
-            "meter" => &MeterRole as &dyn AriaRoleDefinition,
-            "nav" => &NavigationRole as &dyn AriaRoleDefinition,
-            "ul" | "ol" => &ListRole as &dyn AriaRoleDefinition,
-            "li" => &ListItemRole as &dyn AriaRoleDefinition,
-            "option" => &OptionRole as &dyn AriaRoleDefinition,
-            "optgroup" => &GroupRole as &dyn AriaRoleDefinition,
-            "output" => &StatusRole as &dyn AriaRoleDefinition,
-            "p" => &ParagraphRole as &dyn AriaRoleDefinition,
-            "progress" => &ProgressBarRole as &dyn AriaRoleDefinition,
-            "search" => &SearchRole as &dyn AriaRoleDefinition,
-            "strong" => &StrongRole as &dyn AriaRoleDefinition,
-            "sub" => &SubScriptRole as &dyn AriaRoleDefinition,
-            "sup" => &SuperScriptRole as &dyn AriaRoleDefinition,
-            "svg" => &GraphicsDocumentRole as &dyn AriaRoleDefinition,
-            "table" => &TableRole as &dyn AriaRoleDefinition,
-            "textarea" => &TextboxRole as &dyn AriaRoleDefinition,
-            "tr" => &RowRole as &dyn AriaRoleDefinition,
+            "meter" => AriaRole::Meter,
+            "nav" => AriaRole::Navigation,
+            "ul" | "ol" => AriaRole::List,
+            "li" => AriaRole::Listitem,
+            "option" => AriaRole::Option,
+            "optgroup" => AriaRole::Group,
+            "output" => AriaRole::Status,
+            "p" => AriaRole::Paragraph,
+            "progress" => AriaRole::Progressbar,
+            "search" => AriaRole::Search,
+            "strong" => AriaRole::Strong,
+            "sub" => AriaRole::Subscript,
+            "sup" => AriaRole::Superscript,
+            "table" => AriaRole::Table,
+            "textarea" => AriaRole::Textbox,
+            "tr" => AriaRole::Row,
             // cell if a descendant of a <table> element,
             // but this crate does not support checking a descendant of an element.
             //
             // ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/td
-            "td" => &CellRole as &dyn AriaRoleDefinition,
+            "td" => AriaRole::Cell,
             // <th> element is able to be a rowheader, columnheader,
             // but this crate does not support checking a descendant of an element.
             //
             // ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
-            "th" => &RowHeaderRole as &dyn AriaRoleDefinition,
-            "time" => &TimeRole as &dyn AriaRoleDefinition,
-            "address" | "details" | "fieldset" => &GroupRole as &dyn AriaRoleDefinition,
-            "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => &HeadingRole as &dyn AriaRoleDefinition,
-            "tbody" | "tfoot" | "thead" => &RowGroupRole as &dyn AriaRoleDefinition,
+            "th" => AriaRole::Rowheader,
+            "time" => AriaRole::Time,
+            "address" | "details" | "fieldset" => AriaRole::Group,
+            "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => AriaRole::Heading,
+            "tbody" | "tfoot" | "thead" => AriaRole::Rowgroup,
             "input" => {
                 let type_values = attributes.get("type")?;
                 match type_values.first()?.as_str() {
-                    "checkbox" => &CheckboxRole as &dyn AriaRoleDefinition,
-                    "number" => &SpinButtonRole as &dyn AriaRoleDefinition,
-                    "radio" => &RadioRole as &dyn AriaRoleDefinition,
-                    "range" => &SliderRole as &dyn AriaRoleDefinition,
-                    "button" | "image" | "reset" | "submit" => {
-                        &ButtonRole as &dyn AriaRoleDefinition
-                    }
+                    "checkbox" => AriaRole::Checkbox,
+                    "number" => AriaRole::Spinbutton,
+                    "radio" => AriaRole::Radio,
+                    "range" => AriaRole::Slider,
+                    "button" | "image" | "reset" | "submit" => AriaRole::Button,
                     "search" => match attributes.get("list") {
-                        Some(_) => &ComboBoxRole as &dyn AriaRoleDefinition,
-                        _ => &SearchboxRole as &dyn AriaRoleDefinition,
+                        Some(_) => AriaRole::Combobox,
+                        _ => AriaRole::Searchbox,
                     },
                     "email" | "tel" | "url" => match attributes.get("list") {
-                        Some(_) => &ComboBoxRole as &dyn AriaRoleDefinition,
-                        _ => &TextboxRole as &dyn AriaRoleDefinition,
+                        Some(_) => AriaRole::Combobox,
+                        _ => AriaRole::Textbox,
                     },
-                    "text" => &TextboxRole as &dyn AriaRoleDefinition,
-                    _ => &TextboxRole as &dyn AriaRoleDefinition,
+                    "text" => AriaRole::Textbox,
+                    _ => AriaRole::Textbox,
                 }
             }
-            "a" | "area" => match attributes.get("href") {
-                Some(_) => &LinkRole as &dyn AriaRoleDefinition,
-                _ => &GenericRole as &dyn AriaRoleDefinition,
+            "a" | "area" | "link" => match attributes.get("href") {
+                Some(_) => AriaRole::Link,
+                _ => AriaRole::Generic,
             },
             "img" => match attributes.get("alt") {
                 Some(values) => {
                     if values.iter().any(|x| !x.is_empty()) {
-                        &ImgRole as &dyn AriaRoleDefinition
+                        AriaRole::Img
                     } else {
-                        &PresentationRole as &dyn AriaRoleDefinition
+                        AriaRole::Presentation
                     }
                 }
-                None => &ImgRole as &dyn AriaRoleDefinition,
+                None => AriaRole::Img,
             },
             "section" => {
                 let has_accessible_name = attributes.get("aria-labelledby").is_some()
                     || attributes.get("aria-label").is_some()
                     || attributes.get("title").is_some();
                 if has_accessible_name {
-                    &RegionRole as &dyn AriaRoleDefinition
+                    AriaRole::Region
                 } else {
                     return None;
                 }
@@ -1174,24 +1133,22 @@ impl<'a> AriaRoles {
                     None => 0,
                 };
                 let multiple = attributes.get("multiple");
-
                 if multiple.is_none() && size <= 1 {
-                    &ComboBoxRole as &dyn AriaRoleDefinition
+                    AriaRole::Combobox
                 } else {
-                    &ListBoxRole as &dyn AriaRoleDefinition
+                    AriaRole::Listbox
                 }
             }
             "b" | "bdi" | "bdo" | "body" | "data" | "div" | "hgroup" | "i" | "q" | "samp"
-            | "small" | "span" | "u" | "pre" => &GenericRole as &dyn AriaRoleDefinition,
+            | "small" | "span" | "u" | "pre" => AriaRole::Generic,
             "header" | "footer" => {
                 // This crate does not support checking a descendant of an element.
                 // header (maybe BannerRole): https://www.w3.org/WAI/ARIA/apg/patterns/landmarks/examples/banner.html
                 // footer (maybe ContentInfoRole): https://www.w3.org/WAI/ARIA/apg/patterns/landmarks/examples/contentinfo.html
-                &GenericRole as &dyn AriaRoleDefinition
+                AriaRole::Generic
             }
             _ => return None,
-        };
-        Some(result)
+        })
     }
 
     /// Given the name of element, the function tells whether it's interactive
@@ -1356,13 +1313,13 @@ impl<'a> AriaRoles {
         &self,
         element_name: &str,
         attributes: &FxHashMap<String, Vec<String>>,
-    ) -> Option<&'static dyn AriaRoleDefinition> {
+    ) -> Option<AriaRole> {
         attributes
             .get("role")
             .and_then(|role| role.first())
             .map_or_else(
                 || self.get_implicit_role(element_name, attributes),
-                |r| self.get_role(r),
+                |r| AriaRole::from_str(r).ok(),
             )
     }
 
@@ -1390,10 +1347,9 @@ impl<'a> AriaRoles {
 
         let role_name = self.get_role_by_element_name(element_name, attributes);
 
-        match role_name.map(|role| role.type_name()) {
-            Some("biome_aria::roles::PresentationRole" | "biome_aria::roles::GenericRole") => false,
+        match role_name {
+            None | Some(AriaRole::Presentation | AriaRole::Generic) => false,
             Some(_) => true,
-            None => false,
         }
     }
 }
@@ -1426,6 +1382,7 @@ mod test {
     use rustc_hash::FxHashMap;
 
     use crate::AriaRoles;
+    use biome_aria_metadata::AriaRole;
 
     #[test]
     fn should_be_interactive() {
@@ -1463,16 +1420,13 @@ mod test {
         let implicit_role = aria_roles
             .get_implicit_role("button", &FxHashMap::default())
             .unwrap();
-        assert_eq!(implicit_role.type_name(), "biome_aria::roles::ButtonRole");
+        assert_eq!(implicit_role, AriaRole::Button);
 
         // <input type="search">
         let mut attributes = FxHashMap::default();
         attributes.insert("type".to_string(), vec!["search".to_string()]);
         let implicit_role = aria_roles.get_implicit_role("input", &attributes).unwrap();
-        assert_eq!(
-            implicit_role.type_name(),
-            "biome_aria::roles::SearchboxRole"
-        );
+        assert_eq!(implicit_role, AriaRole::Searchbox);
 
         // <select name="animals" multiple size="4">
         let mut attributes = FxHashMap::default();
@@ -1480,6 +1434,6 @@ mod test {
         attributes.insert("multiple".to_string(), vec![String::new()]);
         attributes.insert("size".to_string(), vec!["4".to_string()]);
         let implicit_role = aria_roles.get_implicit_role("select", &attributes).unwrap();
-        assert_eq!(implicit_role.type_name(), "biome_aria::roles::ListBoxRole");
+        assert_eq!(implicit_role, AriaRole::Listbox);
     }
 }

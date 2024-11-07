@@ -1,8 +1,10 @@
+use std::str::FromStr;
+
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
-use biome_aria::{roles::AriaRoleDefinition, AriaRoles};
+use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList,
@@ -76,9 +78,9 @@ impl Rule for NoRedundantRoles {
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-        let explicit_role = get_explicit_role(aria_roles, &role_attribute_value)?;
+        let explicit_role = get_explicit_role(&role_attribute_value)?;
 
-        let is_redundant = implicit_role.type_name() == explicit_role.type_name();
+        let is_redundant = implicit_role == explicit_role;
         if is_redundant {
             return Some(RuleState {
                 redundant_attribute: role_attribute,
@@ -131,17 +133,14 @@ fn get_element_name_and_attributes(node: &AnyJsxElement) -> Option<(String, JsxA
     }
 }
 
-fn get_explicit_role(
-    aria_roles: &AriaRoles,
-    role_attribute_value: &AnyJsxAttributeValue,
-) -> Option<&'static dyn AriaRoleDefinition> {
+fn get_explicit_role(role_attribute_value: &AnyJsxAttributeValue) -> Option<AriaRole> {
     let static_value = role_attribute_value.as_static_value()?;
 
     // If a role attribute has multiple values, the first valid value (specified role) will be used.
     // Check: https://www.w3.org/TR/2014/REC-wai-aria-implementation-20140320/#mapping_role
     let explicit_role = static_value
         .text()
-        .split(' ')
-        .find_map(|role| aria_roles.get_role(role))?;
+        .split_ascii_whitespace()
+        .find_map(|value| AriaRole::from_str(value).ok())?;
     Some(explicit_role)
 }
