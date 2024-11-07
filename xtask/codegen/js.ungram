@@ -2144,13 +2144,10 @@ TsImportTypeAssertionBlock =
 // a: typeof import("mod", { with: { "resolution-mode": "import" } })
 //                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 TsImportTypeArguments = 
-  '('  
-     argument: AnyTsType
-	  (
-		','
-		TsImportTypeAssertionBlock
-	  )?
-  ')'
+    '(' 
+    argument: AnyTsType 
+	(',' TsImportTypeAssertionBlock )?
+	')'
 
 // a: import("./test").T<typeof X>
 //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
