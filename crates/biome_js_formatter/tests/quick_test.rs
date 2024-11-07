@@ -17,10 +17,6 @@ fn quick_test() {
 export let shim: typeof import("./foo2") = {
     Bar: Bar2
 };
-
-export interface Foo {
-    bar: import('immutable').Map<string, int>;
-}
     "#;
     let source_type = JsFileSource::tsx();
     let tree = parse(
@@ -28,7 +24,6 @@ export interface Foo {
         source_type,
         JsParserOptions::default().with_parse_class_parameter_decorators(),
     );
-    eprintln!("tree: {:?}", tree.tree());
     let options = JsFormatOptions::new(source_type)
         .with_indent_style(IndentStyle::Space)
         .with_line_width(LineWidth::try_from(80).unwrap())

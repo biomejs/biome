@@ -14,21 +14,16 @@ impl FormatNodeRule<TsImportTypeArguments> for FormatTsImportTypeArguments {
             r_paren_token,
         } = node.as_fields();
 
-        if comma_token.is_some() && ts_import_type_assertion_block.is_some() {
-            write!(
-                f,
-                [
-                    l_paren_token.format(),
-                    argument.format(),
-                    comma_token.format(),
-                    space(),
-                    ts_import_type_assertion_block.format(),
-                    space(),
-                    r_paren_token.format()
-                ]
-            )
-        } else {
-            Err(SyntaxError)
+        write!(f, [l_paren_token.format(), argument.format()])?;
+
+        if let Some(comma_token) = comma_token {
+            write!(f, [comma_token.format(), space()])?;
         }
+
+        if let Some(ts_import_type_assertion_block) = ts_import_type_assertion_block {
+            write!(f, [ts_import_type_assertion_block.format()])?;
+        }
+
+        write!(f, [r_paren_token.format()])
     }
 }
