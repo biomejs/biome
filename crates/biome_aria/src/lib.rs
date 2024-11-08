@@ -2,11 +2,9 @@ use std::str::FromStr;
 
 pub mod iso;
 mod macros;
-pub mod properties;
 pub mod roles;
 
-pub use biome_aria_metadata::{AriaPropertiesEnum, AriaPropertyTypeEnum};
-pub use properties::AriaProperties;
+pub use biome_aria_metadata::{AriaAttribute, AriaValueType};
 pub(crate) use roles::AriaRoleDefinition;
 pub use roles::AriaRoles;
 
@@ -21,7 +19,7 @@ pub use roles::AriaRoles;
 /// assert!(is_aria_property_valid("aria-checked"));
 /// ```
 pub fn is_aria_property_valid(property: &str) -> bool {
-    AriaPropertiesEnum::from_str(property).is_ok()
+    AriaAttribute::from_str(property).is_ok()
 }
 
 #[cfg(test)]

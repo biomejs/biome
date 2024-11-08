@@ -1,5 +1,5 @@
 use crate::{define_role, is_aria_property_valid};
-use biome_aria_metadata::AriaPropertiesEnum;
+use biome_aria_metadata::AriaAttribute;
 use rustc_hash::FxHashMap;
 use std::fmt::Debug;
 use std::slice::Iter;
@@ -44,10 +44,10 @@ pub trait AriaRoleDefinition: Debug {
     /// ```
     fn is_property_required(&self, property_to_check: &str) -> bool {
         if is_aria_property_valid(property_to_check) {
-            let property_to_check = AriaPropertiesEnum::from_str(property_to_check);
+            let property_to_check = AriaAttribute::from_str(property_to_check);
             if let Ok(property_to_check) = property_to_check {
                 for (property, required) in self.properties() {
-                    let property = AriaPropertiesEnum::from_str(property).unwrap();
+                    let property = AriaAttribute::from_str(property).unwrap();
                     if property == property_to_check {
                         return *required;
                     }

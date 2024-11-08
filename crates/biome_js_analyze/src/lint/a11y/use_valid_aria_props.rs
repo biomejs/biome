@@ -1,7 +1,9 @@
-use crate::services::aria::Aria;
+use std::str::FromStr;
+
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_aria_metadata::AriaAttribute;
 use biome_console::markup;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::JsxAttribute;
@@ -35,14 +37,13 @@ declare_lint_rule! {
 }
 
 impl Rule for UseValidAriaProps {
-    type Query = Aria<AnyJsxElement>;
+    type Query = Ast<AnyJsxElement>;
     type State = JsxAttribute;
     type Signals = Box<[Self::State]>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let aria_properties = ctx.aria_properties();
 
         // check attributes that belong only to HTML elements
         if node.is_element() {
@@ -54,9 +55,7 @@ impl Rule for UseValidAriaProps {
                     let attribute_name =
                         attribute.name().ok()?.as_jsx_name()?.value_token().ok()?;
                     if attribute_name.text_trimmed().starts_with("aria-")
-                        && aria_properties
-                            .get_property(attribute_name.text_trimmed())
-                            .is_none()
+                        && AriaAttribute::from_str(attribute_name.text_trimmed()).is_err()
                     {
                         Some(attribute.clone())
                     } else {
