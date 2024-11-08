@@ -1,8 +1,10 @@
+use std::str::FromStr;
+
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
-use biome_aria::AriaRoles;
+use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, AnyNumberLikeExpression, TextRange,
@@ -94,7 +96,7 @@ impl Rule for NoNoninteractiveTabindex {
             };
 
             let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-            if attribute_has_interactive_role(&role_attribute_value, aria_roles)? {
+            if attribute_has_interactive_role(&role_attribute_value)? {
                 return None;
             }
 
@@ -167,9 +169,9 @@ fn attribute_has_negative_tabindex(
 }
 
 /// Checks if the given role attribute value is interactive or not based on ARIA roles.
-fn attribute_has_interactive_role(
-    role_attribute_value: &AnyJsxAttributeValue,
-    aria_roles: &AriaRoles,
-) -> Option<bool> {
-    Some(aria_roles.is_role_interactive(role_attribute_value.as_static_value()?.text()))
+fn attribute_has_interactive_role(role_attribute_value: &AnyJsxAttributeValue) -> Option<bool> {
+    Some(
+        AriaRole::from_str(role_attribute_value.as_static_value()?.text())
+            .is_ok_and(|role| role.is_interactive()),
+    )
 }

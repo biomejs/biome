@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -29,7 +30,7 @@ expression: invalid.jsx
 	<hgroup onClick={() => {}} />
 	<i onClick={() => {}} />
 	<kbd onClick={() => {}} />
-	<link onClick={() => {}} href="#" />
+
 	<map onClick={() => {}} />
 	<meta onClick={() => {}} />
 	<noscript onClick={() => {}} />
@@ -446,7 +447,7 @@ invalid.jsx:24:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
   > 24 │ 	<i onClick={() => {}} />
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^
     25 │ 	<kbd onClick={() => {}} />
-    26 │ 	<link onClick={() => {}} href="#" />
+    26 │ 
   
   i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
@@ -462,25 +463,8 @@ invalid.jsx:25:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
     24 │ 	<i onClick={() => {}} />
   > 25 │ 	<kbd onClick={() => {}} />
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ 	<link onClick={() => {}} href="#" />
+    26 │ 
     27 │ 	<map onClick={() => {}} />
-  
-  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
-  
-
-```
-
-```
-invalid.jsx:26:2 lint/nursery/noStaticElementInteractions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Static Elements should not be interactive.
-  
-    24 │ 	<i onClick={() => {}} />
-    25 │ 	<kbd onClick={() => {}} />
-  > 26 │ 	<link onClick={() => {}} href="#" />
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ 	<map onClick={() => {}} />
-    28 │ 	<meta onClick={() => {}} />
   
   i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
   
@@ -493,7 +477,7 @@ invalid.jsx:27:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
   ! Static Elements should not be interactive.
   
     25 │ 	<kbd onClick={() => {}} />
-    26 │ 	<link onClick={() => {}} href="#" />
+    26 │ 
   > 27 │ 	<map onClick={() => {}} />
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^
     28 │ 	<meta onClick={() => {}} />
@@ -509,7 +493,6 @@ invalid.jsx:28:2 lint/nursery/noStaticElementInteractions ━━━━━━━�
 
   ! Static Elements should not be interactive.
   
-    26 │ 	<link onClick={() => {}} href="#" />
     27 │ 	<map onClick={() => {}} />
   > 28 │ 	<meta onClick={() => {}} />
        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
