@@ -2125,14 +2125,40 @@ TsMappedTypeReadonlyModifierClause =
 	operator_token: ('+' | '-')?
 	'readonly'
 
+// a: typeof import("mod", { with: { "resolution-mode": "import" } })
+//                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TsImportTypeAssertion = 
+  assertion_kind: ('assert' | 'with')
+  ':'
+  '{'
+  assertions: JsImportAssertionEntryList
+  '}'
+
+// a: typeof import("mod", { with: { "resolution-mode": "import" } })
+//                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TsImportTypeAssertionBlock = 
+	'{'
+	type_assertion: TsImportTypeAssertion
+	'}'
+
+// a: typeof import("mod", { with: { "resolution-mode": "import" } })
+//                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TsImportTypeArguments = 
+    '(' 
+    argument: AnyTsType 
+	(',' TsImportTypeAssertionBlock )?
+	')'
+
 // a: import("./test").T<typeof X>
 //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // a: import("./test")<string>
 //    ^^^^^^^^^^^^^^^^^^^^^^^^^
+// a: typeof import("./test", { with: { "resolution-mode": "import" } })
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 TsImportType =
 	'typeof'?
 	'import'
-	arguments: JsCallArguments
+	arguments: TsImportTypeArguments
 	qualifier_clause: TsImportTypeQualifier?
 	type_arguments: TsTypeArguments?
 

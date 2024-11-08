@@ -36,6 +36,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 ### Bug fixes
 
 - Fix [#4121](https://github.com/biomejs/biome/issues/4326), don't ident a CSS selector when has leading comments. Contributed by @fireairforce
+- Fix [#4334](https://github.com/biomejs/biome/issues/4334), don't insert trailing comma on type import statement. Contributed by @fireairforce
 
 ### JavaScript APIs
 
