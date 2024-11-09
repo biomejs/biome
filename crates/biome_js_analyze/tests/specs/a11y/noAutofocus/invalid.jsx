@@ -11,4 +11,5 @@
     <div autoFocus />
     <div autoFocus={true} />
     <div autoFocus={false} />
+    <div popover={false}><input autoFocus /></div>
 </>

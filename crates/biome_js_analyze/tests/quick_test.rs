@@ -14,7 +14,7 @@ use std::{ffi::OsStr, fs::read_to_string, path::Path, slice};
 #[ignore]
 #[test]
 fn quick_test() {
-    let input_file = Path::new("tests/specs/nursery/useSortedClasses/issue.jsx");
+    let input_file = Path::new("tests/specs/a11y/noAutofocus/invalid.jsx");
     let file_name = input_file.file_name().and_then(OsStr::to_str).unwrap();
 
     let (group, rule) = parse_test_path(input_file);
