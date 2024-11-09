@@ -10,7 +10,7 @@ use biome_fs::FileSystem;
 use biome_grit_patterns::GritTargetLanguage;
 use biome_service::configuration::LoadedConfiguration;
 use biome_service::workspace::ParsePatternParams;
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct SearchCommandPayload {
@@ -28,7 +28,7 @@ impl CommandRunner for SearchCommandPayload {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        _fs: &DynRef<'_, dyn FileSystem>,
+        _fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError> {
         let LoadedConfiguration {
@@ -44,7 +44,7 @@ impl CommandRunner for SearchCommandPayload {
 
     fn get_files_to_process(
         &self,
-        _fs: &DynRef<'_, dyn FileSystem>,
+        _fs: &dyn FileSystem,
         _configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         Ok(self.paths.clone())

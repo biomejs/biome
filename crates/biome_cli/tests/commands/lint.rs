@@ -16,10 +16,11 @@ use crate::configs::{
     CONFIG_LINTER_UPGRADE_DIAGNOSTIC, CONFIG_RECOMMENDED_GROUP,
 };
 use crate::snap_test::{assert_file_contents, markup_to_string, SnapshotPayload};
-use crate::{assert_cli_snapshot, run_cli, FORMATTED, LINT_ERROR, PARSE_ERROR};
+use crate::{
+    assert_cli_snapshot, run_cli, run_cli_with_dyn_fs, FORMATTED, LINT_ERROR, PARSE_ERROR,
+};
 use biome_console::{markup, BufferConsole, LogLevel, MarkupBuf};
 use biome_fs::{ErrorEntry, FileSystemExt, MemoryFileSystem, OsFileSystem};
-use biome_service::DynRef;
 
 const ERRORS: &str = r#"
 for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);for(;true;);
@@ -54,14 +55,10 @@ const NURSERY_UNSTABLE: &str = r#"if(a = b) {}"#;
 
 #[test]
 fn lint_help() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("lint"), "--help"].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "--help"].as_slice()));
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -82,10 +79,10 @@ fn ok() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), FORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (_, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -99,10 +96,10 @@ fn ok_read_only() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), FORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (_, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -116,10 +113,10 @@ fn parse_error() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), PARSE_ERROR.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -139,10 +136,10 @@ fn maximum_diagnostics() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), ERRORS.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -184,17 +181,10 @@ fn apply_ok() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--write"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -224,17 +214,10 @@ fn apply_noop() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), FIX_AFTER.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--write"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -256,12 +239,12 @@ fn apply_suggested_error() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--write",
                 "--unsafe",
                 file_path.as_os_str().to_str().unwrap(),
@@ -289,12 +272,12 @@ fn apply_suggested() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--write",
                 "--unsafe",
                 file_path.as_os_str().to_str().unwrap(),
@@ -345,12 +328,12 @@ function f() { arguments; }
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), source.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--write",
                 "--unsafe",
                 test1.as_os_str().to_str().unwrap(),
@@ -385,17 +368,10 @@ fn no_lint_if_linter_is_disabled_when_run_apply() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), CONFIG_LINTER_DISABLED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--write"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -428,17 +404,10 @@ fn no_lint_if_linter_is_disabled_when_run_apply_biome_jsonc() {
     let config_path = Path::new("biome.jsonc");
     fs.insert(config_path.into(), CONFIG_LINTER_DISABLED_JSONC.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--write"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -471,10 +440,10 @@ fn no_lint_if_linter_is_disabled() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), CONFIG_LINTER_DISABLED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -507,17 +476,10 @@ fn should_disable_a_rule() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), CONFIG_LINTER_SUPPRESSED_RULE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--write"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -553,17 +515,10 @@ fn should_disable_a_rule_group() {
         CONFIG_LINTER_SUPPRESSED_GROUP.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--write"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -598,10 +553,10 @@ fn downgrade_severity() {
     let file_path = Path::new("file.js");
     fs.insert(file_path.into(), NO_DEBUGGER.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     println!("{console:?}");
@@ -644,12 +599,12 @@ fn downgrade_severity_info() {
     let file_path = Path::new("file.js");
     fs.insert(file_path.into(), NO_DEBUGGER.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--error-on-warnings",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -695,10 +650,10 @@ fn upgrade_severity() {
     let file_path = Path::new("file.js");
     fs.insert(file_path.into(), UPGRADE_SEVERITY_CODE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -740,17 +695,10 @@ fn no_lint_when_file_is_ignored() {
     let file_path = Path::new("test.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--write"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -786,13 +734,13 @@ fn no_lint_if_files_are_listed_in_ignore_option() {
     let file_path_test2 = Path::new("test2.js");
     fs.insert(file_path_test2.into(), FIX_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--write"),
+                "lint",
+                "--write",
                 file_path_test1.as_os_str().to_str().unwrap(),
                 file_path_test2.as_os_str().to_str().unwrap(),
             ]
@@ -867,10 +815,10 @@ fn fs_error_dereferenced_symlink() {
         ));
     }
 
-    let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
-        Args::from([("lint"), root_path.display().to_string().as_str()].as_slice()),
+        Args::from(["lint", &root_path.display().to_string()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -911,10 +859,10 @@ fn fs_error_infinite_symlink_expansion_to_dirs() {
         check_windows_symlink!(symlink_dir(subdir1_path, subdir2_path.join("symlink2")));
     }
 
-    let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
-        Args::from([("lint"), (root_path.display().to_string().as_str())].as_slice()),
+        Args::from(["lint", &root_path.display().to_string()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -957,10 +905,10 @@ fn fs_error_infinite_symlink_expansion_to_files() {
         check_windows_symlink!(symlink_dir(&symlink1_path, &symlink2_path));
     }
 
-    let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
-        Args::from([("lint"), (root_path.display().to_string().as_str())].as_slice()),
+        Args::from(["lint", &root_path.display().to_string()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -994,17 +942,10 @@ fn fs_error_read_only() {
     let file_path = Path::new("test.js");
     fs.insert(file_path.into(), *b"content");
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (mut fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--write"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--write", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1028,11 +969,7 @@ fn fs_error_unknown() {
 
     fs.insert_error(PathBuf::from("prefix/ci.js"), ErrorEntry::UnknownFileType);
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("lint"), ("prefix")].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "prefix"].as_slice()));
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -1138,17 +1075,17 @@ fn fs_files_ignore_symlink() {
         file.write_all(APPLY_SUGGESTED_BEFORE.as_bytes()).unwrap();
     }
 
-    let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--config-path"),
-                (root_path.display().to_string().as_str()),
+                "lint",
+                "--config-path",
+                &root_path.display().to_string(),
                 "--write",
                 "--unsafe",
-                (src_path.display().to_string().as_str()),
+                &src_path.display().to_string(),
             ]
             .as_slice(),
         ),
@@ -1191,10 +1128,10 @@ fn include_files_in_subdir() {
         .write_all(APPLY_SUGGESTED_BEFORE.as_bytes())
         .unwrap();
 
-    let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(root_path.clone()))),
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
-        Args::from([("lint"), root_path.display().to_string().as_str()].as_slice()),
+        Args::from(["lint", &root_path.display().to_string()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -1249,10 +1186,10 @@ fn include_files_in_symlinked_subdir() {
         ));
     }
 
-    let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(subroot_path.clone()))),
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(root_path.clone())),
         &mut console,
-        Args::from([("lint"), subroot_path.display().to_string().as_str()].as_slice()),
+        Args::from(["lint", &subroot_path.display().to_string()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -1309,10 +1246,10 @@ fn ignore_file_in_subdir_in_symlinked_dir() {
         ));
     }
 
-    let result = run_cli(
-        DynRef::Owned(Box::new(OsFileSystem::new(subroot_path.clone()))),
+    let result = run_cli_with_dyn_fs(
+        Box::new(OsFileSystem::new(subroot_path.clone())),
         &mut console,
-        Args::from([("lint"), subroot_path.display().to_string().as_str()].as_slice()),
+        Args::from(["lint", &subroot_path.display().to_string()].as_slice()),
     );
 
     remove_dir_all(root_path).unwrap();
@@ -1334,10 +1271,10 @@ fn file_too_large() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), "statement();\n".repeat(80660).as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (mut fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1364,10 +1301,10 @@ fn file_too_large_config_limit() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1389,13 +1326,13 @@ fn file_too_large_cli_limit() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--files-max-size=16"),
+                "lint",
+                "--files-max-size=16",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -1421,13 +1358,13 @@ fn files_max_size_parse_error() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), "statement1();\nstatement2();");
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--files-max-size=-1"),
+                "lint",
+                "--files-max-size=-1",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -1456,11 +1393,7 @@ fn max_diagnostics_default() {
         fs.insert(file_path, LINT_ERROR.as_bytes());
     }
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("lint"), ("src")].as_slice()),
-    );
+    let (_, result) = run_cli(fs, &mut console, Args::from(["lint", "src"].as_slice()));
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -1498,14 +1431,14 @@ fn max_diagnostics() {
         fs.insert(file_path, LINT_ERROR.as_bytes());
     }
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (_, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--max-diagnostics"),
-                ("10"),
+                "lint",
+                "--max-diagnostics",
+                "10",
                 Path::new("src").as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -1539,14 +1472,10 @@ fn max_diagnostics() {
 
 #[test]
 fn no_supported_file_found() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("lint"), "."].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", "."].as_slice()));
 
     eprintln!("{:?}", console.out_buffer);
 
@@ -1567,17 +1496,10 @@ fn print_verbose() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--verbose"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--verbose", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1599,10 +1521,10 @@ fn unsupported_file() {
     let file_path = Path::new("check.txt");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -1623,17 +1545,10 @@ fn unsupported_file_verbose() {
     let file_path = Path::new("check.txt");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                "--verbose",
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--verbose", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -1654,10 +1569,10 @@ fn suppression_syntax_error() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), *b"// biome-ignore(:\n");
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1682,10 +1597,10 @@ fn config_recommended_group() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), NEW_SYMBOL.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
@@ -1705,10 +1620,10 @@ fn nursery_unstable() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), NURSERY_UNSTABLE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1739,10 +1654,10 @@ fn top_level_all_true() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1787,10 +1702,10 @@ fn top_level_all_true_group_level_all_false() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1835,10 +1750,10 @@ fn top_level_all_false_group_level_all_true() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -1887,10 +1802,10 @@ fn top_level_all_true_group_level_empty() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), biome_json.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1930,10 +1845,10 @@ fn top_level_recommended_true_group_level_all_false() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), biome_json.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -1976,10 +1891,10 @@ fn group_level_recommended_false_enable_specific() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), biome_json.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2020,10 +1935,10 @@ fn ignore_configured_globals() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), rome_json.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2071,12 +1986,12 @@ file2.js
     let ignore_file = Path::new(".gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 file_path1.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
             ]
@@ -2131,12 +2046,12 @@ fn ignore_vcs_os_independent_parse() {
     let ignore_file = Path::new(".gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 file_path1.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
                 file_path3.as_os_str().to_str().unwrap(),
@@ -2182,16 +2097,16 @@ file2.js
     let ignore_file = Path::new("./.gitignore");
     fs.insert(ignore_file.into(), git_ignore.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--vcs-enabled=true"),
-                ("--vcs-client-kind=git"),
-                ("--vcs-use-ignore-file=true"),
-                ("--vcs-root=."),
+                "lint",
+                "--vcs-enabled=true",
+                "--vcs-client-kind=git",
+                "--vcs-use-ignore-file=true",
+                "--vcs-root=.",
                 file_path1.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
             ]
@@ -2212,17 +2127,17 @@ file2.js
 
 #[test]
 fn check_stdin_write_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push("import {a as a} from 'mod'; function f() {return{a}} class Foo {}".to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--write", ("--stdin-file-path"), ("mock.js")].as_slice()),
+        Args::from(["lint", "--write", "--stdin-file-path", "mock.js"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2252,7 +2167,7 @@ fn check_stdin_write_successfully() {
 
 #[test]
 fn check_stdin_shows_parse_diagnostics() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console.in_buffer.push(
@@ -2265,10 +2180,10 @@ const = ""; "#
             .to_string(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--write", ("--stdin-file-path"), ("mock.ts")].as_slice()),
+        Args::from(["lint", "--write", "--stdin-file-path", "mock.ts"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2284,23 +2199,23 @@ const = ""; "#
 
 #[test]
 fn check_stdin_write_unsafe_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console
         .in_buffer
         .push("function f() {var x=1; return{x}} class Foo {}".to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--write",
                 "--unsafe",
-                ("--stdin-file-path"),
-                ("mock.js"),
+                "--stdin-file-path",
+                "mock.js",
             ]
             .as_slice(),
         ),
@@ -2355,10 +2270,10 @@ fn should_apply_correct_file_source() {
         .as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2418,10 +2333,10 @@ fn should_not_enable_all_recommended_rules() {
 		"#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2467,10 +2382,10 @@ array.map((sentence) => sentence.split(" ")).flat();
 		"#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2495,12 +2410,12 @@ fn apply_bogus_argument() {
         "function _13_1_3_fun(arguments) { }".as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 file_path.as_os_str().to_str().unwrap(),
                 "--write",
                 "--unsafe",
@@ -2531,12 +2446,12 @@ fn ignores_unknown_file() {
     let file_path2 = Path::new("test.js");
     fs.insert(file_path2.into(), *b"console.log('bar');\n");
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 file_path1.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
                 "--files-ignore-unknown=true",
@@ -2580,10 +2495,10 @@ fn check_json_files() {
         .as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path1.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path1.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -2600,12 +2515,12 @@ fn check_json_files() {
 #[test]
 fn doesnt_error_if_no_files_were_processed() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--no-errors-on-unmatched", ("file.js")].as_slice()),
+        Args::from(["lint", "--no-errors-on-unmatched", "file.js"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2651,10 +2566,10 @@ A = 0;
         .as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--write", "--unsafe", ("file.js")].as_slice()),
+        Args::from(["lint", "--write", "--unsafe", "file.js"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -2700,12 +2615,12 @@ A = 0;
         .as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--write",
                 "--unsafe",
                 "--error-on-warnings",
@@ -2739,12 +2654,12 @@ fn should_only_processes_changed_files_when_changed_flag_is_set() {
     let file_path2 = Path::new("file2.js");
     fs.insert(file_path2.into(), r#"console.log('file2');"#.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--changed",
                 "--since=main",
                 file_path.as_os_str().to_str().unwrap(),
@@ -2778,12 +2693,12 @@ fn should_error_if_changed_flag_is_used_without_since_or_default_branch_config()
     let file_path2 = Path::new("file2.js");
     fs.insert(file_path2.into(), r#"console.log('file2');"#.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--changed",
                 file_path.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
@@ -2829,12 +2744,12 @@ fn should_process_changed_files_if_changed_flag_is_set_and_default_branch_is_con
     let file_path2 = Path::new("file2.js");
     fs.insert(file_path2.into(), r#"console.log('file2');"#.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--changed",
                 file_path.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
@@ -2867,12 +2782,12 @@ fn should_error_if_since_arg_is_used_without_changed() {
     let file_path2 = Path::new("file2.js");
     fs.insert(file_path2.into(), r#"console.log('file2');"#.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--since=main",
                 file_path.as_os_str().to_str().unwrap(),
                 file_path2.as_os_str().to_str().unwrap(),
@@ -2923,12 +2838,12 @@ fn should_only_process_changed_file_if_its_included() {
     let file_path2 = Path::new("file2.js");
     fs.insert(file_path2.into(), r#"console.log('file2');"#.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--changed",
                 "--since=main",
                 file_path.as_os_str().to_str().unwrap(),
@@ -2978,12 +2893,12 @@ fn should_not_process_ignored_file_even_if_its_changed() {
     let file_path2 = Path::new("file2.js");
     fs.insert(file_path2.into(), r#"console.log('file2');"#.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--changed",
                 "--since=main",
                 file_path.as_os_str().to_str().unwrap(),
@@ -3015,12 +2930,12 @@ fn should_not_error_for_no_changed_files_with_no_errors_on_unmatched() {
     let file_path2 = Path::new("file2.js");
     fs.insert(file_path2.into(), r#"console.log('file2');"#.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--changed",
                 "--since=main",
                 "--no-errors-on-unmatched",
@@ -3045,12 +2960,12 @@ fn should_not_error_for_no_changed_files_with_no_errors_on_unmatched() {
 #[test]
 fn should_error_if_changed_flag_and_staged_flag_are_active_at_the_same_time() {
     let mut console = BufferConsole::default();
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--staged", "--changed"].as_slice()),
+        Args::from(["lint", "--staged", "--changed"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3090,10 +3005,10 @@ fn should_only_processes_staged_files_when_staged_flag_is_set() {
         r#"console.log('file2');"#.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--staged"].as_slice()),
+        Args::from(["lint", "--staged"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3141,10 +3056,10 @@ fn should_only_process_staged_file_if_its_included() {
         r#"console.log('file2');"#.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--staged"].as_slice()),
+        Args::from(["lint", "--staged"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -3190,10 +3105,10 @@ fn should_not_process_ignored_file_even_if_its_staged() {
         r#"console.log('file2');"#.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--staged"].as_slice()),
+        Args::from(["lint", "--staged"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3215,10 +3130,10 @@ fn lint_syntax_rules() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), r#"class A { #foo; #foo }"#.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3266,10 +3181,10 @@ import "lodash";
 		"#,
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3291,11 +3206,7 @@ fn should_lint_error_without_file_paths() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
-        &mut console,
-        Args::from([("lint"), ""].as_slice()),
-    );
+    let (fs, result) = run_cli(fs, &mut console, Args::from(["lint", ""].as_slice()));
 
     assert!(result.is_err(), "run_cli returned {result:?}");
 
@@ -3316,10 +3227,10 @@ fn lint_error() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -3341,12 +3252,12 @@ fn lint_only_rule_doesnt_exist() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious/inexistant",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3373,12 +3284,12 @@ fn lint_only_missing_group() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), LINT_ERROR.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=noDebugger",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3406,12 +3317,12 @@ fn lint_only_rule() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious/noDebugger",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3437,12 +3348,12 @@ fn lint_only_multiple_rules() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious/noDebugger",
                 "--only=performance/noDelete",
                 file_path.as_os_str().to_str().unwrap(),
@@ -3469,12 +3380,12 @@ fn lint_only_rule_and_group() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious/noDebugger",
                 "--only=performance",
                 file_path.as_os_str().to_str().unwrap(),
@@ -3505,12 +3416,12 @@ fn lint_only_rule_ignore_suppression_comments() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious/noDebugger",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3555,12 +3466,12 @@ fn lint_only_rule_with_config() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), config.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=style/useNamingConvention",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3597,12 +3508,12 @@ fn lint_only_rule_with_recommended_disabled() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), config.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=lint/style/useNamingConvention",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3637,12 +3548,12 @@ fn lint_only_rule_with_linter_disabled() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), config.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=style/useNamingConvention",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3683,12 +3594,12 @@ fn lint_only_group() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), config.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3729,12 +3640,12 @@ fn lint_only_group_with_disabled_rule() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), config.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=lint/suspicious",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3768,12 +3679,12 @@ fn lint_only_write() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), config.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--write",
                 "--only=complexity/useArrowFunction",
                 file_path.as_os_str().to_str().unwrap(),
@@ -3800,12 +3711,12 @@ fn lint_skip_rule() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--skip=suspicious/noDebugger",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3842,12 +3753,12 @@ fn lint_skip_group_with_enabled_rule() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), config.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--skip=suspicious",
                 file_path.as_os_str().to_str().unwrap(),
             ]
@@ -3873,12 +3784,12 @@ fn lint_skip_multiple_rules() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--skip=suspicious/noDebugger",
                 "--skip=performance/noDelete",
                 file_path.as_os_str().to_str().unwrap(),
@@ -3905,12 +3816,12 @@ fn lint_skip_rule_and_group() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--skip=suspicious/noDebugger",
                 "--skip=performance",
                 file_path.as_os_str().to_str().unwrap(),
@@ -3945,12 +3856,12 @@ fn lint_skip_write() {
     let config_path = Path::new("biome.json");
     fs.insert(config_path.into(), config.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--write",
                 "--skip=complexity/useArrowFunction",
                 file_path.as_os_str().to_str().unwrap(),
@@ -3977,12 +3888,12 @@ fn lint_only_group_skip_rule() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious",
                 "--skip=suspicious/noDebugger",
                 file_path.as_os_str().to_str().unwrap(),
@@ -4009,12 +3920,12 @@ fn lint_only_rule_skip_group() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious/noDebugger",
                 "--skip=suspicious",
                 file_path.as_os_str().to_str().unwrap(),
@@ -4041,12 +3952,12 @@ fn lint_only_skip_rule() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious/noDebugger",
                 "--skip=suspicious/noDebugger",
                 file_path.as_os_str().to_str().unwrap(),
@@ -4073,12 +3984,12 @@ fn lint_only_skip_group() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--only=suspicious",
                 "--skip=suspicious",
                 file_path.as_os_str().to_str().unwrap(),
@@ -4102,10 +4013,10 @@ fn fix_ok() {
     let mut console = BufferConsole::default();
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), FIX_BEFORE.as_bytes());
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), ("--fix"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--fix", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
 
@@ -4130,10 +4041,10 @@ fn fix_noop() {
     let mut console = BufferConsole::default();
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), FIX_AFTER.as_bytes());
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), ("--fix"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", "--fix", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
     assert!(result.is_ok(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(
@@ -4151,14 +4062,14 @@ fn fix_suggested_error() {
     let mut console = BufferConsole::default();
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--fix"),
-                ("--write"),
+                "lint",
+                "--fix",
+                "--write",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -4180,14 +4091,14 @@ fn fix_suggested() {
     let mut console = BufferConsole::default();
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), APPLY_SUGGESTED_BEFORE.as_bytes());
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--fix"),
-                ("--unsafe"),
+                "lint",
+                "--fix",
+                "--unsafe",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -4229,14 +4140,14 @@ function f() { arguments; }
     fs.insert(test1.into(), source.as_bytes());
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), source.as_bytes());
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--fix"),
-                ("--unsafe"),
+                "lint",
+                "--fix",
+                "--unsafe",
                 test1.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -4264,10 +4175,10 @@ fn should_error_if_unstaged_files_only_with_staged_flag() {
         Path::new("file1.js").into(),
         r#"console.log('file1');"#.as_bytes(),
     );
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--staged"].as_slice()),
+        Args::from(["lint", "--staged"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -4289,10 +4200,10 @@ fn should_error_if_unchanged_files_only_with_changed_flag() {
         Path::new("file1.js").into(),
         r#"console.log('file1');"#.as_bytes(),
     );
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), "--changed", "--since=main"].as_slice()),
+        Args::from(["lint", "--changed", "--since=main"].as_slice()),
     );
     assert!(result.is_err(), "run_cli returned {result:?}");
     assert_cli_snapshot(SnapshotPayload::new(

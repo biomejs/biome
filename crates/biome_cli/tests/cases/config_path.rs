@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -36,10 +35,10 @@ fn set_config_path_to_directory() {
         .as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), ("--config-path=config"), ("src")].as_slice()),
+        Args::from(["check", "--config-path=config", "src"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -83,10 +82,10 @@ fn set_config_path_to_file() {
         .as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), ("--config-path=config/a.jsonc"), ("src")].as_slice()),
+        Args::from(["check", "--config-path=config/a.jsonc", "src"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

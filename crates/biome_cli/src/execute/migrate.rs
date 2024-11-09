@@ -49,9 +49,9 @@ pub(crate) fn run(migrate_payload: MigratePayload) -> Result<(), CliDiagnostic> 
         sub_command,
     } = migrate_payload;
     let mut cache = NodeCache::default();
-    let fs = &session.app.fs;
     let console = session.app.console;
     let workspace = session.app.workspace;
+    let fs = workspace.fs();
 
     let open_options = if write {
         OpenOptions::default().read(true).write(true)

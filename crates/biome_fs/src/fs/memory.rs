@@ -1,6 +1,6 @@
 use oxc_resolver::{Resolution, ResolveError};
 use rustc_hash::FxHashMap;
-use std::collections::hash_map::{Entry, IntoIter};
+use std::collections::hash_map::Entry;
 use std::io;
 use std::panic::{AssertUnwindSafe, RefUnwindSafe};
 use std::path::{Path, PathBuf};
@@ -23,9 +23,11 @@ type OnGetChangedFiles = Option<
     >,
 >;
 
+type Files = Arc<RwLock<FxHashMap<PathBuf, FileEntry>>>;
+
 /// Fully in-memory file system, stores the content of all known files in a hashmap
 pub struct MemoryFileSystem {
-    files: AssertUnwindSafe<RwLock<FxHashMap<PathBuf, FileEntry>>>,
+    pub files: AssertUnwindSafe<Files>,
     errors: FxHashMap<PathBuf, ErrorEntry>,
     allow_write: bool,
     on_get_staged_files: OnGetChangedFiles,
@@ -75,6 +77,14 @@ pub enum ErrorEntry {
 }
 
 impl MemoryFileSystem {
+    /// Creates a new instance with pre-initialized files.
+    pub fn from_files(files: Files) -> Self {
+        Self {
+            files: AssertUnwindSafe(files),
+            ..Default::default()
+        }
+    }
+
     /// Create a read-only instance of [MemoryFileSystem]
     ///
     /// This instance will disallow any modification through the [FileSystem]
@@ -89,7 +99,7 @@ impl MemoryFileSystem {
 
     /// Create or update a file in the filesystem
     pub fn insert(&mut self, path: PathBuf, content: impl Into<Vec<u8>>) {
-        let files = self.files.0.get_mut();
+        let mut files = self.files.0.write();
         files.insert(path, Arc::new(Mutex::new(content.into())));
     }
 
@@ -101,11 +111,6 @@ impl MemoryFileSystem {
     /// Remove a file from the filesystem
     pub fn remove(&mut self, path: &Path) {
         self.files.0.write().remove(path);
-    }
-
-    pub fn files(self) -> IntoIter<PathBuf, FileEntry> {
-        let files = self.files.0.into_inner();
-        files.into_iter()
     }
 
     pub fn set_on_get_changed_files(

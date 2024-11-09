@@ -63,7 +63,7 @@ use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Markup, MarkupBuf};
 use biome_diagnostics::CodeSuggestion;
 use biome_formatter::Printed;
-use biome_fs::BiomePath;
+use biome_fs::{BiomePath, FileSystem};
 use biome_grit_patterns::GritTargetLanguage;
 use biome_js_syntax::{TextRange, TextSize};
 use biome_text_edit::TextEdit;
@@ -930,6 +930,9 @@ pub struct UnregisterProjectFolderParams {
 }
 
 pub trait Workspace: Send + Sync + RefUnwindSafe {
+    /// Returns the filesystem implementation to open files with.
+    fn fs(&self) -> &dyn FileSystem;
+
     /// Checks whether a certain feature is supported. There are different conditions:
     /// - Biome doesn't recognize a file, so it can't provide the feature;
     /// - the feature is disabled inside the configuration;
@@ -1056,21 +1059,24 @@ pub trait Workspace: Send + Sync + RefUnwindSafe {
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server() -> Box<dyn Workspace> {
-    Box::new(server::WorkspaceServer::new())
+pub fn server(fs: Box<dyn FileSystem>) -> Box<dyn Workspace> {
+    Box::new(server::WorkspaceServer::new(fs))
 }
 
 /// Convenience function for constructing a server instance of [Workspace]
-pub fn server_sync() -> Arc<dyn Workspace> {
-    Arc::new(server::WorkspaceServer::new())
+pub fn server_sync(fs: Box<dyn FileSystem>) -> Arc<dyn Workspace> {
+    Arc::new(server::WorkspaceServer::new(fs))
 }
 
 /// Convenience function for constructing a client instance of [Workspace]
-pub fn client<T>(transport: T) -> Result<Box<dyn Workspace>, WorkspaceError>
+pub fn client<T>(
+    transport: T,
+    fs: Box<dyn FileSystem>,
+) -> Result<Box<dyn Workspace>, WorkspaceError>
 where
     T: WorkspaceTransport + RefUnwindSafe + Send + Sync + 'static,
 {
-    Ok(Box::new(client::WorkspaceClient::new(transport)?))
+    Ok(Box::new(client::WorkspaceClient::new(transport, fs)?))
 }
 
 /// [RAII](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization)

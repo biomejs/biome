@@ -1261,6 +1261,7 @@ version = "1.9.4"
 dependencies = [
  "biome_console",
  "biome_diagnostics",
+ "biome_fs",
  "biome_js_factory",
  "biome_js_formatter",
  "biome_rowan",

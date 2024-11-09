@@ -12,7 +12,7 @@ use biome_fs::{ConfigName, FileSystem, OsFileSystem};
 use biome_service::workspace::{
     RageEntry, RageParams, RageResult, RegisterProjectFolderParams, UnregisterProjectFolderParams,
 };
-use biome_service::{workspace, DynRef, Workspace};
+use biome_service::{workspace, Workspace};
 use futures::future::ready;
 use futures::FutureExt;
 use rustc_hash::FxHashMap;
@@ -559,30 +559,25 @@ impl ServerFactory {
     }
 
     pub fn create(&self, config_path: Option<PathBuf>) -> ServerConnection {
-        self.create_with_fs(config_path, DynRef::Owned(Box::<OsFileSystem>::default()))
+        self.create_with_fs(config_path, Box::new(OsFileSystem::default()))
     }
 
     /// Create a new [ServerConnection] from this factory
     pub fn create_with_fs(
         &self,
         config_path: Option<PathBuf>,
-        fs: DynRef<'static, dyn FileSystem>,
+        fs: Box<dyn FileSystem>,
     ) -> ServerConnection {
         let workspace = self
             .workspace
             .clone()
-            .unwrap_or_else(workspace::server_sync);
+            .unwrap_or_else(|| workspace::server_sync(fs));
 
         let session_key = SessionKey(self.next_session_key.fetch_add(1, Ordering::Relaxed));
 
         let mut builder = LspService::build(move |client| {
-            let mut session = Session::new(
-                session_key,
-                client,
-                workspace,
-                self.cancellation.clone(),
-                fs,
-            );
+            let mut session =
+                Session::new(session_key, client, workspace, self.cancellation.clone());
             if let Some(path) = config_path {
                 session.set_config_path(path);
             }

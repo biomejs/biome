@@ -7,8 +7,7 @@
 //! execute the traversal of directory and files, based on the command that were passed.
 
 use biome_console::{ColorMode, Console};
-use biome_fs::OsFileSystem;
-use biome_service::{App, DynRef, Workspace, WorkspaceRef};
+use biome_service::{App, Workspace, WorkspaceRef};
 use commands::search::SearchCommandPayload;
 use std::env;
 
@@ -55,11 +54,7 @@ impl<'app> CliSession<'app> {
         console: &'app mut dyn Console,
     ) -> Result<Self, CliDiagnostic> {
         Ok(Self {
-            app: App::new(
-                DynRef::Owned(Box::<OsFileSystem>::default()),
-                console,
-                WorkspaceRef::Borrowed(workspace),
-            ),
+            app: App::new(console, WorkspaceRef::Borrowed(workspace)),
         })
     }
 
