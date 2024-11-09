@@ -308,7 +308,7 @@ fn generate_enums(
             Self::#name => #property
         });
         from_string_metadata.push(quote! {
-            #property => Ok(#enum_name::#name)
+            #property => Ok(Self::#name)
         });
         enum_metadata.push(name);
     }

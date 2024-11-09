@@ -306,15 +306,6 @@ define_role! {
 }
 
 define_role! {
-    /// https://w3c.github.io/aria/#search
-    SearchRole {
-        PROPS: [],
-        ROLES: ["landmark"],
-        CONCEPTS: &[("search", &[])],
-    }
-}
-
-define_role! {
     /// https://www.w3.org/TR/wai-aria-1.1/#searchbox
     SearchboxRole {
         PROPS: [
@@ -455,15 +446,6 @@ define_role! {
 }
 
 define_role! {
-    /// https://w3c.github.io/aria/#associationlist
-    AssociationListRole {
-        PROPS: [],
-        ROLES: ["section"],
-        CONCEPTS: &[("dl", &[])],
-    }
-}
-
-define_role! {
     /// https://w3c.github.io/aria/#contentinfo
     ContentInfoRole {
         PROPS: [],
@@ -510,10 +492,9 @@ impl<'a> AriaRoles {
         "caption",
         "main",
         "time",
-        "p",
-        "aside",
+        "paragraph",
+        "complementary",
         "blockquote",
-        "associationlist",
         "status",
         "contentinfo",
         "region",
@@ -749,10 +730,9 @@ impl<'a> AriaRoles {
                 "caption" => &CaptionRole as &dyn AriaRoleDefinitionWithConcepts,
                 "main" => &MainRole as &dyn AriaRoleDefinitionWithConcepts,
                 "time" => &TimeRole as &dyn AriaRoleDefinitionWithConcepts,
-                "p" => &ParagraphRole as &dyn AriaRoleDefinitionWithConcepts,
-                "aside" => &ComplementaryRole as &dyn AriaRoleDefinitionWithConcepts,
+                "paragraph" => &ParagraphRole as &dyn AriaRoleDefinitionWithConcepts,
+                "complementary" => &ComplementaryRole as &dyn AriaRoleDefinitionWithConcepts,
                 "blockquote" => &BlockQuoteRole as &dyn AriaRoleDefinitionWithConcepts,
-                "associationlist" => &AssociationListRole as &dyn AriaRoleDefinitionWithConcepts,
                 "status" => &StatusRole as &dyn AriaRoleDefinitionWithConcepts,
                 "contentinfo" => &ContentInfoRole as &dyn AriaRoleDefinitionWithConcepts,
                 "region" => &RegionRole as &dyn AriaRoleDefinitionWithConcepts,
@@ -766,59 +746,6 @@ impl<'a> AriaRoles {
         }
 
         false
-    }
-
-    /// Given a role, it returns the corresponding elements and attributes associated to that role
-    pub fn get_elements_by_role(&self, role: &str) -> ElementsAndAttributes {
-        let role_candidate = match role {
-            "checkbox" => &CheckboxRole as &dyn AriaRoleDefinitionWithConcepts,
-            "radio" => &RadioRole as &dyn AriaRoleDefinitionWithConcepts,
-            "option" => &OptionRole as &dyn AriaRoleDefinitionWithConcepts,
-            "combobox" => &ComboBoxRole as &dyn AriaRoleDefinitionWithConcepts,
-            "heading" => &HeadingRole as &dyn AriaRoleDefinitionWithConcepts,
-            "separator" => &SeparatorRole as &dyn AriaRoleDefinitionWithConcepts,
-            "button" => &ButtonRole as &dyn AriaRoleDefinitionWithConcepts,
-            "article" => &ArticleRole as &dyn AriaRoleDefinitionWithConcepts,
-            "dialog" => &DialogRole as &dyn AriaRoleDefinitionWithConcepts,
-            "cell" => &CellRole as &dyn AriaRoleDefinitionWithConcepts,
-            "columnheader" => &ColumnHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
-            "definition" => &DefinitionRole as &dyn AriaRoleDefinitionWithConcepts,
-            "figure" => &FigureRole as &dyn AriaRoleDefinitionWithConcepts,
-            "form" => &FormRole as &dyn AriaRoleDefinitionWithConcepts,
-            "graphics-document" => &GraphicsDocumentRole as &dyn AriaRoleDefinitionWithConcepts,
-            "graphics-object" => &GraphicsObjectRole as &dyn AriaRoleDefinitionWithConcepts,
-            "grid" => &GridRole as &dyn AriaRoleDefinitionWithConcepts,
-            "gridcell" => &GridCellRole as &dyn AriaRoleDefinitionWithConcepts,
-            "group" => &GroupRole as &dyn AriaRoleDefinitionWithConcepts,
-            "img" => &ImgRole as &dyn AriaRoleDefinitionWithConcepts,
-            "link" => &LinkRole as &dyn AriaRoleDefinitionWithConcepts,
-            "list" => &ListRole as &dyn AriaRoleDefinitionWithConcepts,
-            "listbox" => &ListBoxRole as &dyn AriaRoleDefinitionWithConcepts,
-            "listitem" => &ListItemRole as &dyn AriaRoleDefinitionWithConcepts,
-            "navigation" => &NavigationRole as &dyn AriaRoleDefinitionWithConcepts,
-            "row" => &RowRole as &dyn AriaRoleDefinitionWithConcepts,
-            "rowgroup" => &RowGroupRole as &dyn AriaRoleDefinitionWithConcepts,
-            "rowheader" => &RowHeaderRole as &dyn AriaRoleDefinitionWithConcepts,
-            "search" => &SearchRole as &dyn AriaRoleDefinitionWithConcepts,
-            "searchbox" => &SearchboxRole as &dyn AriaRoleDefinitionWithConcepts,
-            "table" => &TableRole as &dyn AriaRoleDefinitionWithConcepts,
-            "term" => &TermRole as &dyn AriaRoleDefinitionWithConcepts,
-            "textbox" => &TextboxRole as &dyn AriaRoleDefinitionWithConcepts,
-            "generic" => &GenericRole as &dyn AriaRoleDefinitionWithConcepts,
-            "caption" => &CaptionRole as &dyn AriaRoleDefinitionWithConcepts,
-            "main" => &MainRole as &dyn AriaRoleDefinitionWithConcepts,
-            "time" => &TimeRole as &dyn AriaRoleDefinitionWithConcepts,
-            "p" => &ParagraphRole as &dyn AriaRoleDefinitionWithConcepts,
-            "aside" => &ComplementaryRole as &dyn AriaRoleDefinitionWithConcepts,
-            "blockquote" => &BlockQuoteRole as &dyn AriaRoleDefinitionWithConcepts,
-            "associationlist" => &AssociationListRole as &dyn AriaRoleDefinitionWithConcepts,
-            "status" => &StatusRole as &dyn AriaRoleDefinitionWithConcepts,
-            "contentinfo" => &ContentInfoRole as &dyn AriaRoleDefinitionWithConcepts,
-            "region" => &RegionRole as &dyn AriaRoleDefinitionWithConcepts,
-            _ => return None,
-        };
-
-        role_candidate.concepts_by_role()
     }
 
     /// Given an element name and attributes, it returns the role associated with that element.
