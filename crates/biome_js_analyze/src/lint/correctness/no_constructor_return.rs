@@ -81,6 +81,6 @@ impl Rule for NoConstructorReturn {
         ).detail(
             constructor.range(),
             "The constructor is here:"
-        ).note("Returning a value from a constructor is ignored."))
+        ).note("Returning a value from a constructor may confuse users of the class."))
     }
 }
