@@ -449,9 +449,20 @@ fn generate_aria_roles(aria: &Aria) -> TokenStream {
     let mut required_attributes_match_lines = Vec::new();
     let mut prohibited_attributes_match_lines = Vec::new();
     let mut attributes_match_lines = Vec::with_capacity(aria.roles.len());
+    let mut global_attribute_variants = Vec::new();
     let mut variants = Vec::new();
     for (name, data) in &aria.roles {
         if data.is_abstract {
+            if name == "roletype" {
+                variants.clear();
+                for global_attribute in &data.supported_attributes {
+                    let variant = Ident::new(
+                        &Case::Pascal.convert(&global_attribute.name),
+                        Span::call_site(),
+                    );
+                    global_attribute_variants.push(variant);
+                }
+            }
             continue;
         }
         let superclass_roles = aria.superclass_roles(name).expect("All roles exist");
@@ -626,6 +637,14 @@ fn generate_aria_roles(aria: &Aria) -> TokenStream {
     let html_element_enum = generate_enums(&html_element_names, "HtmlElement");
     let html_attribute_enum = generate_enums(&html_attributes_names, "HtmlAttribute");
     quote! {
+        impl AriaAttribute {
+            pub fn is_global(self) -> bool {
+                matches!(
+                    self,
+                    #( Self::#global_attribute_variants )|*
+                )
+            }
+        }
         #html_element_enum
         #html_attribute_enum
         #aria_abstarct_role_enum

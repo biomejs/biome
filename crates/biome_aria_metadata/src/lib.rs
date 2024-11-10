@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 include!(concat!(env!("OUT_DIR"), "/roles_and_attributes.rs"));
 
 pub const ISO_COUNTRIES: [&str; 233] = [
@@ -30,6 +32,26 @@ pub const ISO_LANGUAGES: [&str; 150] = [
     "tt", "te", "th", "bo", "ti", "to", "ts", "tr", "tk", "tw", "ug", "uk", "ur", "uz", "vi", "vo",
     "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
 ];
+
+/// Returns a list of valid ISO countries
+pub fn is_valid_country(country: &str) -> bool {
+    IsoCountries::from_str(country).is_ok()
+}
+
+/// Returns a list of valid ISO languages
+pub fn is_valid_language(language: &str) -> bool {
+    IsoLanguages::from_str(language).is_ok()
+}
+
+/// An array of all available countries
+pub fn countries() -> &'static [&'static str] {
+    &ISO_COUNTRIES
+}
+
+/// An array of all available languages
+pub fn languages() -> &'static [&'static str] {
+    &ISO_LANGUAGES
+}
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum AriaAttributeKind {
