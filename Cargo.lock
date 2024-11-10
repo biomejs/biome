@@ -143,6 +143,8 @@ dependencies = [
 name = "biome_aria_metadata"
 version = "0.5.7"
 dependencies = [
+ "biome_deserialize",
+ "biome_deserialize_macros",
  "biome_string_case",
  "prettyplease",
  "proc-macro2",

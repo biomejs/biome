@@ -4174,7 +4174,7 @@
     },
     "aria-errormessage": {
       "type": "property",
-      "description": "Identifies the element that provides an error message for the object.  See related aria-invalid and aria-describedby. ",
+      "description": "Identifies the element that provides an error message for the object.  See related aria-invalid and aria-describedby.",
       "valueType": "ID reference"
     },
     "aria-flowto": {
