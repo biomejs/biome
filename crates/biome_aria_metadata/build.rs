@@ -1,11 +1,16 @@
 //! Generate ARAI metadata from `./aria-data.json`
 
+use biome_deserialize::Merge;
 use biome_string_case::Case;
 use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::{format_ident, quote};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 use std::{env, fs, io};
+
+const WAI_ARIA: &str = "../../packages/aria-data/wai-aria-1-3.json";
+const GRAPHICS_ARIA: &str = "../../packages/aria-data/graphics-aria-1-0.json";
+const DPUB_ARIA: &str = "../../packages/aria-data/dpub-aria-1-1.json";
 
 const ISO_COUNTRIES: &[&str] = &[
     "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ", "BS",
@@ -38,12 +43,11 @@ const ISO_LANGUAGES: &[&str] = &[
     "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
 ];
 
-#[derive(Debug, Default, serde::Deserialize)]
+#[derive(Debug, Default, biome_deserialize_macros::Merge, serde::Deserialize)]
 struct Aria {
     roles: BTreeMap<String, AriaRole>,
     attributes: BTreeMap<String, AriaAttribute>,
 }
-
 impl Aria {
     /// Retuurns direct and indirect superclass roles.
     fn superclass_roles(&self, role_name: &str) -> Result<BTreeSet<String>, String> {
@@ -60,7 +64,7 @@ impl Aria {
     }
 }
 
-#[derive(Debug, Default, serde::Deserialize)]
+#[derive(Debug, Default, biome_deserialize_macros::Merge, serde::Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 struct AriaRole {
     description: String,
@@ -182,7 +186,7 @@ enum AriaAttributeReferenceShortcut {
     },
 }
 
-#[derive(Debug, Default, serde::Deserialize)]
+#[derive(Debug, Default, biome_deserialize_macros::Merge, serde::Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 struct AriaAttribute {
     r#type: AriaAttributeType,
@@ -195,7 +199,9 @@ struct AriaAttribute {
     values: BTreeMap<String, ValueDefinition>,
 }
 
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, serde::Deserialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Eq, PartialEq, biome_deserialize_macros::Merge, serde::Deserialize,
+)]
 enum AriaValueType {
     #[default]
     #[serde(rename = "true/false")]
@@ -220,7 +226,7 @@ enum AriaValueType {
     Tristate,
 }
 
-#[derive(Debug, Default, serde::Deserialize)]
+#[derive(Debug, Default, biome_deserialize_macros::Merge, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 enum AriaAttributeType {
     #[default]
@@ -228,7 +234,7 @@ enum AriaAttributeType {
     State,
 }
 
-#[derive(Debug, Default, serde::Deserialize)]
+#[derive(Debug, Default, biome_deserialize_macros::Merge, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 #[allow(dead_code)]
 struct ValueDefinition {
@@ -239,13 +245,25 @@ struct ValueDefinition {
 fn main() -> io::Result<()> {
     // CARGO instructions: rern if one of these files change
     println!("cargo::rerun-if-changed=build.rs");
-    println!("cargo::rerun-if-changed=aria-data.json");
+    println!("cargo::rerun-if-changed={WAI_ARIA}");
+    println!("cargo::rerun-if-changed={GRAPHICS_ARIA}");
+    println!("cargo::rerun-if-changed={DPUB_ARIA}");
 
-    let text = std::fs::read_to_string("aria-data.json")?;
-    let data: Aria = serde_json::from_str(&text)?;
+    let text = std::fs::read_to_string(WAI_ARIA)?;
+    let wair_aria: Aria = serde_json::from_str(&text)?;
 
-    let aria_attributes = generate_aria_attributes(&data.attributes);
-    let aria_roles = generate_aria_roles(&data);
+    let text = std::fs::read_to_string(DPUB_ARIA)?;
+    let dpub_aria: Aria = serde_json::from_str(&text)?;
+
+    let text = std::fs::read_to_string(GRAPHICS_ARIA)?;
+    let graphics_aria: Aria = serde_json::from_str(&text)?;
+
+    let mut aria = graphics_aria;
+    aria.merge_with(dpub_aria);
+    aria.merge_with(wair_aria);
+
+    let aria_attributes = generate_aria_attributes(&aria.attributes);
+    let aria_roles = generate_aria_roles(&aria);
 
     let iso_countries = generate_enums(ISO_COUNTRIES, "IsoCountries");
     let iso_languages = generate_enums(ISO_LANGUAGES, "IsoLanguages");
@@ -268,7 +286,7 @@ fn main() -> io::Result<()> {
     // We print the code even if it cannot be parsed,
     // this allows to debug the code by directly looking at it.
     let out_dir = env::var("OUT_DIR").unwrap();
-    fs::write(PathBuf::from(out_dir).join("roles_and_properties.rs"), ast)?;
+    fs::write(PathBuf::from(out_dir).join("roles_and_attributes.rs"), ast)?;
 
     Ok(())
 }

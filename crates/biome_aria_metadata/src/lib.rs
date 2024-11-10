@@ -1,4 +1,4 @@
-include!(concat!(env!("OUT_DIR"), "/roles_and_properties.rs"));
+include!(concat!(env!("OUT_DIR"), "/roles_and_attributes.rs"));
 
 pub const ISO_COUNTRIES: [&str; 233] = [
     "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ", "BS",
