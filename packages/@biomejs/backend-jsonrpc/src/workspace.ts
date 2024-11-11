@@ -2881,9 +2881,10 @@ export interface GetFormatterIRParams {
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
 	maxDiagnostics: number;
-	only: RuleCode[];
+	only?: RuleCode[];
 	path: BiomePath;
-	skip: RuleCode[];
+	rules?: RuleCode[];
+	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
 export type RuleCode = string;
@@ -3366,11 +3367,11 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
-	additionalRules: RuleCode[];
-	only: RuleCode[];
+	only?: RuleCode[];
 	path: BiomePath;
 	range?: TextRange;
-	skip: RuleCode[];
+	rules?: RuleCode[];
+	skip?: RuleCode[];
 	suppressionReason?: string;
 }
 export interface PullActionsResult {
@@ -3460,11 +3461,12 @@ export interface FormatOnTypeParams {
 }
 export interface FixFileParams {
 	fixFileMode: FixFileMode;
-	only: RuleCode[];
+	only?: RuleCode[];
 	path: BiomePath;
 	ruleCategories: RuleCategories;
+	rules?: RuleCode[];
 	shouldFormat: boolean;
-	skip: RuleCode[];
+	skip?: RuleCode[];
 	suppressionReason?: string;
 }
 /**

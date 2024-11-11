@@ -638,8 +638,11 @@ pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
     pub max_diagnostics: u64,
+    #[serde(default)]
     pub only: Vec<RuleSelector>,
+    #[serde(default)]
     pub skip: Vec<RuleSelector>,
+    #[serde(default)]
     pub rules: Vec<RuleSelector>,
 }
 
@@ -658,9 +661,12 @@ pub struct PullDiagnosticsResult {
 pub struct PullActionsParams {
     pub path: BiomePath,
     pub range: Option<TextRange>,
-    pub only: Vec<RuleSelector>,
-    pub skip: Vec<RuleSelector>,
     pub suppression_reason: Option<String>,
+    #[serde(default)]
+    pub only: Vec<RuleSelector>,
+    #[serde(default)]
+    pub skip: Vec<RuleSelector>,
+    #[serde(default)]
     pub rules: Vec<RuleSelector>,
 }
 
@@ -723,8 +729,12 @@ pub struct FixFileParams {
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
+    #[serde(default)]
     pub only: Vec<RuleSelector>,
+    #[serde(default)]
     pub skip: Vec<RuleSelector>,
+    #[serde(default)]
+    pub rules: Vec<RuleSelector>,
     pub rule_categories: RuleCategories,
     pub suppression_reason: Option<String>,
 }
@@ -1196,6 +1206,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             skip,
             rule_categories,
             suppression_reason,
+            rules: vec![],
         })
     }
 
