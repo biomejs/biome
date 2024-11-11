@@ -96,6 +96,33 @@ impl JsImportCallExpression {
 }
 
 impl JsCallExpression {
+    /// This is a specialized function that checks if the current [call expression]
+    /// represents a call to `require("...")`:
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, T};
+    /// use biome_js_factory::make;
+    ///
+    /// let require_identifier = make::js_identifier_expression(make::js_reference_identifier(make::ident("require")));
+    /// let source_name = make::js_string_literal_expression(make::js_string_literal("foo"));
+    /// let call_arguments = make::js_call_arguments(
+    ///     make::token(T!['(']),
+    ///     make::js_call_argument_list([AnyJsCallArgument::AnyJsExpression(AnyJsExpression::AnyJsLiteralExpression(source_name.into()))], []),
+    ///     make::token(T![')']),
+    /// );
+    /// let require_call_expression = make::js_call_expression(require_identifier.into(), call_arguments).build();
+    /// assert!(require_call_expression.is_require_call_expression());
+    /// ```
+    pub fn is_require_call_expression(&self) -> bool {
+        self.callee()
+            .ok()
+            .and_then(|callee| callee.as_js_reference_identifier()?.value_token().ok())
+            .map(|name| name.text_trimmed() == "require")
+            .unwrap_or(false)
+    }
+
     /// Returns the inner text of the module specifier
     /// if this call expression represents a call to `require("...")`:
     ///
@@ -116,9 +143,7 @@ impl JsCallExpression {
     /// assert_eq!(require_call_expression.imported_module_source_text().unwrap().text(), "foo");
     /// ```
     pub fn imported_module_source_text(&self) -> Option<TokenText> {
-        let callee = self.callee().ok()?;
-        let name = callee.as_js_reference_identifier()?.value_token().ok()?;
-        if name.text_trimmed() == "require" {
+        if self.is_require_call_expression() {
             let [Some(argument)] = self.arguments().ok()?.get_arguments_by_index([0])
             else {
                 return None;
@@ -154,9 +179,7 @@ impl JsCallExpression {
     /// assert_eq!(require_call_expression.imported_module_source_token().unwrap().text(), "\"foo\"");
     /// ```
     pub fn imported_module_source_token(&self) -> Option<SyntaxToken<crate::JsLanguage>> {
-        let callee = self.callee().ok()?;
-        let name = callee.as_js_reference_identifier()?.value_token().ok()?;
-        if name.text_trimmed() == "require" {
+        if self.is_require_call_expression() {
             let [Some(argument)] = self.arguments().ok()?.get_arguments_by_index([0])
             else {
                 return None;
