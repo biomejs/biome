@@ -5,7 +5,8 @@ use crate::{
     JsNamespaceImportSpecifier, JsShorthandNamedImportSpecifier, JsSyntaxKind, JsSyntaxToken,
 };
 use biome_rowan::{
-    declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, TokenText,
+    declare_node_union, AstNode, SyntaxError, SyntaxNodeOptionExt, SyntaxResult, SyntaxToken,
+    TokenText,
 };
 
 impl JsImport {
@@ -27,6 +28,70 @@ impl JsImport {
     /// ```
     pub fn source_text(&self) -> SyntaxResult<TokenText> {
         self.import_clause()?.source()?.inner_string_text()
+    }
+}
+
+impl JsImportCallExpression {
+    /// Returns the inner text of the module specifier:
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, T};
+    /// use biome_js_factory::make;
+    ///
+    /// let import_token = make::token(T![import]);
+    /// let source_name = make::js_string_literal_expression(make::js_string_literal("foo"));
+    /// let call_arguments = make::js_call_arguments(
+    ///     make::token(T!['(']),
+    ///     make::js_call_argument_list([AnyJsCallArgument::AnyJsExpression(AnyJsExpression::AnyJsLiteralExpression(source_name.into()))], []),
+    ///     make::token(T![')']),
+    /// );
+    /// let import_call_expression = make::js_import_call_expression(import_token, call_arguments);
+    /// assert_eq!(import_call_expression.module_source_text().unwrap().text(), "foo");
+    /// ```
+    pub fn module_source_text(&self) -> Option<TokenText> {
+        let [Some(argument)] = self.arguments().ok()?.get_arguments_by_index([0])
+        else {
+            return None;
+        };
+        argument
+            .as_any_js_expression()?
+            .as_any_js_literal_expression()?
+            .as_js_string_literal_expression()?
+            .inner_string_text()
+            .ok()
+    }
+
+    /// Returns the whole token text of the module specifier, with quotes included:
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, T};
+    /// use biome_js_factory::make;
+    ///
+    /// let import_token = make::token(T![import]);
+    /// let source_name = make::js_string_literal_expression(make::js_string_literal("foo"));
+    /// let call_arguments = make::js_call_arguments(
+    ///     make::token(T!['(']),
+    ///     make::js_call_argument_list([AnyJsCallArgument::AnyJsExpression(AnyJsExpression::AnyJsLiteralExpression(source_name.into()))], []),
+    ///     make::token(T![')']),
+    /// );
+    /// let import_call_expression = make::js_import_call_expression(import_token, call_arguments);
+    /// assert_eq!(import_call_expression.module_source_token().unwrap().text(), "\"foo\"");
+    /// ```
+    pub fn module_source_token(&self) -> Option<SyntaxToken<crate::JsLanguage>> {
+        let [Some(argument)] = self.arguments().ok()?.get_arguments_by_index([0])
+        else {
+            return None;
+        };
+        argument
+            .as_any_js_expression()?
+            .as_any_js_literal_expression()?
+            .as_js_string_literal_expression()?
+            .value_token()
+            .ok()
     }
 }
 
@@ -214,7 +279,7 @@ declare_node_union! {
 }
 
 impl AnyJsImportSourceLike {
-    /// Returns the inner text of specifier:
+    /// Returns the inner text of the specifier:
     ///
     /// ## Examples
     ///
@@ -248,16 +313,7 @@ impl AnyJsImportSourceLike {
                 }
             }
             AnyJsImportSourceLike::JsImportCallExpression(import_call) => {
-                let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
-                else {
-                    return None;
-                };
-                argument
-                    .as_any_js_expression()?
-                    .as_any_js_literal_expression()?
-                    .as_js_string_literal_expression()?
-                    .inner_string_text()
-                    .ok()
+                import_call.module_source_text()
             }
         }
     }
@@ -296,16 +352,7 @@ impl AnyJsImportSourceLike {
                 }
             }
             AnyJsImportSourceLike::JsImportCallExpression(import_call) => {
-                let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
-                else {
-                    return None;
-                };
-                argument
-                    .as_any_js_expression()?
-                    .as_any_js_literal_expression()?
-                    .as_js_string_literal_expression()?
-                    .value_token()
-                    .ok()
+                import_call.module_source_token()
             }
         }
     }
