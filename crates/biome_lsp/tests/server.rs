@@ -2735,13 +2735,70 @@ async fn pull_source_assist_action() -> Result<()> {
         )
         .await?
         .context("codeAction returned None")?;
-
+    let mut changes = HashMap::default();
+    changes.insert(
+        url!("file.json"),
+        vec![
+            TextEdit {
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 2,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 5,
+                    },
+                },
+                new_text: "foo".to_string(),
+            },
+            TextEdit {
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 8,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 12,
+                    },
+                },
+                new_text: "\"bar\"".to_string(),
+            },
+            TextEdit {
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 31,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 34,
+                    },
+                },
+                new_text: "zod".to_string(),
+            },
+            TextEdit {
+                range: Range {
+                    start: Position {
+                        line: 0,
+                        character: 37,
+                    },
+                    end: Position {
+                        line: 0,
+                        character: 42,
+                    },
+                },
+                new_text: "true".to_string(),
+            },
+        ],
+    );
     let expected_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
-        title: String::from("Fix all auto-fixable issues"),
-        kind: Some(lsp::CodeActionKind::new("source.fixAll.biome")),
-        diagnostics: Some(vec![]),
+        title: String::from("They keys of the current object can be sorted."),
+        kind: Some(lsp::CodeActionKind::new("source.biome.json.useSortedKeys")),
+        diagnostics: None,
         edit: Some(lsp::WorkspaceEdit {
-            changes: None,
+            changes: Some(changes),
             document_changes: None,
             change_annotations: None,
         }),

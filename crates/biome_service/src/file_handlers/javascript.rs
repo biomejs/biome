@@ -211,20 +211,19 @@ impl ServiceLanguage for JsLanguage {
                 })
                 .unwrap_or_default();
 
-        let mut jsx_runtime = None;
+        let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
 
         if let (Some(overrides), Some(global)) = (overrides, global) {
-            jsx_runtime = Some(
-                match overrides
-                    .override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
-                {
-                    // In the future, we may wish to map an `Auto` variant to a concrete
-                    // analyzer value for easy access by the analyzer.
-                    JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
-                    JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
-                },
-            );
+            let jsx_runtime = match overrides
+                .override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
+            {
+                // In the future, we may wish to map an `Auto` variant to a concrete
+                // analyzer value for easy access by the analyzer.
+                JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
+                JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
+            };
+            configuration = configuration.with_jsx_runtime(jsx_runtime);
 
             globals.extend(
                 overrides
@@ -270,20 +269,19 @@ impl ServiceLanguage for JsLanguage {
             }
         }
 
-        let configuration = AnalyzerConfiguration {
-            rules: global
-                .map(|g| to_analyzer_rules(g, path.as_path()))
-                .unwrap_or_default(),
-            globals,
-            preferred_quote,
-            jsx_runtime,
-        };
+        let configuration = configuration
+            .with_rules(
+                global
+                    .map(|g| to_analyzer_rules(g, path.as_path()))
+                    .unwrap_or_default(),
+            )
+            .with_globals(globals)
+            .with_preferred_quote(preferred_quote);
 
-        AnalyzerOptions {
-            configuration,
-            file_path: path.to_path_buf(),
-            suppression_reason,
-        }
+        AnalyzerOptions::default()
+            .with_file_path(path.as_path())
+            .with_configuration(configuration)
+            .with_suppression_reason(suppression_reason)
     }
 }
 

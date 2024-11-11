@@ -3,7 +3,7 @@ use rustc_hash::FxHashMap;
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
@@ -55,34 +55,76 @@ impl AnalyzerRules {
 #[derive(Debug, Default)]
 pub struct AnalyzerConfiguration {
     /// A list of rules and their options
-    pub rules: AnalyzerRules,
+    rules: AnalyzerRules,
 
     /// A collections of bindings that the analyzers should consider as "external".
     ///
     /// For example, lint rules should ignore them.
-    pub globals: Vec<Box<str>>,
+    globals: Vec<Box<str>>,
 
     /// Allows to choose a different quote when applying fixes inside the lint rules
-    pub preferred_quote: PreferredQuote,
+    preferred_quote: PreferredQuote,
 
     /// Indicates the type of runtime or transformation used for interpreting JSX.
-    pub jsx_runtime: Option<JsxRuntime>,
+    jsx_runtime: Option<JsxRuntime>,
+}
+
+impl AnalyzerConfiguration {
+    pub fn with_rules(mut self, rules: AnalyzerRules) -> Self {
+        self.rules = rules;
+        self
+    }
+
+    pub fn with_globals(mut self, globals: Vec<Box<str>>) -> Self {
+        self.globals = globals;
+        self
+    }
+
+    pub fn with_jsx_runtime(mut self, jsx_runtime: JsxRuntime) -> Self {
+        self.jsx_runtime = Some(jsx_runtime);
+        self
+    }
+
+    pub fn with_preferred_quote(mut self, preferred_quote: PreferredQuote) -> Self {
+        self.preferred_quote = preferred_quote;
+        self
+    }
+
+    /// Returns the rules that are configured for this analyzer
+    pub fn rules(&self) -> &AnalyzerRules {
+        &self.rules
+    }
 }
 
 /// A set of information useful to the analyzer infrastructure
 #[derive(Debug, Default)]
 pub struct AnalyzerOptions {
     /// A data structured derived from the [`biome.json`] file
-    pub configuration: AnalyzerConfiguration,
+    configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed
-    pub file_path: PathBuf,
+    file_path: PathBuf,
 
     /// Suppression reason used when applying a suppression code action
-    pub suppression_reason: Option<String>,
+    suppression_reason: Option<String>,
 }
 
 impl AnalyzerOptions {
+    pub fn with_file_path(mut self, file_path: impl Into<PathBuf>) -> Self {
+        self.file_path = file_path.into();
+        self
+    }
+
+    pub fn with_configuration(mut self, analyzer_configuration: AnalyzerConfiguration) -> Self {
+        self.configuration = analyzer_configuration;
+        self
+    }
+
+    pub fn with_suppression_reason(mut self, reason: Option<String>) -> Self {
+        self.suppression_reason = reason;
+        self
+    }
+
     pub fn globals(&self) -> Vec<&str> {
         self.configuration
             .globals
@@ -116,6 +158,14 @@ impl AnalyzerOptions {
 
     pub fn preferred_quote(&self) -> &PreferredQuote {
         &self.configuration.preferred_quote
+    }
+
+    pub fn file_path(&self) -> &Path {
+        self.file_path.as_ref()
+    }
+
+    pub fn suppression_reason(&self) -> Option<&str> {
+        self.suppression_reason.as_deref()
     }
 }
 

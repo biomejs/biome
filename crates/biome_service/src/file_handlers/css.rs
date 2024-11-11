@@ -141,19 +141,18 @@ impl ServiceLanguage for CssLanguage {
             })
             .unwrap_or_default();
 
-        let configuration = AnalyzerConfiguration {
-            rules: global
-                .map(|g| to_analyzer_rules(g, file_path.as_path()))
-                .unwrap_or_default(),
-            preferred_quote,
-            ..Default::default()
-        };
+        let configuration = AnalyzerConfiguration::default()
+            .with_rules(
+                global
+                    .map(|g| to_analyzer_rules(g, file_path.as_path()))
+                    .unwrap_or_default(),
+            )
+            .with_preferred_quote(preferred_quote);
 
-        AnalyzerOptions {
-            configuration,
-            file_path: file_path.to_path_buf(),
-            suppression_reason,
-        }
+        AnalyzerOptions::default()
+            .with_file_path(file_path.as_path())
+            .with_configuration(configuration)
+            .with_suppression_reason(suppression_reason)
     }
 }
 

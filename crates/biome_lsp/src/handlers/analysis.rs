@@ -5,6 +5,7 @@ use anyhow::{Context, Result};
 use biome_analyze::{
     ActionCategory, RuleCategoriesBuilder, SourceActionKind, SUPPRESSION_INLINE_ACTION_CATEGORY,
 };
+use biome_configuration::analyzer::RuleSelector;
 use biome_diagnostics::Applicability;
 use biome_fs::BiomePath;
 use biome_lsp_converters::from_proto;
@@ -54,7 +55,6 @@ pub(crate) fn code_actions(
             .build(),
     })?;
 
-    dbg!("here");
     if !file_features.supports_lint()
         && !file_features.supports_organize_imports()
         && !file_features.supports_assist()
@@ -129,6 +129,10 @@ pub(crate) fn code_actions(
         skip: vec![],
         only: vec![],
         suppression_reason: None,
+        additional_rules: filters
+            .iter()
+            .filter_map(|filter| RuleSelector::from_lsp_filter(*filter))
+            .collect(),
     }) {
         Ok(result) => result,
         Err(err) => {

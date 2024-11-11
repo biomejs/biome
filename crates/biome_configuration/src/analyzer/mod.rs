@@ -389,16 +389,39 @@ pub enum RuleSelector {
 impl RuleSelector {
     /// It retrieves a [RuleSelector] from an LSP filter.
     ///
-    /// ## Warnings
+    /// In Biome, the only assists that belong to the `source` group can be applied when applying executing the `source.fixAll` signal from the editor.
+    /// Hence, these filters are usually written as `source.biome.*`. So we already know the group of the rule in advance.
     ///
-    /// As for today, this function retrieves filter that belong to the assist
-    pub fn from_lsp_filter(filter: &'static str) -> Option<Self> {
-        filter.strip_prefix("source.").and_then(|filter| {
-            filter
-                .split('.')
-                .last()
-                .map(|action_name| Self::Rule("source", action_name))
-        })
+    /// On the other hand, linter rules work differently. They are prefixed with `quickfix.biome.*` and they must have the name of the group in their name. For example:
+    /// - `quickfix.biome.style.useConst`
+    /// - `quickfix.biome.a11y.useAltText`
+    ///
+    /// ```
+    /// use biome_configuration::analyzer::RuleSelector;
+    ///
+    /// let filter = "source.biome.useSortedKeys";
+    /// let selector = RuleSelector::from_lsp_filter(filter).unwrap();
+    /// assert_eq!(selector, RuleSelector::Rule("source", "useSortedKeys"));
+    /// let filter = "quickfix.biome.style.useConst";
+    /// let selector = RuleSelector::from_lsp_filter(filter).unwrap();
+    /// assert_eq!(selector, RuleSelector::Rule("style", "useConst"));
+    /// let filter = "quickfix.biome.a11y.useAltText";
+    /// let selector = RuleSelector::from_lsp_filter(filter).unwrap();
+    /// assert_eq!(selector, RuleSelector::Rule("a11y", "useAltText"));
+    /// ```
+    pub fn from_lsp_filter(filter: &str) -> Option<Self> {
+        if let Some(filter) = filter.strip_prefix("source.biome.") {
+            let group = assist::RuleGroup::from_str("source").ok()?;
+            let rule_name = Actions::has_rule(group, filter)?;
+            Some(RuleSelector::Rule(group.as_str(), rule_name))
+        } else if let Some(filter) = filter.strip_prefix("quickfix.biome.") {
+            let (group, rule_name) = filter.split_once('.')?;
+            let group = linter::RuleGroup::from_str(group).ok()?;
+            let rule_name = Rules::has_rule(group, rule_name)?;
+            Some(RuleSelector::Rule(group.as_str(), rule_name))
+        } else {
+            None
+        }
     }
 }
 
@@ -423,42 +446,36 @@ impl<'a> From<&'a RuleSelector> for RuleFilter<'static> {
 impl FromStr for RuleSelector {
     type Err = &'static str;
     fn from_str(selector: &str) -> Result<Self, Self::Err> {
-        let lint_selector = selector.strip_prefix("lint/");
-        if let Some(lint_selector) = lint_selector {
-            if let Some((group_name, rule_name)) = lint_selector.split_once('/') {
-                let group = linter::RuleGroup::from_str(group_name)?;
+        let selector = selector
+            .strip_prefix("lint/")
+            .or_else(|| selector.strip_prefix("assist/"))
+            .unwrap_or(selector);
+
+        if let Some((group_name, rule_name)) = selector.split_once('/') {
+            if let Ok(group) = linter::RuleGroup::from_str(group_name) {
                 if let Some(rule_name) = Rules::has_rule(group, rule_name) {
-                    return Ok(RuleSelector::Rule(group.as_str(), rule_name));
+                    Ok(RuleSelector::Rule(group.as_str(), rule_name))
+                } else {
+                    Err("This rule doesn't exist.")
                 }
-            } else {
-                return match linter::RuleGroup::from_str(lint_selector) {
-                    Ok(group) => Ok(RuleSelector::Group(group.as_str())),
-                    Err(_) => Err(
-                        "This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.",
-                    ),
-                };
-            }
-        }
-
-        let assist_selector = selector.strip_prefix("assist/");
-
-        if let Some(assist_selector) = assist_selector {
-            if let Some((group_name, rule_name)) = assist_selector.split_once('/') {
-                let group = assist::RuleGroup::from_str(group_name)?;
+            } else if let Ok(group) = assist::RuleGroup::from_str(group_name) {
                 if let Some(rule_name) = Actions::has_rule(group, rule_name) {
-                    return Ok(RuleSelector::Rule(group.as_str(), rule_name));
+                    Ok(RuleSelector::Rule(group.as_str(), rule_name))
+                } else {
+                    Err("This rule doesn't exist.")
                 }
             } else {
-                return match assist::RuleGroup::from_str(assist_selector) {
-                    Ok(group) => Ok(RuleSelector::Group(group.as_str())),
-                    Err(_) => Err(
-                        "This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.",
-                    ),
-                };
+                Err("This rule doesn't exist.")
             }
+        } else {
+            if let Ok(group) = linter::RuleGroup::from_str(selector) {
+                return Ok(RuleSelector::Group(group.as_str()));
+            }
+            if let Ok(group) = assist::RuleGroup::from_str(selector) {
+                return Ok(RuleSelector::Group(group.as_str()));
+            }
+            Err("This group doesn't exist. Use the syntax `<group>/<rule>` to specify a rule.")
         }
-
-        Err("The rule doesn't exist.")
     }
 }
 
@@ -479,7 +496,7 @@ impl<'de> serde::Deserialize<'de> for RuleSelector {
         impl<'de> serde::de::Visitor<'de> for Visitor {
             type Value = RuleSelector;
             fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("<group>/<ruyle_name>")
+                formatter.write_str("<group>/<rule_name>")
             }
             fn visit_str<E: serde::de::Error>(self, v: &str) -> Result<Self::Value, E> {
                 match RuleSelector::from_str(v) {
@@ -499,5 +516,46 @@ impl schemars::JsonSchema for RuleSelector {
     }
     fn json_schema(gen: &mut schemars::gen::SchemaGenerator) -> schemars::schema::Schema {
         String::json_schema(gen)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::analyzer::RuleSelector;
+    use std::str::FromStr;
+
+    #[test]
+    fn lsp_filter_to_rule_selector() {
+        let filter = "source.biome.useSortedKeys";
+        let selector = RuleSelector::from_lsp_filter(filter).unwrap();
+        assert_eq!(selector, RuleSelector::Rule("source", "useSortedKeys"));
+
+        let filter = "quickfix.biome.style.useConst";
+        let selector = RuleSelector::from_lsp_filter(filter).unwrap();
+        assert_eq!(selector, RuleSelector::Rule("style", "useConst"));
+    }
+
+    #[test]
+    fn correctly_parses_string_to_rule_selector() {
+        assert_eq!(
+            RuleSelector::from_str("suspicious").unwrap(),
+            RuleSelector::Group("suspicious")
+        );
+        assert_eq!(
+            RuleSelector::from_str("lint/suspicious").unwrap(),
+            RuleSelector::Group("suspicious")
+        );
+        assert_eq!(
+            RuleSelector::from_str("lint/suspicious/noDuplicateObjectKeys").unwrap(),
+            RuleSelector::Rule("suspicious", "noDuplicateObjectKeys")
+        );
+        assert_eq!(
+            RuleSelector::from_str("assist/source").unwrap(),
+            RuleSelector::Group("source")
+        );
+        assert_eq!(
+            RuleSelector::from_str("assist/source/useSortedKeys").unwrap(),
+            RuleSelector::Rule("source", "useSortedKeys")
+        );
     }
 }

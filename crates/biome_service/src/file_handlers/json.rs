@@ -134,19 +134,17 @@ impl ServiceLanguage for JsonLanguage {
         _file_source: &DocumentFileSource,
         suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
-        let configuration = AnalyzerConfiguration {
-            rules: global
-                .map(|g| to_analyzer_rules(g, path.as_path()))
-                .unwrap_or_default(),
-            globals: vec![],
-            preferred_quote: PreferredQuote::Double,
-            ..Default::default()
-        };
-        AnalyzerOptions {
-            configuration,
-            file_path: path.to_path_buf(),
-            suppression_reason,
-        }
+        let configuration = AnalyzerConfiguration::default()
+            .with_rules(
+                global
+                    .map(|g| to_analyzer_rules(g, path.as_path()))
+                    .unwrap_or_default(),
+            )
+            .with_preferred_quote(PreferredQuote::Double);
+        AnalyzerOptions::default()
+            .with_file_path(path.as_path())
+            .with_configuration(configuration)
+            .with_suppression_reason(suppression_reason)
     }
 }
 

@@ -15,8 +15,8 @@ use crate::workspace::{
 };
 use crate::WorkspaceError;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
-    RuleCategoriesBuilder, RuleCategory, RuleError,
+    AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder, RuleCategory,
+    RuleError,
 };
 use biome_diagnostics::{category, Applicability, Diagnostic, DiagnosticExt, Severity};
 use biome_formatter::{
@@ -143,11 +143,9 @@ impl ServiceLanguage for GraphqlLanguage {
         _file_source: &DocumentFileSource,
         suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
-        AnalyzerOptions {
-            configuration: AnalyzerConfiguration::default(),
-            file_path: path.to_path_buf(),
-            suppression_reason,
-        }
+        AnalyzerOptions::default()
+            .with_file_path(path.as_path())
+            .with_suppression_reason(suppression_reason)
     }
 }
 
