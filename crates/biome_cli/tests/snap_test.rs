@@ -339,18 +339,16 @@ impl From<SnapshotPayload<'_>> for CliSnapshot {
             }
         }
 
-        let files: Vec<_> = fs
-            .files()
+        cli_snapshot.files = fs
+            .files
+            .read()
+            .iter()
             .map(|(file, entry)| {
                 let content = entry.lock();
                 let content = std::str::from_utf8(content.as_slice()).unwrap();
                 (file.to_str().unwrap().to_string(), String::from(content))
             })
             .collect();
-
-        for (file, content) in files {
-            cli_snapshot.files.insert(file, content);
-        }
 
         let in_buffer = &console.in_buffer;
         for (index, message) in in_buffer.iter().enumerate() {

@@ -29,7 +29,7 @@ use biome_service::configuration::{
 };
 use biome_service::documentation::Doc;
 use biome_service::workspace::{FixFileMode, RegisterProjectFolderParams, UpdateSettingsParams};
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError};
 use bpaf::Bpaf;
 use std::ffi::OsString;
 use std::path::PathBuf;
@@ -641,9 +641,7 @@ pub(crate) fn validate_configuration_diagnostics(
     Ok(())
 }
 
-fn resolve_manifest(
-    fs: &DynRef<'_, dyn FileSystem>,
-) -> Result<Option<(BiomePath, String)>, WorkspaceError> {
+fn resolve_manifest(fs: &dyn FileSystem) -> Result<Option<(BiomePath, String)>, WorkspaceError> {
     let result = fs.auto_search(
         &fs.working_directory().unwrap_or_default(),
         &["package.json"],
@@ -661,7 +659,7 @@ fn get_files_to_process_with_cli_options(
     since: Option<&str>,
     changed: bool,
     staged: bool,
-    fs: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     configuration: &PartialConfiguration,
 ) -> Result<Option<Vec<OsString>>, CliDiagnostic> {
     if since.is_some() {
@@ -769,9 +767,9 @@ pub(crate) trait CommandRunner: Sized {
     /// The main command to use.
     fn run(&mut self, session: CliSession, cli_options: &CliOptions) -> Result<(), CliDiagnostic> {
         setup_cli_subscriber(cli_options.log_level, cli_options.log_kind);
-        let fs = &session.app.fs;
         let console = &mut *session.app.console;
         let workspace = &*session.app.workspace;
+        let fs = workspace.fs();
         self.check_incompatible_arguments()?;
         let (execution, paths) = self.configure_workspace(fs, console, workspace, cli_options)?;
         execute_mode(execution, session, cli_options, paths)
@@ -786,7 +784,7 @@ pub(crate) trait CommandRunner: Sized {
     /// - Updates the settings that belong to the project registered
     fn configure_workspace(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         console: &mut dyn Console,
         workspace: &dyn Workspace,
         cli_options: &CliOptions,
@@ -856,14 +854,14 @@ pub(crate) trait CommandRunner: Sized {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError>;
 
     /// It returns the paths that need to be handled/traversed.
     fn get_files_to_process(
         &self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic>;
 
@@ -905,7 +903,7 @@ pub trait LoadEditorConfig: CommandRunner {
         &self,
         configuration_path: Option<PathBuf>,
         fs_configuration: &PartialConfiguration,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError> {
         Ok(if self.should_load_editor_config(fs_configuration) {

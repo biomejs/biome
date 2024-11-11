@@ -1,12 +1,11 @@
 use std::{io, path::Path};
 
 use biome_fs::{FileSystem, OpenOptions};
-use biome_service::DynRef;
 
 /// Read an ignore file that follows gitignore pattern syntax,
 /// and turn them into a list of UNIX glob patterns.
 pub(crate) fn read_ignore_file(
-    fs: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     ignore_filename: &str,
 ) -> io::Result<IgnorePatterns> {
     let mut file = fs.open_with_options(

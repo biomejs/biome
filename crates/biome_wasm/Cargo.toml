@@ -22,6 +22,7 @@ experimental-html = ["biome_service/experimental-html"]
 [dependencies]
 biome_console      = { workspace = true }
 biome_diagnostics  = { workspace = true }
+biome_fs           = { workspace = true }
 biome_service      = { workspace = true }
 js-sys             = "0.3.72"
 serde              = { workspace = true }

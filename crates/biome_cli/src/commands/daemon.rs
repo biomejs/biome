@@ -4,6 +4,7 @@ use crate::{
     CliDiagnostic, CliSession,
 };
 use biome_console::{markup, ConsoleExt};
+use biome_fs::OsFileSystem;
 use biome_lsp::ServerFactory;
 use biome_service::{workspace::WorkspaceClient, TransportError, WorkspaceError};
 use std::{env, fs, path::PathBuf};
@@ -50,7 +51,7 @@ pub(crate) fn stop(session: CliSession) -> Result<(), CliDiagnostic> {
     let rt = Runtime::new()?;
 
     if let Some(transport) = open_transport(rt)? {
-        let client = WorkspaceClient::new(transport)?;
+        let client = WorkspaceClient::new(transport, Box::new(OsFileSystem::default()))?;
         match client.shutdown() {
             // The `ChannelClosed` error is expected since the server can
             // shutdown before sending a response

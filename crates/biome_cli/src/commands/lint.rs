@@ -15,7 +15,7 @@ use biome_console::Console;
 use biome_deserialize::Merge;
 use biome_fs::FileSystem;
 use biome_service::configuration::LoadedConfiguration;
-use biome_service::{DynRef, Workspace, WorkspaceError};
+use biome_service::{Workspace, WorkspaceError};
 use std::ffi::OsString;
 
 pub(crate) struct LintCommandPayload {
@@ -46,7 +46,7 @@ impl CommandRunner for LintCommandPayload {
     fn merge_configuration(
         &mut self,
         loaded_configuration: LoadedConfiguration,
-        _fs: &DynRef<'_, dyn FileSystem>,
+        _fs: &dyn FileSystem,
         _console: &mut dyn Console,
     ) -> Result<PartialConfiguration, WorkspaceError> {
         let LoadedConfiguration {
@@ -100,7 +100,7 @@ impl CommandRunner for LintCommandPayload {
 
     fn get_files_to_process(
         &self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         configuration: &PartialConfiguration,
     ) -> Result<Vec<OsString>, CliDiagnostic> {
         let paths = get_files_to_process_with_cli_options(
