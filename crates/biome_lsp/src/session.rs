@@ -331,7 +331,7 @@ impl Session {
                     categories = categories.with_lint();
                 }
                 if file_features.supports_organize_imports() {
-                    categories = categories.with_action();
+                    categories = categories.with_assist();
                 }
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {

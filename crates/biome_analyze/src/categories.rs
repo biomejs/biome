@@ -214,7 +214,7 @@ pub enum SourceActionKind {
 pub(crate) enum Categories {
     Syntax = 1 << RuleCategory::Syntax as u8,
     Lint = 1 << RuleCategory::Lint as u8,
-    Action = 1 << RuleCategory::Action as u8,
+    Assist = 1 << RuleCategory::Action as u8,
     Transformation = 1 << RuleCategory::Transformation as u8,
 }
 
@@ -260,7 +260,7 @@ impl From<RuleCategory> for RuleCategories {
         match input {
             RuleCategory::Syntax => RuleCategories(BitFlags::from_flag(Categories::Syntax)),
             RuleCategory::Lint => RuleCategories(BitFlags::from_flag(Categories::Lint)),
-            RuleCategory::Action => RuleCategories(BitFlags::from_flag(Categories::Action)),
+            RuleCategory::Action => RuleCategories(BitFlags::from_flag(Categories::Assist)),
             RuleCategory::Transformation => {
                 RuleCategories(BitFlags::from_flag(Categories::Transformation))
             }
@@ -284,7 +284,7 @@ impl serde::Serialize for RuleCategories {
             flags.push(RuleCategory::Lint);
         }
 
-        if self.0.contains(Categories::Action) {
+        if self.0.contains(Categories::Assist) {
             flags.push(RuleCategory::Action);
         }
 
@@ -370,8 +370,8 @@ impl RuleCategoriesBuilder {
         self
     }
 
-    pub fn with_action(mut self) -> Self {
-        self.flags.insert(Categories::Action);
+    pub fn with_assist(mut self) -> Self {
+        self.flags.insert(Categories::Assist);
         self
     }
 

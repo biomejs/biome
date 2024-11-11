@@ -463,7 +463,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 categories: RuleCategoriesBuilder::default()
                     .with_syntax()
                     .with_lint()
-                    .with_action()
+                    .with_assist()
                     .build(),
                 enabled_rules: Some(enabled_rules.as_slice()),
                 disabled_rules: &disabled_rules,

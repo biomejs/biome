@@ -2650,9 +2650,7 @@ async fn pull_source_assist_action() -> Result<()> {
     }"#;
 
     fs.insert(url!("biome.json").to_file_path().unwrap(), config);
-    let (service, client) = factory
-        .create_with_fs(None, Box::new(MemoryFileSystem::default()))
-        .into_inner();
+    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2704,18 +2702,16 @@ async fn pull_source_assist_action() -> Result<()> {
                 range: Range {
                     start: Position {
                         line: 0,
-                        character: 6,
+                        character: 0,
                     },
                     end: Position {
                         line: 0,
-                        character: 6,
+                        character: 15,
                     },
                 },
                 context: lsp::CodeActionContext {
                     diagnostics: vec![unsafe_fixable.clone()],
-                    only: Some(vec![lsp::CodeActionKind::new(
-                        "source.biome.json.useSortedKeys",
-                    )]),
+                    only: Some(vec![lsp::CodeActionKind::new("source.biome.useSortedKeys")]),
                     ..Default::default()
                 },
                 work_done_progress_params: WorkDoneProgressParams {
@@ -2788,7 +2784,7 @@ async fn pull_source_assist_action() -> Result<()> {
     );
     let expected_action = lsp::CodeActionOrCommand::CodeAction(lsp::CodeAction {
         title: String::from("They keys of the current object can be sorted."),
-        kind: Some(lsp::CodeActionKind::new("source.biome.json.useSortedKeys")),
+        kind: Some(lsp::CodeActionKind::new("source.biome.useSortedKeys")),
         diagnostics: None,
         edit: Some(lsp::WorkspaceEdit {
             changes: Some(changes),

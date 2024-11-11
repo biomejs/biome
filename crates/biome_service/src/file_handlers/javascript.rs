@@ -569,7 +569,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
                 categories: RuleCategoriesBuilder::default()
                     .with_syntax()
                     .with_lint()
-                    .with_action()
+                    .with_assist()
                     .build(),
                 enabled_rules: Some(enabled_rules.as_slice()),
                 disabled_rules: &disabled_rules,
@@ -883,7 +883,7 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
 
     let filter = AnalysisFilter {
         enabled_rules: Some(&[RuleFilter::Rule("source", "organizeImports")]),
-        categories: RuleCategoriesBuilder::default().with_action().build(),
+        categories: RuleCategoriesBuilder::default().with_assist().build(),
         ..AnalysisFilter::default()
     };
 

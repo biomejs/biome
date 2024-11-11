@@ -1218,7 +1218,15 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
     #[must_use]
     pub(crate) fn finish(self) -> (Vec<RuleFilter<'b>>, Vec<RuleFilter<'b>>) {
         let mut disabled_rules = vec![];
-        let mut enabled_rules = vec![];
+        let mut enabled_rules: Vec<_> = self
+            .enabled_rules
+            .map(|enabled_rules| {
+                enabled_rules
+                    .into_iter()
+                    .map(|selector| RuleFilter::from(selector))
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default();
         let mut syntax = SyntaxVisitor::default();
 
         biome_js_analyze::visit_registry(&mut syntax);
