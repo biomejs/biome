@@ -1400,10 +1400,6 @@ export interface Nursery {
 	 */
 	useGuardForIn?: RuleConfiguration_for_Null;
 	/**
-	 * Disallows package private imports.
-	 */
-	useImportRestrictions?: RuleConfiguration_for_Null;
-	/**
 	 * Enforce specifying the name of GraphQL operations.
 	 */
 	useNamedOperation?: RuleFixConfiguration_for_Null;
@@ -2519,6 +2515,10 @@ export interface RestrictedImportsOptions {
 	 * A list of import paths that should trigger the rule.
 	 */
 	paths: {};
+	/**
+	 * Whether to place restrictions on the importing of "package private" symbols.
+	 */
+	restrictPackagePrivate?: PackagePrivateRestriction;
 }
 export interface NoRestrictedTypesOptions {
 	types?: {};
@@ -2663,6 +2663,10 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
+/**
+ * Allowed values for the `restrictPackagePrivate` option.
+ */
+export type PackagePrivateRestriction = "all" | "none";
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];

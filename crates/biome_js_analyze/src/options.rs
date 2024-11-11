@@ -348,8 +348,6 @@ pub type UseIframeTitle =
     <lint::a11y::use_iframe_title::UseIframeTitle as biome_analyze::Rule>::Options;
 pub type UseImportExtensions =
     <lint::correctness::use_import_extensions::UseImportExtensions as biome_analyze::Rule>::Options;
-pub type UseImportRestrictions =
-    <lint::nursery::use_import_restrictions::UseImportRestrictions as biome_analyze::Rule>::Options;
 pub type UseImportType =
     <lint::style::use_import_type::UseImportType as biome_analyze::Rule>::Options;
 pub type UseIsArray = <lint::suspicious::use_is_array::UseIsArray as biome_analyze::Rule>::Options;
