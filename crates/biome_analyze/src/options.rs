@@ -3,7 +3,7 @@ use rustc_hash::FxHashMap;
 use crate::{FixKind, Rule, RuleKey};
 use std::any::{Any, TypeId};
 use std::fmt::Debug;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 /// A convenient new type data structure to store the options that belong to a rule
 #[derive(Debug)]
@@ -55,7 +55,7 @@ impl AnalyzerRules {
 #[derive(Debug, Default)]
 pub struct AnalyzerConfiguration {
     /// A list of rules and their options
-    rules: AnalyzerRules,
+    pub(crate) rules: AnalyzerRules,
 
     /// A collections of bindings that the analyzers should consider as "external".
     ///
@@ -89,11 +89,6 @@ impl AnalyzerConfiguration {
         self.preferred_quote = preferred_quote;
         self
     }
-
-    /// Returns the rules that are configured for this analyzer
-    pub fn rules(&self) -> &AnalyzerRules {
-        &self.rules
-    }
 }
 
 /// A set of information useful to the analyzer infrastructure
@@ -103,10 +98,10 @@ pub struct AnalyzerOptions {
     configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed
-    file_path: PathBuf,
+    pub(crate) file_path: PathBuf,
 
     /// Suppression reason used when applying a suppression code action
-    suppression_reason: Option<String>,
+    pub(crate) suppression_reason: Option<String>,
 }
 
 impl AnalyzerOptions {
@@ -158,14 +153,6 @@ impl AnalyzerOptions {
 
     pub fn preferred_quote(&self) -> &PreferredQuote {
         &self.configuration.preferred_quote
-    }
-
-    pub fn file_path(&self) -> &Path {
-        self.file_path.as_ref()
-    }
-
-    pub fn suppression_reason(&self) -> Option<&str> {
-        self.suppression_reason.as_deref()
     }
 }
 

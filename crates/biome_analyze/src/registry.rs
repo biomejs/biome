@@ -406,7 +406,7 @@ impl<L: Language + Default> RegistryRule<L> {
                 params.root,
                 params.services,
                 &globals,
-                params.options.file_path(),
+                params.options.file_path.as_path(),
                 &options,
                 preferred_quote,
                 jsx_runtime,
