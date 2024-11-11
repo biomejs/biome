@@ -78,7 +78,7 @@ pub(crate) fn code_actions(
             let kind = kind.as_str();
             if FIX_ALL_CATEGORY.matches(kind) {
                 has_fix_all = true;
-            } else if "quickfix.biome" == kind {
+            } else if ActionCategory::QuickFix(Cow::Borrowed("")).to_str() == kind {
                 // The action is a on-save quick-fixes
                 has_quick_fix = true;
             }

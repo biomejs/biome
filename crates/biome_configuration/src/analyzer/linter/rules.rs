@@ -416,6 +416,35 @@ impl Rules {
         }
         enabled_rules.difference(&disabled_rules).copied().collect()
     }
+    #[doc = r" It returns the disabled rules by configuration"]
+    pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut disabled_rules = FxHashSet::default();
+        if let Some(group) = self.a11y.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.complexity.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.correctness.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.nursery.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.performance.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.security.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.style.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        if let Some(group) = self.suspicious.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        disabled_rules
+    }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
 #[deserializable(with_validator)]

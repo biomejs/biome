@@ -857,14 +857,21 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
 
     fn finish(mut self) -> (FxHashSet<RuleFilter<'a>>, FxHashSet<RuleFilter<'a>>) {
         let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
+        let rules = self
+            .settings
+            .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")));
         if !has_only_filter {
-            let enabled_rules = self
-                .settings
-                .and_then(|settings| settings.as_linter_rules(self.path.expect("Path to be set")))
+            let enabled_rules = rules
                 .as_ref()
                 .map(|rules| rules.as_enabled_rules())
                 .unwrap_or_default();
             self.enabled_rules.extend(enabled_rules);
+            self.disabled_rules.extend(
+                rules
+                    .as_ref()
+                    .map(|rules| rules.as_disabled_rules())
+                    .unwrap_or_default(),
+            );
         }
         (self.enabled_rules, self.disabled_rules)
     }
@@ -1222,8 +1229,8 @@ impl<'b> AnalyzerVisitorBuilder<'b> {
             .enabled_rules
             .map(|enabled_rules| {
                 enabled_rules
-                    .into_iter()
-                    .map(|selector| RuleFilter::from(selector))
+                    .iter()
+                    .map(RuleFilter::from)
                     .collect::<Vec<_>>()
             })
             .unwrap_or_default();
