@@ -95,6 +95,84 @@ impl JsImportCallExpression {
     }
 }
 
+impl JsCallExpression {
+    /// Returns the inner text of the module specifier
+    /// if this call expression represents a call to `require("...")`:
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, T};
+    /// use biome_js_factory::make;
+    ///
+    /// let require_identifier = make::js_identifier_expression(make::js_reference_identifier(make::ident("require")));
+    /// let source_name = make::js_string_literal_expression(make::js_string_literal("foo"));
+    /// let call_arguments = make::js_call_arguments(
+    ///     make::token(T!['(']),
+    ///     make::js_call_argument_list([AnyJsCallArgument::AnyJsExpression(AnyJsExpression::AnyJsLiteralExpression(source_name.into()))], []),
+    ///     make::token(T![')']),
+    /// );
+    /// let require_call_expression = make::js_call_expression(require_identifier.into(), call_arguments).build();
+    /// assert_eq!(require_call_expression.imported_module_source_text().unwrap().text(), "foo");
+    /// ```
+    pub fn imported_module_source_text(&self) -> Option<TokenText> {
+        let callee = self.callee().ok()?;
+        let name = callee.as_js_reference_identifier()?.value_token().ok()?;
+        if name.text_trimmed() == "require" {
+            let [Some(argument)] = self.arguments().ok()?.get_arguments_by_index([0])
+            else {
+                return None;
+            };
+            argument
+                .as_any_js_expression()?
+                .as_any_js_literal_expression()?
+                .as_js_string_literal_expression()?
+                .inner_string_text()
+                .ok()
+        } else {
+            None
+        }
+    }
+
+    /// Returns the whole token text of the module specifier, with quotes included,
+    /// if this call expression represents a call to `require("...")`:
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_syntax::{AnyJsCallArgument, AnyJsExpression, T};
+    /// use biome_js_factory::make;
+    ///
+    /// let require_identifier = make::js_identifier_expression(make::js_reference_identifier(make::ident("require")));
+    /// let source_name = make::js_string_literal_expression(make::js_string_literal("foo"));
+    /// let call_arguments = make::js_call_arguments(
+    ///     make::token(T!['(']),
+    ///     make::js_call_argument_list([AnyJsCallArgument::AnyJsExpression(AnyJsExpression::AnyJsLiteralExpression(source_name.into()))], []),
+    ///     make::token(T![')']),
+    /// );
+    /// let require_call_expression = make::js_call_expression(require_identifier.into(), call_arguments).build();
+    /// assert_eq!(require_call_expression.imported_module_source_token().unwrap().text(), "\"foo\"");
+    /// ```
+    pub fn imported_module_source_token(&self) -> Option<SyntaxToken<crate::JsLanguage>> {
+        let callee = self.callee().ok()?;
+        let name = callee.as_js_reference_identifier()?.value_token().ok()?;
+        if name.text_trimmed() == "require" {
+            let [Some(argument)] = self.arguments().ok()?.get_arguments_by_index([0])
+            else {
+                return None;
+            };
+            argument
+                .as_any_js_expression()?
+                .as_any_js_literal_expression()?
+                .as_js_string_literal_expression()?
+                .value_token()
+                .ok()
+        } else {
+            None
+        }
+    }
+}
+
 impl AnyJsImportClause {
     /// Type token of the import clause.
     ///
@@ -295,22 +373,7 @@ impl AnyJsImportSourceLike {
         match self {
             AnyJsImportSourceLike::JsModuleSource(source) => source.inner_string_text().ok(),
             AnyJsImportSourceLike::JsCallExpression(expression) => {
-                let callee = expression.callee().ok()?;
-                let name = callee.as_js_reference_identifier()?.value_token().ok()?;
-                if name.text_trimmed() == "require" {
-                    let [Some(argument)] = expression.arguments().ok()?.get_arguments_by_index([0])
-                    else {
-                        return None;
-                    };
-                    argument
-                        .as_any_js_expression()?
-                        .as_any_js_literal_expression()?
-                        .as_js_string_literal_expression()?
-                        .inner_string_text()
-                        .ok()
-                } else {
-                    None
-                }
+                expression.imported_module_source_text()
             }
             AnyJsImportSourceLike::JsImportCallExpression(import_call) => {
                 import_call.module_source_text()
@@ -334,22 +397,7 @@ impl AnyJsImportSourceLike {
         match self {
             AnyJsImportSourceLike::JsModuleSource(source) => source.value_token().ok(),
             AnyJsImportSourceLike::JsCallExpression(expression) => {
-                let callee = expression.callee().ok()?;
-                let name = callee.as_js_reference_identifier()?.value_token().ok()?;
-                if name.text_trimmed() == "require" {
-                    let [Some(argument)] = expression.arguments().ok()?.get_arguments_by_index([0])
-                    else {
-                        return None;
-                    };
-                    argument
-                        .as_any_js_expression()?
-                        .as_any_js_literal_expression()?
-                        .as_js_string_literal_expression()?
-                        .value_token()
-                        .ok()
-                } else {
-                    None
-                }
+                expression.imported_module_source_token()
             }
             AnyJsImportSourceLike::JsImportCallExpression(import_call) => {
                 import_call.module_source_token()
