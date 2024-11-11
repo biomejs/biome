@@ -643,7 +643,7 @@ impl Workspace for WorkspaceServer {
                         categories: params.categories,
                         manifest,
                         suppression_reason: None,
-                        rules: params.rules,
+                        enabled_rules: params.enabled_rules,
                     });
 
                     (
@@ -700,7 +700,7 @@ impl Workspace for WorkspaceServer {
             only: params.only,
             skip: params.skip,
             suppression_reason: None,
-            rules: params.rules,
+            enabled_rules: params.enabled_rules,
         }))
     }
 

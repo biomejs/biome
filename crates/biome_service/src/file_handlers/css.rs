@@ -332,7 +332,7 @@ fn lint(params: LintParams) -> LintResults {
         .with_only(&params.only)
         .with_skip(&params.skip)
         .with_path(params.path.as_path())
-        .with_enabled_rules(&params.rules)
+        .with_enabled_rules(&params.enabled_rules)
         .finish();
     let mut diagnostics = params.parse.into_diagnostics();
 
@@ -435,7 +435,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         language,
         only,
         skip,
-        rules,
+        enabled_rules: rules,
         suppression_reason,
     } = params;
     debug_span!("Code actions CSS", range =? range, path =? path).in_scope(move || {

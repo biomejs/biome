@@ -459,7 +459,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) rules: Vec<RuleSelector>,
+    pub(crate) enabled_rules: Vec<RuleSelector>,
 }
 
 pub(crate) struct LintResults {
@@ -478,7 +478,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) suppression_reason: Option<String>,
-    pub(crate) rules: Vec<RuleSelector>,
+    pub(crate) enabled_rules: Vec<RuleSelector>,
 }
 
 type Lint = fn(LintParams) -> LintResults;

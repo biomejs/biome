@@ -310,7 +310,7 @@ fn lint(params: LintParams) -> LintResults {
         .with_only(&params.only)
         .with_skip(&params.skip)
         .with_path(params.path.as_path())
-        .with_enabled_rules(&params.rules)
+        .with_enabled_rules(&params.enabled_rules)
         .finish();
     let mut diagnostics = params.parse.into_diagnostics();
 
@@ -407,7 +407,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         only,
         skip,
         suppression_reason,
-        rules,
+        enabled_rules: rules,
     } = params;
     debug_span!("Code actions GraphQL", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();

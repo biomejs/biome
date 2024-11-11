@@ -642,8 +642,9 @@ pub struct PullDiagnosticsParams {
     pub only: Vec<RuleSelector>,
     #[serde(default)]
     pub skip: Vec<RuleSelector>,
+    /// Rules to apply on top of the configuration
     #[serde(default)]
-    pub rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -667,7 +668,7 @@ pub struct PullActionsParams {
     #[serde(default)]
     pub skip: Vec<RuleSelector>,
     #[serde(default)]
-    pub rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -733,9 +734,11 @@ pub struct FixFileParams {
     pub only: Vec<RuleSelector>,
     #[serde(default)]
     pub skip: Vec<RuleSelector>,
+    /// Rules to apply to the file
     #[serde(default)]
-    pub rules: Vec<RuleSelector>,
+    pub enabled_rules: Vec<RuleSelector>,
     pub rule_categories: RuleCategories,
+    #[serde(default)]
     pub suppression_reason: Option<String>,
 }
 
@@ -1147,7 +1150,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             max_diagnostics: max_diagnostics.into(),
             only,
             skip,
-            rules: vec![],
+            enabled_rules: vec![],
         })
     }
 
@@ -1157,7 +1160,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
         suppression_reason: Option<String>,
-        rules: Vec<RuleSelector>,
+        enabled_rules: Vec<RuleSelector>,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
@@ -1165,7 +1168,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             suppression_reason,
-            rules,
+            enabled_rules,
         })
     }
 
@@ -1212,7 +1215,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             skip,
             rule_categories,
             suppression_reason,
-            rules: vec![],
+            enabled_rules: vec![],
         })
     }
 

@@ -2880,10 +2880,13 @@ export interface GetFormatterIRParams {
 }
 export interface PullDiagnosticsParams {
 	categories: RuleCategories;
+	/**
+	 * Rules to apply on top of the configuration
+	 */
+	enabledRules?: RuleCode[];
 	maxDiagnostics: number;
 	only?: RuleCode[];
 	path: BiomePath;
-	rules?: RuleCode[];
 	skip?: RuleCode[];
 }
 export type RuleCategories = RuleCategory[];
@@ -3367,10 +3370,10 @@ export interface BacktraceSymbol {
 	name?: string;
 }
 export interface PullActionsParams {
+	enabledRules?: RuleCode[];
 	only?: RuleCode[];
 	path: BiomePath;
 	range?: TextRange;
-	rules?: RuleCode[];
 	skip?: RuleCode[];
 	suppressionReason?: string;
 }
@@ -3460,11 +3463,14 @@ export interface FormatOnTypeParams {
 	path: BiomePath;
 }
 export interface FixFileParams {
+	/**
+	 * Rules to apply to the file
+	 */
+	enabledRules?: RuleCode[];
 	fixFileMode: FixFileMode;
 	only?: RuleCode[];
 	path: BiomePath;
 	ruleCategories: RuleCategories;
-	rules?: RuleCode[];
 	shouldFormat: boolean;
 	skip?: RuleCode[];
 	suppressionReason?: string;

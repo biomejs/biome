@@ -129,7 +129,7 @@ pub(crate) fn code_actions(
         skip: vec![],
         only: vec![],
         suppression_reason: None,
-        rules: filters
+        enabled_rules: filters
             .iter()
             .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
             .collect(),
@@ -281,7 +281,7 @@ fn fix_all(
         should_format,
         only: vec![],
         skip: vec![],
-        rules: vec![],
+        enabled_rules: vec![],
         suppression_reason: None,
         rule_categories: RuleCategoriesBuilder::default()
             .with_syntax()

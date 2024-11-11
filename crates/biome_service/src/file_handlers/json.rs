@@ -345,7 +345,7 @@ fn lint(params: LintParams) -> LintResults {
         .with_only(&params.only)
         .with_skip(&params.skip)
         .with_path(params.path.as_path())
-        .with_enabled_rules(&params.rules)
+        .with_enabled_rules(&params.enabled_rules)
         .finish();
     let mut diagnostics = params.parse.into_diagnostics();
     // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
@@ -453,7 +453,7 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         language,
         skip,
         only,
-        rules,
+        enabled_rules: rules,
         suppression_reason,
     } = params;
 
