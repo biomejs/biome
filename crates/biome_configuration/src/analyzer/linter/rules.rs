@@ -3440,10 +3440,10 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_named_operation:
         Option<RuleFixConfiguration<biome_graphql_analyze::options::UseNamedOperation>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Require private members to be marked as readonly if they're never modified outside of the constructor"]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_readonly_class_properties:
-        Option<RuleConfiguration<biome_js_analyze::options::UseReadonlyClassProperties>>,
+        Option<RuleFixConfiguration<biome_js_analyze::options::UseReadonlyClassProperties>>,
     #[doc = "Enforce the sorting of CSS utility classes."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub use_sorted_classes:

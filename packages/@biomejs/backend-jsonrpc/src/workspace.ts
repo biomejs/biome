@@ -1415,9 +1415,9 @@ export interface Nursery {
 	 */
 	useNamedOperation?: RuleFixConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Require private members to be marked as readonly if they're never modified outside of the constructor
 	 */
-	useReadonlyClassProperties?: RuleConfiguration_for_Null;
+	useReadonlyClassProperties?: RuleFixConfiguration_for_ReadonlyClassPropertiesOptions;
 	/**
 	 * Enforce the sorting of CSS utility classes.
 	 */
@@ -2092,6 +2092,9 @@ export type RuleConfiguration_for_UseComponentExportOnlyModulesOptions =
 export type RuleConfiguration_for_ConsistentMemberAccessibilityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ConsistentMemberAccessibilityOptions;
+export type RuleFixConfiguration_for_ReadonlyClassPropertiesOptions =
+	| RulePlainConfiguration
+	| RuleWithFixOptions_for_ReadonlyClassPropertiesOptions;
 export type RuleFixConfiguration_for_UtilityClassSortingOptions =
 	| RulePlainConfiguration
 	| RuleWithFixOptions_for_UtilityClassSortingOptions;
@@ -2320,6 +2323,20 @@ export interface RuleWithOptions_for_ConsistentMemberAccessibilityOptions {
 	 * Rule's options
 	 */
 	options: ConsistentMemberAccessibilityOptions;
+}
+export interface RuleWithFixOptions_for_ReadonlyClassPropertiesOptions {
+	/**
+	 * The kind of the code actions emitted by the rule
+	 */
+	fix?: FixKind;
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: ReadonlyClassPropertiesOptions;
 }
 export interface RuleWithFixOptions_for_UtilityClassSortingOptions {
 	/**
@@ -2556,6 +2573,17 @@ export interface UseComponentExportOnlyModulesOptions {
 }
 export interface ConsistentMemberAccessibilityOptions {
 	accessibility?: Accessibility;
+}
+/**
+ * Rule's options.
+ */
+export interface ReadonlyClassPropertiesOptions {
+	/**
+	* If `true`, then check all class properties member
+
+If `false`, then only check private members 
+	 */
+	checkAllProperties: boolean;
 }
 export interface UtilityClassSortingOptions {
 	/**

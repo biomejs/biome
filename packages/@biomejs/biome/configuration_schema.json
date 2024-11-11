@@ -2472,7 +2472,7 @@
 					]
 				},
 				"useReadonlyClassProperties": {
-					"description": "Require private members to be marked as `readonly` if they're never modified outside of the constructor",
+					"description": "Require private members to be marked as readonly if they're never modified outside of the constructor",
 					"anyOf": [
 						{ "$ref": "#/definitions/ReadonlyClassPropertiesConfiguration" },
 						{ "type": "null" }
@@ -2731,6 +2731,23 @@
 		},
 		"QuoteProperties": { "type": "string", "enum": ["asNeeded", "preserve"] },
 		"QuoteStyle": { "type": "string", "enum": ["double", "single"] },
+		"ReadonlyClassPropertiesConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithReadonlyClassPropertiesOptions" }
+			]
+		},
+		"ReadonlyClassPropertiesOptions": {
+			"description": "Rule's options.",
+			"type": "object",
+			"properties": {
+				"checkAllProperties": {
+					"description": "If `true`, then check all class properties member\n\nIf `false`, then only check private members",
+					"type": "boolean"
+				}
+			},
+			"additionalProperties": false
+		},
 		"Regex": { "type": "string" },
 		"RestrictedGlobalsConfiguration": {
 			"anyOf": [
@@ -3071,6 +3088,25 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoUndeclaredDependenciesOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithReadonlyClassPropertiesOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"fix": {
+					"description": "The kind of the code actions emitted by the rule",
+					"anyOf": [{ "$ref": "#/definitions/FixKind" }, { "type": "null" }]
+				},
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/ReadonlyClassPropertiesOptions" }]
 				}
 			},
 			"additionalProperties": false
@@ -4409,34 +4445,6 @@
 			},
 			"additionalProperties": false
 		},
-    "ReadonlyClassPropertiesConfiguration": {
-      "anyOf": [
-				{ "$ref": "#/definitions/RulePlainConfiguration" },
-				{ "$ref": "#/definitions/RuleWithReadonlyClassPropertiesOptions" }
-			]
-    },
-    "RuleWithReadonlyClassPropertiesOptions": {
-      "type": "object",
-      "required": ["level"],
-      "properties": {
-        "level": {
-					"description": "The severity of the emitted diagnostics by the rule",
-					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
-				},
-        "options": {
-          "description": "Rule's options.",
-					"$ref": "#/definitions/ReadonlyClassPropertiesOptions"
-        }
-      }
-    },
-    "ReadonlyClassPropertiesOptions": {
-      "description": "Rule's options.",
-      "type": "object",
-      "properties": {
-        "checkAllProperties": { "default": false, "type": "boolean" }
-      },
-      "additionalProperties": false
-    },
 		"UtilityClassSortingConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
