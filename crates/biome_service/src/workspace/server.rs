@@ -692,6 +692,7 @@ impl Workspace for WorkspaceServer {
             only: params.only,
             skip: params.skip,
             suppression_reason: None,
+            rules: params.rules,
         }))
     }
 

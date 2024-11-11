@@ -660,7 +660,7 @@ pub struct PullActionsParams {
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
     pub suppression_reason: Option<String>,
-    pub additional_rules: Vec<RuleSelector>,
+    pub rules: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1147,7 +1147,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             suppression_reason,
-            additional_rules,
+            rules: additional_rules,
         })
     }
 
