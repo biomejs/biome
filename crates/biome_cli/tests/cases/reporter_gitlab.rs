@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -57,12 +56,12 @@ fn reports_diagnostics_gitlab_check_command() {
     let file_path2 = Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
@@ -94,12 +93,12 @@ fn reports_diagnostics_gitlab_ci_command() {
     let file_path2 = Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("ci"),
+                "ci",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
@@ -131,12 +130,12 @@ fn reports_diagnostics_gitlab_lint_command() {
     let file_path2 = Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
+                "lint",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),
@@ -168,12 +167,12 @@ fn reports_diagnostics_gitlab_format_command() {
     let file_path2 = Path::new("index.ts");
     fs.insert(file_path2.into(), MAIN_2.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
+                "format",
                 "--reporter=gitlab",
                 "--max-diagnostics=200",
                 file_path1.as_os_str().to_str().unwrap(),

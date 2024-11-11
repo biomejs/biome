@@ -2,7 +2,6 @@ use crate::snap_test::SnapshotPayload;
 use crate::{assert_cli_snapshot, run_cli, FORMATTED};
 use biome_console::BufferConsole;
 use biome_fs::{FileSystemExt, MemoryFileSystem};
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -21,13 +20,13 @@ fn ok() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), FORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (_, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--suppress"),
+                "lint",
+                "--suppress",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -45,14 +44,14 @@ fn err_when_both_write_and_suppress_are_passed() {
     let file_path = Path::new("check.js");
     fs.insert(file_path.into(), FORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--write"),
-                ("--suppress"),
+                "lint",
+                "--write",
+                "--suppress",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -77,13 +76,13 @@ fn suppress_ok() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--suppress"),
+                "lint",
+                "--suppress",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -120,13 +119,13 @@ fn suppress_multiple_ok() {
         [SUPPRESS_BEFORE, SUPPRESS_BEFORE].join("\n").as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--suppress"),
+                "lint",
+                "--suppress",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -160,14 +159,14 @@ fn suppress_only_ok() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--suppress"),
-                ("--only=lint/suspicious/noCompareNegZero"),
+                "lint",
+                "--suppress",
+                "--only=lint/suspicious/noCompareNegZero",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -201,14 +200,14 @@ fn suppress_skip_ok() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--suppress"),
-                ("--skip=lint/suspicious/noCompareNegZero"),
+                "lint",
+                "--suppress",
+                "--skip=lint/suspicious/noCompareNegZero",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -242,17 +241,10 @@ fn err_when_only_reason() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from(
-            [
-                ("lint"),
-                ("--reason"),
-                file_path.as_os_str().to_str().unwrap(),
-            ]
-            .as_slice(),
-        ),
+        Args::from(["lint", "--reason", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -282,14 +274,14 @@ fn custom_explanation_with_reason() {
     let file_path = Path::new("fix.js");
     fs.insert(file_path.into(), SUPPRESS_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--suppress"),
-                ("--reason=We love Biome"),
+                "lint",
+                "--suppress",
+                "--reason=We love Biome",
                 file_path.as_os_str().to_str().unwrap(),
             ]
             .as_slice(),
@@ -335,10 +327,10 @@ let foo = 2;
 let bar = 33;",
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

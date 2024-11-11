@@ -8,7 +8,6 @@ use biome_lsp::ServerFactory;
 use biome_lsp::WorkspaceSettings;
 use biome_service::workspace::GetSyntaxTreeResult;
 use biome_service::workspace::{GetFileContentParams, GetSyntaxTreeParams};
-use biome_service::DynRef;
 use futures::channel::mpsc::{channel, Sender};
 use futures::Sink;
 use futures::SinkExt;
@@ -1491,9 +1490,7 @@ async fn pull_diagnostics_for_css_files() -> Result<()> {
     }"#;
 
     fs.insert(url!("biome.json").to_file_path().unwrap(), config);
-    let (service, client) = factory
-        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
-        .into_inner();
+    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
 
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
@@ -1857,9 +1854,7 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
 }"#;
 
     fs.insert(url!("biome.json").to_file_path().unwrap(), config);
-    let (service, client) = factory
-        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
-        .into_inner();
+    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 
@@ -2335,9 +2330,7 @@ async fn does_not_format_ignored_files() -> Result<()> {
     }"#;
 
     fs.insert(url!("biome.json").to_file_path().unwrap(), config);
-    let (service, client) = factory
-        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
-        .into_inner();
+    let (service, client) = factory.create_with_fs(None, Box::new(fs)).into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
 

@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -20,10 +19,10 @@ fn prettier_migrate() {
     let prettier_path = Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -51,10 +50,10 @@ fn prettier_migrate_end_of_line() {
     let prettier_path = Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -93,10 +92,10 @@ generated/*.spec.js
     let prettier_ignore_path = Path::new(".prettierignore");
     fs.insert(prettier_ignore_path.into(), prettier_ignore.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -124,10 +123,10 @@ fn prettier_migrate_jsonc() {
     let prettier_path = Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -151,10 +150,10 @@ fn prettier_migrate_no_file() {
     let configuration_path = Path::new("biome.json");
     fs.insert(configuration_path.into(), configuration.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -182,10 +181,10 @@ fn prettier_migrate_yml_file() {
     let prettier_path = Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -213,10 +212,10 @@ fn prettier_migrate_write() {
     let prettier_path = Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -244,10 +243,10 @@ fn prettier_migrate_fix() {
     let prettier_path = Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--fix"].as_slice()),
+        Args::from(["migrate", "prettier", "--fix"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -275,10 +274,10 @@ fn prettierjson_migrate_write() {
     let prettier_path = Path::new(".prettierrc.json");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -310,10 +309,10 @@ fn prettier_migrate_write_packagejson() {
     let prettier_path = Path::new("package.json");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -352,10 +351,10 @@ generated/*.spec.js
     let prettier_ignore_path = Path::new(".prettierignore");
     fs.insert(prettier_ignore_path.into(), prettier_ignore.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -383,10 +382,10 @@ fn prettier_migrate_write_biome_jsonc() {
     let prettier_path = Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier", "--write"].as_slice()),
+        Args::from(["migrate", "prettier", "--write"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
@@ -425,10 +424,10 @@ fn prettier_migrate_overrides() {
     let prettier_path = Path::new(".prettierrc");
     fs.insert(prettier_path.into(), prettier.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("migrate"), "prettier"].as_slice()),
+        Args::from(["migrate", "prettier"].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");
