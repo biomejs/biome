@@ -191,7 +191,7 @@ where
 
         for plugin in plugins {
             let root: AnyParse = ctx.root.syntax().as_send().expect("not a root node").into();
-            for diagnostic in plugin.evaluate(root, ctx.options.file_path.to_path_buf()) {
+            for diagnostic in plugin.evaluate(root, ctx.options.file_path.clone()) {
                 let signal = DiagnosticSignal::new(|| diagnostic.clone());
 
                 if let ControlFlow::Break(br) = (emit_signal)(&signal) {
