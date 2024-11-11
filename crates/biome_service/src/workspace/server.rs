@@ -25,7 +25,7 @@ use biome_diagnostics::{
     serde::Diagnostic as SerdeDiagnostic, Diagnostic, DiagnosticExt, Severity,
 };
 use biome_formatter::Printed;
-use biome_fs::{BiomePath, ConfigName};
+use biome_fs::{BiomePath, ConfigName, FileSystem};
 use biome_grit_patterns::{compile_pattern_with_options, CompilePatternOptions, GritQuery};
 use biome_js_syntax::ModuleKind;
 use biome_json_parser::{parse_json_with_cache, JsonParserOptions};
@@ -57,6 +57,8 @@ pub(super) struct WorkspaceServer {
     file_sources: RwLock<IndexSet<DocumentFileSource>>,
     /// Stores patterns to search for.
     patterns: DashMap<PatternId, GritQuery>,
+    /// File system implementation.
+    fs: Box<dyn FileSystem>,
 }
 
 /// The `Workspace` object is long-lived, so we want it to be able to cross
@@ -83,7 +85,7 @@ impl WorkspaceServer {
     /// This is implemented as a crate-private method instead of using
     /// [Default] to disallow instances of [Workspace] from being created
     /// outside a [crate::App]
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(fs: Box<dyn FileSystem>) -> Self {
         Self {
             features: Features::new(),
             settings: RwLock::default(),
@@ -92,6 +94,7 @@ impl WorkspaceServer {
             current_project_path: RwLock::default(),
             file_sources: RwLock::default(),
             patterns: Default::default(),
+            fs,
         }
     }
 
@@ -349,6 +352,10 @@ impl WorkspaceServer {
 }
 
 impl Workspace for WorkspaceServer {
+    fn fs(&self) -> &dyn FileSystem {
+        self.fs.as_ref()
+    }
+
     fn check_file_size(
         &self,
         params: CheckFileSizeParams,

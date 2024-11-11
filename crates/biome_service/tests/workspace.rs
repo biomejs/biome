@@ -2,15 +2,16 @@
 mod test {
     use biome_analyze::RuleCategories;
     use biome_configuration::analyzer::{RuleGroup, RuleSelector};
-    use biome_fs::BiomePath;
+    use biome_fs::{BiomePath, MemoryFileSystem};
     use biome_js_syntax::{JsFileSource, TextSize};
     use biome_service::file_handlers::DocumentFileSource;
     use biome_service::workspace::{
         server, FileGuard, OpenFileParams, RegisterProjectFolderParams,
     };
     use biome_service::Workspace;
+
     fn create_server() -> Box<dyn Workspace> {
-        let workspace = server();
+        let workspace = server(Box::new(MemoryFileSystem::default()));
         workspace
             .register_project_folder(RegisterProjectFolderParams {
                 set_as_current_workspace: true,

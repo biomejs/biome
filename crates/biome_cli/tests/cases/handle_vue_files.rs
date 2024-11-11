@@ -4,7 +4,6 @@ use crate::snap_test::{
 };
 use biome_console::{markup, BufferConsole};
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -152,10 +151,10 @@ fn format_vue_implicit_js_files() {
         VUE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -182,8 +181,8 @@ fn format_vue_implicit_js_files_write() {
         VUE_IMPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -219,10 +218,10 @@ fn format_vue_explicit_js_files() {
         VUE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -249,8 +248,8 @@ fn format_vue_explicit_js_files_write() {
         VUE_EXPLICIT_JS_FILE_UNFORMATTED.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -283,8 +282,8 @@ fn format_empty_vue_js_files_write() {
     let vue_file_path = Path::new("file.vue");
     fs.insert(vue_file_path.into(), "<template></template>".as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -317,10 +316,10 @@ fn format_vue_ts_files() {
     let vue_file_path = Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_TS_FILE_UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -344,8 +343,8 @@ fn format_vue_ts_files_write() {
     let vue_file_path = Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_TS_FILE_UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -378,8 +377,8 @@ fn format_empty_vue_ts_files_write() {
     let vue_file_path = Path::new("file.vue");
     fs.insert(vue_file_path.into(), "<template></template>".as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -415,10 +414,10 @@ fn format_vue_carriage_return_line_feed_files() {
         VUE_CARRIAGE_RETURN_LINE_FEED_FILE_UNFORMATTED.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -449,10 +448,10 @@ fn format_vue_generic_component_files() {
         VUE_GENERIC_COMPONENT_FILE_UNFORMATTED.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("format"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -476,10 +475,10 @@ fn lint_vue_js_files() {
     let vue_file_path = Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_JS_FILE_NOT_LINTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -501,10 +500,10 @@ fn lint_vue_ts_files() {
     let vue_file_path = Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_TS_FILE_NOT_LINTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -526,12 +525,12 @@ fn sorts_imports_check() {
     let vue_file_path = Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_FILE_IMPORTS_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 vue_file_path.as_os_str().to_str().unwrap(),
@@ -561,12 +560,12 @@ fn sorts_imports_write() {
     let vue_file_path = Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_FILE_IMPORTS_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
+                "check",
                 "--formatter-enabled=false",
                 "--linter-enabled=false",
                 "--write",
@@ -591,13 +590,13 @@ fn sorts_imports_write() {
 
 #[test]
 fn format_stdin_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console.in_buffer.push(VUE_TS_FILE_UNFORMATTED.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["format", "--stdin-file-path", "file.vue"].as_slice()),
     );
@@ -626,13 +625,13 @@ fn format_stdin_successfully() {
 
 #[test]
 fn format_stdin_write_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console.in_buffer.push(VUE_TS_FILE_UNFORMATTED.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["format", "--write", "--stdin-file-path", "file.vue"].as_slice()),
     );
@@ -661,13 +660,13 @@ fn format_stdin_write_successfully() {
 
 #[test]
 fn lint_stdin_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console.in_buffer.push(VUE_TS_FILE_NOT_LINTED.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["lint", "--stdin-file-path", "file.svelte"].as_slice()),
     );
@@ -696,13 +695,13 @@ fn lint_stdin_successfully() {
 
 #[test]
 fn lint_stdin_write_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console.in_buffer.push(VUE_TS_FILE_NOT_LINTED.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["lint", "--write", "--stdin-file-path", "file.svelte"].as_slice()),
     );
@@ -731,13 +730,13 @@ fn lint_stdin_write_successfully() {
 
 #[test]
 fn lint_stdin_write_unsafe_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console.in_buffer.push(VUE_TS_FILE_NOT_LINTED.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -775,13 +774,13 @@ fn lint_stdin_write_unsafe_successfully() {
 
 #[test]
 fn check_stdin_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console.in_buffer.push(VUE_TS_FILE_CHECK_BEFORE.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["check", "--stdin-file-path", "file.vue"].as_slice()),
     );
@@ -810,13 +809,13 @@ fn check_stdin_successfully() {
 
 #[test]
 fn check_stdin_write_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console.in_buffer.push(VUE_TS_FILE_CHECK_BEFORE.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["check", "--write", "--stdin-file-path", "file.vue"].as_slice()),
     );
@@ -845,13 +844,13 @@ fn check_stdin_write_successfully() {
 
 #[test]
 fn check_stdin_write_unsafe_successfully() {
-    let mut fs = MemoryFileSystem::default();
+    let fs = MemoryFileSystem::default();
     let mut console = BufferConsole::default();
 
     console.in_buffer.push(VUE_TS_FILE_CHECK_BEFORE.to_string());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -895,10 +894,10 @@ fn vue_compiler_macros_as_globals() {
     let vue_file_path = Path::new("file.vue");
     fs.insert(vue_file_path.into(), VUE_TS_FILE_SETUP_GLOBALS.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("lint"), vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["lint", vue_file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");

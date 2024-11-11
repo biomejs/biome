@@ -1,6 +1,5 @@
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -27,8 +26,8 @@ fn search_css_pattern() {
     let file_path = Path::new("file.css");
     fs.insert(file_path.into(), CSS_FILE_CONTENT.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -60,8 +59,8 @@ fn search_css_pattern_shorthand() {
     let file_path = Path::new("file.css");
     fs.insert(file_path.into(), CSS_FILE_CONTENT.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -93,8 +92,8 @@ fn search_js_pattern() {
     let file_path = Path::new("file.js");
     fs.insert(file_path.into(), JS_FILE_CONTENT.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [

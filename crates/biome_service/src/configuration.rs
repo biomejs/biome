@@ -1,6 +1,6 @@
 use crate::matcher::Pattern;
 use crate::settings::Settings;
-use crate::{DynRef, WorkspaceError};
+use crate::WorkspaceError;
 use biome_analyze::AnalyzerRules;
 use biome_configuration::diagnostics::{CantLoadExtendFile, EditorConfigDiagnostic};
 use biome_configuration::{push_to_analyzer_assist, VERSION};
@@ -101,7 +101,7 @@ impl FusedIterator for ConfigurationDiagnosticsIter<'_> {}
 impl LoadedConfiguration {
     fn try_from_payload(
         value: Option<ConfigurationPayload>,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
     ) -> Result<Self, WorkspaceError> {
         let Some(value) = value else {
             return Ok(LoadedConfiguration::default());
@@ -142,7 +142,7 @@ impl LoadedConfiguration {
 
 /// Load the partial configuration for this session of the CLI.
 pub fn load_configuration(
-    fs: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     config_path: ConfigurationPathHint,
 ) -> Result<LoadedConfiguration, WorkspaceError> {
     let config = load_config(fs, config_path)?;
@@ -156,7 +156,7 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 
 /// Load the configuration from the file system.
 ///
-/// The configuration file will be read from the `file_system`. A [path hint](ConfigurationPathHint) should be provided.
+/// The configuration file will be read from the `fs`. A [path hint](ConfigurationPathHint) should be provided.
 ///
 /// - If the path hint is a path to a file that is provided by the user, the function will try to load that file or error.
 ///     The name doesn't have to be `biome.json` or `biome.jsonc`. And if it doesn't end with `.json`, Biome will try to
@@ -168,10 +168,7 @@ type LoadConfig = Result<Option<ConfigurationPayload>, WorkspaceError>;
 /// - Otherwise, the function will try to traverse upwards the file system until it finds a `biome.json` or `biome.jsonc`
 ///     file, or there aren't directories anymore. In this case, the function will not error but return an `Ok(None)`, which
 ///     means Biome will use the default configuration.
-fn load_config(
-    file_system: &DynRef<'_, dyn FileSystem>,
-    base_path: ConfigurationPathHint,
-) -> LoadConfig {
+fn load_config(fs: &dyn FileSystem, base_path: ConfigurationPathHint) -> LoadConfig {
     // This path is used for configuration resolution from external packages.
     let external_resolution_base_path = match base_path {
         // Path hint from LSP is always the workspace root
@@ -180,7 +177,7 @@ fn load_config(
         ConfigurationPathHint::FromWorkspace(ref path) => path.clone(),
         // Path hint from user means the command is invoked from the CLI
         // So we use the working directory (CWD) as the resolution base path
-        ConfigurationPathHint::FromUser(_) | ConfigurationPathHint::None => file_system
+        ConfigurationPathHint::FromUser(_) | ConfigurationPathHint::None => fs
             .working_directory()
             .map_or(PathBuf::new(), |working_directory| working_directory),
     };
@@ -188,8 +185,8 @@ fn load_config(
     // If the configuration path hint is from user and is a file path,
     // we'll load it directly
     if let ConfigurationPathHint::FromUser(ref config_file_path) = base_path {
-        if file_system.path_is_file(config_file_path) {
-            let content = file_system.read_file_from_path(config_file_path)?;
+        if fs.path_is_file(config_file_path) {
+            let content = fs.read_file_from_path(config_file_path)?;
             let parser_options = match config_file_path.extension().map(OsStr::as_encoded_bytes) {
                 Some(b"json") => JsonParserOptions::default(),
                 _ => JsonParserOptions::default()
@@ -213,11 +210,11 @@ fn load_config(
         ConfigurationPathHint::FromLsp(path) => path,
         ConfigurationPathHint::FromUser(path) => path,
         ConfigurationPathHint::FromWorkspace(path) => path,
-        ConfigurationPathHint::None => file_system.working_directory().unwrap_or_default(),
+        ConfigurationPathHint::None => fs.working_directory().unwrap_or_default(),
     };
 
     // We first search for `biome.json` or `biome.jsonc` files
-    if let Some(auto_search_result) = file_system.auto_search(
+    if let Some(auto_search_result) = fs.auto_search(
         &configuration_directory,
         ConfigName::file_names().as_slice(),
         should_error,
@@ -245,13 +242,13 @@ fn load_config(
 }
 
 pub fn load_editorconfig(
-    file_system: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     workspace_root: PathBuf,
 ) -> Result<(Option<PartialConfiguration>, Vec<EditorConfigDiagnostic>), WorkspaceError> {
     // How .editorconfig is supposed to be resolved: https://editorconfig.org/#file-location
     // We currently don't support the `root` property, so we just search for the file like we do for biome.json
     if let Some(auto_search_result) =
-        match file_system.auto_search(&workspace_root, [".editorconfig"].as_slice(), false) {
+        match fs.auto_search(&workspace_root, [".editorconfig"].as_slice(), false) {
             Ok(result) => result,
             Err(error) => return Err(WorkspaceError::from(error)),
         }
@@ -295,7 +292,7 @@ pub fn load_editorconfig(
 /// - the configuration file already exists
 /// - the program doesn't have the write rights
 pub fn create_config(
-    fs: &mut DynRef<dyn FileSystem>,
+    fs: &dyn FileSystem,
     mut configuration: PartialConfiguration,
     emit_jsonc: bool,
 ) -> Result<(), WorkspaceError> {
@@ -368,7 +365,7 @@ pub fn to_analyzer_rules(settings: &Settings, path: &Path) -> AnalyzerRules {
 pub trait PartialConfigurationExt {
     fn apply_extends(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         file_path: &Path,
         external_resolution_base_path: &Path,
         diagnostics: &mut Vec<Error>,
@@ -376,7 +373,7 @@ pub trait PartialConfigurationExt {
 
     fn deserialize_extends(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         relative_resolution_base_path: &Path,
         external_resolution_base_path: &Path,
     ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError>;
@@ -385,7 +382,7 @@ pub trait PartialConfigurationExt {
 
     fn retrieve_gitignore_matches(
         &self,
-        file_system: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         vcs_base_path: Option<&Path>,
     ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError>;
 }
@@ -399,7 +396,7 @@ impl PartialConfigurationExt for PartialConfiguration {
     /// If a configuration can't be resolved from the file system, the operation will fail.
     fn apply_extends(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         file_path: &Path,
         external_resolution_base_path: &Path,
         diagnostics: &mut Vec<Error>,
@@ -441,7 +438,7 @@ impl PartialConfigurationExt for PartialConfiguration {
     /// It attempts to deserialize all the configuration files that were specified in the `extends` property
     fn deserialize_extends(
         &mut self,
-        fs: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         relative_resolution_base_path: &Path,
         external_resolution_base_path: &Path,
     ) -> Result<Vec<Deserialized<PartialConfiguration>>, WorkspaceError> {
@@ -529,7 +526,7 @@ impl PartialConfigurationExt for PartialConfiguration {
     /// A tuple with VCS root folder and the contents of the `.gitignore` file
     fn retrieve_gitignore_matches(
         &self,
-        file_system: &DynRef<'_, dyn FileSystem>,
+        fs: &dyn FileSystem,
         vcs_base_path: Option<&Path>,
     ) -> Result<(Option<PathBuf>, Vec<String>), WorkspaceError> {
         let Some(vcs) = &self.vcs else {
@@ -544,7 +541,7 @@ impl PartialConfigurationExt for PartialConfiguration {
             };
             if let Some(client_kind) = &vcs.client_kind {
                 if !vcs.ignore_file_disabled() {
-                    let result = file_system
+                    let result = fs
                         .auto_search(&vcs_base_path, &[client_kind.ignore_file()], false)
                         .map_err(WorkspaceError::from)?;
 

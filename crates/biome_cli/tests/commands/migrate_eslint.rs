@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -43,8 +42,8 @@ fn migrate_eslintrcjson() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -96,8 +95,8 @@ fn migrate_eslintrc() {
     fs.insert(Path::new(".eslintrc").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -149,8 +148,8 @@ fn migrate_eslintrcjson_write() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint", "--write"].as_slice()),
     );
@@ -202,8 +201,8 @@ fn migrate_eslintrcjson_fix() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint", "--fix"].as_slice()),
     );
@@ -228,8 +227,8 @@ fn migrate_eslintrcjson_override_existing_config() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -254,8 +253,8 @@ fn migrate_eslintrcjson_exclude_inspired() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -280,8 +279,8 @@ fn migrate_eslintrcjson_include_inspired() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint", "--include-inspired"].as_slice()),
     );
@@ -381,8 +380,8 @@ fn migrate_eslintrcjson_rule_options() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint", "--include-inspired"].as_slice()),
     );
@@ -407,8 +406,8 @@ fn migrate_eslintrcjson_empty() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -431,8 +430,8 @@ fn migrate_eslintrcjson_missing_biomejson() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -457,8 +456,8 @@ fn migrate_eslintrcyaml_unsupported() {
     fs.insert(Path::new(".eslintrc.yaml").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -492,8 +491,8 @@ fn migrate_eslint_config_packagejson() {
     fs.insert(Path::new("package.json").into(), packagejson.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -521,8 +520,8 @@ fn migrate_no_eslint_config_packagejson() {
     fs.insert(Path::new("package.json").into(), packagejson.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -555,8 +554,8 @@ test/main.js
     fs.insert(Path::new(".eslintignore").into(), eslintignore.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -586,8 +585,8 @@ fn migrate_eslintignore_and_ignore_patterns() {
     fs.insert(Path::new(".eslintignore").into(), eslintignore.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -617,8 +616,8 @@ a/**
     fs.insert(Path::new(".eslintignore").into(), eslintignore.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -650,8 +649,8 @@ fn migrate_eslintrcjson_extended_rules() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );
@@ -689,8 +688,8 @@ fn migrate_merge_with_overrides() {
     fs.insert(Path::new(".eslintrc.json").into(), eslintrc.as_bytes());
 
     let mut console = BufferConsole::default();
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["migrate", "eslint"].as_slice()),
     );

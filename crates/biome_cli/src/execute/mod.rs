@@ -25,7 +25,6 @@ use biome_grit_patterns::GritTargetLanguage;
 use biome_service::workspace::{
     FeatureName, FeaturesBuilder, FixFileMode, FormatFileParams, OpenFileParams, PatternId,
 };
-use std::borrow::Borrow;
 use std::ffi::OsString;
 use std::fmt::{Display, Formatter};
 use std::path::{Path, PathBuf};
@@ -569,7 +568,7 @@ pub fn execute_mode(
                 };
                 reporter.write(&mut GitLabReporterVisitor::new(
                     console,
-                    session.app.fs.borrow().working_directory(),
+                    session.app.workspace.fs().working_directory(),
                 ))?;
             }
             ReportMode::Junit => {

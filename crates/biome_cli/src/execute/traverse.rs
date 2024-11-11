@@ -81,8 +81,8 @@ pub(crate) fn traverse(
     let matches = AtomicUsize::new(0);
     let skipped = AtomicUsize::new(0);
 
-    let fs = &*session.app.fs;
     let workspace = &*session.app.workspace;
+    let fs = workspace.fs();
 
     let max_diagnostics = execution.get_max_diagnostics();
     let remaining_diagnostics = AtomicU32::new(max_diagnostics);

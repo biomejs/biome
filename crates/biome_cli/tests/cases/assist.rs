@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -33,10 +32,10 @@ fn assist_emit_diagnostic() {
         r#"{ "zod": true, "lorem": "ipsum", "foo": "bar" }"#.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_err(), "run_cli returned {result:?}");
@@ -77,10 +76,10 @@ fn assist_writes() {
         r#"{ "zod": true, "lorem": "ipsum", "foo": "bar" }"#.as_bytes(),
     );
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("check"), "--write", file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["check", "--write", file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     assert!(result.is_ok(), "run_cli returned {result:?}");

@@ -11,7 +11,6 @@ use biome_formatter::{
 use biome_fs::{FileSystem, OpenOptions};
 use biome_js_formatter::context::{ArrowParentheses, QuoteProperties, Semicolons, TrailingCommas};
 use biome_json_parser::JsonParserOptions;
-use biome_service::DynRef;
 use std::{ffi::OsStr, path::Path};
 
 use super::{eslint_eslint::ShorthandVec, node};
@@ -380,7 +379,7 @@ pub(crate) const IGNORE_FILE: &str = ".prettierignore";
 
 /// This function is in charge of reading prettier files, deserialize its contents
 pub(crate) fn read_config_file(
-    fs: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     console: &mut dyn Console,
 ) -> Result<Config, CliDiagnostic> {
     // We don't report an error if Prettier config is not embedded in `PACKAGE_JSON`.
@@ -405,7 +404,7 @@ pub(crate) fn read_config_file(
 }
 
 fn load_config(
-    fs: &DynRef<'_, dyn FileSystem>,
+    fs: &dyn FileSystem,
     path: &Path,
     console: &mut dyn Console,
 ) -> Result<PrettierConfiguration, CliDiagnostic> {

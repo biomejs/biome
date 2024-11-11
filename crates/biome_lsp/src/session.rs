@@ -9,7 +9,7 @@ use biome_configuration::ConfigurationPathHint;
 use biome_console::markup;
 use biome_deserialize::Merge;
 use biome_diagnostics::{DiagnosticExt, Error, PrintDescription};
-use biome_fs::{BiomePath, FileSystem};
+use biome_fs::BiomePath;
 use biome_lsp_converters::{negotiated_encoding, PositionEncoding, WideEncoding};
 use biome_service::configuration::{
     load_configuration, load_editorconfig, LoadedConfiguration, PartialConfigurationExt,
@@ -21,7 +21,7 @@ use biome_service::workspace::{
 };
 use biome_service::workspace::{RageEntry, RageParams, RageResult, UpdateSettingsParams};
 use biome_service::Workspace;
-use biome_service::{DynRef, WorkspaceError};
+use biome_service::WorkspaceError;
 use futures::stream::futures_unordered::FuturesUnordered;
 use futures::StreamExt;
 use rustc_hash::FxHashMap;
@@ -73,9 +73,6 @@ pub(crate) struct Session {
     /// A flag to notify a message to the user when the configuration is broken, and the LSP attempts
     /// to update the diagnostics
     notified_broken_configuration: AtomicBool,
-
-    /// File system to read files inside the workspace
-    pub(crate) fs: DynRef<'static, dyn FileSystem>,
 
     documents: RwLock<FxHashMap<lsp_types::Url, Document>>,
 
@@ -165,7 +162,6 @@ impl Session {
         client: tower_lsp::Client,
         workspace: Arc<dyn Workspace>,
         cancellation: Arc<Notify>,
-        fs: DynRef<'static, dyn FileSystem>,
     ) -> Self {
         let documents = Default::default();
         let config = RwLock::new(ExtensionSettings::new());
@@ -177,7 +173,6 @@ impl Session {
             configuration_status: AtomicU8::new(ConfigurationStatus::Missing as u8),
             documents,
             extension_settings: config,
-            fs,
             cancellation,
             config_path: None,
             manifest_path: None,
@@ -490,7 +485,7 @@ impl Session {
         &self,
         base_path: ConfigurationPathHint,
     ) -> ConfigurationStatus {
-        match load_configuration(&self.fs, base_path.clone()) {
+        match load_configuration(self.workspace.fs(), base_path.clone()) {
             Ok(loaded_configuration) => {
                 if loaded_configuration.has_errors() {
                     error!("Couldn't load the configuration file, reasons:");
@@ -508,7 +503,7 @@ impl Session {
                     info!("Configuration loaded successfully from disk.");
                     info!("Update workspace settings.");
 
-                    let fs = &self.fs;
+                    let fs = self.workspace.fs();
                     let should_use_editorconfig =
                         fs_configuration.use_editorconfig().unwrap_or_default();
                     let mut configuration = if should_use_editorconfig {
@@ -608,7 +603,8 @@ impl Session {
             .map(PathBuf::from)
             .or(self.base_path());
         if let Some(base_path) = base_path {
-            let result = self.fs.auto_search(&base_path, &["package.json"], false);
+            let fs = self.workspace.fs();
+            let result = fs.auto_search(&base_path, &["package.json"], false);
             match result {
                 Ok(result) => {
                     if let Some(result) = result {

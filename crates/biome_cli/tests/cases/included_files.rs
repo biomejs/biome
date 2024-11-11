@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, assert_file_contents, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -37,13 +36,13 @@ fn does_handle_only_included_files() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -86,13 +85,13 @@ fn does_not_handle_included_files_if_overridden_by_ignore() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -135,13 +134,13 @@ fn does_not_handle_included_files_if_overridden_by_ignore_formatter() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNFORMATTED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("format"),
-                ("--write"),
+                "format",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -184,13 +183,13 @@ fn does_not_handle_included_files_if_overridden_by_ignore_linter() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), FIX_BEFORE.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("lint"),
-                ("--write"),
+                "lint",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]
@@ -235,13 +234,13 @@ fn does_not_handle_included_files_if_overridden_by_organize_imports() {
     let test2 = Path::new("test2.js");
     fs.insert(test2.into(), UNORGANIZED.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
-                ("check"),
-                ("--write"),
+                "check",
+                "--write",
                 test.as_os_str().to_str().unwrap(),
                 test2.as_os_str().to_str().unwrap(),
             ]

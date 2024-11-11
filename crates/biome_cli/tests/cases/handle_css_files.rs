@@ -2,7 +2,6 @@ use crate::run_cli;
 use crate::snap_test::{assert_cli_snapshot, SnapshotPayload};
 use biome_console::BufferConsole;
 use biome_fs::MemoryFileSystem;
-use biome_service::DynRef;
 use bpaf::Args;
 use std::path::Path;
 
@@ -15,10 +14,10 @@ fn should_not_format_files_by_default() {
     let css_file = Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
-        Args::from([("format"), css_file.as_os_str().to_str().unwrap()].as_slice()),
+        Args::from(["format", css_file.as_os_str().to_str().unwrap()].as_slice()),
     );
 
     // no files processed error
@@ -42,8 +41,8 @@ fn should_format_files_by_when_opt_in() {
     let css_file = Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -76,8 +75,8 @@ fn should_format_write_files_by_when_opt_in() {
     let css_file = Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
@@ -120,8 +119,8 @@ fn should_not_lint_files_by_default() {
     let css_file = Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(["lint", css_file.as_os_str().to_str().unwrap()].as_slice()),
     );
@@ -157,8 +156,8 @@ fn should_lint_files_by_when_enabled() {
     let css_file = Path::new("input.css");
     fs.insert(css_file.into(), css_file_content.as_bytes());
 
-    let result = run_cli(
-        DynRef::Borrowed(&mut fs),
+    let (fs, result) = run_cli(
+        fs,
         &mut console,
         Args::from(
             [
