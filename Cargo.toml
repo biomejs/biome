@@ -201,7 +201,7 @@ slotmap            = "1.0.7"
 smallvec           = { version = "1.13.2", features = ["union", "const_new", "serde"] }
 syn                = "1.0.109"
 termcolor          = "1.4.1"
-tokio              = "1.40.0"
+tokio              = "1.41.1"
 tracing            = { version = "0.1.40", default-features = false, features = ["std"] }
 tracing-subscriber = "0.3.18"
 unicode-bom        = "2.0.3"
