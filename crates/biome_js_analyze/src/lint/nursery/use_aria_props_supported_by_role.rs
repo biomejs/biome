@@ -59,12 +59,14 @@ impl Rule for UseAriaPropsSupportedByRole {
         let attributes = ctx.convert_all_attribute_values(attributes);
 
         if let Some(attributes) = &attributes {
-            let role_attributes = attributes
+            let role = attributes
                 .get("role")
                 .and_then(|roles| roles.first())
                 .and_then(|role| AriaRole::from_str(role).ok())
-                .or_else(|| aria_roles.get_implicit_role(element_name, attributes))
-                .map_or(Default::default(), |role| role.attributes());
+                .or_else(|| aria_roles.get_implicit_role(element_name, attributes));
+            let role_attributes = role.map_or(Default::default(), |role| role.attributes());
+            let role_prohibited_attributes =
+                role.map_or(Default::default(), |role| role.prohibited_attributes());
             for (attribute, values) in attributes {
                 let Ok(aria_attribute) = AriaAttribute::from_str(attribute) else {
                     continue;
@@ -76,7 +78,9 @@ impl Rule for UseAriaPropsSupportedByRole {
                 {
                     continue;
                 }
-                if !is_global_aria(attribute) && !role_attributes.contains(&aria_attribute) {
+                if role_prohibited_attributes.contains(&aria_attribute)
+                    || (!aria_attribute.is_global() && !role_attributes.contains(&aria_attribute))
+                {
                     return Some(attribute.clone());
                 }
             }
@@ -101,33 +105,5 @@ impl Rule for UseAriaPropsSupportedByRole {
                 "Ensure that ARIA attributes are valid for the role of the element."
             }),
         )
-    }
-}
-
-/// Check if the aria attribute is global
-/// https://www.w3.org/TR/wai-aria-1.1/#global_states
-///
-/// However, aria-invalid and aria-haspopup are not included this list
-/// Because every elements cannot have These attributes.
-/// https://www.w3.org/TR/wai-aria-1.1/#aria-invalid
-/// https://www.w3.org/TR/wai-aria-1.1/#aria-haspopup
-fn is_global_aria(aria_attribute: &str) -> bool {
-    matches! {
-        aria_attribute,
-        "aria-atomic"
-            | "aria-busy"
-            | "aria-controls"
-            | "aria-describedby"
-            | "aria-disabled"
-            | "aria-dropeffect"
-            | "aria-flowto"
-            | "aria-grabbed"
-            | "aria-hidden"
-            | "aria-label"
-            | "aria-labelledby"
-            | "aria-live"
-            | "aria-owns"
-            | "aria-relevant"
-            | "aria-roledescription"
     }
 }

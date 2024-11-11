@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 include!(concat!(env!("OUT_DIR"), "/roles_and_attributes.rs"));
 
 pub const ISO_COUNTRIES: [&str; 233] = [
@@ -30,6 +32,26 @@ pub const ISO_LANGUAGES: [&str; 150] = [
     "tt", "te", "th", "bo", "ti", "to", "ts", "tr", "tk", "tw", "ug", "uk", "ur", "uz", "vi", "vo",
     "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
 ];
+
+/// Returns a list of valid ISO countries
+pub fn is_valid_country(country: &str) -> bool {
+    IsoCountries::from_str(country).is_ok()
+}
+
+/// Returns a list of valid ISO languages
+pub fn is_valid_language(language: &str) -> bool {
+    IsoLanguages::from_str(language).is_ok()
+}
+
+/// An array of all available countries
+pub fn countries() -> &'static [&'static str] {
+    &ISO_COUNTRIES
+}
+
+/// An array of all available languages
+pub fn languages() -> &'static [&'static str] {
+    &ISO_LANGUAGES
+}
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum AriaAttributeKind {
@@ -107,12 +129,29 @@ fn is_valid_html_id(id: &str) -> bool {
 }
 
 impl AriaRole {
-    /// Returns `true` if the given role inherits of `AriaAbstractRole::Widget`.
+    /// Returns `true` if the given role inherits of `AriaAbstractRole::Widget` and is not `Self::Progressbar`.
     ///
     /// This corresponds to a role that defines a user interface widget (slider, tree control, ...)
     pub fn is_interactive(self) -> bool {
-        self.inherited_abstract_roles()
-            .contains(&AriaAbstractRole::Widget)
+        // `progressbar` inherits of `widget`, but its value is always `readonly`.
+        // So we treat it as a non-interactive role.
+        self != Self::Progressbar
+            && self
+                .inherited_abstract_roles()
+                .contains(&AriaAbstractRole::Widget)
+    }
+
+    /// Returns `true` if the given role is not interactive and is not `Self::Toolbar`.
+    pub fn is_non_interactive(self) -> bool {
+        // FIXME: could we make `Self""is_non_interactive` the negation of `Self""is_interactive`?
+        //
+        // This current asymetry is ported from  ESLint JSX A11y:
+        // https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/src/util/isNonInteractiveElement.js#L30
+        // We should assess if this asymetry is intended.
+        //
+        // `toolbar` doesn't inherit of `widget`, but it does support  `aria-activedescendant`.
+        // So, we treat it as a interactive role.
+        self != Self::Toolbar && !self.is_interactive()
     }
 
     /// Returns `true` if the given role inherits of `AriaAbstractRole::Structure`.
@@ -183,12 +222,26 @@ impl AriaRoles {
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct HtmlElementInstance {
-    element: HtmlElement,
-    attributes: &'static [HtmlAttributeInstance],
+    pub element: HtmlElement,
+    pub attributes: &'static [HtmlAttributeInstance],
+}
+impl std::fmt::Display for HtmlElementInstance {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<{}", self.element)?;
+        for attribute in self.attributes {
+            write!(f, " {attribute}")?;
+        }
+        write!(f, ">")
+    }
 }
 
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct HtmlAttributeInstance {
-    attribute: HtmlAttribute,
-    value: &'static str,
+    pub attribute: HtmlAttribute,
+    pub value: &'static str,
+}
+impl std::fmt::Display for HtmlAttributeInstance {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}=\"{}\"", self.attribute, self.value)
+    }
 }
