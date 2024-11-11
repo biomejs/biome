@@ -210,26 +210,26 @@ declare_node_union! {
     ///    import("lodash")
     /// // ^^^^^^^^^^^^^^^^
     /// ```
-    pub AnyJsImportLike = JsModuleSource | JsCallExpression |  JsImportCallExpression
+    pub AnyJsImportSourceLike = JsModuleSource | JsCallExpression |  JsImportCallExpression
 }
 
-impl AnyJsImportLike {
+impl AnyJsImportSourceLike {
     /// Returns the inner text of specifier:
     ///
     /// ## Examples
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_js_syntax::AnyJsImportLike;
+    /// use biome_js_syntax::AnyJsImportSourceLike;
     ///
     /// let source_name = make::js_module_source(make::js_string_literal("foo"));
-    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(source_name);
+    /// let any_import_specifier = AnyJsImportSourceLike::JsModuleSource(source_name);
     /// assert_eq!(any_import_specifier.inner_string_text().unwrap().text(), "foo")
     /// ```
     pub fn inner_string_text(&self) -> Option<TokenText> {
         match self {
-            AnyJsImportLike::JsModuleSource(source) => source.inner_string_text().ok(),
-            AnyJsImportLike::JsCallExpression(expression) => {
+            AnyJsImportSourceLike::JsModuleSource(source) => source.inner_string_text().ok(),
+            AnyJsImportSourceLike::JsCallExpression(expression) => {
                 let callee = expression.callee().ok()?;
                 let name = callee.as_js_reference_identifier()?.value_token().ok()?;
                 if name.text_trimmed() == "require" {
@@ -247,7 +247,7 @@ impl AnyJsImportLike {
                     None
                 }
             }
-            AnyJsImportLike::JsImportCallExpression(import_call) => {
+            AnyJsImportSourceLike::JsImportCallExpression(import_call) => {
                 let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
                 else {
                     return None;
@@ -268,16 +268,16 @@ impl AnyJsImportLike {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_js_syntax::AnyJsImportLike;
+    /// use biome_js_syntax::AnyJsImportSourceLike;
     ///
     /// let source_name = make::js_module_source(make::js_string_literal("foo"));
-    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(source_name);
+    /// let any_import_specifier = AnyJsImportSourceLike::JsModuleSource(source_name);
     /// assert_eq!(any_import_specifier.module_name_token().unwrap().text(), "\"foo\"")
     /// ```
     pub fn module_name_token(&self) -> Option<JsSyntaxToken> {
         match self {
-            AnyJsImportLike::JsModuleSource(source) => source.value_token().ok(),
-            AnyJsImportLike::JsCallExpression(expression) => {
+            AnyJsImportSourceLike::JsModuleSource(source) => source.value_token().ok(),
+            AnyJsImportSourceLike::JsCallExpression(expression) => {
                 let callee = expression.callee().ok()?;
                 let name = callee.as_js_reference_identifier()?.value_token().ok()?;
                 if name.text_trimmed() == "require" {
@@ -295,7 +295,7 @@ impl AnyJsImportLike {
                     None
                 }
             }
-            AnyJsImportLike::JsImportCallExpression(import_call) => {
+            AnyJsImportSourceLike::JsImportCallExpression(import_call) => {
                 let [Some(argument)] = import_call.arguments().ok()?.get_arguments_by_index([0])
                 else {
                     return None;
@@ -320,21 +320,21 @@ impl AnyJsImportLike {
     ///
     /// ```
     /// use biome_js_factory::make;
-    /// use biome_js_syntax::{AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
+    /// use biome_js_syntax::{AnyJsImportSourceLike, JsSyntaxKind, JsSyntaxToken};
     ///
     /// let module_token = JsSyntaxToken::new_detached(JsSyntaxKind::MODULE_KW, "module", [], []);
     /// let module_source = make::js_module_source(make::js_string_literal("foo"));
     /// let module_declaration = make::ts_external_module_declaration(module_token, module_source.into()).build();
-    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(module_declaration.source().unwrap().as_js_module_source().unwrap().clone());
+    /// let any_import_specifier = AnyJsImportSourceLike::JsModuleSource(module_declaration.source().unwrap().as_js_module_source().unwrap().clone());
     /// assert!(any_import_specifier.is_in_ts_module_declaration());
     ///
     /// let module_source = make::js_module_source(make::js_string_literal("bar"));
-    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(module_source.into());
+    /// let any_import_specifier = AnyJsImportSourceLike::JsModuleSource(module_source.into());
     /// assert!(!any_import_specifier.is_in_ts_module_declaration());
     /// ```
     pub fn is_in_ts_module_declaration(&self) -> bool {
         // It first has to be a JsModuleSource
-        matches!(self, AnyJsImportLike::JsModuleSource(_))
+        matches!(self, AnyJsImportSourceLike::JsModuleSource(_))
             && matches!(
                 self.syntax().parent().kind(),
                 Some(JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION)

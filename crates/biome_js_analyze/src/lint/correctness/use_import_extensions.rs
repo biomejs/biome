@@ -6,7 +6,7 @@ use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule,
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxToken};
+use biome_js_syntax::{inner_string_text, AnyJsImportSourceLike, JsSyntaxToken};
 use biome_rowan::BatchMutationExt;
 
 use crate::JsRuleAction;
@@ -141,7 +141,7 @@ pub struct SuggestedExtensionMapping {
 }
 
 impl Rule for UseImportExtensions {
-    type Query = Ast<AnyJsImportLike>;
+    type Query = Ast<AnyJsImportSourceLike>;
     type State = UseImportExtensionsState;
     type Signals = Option<Self::State>;
     type Options = Box<UseImportExtensionsOptions>;
@@ -205,7 +205,7 @@ pub struct UseImportExtensionsState {
 
 fn get_extensionless_import(
     file_ext: &str,
-    node: &AnyJsImportLike,
+    node: &AnyJsImportSourceLike,
     custom_suggested_imports: &FxHashMap<Box<str>, SuggestedExtensionMapping>,
 ) -> Option<UseImportExtensionsState> {
     let module_name_token = node.module_name_token()?;
