@@ -223,7 +223,7 @@ impl Rule for NoUndeclaredDependencies {
                 || (is_optional_dependency_available && ctx.is_optional_dependency(package_name))
         };
 
-        let token_text = node.inner_string_text()?;
+        let token_text = node.module_source_text()?;
         let package_name = parse_package_name(token_text.text())?;
         if is_available(package_name)
             // Self package imports

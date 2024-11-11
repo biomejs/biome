@@ -226,7 +226,7 @@ impl AnyJsImportSourceLike {
     /// let any_import_specifier = AnyJsImportSourceLike::JsModuleSource(source_name);
     /// assert_eq!(any_import_specifier.inner_string_text().unwrap().text(), "foo")
     /// ```
-    pub fn inner_string_text(&self) -> Option<TokenText> {
+    pub fn module_source_text(&self) -> Option<TokenText> {
         match self {
             AnyJsImportSourceLike::JsModuleSource(source) => source.inner_string_text().ok(),
             AnyJsImportSourceLike::JsCallExpression(expression) => {
