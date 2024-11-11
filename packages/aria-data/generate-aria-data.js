@@ -157,7 +157,10 @@ function parseDescription(node) {
 	const text = node?.textContent;
 	if (text != null) {
 		const [_, deprecatedInVersion, description] = text.match(DESCRIPTION_REGEX);
-		return { deprecatedInVersion, description: description.trim().replace(/\n[ ]*/g, "") };
+		return {
+			deprecatedInVersion,
+			description: description.trim().replace(/\n[ ]*/g, ""),
+		};
 	}
 	return {};
 }
@@ -335,7 +338,7 @@ async function run({ positionals: [spec = DEFAULT_ARIA_SSPEC] }) {
 		);
 		process.exit(1);
 	}
-	let [_, version] = spec.match(SPEC_REGEX)
+	const [_, version] = spec.match(SPEC_REGEX);
 	const url = `https://www.w3.org/TR/${spec}/`;
 
 	const browser = new Browser({
