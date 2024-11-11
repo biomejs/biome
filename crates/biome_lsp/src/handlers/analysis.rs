@@ -281,6 +281,7 @@ fn fix_all(
         should_format,
         only: vec![],
         skip: vec![],
+        rules: vec![],
         suppression_reason: None,
         rule_categories: RuleCategoriesBuilder::default()
             .with_syntax()

@@ -2651,7 +2651,7 @@ async fn pull_source_assist_action() -> Result<()> {
 
     fs.insert(url!("biome.json").to_file_path().unwrap(), config);
     let (service, client) = factory
-        .create_with_fs(None, DynRef::Owned(Box::new(fs)))
+        .create_with_fs(None, Box::new(MemoryFileSystem::default()))
         .into_inner();
     let (stream, sink) = client.split();
     let mut server = Server::new(service);
