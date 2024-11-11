@@ -131,7 +131,7 @@ pub(crate) fn code_actions(
         suppression_reason: None,
         rules: filters
             .iter()
-            .filter_map(|filter| RuleSelector::from_lsp_filter(*filter))
+            .filter_map(|filter| RuleSelector::from_lsp_filter(filter))
             .collect(),
     }) {
         Ok(result) => result,

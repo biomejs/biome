@@ -856,7 +856,7 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
     }
 
     fn finish(mut self) -> (FxHashSet<RuleFilter<'a>>, FxHashSet<RuleFilter<'a>>) {
-        let has_only_filter = self.only.map(|only| !only.is_empty()).unwrap_or(true);
+        let has_only_filter = self.only.map_or(true, |only| !only.is_empty());
         if !has_only_filter {
             let enabled_rules = self
                 .settings
