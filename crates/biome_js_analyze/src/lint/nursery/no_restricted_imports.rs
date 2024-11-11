@@ -172,24 +172,31 @@ impl Deserializable for CustomRestrictedImport {
 impl Rule for NoRestrictedImports {
     type Query = Ast<AnyJsImportLike>;
     type State = (TextRange, String);
-    type Signals = Option<Self::State>;
+    type Signals = Box<[Self::State]>;
     type Options = Box<RestrictedImportsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         if node.is_in_ts_module_declaration() {
-            return None;
+            return [].into();
         }
-        let module_name = node.module_name_token()?;
-        let inner_text = inner_string_text(&module_name);
+        if let Some(module_name) = node.module_name_token() {
+            let inner_text = inner_string_text(&module_name);
 
-        ctx.options()
-            .paths
-            .get(inner_text.text())
-            .map(|restricted_import| {
-                let restricted_import_options: CustomRestrictedImportOptions = restricted_import.clone().into();
-                (module_name.text_trimmed_range(), restricted_import_options.message.to_string())
-            })
+            let signals = ctx.options()
+                .paths
+                .get(inner_text.text())
+                .into_iter()
+                .flat_map(|restricted_import| {
+                    let restricted_import_options: CustomRestrictedImportOptions = restricted_import.clone().into();
+                    [(module_name.text_trimmed_range(), restricted_import_options.message.to_string())]
+                })
+                .collect::<Vec<_>>();
+
+            signals.into_boxed_slice()
+        } else {
+            [].into()
+        }
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, (span, text): &Self::State) -> Option<RuleDiagnostic> {
