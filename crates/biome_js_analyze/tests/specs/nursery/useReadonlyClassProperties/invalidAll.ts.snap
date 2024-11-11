@@ -1,0 +1,221 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: invalidAll.ts
+---
+# Input
+```ts
+class InvalidAllContainer {
+  // These member variables could be marked as readonly
+  private neverModifiedMember = true;
+  private onlyModifiedInConstructor: number;
+  #neverModifiedPrivateField = 3;
+	public publicNeverModifiedMember = true;
+  public publicOnlyModifiedInConstructor: number;
+	protected protectedNeverModifiedMember = true;
+  protected protectedOnlyModifiedInConstructor: number;
+
+  public constructor(
+    onlyModifiedInConstructor: number,
+    // These member variables could be marked as readonly
+    private neverModifiedParameter: string,
+		public publicNeverModifiedParameter: string,
+		protected protectedNeverModifiedParameter: string,
+  ) {
+    this.onlyModifiedInConstructor = onlyModifiedInConstructor;
+		this.publicOnlyModifiedInConstructor = onlyModifiedInConstructor;
+		this.protectedOnlyModifiedInConstructor = onlyModifiedInConstructor;
+  }
+}
+
+```
+
+# Diagnostics
+```
+invalidAll.ts:3:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member 'neverModifiedMember' is never reassigned; mark it as `readonly`.
+  
+    1 │ class InvalidAllContainer {
+    2 │   // These member variables could be marked as readonly
+  > 3 │   private neverModifiedMember = true;
+      │           ^^^^^^^^^^^^^^^^^^^
+    4 │   private onlyModifiedInConstructor: number;
+    5 │   #neverModifiedPrivateField = 3;
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    3 │ ··private·readonly·neverModifiedMember·=·true;
+      │           +++++++++                           
+
+```
+
+```
+invalidAll.ts:4:11 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member 'onlyModifiedInConstructor' is never reassigned; mark it as `readonly`.
+  
+    2 │   // These member variables could be marked as readonly
+    3 │   private neverModifiedMember = true;
+  > 4 │   private onlyModifiedInConstructor: number;
+      │           ^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │   #neverModifiedPrivateField = 3;
+    6 │ 	public publicNeverModifiedMember = true;
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    4 │ ··private·readonly·onlyModifiedInConstructor:·number;
+      │           +++++++++                                  
+
+```
+
+```
+invalidAll.ts:5:3 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member '#neverModifiedPrivateField' is never reassigned; mark it as `readonly`.
+  
+    3 │   private neverModifiedMember = true;
+    4 │   private onlyModifiedInConstructor: number;
+  > 5 │   #neverModifiedPrivateField = 3;
+      │   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 	public publicNeverModifiedMember = true;
+    7 │   public publicOnlyModifiedInConstructor: number;
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    5 │ ··readonly·#neverModifiedPrivateField·=·3;
+      │   +++++++++                               
+
+```
+
+```
+invalidAll.ts:6:9 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member 'publicNeverModifiedMember' is never reassigned; mark it as `readonly`.
+  
+    4 │   private onlyModifiedInConstructor: number;
+    5 │   #neverModifiedPrivateField = 3;
+  > 6 │ 	public publicNeverModifiedMember = true;
+      │ 	       ^^^^^^^^^^^^^^^^^^^^^^^^^
+    7 │   public publicOnlyModifiedInConstructor: number;
+    8 │ 	protected protectedNeverModifiedMember = true;
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    6 │ → public·readonly·publicNeverModifiedMember·=·true;
+      │          +++++++++                                 
+
+```
+
+```
+invalidAll.ts:7:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member 'publicOnlyModifiedInConstructor' is never reassigned; mark it as `readonly`.
+  
+    5 │   #neverModifiedPrivateField = 3;
+    6 │ 	public publicNeverModifiedMember = true;
+  > 7 │   public publicOnlyModifiedInConstructor: number;
+      │          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ 	protected protectedNeverModifiedMember = true;
+    9 │   protected protectedOnlyModifiedInConstructor: number;
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    7 │ ··public·readonly·publicOnlyModifiedInConstructor:·number;
+      │          +++++++++                                        
+
+```
+
+```
+invalidAll.ts:8:12 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member 'protectedNeverModifiedMember' is never reassigned; mark it as `readonly`.
+  
+     6 │ 	public publicNeverModifiedMember = true;
+     7 │   public publicOnlyModifiedInConstructor: number;
+   > 8 │ 	protected protectedNeverModifiedMember = true;
+       │ 	          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │   protected protectedOnlyModifiedInConstructor: number;
+    10 │ 
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    8 │ → protected·readonly·protectedNeverModifiedMember·=·true;
+      │             +++++++++                                    
+
+```
+
+```
+invalidAll.ts:9:13 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member 'protectedOnlyModifiedInConstructor' is never reassigned; mark it as `readonly`.
+  
+     7 │   public publicOnlyModifiedInConstructor: number;
+     8 │ 	protected protectedNeverModifiedMember = true;
+   > 9 │   protected protectedOnlyModifiedInConstructor: number;
+       │             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    10 │ 
+    11 │   public constructor(
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    9 │ ··protected·readonly·protectedOnlyModifiedInConstructor:·number;
+      │             +++++++++                                           
+
+```
+
+```
+invalidAll.ts:14:13 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member 'neverModifiedParameter' is never reassigned; mark it as `readonly`.
+  
+    12 │     onlyModifiedInConstructor: number,
+    13 │     // These member variables could be marked as readonly
+  > 14 │     private neverModifiedParameter: string,
+       │             ^^^^^^^^^^^^^^^^^^^^^^
+    15 │ 		public publicNeverModifiedParameter: string,
+    16 │ 		protected protectedNeverModifiedParameter: string,
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    14 │ ····private·readonly·neverModifiedParameter:·string,
+       │             +++++++++                               
+
+```
+
+```
+invalidAll.ts:15:10 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member 'publicNeverModifiedParameter' is never reassigned; mark it as `readonly`.
+  
+    13 │     // These member variables could be marked as readonly
+    14 │     private neverModifiedParameter: string,
+  > 15 │ 		public publicNeverModifiedParameter: string,
+       │ 		       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    16 │ 		protected protectedNeverModifiedParameter: string,
+    17 │   ) {
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    15 │ → → public·readonly·publicNeverModifiedParameter:·string,
+       │            +++++++++                                     
+
+```
+
+```
+invalidAll.ts:16:13 lint/nursery/useReadonlyClassProperties  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Member 'protectedNeverModifiedParameter' is never reassigned; mark it as `readonly`.
+  
+    14 │     private neverModifiedParameter: string,
+    15 │ 		public publicNeverModifiedParameter: string,
+  > 16 │ 		protected protectedNeverModifiedParameter: string,
+       │ 		          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │   ) {
+    18 │     this.onlyModifiedInConstructor = onlyModifiedInConstructor;
+  
+  i Unsafe fix: Add `readonly` decorator.
+  
+    16 │ → → protected·readonly·protectedNeverModifiedParameter:·string,
+       │               +++++++++                                        
+
+```
