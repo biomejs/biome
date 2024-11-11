@@ -387,6 +387,77 @@ impl JsModuleSource {
 }
 
 declare_node_union! {
+    /// This node union is meant to match all variations of static & dynamic imports:
+    /// ```js
+    ///    require("lodash") // NodeJS require
+    /// // ^^^^^^^^^^^^^^^^^
+    ///    import("lodash")  // Dynamic ESM import
+    /// // ^^^^^^^^^^^^^^^^
+    ///    import "lodash";  // Static ESM Import (in all its variations)
+    /// // ^^^^^^^^^^^^^^^
+    ///    import lodash from "lodash";
+    /// // ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ///    import * as utils from "lodash";
+    /// // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ///    import { chunk, differenceBy } from "lodash";
+    /// // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ///    import lodash, { chunk as _chunk } from "lodash";
+    /// // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    /// ```
+    pub AnyJsImportLike = JsImport | JsCallExpression |  JsImportCallExpression
+}
+
+impl AnyJsImportLike {
+    /// Returns the inner text of the specifier:
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::AnyJsImportLike;
+    ///
+    /// let source_name = make::js_module_source(make::js_string_literal("foo"));
+    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(source_name);
+    /// assert_eq!(any_import_specifier.inner_string_text().unwrap().text(), "foo")
+    /// ```
+    pub fn module_source_text(&self) -> Option<TokenText> {
+        match self {
+            AnyJsImportLike::JsImport(import) => import.source_text().ok(),
+            AnyJsImportLike::JsCallExpression(expression) => {
+                expression.imported_module_source_text()
+            }
+            AnyJsImportLike::JsImportCallExpression(import_call) => {
+                import_call.module_source_text()
+            }
+        }
+    }
+
+    /// Returns the whole token text of the specifier, with quotes included:
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::AnyJsImportLike;
+    ///
+    /// let source_name = make::js_module_source(make::js_string_literal("foo"));
+    /// let any_import_specifier = AnyJsImportLike::JsModuleSource(source_name);
+    /// assert_eq!(any_import_specifier.module_name_token().unwrap().text(), "\"foo\"")
+    /// ```
+    pub fn module_name_token(&self) -> Option<JsSyntaxToken> {
+        match self {
+            AnyJsImportLike::JsImport(source) => source.source_token().ok(),
+            AnyJsImportLike::JsCallExpression(expression) => {
+                expression.imported_module_source_token()
+            }
+            AnyJsImportLike::JsImportCallExpression(import_call) => {
+                import_call.module_source_token()
+            }
+        }
+    }
+}
+
+declare_node_union! {
     /// This node union is meant to match the following syntax:
     /// ```js
     ///    import "lodash";
