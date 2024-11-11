@@ -640,6 +640,7 @@ pub struct PullDiagnosticsParams {
     pub max_diagnostics: u64,
     pub only: Vec<RuleSelector>,
     pub skip: Vec<RuleSelector>,
+    pub rules: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -1130,6 +1131,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             max_diagnostics: max_diagnostics.into(),
             only,
             skip,
+            rules: vec![],
         })
     }
 
@@ -1139,7 +1141,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
         suppression_reason: Option<String>,
-        additional_rules: Vec<RuleSelector>,
+        rules: Vec<RuleSelector>,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
@@ -1147,7 +1149,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             suppression_reason,
-            rules: additional_rules,
+            rules,
         })
     }
 

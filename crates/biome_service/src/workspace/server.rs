@@ -636,6 +636,7 @@ impl Workspace for WorkspaceServer {
                         categories: params.categories,
                         manifest,
                         suppression_reason: None,
+                        rules: params.rules,
                     });
 
                     (

@@ -345,6 +345,7 @@ impl Session {
                 max_diagnostics: u64::MAX,
                 only: Vec::new(),
                 skip: Vec::new(),
+                rules: Vec::new(),
             })?;
 
             tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);

@@ -459,6 +459,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
     pub(crate) suppression_reason: Option<String>,
+    pub(crate) rules: Vec<RuleSelector>,
 }
 
 pub(crate) struct LintResults {

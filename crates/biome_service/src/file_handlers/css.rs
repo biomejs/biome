@@ -311,113 +311,111 @@ fn format_on_type(
 }
 
 fn lint(params: LintParams) -> LintResults {
-    debug_span!("Linting CSS file", path =? params.path, language =? params.language).in_scope(
-        move || {
-            let workspace_settings = &params.workspace;
-            let analyzer_options = workspace_settings.analyzer_options::<CssLanguage>(
-                params.path,
-                &params.language,
-                params.suppression_reason,
-            );
-            let tree = params.parse.tree();
+    let _ =
+        debug_span!("Linting CSS file", path =? params.path, language =? params.language).entered();
+    let workspace_settings = &params.workspace;
+    let analyzer_options = workspace_settings.analyzer_options::<CssLanguage>(
+        params.path,
+        &params.language,
+        params.suppression_reason,
+    );
+    let tree = params.parse.tree();
 
-            let has_only_filter = !params.only.is_empty();
-            let rules = params
-                .workspace
-                .settings()
-                .as_ref()
-                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
+    let has_only_filter = !params.only.is_empty();
+    let rules = params
+        .workspace
+        .settings()
+        .as_ref()
+        .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
-            let (enabled_rules, disabled_rules) =
-                AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_only(&params.only)
-                    .with_skip(&params.skip)
-                    .with_path(params.path.as_path())
-                    .finish();
-            let mut diagnostics = params.parse.into_diagnostics();
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_only(&params.only)
+        .with_skip(&params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_rules(&params.rules)
+        .finish();
+    let mut diagnostics = params.parse.into_diagnostics();
 
-            let filter = AnalysisFilter {
-                categories: params.categories,
-                enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: &disabled_rules,
-                range: None,
-            };
+    let filter = AnalysisFilter {
+        categories: params.categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
 
-            // Do not report unused suppression comment diagnostics if:
-            // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
-            let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
+    // Do not report unused suppression comment diagnostics if:
+    // - it is a syntax-only analyzer pass, or
+    // - if a single rule is run.
+    let ignores_suppression_comment =
+        !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
 
-            let mut diagnostic_count = diagnostics.len() as u32;
-            let mut errors = diagnostics
-                .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
-                .count();
+    let mut diagnostic_count = diagnostics.len() as u32;
+    let mut errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() <= Severity::Error)
+        .count();
 
-            info!("Analyze file {}", params.path.display());
-            let (_, analyze_diagnostics) =
-                analyze(&tree, filter, &analyzer_options, Vec::new(), |signal| {
-                    if let Some(mut diagnostic) = signal.diagnostic() {
-                        // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
-                        if ignores_suppression_comment
-                            && diagnostic.category() == Some(category!("suppressions/unused"))
-                        {
-                            return ControlFlow::<Never>::Continue(());
-                        }
+    info!("Analyze file {}", params.path.display());
+    let (_, analyze_diagnostics) =
+        analyze(&tree, filter, &analyzer_options, Vec::new(), |signal| {
+            if let Some(mut diagnostic) = signal.diagnostic() {
+                // Do not report unused suppression comment diagnostics if this is a syntax-only analyzer pass
+                if ignores_suppression_comment
+                    && diagnostic.category() == Some(category!("suppressions/unused"))
+                {
+                    return ControlFlow::<Never>::Continue(());
+                }
 
-                        diagnostic_count += 1;
+                diagnostic_count += 1;
 
-                        // We do now check if the severity of the diagnostics should be changed.
-                        // The configuration allows to change the severity of the diagnostics emitted by rules.
-                        let severity = diagnostic
-                            .category()
-                            .filter(|category| category.name().starts_with("lint/"))
-                            .map_or_else(
-                                || diagnostic.severity(),
-                                |category| {
-                                    rules
-                                        .as_ref()
-                                        .and_then(|rules| rules.get_severity_from_code(category))
-                                        .unwrap_or(Severity::Warning)
-                                },
-                            );
+                // We do now check if the severity of the diagnostics should be changed.
+                // The configuration allows to change the severity of the diagnostics emitted by rules.
+                let severity = diagnostic
+                    .category()
+                    .filter(|category| category.name().starts_with("lint/"))
+                    .map_or_else(
+                        || diagnostic.severity(),
+                        |category| {
+                            rules
+                                .as_ref()
+                                .and_then(|rules| rules.get_severity_from_code(category))
+                                .unwrap_or(Severity::Warning)
+                        },
+                    );
 
-                        if severity >= Severity::Error {
-                            errors += 1;
-                        }
+                if severity >= Severity::Error {
+                    errors += 1;
+                }
 
-                        if diagnostic_count <= params.max_diagnostics {
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    diagnostic = diagnostic.add_code_suggestion(action.into());
-                                }
-                            }
-
-                            let error = diagnostic.with_severity(severity);
-
-                            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                if diagnostic_count <= params.max_diagnostics {
+                    for action in signal.actions() {
+                        if !action.is_suppression() {
+                            diagnostic = diagnostic.add_code_suggestion(action.into());
                         }
                     }
 
-                    ControlFlow::<Never>::Continue(())
-                });
+                    let error = diagnostic.with_severity(severity);
 
-            diagnostics.extend(
-                analyze_diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect::<Vec<_>>(),
-            );
-            let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
-
-            LintResults {
-                diagnostics,
-                errors,
-                skipped_diagnostics,
+                    diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                }
             }
-        },
-    )
+
+            ControlFlow::<Never>::Continue(())
+        });
+
+    diagnostics.extend(
+        analyze_diagnostics
+            .into_iter()
+            .map(biome_diagnostics::serde::Diagnostic::new)
+            .collect::<Vec<_>>(),
+    );
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
+    }
 }
 
 fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult, WorkspaceError> {
