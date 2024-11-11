@@ -5728,14 +5728,77 @@ pub(crate) const MATH_ML_TAGS: [&str; 32] = [
 mod tests {
     use std::collections::HashSet;
 
-    use super::{
-        FUNCTION_KEYWORDS, HTML_TAGS, KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES,
-        KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES, KNOWN_SAFARI_PROPERTIES,
-        KNOWN_SAMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
-        LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES, MATH_ML_TAGS, MEDIA_FEATURE_NAMES,
-        RESET_TO_INITIAL_PROPERTIES_BY_BORDER, RESET_TO_INITIAL_PROPERTIES_BY_FONT,
-        SHORTHAND_PROPERTIES, SVG_TAGS,
-    };
+    use super::*;
+
+    #[test]
+    fn test_basic_keywords_sorted() {
+        let mut sorted = BASIC_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(BASIC_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_system_family_name_keywords_sorted() {
+        let mut sorted = SYSTEM_FAMILY_NAME_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(SYSTEM_FAMILY_NAME_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_family_keywords_sorted() {
+        let mut sorted = FONT_FAMILY_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(FONT_FAMILY_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_weight_absolute_keywords_sorted() {
+        let mut sorted = FONT_WEIGHT_ABSOLUTE_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(FONT_WEIGHT_ABSOLUTE_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_weight_numeric_keywords_sorted() {
+        let mut sorted = FONT_WEIGHT_NUMERIC_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(FONT_WEIGHT_NUMERIC_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_style_keywords_sorted() {
+        let mut sorted = FONT_STYLE_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(FONT_STYLE_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_variants_keywords_sorted() {
+        let mut sorted = FONT_VARIANTS_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(FONT_VARIANTS_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_stretch_keywords_sorted() {
+        let mut sorted = FONT_STRETCH_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(FONT_STRETCH_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_size_keywords_sorted() {
+        let mut sorted = FONT_SIZE_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(FONT_SIZE_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_line_height_keywords_sorted() {
+        let mut sorted = LINE_HEIGHT_KEYWORDS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(LINE_HEIGHT_KEYWORDS, sorted.as_slice());
+    }
 
     #[test]
     fn test_function_keywords_sorted() {
@@ -5752,10 +5815,115 @@ mod tests {
     }
 
     #[test]
+    fn test_level_one_and_two_pseudo_elements_sorted() {
+        let mut sorted = LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_vendor_specific_pseudo_elements_sorted() {
+        let mut sorted = VENDOR_SPECIFIC_PSEUDO_ELEMENTS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(VENDOR_SPECIFIC_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_shadow_tree_pseudo_elements_sorted() {
+        let mut sorted = SHADOW_TREE_PSEUDO_ELEMENTS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(SHADOW_TREE_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_other_pseudo_elements_sorted() {
+        let mut sorted = OTHER_PSEUDO_ELEMENTS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(OTHER_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_vendor_prefixes_sorted() {
+        let mut sorted = VENDOR_PREFIXES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(VENDOR_PREFIXES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_at_rule_page_pseudo_classes_sorted() {
+        let mut sorted = AT_RULE_PAGE_PSEUDO_CLASSES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(AT_RULE_PAGE_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_webkit_scrollbar_pseudo_elements_sorted() {
+        let mut sorted = WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_webkit_scrollbar_pseudo_classes_sorted() {
+        let mut sorted = WEBKIT_SCROLLBAR_PSEUDO_CLASSES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(WEBKIT_SCROLLBAR_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_a_nplus_bnotation_pseudo_classes_sorted() {
+        let mut sorted = A_NPLUS_BNOTATION_PSEUDO_CLASSES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(A_NPLUS_BNOTATION_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_a_nplus_bof_snotation_pseudo_classes_sorted() {
+        let mut sorted = A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_linguistic_pseudo_classes_sorted() {
+        let mut sorted = LINGUISTIC_PSEUDO_CLASSES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(LINGUISTIC_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_logical_combinations_pseudo_classes_sorted() {
+        let mut sorted = LOGICAL_COMBINATIONS_PSEUDO_CLASSES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(LOGICAL_COMBINATIONS_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_resource_state_pseudo_classes_sorted() {
+        let mut sorted = RESOURCE_STATE_PSEUDO_CLASSES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(RESOURCE_STATE_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_other_pseudo_classes_sorted() {
+        let mut sorted = OTHER_PSEUDO_CLASSES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(OTHER_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
     fn test_known_properties_order() {
         for items in KNOWN_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
+    }
+
+    #[test]
+    fn test_known_chrome_properties_sorted() {
+        let mut sorted = KNOWN_CHROME_PROPERTIES.to_vec();
+        sorted.sort_unstable();
+        assert_eq!(KNOWN_CHROME_PROPERTIES, sorted.as_slice());
     }
 
     #[test]
