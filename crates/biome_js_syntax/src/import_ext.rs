@@ -10,7 +10,7 @@ use biome_rowan::{
 };
 
 impl JsImport {
-    /// It checks if the source of an import against the string `source_to_check`
+    /// Returns the source of an import.
     ///
     /// ## Examples
     ///
@@ -28,6 +28,26 @@ impl JsImport {
     /// ```
     pub fn source_text(&self) -> SyntaxResult<TokenText> {
         self.import_clause()?.source()?.inner_string_text()
+    }
+
+    /// Returns the whole token text of the import source specifier.
+    ///
+    /// ## Examples
+    ///
+    /// ```
+    /// use biome_js_factory::make;
+    /// use biome_js_syntax::T;
+    ///
+    /// let source = make::js_module_source(make::js_string_literal("react"));
+    /// let binding = make::js_identifier_binding(make::ident("React"));
+    /// let specifier = make::js_default_import_specifier(binding.into());
+    /// let clause = make::js_import_default_clause(specifier, make::token(T![from]), source.into()).build();
+    /// let import = make::js_import(make::token(T![import]), clause.into()).build();
+    ///
+    /// assert_eq!(import.source_token().unwrap().text(), "\"react\"");
+    /// ```
+    pub fn source_token(&self) -> SyntaxResult<SyntaxToken<crate::JsLanguage>>{
+        self.import_clause()?.source()?.value_token()
     }
 }
 
