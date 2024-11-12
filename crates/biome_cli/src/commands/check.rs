@@ -2,7 +2,7 @@ use super::{determine_fix_file_mode, FixFileModeOptions, LoadEditorConfig};
 use crate::cli_options::CliOptions;
 use crate::commands::{get_files_to_process_with_cli_options, CommandRunner};
 use crate::{CliDiagnostic, Execution, TraversalMode};
-use biome_configuration::analyzer::assists::PartialAssistsConfiguration;
+use biome_configuration::analyzer::assist::PartialAssistConfiguration;
 use biome_configuration::{
     organize_imports::PartialOrganizeImports, PartialConfiguration, PartialFormatterConfiguration,
     PartialLinterConfiguration,
@@ -23,7 +23,7 @@ pub(crate) struct CheckCommandPayload {
     pub(crate) formatter_enabled: Option<bool>,
     pub(crate) linter_enabled: Option<bool>,
     pub(crate) organize_imports_enabled: Option<bool>,
-    pub(crate) assists_enabled: Option<bool>,
+    pub(crate) assist_enabled: Option<bool>,
     pub(crate) staged: bool,
     pub(crate) changed: bool,
     pub(crate) since: Option<String>,
@@ -81,12 +81,12 @@ impl CommandRunner for CheckCommandPayload {
             organize_imports.enabled = self.organize_imports_enabled;
         }
 
-        let assists = fs_configuration
-            .assists
-            .get_or_insert_with(PartialAssistsConfiguration::default);
+        let assist = fs_configuration
+            .assist
+            .get_or_insert_with(PartialAssistConfiguration::default);
 
-        if self.assists_enabled.is_some() {
-            assists.enabled = self.assists_enabled;
+        if self.assist_enabled.is_some() {
+            assist.enabled = self.assist_enabled;
         }
 
         if let Some(mut configuration) = self.configuration.clone() {

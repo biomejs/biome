@@ -336,8 +336,8 @@ impl WorkspaceServer {
                     &organize_imports.ignored_files,
                 )
             }
-            FeatureKind::Assists => {
-                let assists = &settings.assists;
+            FeatureKind::Assist => {
+                let assists = &settings.assist;
                 (&assists.included_files, &assists.ignored_files)
             }
             // TODO: enable once the configuration is available
@@ -643,6 +643,7 @@ impl Workspace for WorkspaceServer {
                         categories: params.categories,
                         manifest,
                         suppression_reason: None,
+                        enabled_rules: params.enabled_rules,
                     });
 
                     (
@@ -699,6 +700,7 @@ impl Workspace for WorkspaceServer {
             only: params.only,
             skip: params.skip,
             suppression_reason: None,
+            enabled_rules: params.enabled_rules,
         }))
     }
 

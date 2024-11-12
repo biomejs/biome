@@ -11,12 +11,11 @@ use biome_service::file_handlers::{AstroFileHandler, SvelteFileHandler, VueFileH
 use biome_service::workspace::FixFileMode;
 
 /// Lints a single file and returns a [FileResult]
-pub(crate) fn assists_with_guard<'ctx>(
+pub(crate) fn assist_with_guard<'ctx>(
     ctx: &'ctx SharedTraversalOptions<'ctx, '_>,
     workspace_file: &mut WorkspaceFile,
 ) -> FileResult {
-    let _ =
-        tracing::info_span!("Processes assists", path =? workspace_file.path.display()).entered();
+    let _ = tracing::info_span!("Process assist", path =? workspace_file.path.display()).entered();
     let input = workspace_file.input()?;
 
     let only = Vec::new();
@@ -26,14 +25,14 @@ pub(crate) fn assists_with_guard<'ctx>(
         .fix_file(
             FixFileMode::SafeFixes,
             false,
-            RuleCategoriesBuilder::default().with_action().build(),
+            RuleCategoriesBuilder::default().with_assist().build(),
             only.clone(),
             skip.clone(),
             None,
         )
         .with_file_path_and_code(
             workspace_file.path.display().to_string(),
-            category!("assists"),
+            category!("assist"),
         )?;
 
     ctx.push_message(Message::SkippedFixes {
@@ -60,7 +59,7 @@ pub(crate) fn assists_with_guard<'ctx>(
                 file_name: workspace_file.path.display().to_string(),
                 old: input,
                 new: output,
-                diff_kind: DiffKind::Assists,
+                diff_kind: DiffKind::Assist,
             }));
         } else {
             if output != input && ctx.execution.as_fix_file_mode().is_some() {

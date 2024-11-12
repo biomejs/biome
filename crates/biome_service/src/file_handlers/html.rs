@@ -1,4 +1,4 @@
-use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
+use biome_analyze::AnalyzerOptions;
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
 use biome_html_formatter::{format_node, HtmlFormatOptions};
@@ -100,11 +100,9 @@ impl ServiceLanguage for HtmlLanguage {
         _file_source: &super::DocumentFileSource,
         suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
-        AnalyzerOptions {
-            configuration: AnalyzerConfiguration::default(),
-            file_path: path.to_path_buf(),
-            suppression_reason,
-        }
+        AnalyzerOptions::default()
+            .with_file_path(path.as_path())
+            .with_suppression_reason(suppression_reason)
     }
 }
 

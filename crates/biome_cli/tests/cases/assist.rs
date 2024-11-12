@@ -14,7 +14,7 @@ fn assist_emit_diagnostic() {
     fs.insert(
         config.into(),
         r#"{ 
-            "assists": { 
+            "assist": { 
                 "enabled": true,
                 "actions": {
                   "source": {
@@ -58,7 +58,7 @@ fn assist_writes() {
     fs.insert(
         config.into(),
         r#"{ 
-            "assists": { 
+            "assist": { 
                 "enabled": true,
                 "actions": {
                   "source": {

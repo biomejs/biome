@@ -1,8 +1,8 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::analyzer::assists::*;
+use crate::analyzer::assist::*;
 use biome_analyze::{AnalyzerRules, MetadataRegistry};
-pub fn push_to_analyzer_assists(
+pub fn push_to_analyzer_assist(
     rules: &Actions,
     metadata: &MetadataRegistry,
     analyzer_rules: &mut AnalyzerRules,

@@ -127,7 +127,7 @@ impl FileFeaturesResult {
         (FeatureKind::Format, SupportKind::FileNotSupported),
         (FeatureKind::OrganizeImports, SupportKind::FileNotSupported),
         (FeatureKind::Search, SupportKind::FileNotSupported),
-        (FeatureKind::Assists, SupportKind::FileNotSupported),
+        (FeatureKind::Assist, SupportKind::FileNotSupported),
         (FeatureKind::Debug, SupportKind::FileNotSupported),
     ];
 
@@ -153,7 +153,7 @@ impl FileFeaturesResult {
 
         if capabilities.analyzer.code_actions.is_some() {
             self.features_supported
-                .insert(FeatureKind::Assists, SupportKind::Supported);
+                .insert(FeatureKind::Assist, SupportKind::Supported);
         }
 
         if capabilities.search.search.is_some() {
@@ -227,14 +227,14 @@ impl FileFeaturesResult {
         }
 
         // assists
-        if let Some(disabled) = settings.override_settings.assists_disabled(path) {
+        if let Some(disabled) = settings.override_settings.assist_disabled(path) {
             if disabled {
                 self.features_supported
-                    .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+                    .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
             }
-        } else if !settings.assists().enabled {
+        } else if !settings.assist().enabled {
             self.features_supported
-                .insert(FeatureKind::Assists, SupportKind::FeatureNotEnabled);
+                .insert(FeatureKind::Assist, SupportKind::FeatureNotEnabled);
         }
 
         debug!(
@@ -284,8 +284,8 @@ impl FileFeaturesResult {
         self.supports_for(&FeatureKind::OrganizeImports)
     }
 
-    pub fn supports_assists(&self) -> bool {
-        self.supports_for(&FeatureKind::Assists)
+    pub fn supports_assist(&self) -> bool {
+        self.supports_for(&FeatureKind::Assist)
     }
 
     pub fn supports_search(&self) -> bool {
@@ -417,7 +417,7 @@ pub enum FeatureKind {
     Lint,
     OrganizeImports,
     Search,
-    Assists,
+    Assist,
     Debug,
 }
 
@@ -498,8 +498,8 @@ impl FeaturesBuilder {
         self
     }
 
-    pub fn with_assists(mut self) -> Self {
-        self.0.insert(FeatureKind::Assists);
+    pub fn with_assist(mut self) -> Self {
+        self.0.insert(FeatureKind::Assist);
         self
     }
 
@@ -638,8 +638,13 @@ pub struct PullDiagnosticsParams {
     pub path: BiomePath,
     pub categories: RuleCategories,
     pub max_diagnostics: u64,
+    #[serde(default)]
     pub only: Vec<RuleSelector>,
+    #[serde(default)]
     pub skip: Vec<RuleSelector>,
+    /// Rules to apply on top of the configuration
+    #[serde(default)]
+    pub enabled_rules: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -657,9 +662,13 @@ pub struct PullDiagnosticsResult {
 pub struct PullActionsParams {
     pub path: BiomePath,
     pub range: Option<TextRange>,
-    pub only: Vec<RuleSelector>,
-    pub skip: Vec<RuleSelector>,
     pub suppression_reason: Option<String>,
+    #[serde(default)]
+    pub only: Vec<RuleSelector>,
+    #[serde(default)]
+    pub skip: Vec<RuleSelector>,
+    #[serde(default)]
+    pub enabled_rules: Vec<RuleSelector>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -721,9 +730,15 @@ pub struct FixFileParams {
     pub path: BiomePath,
     pub fix_file_mode: FixFileMode,
     pub should_format: bool,
+    #[serde(default)]
     pub only: Vec<RuleSelector>,
+    #[serde(default)]
     pub skip: Vec<RuleSelector>,
+    /// Rules to apply to the file
+    #[serde(default)]
+    pub enabled_rules: Vec<RuleSelector>,
     pub rule_categories: RuleCategories,
+    #[serde(default)]
     pub suppression_reason: Option<String>,
 }
 
@@ -1135,6 +1150,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             max_diagnostics: max_diagnostics.into(),
             only,
             skip,
+            enabled_rules: vec![],
         })
     }
 
@@ -1144,6 +1160,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
         only: Vec<RuleSelector>,
         skip: Vec<RuleSelector>,
         suppression_reason: Option<String>,
+        enabled_rules: Vec<RuleSelector>,
     ) -> Result<PullActionsResult, WorkspaceError> {
         self.workspace.pull_actions(PullActionsParams {
             path: self.path.clone(),
@@ -1151,6 +1168,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             only,
             skip,
             suppression_reason,
+            enabled_rules,
         })
     }
 
@@ -1197,6 +1215,7 @@ impl<'app, W: Workspace + ?Sized> FileGuard<'app, W> {
             skip,
             rule_categories,
             suppression_reason,
+            enabled_rules: vec![],
         })
     }
 

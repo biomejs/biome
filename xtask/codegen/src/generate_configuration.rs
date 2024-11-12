@@ -95,13 +95,13 @@ impl RegistryVisitor<GraphqlLanguage> for LintRulesVisitor {
     }
 }
 
-// ======= ASSISTS ======
+// ======= ASSIST ======
 #[derive(Default)]
-struct AssistsRulesVisitor {
+struct AssistActionsVisitor {
     groups: BTreeMap<&'static str, BTreeMap<&'static str, RuleMetadata>>,
 }
 
-impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<JsLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = JsLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -119,7 +119,7 @@ impl RegistryVisitor<JsLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<JsonLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = JsonLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -138,7 +138,7 @@ impl RegistryVisitor<JsonLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<CssLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = CssLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -157,7 +157,7 @@ impl RegistryVisitor<CssLanguage> for AssistsRulesVisitor {
     }
 }
 
-impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
+impl RegistryVisitor<GraphqlLanguage> for AssistActionsVisitor {
     fn record_category<C: GroupCategory<Language = GraphqlLanguage>>(&mut self) {
         if matches!(C::CATEGORY, RuleCategory::Action) {
             C::record_groups(self);
@@ -178,20 +178,19 @@ impl RegistryVisitor<GraphqlLanguage> for AssistsRulesVisitor {
 
 pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
     let linter_config_root = project_root().join("crates/biome_configuration/src/analyzer/linter");
-    let assists_config_root =
-        project_root().join("crates/biome_configuration/src/analyzer/assists");
+    let assist_config_root = project_root().join("crates/biome_configuration/src/analyzer/assist");
     let push_rules_directory = project_root().join("crates/biome_configuration/src/generated");
 
     let mut lint_visitor = LintRulesVisitor::default();
-    let mut assists_visitor = AssistsRulesVisitor::default();
+    let mut assist_visitor = AssistActionsVisitor::default();
     biome_js_analyze::visit_registry(&mut lint_visitor);
-    biome_js_analyze::visit_registry(&mut assists_visitor);
+    biome_js_analyze::visit_registry(&mut assist_visitor);
     biome_json_analyze::visit_registry(&mut lint_visitor);
-    biome_json_analyze::visit_registry(&mut assists_visitor);
+    biome_json_analyze::visit_registry(&mut assist_visitor);
     biome_css_analyze::visit_registry(&mut lint_visitor);
-    biome_css_analyze::visit_registry(&mut assists_visitor);
+    biome_css_analyze::visit_registry(&mut assist_visitor);
     biome_graphql_analyze::visit_registry(&mut lint_visitor);
-    biome_graphql_analyze::visit_registry(&mut assists_visitor);
+    biome_graphql_analyze::visit_registry(&mut assist_visitor);
 
     // let LintRulesVisitor { groups } = lint_visitor;
 
@@ -203,8 +202,8 @@ pub(crate) fn generate_rules_configuration(mode: Mode) -> Result<()> {
         RuleCategory::Lint,
     )?;
     generate_for_groups(
-        assists_visitor.groups,
-        assists_config_root.as_path(),
+        assist_visitor.groups,
+        assist_config_root.as_path(),
         push_rules_directory.as_path(),
         &mode,
         RuleCategory::Action,
@@ -225,6 +224,7 @@ fn generate_for_groups(
     let mut group_idents = Vec::with_capacity(groups.len());
     let mut group_strings = Vec::with_capacity(groups.len());
     let mut group_as_default_rules = Vec::with_capacity(groups.len());
+    let mut group_as_disabled_rules = Vec::with_capacity(groups.len());
     for (group, rules) in groups {
         let group_pascal_ident = quote::format_ident!("{}", &Case::Pascal.convert(group));
         let group_ident = quote::format_ident!("{}", group);
@@ -264,6 +264,12 @@ fn generate_for_groups(
             }
         });
 
+        group_as_disabled_rules.push(quote! {
+            if let Some(group) = self.#group_ident.as_ref() {
+                disabled_rules.extend(&group.get_disabled_rules());
+            }
+        });
+
         group_pascal_idents.push(group_pascal_ident);
         group_idents.push(group_ident);
         group_strings.push(Literal::string(group));
@@ -282,7 +288,7 @@ fn generate_for_groups(
                 let mut split_code = category.name().split('/');
 
                 let _lint = split_code.next();
-                debug_assert_eq!(_lint, Some("assists"));
+                debug_assert_eq!(_lint, Some("assist"));
 
                 let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
                 let rule_name = split_code.next()?;
@@ -419,6 +425,13 @@ fn generate_for_groups(
                     let mut enabled_rules = FxHashSet::default();
                     #( #group_as_default_rules )*
                     enabled_rules
+                }
+
+                /// It returns the disabled rules by configuration
+                pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                    let mut disabled_rules = FxHashSet::default();
+                    #( #group_as_disabled_rules )*
+                    disabled_rules
                 }
             }
 
@@ -557,6 +570,13 @@ fn generate_for_groups(
 
                     enabled_rules.difference(&disabled_rules).copied().collect()
                 }
+
+                /// It returns the disabled rules by configuration
+                pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                    let mut disabled_rules = FxHashSet::default();
+                    #( #group_as_disabled_rules )*
+                    disabled_rules
+                }
             }
 
             #( #struct_groups )*
@@ -599,10 +619,10 @@ fn generate_for_groups(
         }
         RuleCategory::Action => {
             quote! {
-                use crate::analyzer::assists::*;
+                use crate::analyzer::assist::*;
                 use biome_analyze::{AnalyzerRules, MetadataRegistry};
 
-                pub fn push_to_analyzer_assists(
+                pub fn push_to_analyzer_assist(
                     rules: &Actions,
                     metadata: &MetadataRegistry,
                     analyzer_rules: &mut AnalyzerRules,
@@ -629,7 +649,7 @@ fn generate_for_groups(
 
     let file_name = match kind {
         RuleCategory::Lint => &push_directory.join("linter.rs"),
-        RuleCategory::Action => &push_directory.join("assists.rs"),
+        RuleCategory::Action => &push_directory.join("assist.rs"),
         RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(),
     };
 
@@ -834,6 +854,12 @@ fn generate_group_struct(
                 pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
                    let mut index_set = FxHashSet::default();
                    #( #rule_enabled_check_line )*
+                   index_set
+                }
+
+                pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+                   let mut index_set = FxHashSet::default();
+                   #( #rule_disabled_check_line )*
                    index_set
                 }
 

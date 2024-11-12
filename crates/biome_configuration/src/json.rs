@@ -23,8 +23,8 @@ pub struct JsonConfiguration {
     pub linter: JsonLinter,
 
     /// Assists options
-    #[partial(type, bpaf(external(partial_json_assists), optional))]
-    pub assists: JsonAssists,
+    #[partial(type, bpaf(external(partial_json_assist), optional))]
+    pub assists: JsonAssist,
 }
 
 /// Options that changes how the JSON parser behaves
@@ -136,13 +136,13 @@ impl PartialJsonLinter {
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct JsonAssists {
+pub struct JsonAssist {
     /// Control the linter for JSON (and its super languages) files.
-    #[partial(bpaf(long("json-assists-enabled"), argument("true|false"), optional))]
+    #[partial(bpaf(long("json-assist-enabled"), argument("true|false"), optional))]
     pub enabled: bool,
 }
 
-impl Default for JsonAssists {
+impl Default for JsonAssist {
     fn default() -> Self {
         Self { enabled: true }
     }

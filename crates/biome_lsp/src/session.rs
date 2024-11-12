@@ -308,7 +308,7 @@ impl Session {
         let file_features = self.workspace.file_features(SupportsFeatureParams {
             features: FeaturesBuilder::new()
                 .with_linter()
-                .with_assists()
+                .with_assist()
                 .with_organize_imports()
                 .build(),
             path: biome_path.clone(),
@@ -316,7 +316,7 @@ impl Session {
 
         if !file_features.supports_lint()
             && !file_features.supports_organize_imports()
-            && !file_features.supports_assists()
+            && !file_features.supports_assist()
         {
             self.client
                 .publish_diagnostics(url, vec![], Some(doc.version))
@@ -331,7 +331,7 @@ impl Session {
                     categories = categories.with_lint();
                 }
                 if file_features.supports_organize_imports() {
-                    categories = categories.with_action();
+                    categories = categories.with_assist();
                 }
             }
             let result = self.workspace.pull_diagnostics(PullDiagnosticsParams {
@@ -340,6 +340,7 @@ impl Session {
                 max_diagnostics: u64::MAX,
                 only: Vec::new(),
                 skip: Vec::new(),
+                enabled_rules: Vec::new(),
             })?;
 
             tracing::trace!("biome diagnostics: {:#?}", result.diagnostics);

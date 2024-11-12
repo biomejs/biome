@@ -240,7 +240,7 @@ type User {
             RuleCategories::all(),
             10,
             vec![RuleSelector::Rule(
-                RuleGroup::Nursery,
+                RuleGroup::Nursery.as_str(),
                 "useDeprecatedReason",
             )],
             vec![],

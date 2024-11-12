@@ -1,4 +1,4 @@
-mod assists;
+mod assist;
 mod check;
 mod format;
 mod lint;
@@ -74,7 +74,7 @@ impl Message {
 pub(crate) enum DiffKind {
     Format,
     OrganizeImports,
-    Assists,
+    Assist,
 }
 
 impl<D> From<D> for Message
