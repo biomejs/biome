@@ -1916,7 +1916,6 @@ async fn does_not_pull_action_for_disabled_rule_in_override_issue_2782() -> Resu
         .await?
         .context("codeAction returned None")?;
 
-    dbg!(&res);
     assert!(res.is_empty(), "This should not have code actions");
 
     server.close_document().await?;
