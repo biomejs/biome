@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_aria_metadata::AriaRole;
 use biome_console::markup;
@@ -101,6 +99,6 @@ impl Rule for UseFocusableInteractive {
 
 /// Checks if the given role attribute value is interactive or not based on ARIA roles.
 fn attribute_has_interactive_role(role_attribute_value: &AnyJsxAttributeValue) -> Option<bool> {
-    let role = AriaRole::from_str(role_attribute_value.as_static_value()?.text()).ok()?;
+    let role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
     Some(role.is_interactive() && !role.is_composite())
 }

@@ -1,7 +1,6 @@
 use biome_aria_metadata::AriaRole;
 use rustc_hash::FxHashMap;
 use std::fmt::Debug;
-use std::str::FromStr;
 
 /// Convenient type to retrieve metadata regarding ARIA roles
 #[derive(Debug, Default)]
@@ -261,7 +260,7 @@ impl AriaRoles {
             .and_then(|role| role.first())
             .map_or_else(
                 || self.get_implicit_role(element_name, attributes),
-                |r| AriaRole::from_str(r).ok(),
+                |r| AriaRole::from_roles(r),
             )
     }
 

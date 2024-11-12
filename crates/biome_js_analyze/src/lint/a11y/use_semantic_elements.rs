@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
@@ -69,7 +67,7 @@ impl Rule for UseSemanticElements {
             return None;
         }
 
-        let role = AriaRole::from_str(role_value).ok()?;
+        let role = AriaRole::from_roles(role_value)?;
         if role.base_html_elements().is_empty() && role.related_html_elements().is_empty() {
             None
         } else {
@@ -81,7 +79,7 @@ impl Rule for UseSemanticElements {
         let role_attribute = state;
         let role_value = role_attribute.as_static_value()?;
         let role_value = role_value.as_string_constant()?;
-        let role = AriaRole::from_str(role_value).ok()?;
+        let role = AriaRole::from_roles(role_value)?;
 
         let candidates = role
             .base_html_elements()

@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_aria_metadata::AriaRole;
@@ -77,7 +75,7 @@ impl Rule for UseAriaPropsForRole {
                 .as_jsx_string()?
                 .inner_string_text()
                 .ok()?;
-            let role = AriaRole::from_str(name.text()).ok();
+            let role = AriaRole::from_roles(name.text());
             let missing_aria_props: Vec<_> = role
                 .into_iter()
                 .flat_map(|role| role.required_attributes().iter())

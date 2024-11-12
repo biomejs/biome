@@ -62,7 +62,7 @@ impl Rule for UseAriaPropsSupportedByRole {
             let role = attributes
                 .get("role")
                 .and_then(|roles| roles.first())
-                .and_then(|role| AriaRole::from_str(role).ok())
+                .and_then(|role| AriaRole::from_roles(role))
                 .or_else(|| aria_roles.get_implicit_role(element_name, attributes));
             let role_attributes = role.map_or(Default::default(), |role| role.attributes());
             let role_prohibited_attributes =

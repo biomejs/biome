@@ -129,6 +129,21 @@ fn is_valid_html_id(id: &str) -> bool {
 }
 
 impl AriaRole {
+    /// Returns the first valid role from `values`, a space-separated list of roles.
+    ///
+    /// If a role attribute has multiple values, the first valid role (specified role) will be used.
+    /// See <https://www.w3.org/TR/2014/REC-wai-aria-implementation-20140320/#mapping_role>
+    ///
+    /// ```
+    /// use biome_aria_metadata::AriaRole;
+    /// assert_eq!(AriaRole::from_roles("INVALID main FALLBACK"), Some(AriaRole::Main));
+    /// ```
+    pub fn from_roles(roles: &str) -> Option<AriaRole> {
+        roles
+            .split_ascii_whitespace()
+            .find_map(|value| value.parse().ok())
+    }
+
     /// Returns `true` if the given role inherits of `AriaAbstractRole::Widget` and is not `Self::Progressbar`.
     ///
     /// This corresponds to a role that defines a user interface widget (slider, tree control, ...)

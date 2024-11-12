@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
@@ -171,7 +169,7 @@ fn attribute_has_negative_tabindex(
 /// Checks if the given role attribute value is interactive or not based on ARIA roles.
 fn attribute_has_interactive_role(role_attribute_value: &AnyJsxAttributeValue) -> Option<bool> {
     Some(
-        AriaRole::from_str(role_attribute_value.as_static_value()?.text())
-            .is_ok_and(|role| role.is_interactive()),
+        AriaRole::from_roles(role_attribute_value.as_static_value()?.text())
+            .is_some_and(|role| role.is_interactive()),
     )
 }
