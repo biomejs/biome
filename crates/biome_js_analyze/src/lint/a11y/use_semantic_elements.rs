@@ -59,7 +59,7 @@ impl Rule for UseSemanticElements {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let role_attribute = node.find_attribute_by_name("role").ok().flatten()?;
+        let role_attribute = node.find_attribute_by_name("role")?;
         let role_value = role_attribute.as_static_value()?;
         let role_value = role_value.as_string_constant()?;
 

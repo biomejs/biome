@@ -154,7 +154,7 @@ impl Rule for UseValidAutocomplete {
         let input_components = &options.input_components;
         match ctx.query() {
             UseValidAutocompleteQuery::JsxOpeningElement(elem) => {
-                let elem_name = elem.name().ok()?.name_value_token()?;
+                let elem_name = elem.name().ok()?.name_value_token().ok()?;
                 let elem_name = elem_name.text_trimmed();
                 if !(elem_name == "input"
                     || input_components.iter().any(|x| x.as_ref() == elem_name))
@@ -162,7 +162,7 @@ impl Rule for UseValidAutocomplete {
                     return None;
                 }
                 let attributes = elem.attributes();
-                let autocomplete = attributes.find_by_name("autocomplete").ok()??;
+                let autocomplete = attributes.find_by_name("autocomplete")?;
                 let _initializer = autocomplete.initializer()?;
                 let extract_attrs = ctx.extract_attributes(&attributes)?;
                 let autocomplete_values = extract_attrs.get("autocomplete")?;
@@ -183,7 +183,7 @@ impl Rule for UseValidAutocomplete {
                 Some(autocomplete.range())
             }
             UseValidAutocompleteQuery::JsxSelfClosingElement(elem) => {
-                let elem_name = elem.name().ok()?.name_value_token()?;
+                let elem_name = elem.name().ok()?.name_value_token().ok()?;
                 let elem_name = elem_name.text_trimmed();
                 if !(elem_name == "input"
                     || input_components.iter().any(|x| x.as_ref() == elem_name))
@@ -191,7 +191,7 @@ impl Rule for UseValidAutocomplete {
                     return None;
                 }
                 let attributes = elem.attributes();
-                let autocomplete = attributes.find_by_name("autocomplete").ok()??;
+                let autocomplete = attributes.find_by_name("autocomplete")?;
                 let _initializer = autocomplete.initializer()?;
                 let extract_attrs = ctx.extract_attributes(&attributes)?;
                 let autocomplete_values = extract_attrs.get("autocomplete")?;

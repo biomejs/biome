@@ -147,7 +147,7 @@ impl Rule for UseValidAnchor {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let name = node.name().ok()?.name_value_token()?;
+        let name = node.name().ok()?.name_value_token().ok()?;
 
         if name.text_trimmed() == "a" {
             let anchor_attribute = node.find_attribute_by_name("href");
