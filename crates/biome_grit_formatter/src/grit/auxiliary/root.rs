@@ -15,12 +15,19 @@ impl FormatNodeRule<GritRoot> for FormatGritRoot {
             eof_token,
         } = node.as_fields();
 
+        write!(f, [bom_token.format()])?;
+
+        if let Some(version) = version {
+            write!(f, [version.format(), hard_line_break()])?;
+        }
+
+        if let Some(language) = language {
+            write!(f, [language.format(), hard_line_break()])?;
+        }
+
         write!(
             f,
             [
-                bom_token.format(),
-                version.format(),
-                language.format(),
                 definitions.format(),
                 hard_line_break(),
                 format_removed(&eof_token?),

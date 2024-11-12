@@ -1,0 +1,17 @@
+language js
+
+multifile {
+  bubble($prop, $source_file, $new_prop) file($body) where $body <: contains `type $prop = $_` where {
+    $source_file <: undefined,
+    $prop <: `Props`,
+    $new_prop = `New$prop`,
+    $prop => $new_prop,
+    $source_file = $filename
+  },
+  bubble($prop, $source_file, $new_prop) file($body) where {
+    $body <: contains `$prop` where {
+      $prop <: imported_from(from=includes $source_file),
+    },
+    $body <: contains `$prop` => $new_prop,
+  }
+}

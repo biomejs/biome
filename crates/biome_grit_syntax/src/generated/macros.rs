@@ -190,10 +190,6 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::GritPatternAny::new_unchecked(node) };
                     $body
                 }
-                $crate::GritSyntaxKind::GRIT_PATTERN_ARG_LIST => {
-                    let $pattern = unsafe { $crate::GritPatternArgList::new_unchecked(node) };
-                    $body
-                }
                 $crate::GritSyntaxKind::GRIT_PATTERN_AS => {
                     let $pattern = unsafe { $crate::GritPatternAs::new_unchecked(node) };
                     $body

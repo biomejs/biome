@@ -324,14 +324,14 @@ impl GritBubble {
     pub fn as_fields(&self) -> GritBubbleFields {
         GritBubbleFields {
             bubble_token: self.bubble_token(),
-            variables: self.variables(),
+            scope: self.scope(),
             pattern: self.pattern(),
         }
     }
     pub fn bubble_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn variables(&self) -> Option<GritBubbleScope> {
+    pub fn scope(&self) -> Option<GritBubbleScope> {
         support::node(&self.syntax, 1usize)
     }
     pub fn pattern(&self) -> SyntaxResult<AnyGritMaybeCurlyPattern> {
@@ -349,7 +349,7 @@ impl Serialize for GritBubble {
 #[derive(Serialize)]
 pub struct GritBubbleFields {
     pub bubble_token: SyntaxResult<SyntaxToken>,
-    pub variables: Option<GritBubbleScope>,
+    pub scope: Option<GritBubbleScope>,
     pub pattern: SyntaxResult<AnyGritMaybeCurlyPattern>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -1878,41 +1878,6 @@ pub struct GritPatternAnyFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritPatternArgList {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GritPatternArgList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GritPatternArgListFields {
-        GritPatternArgListFields {
-            grit_variable_list: self.grit_variable_list(),
-        }
-    }
-    pub fn grit_variable_list(&self) -> GritVariableList {
-        support::list(&self.syntax, 0usize)
-    }
-}
-impl Serialize for GritPatternArgList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct GritPatternArgListFields {
-    pub grit_variable_list: GritVariableList,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPatternAs {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2120,8 +2085,8 @@ impl GritPatternDefinition {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 3usize)
     }
-    pub fn args(&self) -> SyntaxResult<GritPatternArgList> {
-        support::required_node(&self.syntax, 4usize)
+    pub fn args(&self) -> GritVariableList {
+        support::list(&self.syntax, 4usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 5usize)
@@ -2147,7 +2112,7 @@ pub struct GritPatternDefinitionFields {
     pub pattern_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GritName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub args: SyntaxResult<GritPatternArgList>,
+    pub args: GritVariableList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub language: Option<GritLanguageDeclaration>,
     pub body: SyntaxResult<GritPatternDefinitionBody>,
@@ -2880,8 +2845,8 @@ impl GritPredicateDefinition {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
     }
-    pub fn args(&self) -> SyntaxResult<GritPatternArgList> {
-        support::required_node(&self.syntax, 3usize)
+    pub fn args(&self) -> GritVariableList {
+        support::list(&self.syntax, 3usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 4usize)
@@ -2903,7 +2868,7 @@ pub struct GritPredicateDefinitionFields {
     pub predicate_token: SyntaxResult<SyntaxToken>,
     pub name: SyntaxResult<GritName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub args: SyntaxResult<GritPatternArgList>,
+    pub args: GritVariableList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<GritCurlyPredicateList>,
 }
@@ -3676,8 +3641,8 @@ impl GritRegexPatternVariables {
     pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 0usize)
     }
-    pub fn args(&self) -> SyntaxResult<GritPatternArgList> {
-        support::required_node(&self.syntax, 1usize)
+    pub fn args(&self) -> GritVariableList {
+        support::list(&self.syntax, 1usize)
     }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 2usize)
@@ -3694,7 +3659,7 @@ impl Serialize for GritRegexPatternVariables {
 #[derive(Serialize)]
 pub struct GritRegexPatternVariablesFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub args: SyntaxResult<GritPatternArgList>,
+    pub args: GritVariableList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -5385,10 +5350,7 @@ impl std::fmt::Debug for GritBubble {
                 "bubble_token",
                 &support::DebugSyntaxResult(self.bubble_token()),
             )
-            .field(
-                "variables",
-                &support::DebugOptionalElement(self.variables()),
-            )
+            .field("scope", &support::DebugOptionalElement(self.scope()))
             .field("pattern", &support::DebugSyntaxResult(self.pattern()))
             .finish()
     }
@@ -6934,44 +6896,6 @@ impl From<GritPatternAny> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritPatternArgList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_PATTERN_ARG_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_PATTERN_ARG_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GritPatternArgList {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritPatternArgList")
-            .field("grit_variable_list", &self.grit_variable_list())
-            .finish()
-    }
-}
-impl From<GritPatternArgList> for SyntaxNode {
-    fn from(n: GritPatternArgList) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GritPatternArgList> for SyntaxElement {
-    fn from(n: GritPatternArgList) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for GritPatternAs {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7179,7 +7103,7 @@ impl std::fmt::Debug for GritPatternDefinition {
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
-            .field("args", &support::DebugSyntaxResult(self.args()))
+            .field("args", &self.args())
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
@@ -7914,7 +7838,7 @@ impl std::fmt::Debug for GritPredicateDefinition {
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
-            .field("args", &support::DebugSyntaxResult(self.args()))
+            .field("args", &self.args())
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
@@ -8703,7 +8627,7 @@ impl std::fmt::Debug for GritRegexPatternVariables {
                 "l_paren_token",
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
-            .field("args", &support::DebugSyntaxResult(self.args()))
+            .field("args", &self.args())
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
@@ -11690,11 +11614,6 @@ impl std::fmt::Display for GritPatternAnd {
     }
 }
 impl std::fmt::Display for GritPatternAny {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
-impl std::fmt::Display for GritPatternArgList {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

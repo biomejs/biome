@@ -114,7 +114,7 @@ impl GritBubble {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_variables(self, element: Option<GritBubbleScope>) -> Self {
+    pub fn with_scope(self, element: Option<GritBubbleScope>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -767,14 +767,6 @@ impl GritPatternAny {
         )
     }
 }
-impl GritPatternArgList {
-    pub fn with_grit_variable_list(self, element: GritVariableList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-}
 impl GritPatternAs {
     pub fn with_pattern(self, element: AnyGritPattern) -> Self {
         Self::unwrap_cast(
@@ -868,7 +860,7 @@ impl GritPatternDefinition {
                 .splice_slots(3usize..=3usize, once(Some(element.into()))),
         )
     }
-    pub fn with_args(self, element: GritPatternArgList) -> Self {
+    pub fn with_args(self, element: GritVariableList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
@@ -1236,7 +1228,7 @@ impl GritPredicateDefinition {
                 .splice_slots(2usize..=2usize, once(Some(element.into()))),
         )
     }
-    pub fn with_args(self, element: GritPatternArgList) -> Self {
+    pub fn with_args(self, element: GritVariableList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
@@ -1578,7 +1570,7 @@ impl GritRegexPatternVariables {
                 .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_args(self, element: GritPatternArgList) -> Self {
+    pub fn with_args(self, element: GritVariableList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
