@@ -1,10 +1,10 @@
-use crate::services::aria::{Aria, AttributeValue};
-use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::{JsxOpeningElement, JsxSelfClosingElement};
-use biome_rowan::{declare_node_union, AstNode, TextRange};
-use serde::{Deserialize, Serialize};
+use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_rowan::{AstNode, TextRange};
 
 declare_lint_rule! {
     /// Use valid values for the `autocomplete` attribute on `input` elements.
@@ -55,10 +55,6 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintJsxA11y("autocomplete-valid")],
         recommended: false,
     }
-}
-
-declare_node_union! {
-    pub UseValidAutocompleteQuery = JsxSelfClosingElement | JsxOpeningElement
 }
 
 // Sorted for binary search
@@ -135,7 +131,9 @@ const BILLING_AND_SHIPPING_ADDRESS: &[&str; 11] = &[
     "street-address",
 ];
 
-#[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
+#[derive(
+    Clone, Debug, Default, Deserializable, Eq, PartialEq, serde::Deserialize, serde::Serialize,
+)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct UseValidAutocompleteOptions {
@@ -144,74 +142,34 @@ pub struct UseValidAutocompleteOptions {
 }
 
 impl Rule for UseValidAutocomplete {
-    type Query = Aria<UseValidAutocompleteQuery>;
+    type Query = Ast<AnyJsxElement>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = Box<UseValidAutocompleteOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let options = ctx.options();
-        let input_components = &options.input_components;
-        match ctx.query() {
-            UseValidAutocompleteQuery::JsxOpeningElement(elem) => {
-                let elem_name = elem.name().ok()?.name_value_token().ok()?;
-                let elem_name = elem_name.text_trimmed();
-                if !(elem_name == "input"
-                    || input_components.iter().any(|x| x.as_ref() == elem_name))
-                {
-                    return None;
-                }
-                let attributes = elem.attributes();
-                let autocomplete = attributes.find_by_name("autocomplete")?;
-                let _initializer = autocomplete.initializer()?;
-                let extract_attrs = ctx.extract_attributes(&attributes)?;
-                let autocomplete_values = extract_attrs.get("autocomplete")?;
-                if autocomplete_values
-                    .first()
-                    .map_or(false, |v| matches!(v, AttributeValue::DynamicValue(_)))
-                {
-                    return None;
-                }
+        let node = ctx.query();
+        let input_components = &ctx.options().input_components;
 
-                let autocomplete_values = ctx.convert_attribute_values(autocomplete_values.clone());
-
-                if autocomplete_values.first() == Some(&"none".to_string())
-                    || is_valid_autocomplete(&autocomplete_values)?
-                {
-                    return None;
-                }
-                Some(autocomplete.range())
-            }
-            UseValidAutocompleteQuery::JsxSelfClosingElement(elem) => {
-                let elem_name = elem.name().ok()?.name_value_token().ok()?;
-                let elem_name = elem_name.text_trimmed();
-                if !(elem_name == "input"
-                    || input_components.iter().any(|x| x.as_ref() == elem_name))
-                {
-                    return None;
-                }
-                let attributes = elem.attributes();
-                let autocomplete = attributes.find_by_name("autocomplete")?;
-                let _initializer = autocomplete.initializer()?;
-                let extract_attrs = ctx.extract_attributes(&attributes)?;
-                let autocomplete_values = extract_attrs.get("autocomplete")?;
-                if autocomplete_values
-                    .first()
-                    .map_or(false, |v| matches!(v, AttributeValue::DynamicValue(_)))
-                {
-                    return None;
-                }
-
-                let autocomplete_values = ctx.convert_attribute_values(autocomplete_values.clone());
-
-                if autocomplete_values.first() == Some(&"none".to_string())
-                    || is_valid_autocomplete(&autocomplete_values)?
-                {
-                    return None;
-                }
-                Some(autocomplete.range())
-            }
+        let elem_name = node.name().ok()?.name_value_token().ok()?;
+        let elem_name = elem_name.text_trimmed();
+        if elem_name != "input" && input_components.iter().all(|x| x.as_ref() != elem_name) {
+            return None;
         }
+
+        let autocomplete_attribute = node.attributes().find_by_name("autocomplete")?;
+        let autocomplete_val = autocomplete_attribute.as_static_value()?;
+        let autocompletes = autocomplete_val
+            .text()
+            .split_ascii_whitespace()
+            .collect::<smallvec::SmallVec<[&str; 2]>>();
+        if (autocompletes.len() == 1 && autocompletes[0] == "none")
+            || is_valid_autocomplete(&autocompletes)
+        {
+            return None;
+        }
+
+        Some(autocomplete_attribute.range())
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
@@ -236,38 +194,33 @@ impl Rule for UseValidAutocomplete {
 }
 
 /// Checks if the autocomplete attribute values are valid
-fn is_valid_autocomplete(autocomplete_values: &[String]) -> Option<bool> {
-    let is_valid = match autocomplete_values.len() {
+fn is_valid_autocomplete(autocomplete_values: &[&str]) -> bool {
+    match autocomplete_values.len() {
         0 => true,
         1 => {
-            let first = autocomplete_values.first()?.as_str();
+            // SAFETY: the size of the slice is superior or equal to `1`
+            let first = autocomplete_values[0];
             first.is_empty()
-                | first.starts_with("section-")
-                | VALID_AUTOCOMPLETE_VALUES.binary_search(&first).is_ok()
+                || first.starts_with("section-")
+                || VALID_AUTOCOMPLETE_VALUES.binary_search(&first).is_ok()
         }
-        _ => {
-            let first = autocomplete_values.first()?.as_str();
-            let second = autocomplete_values.get(1)?.as_str();
+        2.. => {
+            // SAFETY: the size of the slice is superior or equal to `2`
+            let first = autocomplete_values[0];
+            let second = autocomplete_values[1];
             first.starts_with("section-")
                 || ["billing", "shipping"].contains(&first)
-                    && (BILLING_AND_SHIPPING_ADDRESS.binary_search(&second).is_ok()
+                    && (BILLING_AND_SHIPPING_ADDRESS.contains(&second)
                         || VALID_AUTOCOMPLETE_VALUES.binary_search(&second).is_ok())
-                || autocomplete_values.iter().all(|val| {
-                    VALID_AUTOCOMPLETE_VALUES
-                        .binary_search(&val.as_str())
-                        .is_ok()
-                })
+                || autocomplete_values
+                    .iter()
+                    .all(|val| VALID_AUTOCOMPLETE_VALUES.binary_search(val).is_ok())
         }
-    };
-    Some(is_valid)
+    }
 }
 
 #[test]
 fn test_order() {
-    for items in VALID_AUTOCOMPLETE_VALUES.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
-    for items in BILLING_AND_SHIPPING_ADDRESS.windows(2) {
-        assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
-    }
+    assert!(VALID_AUTOCOMPLETE_VALUES.is_sorted());
+    assert!(BILLING_AND_SHIPPING_ADDRESS.is_sorted());
 }
