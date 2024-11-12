@@ -30,7 +30,7 @@ GritRoot {
             l_paren_token: L_PAREN@33..34 "(" [] [],
             args: GritVariableList [],
             r_paren_token: R_PAREN@34..36 ")" [] [Whitespace(" ")],
-            body: GritCurlyPredicateList {
+            body: GritPredicateCurly {
                 l_curly_token: L_CURLY@36..37 "{" [] [],
                 predicates: GritPredicateList [
                     GritPredicateMatch {
@@ -105,7 +105,7 @@ GritRoot {
       2: L_PAREN@33..34 "(" [] []
       3: GRIT_VARIABLE_LIST@34..34
       4: R_PAREN@34..36 ")" [] [Whitespace(" ")]
-      5: GRIT_CURLY_PREDICATE_LIST@36..71
+      5: GRIT_PREDICATE_CURLY@36..71
         0: L_CURLY@36..37 "{" [] []
         1: GRIT_PREDICATE_LIST@37..69
           0: GRIT_PREDICATE_MATCH@37..69

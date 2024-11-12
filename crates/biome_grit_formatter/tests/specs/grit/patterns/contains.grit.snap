@@ -34,9 +34,3 @@ Attribute Position: Auto
 	$content <: contains `secret` until `sanitized($_)`
 }
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-" until `sanitized($_)`" => 123..145

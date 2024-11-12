@@ -175,26 +175,6 @@ impl GritCurlyPattern {
         )
     }
 }
-impl GritCurlyPredicateList {
-    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(0usize..=0usize, once(Some(element.into()))),
-        )
-    }
-    pub fn with_predicates(self, element: GritPredicateList) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
-        )
-    }
-    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
-        Self::unwrap_cast(
-            self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
-        )
-    }
-}
 impl GritDivOperation {
     pub fn with_left(self, element: AnyGritPattern) -> Self {
         Self::unwrap_cast(
@@ -316,7 +296,7 @@ impl GritFunctionDefinition {
                 .splice_slots(4usize..=4usize, once(Some(element.into()))),
         )
     }
-    pub fn with_body(self, element: GritCurlyPredicateList) -> Self {
+    pub fn with_body(self, element: GritPredicateCurly) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),
@@ -1209,6 +1189,26 @@ impl GritPredicateCall {
         )
     }
 }
+impl GritPredicateCurly {
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_predicates(self, element: GritPredicateList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+}
 impl GritPredicateDefinition {
     pub fn with_predicate_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -1240,7 +1240,7 @@ impl GritPredicateDefinition {
                 .splice_slots(4usize..=4usize, once(Some(element.into()))),
         )
     }
-    pub fn with_body(self, element: GritCurlyPredicateList) -> Self {
+    pub fn with_body(self, element: GritPredicateCurly) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),

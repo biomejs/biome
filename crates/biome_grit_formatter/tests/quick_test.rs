@@ -12,11 +12,8 @@ mod language {
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
-    let src = r#"`function $functionName($_) {$_}` as $f where {
-  $functionName <: r"test.*",
-  $f => .,
-  $new_file_name = `$functionName.test.js`,
-  $new_files += file(name = $new_file_name, body = $f)
+    let src = r#"function lines($string) {
+    return split($string, separator=`\n`)
 }
 
 "#;

@@ -158,13 +158,13 @@ GritSubOperation =
     left: AnyGritPattern '-' right: AnyGritPattern
 
 GritPatternAs =
-    pattern: AnyGritPattern 
-    'as' 
+    pattern: AnyGritPattern
+    'as'
     variable: GritVariable
 
 GritPatternLimit =
-    pattern: AnyGritPattern 
-    'limit' 
+    pattern: AnyGritPattern
+    'limit'
     limit: GritIntLiteral
 
 // statement, in the engine this is a predicate that always evaluates to true
@@ -378,7 +378,7 @@ GritRegexPatternVariables =
 //////////////
 
 // `pattern` where { predicates }
-//                 ^^^^^^^^^^^^^^ 
+//                 ^^^^^^^^^^^^^^
 AnyGritPredicate =
     GritPredicateNot
     | GritPredicateMaybe
@@ -491,7 +491,7 @@ GritPredicateEqual =
     right: AnyGritPattern
 
 // `log($message)` where $message <: `Hello, world!`
-//                       ^^^^^^^^ ^^ ^^^^^^^^^^^^^^^ 
+//                       ^^^^^^^^ ^^ ^^^^^^^^^^^^^^^
 GritPredicateMatch =
     left: AnyGritPredicateMatchSubject
     match: '<:'
@@ -532,7 +532,7 @@ GritFunctionDefinition =
     '('
     args: GritVariableList
     ')'
-    body: GritCurlyPredicateList
+    body: GritPredicateCurly
 
 // private pattern my_function($arg1, $arg2) { ... }
 // ^^^^^^^ ^^^^^^^ ^^^^^^^^^^^^^^^^^^ ^^^^^^ ^ ^^^ ^
@@ -559,9 +559,9 @@ GritPredicateDefinition =
     '('
     args: GritVariableList
     ')'
-    body: GritCurlyPredicateList
+    body: GritPredicateCurly
 
-GritCurlyPredicateList =
+GritPredicateCurly =
     '{'
     predicates: GritPredicateList
     '}'

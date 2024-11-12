@@ -478,51 +478,6 @@ pub struct GritCurlyPatternFields {
     pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
-pub struct GritCurlyPredicateList {
-    pub(crate) syntax: SyntaxNode,
-}
-impl GritCurlyPredicateList {
-    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
-    #[doc = r""]
-    #[doc = r" # Safety"]
-    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
-    #[doc = r" or a match on [SyntaxNode::kind]"]
-    #[inline]
-    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
-        Self { syntax }
-    }
-    pub fn as_fields(&self) -> GritCurlyPredicateListFields {
-        GritCurlyPredicateListFields {
-            l_curly_token: self.l_curly_token(),
-            predicates: self.predicates(),
-            r_curly_token: self.r_curly_token(),
-        }
-    }
-    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 0usize)
-    }
-    pub fn predicates(&self) -> GritPredicateList {
-        support::list(&self.syntax, 1usize)
-    }
-    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-}
-impl Serialize for GritCurlyPredicateList {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        self.as_fields().serialize(serializer)
-    }
-}
-#[derive(Serialize)]
-pub struct GritCurlyPredicateListFields {
-    pub l_curly_token: SyntaxResult<SyntaxToken>,
-    pub predicates: GritPredicateList,
-    pub r_curly_token: SyntaxResult<SyntaxToken>,
-}
-#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritDivOperation {
     pub(crate) syntax: SyntaxNode,
 }
@@ -806,7 +761,7 @@ impl GritFunctionDefinition {
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 4usize)
     }
-    pub fn body(&self) -> SyntaxResult<GritCurlyPredicateList> {
+    pub fn body(&self) -> SyntaxResult<GritPredicateCurly> {
         support::required_node(&self.syntax, 5usize)
     }
 }
@@ -825,7 +780,7 @@ pub struct GritFunctionDefinitionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub args: GritVariableList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
-    pub body: SyntaxResult<GritCurlyPredicateList>,
+    pub body: SyntaxResult<GritPredicateCurly>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritIntLiteral {
@@ -2813,6 +2768,51 @@ pub struct GritPredicateCallFields {
     pub r_paren_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct GritPredicateCurly {
+    pub(crate) syntax: SyntaxNode,
+}
+impl GritPredicateCurly {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> GritPredicateCurlyFields {
+        GritPredicateCurlyFields {
+            l_curly_token: self.l_curly_token(),
+            predicates: self.predicates(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn predicates(&self) -> GritPredicateList {
+        support::list(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for GritPredicateCurly {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct GritPredicateCurlyFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub predicates: GritPredicateList,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPredicateDefinition {
     pub(crate) syntax: SyntaxNode,
 }
@@ -2851,7 +2851,7 @@ impl GritPredicateDefinition {
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 4usize)
     }
-    pub fn body(&self) -> SyntaxResult<GritCurlyPredicateList> {
+    pub fn body(&self) -> SyntaxResult<GritPredicateCurly> {
         support::required_node(&self.syntax, 5usize)
     }
 }
@@ -2870,7 +2870,7 @@ pub struct GritPredicateDefinitionFields {
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub args: GritVariableList,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
-    pub body: SyntaxResult<GritCurlyPredicateList>,
+    pub body: SyntaxResult<GritPredicateCurly>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct GritPredicateElseClause {
@@ -5495,52 +5495,6 @@ impl From<GritCurlyPattern> for SyntaxElement {
         n.syntax.into()
     }
 }
-impl AstNode for GritCurlyPredicateList {
-    type Language = Language;
-    const KIND_SET: SyntaxKindSet<Language> =
-        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_CURLY_PREDICATE_LIST as u16));
-    fn can_cast(kind: SyntaxKind) -> bool {
-        kind == GRIT_CURLY_PREDICATE_LIST
-    }
-    fn cast(syntax: SyntaxNode) -> Option<Self> {
-        if Self::can_cast(syntax.kind()) {
-            Some(Self { syntax })
-        } else {
-            None
-        }
-    }
-    fn syntax(&self) -> &SyntaxNode {
-        &self.syntax
-    }
-    fn into_syntax(self) -> SyntaxNode {
-        self.syntax
-    }
-}
-impl std::fmt::Debug for GritCurlyPredicateList {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GritCurlyPredicateList")
-            .field(
-                "l_curly_token",
-                &support::DebugSyntaxResult(self.l_curly_token()),
-            )
-            .field("predicates", &self.predicates())
-            .field(
-                "r_curly_token",
-                &support::DebugSyntaxResult(self.r_curly_token()),
-            )
-            .finish()
-    }
-}
-impl From<GritCurlyPredicateList> for SyntaxNode {
-    fn from(n: GritCurlyPredicateList) -> SyntaxNode {
-        n.syntax
-    }
-}
-impl From<GritCurlyPredicateList> for SyntaxElement {
-    fn from(n: GritCurlyPredicateList) -> SyntaxElement {
-        n.syntax.into()
-    }
-}
 impl AstNode for GritDivOperation {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -7802,6 +7756,52 @@ impl From<GritPredicateCall> for SyntaxNode {
 }
 impl From<GritPredicateCall> for SyntaxElement {
     fn from(n: GritPredicateCall) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for GritPredicateCurly {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(GRIT_PREDICATE_CURLY as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == GRIT_PREDICATE_CURLY
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for GritPredicateCurly {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GritPredicateCurly")
+            .field(
+                "l_curly_token",
+                &support::DebugSyntaxResult(self.l_curly_token()),
+            )
+            .field("predicates", &self.predicates())
+            .field(
+                "r_curly_token",
+                &support::DebugSyntaxResult(self.r_curly_token()),
+            )
+            .finish()
+    }
+}
+impl From<GritPredicateCurly> for SyntaxNode {
+    fn from(n: GritPredicateCurly) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<GritPredicateCurly> for SyntaxElement {
+    fn from(n: GritPredicateCurly) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -11458,11 +11458,6 @@ impl std::fmt::Display for GritCurlyPattern {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
-impl std::fmt::Display for GritCurlyPredicateList {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(self.syntax(), f)
-    }
-}
 impl std::fmt::Display for GritDivOperation {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -11714,6 +11709,11 @@ impl std::fmt::Display for GritPredicateAssignment {
     }
 }
 impl std::fmt::Display for GritPredicateCall {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for GritPredicateCurly {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

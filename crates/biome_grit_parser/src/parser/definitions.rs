@@ -103,7 +103,7 @@ fn parse_curly_predicate_list(p: &mut GritParser) -> ParsedSyntax {
     PredicateList.parse_list(p);
     p.expect(T!['}']);
 
-    Present(m.complete(p, GRIT_CURLY_PREDICATE_LIST))
+    Present(m.complete(p, GRIT_PREDICATE_CURLY))
 }
 
 #[inline]

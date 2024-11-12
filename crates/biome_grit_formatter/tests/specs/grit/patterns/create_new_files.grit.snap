@@ -32,9 +32,3 @@ Attribute Position: Auto
 	$new_files += file(name = $new_file_name, body = $f)
 }
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-" r\"test.*" => 65..74
