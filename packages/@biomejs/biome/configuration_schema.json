@@ -2218,6 +2218,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalDirnameFilename": {
+					"description": "Disallow the use of __dirname and __filename in the global scope.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noHeadElement": {
 					"description": "Prevent usage of \\<head> element in a Next.js project.",
 					"anyOf": [

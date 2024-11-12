@@ -130,6 +130,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Also, this will bring the Biome rule closer to the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef).
 
   Contributed by @Conaclos
+  
+- Add [noGlobalDirnameFilename](https://biomejs.dev/linter/rules/no-global-dirname-filename/). Contributed by @unvalley
 
 #### Enhancements
 
