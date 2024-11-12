@@ -386,6 +386,16 @@ pub(crate) fn migrate_eslint_any_rule(
             let rule = group.use_optional_chain.get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@typescript-eslint/prefer-readonly" => {
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .use_readonly_class_properties
+                .get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@typescript-eslint/require-await" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group.use_await.get_or_insert(Default::default());
