@@ -8,10 +8,10 @@
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
 			"type": ["string", "null"]
 		},
-		"assists": {
+		"assist": {
 			"description": "Specific configuration for assists",
 			"anyOf": [
-				{ "$ref": "#/definitions/AssistsConfiguration" },
+				{ "$ref": "#/definitions/AssistConfiguration" },
 				{ "type": "null" }
 			]
 		},
@@ -375,15 +375,15 @@
 			"additionalProperties": false
 		},
 		"ArrowParentheses": { "type": "string", "enum": ["always", "asNeeded"] },
-		"AssistsConfiguration": {
+		"AssistConfiguration": {
 			"type": "object",
 			"properties": {
 				"actions": {
-					"description": "Whether Biome should fail in CLI if the assists were not applied to the code.",
+					"description": "Whether Biome should fail in CLI if the assist were not applied to the code.",
 					"anyOf": [{ "$ref": "#/definitions/Actions" }, { "type": "null" }]
 				},
 				"enabled": {
-					"description": "Whether Biome should enable assists via LSP.",
+					"description": "Whether Biome should enable assist via LSP.",
 					"type": ["boolean", "null"]
 				},
 				"ignore": {
@@ -1110,7 +1110,7 @@
 			},
 			"additionalProperties": false
 		},
-		"CssAssists": {
+		"CssAssist": {
 			"description": "Options that changes how the CSS assists behaves",
 			"type": "object",
 			"properties": {
@@ -1125,9 +1125,9 @@
 			"description": "Options applied to CSS files",
 			"type": "object",
 			"properties": {
-				"assists": {
-					"description": "CSS assists options",
-					"anyOf": [{ "$ref": "#/definitions/CssAssists" }, { "type": "null" }]
+				"assist": {
+					"description": "CSS assist options",
+					"anyOf": [{ "$ref": "#/definitions/CssAssist" }, { "type": "null" }]
 				},
 				"formatter": {
 					"description": "CSS formatter options",
@@ -1701,7 +1701,7 @@
 			},
 			"additionalProperties": false
 		},
-		"JsonAssists": {
+		"JsonAssist": {
 			"description": "Linter options specific to the JSON linter",
 			"type": "object",
 			"properties": {
@@ -1718,7 +1718,7 @@
 			"properties": {
 				"assists": {
 					"description": "Assists options",
-					"anyOf": [{ "$ref": "#/definitions/JsonAssists" }, { "type": "null" }]
+					"anyOf": [{ "$ref": "#/definitions/JsonAssist" }, { "type": "null" }]
 				},
 				"formatter": {
 					"description": "Formatting options",

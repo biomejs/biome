@@ -38,7 +38,7 @@ use biome_json_syntax::{JsonFileSource, JsonLanguage, JsonRoot, JsonSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::{AstNode, NodeCache};
 use biome_rowan::{TextRange, TextSize, TokenAtOffset};
-use tracing::{debug_span, error, trace, trace_span};
+use tracing::{debug_span, error, instrument, trace};
 
 #[derive(Debug, Clone, Default, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -134,19 +134,17 @@ impl ServiceLanguage for JsonLanguage {
         _file_source: &DocumentFileSource,
         suppression_reason: Option<String>,
     ) -> AnalyzerOptions {
-        let configuration = AnalyzerConfiguration {
-            rules: global
-                .map(|g| to_analyzer_rules(g, path.as_path()))
-                .unwrap_or_default(),
-            globals: vec![],
-            preferred_quote: PreferredQuote::Double,
-            ..Default::default()
-        };
-        AnalyzerOptions {
-            configuration,
-            file_path: path.to_path_buf(),
-            suppression_reason,
-        }
+        let configuration = AnalyzerConfiguration::default()
+            .with_rules(
+                global
+                    .map(|g| to_analyzer_rules(g, path.as_path()))
+                    .unwrap_or_default(),
+            )
+            .with_preferred_quote(PreferredQuote::Double);
+        AnalyzerOptions::default()
+            .with_file_path(path.as_path())
+            .with_configuration(configuration)
+            .with_suppression_reason(suppression_reason)
     }
 }
 
@@ -315,135 +313,134 @@ fn format_on_type(
 }
 
 fn lint(params: LintParams) -> LintResults {
-    tracing::debug_span!("Linting JSON file", path =? params.path, language =? params.language)
-        .in_scope(move || {
-            let Some(file_source) = params
-                .language
-                .to_json_file_source()
-                .or(JsonFileSource::try_from(params.path.as_path()).ok())
-            else {
-                return LintResults {
-                    errors: 0,
-                    diagnostics: vec![],
-                    skipped_diagnostics: 0,
-                };
-            };
-            let root: JsonRoot = params.parse.tree();
+    let _ = debug_span!("Linting JSON file", path =? params.path, language =? params.language)
+        .entered();
+    let Some(file_source) = params
+        .language
+        .to_json_file_source()
+        .or(JsonFileSource::try_from(params.path.as_path()).ok())
+    else {
+        return LintResults {
+            errors: 0,
+            diagnostics: vec![],
+            skipped_diagnostics: 0,
+        };
+    };
+    let root: JsonRoot = params.parse.tree();
 
-            let analyzer_options = &params.workspace.analyzer_options::<JsonLanguage>(
-                params.path,
-                &params.language,
-                params.suppression_reason,
-            );
+    let analyzer_options = &params.workspace.analyzer_options::<JsonLanguage>(
+        params.path,
+        &params.language,
+        params.suppression_reason,
+    );
 
-            let has_only_filter = !params.only.is_empty();
-            let rules = params
-                .workspace
-                .settings()
-                .as_ref()
-                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
+    let has_only_filter = !params.only.is_empty();
+    let rules = params
+        .workspace
+        .settings()
+        .as_ref()
+        .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
-            let (enabled_rules, disabled_rules) =
-                AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&params.only, &params.skip, params.path.as_path())
-                    .with_assists_rules(&params.only, &params.skip, params.path.as_path())
-                    .finish();
-            let mut diagnostics = params.parse.into_diagnostics();
-            // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
-            // malformed configuration
-            if params.path.ends_with(ConfigName::biome_json())
-                || params.path.ends_with(ConfigName::biome_jsonc())
-            {
-                let deserialized = deserialize_from_json_ast::<PartialConfiguration>(&root, "");
-                diagnostics.extend(
-                    deserialized
-                        .into_diagnostics()
-                        .into_iter()
-                        .map(biome_diagnostics::serde::Diagnostic::new)
-                        .collect::<Vec<_>>(),
-                );
-            }
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_only(&params.only)
+        .with_skip(&params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_rules(&params.enabled_rules)
+        .finish();
+    let mut diagnostics = params.parse.into_diagnostics();
+    // if we're parsing the `biome.json` file, we deserialize it, so we can emit diagnostics for
+    // malformed configuration
+    if params.path.ends_with(ConfigName::biome_json())
+        || params.path.ends_with(ConfigName::biome_jsonc())
+    {
+        let deserialized = deserialize_from_json_ast::<PartialConfiguration>(&root, "");
+        diagnostics.extend(
+            deserialized
+                .into_diagnostics()
+                .into_iter()
+                .map(biome_diagnostics::serde::Diagnostic::new)
+                .collect::<Vec<_>>(),
+        );
+    }
 
-            let filter = AnalysisFilter {
-                categories: params.categories,
-                enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: &disabled_rules,
-                range: None,
-            };
+    let filter = AnalysisFilter {
+        categories: params.categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
 
-            // Do not report unused suppression comment diagnostics if:
-            // - it is a syntax-only analyzer pass, or
-            // - if a single rule is run.
-            let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
+    // Do not report unused suppression comment diagnostics if:
+    // - it is a syntax-only analyzer pass, or
+    // - if a single rule is run.
+    let ignores_suppression_comment =
+        !filter.categories.contains(RuleCategory::Lint) || has_only_filter;
 
-            let mut diagnostic_count = diagnostics.len() as u32;
-            let mut errors = diagnostics
-                .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
-                .count();
-            let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
+    let mut diagnostic_count = diagnostics.len() as u32;
+    let mut errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() <= Severity::Error)
+        .count();
+    let skipped_diagnostics = diagnostic_count - diagnostics.len() as u32;
 
-            let (_, analyze_diagnostics) =
-                analyze(&root, filter, analyzer_options, file_source, |signal| {
-                    if let Some(mut diagnostic) = signal.diagnostic() {
-                        if ignores_suppression_comment
-                            && diagnostic.category() == Some(category!("suppressions/unused"))
-                        {
-                            return ControlFlow::<Never>::Continue(());
-                        }
+    let (_, analyze_diagnostics) =
+        analyze(&root, filter, analyzer_options, file_source, |signal| {
+            if let Some(mut diagnostic) = signal.diagnostic() {
+                if ignores_suppression_comment
+                    && diagnostic.category() == Some(category!("suppressions/unused"))
+                {
+                    return ControlFlow::<Never>::Continue(());
+                }
 
-                        diagnostic_count += 1;
+                diagnostic_count += 1;
 
-                        // We do now check if the severity of the diagnostics should be changed.
-                        // The configuration allows to change the severity of the diagnostics emitted by rules.
-                        let severity = diagnostic
-                            .category()
-                            .filter(|category| category.name().starts_with("lint/"))
-                            .map_or_else(
-                                || diagnostic.severity(),
-                                |category| {
-                                    rules
-                                        .as_ref()
-                                        .and_then(|rules| rules.get_severity_from_code(category))
-                                        .unwrap_or(Severity::Warning)
-                                },
-                            );
+                // We do now check if the severity of the diagnostics should be changed.
+                // The configuration allows to change the severity of the diagnostics emitted by rules.
+                let severity = diagnostic
+                    .category()
+                    .filter(|category| category.name().starts_with("lint/"))
+                    .map_or_else(
+                        || diagnostic.severity(),
+                        |category| {
+                            rules
+                                .as_ref()
+                                .and_then(|rules| rules.get_severity_from_code(category))
+                                .unwrap_or(Severity::Warning)
+                        },
+                    );
 
-                        if severity <= Severity::Error {
-                            errors += 1;
-                        }
+                if severity <= Severity::Error {
+                    errors += 1;
+                }
 
-                        if diagnostic_count <= params.max_diagnostics {
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    diagnostic = diagnostic.add_code_suggestion(action.into());
-                                }
-                            }
-
-                            let error = diagnostic.with_severity(severity);
-
-                            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                if diagnostic_count <= params.max_diagnostics {
+                    for action in signal.actions() {
+                        if !action.is_suppression() {
+                            diagnostic = diagnostic.add_code_suggestion(action.into());
                         }
                     }
 
-                    ControlFlow::<Never>::Continue(())
-                });
+                    let error = diagnostic.with_severity(severity);
 
-            diagnostics.extend(
-                analyze_diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect::<Vec<_>>(),
-            );
-
-            LintResults {
-                diagnostics,
-                errors,
-                skipped_diagnostics,
+                    diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                }
             }
-        })
+
+            ControlFlow::<Never>::Continue(())
+        });
+
+    diagnostics.extend(
+        analyze_diagnostics
+            .into_iter()
+            .map(biome_diagnostics::serde::Diagnostic::new)
+            .collect::<Vec<_>>(),
+    );
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
+    }
 }
 
 fn code_actions(params: CodeActionsParams) -> PullActionsResult {
@@ -456,58 +453,60 @@ fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         language,
         skip,
         only,
-        suppression_reason: _,
+        enabled_rules: rules,
+        suppression_reason,
     } = params;
 
-    debug_span!("Code actions JSON",  range =? range, path =? path).in_scope(move || {
-        let tree: JsonRoot = parse.tree();
-        trace_span!("Parsed file", tree =? tree).in_scope(move || {
-            let analyzer_options =
-                workspace.analyzer_options::<JsonLanguage>(params.path, &params.language, None);
-            let mut actions = Vec::new();
-            let (enabled_rules, disabled_rules) =
-                AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&only, &skip, params.path.as_path())
-                    .with_assists_rules(&only, &skip, params.path.as_path())
-                    .finish();
+    let _ = debug_span!("Code actions JSON",  range =? range, path =? path).entered();
+    let tree: JsonRoot = parse.tree();
+    let analyzer_options = workspace.analyzer_options::<JsonLanguage>(
+        params.path,
+        &params.language,
+        suppression_reason,
+    );
+    let mut actions = Vec::new();
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_only(&only)
+        .with_skip(&skip)
+        .with_path(path.as_path())
+        .with_enabled_rules(&rules)
+        .finish();
 
-            let filter = AnalysisFilter {
-                categories: RuleCategoriesBuilder::default()
-                    .with_syntax()
-                    .with_lint()
-                    .with_action()
-                    .build(),
-                enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: &disabled_rules,
-                range,
-            };
+    let filter = AnalysisFilter {
+        categories: RuleCategoriesBuilder::default()
+            .with_syntax()
+            .with_lint()
+            .with_assist()
+            .build(),
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range,
+    };
 
-            let Some(file_source) = language.to_json_file_source() else {
-                error!("Could not determine the file source of the file");
-                return PullActionsResult { actions: vec![] };
-            };
+    let Some(file_source) = language.to_json_file_source() else {
+        error!("Could not determine the file source of the file");
+        return PullActionsResult { actions: vec![] };
+    };
 
-            trace!("JSON runs the analyzer");
-            analyze(&tree, filter, &analyzer_options, file_source, |signal| {
-                actions.extend(signal.actions().into_code_action_iter().map(|item| {
-                    CodeAction {
-                        category: item.category.clone(),
-                        rule_name: item
-                            .rule_name
-                            .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
-                        suggestion: item.suggestion,
-                    }
-                }));
+    trace!("JSON runs the analyzer");
+    analyze(&tree, filter, &analyzer_options, file_source, |signal| {
+        actions.extend(signal.actions().into_code_action_iter().map(|item| {
+            CodeAction {
+                category: item.category.clone(),
+                rule_name: item
+                    .rule_name
+                    .map(|(group, name)| (Cow::Borrowed(group), Cow::Borrowed(name))),
+                suggestion: item.suggestion,
+            }
+        }));
 
-                ControlFlow::<Never>::Continue(())
-            });
+        ControlFlow::<Never>::Continue(())
+    });
 
-            PullActionsResult { actions }
-        })
-    })
+    PullActionsResult { actions }
 }
 
+#[instrument(level = "debug", skip(params))]
 fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let mut tree: JsonRoot = params.parse.tree();
     let Some(settings) = params.workspace.settings() else {
@@ -523,16 +522,16 @@ fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceError> {
     let rules = settings.as_linter_rules(params.biome_path.as_path());
 
     let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
-        .with_syntax_rules()
-        .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
-        .with_assists_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .with_only(&params.only)
+        .with_skip(&params.skip)
+        .with_path(params.biome_path.as_path())
         .finish();
 
     let filter = AnalysisFilter {
         categories: RuleCategoriesBuilder::default()
             .with_syntax()
             .with_lint()
-            .with_action()
+            .with_assist()
             .build(),
         enabled_rules: Some(enabled_rules.as_slice()),
         disabled_rules: &disabled_rules,

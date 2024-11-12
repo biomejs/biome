@@ -21,9 +21,9 @@ pub struct CssConfiguration {
     #[partial(type, bpaf(external(partial_css_linter), optional))]
     pub linter: CssLinter,
 
-    /// CSS assists options
-    #[partial(type, bpaf(external(partial_css_assists), optional))]
-    pub assists: CssAssists,
+    /// CSS assist options
+    #[partial(type, bpaf(external(partial_css_assist), optional))]
+    pub assist: CssAssist,
 }
 
 /// Options that changes how the CSS parser behaves
@@ -128,9 +128,9 @@ impl PartialCssLinter {
 #[partial(derive(Bpaf, Clone, Deserializable, Eq, Merge, PartialEq))]
 #[partial(cfg_attr(feature = "schema", derive(schemars::JsonSchema)))]
 #[partial(serde(rename_all = "camelCase", default, deny_unknown_fields))]
-pub struct CssAssists {
+pub struct CssAssist {
     /// Control the assists for CSS files.
-    #[partial(bpaf(long("css-assists-enabled"), argument("true|false"), optional))]
+    #[partial(bpaf(long("css-assist-enabled"), argument("true|false"), optional))]
     pub enabled: bool,
 }
 

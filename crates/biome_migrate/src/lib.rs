@@ -16,7 +16,7 @@ use biome_json_syntax::JsonLanguage;
 use biome_rowan::{BatchMutation, SyntaxToken};
 use std::convert::Infallible;
 use std::ops::Deref;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
 /// Return the static [MetadataRegistry] for the JS analyzer rules
@@ -45,10 +45,7 @@ where
     B: 'a,
 {
     let filter = AnalysisFilter::default();
-    let options = AnalyzerOptions {
-        file_path: PathBuf::from(configuration_file_path),
-        ..AnalyzerOptions::default()
-    };
+    let options = AnalyzerOptions::default().with_file_path(configuration_file_path);
     let mut registry = RuleRegistry::builder(&filter, root);
     visit_migration_registry(&mut registry);
 

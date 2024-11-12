@@ -1,6 +1,9 @@
 use crate::test_case::TestCase;
 use biome_analyze::options::JsxRuntime;
-use biome_analyze::{AnalysisFilter, AnalyzerOptions, ControlFlow, Never, RuleCategoriesBuilder};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, Never,
+    RuleCategoriesBuilder,
+};
 use biome_css_formatter::context::{CssFormatContext, CssFormatOptions};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::{CssRoot, CssSyntaxNode};
@@ -187,8 +190,10 @@ impl Analyze {
                         .build(),
                     ..AnalysisFilter::default()
                 };
-                let mut options = AnalyzerOptions::default();
-                options.configuration.jsx_runtime = Some(JsxRuntime::default());
+                let options = AnalyzerOptions::default().with_configuration(
+                    AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::default()),
+                );
+
                 biome_js_analyze::analyze(
                     root,
                     filter,

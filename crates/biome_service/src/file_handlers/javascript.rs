@@ -211,20 +211,19 @@ impl ServiceLanguage for JsLanguage {
                 })
                 .unwrap_or_default();
 
-        let mut jsx_runtime = None;
+        let mut configuration = AnalyzerConfiguration::default();
         let mut globals = Vec::new();
 
         if let (Some(overrides), Some(global)) = (overrides, global) {
-            jsx_runtime = Some(
-                match overrides
-                    .override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
-                {
-                    // In the future, we may wish to map an `Auto` variant to a concrete
-                    // analyzer value for easy access by the analyzer.
-                    JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
-                    JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
-                },
-            );
+            let jsx_runtime = match overrides
+                .override_jsx_runtime(path, global.languages.javascript.environment.jsx_runtime)
+            {
+                // In the future, we may wish to map an `Auto` variant to a concrete
+                // analyzer value for easy access by the analyzer.
+                JsxRuntime::Transparent => biome_analyze::options::JsxRuntime::Transparent,
+                JsxRuntime::ReactClassic => biome_analyze::options::JsxRuntime::ReactClassic,
+            };
+            configuration = configuration.with_jsx_runtime(jsx_runtime);
 
             globals.extend(
                 overrides
@@ -270,20 +269,19 @@ impl ServiceLanguage for JsLanguage {
             }
         }
 
-        let configuration = AnalyzerConfiguration {
-            rules: global
-                .map(|g| to_analyzer_rules(g, path.as_path()))
-                .unwrap_or_default(),
-            globals,
-            preferred_quote,
-            jsx_runtime,
-        };
+        let configuration = configuration
+            .with_rules(
+                global
+                    .map(|g| to_analyzer_rules(g, path.as_path()))
+                    .unwrap_or_default(),
+            )
+            .with_globals(globals)
+            .with_preferred_quote(preferred_quote);
 
-        AnalyzerOptions {
-            configuration,
-            file_path: path.to_path_buf(),
-            suppression_reason,
-        }
+        AnalyzerOptions::default()
+            .with_file_path(path.as_path())
+            .with_configuration(configuration)
+            .with_suppression_reason(suppression_reason)
     }
 }
 
@@ -419,124 +417,124 @@ fn debug_formatter_ir(
 }
 
 pub(crate) fn lint(params: LintParams) -> LintResults {
-    debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
-        .in_scope(move || {
-            let Some(file_source) = params
-                .language
-                .to_js_file_source()
-                .or(JsFileSource::try_from(params.path.as_path()).ok())
-            else {
-                return LintResults {
-                    errors: 0,
-                    diagnostics: Vec::new(),
-                    skipped_diagnostics: 0,
-                };
-            };
-            let tree = params.parse.tree();
-            let analyzer_options = &params.workspace.analyzer_options::<JsLanguage>(
-                params.path,
-                &params.language,
-                params.suppression_reason,
-            );
+    let _ =
+        debug_span!("Linting JavaScript file", path =? params.path, language =? params.language)
+            .entered();
+    let Some(file_source) = params
+        .language
+        .to_js_file_source()
+        .or(JsFileSource::try_from(params.path.as_path()).ok())
+    else {
+        return LintResults {
+            errors: 0,
+            diagnostics: Vec::new(),
+            skipped_diagnostics: 0,
+        };
+    };
+    let tree = params.parse.tree();
+    let analyzer_options = &params.workspace.analyzer_options::<JsLanguage>(
+        params.path,
+        &params.language,
+        params.suppression_reason,
+    );
 
-            let rules = params
-                .workspace
-                .settings()
-                .as_ref()
-                .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
+    let rules = params
+        .workspace
+        .settings()
+        .as_ref()
+        .and_then(|settings| settings.as_linter_rules(params.path.as_path()));
 
-            let (enabled_rules, disabled_rules) =
-                AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&params.only, &params.skip, params.path.as_path())
-                    .with_assists_rules(&params.only, &params.skip, params.path.as_path())
-                    .finish();
+    let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
+        .with_only(&params.only)
+        .with_skip(&params.skip)
+        .with_path(params.path.as_path())
+        .with_enabled_rules(&params.enabled_rules)
+        .finish();
 
-            let filter = AnalysisFilter {
-                categories: params.categories,
-                enabled_rules: Some(enabled_rules.as_slice()),
-                disabled_rules: &disabled_rules,
-                range: None,
-            };
+    let filter = AnalysisFilter {
+        categories: params.categories,
+        enabled_rules: Some(enabled_rules.as_slice()),
+        disabled_rules: &disabled_rules,
+        range: None,
+    };
 
-            let ignores_suppression_comment =
-                !filter.categories.contains(RuleCategory::Lint) || !params.only.is_empty();
+    let ignores_suppression_comment =
+        !filter.categories.contains(RuleCategory::Lint) || !params.only.is_empty();
 
-            let mut diagnostics = params.parse.into_diagnostics();
-            let mut diagnostic_count = diagnostics.len() as u32;
-            let mut errors = diagnostics
-                .iter()
-                .filter(|diag| diag.severity() <= Severity::Error)
-                .count();
+    let mut diagnostics = params.parse.into_diagnostics();
+    let mut diagnostic_count = diagnostics.len() as u32;
+    let mut errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() <= Severity::Error)
+        .count();
 
-            info!("Analyze file {}", params.path.display());
-            let (_, analyze_diagnostics) = analyze(
-                &tree,
-                filter,
-                analyzer_options,
-                Vec::new(),
-                file_source,
-                params.manifest,
-                |signal| {
-                    if let Some(mut diagnostic) = signal.diagnostic() {
-                        if ignores_suppression_comment
-                            && diagnostic.category() == Some(category!("suppressions/unused"))
-                        {
-                            return ControlFlow::<Never>::Continue(());
-                        }
+    info!("Analyze file {}", params.path.display());
+    let (_, analyze_diagnostics) = analyze(
+        &tree,
+        filter,
+        analyzer_options,
+        Vec::new(),
+        file_source,
+        params.manifest,
+        |signal| {
+            if let Some(mut diagnostic) = signal.diagnostic() {
+                if ignores_suppression_comment
+                    && diagnostic.category() == Some(category!("suppressions/unused"))
+                {
+                    return ControlFlow::<Never>::Continue(());
+                }
 
-                        diagnostic_count += 1;
+                diagnostic_count += 1;
 
-                        // We do now check if the severity of the diagnostics should be changed.
-                        // The configuration allows to change the severity of the diagnostics emitted by rules.
-                        let severity = diagnostic
-                            .category()
-                            .filter(|category| category.name().starts_with("lint/"))
-                            .map_or_else(
-                                || diagnostic.severity(),
-                                |category| {
-                                    rules
-                                        .as_ref()
-                                        .and_then(|rules| rules.get_severity_from_code(category))
-                                        .unwrap_or(Severity::Warning)
-                                },
-                            );
+                // We do now check if the severity of the diagnostics should be changed.
+                // The configuration allows to change the severity of the diagnostics emitted by rules.
+                let severity = diagnostic
+                    .category()
+                    .filter(|category| category.name().starts_with("lint/"))
+                    .map_or_else(
+                        || diagnostic.severity(),
+                        |category| {
+                            rules
+                                .as_ref()
+                                .and_then(|rules| rules.get_severity_from_code(category))
+                                .unwrap_or(Severity::Warning)
+                        },
+                    );
 
-                        if severity >= Severity::Error {
-                            errors += 1;
-                        }
+                if severity >= Severity::Error {
+                    errors += 1;
+                }
 
-                        if diagnostic_count <= params.max_diagnostics {
-                            for action in signal.actions() {
-                                if !action.is_suppression() {
-                                    diagnostic = diagnostic.add_code_suggestion(action.into());
-                                }
-                            }
-
-                            let error = diagnostic.with_severity(severity);
-
-                            diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                if diagnostic_count <= params.max_diagnostics {
+                    for action in signal.actions() {
+                        if !action.is_suppression() {
+                            diagnostic = diagnostic.add_code_suggestion(action.into());
                         }
                     }
 
-                    ControlFlow::<Never>::Continue(())
-                },
-            );
+                    let error = diagnostic.with_severity(severity);
 
-            diagnostics.extend(
-                analyze_diagnostics
-                    .into_iter()
-                    .map(biome_diagnostics::serde::Diagnostic::new)
-                    .collect::<Vec<_>>(),
-            );
-            let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
-
-            LintResults {
-                diagnostics,
-                errors,
-                skipped_diagnostics,
+                    diagnostics.push(biome_diagnostics::serde::Diagnostic::new(error));
+                }
             }
-        })
+
+            ControlFlow::<Never>::Continue(())
+        },
+    );
+
+    diagnostics.extend(
+        analyze_diagnostics
+            .into_iter()
+            .map(biome_diagnostics::serde::Diagnostic::new)
+            .collect::<Vec<_>>(),
+    );
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
+    }
 }
 
 #[tracing::instrument(level = "debug", skip(params))]
@@ -551,6 +549,7 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
         only,
         skip,
         suppression_reason,
+        enabled_rules: rules,
     } = params;
     debug_span!("Code actions JavaScript", range =? range, path =? path).in_scope(move || {
         let tree = parse.tree();
@@ -560,16 +559,17 @@ pub(crate) fn code_actions(params: CodeActionsParams) -> PullActionsResult {
             let mut actions = Vec::new();
             let (enabled_rules, disabled_rules) =
                 AnalyzerVisitorBuilder::new(params.workspace.settings())
-                    .with_syntax_rules()
-                    .with_linter_rules(&only, &skip, params.path.as_path())
-                    .with_assists_rules(&only, &skip, params.path.as_path())
+                    .with_only(&only)
+                    .with_skip(&skip)
+                    .with_path(path.as_path())
+                    .with_enabled_rules(&rules)
                     .finish();
 
             let filter = AnalysisFilter {
                 categories: RuleCategoriesBuilder::default()
                     .with_syntax()
                     .with_lint()
-                    .with_action()
+                    .with_assist()
                     .build(),
                 enabled_rules: Some(enabled_rules.as_slice()),
                 disabled_rules: &disabled_rules,
@@ -628,9 +628,9 @@ pub(crate) fn fix_all(params: FixAllParams) -> Result<FixFileResult, WorkspaceEr
     let rules = settings.as_linter_rules(params.biome_path.as_path());
 
     let (enabled_rules, disabled_rules) = AnalyzerVisitorBuilder::new(params.workspace.settings())
-        .with_syntax_rules()
-        .with_linter_rules(&params.only, &params.skip, params.biome_path.as_path())
-        .with_assists_rules(&params.only, &params.skip, params.biome_path.as_path())
+        .with_only(&params.only)
+        .with_skip(&params.skip)
+        .with_path(params.biome_path.as_path())
         .finish();
 
     let filter = AnalysisFilter {
@@ -883,7 +883,7 @@ pub(crate) fn organize_imports(parse: AnyParse) -> Result<OrganizeImportsResult,
 
     let filter = AnalysisFilter {
         enabled_rules: Some(&[RuleFilter::Rule("source", "organizeImports")]),
-        categories: RuleCategoriesBuilder::default().with_action().build(),
+        categories: RuleCategoriesBuilder::default().with_assist().build(),
         ..AnalysisFilter::default()
     };
 

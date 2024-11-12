@@ -68,7 +68,7 @@ impl Actions {
     pub fn get_severity_from_code(&self, category: &Category) -> Option<Severity> {
         let mut split_code = category.name().split('/');
         let _lint = split_code.next();
-        debug_assert_eq!(_lint, Some("assists"));
+        debug_assert_eq!(_lint, Some("assist"));
         let group = <RuleGroup as std::str::FromStr>::from_str(split_code.next()?).ok()?;
         let rule_name = split_code.next()?;
         let rule_name = Self::has_rule(group, rule_name)?;
@@ -90,6 +90,14 @@ impl Actions {
             enabled_rules.extend(&group.get_enabled_rules());
         }
         enabled_rules
+    }
+    #[doc = r" It returns the disabled rules by configuration"]
+    pub fn as_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut disabled_rules = FxHashSet::default();
+        if let Some(group) = self.source.as_ref() {
+            disabled_rules.extend(&group.get_disabled_rules());
+        }
+        disabled_rules
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
@@ -128,6 +136,25 @@ impl Source {
         }
         if let Some(rule) = self.use_sorted_keys.as_ref() {
             if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
+            }
+        }
+        index_set
+    }
+    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
+        let mut index_set = FxHashSet::default();
+        if let Some(rule) = self.organize_imports.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_attributes.as_ref() {
+            if rule.is_disabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
+            }
+        }
+        if let Some(rule) = self.use_sorted_keys.as_ref() {
+            if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }

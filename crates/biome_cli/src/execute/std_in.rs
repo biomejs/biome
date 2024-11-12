@@ -122,6 +122,7 @@ pub(crate) fn run<'a>(
                     only: only.clone(),
                     skip: skip.clone(),
                     suppression_reason: None,
+                    enabled_rules: vec![],
                     rule_categories: RuleCategoriesBuilder::default()
                         .with_syntax()
                         .with_lint()

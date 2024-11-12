@@ -1,7 +1,7 @@
 use crate::workspace::{DocumentFileSource, ProjectKey, WorkspaceData};
 use crate::{Matcher, WorkspaceError};
 use biome_analyze::{AnalyzerOptions, AnalyzerRules};
-use biome_configuration::analyzer::assists::AssistsConfiguration;
+use biome_configuration::analyzer::assist::{Actions, AssistConfiguration};
 use biome_configuration::diagnostics::InvalidIgnorePattern;
 use biome_configuration::javascript::JsxRuntime;
 use biome_configuration::organize_imports::OrganizeImports;
@@ -196,8 +196,8 @@ pub struct Settings {
     pub files: FilesSettings,
     /// Import sorting settings
     pub organize_imports: OrganizeImportsSettings,
-    /// Assists settings
-    pub assists: AssistsSettings,
+    /// Assist settings
+    pub assist: AssistSettings,
     /// overrides
     pub override_settings: OverrideSettings,
 }
@@ -226,12 +226,10 @@ impl Settings {
                 to_linter_settings(working_directory.clone(), LinterConfiguration::from(linter))?;
         }
 
-        // assists part
-        if let Some(assists) = configuration.assists {
-            self.assists = to_assists_settings(
-                working_directory.clone(),
-                AssistsConfiguration::from(assists),
-            )?;
+        // assist part
+        if let Some(assist) = configuration.assist {
+            self.assist =
+                to_assist_settings(working_directory.clone(), AssistConfiguration::from(assist))?;
         }
 
         // Filesystem settings
@@ -330,8 +328,8 @@ impl Settings {
     }
 
     /// Retrieves the settings of the organize imports
-    pub fn assists(&self) -> &AssistsSettings {
-        &self.assists
+    pub fn assist(&self) -> &AssistSettings {
+        &self.assist
     }
 
     /// It retrieves the severity based on the `code` of the rule and the current configuration.
@@ -376,14 +374,11 @@ impl Settings {
     }
 
     /// Returns assists rules taking overrides into account.
-    pub fn as_assists_rules(
-        &self,
-        path: &Path,
-    ) -> Option<Cow<biome_configuration::analyzer::assists::Actions>> {
-        let mut result = self.assists.actions.as_ref().map(Cow::Borrowed);
+    pub fn as_assist_actions(&self, path: &Path) -> Option<Cow<Actions>> {
+        let mut result = self.assist.actions.as_ref().map(Cow::Borrowed);
         let overrides = &self.override_settings;
         for pattern in overrides.patterns.iter() {
-            let pattern_rules = pattern.assists.actions.as_ref();
+            let pattern_rules = pattern.assist.actions.as_ref();
             if let Some(pattern_rules) = pattern_rules {
                 if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                     result = if let Some(mut result) = result.take() {
@@ -522,12 +517,12 @@ pub struct OverrideOrganizeImportsSettings {
 
 /// Linter settings for the entire workspace
 #[derive(Debug)]
-pub struct AssistsSettings {
+pub struct AssistSettings {
     /// Enabled by default
     pub enabled: bool,
 
     /// List of rules
-    pub actions: Option<biome_configuration::analyzer::assists::Actions>,
+    pub actions: Option<Actions>,
 
     /// List of ignored paths/files to match
     pub ignored_files: Matcher,
@@ -536,7 +531,7 @@ pub struct AssistsSettings {
     pub included_files: Matcher,
 }
 
-impl Default for AssistsSettings {
+impl Default for AssistSettings {
     fn default() -> Self {
         Self {
             enabled: true,
@@ -547,14 +542,14 @@ impl Default for AssistsSettings {
     }
 }
 
-/// Assists settings for the entire workspace
+/// Assist settings for the entire workspace
 #[derive(Debug, Default)]
-pub struct OverrideAssistsSettings {
+pub struct OverrideAssistSettings {
     /// Enabled by default
     pub enabled: Option<bool>,
 
     /// List of rules
-    pub actions: Option<biome_configuration::analyzer::assists::Actions>,
+    pub actions: Option<Actions>,
 }
 
 /// Static map of language names to language-specific settings
@@ -1149,11 +1144,11 @@ impl OverrideSettings {
         })
     }
 
-    /// Scans the overrides and checks if there's an override that disable the assists for `path`
-    pub fn assists_disabled(&self, path: &Path) -> Option<bool> {
+    /// Scans the overrides and checks if there's an override that disable the assist for `path`
+    pub fn assist_disabled(&self, path: &Path) -> Option<bool> {
         // Reverse the traversal as only the last override takes effect
         self.patterns.iter().rev().find_map(|pattern| {
-            if let Some(enabled) = pattern.assists.enabled {
+            if let Some(enabled) = pattern.assist.enabled {
                 if pattern.include.matches_path(path) && !pattern.exclude.matches_path(path) {
                     return Some(!enabled);
                 }
@@ -1173,8 +1168,8 @@ pub struct OverrideSettingPattern {
     pub linter: OverrideLinterSettings,
     /// Linter settings applied to all files in the workspace
     pub organize_imports: OverrideOrganizeImportsSettings,
-    /// Linter settings applied to all files in the workspace
-    pub assists: OverrideAssistsSettings,
+    /// Assist settings applied to all files in the workspace
+    pub assist: OverrideAssistSettings,
     /// Language specific settings
     pub languages: LanguageListSettings,
 
@@ -1793,11 +1788,11 @@ impl TryFrom<OverrideLinterConfiguration> for LinterSettings {
     }
 }
 
-pub fn to_assists_settings(
+pub fn to_assist_settings(
     working_directory: Option<PathBuf>,
-    conf: AssistsConfiguration,
-) -> Result<AssistsSettings, WorkspaceError> {
-    Ok(AssistsSettings {
+    conf: AssistConfiguration,
+) -> Result<AssistSettings, WorkspaceError> {
+    Ok(AssistSettings {
         enabled: conf.enabled,
         actions: Some(conf.actions),
         ignored_files: to_matcher(working_directory.clone(), Some(conf.ignore.as_slice()))?,
@@ -1805,7 +1800,7 @@ pub fn to_assists_settings(
     })
 }
 
-impl TryFrom<OverrideAssistsConfiguration> for AssistsSettings {
+impl TryFrom<OverrideAssistsConfiguration> for AssistSettings {
     type Error = WorkspaceError;
 
     fn try_from(conf: OverrideAssistsConfiguration) -> Result<Self, Self::Error> {
