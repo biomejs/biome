@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::services::aria::Aria;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
@@ -80,7 +78,8 @@ impl Rule for NoNoninteractiveElementToInteractiveRole {
             let attributes = ctx.extract_attributes(&node.attributes());
             let attributes = ctx.convert_all_attribute_values(attributes);
             if aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes)
-                && AriaRole::from_str(role_attribute_value).is_ok_and(|role| role.is_interactive())
+                && AriaRole::from_roles(role_attribute_value)
+                    .is_some_and(|role| role.is_interactive())
             {
                 // <div> and <span> are considered neither interactive nor non-interactive, depending on the presence or absence of the role attribute.
                 // We don't report <div> and <span> here, because we cannot determine whether they are interactive or non-interactive.

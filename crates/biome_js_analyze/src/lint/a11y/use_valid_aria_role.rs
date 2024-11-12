@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use crate::JsRuleAction;
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
@@ -110,7 +108,7 @@ impl Rule for UseValidAriaRole {
         let mut role_attribute_value = role_attribute_value.split_ascii_whitespace();
 
         let is_valid = role_attribute_value.all(|val| {
-            AriaRole::from_str(val).is_ok()
+            AriaRole::from_roles(val).is_some()
                 || allowed_invalid_roles
                     .iter()
                     .any(|role| role.as_ref() == val)
