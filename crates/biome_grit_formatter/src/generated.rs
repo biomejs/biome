@@ -1644,46 +1644,6 @@ impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternAny {
         )
     }
 }
-impl FormatRule<biome_grit_syntax::GritPatternArgList>
-    for crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList
-{
-    type Context = GritFormatContext;
-    #[inline(always)]
-    fn fmt(
-        &self,
-        node: &biome_grit_syntax::GritPatternArgList,
-        f: &mut GritFormatter,
-    ) -> FormatResult<()> {
-        FormatNodeRule::<biome_grit_syntax::GritPatternArgList>::fmt(self, node, f)
-    }
-}
-impl AsFormat<GritFormatContext> for biome_grit_syntax::GritPatternArgList {
-    type Format<'a> = FormatRefWithRule<
-        'a,
-        biome_grit_syntax::GritPatternArgList,
-        crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList,
-    >;
-    fn format(&self) -> Self::Format<'_> {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule::new(
-            self,
-            crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList::default(),
-        )
-    }
-}
-impl IntoFormat<GritFormatContext> for biome_grit_syntax::GritPatternArgList {
-    type Format = FormatOwnedWithRule<
-        biome_grit_syntax::GritPatternArgList,
-        crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList,
-    >;
-    fn into_format(self) -> Self::Format {
-        #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule::new(
-            self,
-            crate::grit::patterns::pattern_arg_list::FormatGritPatternArgList::default(),
-        )
-    }
-}
 impl FormatRule<biome_grit_syntax::GritPatternAs>
     for crate::grit::patterns::pattern_as::FormatGritPatternAs
 {

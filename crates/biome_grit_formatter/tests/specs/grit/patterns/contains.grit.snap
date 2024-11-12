@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: grit/patterns/contains.grit
+snapshot_kind: text
 ---
 # Input
 
@@ -27,9 +28,7 @@ Attribute Position: Auto
 -----
 
 ```grit
-`function ($args) { $body }` where {
-	$args <: contains `x`
-}
+`function ($args) { $body }` where { $args <: contains `x` }
 
 `console.$_($content)` where {
 	$content <: contains `secret` until `sanitized($_)`
@@ -40,6 +39,4 @@ Attribute Position: Auto
 
 ## Unimplemented nodes/tokens
 
-"\t$args" => 37..43
-"\t$content" => 94..103
-" until `sanitized($_)`" => 124..146
+" until `sanitized($_)`" => 123..145

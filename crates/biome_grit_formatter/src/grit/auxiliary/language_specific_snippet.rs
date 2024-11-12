@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritLanguageSpecificSnippet;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritLanguageSpecificSnippet, GritLanguageSpecificSnippetFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritLanguageSpecificSnippet;
 impl FormatNodeRule<GritLanguageSpecificSnippet> for FormatGritLanguageSpecificSnippet {
@@ -9,6 +9,11 @@ impl FormatNodeRule<GritLanguageSpecificSnippet> for FormatGritLanguageSpecificS
         node: &GritLanguageSpecificSnippet,
         f: &mut GritFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritLanguageSpecificSnippetFields {
+            language,
+            snippet_token,
+        } = node.as_fields();
+
+        write!(f, [language.format(), snippet_token.format()])
     }
 }

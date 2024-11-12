@@ -1,6 +1,7 @@
 ---
 source: crates/biome_grit_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 ```grit
@@ -172,7 +173,7 @@ GritRoot {
                             some_token: SOME_KW@308..313 "some" [] [Whitespace(" ")],
                             pattern: GritBubble {
                                 bubble_token: BUBBLE_KW@313..319 "bubble" [] [],
-                                variables: GritBubbleScope {
+                                scope: GritBubbleScope {
                                     l_paren_token: L_PAREN@319..320 "(" [] [],
                                     variables: GritVariableList [
                                         GritVariable {
@@ -285,7 +286,7 @@ GritRoot {
                             some_token: SOME_KW@541..546 "some" [] [Whitespace(" ")],
                             pattern: GritBubble {
                                 bubble_token: BUBBLE_KW@546..552 "bubble" [] [],
-                                variables: GritBubbleScope {
+                                scope: GritBubbleScope {
                                     l_paren_token: L_PAREN@552..553 "(" [] [],
                                     variables: GritVariableList [
                                         GritVariable {
