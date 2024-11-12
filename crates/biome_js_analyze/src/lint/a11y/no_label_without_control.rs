@@ -102,7 +102,7 @@ impl Rule for NoLabelWithoutControl {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let options = ctx.options();
-        let element_name = node.name()?.name_value_token()?;
+        let element_name = node.name()?.name_value_token().ok()?;
         let element_name = element_name.text_trimmed();
         let is_allowed_element = options.has_element_name(element_name)
             || DEFAULT_LABEL_COMPONENTS.contains(&element_name);
@@ -237,7 +237,7 @@ impl NoLabelWithoutControlOptions {
                             child_iter.skip_subtree();
                             continue;
                         };
-                        let Some(element_name) = element_name.name_value_token() else {
+                        let Ok(element_name) = element_name.name_value_token() else {
                             continue;
                         };
                         let element_name = element_name.text_trimmed();

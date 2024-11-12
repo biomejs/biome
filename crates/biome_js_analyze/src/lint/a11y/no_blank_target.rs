@@ -93,7 +93,7 @@ impl Rule for NoBlankTarget {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.name_value_token()?.text_trimmed() != "a"
+        if node.name_value_token().ok()?.text_trimmed() != "a"
             || node.find_attribute_by_name("href").is_none()
         {
             return None;

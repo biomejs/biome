@@ -65,7 +65,7 @@ impl Rule for UseGoogleFontPreconnect {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if node.name().ok()?.name_value_token()?.text_trimmed() != "link" {
+        if node.name().ok()?.name_value_token().ok()?.text_trimmed() != "link" {
             return None;
         }
 
@@ -107,7 +107,7 @@ impl Rule for UseGoogleFontPreconnect {
         let mut attributes: Vec<_> = node.attributes().iter().collect();
 
         let last_attr_token = match attributes.last()? {
-            AnyJsxAttribute::JsxAttribute(a) => a.name_value_token()?,
+            AnyJsxAttribute::JsxAttribute(a) => a.name_value_token().ok()?,
             AnyJsxAttribute::JsxSpreadAttribute(a) => a.l_curly_token().ok()?,
         };
 

@@ -74,7 +74,7 @@ impl Rule for UseHeadingContent {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let name = node.name().ok()?.name_value_token()?;
+        let name = node.name().ok()?.name_value_token().ok()?;
 
         if HEADING_ELEMENTS.contains(&name.text_trimmed()) {
             if node.has_truthy_attribute("aria-hidden") {

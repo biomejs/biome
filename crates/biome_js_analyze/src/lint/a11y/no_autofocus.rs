@@ -86,11 +86,11 @@ fn find_kept_autofocus_mark(element: &AnyJsxElement) -> bool {
     // 2. inside the element with the popover attribute
 
     let is_dialog_element = match element.name_value_token() {
-        Some(syntax_token) => {
+        Ok(syntax_token) => {
             let tag_name = String::from(syntax_token.text_trimmed());
             tag_name.to_lowercase_cow() == "dialog"
         }
-        None => false,
+        Err(_) => false,
     };
 
     let has_popover_attr = element.has_truthy_attribute("popover");

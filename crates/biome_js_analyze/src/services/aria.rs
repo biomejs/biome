@@ -35,7 +35,7 @@ impl AriaServices {
                     if let Some(static_value) = initializer.as_static_value() {
                         static_value
                             .text()
-                            .split_whitespace()
+                            .split_ascii_whitespace()
                             .map(|s| AttributeValue::StaticValue(s.to_string()))
                             .collect()
                     } else {
