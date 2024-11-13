@@ -147,20 +147,6 @@ pub fn grit_curly_pattern(
         ],
     ))
 }
-pub fn grit_curly_predicate_list(
-    l_curly_token: SyntaxToken,
-    predicates: GritPredicateList,
-    r_curly_token: SyntaxToken,
-) -> GritCurlyPredicateList {
-    GritCurlyPredicateList::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_CURLY_PREDICATE_LIST,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(predicates.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
-}
 pub fn grit_div_operation(
     left: AnyGritPattern,
     slash_token: SyntaxToken,
@@ -244,7 +230,7 @@ pub fn grit_function_definition(
     l_paren_token: SyntaxToken,
     args: GritVariableList,
     r_paren_token: SyntaxToken,
-    body: GritCurlyPredicateList,
+    body: GritPredicateCurly,
 ) -> GritFunctionDefinition {
     GritFunctionDefinition::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_FUNCTION_DEFINITION,
@@ -1005,13 +991,27 @@ pub fn grit_predicate_call(
         ],
     ))
 }
+pub fn grit_predicate_curly(
+    l_curly_token: SyntaxToken,
+    predicates: GritPredicateList,
+    r_curly_token: SyntaxToken,
+) -> GritPredicateCurly {
+    GritPredicateCurly::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_PREDICATE_CURLY,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(predicates.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn grit_predicate_definition(
     predicate_token: SyntaxToken,
     name: GritName,
     l_paren_token: SyntaxToken,
     args: GritVariableList,
     r_paren_token: SyntaxToken,
-    body: GritCurlyPredicateList,
+    body: GritPredicateCurly,
 ) -> GritPredicateDefinition {
     GritPredicateDefinition::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_PREDICATE_DEFINITION,

@@ -34,9 +34,3 @@ Attribute Position: Auto
 	and { $message <: r"Hello, .*!", $method <: `log` }
 }
 ```
-
-
-
-## Unimplemented nodes/tokens
-
-" r\"Hello, .*!" => 88..101

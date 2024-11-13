@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritPredicateGreaterEqual;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritPredicateGreaterEqual, GritPredicateGreaterEqualFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPredicateGreaterEqual;
 impl FormatNodeRule<GritPredicateGreaterEqual> for FormatGritPredicateGreaterEqual {
@@ -9,6 +9,21 @@ impl FormatNodeRule<GritPredicateGreaterEqual> for FormatGritPredicateGreaterEqu
         node: &GritPredicateGreaterEqual,
         f: &mut GritFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritPredicateGreaterEqualFields {
+            right,
+            left,
+            greater_than_equal_token,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                left.format(),
+                space(),
+                greater_than_equal_token.format(),
+                space(),
+                right.format()
+            ]
+        )
     }
 }
