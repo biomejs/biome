@@ -123,6 +123,7 @@ pub fn check_rules() -> anyhow::Result<()> {
 
     Ok(())
 }
+
 struct CodeBlockTest {
     tag: String,
     expect_diagnostic: bool,
@@ -166,6 +167,73 @@ impl FromStr for CodeBlockTest {
     }
 }
 
+struct DiagnosticWriter<'a> {
+    group: &'a str,
+    rule: &'a str,
+    test: &'a CodeBlockTest,
+    code: &'a str,
+    diagnostic_count: i32,
+    all_diagnostics: Vec<biome_diagnostics::Error>,
+    has_error: bool,
+}
+
+impl<'a> DiagnosticWriter<'a> {
+    pub fn new(
+        group: &'a str,
+        rule: &'a str,
+        test: &'a CodeBlockTest,
+        code: &'a str,
+    ) -> DiagnosticWriter<'a> {
+        DiagnosticWriter {
+            group,
+            rule,
+            test,
+            code,
+            diagnostic_count: 0,
+            all_diagnostics: vec![],
+            has_error: false,
+        }
+    }
+
+    pub fn write_diagnostic(&mut self, diag: biome_diagnostics::Error) -> anyhow::Result<()> {
+        let group = self.group;
+        let rule = self.rule;
+        let code = self.code;
+
+        // Record the diagnostic
+        self.all_diagnostics.push(diag);
+
+        // Fail the test if the analysis returns more diagnostics than expected...
+        if self.test.expect_diagnostic {
+            if self.all_diagnostics.len() > 1 {
+                self.print_all_diagnostics();
+                self.has_error = true;
+                bail!("Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}");
+            }
+        } else {
+            // ...or if the analysis returns a diagnostic when it is expected to not report one.
+            self.print_all_diagnostics();
+            self.has_error = true;
+            bail!("Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}");
+        }
+        self.diagnostic_count += 1;
+        Ok(())
+    }
+
+    /// Prints all diagnostics to help the user.
+    fn print_all_diagnostics(&mut self) {
+        let mut console = biome_console::EnvConsole::default();
+        for diag in self.all_diagnostics.iter() {
+            console.println(
+                biome_console::LogLevel::Error,
+                markup! {
+                    {PrintDiagnostic::verbose(diag)}
+                },
+            );
+        }
+    }
+}
+
 /// Parse and analyze the provided code block, and asserts that it emits
 /// exactly zero or one diagnostic depending on the value of `expect_diagnostic`.
 /// That diagnostic is then emitted as text into the `content` buffer
@@ -177,48 +245,13 @@ fn assert_lint(
 ) -> anyhow::Result<()> {
     let file_path = format!("code-block.{}", test.tag);
 
-    let mut diagnostic_count = 0;
-    let mut all_diagnostics = vec![];
-    let mut has_error = false;
-    let mut write_diagnostic = |code: &str, diag: biome_diagnostics::Error| {
-        all_diagnostics.push(diag);
-        // Fail the test if the analysis returns more diagnostics than expected
-        if test.expect_diagnostic {
-            // Print all diagnostics to help the user
-            if all_diagnostics.len() > 1 {
-                let mut console = biome_console::EnvConsole::default();
-                for diag in all_diagnostics.iter() {
-                    console.println(
-                        biome_console::LogLevel::Error,
-                        markup! {
-                            {PrintDiagnostic::verbose(diag)}
-                        },
-                    );
-                }
-                has_error = true;
-                bail!("Analysis of '{group}/{rule}' on the following code block returned multiple diagnostics.\n\n{code}");
-            }
-        } else {
-            // Print all diagnostics to help the user
-            let mut console = biome_console::EnvConsole::default();
-            for diag in all_diagnostics.iter() {
-                console.println(
-                    biome_console::LogLevel::Error,
-                    markup! {
-                        {PrintDiagnostic::verbose(diag)}
-                    },
-                );
-            }
-            has_error = true;
-            bail!("Analysis of '{group}/{rule}' on the following code block returned an unexpected diagnostic.\n\n{code}");
-        }
-        diagnostic_count += 1;
-        Ok(())
-    };
-
     if test.ignore {
         return Ok(());
     }
+
+    // Record the diagnostics emitted by the lint rule to later check if
+    // what was emitted matches the expectations set for this code block.
+    let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
 
     let mut settings = WorkspaceSettings::default();
     let key = settings.insert_project(PathBuf::new());
@@ -247,7 +280,7 @@ fn assert_lint(
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
                     let error = diag.with_file_path(&file_path).with_file_source_code(code);
-                    write_diagnostic(code, error)?;
+                    diagnostics.write_diagnostic(error)?;
                 }
             } else {
                 let root = parse.tree();
@@ -283,7 +316,7 @@ fn assert_lint(
                             .with_severity(severity)
                             .with_file_path(&file_path)
                             .with_file_source_code(code);
-                        let res = write_diagnostic(code, error);
+                        let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
                         if let Err(err) = res {
@@ -302,7 +335,7 @@ fn assert_lint(
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
                     let error = diag.with_file_path(&file_path).with_file_source_code(code);
-                    write_diagnostic(code, error)?;
+                    diagnostics.write_diagnostic(error)?;
                 }
             } else {
                 let root = parse.tree();
@@ -334,7 +367,7 @@ fn assert_lint(
                             .with_severity(severity)
                             .with_file_path(&file_path)
                             .with_file_source_code(code);
-                        let res = write_diagnostic(code, error);
+                        let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
                         if let Err(err) = res {
@@ -353,7 +386,7 @@ fn assert_lint(
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
                     let error = diag.with_file_path(&file_path).with_file_source_code(code);
-                    write_diagnostic(code, error)?;
+                    diagnostics.write_diagnostic(error)?;
                 }
             } else {
                 let root = parse.tree();
@@ -385,7 +418,7 @@ fn assert_lint(
                             .with_severity(severity)
                             .with_file_path(&file_path)
                             .with_file_source_code(code);
-                        let res = write_diagnostic(code, error);
+                        let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
                         if let Err(err) = res {
@@ -404,7 +437,7 @@ fn assert_lint(
             if parse.has_errors() {
                 for diag in parse.into_diagnostics() {
                     let error = diag.with_file_path(&file_path).with_file_source_code(code);
-                    write_diagnostic(code, error)?;
+                    diagnostics.write_diagnostic(error)?;
                 }
             } else {
                 let root = parse.tree();
@@ -436,7 +469,7 @@ fn assert_lint(
                             .with_severity(severity)
                             .with_file_path(&file_path)
                             .with_file_source_code(code);
-                        let res = write_diagnostic(code, error);
+                        let res = diagnostics.write_diagnostic(error);
 
                         // Abort the analysis on error
                         if let Err(err) = res {
@@ -459,12 +492,12 @@ fn assert_lint(
     if test.expect_diagnostic {
         // Fail the test if the analysis didn't emit any diagnostic
         ensure!(
-            diagnostic_count == 1,
+            diagnostics.diagnostic_count == 1,
             "Analysis of '{group}/{rule}' on the following code block returned no diagnostics.\n\n{code}",
         );
     }
 
-    if has_error {
+    if diagnostics.has_error {
         bail!("A code snippet must emit one single diagnostic, but it seems multiple diagnostics were emitted. Make sure that all the snippets inside the code block 'expect_diagnostic' emit only one diagnostic.")
     }
 
