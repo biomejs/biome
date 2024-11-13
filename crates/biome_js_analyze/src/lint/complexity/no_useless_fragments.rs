@@ -2,7 +2,7 @@ use crate::react::{jsx_member_name_is_react_fragment, jsx_reference_identifier_i
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make::{
     js_string_literal_expression, jsx_expression_child, jsx_string, jsx_string_literal,
@@ -397,7 +397,7 @@ impl Rule for NoUselessFragments {
         }
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the Fragment" }.to_owned(),
             mutation,

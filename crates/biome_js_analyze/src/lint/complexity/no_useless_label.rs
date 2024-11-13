@@ -1,7 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{AnyJsStatement, JsLabeledStatement, JsSyntaxKind};
 
@@ -110,7 +108,7 @@ impl Rule for NoUselessLabel {
         mutation.remove_token(label_token);
         mutation.replace_token_discard_trivia(stmt_token, new_stmt_token);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
              markup! {"Remove the unnecessary "<Emphasis>"label"</Emphasis>".\nYou can achieve the same result without the label."}.to_owned(),
             mutation,

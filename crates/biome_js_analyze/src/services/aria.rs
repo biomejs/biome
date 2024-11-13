@@ -2,8 +2,7 @@ use biome_analyze::{
     AddVisitor, FromServices, MissingServicesDiagnostic, Phase, Phases, QueryKey, Queryable,
     RuleKey, ServiceBag, SyntaxVisitor,
 };
-use biome_aria::iso::{countries, is_valid_country, is_valid_language, languages};
-use biome_aria::{AriaProperties, AriaRoles};
+use biome_aria::AriaRoles;
 use biome_js_syntax::{AnyJsRoot, AnyJsxAttribute, JsLanguage, JsSyntaxNode, JsxAttributeList};
 use biome_rowan::AstNode;
 use rustc_hash::FxHashMap;
@@ -12,32 +11,11 @@ use std::sync::Arc;
 #[derive(Debug, Clone)]
 pub struct AriaServices {
     pub(crate) roles: Arc<AriaRoles>,
-    pub(crate) properties: Arc<AriaProperties>,
 }
 
 impl AriaServices {
     pub fn aria_roles(&self) -> &AriaRoles {
         &self.roles
-    }
-
-    pub fn aria_properties(&self) -> &AriaProperties {
-        &self.properties
-    }
-
-    pub fn is_valid_iso_language(&self, language: &str) -> bool {
-        is_valid_language(language)
-    }
-
-    pub fn is_valid_iso_country(&self, country: &str) -> bool {
-        is_valid_country(country)
-    }
-
-    pub fn iso_country_list(&self) -> &'static [&'static str] {
-        countries()
-    }
-
-    pub fn iso_language_list(&self) -> &'static [&'static str] {
-        languages()
     }
 
     /// Parses a [JsxAttributeList] and extracts the names and values of each [JsxAttribute],
@@ -57,7 +35,7 @@ impl AriaServices {
                     if let Some(static_value) = initializer.as_static_value() {
                         static_value
                             .text()
-                            .split_whitespace()
+                            .split_ascii_whitespace()
                             .map(|s| AttributeValue::StaticValue(s.to_string()))
                             .collect()
                     } else {
@@ -115,12 +93,8 @@ impl FromServices for AriaServices {
         let roles: &Arc<AriaRoles> = services
             .get_service()
             .ok_or_else(|| MissingServicesDiagnostic::new(rule_key.rule_name(), &["AriaRoles"]))?;
-        let properties: &Arc<AriaProperties> = services.get_service().ok_or_else(|| {
-            MissingServicesDiagnostic::new(rule_key.rule_name(), &["AriaProperties"])
-        })?;
         Ok(Self {
             roles: roles.clone(),
-            properties: properties.clone(),
         })
     }
 }
@@ -161,7 +135,7 @@ where
 #[cfg(test)]
 mod tests {
     use crate::services::aria::{AriaServices, AttributeValue};
-    use biome_aria::{AriaProperties, AriaRoles};
+    use biome_aria::AriaRoles;
     use biome_js_factory::make::{
         ident, jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_name,
         jsx_string, jsx_string_literal, token,
@@ -194,7 +168,6 @@ mod tests {
         ]);
         let services = AriaServices {
             roles: Arc::new(AriaRoles {}),
-            properties: Arc::new(AriaProperties {}),
         };
 
         let attribute_name_to_values = services.extract_attributes(&attribute_list).unwrap();

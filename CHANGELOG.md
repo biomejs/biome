@@ -22,11 +22,21 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### CLI
 
+#### Bug fixes
+
+- `biome migrate eslint` now correctly resolves scoped package named `eslint-config` with a path.
+  Contributed by @Conaclos
+
 ### Configuration
 
 ### Editors
 
 ### Formatter
+
+### Bug fixes
+
+- Fix [#4121](https://github.com/biomejs/biome/issues/4326), don't ident a CSS selector when has leading comments. Contributed by @fireairforce
+- Fix [#4334](https://github.com/biomejs/biome/issues/4334), don't insert trailing comma on type import statement. Contributed by @fireairforce
 
 ### JavaScript APIs
 
@@ -79,6 +89,103 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) now provides the `checkTypes` option ([#3998](https://github.com/biomejs/biome/issues/3998)).
+
+  `noUndeclaredVariables` is inspired by the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef). It reports all references that are not bound to any declarations within a module.
+  Node.js, JavaScript and TypeScript globals are ignored.
+  Bioem provides the `javascript.globals` option to list additional globals that should be ignored by the rule.
+
+  In TypeScript projects, developers often use global declaration files to declare global types.
+  Biome is currently unable to detect these global types.
+  This creates many false positives for `noUndeclaredVariables`.
+
+  TypeScript is better suited to perform this kind of check.
+  As proof of this, TypeScript ESLint doesn't provide any rule that extends the `no-undef` ESLint rule.
+
+  This is why we introduce today a new option `checkTypes` which, when it is set to `false`, ignores undeclared type references.
+  Given the following configuration...
+
+  ```json
+  {
+      "linter": {
+          "rules": {
+              "correctness": {
+                  "noUndeclaredVariables": {
+                      "level": "error",
+                      "options": { "checkTypes": false }
+                  }
+              }
+          }
+      }
+  }
+  ```
+
+  ... `UndeclaredType` is not reported by the rule.
+
+  ```ts
+  export default function(): UndeclaredType {}
+  ```
+
+  We plan to turn off the option by default in Biome 2.0
+  Also, this will bring the Biome rule closer to the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef).
+
+  Contributed by @Conaclos
+  
+- Add [noGlobalDirnameFilename](https://biomejs.dev/linter/rules/no-global-dirname-filename/). Contributed by @unvalley
+
+#### Enhancements
+
+- `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos
+- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now provides a code fix.
+
+  ```diff
+  - const xs = new Array();
+  + const xs = [];
+  ```
+
+  The code fix is currently marked as unsafe.
+  We plan to make it safe in a future release of Biome.
+
+  Contributed by @Conaclos
+
+- `noUnusedImports` now reports empty named imports and suggests its removal ([#3574](https://github.com/biomejs/biome/issues/3574)).
+
+  The rule now suggests the removal of empty named imports such as:
+
+  ```diff
+  - import {} from "mod";
+  ```
+
+  Contributed by @Conaclos
+
+- `noUnusedImports` now keeps comments separated from the import with a blank line ([#3401](https://github.com/biomejs/biome/issues/3401)).
+
+  Here is an example:
+
+  ```diff
+    // Orphan comment
+
+  - // Header comment
+  - import {} from "mod";
+  ```
+
+  Contributed by @Conaclos
+
+#### Bug fixes
+
+- [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now reports all expressions using the `Array` constructors.
+
+  Previously, the rule reported only use of the `Array` constructor in expressions statements.
+
+  ```js
+  // This was reported
+  new Array();
+  // This was not reported
+  const xs = new Array();
+  ```
+
+  Contributed by @Conaclos
+
 ### Parser
 
 #### Bug fixes
@@ -104,6 +211,32 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @fireairforce
+
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser handle unterminated `JSX_STRING_LITERAL` properly
+
+  ```jsx
+  function Comp() {
+    return (
+        <a rel="
+  ```
+- Fix [#342](https://github.com/biomejs/biome/issues/342), js parser is no longer progressing for an invalid object
+  member name:
+
+  ```js
+  ({
+    params: { [paramName: string]: number } = {}
+  })
+  ```
+
+  Contributed by @denbezrukov
+
+- Fix [#342](https://github.com/biomejs/biome/issues/342), "expected a declaration as guaranteed by is_at_ts_declare_statement" error for declare interface:
+
+  ```ts
+  declare interface
+  ```
+
+  Contributed by @denbezrukov
 
 
 ## v1.9.4 (2024-10-17)
@@ -158,6 +291,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 #### Bug fixes
 
 - Fix [#4121](https://github.com/biomejs/biome/issues/4121). Respect line width when printing multiline strings. Contributed by @ah-yu
+- Fix [#4384](https://github.com/biomejs/biome/issues/4384). Keep `@charset` dobule quote under any situation for css syntax rule. Contributed by @fireairforce
 
 ### JavaScript APIs
 

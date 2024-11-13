@@ -265,11 +265,16 @@ pub(crate) fn is_at_ts_declare_statement(p: &mut JsParser) -> bool {
 
 #[inline]
 pub(crate) fn is_at_ts_interface_declaration(p: &mut JsParser) -> bool {
-    if !p.at(T![interface]) || p.has_nth_preceding_line_break(1) {
+    is_nth_at_ts_interface_declaration(p, 0)
+}
+
+#[inline]
+pub(crate) fn is_nth_at_ts_interface_declaration(p: &mut JsParser, n: usize) -> bool {
+    if !p.nth_at(n, T![interface]) || p.has_nth_preceding_line_break(n + 1) {
         return false;
     }
 
-    is_nth_at_identifier_binding(p, 1) || p.nth_at(1, T!['{'])
+    is_nth_at_identifier_binding(p, n + 1) || p.nth_at(n + 1, T!['{'])
 }
 
 // test ts ts_interface

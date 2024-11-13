@@ -152,6 +152,9 @@ versioned_files = ["crates/biome_json_parser/Cargo.toml"]
 [packages.biome_json_syntax]
 changelog       = "crates/biome_json_syntax/CHANGELOG.md"
 versioned_files = ["crates/biome_json_syntax/Cargo.toml"]
+[packages.biome_lsp_converters]
+changelog       = "crates/biome_lsp_converters/CHANGELOG.md"
+versioned_files = ["crates/biome_lsp_converters/Cargo.toml"]
 [packages.biome_markup]
 changelog       = "crates/biome_markup/CHANGELOG.md"
 versioned_files = ["crates/biome_markup/Cargo.toml"]

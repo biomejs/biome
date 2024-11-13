@@ -1,5 +1,6 @@
 use crate::GritFormatContext;
 
+use biome_formatter::comments::CommentKind;
 use biome_formatter::{
     comments::{is_doc_comment, CommentStyle, Comments, SourceComment},
     prelude::*,
@@ -23,8 +24,8 @@ impl CommentStyle for GritCommentStyle {
 
     fn get_comment_kind(
         _comment: &biome_rowan::SyntaxTriviaPieceComments<Self::Language>,
-    ) -> biome_formatter::comments::CommentKind {
-        todo!()
+    ) -> CommentKind {
+        CommentKind::Line
     }
 
     fn place_comment(

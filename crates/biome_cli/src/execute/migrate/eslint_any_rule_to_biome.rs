@@ -158,6 +158,11 @@ pub(crate) fn migrate_eslint_any_rule(
                 .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
+        "@typescript-eslint/no-array-constructor" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group.use_array_literals.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
         "@typescript-eslint/no-dupe-class-members" => {
             let group = rules.suspicious.get_or_insert_with(Default::default);
             let rule = group
@@ -493,6 +498,13 @@ pub(crate) fn migrate_eslint_any_rule(
         "import/no-default-export" => {
             let group = rules.style.get_or_insert_with(Default::default);
             let rule = group.no_default_export.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "import/no-extraneous-dependencies" => {
+            let group = rules.correctness.get_or_insert_with(Default::default);
+            let rule = group
+                .no_undeclared_dependencies
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "import/no-nodejs-modules" => {
@@ -1631,6 +1643,20 @@ pub(crate) fn migrate_eslint_any_rule(
         "unicorn/prefer-date-now" => {
             let group = rules.complexity.get_or_insert_with(Default::default);
             let rule = group.use_date_now.get_or_insert(Default::default());
+            rule.set_level(rule_severity.into());
+        }
+        "unicorn/prefer-module" => {
+            if !options.include_inspired {
+                results.has_inspired_rules = true;
+                return false;
+            }
+            if !options.include_nursery {
+                return false;
+            }
+            let group = rules.nursery.get_or_insert_with(Default::default);
+            let rule = group
+                .no_global_dirname_filename
+                .get_or_insert(Default::default());
             rule.set_level(rule_severity.into());
         }
         "unicorn/prefer-node-protocol" => {

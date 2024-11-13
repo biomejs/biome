@@ -162,7 +162,7 @@ pub enum GritSyntaxKind {
     GRIT_PATTERN_DEFINITION,
     GRIT_PATTERN_ARG_LIST,
     GRIT_PREDICATE_LIST,
-    GRIT_CURLY_PREDICATE_LIST,
+    GRIT_PREDICATE_CURLY,
     GRIT_PREDICATE_DEFINITION,
     GRIT_FUNCTION_DEFINITION,
     GRIT_PREDICATE_NOT,
@@ -243,7 +243,6 @@ impl GritSyntaxKind {
             | GRIT_LIST_PATTERN_LIST
             | GRIT_PATTERN_ARG_LIST
             | GRIT_PREDICATE_LIST
-            | GRIT_CURLY_PREDICATE_LIST
             | GRIT_VARIABLE_LIST => true,
             _ => false,
         }

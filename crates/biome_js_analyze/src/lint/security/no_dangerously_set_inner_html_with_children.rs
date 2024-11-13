@@ -110,12 +110,10 @@ impl AnyJsCreateElement {
 
                 opening_element
                     .find_attribute_by_name("dangerouslySetInnerHTML")
-                    .ok()?
                     .map(DangerousProp::from)
             }
             AnyJsCreateElement::JsxSelfClosingElement(element) => element
                 .find_attribute_by_name("dangerouslySetInnerHTML")
-                .ok()?
                 .map(DangerousProp::from),
             AnyJsCreateElement::JsCallExpression(call_expression) => {
                 let react_create_element =
@@ -135,12 +133,10 @@ impl AnyJsCreateElement {
 
                 opening_element
                     .find_attribute_by_name("children")
-                    .ok()?
                     .map(DangerousProp::from)
             }
             AnyJsCreateElement::JsxSelfClosingElement(element) => element
                 .find_attribute_by_name("children")
-                .ok()?
                 .map(DangerousProp::from),
             AnyJsCreateElement::JsCallExpression(call_expression) => {
                 let react_create_element =

@@ -1,0 +1,91 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+declare interface
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@0..8 "declare" [] [Whitespace(" ")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsBogusExpression {
+                items: [
+                    JsBogus {
+                        items: [
+                            IDENT@8..17 "interface" [] [],
+                        ],
+                    },
+                ],
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@17..18 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..18
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..17
+    0: JS_EXPRESSION_STATEMENT@0..8
+      0: JS_IDENTIFIER_EXPRESSION@0..8
+        0: JS_REFERENCE_IDENTIFIER@0..8
+          0: IDENT@0..8 "declare" [] [Whitespace(" ")]
+      1: (empty)
+    1: JS_EXPRESSION_STATEMENT@8..17
+      0: JS_BOGUS_EXPRESSION@8..17
+        0: JS_BOGUS@8..17
+          0: IDENT@8..17 "interface" [] []
+      1: (empty)
+  4: EOF@17..18 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_declare_interface_err.ts:1:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a semicolon or an implicit semicolon after a statement, but found none
+  
+  > 1 │ declare interface
+      │         ^^^^^^^^^
+    2 │ 
+  
+  i An explicit or implicit semicolon is expected here...
+  
+  > 1 │ declare interface
+      │         ^^^^^^^^^
+    2 │ 
+  
+  i ...Which is required to end this statement
+  
+  > 1 │ declare interface
+      │ ^^^^^^^^^^^^^^^^^
+    2 │ 
+  
+```

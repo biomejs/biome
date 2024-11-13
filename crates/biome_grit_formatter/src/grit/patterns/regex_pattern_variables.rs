@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritRegexPatternVariables;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritRegexPatternVariables, GritRegexPatternVariablesFields};
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritRegexPatternVariables;
 impl FormatNodeRule<GritRegexPatternVariables> for FormatGritRegexPatternVariables {
@@ -9,6 +9,19 @@ impl FormatNodeRule<GritRegexPatternVariables> for FormatGritRegexPatternVariabl
         node: &GritRegexPatternVariables,
         f: &mut GritFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritRegexPatternVariablesFields {
+            r_paren_token,
+            l_paren_token,
+            args,
+        } = node.as_fields();
+
+        write!(
+            f,
+            [
+                l_paren_token.format(),
+                args.format(),
+                r_paren_token.format()
+            ]
+        )
     }
 }

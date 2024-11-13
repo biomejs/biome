@@ -92,10 +92,10 @@ impl Rule for NoStaticElementInteractions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
+        let element_name = element_name.text_trimmed();
         let aria_roles = ctx.aria_roles();
         let attributes = ctx.extract_attributes(&node.attributes());
         let attributes = ctx.convert_all_attribute_values(attributes);
-        let element_name = element_name.text_trimmed();
 
         // Check if the element is hidden from screen readers.
         if is_hidden_from_screen_reader(node, element_name) {

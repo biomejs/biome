@@ -1,6 +1,6 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -65,7 +65,7 @@ impl Rule for UseGoogleFontPreconnect {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if node.name().ok()?.name_value_token()?.text_trimmed() != "link" {
+        if node.name().ok()?.name_value_token().ok()?.text_trimmed() != "link" {
             return None;
         }
 
@@ -107,7 +107,7 @@ impl Rule for UseGoogleFontPreconnect {
         let mut attributes: Vec<_> = node.attributes().iter().collect();
 
         let last_attr_token = match attributes.last()? {
-            AnyJsxAttribute::JsxAttribute(a) => a.name_value_token()?,
+            AnyJsxAttribute::JsxAttribute(a) => a.name_value_token().ok()?,
             AnyJsxAttribute::JsxSpreadAttribute(a) => a.l_curly_token().ok()?,
         };
 
@@ -133,7 +133,7 @@ impl Rule for UseGoogleFontPreconnect {
         mutation.replace_node(node.attributes(), make::jsx_attribute_list(attributes));
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Add the "<Emphasis>"rel=\"preconnect\""</Emphasis>" attribute." }.to_owned(),
             mutation,

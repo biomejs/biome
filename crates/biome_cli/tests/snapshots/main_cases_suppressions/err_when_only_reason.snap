@@ -1,0 +1,25 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+assertion_line: 423
+expression: content
+---
+## `fix.js`
+
+```js
+(1 >= -0)
+```
+
+# Termination Message
+
+```block
+flags/invalid ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unrecognized option --reason.
+  
+  i Type the following command for more information
+  
+  $ biome `--reason` is only valid when `--suppress` is used. --help
+  
+
+
+```

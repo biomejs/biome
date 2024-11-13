@@ -1,7 +1,7 @@
 //! Generated file, do not edit by hand, see `xtask/codegen`
 
-use crate::analyzer::RuleAssistConfiguration;
-use biome_analyze::RuleFilter;
+use crate::analyzer::{RuleAssistConfiguration, RuleAssistPlainConfiguration};
+use biome_analyze::{options::RuleOptions, RuleFilter};
 use biome_deserialize_macros::{Deserializable, Merge};
 use biome_diagnostics::{Category, Severity};
 use rustc_hash::FxHashSet;
@@ -77,8 +77,8 @@ impl Actions {
                 .source
                 .as_ref()
                 .and_then(|group| group.get_rule_configuration(rule_name))
-                .filter(|conf| !matches!(conf, RuleAssistConfiguration::Off))
-                .map(|conf| conf.into()),
+                .filter(|(level, _)| !matches!(level, RuleAssistPlainConfiguration::Off))
+                .map(|(level, _)| level.into()),
         }
     }
     #[doc = r" It returns the enabled rules by default."]
@@ -86,12 +86,10 @@ impl Actions {
     #[doc = r" The enabled rules are calculated from the difference with the disabled rules."]
     pub fn as_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut enabled_rules = FxHashSet::default();
-        let mut disabled_rules = FxHashSet::default();
         if let Some(group) = self.source.as_ref() {
             enabled_rules.extend(&group.get_enabled_rules());
-            disabled_rules.extend(&group.get_disabled_rules());
         }
-        enabled_rules.difference(&disabled_rules).copied().collect()
+        enabled_rules
     }
 }
 #[derive(Clone, Debug, Default, Deserialize, Deserializable, Eq, Merge, PartialEq, Serialize)]
@@ -99,40 +97,38 @@ impl Actions {
 #[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 #[doc = r" A list of rules that belong to this group"]
 pub struct Source {
-    #[doc = "Enforce props sorting in JSX elements."]
+    #[doc = "Provides a whole-source code action to sort the imports in the file using import groups and natural ordering."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub sort_jsx_props: Option<RuleAssistConfiguration>,
+    pub organize_imports:
+        Option<RuleAssistConfiguration<biome_js_analyze::options::OrganizeImports>>,
+    #[doc = "Enforce attribute sorting in JSX elements."]
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub use_sorted_attributes:
+        Option<RuleAssistConfiguration<biome_js_analyze::options::UseSortedAttributes>>,
     #[doc = "Sorts the keys of a JSON object in natural order"]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub use_sorted_keys: Option<RuleAssistConfiguration>,
+    pub use_sorted_keys:
+        Option<RuleAssistConfiguration<biome_json_analyze::options::UseSortedKeys>>,
 }
 impl Source {
     const GROUP_NAME: &'static str = "source";
-    pub(crate) const GROUP_RULES: &'static [&'static str] = &["sortJsxProps", "useSortedKeys"];
+    pub(crate) const GROUP_RULES: &'static [&'static str] =
+        &["organizeImports", "useSortedAttributes", "useSortedKeys"];
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.sort_jsx_props.as_ref() {
+        if let Some(rule) = self.organize_imports.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
         }
-        if let Some(rule) = self.use_sorted_keys.as_ref() {
+        if let Some(rule) = self.use_sorted_attributes.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
             }
         }
-        index_set
-    }
-    pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
-        let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.sort_jsx_props.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
-            }
-        }
         if let Some(rule) = self.use_sorted_keys.as_ref() {
-            if rule.is_disabled() {
-                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[1]));
+            if rule.is_enabled() {
+                index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[2]));
             }
         }
         index_set
@@ -144,10 +140,20 @@ impl Source {
     pub(crate) fn get_rule_configuration(
         &self,
         rule_name: &str,
-    ) -> Option<RuleAssistConfiguration> {
+    ) -> Option<(RuleAssistPlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
-            "sortJsxProps" => self.sort_jsx_props.as_ref().copied(),
-            "useSortedKeys" => self.use_sorted_keys.as_ref().copied(),
+            "organizeImports" => self
+                .organize_imports
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useSortedAttributes" => self
+                .use_sorted_attributes
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
+            "useSortedKeys" => self
+                .use_sorted_keys
+                .as_ref()
+                .map(|conf| (conf.level(), conf.get_options())),
             _ => None,
         }
     }

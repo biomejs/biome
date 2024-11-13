@@ -633,6 +633,7 @@ impl Workspace for WorkspaceServer {
                         language: self.get_file_source(&params.path),
                         categories: params.categories,
                         manifest,
+                        suppression_reason: None,
                     });
 
                     (
@@ -688,6 +689,7 @@ impl Workspace for WorkspaceServer {
             language,
             only: params.only,
             skip: params.skip,
+            suppression_reason: None,
         }))
     }
 
@@ -787,6 +789,7 @@ impl Workspace for WorkspaceServer {
             only: params.only,
             skip: params.skip,
             rule_categories: params.rule_categories,
+            suppression_reason: params.suppression_reason,
         })
     }
 

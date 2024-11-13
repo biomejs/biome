@@ -1,9 +1,8 @@
 use crate::{services::aria::Aria, JsRuleAction};
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
-use biome_aria::{roles::AriaRoleDefinition, AriaRoles};
+use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList,
@@ -77,9 +76,9 @@ impl Rule for NoRedundantRoles {
 
         let role_attribute = node.find_attribute_by_name("role")?;
         let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-        let explicit_role = get_explicit_role(aria_roles, &role_attribute_value)?;
+        let explicit_role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
 
-        let is_redundant = implicit_role.type_name() == explicit_role.type_name();
+        let is_redundant = implicit_role == explicit_role;
         if is_redundant {
             return Some(RuleState {
                 redundant_attribute: role_attribute,
@@ -107,7 +106,7 @@ impl Rule for NoRedundantRoles {
         let mut mutation = ctx.root().begin();
         mutation.remove_node(state.redundant_attribute.clone());
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"role"</Emphasis>" attribute." }.to_owned(),
             mutation,
@@ -130,19 +129,4 @@ fn get_element_name_and_attributes(node: &AnyJsxElement) -> Option<(String, JsxA
             Some((trimmed_element_name, elem.attributes()))
         }
     }
-}
-
-fn get_explicit_role(
-    aria_roles: &AriaRoles,
-    role_attribute_value: &AnyJsxAttributeValue,
-) -> Option<&'static dyn AriaRoleDefinition> {
-    let static_value = role_attribute_value.as_static_value()?;
-
-    // If a role attribute has multiple values, the first valid value (specified role) will be used.
-    // Check: https://www.w3.org/TR/2014/REC-wai-aria-implementation-20140320/#mapping_role
-    let explicit_role = static_value
-        .text()
-        .split(' ')
-        .find_map(|role| aria_roles.get_role(role))?;
-    Some(explicit_role)
 }

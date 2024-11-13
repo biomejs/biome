@@ -1,20 +1,23 @@
+use super::{
+    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
+    FormatterCapabilities, LintParams, LintResults, ParseResult, ParserCapabilities,
+    SearchCapabilities,
+};
+use crate::workspace::GetSyntaxTreeResult;
 use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     WorkspaceError,
 };
 use biome_analyze::{AnalyzerConfiguration, AnalyzerOptions};
+use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;
 use biome_grit_formatter::{context::GritFormatOptions, format_node};
 use biome_grit_parser::parse_grit_with_cache;
-use biome_grit_syntax::GritLanguage;
+use biome_grit_syntax::{GritLanguage, GritRoot, GritSyntaxNode};
 use biome_parser::AnyParse;
 use biome_rowan::NodeCache;
-
-use super::{
-    AnalyzerCapabilities, Capabilities, DebugCapabilities, DocumentFileSource, ExtensionHandler,
-    FormatterCapabilities, ParseResult, ParserCapabilities, SearchCapabilities,
-};
+use tracing::debug_span;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -95,10 +98,12 @@ impl ServiceLanguage for GritLanguage {
         _language: Option<&Self::LinterSettings>,
         path: &biome_fs::BiomePath,
         _file_source: &super::DocumentFileSource,
+        suppression_reason: Option<String>,
     ) -> biome_analyze::AnalyzerOptions {
         AnalyzerOptions {
             configuration: AnalyzerConfiguration::default(),
             file_path: path.to_path_buf(),
+            suppression_reason,
         }
     }
 }
@@ -111,12 +116,12 @@ impl ExtensionHandler for GritFileHandler {
         Capabilities {
             parser: ParserCapabilities { parse: Some(parse) },
             debug: DebugCapabilities {
-                debug_syntax_tree: None,
+                debug_syntax_tree: Some(debug_syntax_tree),
                 debug_control_flow: None,
-                debug_formatter_ir: None,
+                debug_formatter_ir: Some(debug_formatter_ir),
             },
             analyzer: AnalyzerCapabilities {
-                lint: None,
+                lint: Some(lint),
                 code_actions: None,
                 rename: None,
                 fix_all: None,
@@ -147,6 +152,30 @@ fn parse(
     }
 }
 
+fn debug_syntax_tree(_rome_path: &BiomePath, parse: AnyParse) -> GetSyntaxTreeResult {
+    let syntax: GritSyntaxNode = parse.syntax();
+    let tree: GritRoot = parse.tree();
+    GetSyntaxTreeResult {
+        cst: format!("{syntax:#?}"),
+        ast: format!("{tree:#?}"),
+    }
+}
+
+fn debug_formatter_ir(
+    biome_path: &BiomePath,
+    document_file_source: &DocumentFileSource,
+    parse: AnyParse,
+    settings: WorkspaceSettingsHandle,
+) -> Result<String, WorkspaceError> {
+    let options = settings.format_options::<GritLanguage>(biome_path, document_file_source);
+
+    let tree = parse.syntax();
+    let formatted = format_node(options, &tree)?;
+
+    let root_element = formatted.into_document();
+    Ok(root_element.to_string())
+}
+
 #[tracing::instrument(level = "debug", skip(parse, settings))]
 fn format(
     biome_path: &BiomePath,
@@ -164,5 +193,25 @@ fn format(
     match formatted.print() {
         Ok(printed) => Ok(printed),
         Err(error) => Err(WorkspaceError::FormatError(error.into())),
+    }
+}
+
+#[tracing::instrument(level = "debug", skip(params))]
+fn lint(params: LintParams) -> LintResults {
+    let _ = debug_span!("Linting Grit file", path =? params.path, language =? params.language)
+        .entered();
+    let diagnostics = params.parse.into_diagnostics();
+
+    let diagnostic_count = diagnostics.len() as u32;
+    let skipped_diagnostics = diagnostic_count.saturating_sub(diagnostics.len() as u32);
+    let errors = diagnostics
+        .iter()
+        .filter(|diag| diag.severity() <= Severity::Error)
+        .count();
+
+    LintResults {
+        diagnostics,
+        errors,
+        skipped_diagnostics,
     }
 }

@@ -1,0 +1,40 @@
+---
+source: crates/biome_formatter_test/src/snapshot_builder.rs
+info: grit/patterns/if_else.grit
+snapshot_kind: text
+---
+# Input
+
+```grit
+`$method('$message')` where {
+  if ($message <: r"Hello, .*!") {
+    $method => `console.info`
+  } else {
+    $method => `console.warn`
+  }
+}
+
+```
+
+
+=============================
+
+# Outputs
+
+## Output 1
+
+-----
+Indent style: Tab
+Indent width: 2
+Line ending: LF
+Line width: 80
+Attribute Position: Auto
+-----
+
+```grit
+`$method('$message')` where {
+	if ($message <: r"Hello, .*!") { $method => `console.info` } else {
+		$method => `console.warn`
+	}
+}
+```

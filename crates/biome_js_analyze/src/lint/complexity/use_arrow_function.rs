@@ -1,8 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, AddVisitor, FixKind, Phases,
-    QueryMatch, Queryable, Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
-    VisitorContext,
+    context::RuleContext, declare_lint_rule, AddVisitor, FixKind, Phases, QueryMatch, Queryable,
+    Rule, RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_js_factory::make;
@@ -189,7 +188,7 @@ impl Rule for UseArrowFunction {
             arrow_function,
         );
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use an "<Emphasis>"arrow function"</Emphasis>" instead." }.to_owned(),
             mutation,
@@ -197,7 +196,7 @@ impl Rule for UseArrowFunction {
     }
 }
 
-/// Returns `true` if `function_expr` needs parenthesis when turned into an arrow function.
+/// Returns `true` if `function_expression` needs parenthesis when turned into an arrow function.
 fn needs_parentheses(function_expression: &JsFunctionExpression) -> bool {
     function_expression.syntax().parent().is_some_and(|parent| {
         // Copied from the implementation of `NeedsParentheses` for `JsArrowFunctionExpression`
@@ -308,8 +307,7 @@ impl Visitor for AnyThisScopeVisitor {
                         scope,
                         has_this: false,
                     });
-                }
-                if matches!(
+                } else if matches!(
                     node.kind(),
                     JsSyntaxKind::JS_THIS_EXPRESSION | JsSyntaxKind::JS_NEW_TARGET_EXPRESSION
                 ) {
@@ -321,11 +319,9 @@ impl Visitor for AnyThisScopeVisitor {
                 }
             }
             WalkEvent::Leave(node) => {
-                if let Some(exit_scope) = AnyThisScope::cast_ref(node) {
+                if AnyThisScope::can_cast(node.kind()) {
                     if let Some(scope_metadata) = self.stack.pop() {
-                        if scope_metadata.scope == exit_scope {
-                            ctx.match_query(ActualThisScope(scope_metadata));
-                        }
+                        ctx.match_query(ActualThisScope(scope_metadata));
                     }
                 }
             }

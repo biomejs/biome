@@ -1,5 +1,5 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
-use biome_aria::AriaRoles;
+use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttributeValue};
 use biome_rowan::AstNode;
@@ -68,7 +68,7 @@ impl Rule for UseFocusableInteractive {
             if let Some(role_attribute) = role_attribute {
                 let tabindex_attribute = node.find_attribute_by_name("tabIndex");
                 let role_attribute_value = role_attribute.initializer()?.value().ok()?;
-                if attribute_has_interactive_role(&role_attribute_value, aria_roles)?
+                if attribute_has_interactive_role(&role_attribute_value)?
                     && tabindex_attribute.is_none()
                 {
                     return Some(role_attribute_value.text());
@@ -98,9 +98,7 @@ impl Rule for UseFocusableInteractive {
 }
 
 /// Checks if the given role attribute value is interactive or not based on ARIA roles.
-fn attribute_has_interactive_role(
-    role_attribute_value: &AnyJsxAttributeValue,
-    aria_roles: &AriaRoles,
-) -> Option<bool> {
-    Some(aria_roles.is_role_interactive(role_attribute_value.as_static_value()?.text()))
+fn attribute_has_interactive_role(role_attribute_value: &AnyJsxAttributeValue) -> Option<bool> {
+    let role = AriaRole::from_roles(role_attribute_value.as_static_value()?.text())?;
+    Some(role.is_interactive() && !role.is_composite())
 }

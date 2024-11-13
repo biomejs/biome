@@ -1,6 +1,7 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritRawBacktickSnippetLiteral;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritRawBacktickSnippetLiteral, GritRawBacktickSnippetLiteralFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritRawBacktickSnippetLiteral;
 impl FormatNodeRule<GritRawBacktickSnippetLiteral> for FormatGritRawBacktickSnippetLiteral {
@@ -9,6 +10,7 @@ impl FormatNodeRule<GritRawBacktickSnippetLiteral> for FormatGritRawBacktickSnip
         node: &GritRawBacktickSnippetLiteral,
         f: &mut GritFormatter,
     ) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritRawBacktickSnippetLiteralFields { value_token } = node.as_fields();
+        write!(f, [value_token.format()])
     }
 }

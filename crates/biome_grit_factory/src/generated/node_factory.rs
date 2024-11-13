@@ -88,17 +88,17 @@ pub fn grit_bubble(
     GritBubbleBuilder {
         bubble_token,
         pattern,
-        variables: None,
+        scope: None,
     }
 }
 pub struct GritBubbleBuilder {
     bubble_token: SyntaxToken,
     pattern: AnyGritMaybeCurlyPattern,
-    variables: Option<GritBubbleScope>,
+    scope: Option<GritBubbleScope>,
 }
 impl GritBubbleBuilder {
-    pub fn with_variables(mut self, variables: GritBubbleScope) -> Self {
-        self.variables = Some(variables);
+    pub fn with_scope(mut self, scope: GritBubbleScope) -> Self {
+        self.scope = Some(scope);
         self
     }
     pub fn build(self) -> GritBubble {
@@ -106,7 +106,7 @@ impl GritBubbleBuilder {
             GritSyntaxKind::GRIT_BUBBLE,
             [
                 Some(SyntaxElement::Token(self.bubble_token)),
-                self.variables
+                self.scope
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Node(self.pattern.into_syntax())),
             ],
@@ -143,20 +143,6 @@ pub fn grit_curly_pattern(
         [
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(pattern.into_syntax())),
-            Some(SyntaxElement::Token(r_curly_token)),
-        ],
-    ))
-}
-pub fn grit_curly_predicate_list(
-    l_curly_token: SyntaxToken,
-    predicates: GritPredicateList,
-    r_curly_token: SyntaxToken,
-) -> GritCurlyPredicateList {
-    GritCurlyPredicateList::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_CURLY_PREDICATE_LIST,
-        [
-            Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(predicates.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))
@@ -244,7 +230,7 @@ pub fn grit_function_definition(
     l_paren_token: SyntaxToken,
     args: GritVariableList,
     r_paren_token: SyntaxToken,
-    body: GritCurlyPredicateList,
+    body: GritPredicateCurly,
 ) -> GritFunctionDefinition {
     GritFunctionDefinition::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_FUNCTION_DEFINITION,
@@ -621,12 +607,6 @@ pub fn grit_pattern_any(
         ],
     ))
 }
-pub fn grit_pattern_arg_list(grit_variable_list: GritVariableList) -> GritPatternArgList {
-    GritPatternArgList::unwrap_cast(SyntaxNode::new_detached(
-        GritSyntaxKind::GRIT_PATTERN_ARG_LIST,
-        [Some(SyntaxElement::Node(grit_variable_list.into_syntax()))],
-    ))
-}
 pub fn grit_pattern_as(
     pattern: AnyGritPattern,
     as_token: SyntaxToken,
@@ -701,7 +681,7 @@ pub fn grit_pattern_definition(
     pattern_token: SyntaxToken,
     name: GritName,
     l_paren_token: SyntaxToken,
-    args: GritPatternArgList,
+    args: GritVariableList,
     r_paren_token: SyntaxToken,
     body: GritPatternDefinitionBody,
 ) -> GritPatternDefinitionBuilder {
@@ -720,7 +700,7 @@ pub struct GritPatternDefinitionBuilder {
     pattern_token: SyntaxToken,
     name: GritName,
     l_paren_token: SyntaxToken,
-    args: GritPatternArgList,
+    args: GritVariableList,
     r_paren_token: SyntaxToken,
     body: GritPatternDefinitionBody,
     visibility_token: Option<SyntaxToken>,
@@ -1011,13 +991,27 @@ pub fn grit_predicate_call(
         ],
     ))
 }
+pub fn grit_predicate_curly(
+    l_curly_token: SyntaxToken,
+    predicates: GritPredicateList,
+    r_curly_token: SyntaxToken,
+) -> GritPredicateCurly {
+    GritPredicateCurly::unwrap_cast(SyntaxNode::new_detached(
+        GritSyntaxKind::GRIT_PREDICATE_CURLY,
+        [
+            Some(SyntaxElement::Token(l_curly_token)),
+            Some(SyntaxElement::Node(predicates.into_syntax())),
+            Some(SyntaxElement::Token(r_curly_token)),
+        ],
+    ))
+}
 pub fn grit_predicate_definition(
     predicate_token: SyntaxToken,
     name: GritName,
     l_paren_token: SyntaxToken,
-    args: GritPatternArgList,
+    args: GritVariableList,
     r_paren_token: SyntaxToken,
-    body: GritCurlyPredicateList,
+    body: GritPredicateCurly,
 ) -> GritPredicateDefinition {
     GritPredicateDefinition::unwrap_cast(SyntaxNode::new_detached(
         GritSyntaxKind::GRIT_PREDICATE_DEFINITION,
@@ -1312,7 +1306,7 @@ impl GritRegexPatternBuilder {
 }
 pub fn grit_regex_pattern_variables(
     l_paren_token: SyntaxToken,
-    args: GritPatternArgList,
+    args: GritVariableList,
     r_paren_token: SyntaxToken,
 ) -> GritRegexPatternVariables {
     GritRegexPatternVariables::unwrap_cast(SyntaxNode::new_detached(

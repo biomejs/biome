@@ -1,7 +1,5 @@
 use crate::{services::semantic::Semantic, JsRuleAction};
-use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic,
-};
+use biome_analyze::{context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
 use biome_js_syntax::{
     global_identifier, AnyJsMemberExpression, JsCallExpression, JsExpressionStatement,
@@ -97,7 +95,7 @@ impl Rule for NoConsoleLog {
         }
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove console.log" }.to_owned(),
             mutation,

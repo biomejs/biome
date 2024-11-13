@@ -1,8 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_factory::make::{
@@ -95,7 +93,7 @@ impl Rule for NoBlankTarget {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.name_value_token()?.text_trimmed() != "a"
+        if node.name_value_token().ok()?.text_trimmed() != "a"
             || node.find_attribute_by_name("href").is_none()
         {
             return None;
@@ -193,7 +191,7 @@ impl Rule for NoBlankTarget {
         };
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             message,
             mutation,
