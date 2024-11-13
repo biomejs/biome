@@ -1,5 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
+assertion_line: 86
 expression: valid.ts
 ---
 # Input
@@ -109,4 +110,18 @@ class Accumulator {
   }
 }
 new Accumulator().accumulate(() => 1);
+
+// Returning object from function
+interface Behavior {
+  namedFunc: () => string; 
+  arrowFunc: () => string;
+}
+
+function getObjectWithFunction(): Behavior {
+  return {
+    namedFunc: function myFunc(): string { return "value" },
+    arrowFunc: () => {},
+  }
+}
+
 ```
