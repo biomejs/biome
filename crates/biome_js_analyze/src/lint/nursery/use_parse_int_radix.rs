@@ -23,6 +23,8 @@ declare_lint_rule! {
     ///
     /// This confusion led to the suggestion that you always use the radix parameter to `parseInt()` to eliminate unintended consequences.
     ///
+    /// Source: https://eslint.org/docs/latest/rules/radix
+    ///
     /// ## Examples
     ///
     /// ### Invalid
