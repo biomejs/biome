@@ -7,16 +7,19 @@ use biome_analyze::{
     AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
     RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
+use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
+use biome_deserialize::json::deserialize_from_json_ast;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
+use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
-use biome_json_syntax::JsonLanguage;
+use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
 use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
 use biome_service::workspace::DocumentFileSource;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
@@ -126,9 +129,22 @@ pub fn check_rules() -> anyhow::Result<()> {
 }
 
 struct CodeBlockTest {
+    /// The language tag of this code block.
     tag: String,
+
+    /// True if this is an invalid example that should trigger a diagnostic.
     expect_diagnostic: bool,
+
+    /// Whether to ignore this code block.
     ignore: bool,
+
+    /// True if this is a block of configuration options instead
+    /// of a valid/invalid code example.
+    options: bool,
+
+    /// Whether to use the last code block that was marked with
+    /// `options` as the configuration settings for this code block.
+    use_options: bool,
 }
 
 impl CodeBlockTest {
@@ -152,6 +168,8 @@ impl FromStr for CodeBlockTest {
             tag: String::new(),
             expect_diagnostic: false,
             ignore: false,
+            options: false,
+            use_options: false,
         };
 
         for token in tokens {
@@ -159,6 +177,8 @@ impl FromStr for CodeBlockTest {
                 // Other attributes
                 "expect_diagnostic" => test.expect_diagnostic = true,
                 "ignore" => test.ignore = true,
+                "options" => test.options = true,
+                "use_options" => test.use_options = true,
                 // Regard as language tags, last one wins
                 _ => test.tag = token.to_string(),
             }
@@ -273,6 +293,7 @@ fn assert_lint(
     rule: &'static str,
     test: &CodeBlockTest,
     code: &str,
+    config: &Option<PartialConfiguration>,
 ) -> anyhow::Result<()> {
     let file_path = format!("code-block.{}", test.tag);
 
@@ -284,9 +305,22 @@ fn assert_lint(
     // what was emitted matches the expectations set for this code block.
     let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
 
+    // Create a synthetic workspace configuration
     let mut settings = WorkspaceSettings::default();
     let key = settings.insert_project(PathBuf::new());
     settings.register_current_project(key);
+
+    // Load settings from the preceding `json,options` block if requested
+    if test.use_options {
+        let Some(partial_config) = config else {
+            bail!("Code blocks tagged with 'use_options' must be preceded by a valid 'json,options' code block.");
+        };
+
+        settings
+            .get_current_settings_mut()
+            .merge_with_configuration(partial_config.clone(), None, None, &[])?;
+    }
+
     match test.document_file_source() {
         DocumentFileSource::Js(file_source) => {
             // Temporary support for astro, svelte and vue code blocks
@@ -323,7 +357,7 @@ fn assert_lint(
                 };
 
                 let options = {
-                    let mut o = create_analyzer_options::<JsLanguage>(&settings, &file_path, &test);
+                    let mut o = create_analyzer_options::<JsLanguage>(&settings, &file_path, test);
                     o.configuration.jsx_runtime = Some(JsxRuntime::default());
                     o
                 };
@@ -375,7 +409,7 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, &test);
+                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
 
                 biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -424,7 +458,7 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, &test);
+                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
 
                 biome_css_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -473,7 +507,7 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, &test);
+                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
 
                 biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
@@ -527,13 +561,133 @@ fn assert_lint(
     Ok(())
 }
 
-/// Parse the documentation fragment for a lint rule (in markdown) and lint the code blcoks.
+/// Creates a synthetic JSON AST for an object literal with a single member.
+fn make_json_object_with_single_member<V: Into<AnyJsonValue>>(
+    name: &str,
+    value: V,
+) -> JsonObjectValue {
+    make::json_object_value(
+        make::token(biome_json_syntax::JsonSyntaxKind::L_CURLY),
+        make::json_member_list(
+            [make::json_member(
+                make::json_member_name(make::json_string_literal(name)),
+                make::token(biome_json_syntax::JsonSyntaxKind::COLON),
+                value.into(),
+            )],
+            [],
+        ),
+        make::token(biome_json_syntax::JsonSyntaxKind::R_CURLY),
+    )
+}
+
+/// Parse the options fragment for a lint rule and return the parsed options.
+fn parse_rule_options(
+    group: &'static str,
+    rule: &'static str,
+    test: &CodeBlockTest,
+    code: &str,
+) -> anyhow::Result<Option<PartialConfiguration>> {
+    let file_path = format!("code-block.{}", test.tag);
+
+    // Record the diagnostics emitted during configuration parsing to later check
+    // if what was emitted matches the expectations set for this code block.
+    let mut diagnostics = DiagnosticWriter::new(group, rule, test, code);
+
+    match test.document_file_source() {
+        DocumentFileSource::Json(file_source) => {
+            let parse = biome_json_parser::parse_json(code, JsonParserOptions::from(&file_source));
+
+            if parse.has_errors() {
+                for diag in parse.into_diagnostics() {
+                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                    diagnostics.write_diagnostic(error)?;
+                }
+                // Parsing failed, but test.expect_diagnostic is true
+                return Ok(None);
+            }
+
+            // By convention, the configuration blocks in the documentation
+            // only contain the settings for the lint rule itself, like so:
+            //
+            // ```json,options
+            // {
+            //     "options": {
+            //         ...
+            //     }
+            // }
+            // ```
+            let parsed_root = parse.tree();
+
+            // We therefore extend the JSON AST with some synthetic elements
+            // to make it match the structure expected by the configuration parse:
+            //
+            // {
+            //     "linter": {
+            //         "rules": {
+            //             "<group>": {
+            //                 "<rule>": {<options>}
+            //             }
+            //         }
+            //     }
+            // }
+            let parsed_options = parsed_root.value()?;
+            let synthetic_tree = make_json_object_with_single_member(
+                "linter",
+                make_json_object_with_single_member(
+                    "rules",
+                    make_json_object_with_single_member(
+                        group,
+                        make_json_object_with_single_member(rule, parsed_options),
+                    ),
+                ),
+            );
+
+            // We reuse the original AST where possible so that errors are
+            // reported at the correct locations in the source code.
+            let eof_token = parsed_root.eof_token()?;
+            let mut root_builder = make::json_root(synthetic_tree.into(), eof_token);
+            if let Some(bom_token) = parsed_root.bom_token() {
+                root_builder = root_builder.with_bom_token(bom_token);
+            }
+            let root = root_builder.build();
+
+            // Deserialize the configuration from the partially-synthetic AST,
+            // and report any errors encountered during deserialization.
+            let deserialized = deserialize_from_json_ast::<PartialConfiguration>(&root, "");
+            let (partial_configuration, deserialize_diagnostics) = deserialized.consume();
+
+            if !deserialize_diagnostics.is_empty() {
+                for diag in deserialize_diagnostics {
+                    let error = diag.with_file_path(&file_path).with_file_source_code(code);
+                    diagnostics.write_diagnostic(error)?;
+                }
+                // Deserialization failed, but test.expect_diagnostic is true
+                return Ok(None);
+            }
+
+            let Some(result) = partial_configuration else {
+                bail!("Failed to deserialize configuration options for '{group}/{rule}' from the following code block due to unknown error.\n\n{code}");
+            };
+
+            Ok(Some(result))
+        }
+        _ => {
+            // Only JSON code blocks can contain configuration options
+            bail!("The following non-JSON code block for '{group}/{rule}' was marked as containing configuration options. Only JSON code blocks can used to provide configuration options.\n\n{code}");
+        }
+    }
+}
+
+/// Parse the documentation fragment for a lint rule (in markdown) and lint the code blocks.
 fn parse_documentation(
     group: &'static str,
     rule: &'static str,
     docs: &'static str,
 ) -> anyhow::Result<()> {
     let parser = Parser::new(docs);
+
+    // Track the last configuration options block that was encountered
+    let mut last_options: Option<PartialConfiguration> = None;
 
     // Tracks the content of the current code block if it's using a
     // language supported for analysis
@@ -548,7 +702,11 @@ fn parse_documentation(
             }
             Event::End(TagEnd::CodeBlock) => {
                 if let Some((test, block)) = language.take() {
-                    assert_lint(group, rule, &test, &block)?;
+                    if test.options {
+                        last_options = parse_rule_options(group, rule, &test, &block)?;
+                    } else {
+                        assert_lint(group, rule, &test, &block, &last_options)?;
+                    }
                 }
             }
             Event::Text(text) => {

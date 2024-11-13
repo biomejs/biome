@@ -44,9 +44,8 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "allowInvalidRoles": ["invalid-role", "text"],
     ///         "ignoreNonDom": true

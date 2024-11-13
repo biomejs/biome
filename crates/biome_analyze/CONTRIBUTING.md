@@ -710,6 +710,8 @@ The documentation needs to adhere to the following rules:
 - When adding _invalid_ snippets in the `### Invalid` section, you must use the `expect_diagnostic` code block property. We use this property to generate a diagnostic and attach it to the snippet. A snippet **must emit only ONE diagnostic**.
 - When adding _valid_ snippets in the `### Valid` section, you can use one single snippet.
 - You can use the code block property `ignore` to tell the code generation script to **not generate a diagnostic for an invalid snippet**.
+- You can use the code block property `options` to tell the code generation script that this is a configuration options example.
+- You can use the code block property `use_options` to tell the code generation script to use the options from the most recent `options` block while linting.
 - Update the `language` field in the `declare_lint_rule!` macro to the language the rule primarily applies to.
   - If your rule applies to any JavaScript, you can leave it as `js`.
   - If your rule only makes sense in a specific JavaScript dialect, you should set it to `jsx`, `ts`, or `tsx`, whichever is most appropriate.

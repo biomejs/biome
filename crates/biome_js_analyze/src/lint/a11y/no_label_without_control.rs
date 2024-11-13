@@ -73,9 +73,8 @@ declare_lint_rule! {
     ///
     /// Both options `inputComponents` and `labelComponents` don't have support for namespace components (e.g. `<Control.Input>`).
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "inputComponents": ["CustomInput"],
     ///         "labelAttributes": ["label"],

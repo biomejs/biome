@@ -84,9 +84,8 @@ declare_lint_rule! {
     /// For example, if you want `.ts` files to import other modules as `.js` (or `.jsx`), you should
     /// configure the following options in your Biome config:
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "suggestedExtensions": {
     ///             "ts": {

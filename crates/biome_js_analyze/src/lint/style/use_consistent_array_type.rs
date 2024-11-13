@@ -51,9 +51,8 @@ declare_lint_rule! {
     ///
     /// Use the options to specify the syntax of array declarations to use.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "syntax": "shorthand"
     ///     }

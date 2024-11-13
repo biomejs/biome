@@ -232,7 +232,7 @@ declare_lint_rule! {
     ///
     /// ### TypeScript `namespace` names
     ///
-    /// A _TypeScript_ `namespace` names are in [`camelCase`] or in [`PascalCase`].
+    /// A _TypeScript_ `namespace` name is in [`camelCase`] or in [`PascalCase`].
     ///
     /// ```ts
     /// namespace mathExtra {
@@ -248,11 +248,11 @@ declare_lint_rule! {
     ///
     /// Note that some declarations are always ignored.
     /// You cannot apply a convention to them.
-    /// This is the case of:
+    /// This is the case for:
     ///
     /// - Member names that are not identifiers
     ///
-    ///   ```js,ignore
+    ///   ```js
     ///   class C {
     ///     ["not an identifier"]() {}
     ///   }
@@ -260,27 +260,27 @@ declare_lint_rule! {
     ///
     /// - Named imports
     ///
-    ///  ```js,ignore
+    ///  ```js
     ///   import { an_IMPORT } from "mod"
     ///   ```
     ///
-    /// - destructured object properties
+    /// - Destructured object properties
     ///
-    ///   ```js,ignore
+    ///   ```js
     ///   const { destructed_PROP } = obj;
     ///   ```
     ///
-    /// - class member marked with `override`
+    /// - Class members marked with `override`:
     ///
-    ///   ```ts,ignore
+    ///   ```ts
     ///   class C extends B {
     ///     override overridden_METHOD() {}
     ///   }
     ///   ```
     ///
-    /// - declarations inside an external TypeScript module
+    /// - Declarations inside an external TypeScript module
     ///
-    ///   ```ts,ignore
+    ///   ```ts
     ///   declare module "myExternalModule" {
     ///     export interface my_INTERFACE {}
     ///   }
@@ -290,9 +290,8 @@ declare_lint_rule! {
     ///
     /// The rule provides several options that are detailed in the following subsections.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "strictCase": false,
     ///         "requireAscii": true,
@@ -314,23 +313,50 @@ declare_lint_rule! {
     /// ### strictCase
     ///
     /// When this option is set to `true`, it forbids consecutive uppercase characters in [`camelCase`] and [`PascalCase`].
-    /// For instance,  when the option is set to `true`, `HTTPServer` or `aHTTPServer` will throw an error.
-    /// These names should be renamed to `HttpServer` and `aHttpServer`
     ///
-    /// When the option is set to `false`, consecutive uppercase characters are allowed.
-    /// `HTTPServer` and `aHTTPServer` are so valid.
+    /// **Default:** `true`
     ///
-    /// Default: `true`
+    /// For instance, `HTTPServer` or `aHTTPServer` are not permitted for `strictCase: true`.
+    /// These names should be renamed to `HttpServer` and `aHttpServer`:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "strictCase": true
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// class HTTPServer {
+    /// }
+    /// ```
+    ///
+    /// When `strictCase` is set to `false`, consecutive uppercase characters are allowed.
+    /// For example, `HTTPServer` and `aHTTPServer` would be considered valid then:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "strictCase": false
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// class HTTPServer {
+    /// }
+    /// ```
     ///
     /// ### requireAscii
     ///
-    /// When this option is set to `true`, it forbids names that include non-ASCII characters.
-    /// For instance,  when the option is set to `true`, `café` or `안녕하세요` will throw an error.
+    /// When `true`, names must only consist of ASCII characters only,
+    /// forbidding names like `café` or `안녕하세요` that include non-ASCII characters.
     ///
-    /// When the option is set to `false`, names may include non-ASCII characters.
-    /// `café` and `안녕하세요` are so valid.
+    /// When `requireAscii` is set to `false`, names may include non-ASCII characters.
+    /// For example, `café` and `안녕하세요` would be considered valid then.
     ///
-    /// Default: `false`
+    /// **Default:** `false`
     ///
     /// **This option will be turned on by default in Biome 2.0.**
     ///
@@ -342,8 +368,8 @@ declare_lint_rule! {
     /// You can enforce another convention by setting `enumMemberCase` option.
     /// The supported cases are: [`PascalCase`], [`CONSTANT_CASE`], and [`camelCase`].
     ///
-    /// This option will be deprecated in the future.
-    /// Use the `conventions` option instead.
+    /// **This option will be deprecated in the future.**
+    /// **Use the [`conventions`](#conventions-since-v180) option instead.**
     ///
     /// ### conventions (Since v1.8.0)
     ///
@@ -353,9 +379,8 @@ declare_lint_rule! {
     ///
     /// For example, you can enforce the use of [`CONSTANT_CASE`] for global `const` declarations:
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "conventions": [
     ///             {
@@ -440,9 +465,8 @@ declare_lint_rule! {
     /// - A private property starts with `_` and consists of at least two characters
     /// - The captured name (the name without the leading `_`) is in [`camelCase`].
     ///
-    /// ```json5
+    /// ```json,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             {
@@ -462,9 +486,8 @@ declare_lint_rule! {
     /// then the part of the name captured by the regular expression is forwarded to the next conventions of the array.
     /// In the following example, we require that private class members start with `_` and all class members are in ["camelCase"].
     ///
-    /// ```json5
+    /// ```jsonc,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             {
@@ -491,9 +514,8 @@ declare_lint_rule! {
     /// Because the default conventions already ensure that class members are in ["camelCase"],
     /// the previous example can be simplified to:
     ///
-    /// ```json5
+    /// ```jsonc,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             {
@@ -516,9 +538,8 @@ declare_lint_rule! {
     ///
     /// You can reset all default conventions by adding a convention at the end of the array that accepts anything:
     ///
-    /// ```json5
+    /// ```jsonc,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             // your conventions
@@ -546,9 +567,8 @@ declare_lint_rule! {
     ///   and to be in [`PascalCase`].
     /// - All other names follow the default conventions
     ///
-    /// ```json5
+    /// ```jsonc,options
     /// {
-    ///     // ...
     ///     "options": {
     ///         "conventions": [
     ///             {

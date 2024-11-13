@@ -33,11 +33,11 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <a href='http://external.link' target='_blank' rel="noopener">child</a>
+    /// <a href='http://external.link' target='_blank' rel='noopener'>child</a>
     /// ```
     ///
     /// ```jsx,expect_diagnostic
-    /// <a {...props} href='http://external.link' target='_blank' rel="noopener">child</a>
+    /// <a {...props} href='http://external.link' target='_blank' rel='noopener'>child</a>
     /// ```
     ///
     /// ### Valid
@@ -47,7 +47,7 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```jsx
-    /// <a href='http://external.link' target='_blank' rel="noopener" {...props}>child</a>
+    /// <a href='http://external.link' target='_blank' rel='noopener' {...props}>child</a>
     /// ```
     ///
     /// ## Options
@@ -55,22 +55,37 @@ declare_lint_rule! {
     /// The option `allowDomains` allows specific domains to use `target="_blank"` without `rel="noreferrer"`.
     /// In the following configuration, it's allowed to use the domains `https://example.com` and `example.org`:
     ///
-    /// ```json,ignore
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "allowDomains": ["https://example.com", "example.org"]
     ///     }
     /// }
     /// ```
     ///
-    /// ```jsx,ignore
+    /// ```jsx,use_options
     /// <>
-    ///   <a target="_blank" href="https://example.com"></a>
-    ///   <a target="_blank" href="example.org"></a>
+    ///   <a target='_blank' testme href='https://example.com'></a>
+    ///   <a target='_blank' href='example.org'></a>
     /// </>
     /// ```
     ///
+    /// The diagnostic is applied to all domains not in the allow list:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "allowDomains": ["https://example.com"]
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```jsx,expect_diagnostic,use_options
+    /// <>
+    ///   <a target='_blank' testme href='https://example.com'></a>
+    ///   <a target='_blank' href='example.org'></a>
+    /// </>
+    /// ```
     /// Biome doesn't check if the list contains valid URLs.
     pub NoBlankTarget {
         version: "1.0.0",
