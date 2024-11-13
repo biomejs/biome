@@ -153,3 +153,9 @@ impl StaticValue {
         matches!(self, StaticValue::Null(_) | StaticValue::Undefined(_))
     }
 }
+
+impl AsRef<str> for StaticValue {
+    fn as_ref(&self) -> &str {
+        self.text()
+    }
+}
