@@ -37,7 +37,7 @@ pub fn format_node(
 ///
 /// This runs a simple heuristic to determine the initial indentation
 /// level of the node based on the provided [GritFormatOptions], which
-/// must match currently the current initial of the file. Additionally,
+/// must match the current indentation of the file. Additionally,
 /// because the reformatting happens only locally the resulting code
 /// will be indented with the same level as the original selection,
 /// even if it's a mismatch from the rest of the block the selection is in
@@ -56,7 +56,7 @@ pub fn format_range(
 ///
 /// This runs a simple heuristic to determine the initial indentation
 /// level of the node based on the provided [GritFormatOptions], which
-/// must match currently the current initial of the file. Additionally,
+/// must match the current indentation of the file. Additionally,
 /// because the reformatting happens only locally the resulting code
 /// will be indented with the same level as the original selection,
 /// even if it's a mismatch from the rest of the block the selection is in
