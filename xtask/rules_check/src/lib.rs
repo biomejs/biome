@@ -16,10 +16,11 @@ use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
 use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
-use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
+use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage, TextSize};
 use biome_json_factory::make;
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::{AnyJsonValue, JsonLanguage, JsonObjectValue};
+use biome_rowan::AstNode;
 use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
 use biome_service::workspace::DocumentFileSource;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
@@ -196,6 +197,7 @@ struct DiagnosticWriter<'a> {
     diagnostic_count: i32,
     all_diagnostics: Vec<biome_diagnostics::Error>,
     has_error: bool,
+    subtract_offset: TextSize,
 }
 
 impl<'a> DiagnosticWriter<'a> {
@@ -213,6 +215,7 @@ impl<'a> DiagnosticWriter<'a> {
             diagnostic_count: 0,
             all_diagnostics: vec![],
             has_error: false,
+            subtract_offset: TextSize::from(0),
         }
     }
 
@@ -222,7 +225,7 @@ impl<'a> DiagnosticWriter<'a> {
         let code = self.code;
 
         // Record the diagnostic
-        self.all_diagnostics.push(diag);
+        self.all_diagnostics.push(self.adjust_span_offset(diag));
 
         // Fail the test if the analysis returns more diagnostics than expected...
         if self.test.expect_diagnostic {
@@ -251,6 +254,21 @@ impl<'a> DiagnosticWriter<'a> {
                     {PrintDiagnostic::verbose(diag)}
                 },
             );
+        }
+    }
+
+    /// Adjusts the location of the diagnostic to account for synthetic nodes
+    /// that arent't present in the source code but only in the AST.
+    fn adjust_span_offset(&self, diag: biome_diagnostics::Error) -> biome_diagnostics::Error {
+        if self.subtract_offset != 0.into() {
+            if let Some(span) = diag.location().span {
+                let new_span = span.checked_sub(self.subtract_offset);
+                diag.with_file_span(new_span)
+            } else {
+                diag
+            }
+        } else {
+            diag
         }
     }
 }
@@ -580,6 +598,23 @@ fn make_json_object_with_single_member<V: Into<AnyJsonValue>>(
     )
 }
 
+fn get_first_member<V: Into<AnyJsonValue>>(parent: V, expected_name: &str) -> Option<AnyJsonValue> {
+    let parent_value: AnyJsonValue = parent.into();
+    let member = parent_value
+        .as_json_object_value()?
+        .json_member_list()
+        .into_iter()
+        .next()?
+        .ok()?;
+    let member_name = member.name().ok()?.inner_string_text().ok()?.to_string();
+
+    if member_name.as_str() == expected_name {
+        member.value().ok()
+    } else {
+        None
+    }
+}
+
 /// Parse the options fragment for a lint rule and return the parsed options.
 fn parse_rule_options(
     group: &'static str,
@@ -642,14 +677,29 @@ fn parse_rule_options(
                 ),
             );
 
-            // We reuse the original AST where possible so that errors are
-            // reported at the correct locations in the source code.
+            // Create a new JsonRoot from the synthetic AST
             let eof_token = parsed_root.eof_token()?;
             let mut root_builder = make::json_root(synthetic_tree.into(), eof_token);
             if let Some(bom_token) = parsed_root.bom_token() {
                 root_builder = root_builder.with_bom_token(bom_token);
             }
             let root = root_builder.build();
+
+            // Adjust source code spans to account for the synthetic nodes
+            // so that errors are reported at the correct source code locations:
+            let original_offset = parsed_root.value().ok().map(|v| AstNode::range(&v).start());
+            let wrapped_offset = root
+                .value()
+                .ok()
+                .and_then(|v| get_first_member(v, "linter"))
+                .and_then(|v| get_first_member(v, "rules"))
+                .and_then(|v| get_first_member(v, group))
+                .and_then(|v| get_first_member(v, rule))
+                .map(|v| AstNode::range(&v).start());
+            diagnostics.subtract_offset = wrapped_offset
+                .zip(original_offset)
+                .and_then(|(wrapped, original)| wrapped.checked_sub(original))
+                .unwrap_or_default();
 
             // Deserialize the configuration from the partially-synthetic AST,
             // and report any errors encountered during deserialization.

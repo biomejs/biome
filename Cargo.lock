@@ -3143,6 +3143,7 @@ dependencies = [
  "biome_json_factory",
  "biome_json_parser",
  "biome_json_syntax",
+ "biome_rowan",
  "biome_service",
  "pulldown-cmark",
 ]
