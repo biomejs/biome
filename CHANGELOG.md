@@ -37,7 +37,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#4121](https://github.com/biomejs/biome/issues/4326), don't ident a CSS selector when has leading comments. Contributed by @fireairforce
 - Fix [#4334](https://github.com/biomejs/biome/issues/4334), don't insert trailing comma on type import statement. Contributed by @fireairforce
-
+- Fix [#3229](https://github.com/biomejs/biome/issues/3229), where Biome wasn't idempotent when block comments were placed inside compound selectors. Contributed by @ematipico
 ### JavaScript APIs
 
 ### Linter
@@ -130,7 +130,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   Also, this will bring the Biome rule closer to the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef).
 
   Contributed by @Conaclos
-  
+
 - Add [noGlobalDirnameFilename](https://biomejs.dev/linter/rules/no-global-dirname-filename/). Contributed by @unvalley
 
 #### Enhancements
