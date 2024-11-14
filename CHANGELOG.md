@@ -171,6 +171,19 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- `useValidTypeof` now accepts comparisons with variables.
+
+  Previously, the rule required to compare a `typeof` expression against another `typeof` expression or a valid string literal.
+  We now accept more cases, notably comparison against a variable:
+
+  ```js
+  if (typeof foo === bar) {
+    // ...
+  }
+  ```
+
+  Contributed by @Conaclos
+
 #### Bug fixes
 
 - [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now reports all expressions using the `Array` constructors.
