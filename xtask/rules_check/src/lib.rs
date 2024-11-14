@@ -761,7 +761,12 @@ fn parse_documentation(
             }
             Event::Text(text) => {
                 if let Some((_, block)) = &mut language {
-                    write!(block, "{text}")?;
+                    if let Some(inner_text) = text.strip_prefix("# ") {
+                        // Lines prefixed with "# " are hidden from the public documentation
+                        write!(block, "{inner_text}")?;
+                    } else {
+                        write!(block, "{text}")?;
+                    }
                 }
             }
             // We don't care other events
