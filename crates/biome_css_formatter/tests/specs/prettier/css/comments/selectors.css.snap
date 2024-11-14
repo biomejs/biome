@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/comments/selectors.css
+snapshot_kind: text
 ---
 # Input
 
@@ -231,8 +232,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
  
 -/* comment 29 */
 -.element /* comment 30 */ > /* comment 31 */ .element /* comment 32 */ {
-+/* comment 29 */ .element /* comment 30 */
-+  > /* comment 31 */ .element /* comment 32 */ {
++/* comment 29 */ .element
++  > /* comment 30 */ /* comment 31 */ .element /* comment 32 */ {
  }
  /* comment 33 */
  .element
@@ -249,8 +250,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
  
 -/* comment 37 */
 -.element /* comment 38 */ + /* comment 39 */ .element /* comment 40 */ {
-+/* comment 37 */ .element /* comment 38 */
-+  + /* comment 39 */ .element /* comment 40 */ {
++/* comment 37 */ .element
++  + /* comment 38 */ /* comment 39 */ .element /* comment 40 */ {
  }
  /* comment 41 */
  .element
@@ -267,8 +268,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
  
 -/* comment 45 */
 -.element /* comment 46 */ ~ /* comment 47 */ .element /* comment 48 */ {
-+/* comment 45 */ .element /* comment 46 */
-+  ~ /* comment 47 */ .element /* comment 48 */ {
++/* comment 45 */ .element
++  ~ /* comment 46 */ /* comment 47 */ .element /* comment 48 */ {
  }
  /* comment 49 */
  .element
@@ -442,8 +443,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
 -/* comment 167 */
 -article /* comment 168 */ :--heading /* comment 169 */ + /* comment 170 */ p /* comment 171 */ {
 +/* comment 167 */ article
-+  /* comment 168 */ :--heading /* comment 169 */
-+  + /* comment 170 */ p /* comment 171 */ {
++  /* comment 168 */ :--heading
++  + /* comment 169 */ /* comment 170 */ p /* comment 171 */ {
  }
  
 -/* comment 172 */
@@ -534,8 +535,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
 {
 }
 
-/* comment 29 */ .element /* comment 30 */
-  > /* comment 31 */ .element /* comment 32 */ {
+/* comment 29 */ .element
+  > /* comment 30 */ /* comment 31 */ .element /* comment 32 */ {
 }
 /* comment 33 */
 .element
@@ -545,8 +546,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
 {
 }
 
-/* comment 37 */ .element /* comment 38 */
-  + /* comment 39 */ .element /* comment 40 */ {
+/* comment 37 */ .element
+  + /* comment 38 */ /* comment 39 */ .element /* comment 40 */ {
 }
 /* comment 41 */
 .element
@@ -556,8 +557,8 @@ input:not(/* comment 125 */[/* comment 126 */disabled/* comment 127 */]/* commen
 {
 }
 
-/* comment 45 */ .element /* comment 46 */
-  ~ /* comment 47 */ .element /* comment 48 */ {
+/* comment 45 */ .element
+  ~ /* comment 46 */ /* comment 47 */ .element /* comment 48 */ {
 }
 /* comment 49 */
 .element
@@ -679,8 +680,8 @@ input:not(
 } /* comment 166 */
 
 /* comment 167 */ article
-  /* comment 168 */ :--heading /* comment 169 */
-  + /* comment 170 */ p /* comment 171 */ {
+  /* comment 168 */ :--heading
+  + /* comment 169 */ /* comment 170 */ p /* comment 171 */ {
 }
 
 /* comment 172 */ .foo
