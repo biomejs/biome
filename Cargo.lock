@@ -3130,6 +3130,7 @@ dependencies = [
  "biome_css_parser",
  "biome_css_syntax",
  "biome_diagnostics",
+ "biome_fs",
  "biome_graphql_analyze",
  "biome_graphql_parser",
  "biome_graphql_syntax",

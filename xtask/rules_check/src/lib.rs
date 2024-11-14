@@ -4,19 +4,20 @@
 use anyhow::{bail, ensure};
 use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Queryable,
-    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
+    AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
+    RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
 use biome_css_syntax::CssLanguage;
 use biome_diagnostics::{Diagnostic, DiagnosticExt, PrintDiagnostic};
+use biome_fs::BiomePath;
 use biome_graphql_syntax::GraphqlLanguage;
 use biome_js_parser::JsParserOptions;
 use biome_js_syntax::{EmbeddingKind, JsFileSource, JsLanguage};
 use biome_json_parser::JsonParserOptions;
 use biome_json_syntax::JsonLanguage;
-use biome_service::settings::WorkspaceSettings;
+use biome_service::settings::{ServiceLanguage, WorkspaceSettings};
 use biome_service::workspace::DocumentFileSource;
 use pulldown_cmark::{CodeBlockKind, Event, Parser, Tag, TagEnd};
 use std::collections::BTreeMap;
@@ -234,6 +235,36 @@ impl<'a> DiagnosticWriter<'a> {
     }
 }
 
+fn create_analyzer_options<L>(
+    workspace_settings: &WorkspaceSettings,
+    file_path: &String,
+    test: &CodeBlockTest,
+) -> AnalyzerOptions
+where
+    L: ServiceLanguage,
+{
+    let path = BiomePath::new(PathBuf::from(&file_path));
+    let file_source = &test.document_file_source();
+    let supression_reason = None;
+
+    let settings = workspace_settings.get_current_settings();
+    let linter = settings.map(|s| &s.linter);
+    let overrides = settings.map(|s| &s.override_settings);
+    let language_settings = settings
+        .map(|s| L::lookup_settings(&s.languages))
+        .map(|result| &result.linter);
+
+    L::resolve_analyzer_options(
+        settings,
+        linter,
+        overrides,
+        language_settings,
+        &path,
+        file_source,
+        supression_reason,
+    )
+}
+
 /// Parse and analyze the provided code block, and asserts that it emits
 /// exactly zero or one diagnostic depending on the value of `expect_diagnostic`.
 /// That diagnostic is then emitted as text into the `content` buffer
@@ -291,14 +322,12 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = AnalyzerOptions {
-                    configuration: AnalyzerConfiguration {
-                        jsx_runtime: Some(JsxRuntime::default()),
-                        ..Default::default()
-                    },
-                    file_path: PathBuf::from(&file_path),
-                    suppression_reason: None,
+                let options = {
+                    let mut o = create_analyzer_options::<JsLanguage>(&settings, &file_path, &test);
+                    o.configuration.jsx_runtime = Some(JsxRuntime::default());
+                    o
                 };
+
                 biome_js_analyze::analyze(&root, filter, &options, file_source, None, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
@@ -346,10 +375,8 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = AnalyzerOptions {
-                    file_path: PathBuf::from(&file_path),
-                    ..Default::default()
-                };
+                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, &test);
+
                 biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
@@ -397,10 +424,8 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = AnalyzerOptions {
-                    file_path: PathBuf::from(&file_path),
-                    ..Default::default()
-                };
+                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, &test);
+
                 biome_css_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
@@ -448,10 +473,8 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = AnalyzerOptions {
-                    file_path: PathBuf::from(&file_path),
-                    ..Default::default()
-                };
+                let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, &test);
+
                 biome_graphql_analyze::analyze(&root, filter, &options, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
