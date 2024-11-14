@@ -331,9 +331,14 @@ impl Visitor for AnyThisScopeVisitor {
 
 /// Get a minimal arrow function body from a regular function body.
 fn to_arrow_body(body: JsFunctionBody) -> AnyJsFunctionBody {
+    let directives = body.directives();
     let body_statements = body.statements();
-    // () => { ... }
     let early_result = AnyJsFunctionBody::from(body);
+    if !directives.is_empty() {
+        // The function body has at least one directive.
+        // e.g. `function() { "directive"; return 0; }`
+        return early_result;
+    }
     let Some(AnyJsStatement::JsReturnStatement(return_statement)) = body_statements.iter().next()
     else {
         return early_result;
