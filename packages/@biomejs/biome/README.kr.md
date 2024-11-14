@@ -143,9 +143,6 @@ Biome은 기업이 다양한 개발자들 사이에서 인지도를 얻을 수 �
       <td align="center" valign="middle">
         <a href="https://forge42.dev/" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80"></a>
       </td>
-      <td align="center" valign="middle">
-        <a href="https://transloadit.com/" target="_blank"><img src="https://avatars.githubusercontent.com/u/125754?s=200&v=4" width="80"></a>
-      </td>
     </tr>
   </tbody>
 </table>

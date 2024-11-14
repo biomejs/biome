@@ -156,9 +156,6 @@ Biome 提供了一個簡單的贊助計劃，允許公司在各種開發者中�
       <td align="center" valign="middle">
         <a href="https://forge42.dev/" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80"></a>
       </td>
-      <td align="center" valign="middle">
-        <a href="https://transloadit.com/" target="_blank"><img src="https://avatars.githubusercontent.com/u/125754?s=200&v=4" width="80"></a>
-      </td>
     </tr>
   </tbody>
 </table>
