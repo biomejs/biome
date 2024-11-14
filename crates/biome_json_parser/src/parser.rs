@@ -19,11 +19,13 @@ pub struct JsonParserOptions {
 }
 
 impl JsonParserOptions {
+    #[must_use]
     pub fn with_allow_comments(mut self) -> Self {
         self.allow_comments = true;
         self
     }
 
+    #[must_use]
     pub fn with_allow_trailing_commas(mut self) -> Self {
         self.allow_trailing_commas = true;
         self
@@ -32,12 +34,12 @@ impl JsonParserOptions {
 
 impl From<&JsonFileSource> for JsonParserOptions {
     fn from(file_source: &JsonFileSource) -> Self {
-        let options = Self::default();
+        let mut options = Self::default();
         if file_source.allow_comments() {
-            options.with_allow_comments();
+            options = options.with_allow_comments();
         }
         if file_source.allow_trailing_commas() {
-            options.with_allow_trailing_commas();
+            options = options.with_allow_trailing_commas();
         }
         options
     }
@@ -90,5 +92,27 @@ impl<'source> Parser for JsonParser<'source> {
 
     fn source_mut(&mut self) -> &mut Self::Source {
         &mut self.source
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::JsonParserOptions;
+    use biome_json_syntax::JsonFileSource;
+
+    #[test]
+    fn parse_options_from_json_file_source_respects_allow_comments_and_allow_trailing_comma() {
+        let p1 = JsonParserOptions::from(&JsonFileSource::json());
+        assert!(!p1.allow_comments);
+        assert!(!p1.allow_trailing_commas);
+
+        let p2 = JsonParserOptions::from(&JsonFileSource::json_allow_comments());
+        assert!(p2.allow_comments);
+        assert!(!p2.allow_trailing_commas);
+
+        let p3 =
+            JsonParserOptions::from(&JsonFileSource::json_allow_comments_and_trailing_commas());
+        assert!(p3.allow_comments);
+        assert!(p3.allow_trailing_commas);
     }
 }

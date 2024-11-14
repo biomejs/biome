@@ -160,15 +160,18 @@ impl JsonFileSource {
         }
     }
 
+    #[must_use]
     pub fn with_allow_trailing_commas(mut self) -> Self {
         self.allow_trailing_commas = true;
         self
     }
 
+    #[must_use]
     pub fn allow_trailing_commas(&self) -> bool {
         self.allow_trailing_commas
     }
 
+    #[must_use]
     pub fn with_allow_comments(mut self) -> Self {
         self.allow_comments = true;
         self
