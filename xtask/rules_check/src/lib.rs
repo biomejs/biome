@@ -139,13 +139,27 @@ struct CodeBlockTest {
     /// Whether to ignore this code block.
     ignore: bool,
 
-    /// True if this is a block of configuration options instead
-    /// of a valid/invalid code example.
-    options: bool,
+    /// Whether this is a block of configuration options instead
+    /// of a valid/invalid code example, and if yes, how that
+    /// block of configuration options should be parsed:
+    options: OptionsParsingMode,
 
     /// Whether to use the last code block that was marked with
     /// `options` as the configuration settings for this code block.
     use_options: bool,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+enum OptionsParsingMode {
+    /// This code block does not contain configuration options.
+    #[default]
+    NoOptions,
+
+    /// This code block contains the options for a single rule only.
+    RuleOptionsOnly,
+
+    /// This code block contains JSON that adheres to the full `biome.json` schema.
+    FullConfiguration,
 }
 
 impl CodeBlockTest {
@@ -169,7 +183,7 @@ impl FromStr for CodeBlockTest {
             tag: String::new(),
             expect_diagnostic: false,
             ignore: false,
-            options: false,
+            options: OptionsParsingMode::NoOptions,
             use_options: false,
         };
 
@@ -178,7 +192,8 @@ impl FromStr for CodeBlockTest {
                 // Other attributes
                 "expect_diagnostic" => test.expect_diagnostic = true,
                 "ignore" => test.ignore = true,
-                "options" => test.options = true,
+                "options" => test.options = OptionsParsingMode::RuleOptionsOnly,
+                "full_options" => test.options = OptionsParsingMode::FullConfiguration,
                 "use_options" => test.use_options = true,
                 // Regard as language tags, last one wins
                 _ => test.tag = token.to_string(),
@@ -641,65 +656,93 @@ fn parse_rule_options(
                 return Ok(None);
             }
 
-            // By convention, the configuration blocks in the documentation
-            // only contain the settings for the lint rule itself, like so:
-            //
-            // ```json,options
-            // {
-            //     "options": {
-            //         ...
-            //     }
-            // }
-            // ```
             let parsed_root = parse.tree();
-
-            // We therefore extend the JSON AST with some synthetic elements
-            // to make it match the structure expected by the configuration parse:
-            //
-            // {
-            //     "linter": {
-            //         "rules": {
-            //             "<group>": {
-            //                 "<rule>": {<options>}
-            //             }
-            //         }
-            //     }
-            // }
             let parsed_options = parsed_root.value()?;
-            let synthetic_tree = make_json_object_with_single_member(
-                "linter",
-                make_json_object_with_single_member(
-                    "rules",
-                    make_json_object_with_single_member(
-                        group,
-                        make_json_object_with_single_member(rule, parsed_options),
-                    ),
-                ),
-            );
 
-            // Create a new JsonRoot from the synthetic AST
-            let eof_token = parsed_root.eof_token()?;
-            let mut root_builder = make::json_root(synthetic_tree.into(), eof_token);
-            if let Some(bom_token) = parsed_root.bom_token() {
-                root_builder = root_builder.with_bom_token(bom_token);
-            }
-            let root = root_builder.build();
+            let root = match test.options {
+                OptionsParsingMode::NoOptions => {
+                    unreachable!("parse_rule_options should only be called for options blocks")
+                }
+                OptionsParsingMode::RuleOptionsOnly => {
+                    // By convention, the configuration blocks in the documentation
+                    // only contain the settings for the lint rule itself, like so:
+                    //
+                    // ```json,options
+                    // {
+                    //     "options": {
+                    //         ...
+                    //     }
+                    // }
+                    // ```
+                    //
+                    // We therefore extend the JSON AST with some synthetic elements
+                    // to make it match the structure expected by the configuration parse:
+                    //
+                    // {
+                    //     "linter": {
+                    //         "rules": {
+                    //             "<group>": {
+                    //                 "<rule>": {<options>}
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    let synthetic_tree = make_json_object_with_single_member(
+                        "linter",
+                        make_json_object_with_single_member(
+                            "rules",
+                            make_json_object_with_single_member(
+                                group,
+                                make_json_object_with_single_member(rule, parsed_options),
+                            ),
+                        ),
+                    );
 
-            // Adjust source code spans to account for the synthetic nodes
-            // so that errors are reported at the correct source code locations:
-            let original_offset = parsed_root.value().ok().map(|v| AstNode::range(&v).start());
-            let wrapped_offset = root
-                .value()
-                .ok()
-                .and_then(|v| get_first_member(v, "linter"))
-                .and_then(|v| get_first_member(v, "rules"))
-                .and_then(|v| get_first_member(v, group))
-                .and_then(|v| get_first_member(v, rule))
-                .map(|v| AstNode::range(&v).start());
-            diagnostics.subtract_offset = wrapped_offset
-                .zip(original_offset)
-                .and_then(|(wrapped, original)| wrapped.checked_sub(original))
-                .unwrap_or_default();
+                    // Create a new JsonRoot from the synthetic AST
+                    let eof_token = parsed_root.eof_token()?;
+                    let mut root_builder = make::json_root(synthetic_tree.into(), eof_token);
+                    if let Some(bom_token) = parsed_root.bom_token() {
+                        root_builder = root_builder.with_bom_token(bom_token);
+                    }
+                    let synthetic_root = root_builder.build();
+
+                    // Adjust source code spans to account for the synthetic nodes
+                    // so that errors are reported at the correct source code locations:
+                    let original_offset =
+                        parsed_root.value().ok().map(|v| AstNode::range(&v).start());
+                    let wrapped_offset = synthetic_root
+                        .value()
+                        .ok()
+                        .and_then(|v| get_first_member(v, "linter"))
+                        .and_then(|v| get_first_member(v, "rules"))
+                        .and_then(|v| get_first_member(v, group))
+                        .and_then(|v| get_first_member(v, rule))
+                        .map(|v| AstNode::range(&v).start());
+                    diagnostics.subtract_offset = wrapped_offset
+                        .zip(original_offset)
+                        .and_then(|(wrapped, original)| wrapped.checked_sub(original))
+                        .unwrap_or_default();
+
+                    synthetic_root
+                }
+                OptionsParsingMode::FullConfiguration => {
+                    // In some rare cases, we want to be able to display full JSON configuration
+                    // instead, e.t. to be able to show off per-file overrides:
+                    //
+                    // ```json,full-options
+                    // {
+                    //     "linter": {
+                    //         "rules": {
+                    //             "<group>": {
+                    //                 "<rule>": {<options>}
+                    //             }
+                    //         }
+                    //     }
+                    // }
+                    // ```
+                    parsed_root
+                }
+            };
 
             // Deserialize the configuration from the partially-synthetic AST,
             // and report any errors encountered during deserialization.
@@ -752,7 +795,7 @@ fn parse_documentation(
             }
             Event::End(TagEnd::CodeBlock) => {
                 if let Some((test, block)) = language.take() {
-                    if test.options {
+                    if test.options != OptionsParsingMode::NoOptions {
                         last_options = parse_rule_options(group, rule, &test, &block)?;
                     } else {
                         assert_lint(group, rule, &test, &block, &last_options)?;
