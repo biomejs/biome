@@ -270,7 +270,7 @@ impl Rule for ExampleRule {
 
 #### Rule Options
 
-Some rules may allow customization using options.
+Some rules may allow customization [using per-rule options in `biome.json`](https://biomejs.dev/linter/#rule-options).
 
 > [!NOTE]
 > We try to keep rule options to a minimum and only provide them when needed.
@@ -364,7 +364,7 @@ and do not need to be handled by the rule itself.
 ##### Implementing JSON deserialization/serialization support
 
 > [!WARNING]
-> Although we use `serde`s attribute syntax, we do not actually use the `serde` crate for (de)serialization.
+> Although we use `serde`s attribute syntax, we do not actually use the `serde` crate for (de)serialization of `biome.json`.
 >
 > We instead provide a ***`serde`-inspired*** implementation in `biome_deserialize` and `biome_deserialize_macros` that [differs in some aspects](../biome_deserialize/README.md), like being fault-tolerant.
 
@@ -376,11 +376,16 @@ Also, we use other `serde` macros to adjust the JSON configuration:
 - `deny_unknown_fields`: it raises an error if the configuration contains extraneous fields.
 - `default`: it uses the `Default` value when the field is missing from `biome.json`. This macro makes the field optional.
 
-You can simply use a derive macros:
+Because we use `schemars`to generate a JSON schema for `biome.json`, our options type must support the `schemars::JsonSchema` trait as well.
+
+You can simply use the derive macros provided by `serde`, `biome_deserialize` and `schemars` to generate the necessary implementations automatically:
 
 ```rust
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+use biome_deserialize_macros::Deserializable;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Deserializable)]
+#[cfg_attr(feature = "schemars", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct MyRuleOptions {
     #[serde(default, skip_serializing_if = "is_default")]
