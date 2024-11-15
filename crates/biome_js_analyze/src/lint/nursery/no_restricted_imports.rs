@@ -12,17 +12,40 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "noRestrictedImports": {
-    ///         "options": {
-    ///             "paths": {
-    ///                 "lodash": "Using lodash is not encouraged",
-    ///                 "underscore": "Using underscore is not encouraged"
-    ///             }
+    ///     "options": {
+    ///         "paths": {
+    ///             "lodash": "Using lodash is not encouraged",
+    ///             "underscore": "Using underscore is not encouraged"
     ///         }
     ///     }
     /// }
+    /// ```
+    ///
+    /// ## Examples
+    ///
+    /// ### Invalid
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// import "lodash";
+    /// import "allowed-import";
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// const underscore = await import("underscore");
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// const lodash = require("lodash");
+    /// ```
+    ///
+    /// ### Valid
+    ///
+    /// ```js,use_options
+    /// import "allowed-import";
+    /// const myImport = await import("allowed-import");
+    /// const myImport = require("allowed-import");
     /// ```
     pub NoRestrictedImports {
         version: "1.6.0",

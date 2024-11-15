@@ -176,9 +176,8 @@ declare_lint_rule! {
     ///
     /// #### Example
     ///
-    /// ```json
+    /// ```json, options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "hooks": [
     ///             { "name": "useLocation", "closureIndex": 0, "dependenciesIndex": 1},
@@ -218,7 +217,6 @@ declare_lint_rule! {
     ///
     /// ```json
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "hooks": [
     ///             { "name": "useDispatch", "stableResult": true }

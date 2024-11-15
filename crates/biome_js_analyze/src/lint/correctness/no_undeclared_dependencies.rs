@@ -51,7 +51,8 @@ declare_lint_rule! {
     /// - `optionalDependencies`: If set to `false`, then the rule will show an error when `optionalDependencies` are imported. Defaults to `true`.
     ///
     /// You can set the options like this:
-    /// ```json
+    ///
+    /// ```json,options
     /// {
     ///   "options": {
     ///     "devDependencies": false,

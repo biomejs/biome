@@ -71,7 +71,7 @@ declare_lint_rule! {
     ///
     /// ### Code-related
     ///
-    /// ```json
+    /// ```json,options
     /// {
     ///     "options": {
     ///         "attributes": ["classList"],
@@ -88,17 +88,27 @@ declare_lint_rule! {
     ///
     /// If specified, strings in the indicated functions will be sorted. This is useful when working with libraries like [`clsx`](https://github.com/lukeed/clsx) or [`cva`](https://cva.style/).
     ///
-    /// ```js,ignore
+    /// ```js,expect_diagnostic,use_options
     /// clsx("px-2 foo p-4 bar", {
+    ///     "some-css-class": condition,
+    /// });
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// clsx("some-css-class", {
     ///     "block mx-4": condition,
     /// });
     /// ```
     ///
     /// Tagged template literals are also supported, for example:
     ///
-    /// ```js,ignore
+    /// ```js,use_options
     /// tw`px-2`;
     /// tw.div`px-2`;
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
+    /// tw`px-2 foo p-4 bar`;
     /// ```
     ///
     /// ### Sort-related
@@ -117,8 +127,14 @@ declare_lint_rule! {
     ///
     /// This has two implications:
     ///
-    /// - False positives: classes can be wrongly recognized as utilities even though their values are incorrect. For example, if there's a `px-` utility defined in the configuration, it will match all of the following classes: `px-2`, `px-1337`, `px-[not-actually-valid]`, `px-literally-anything`.
-    /// - No distinction between different utilities that share the same prefix: for example, `text-red-500` and `text-lg` are both interpreted as the same type of utility by this rule, even though the former refers to a color and the latter to a font size. This results in all utilities that share the same prefix being sorted together, regardless of their actual values.
+    /// - **False positives:** classes can be wrongly recognized as utilities even though their values are incorrect.
+    ///   For example, if there's a `px-` utility defined in the configuration, it will match all of the following classes:
+    ///   `px-2`, `px-1337`, `px-[not-actually-valid]`, `px-literally-anything`.
+    ///
+    /// - **No distinction between different utilities that share the same prefix:** for example,
+    ///   `text-red-500` and `text-lg` are both interpreted as the same type of utility by this rule,
+    ///    even though the former refers to a color and the latter to a font size. This results in all
+    ///    utilities that share the same prefix being sorted together, regardless of their actual values.
     ///
     /// ### Custom additions must be specified
     ///

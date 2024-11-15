@@ -40,7 +40,7 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ```ts,expect_diagnostic,ignore
+    /// ```ts,expect_diagnostic
     /// class A {
     ///   fooA(s: string): void;
     ///   fooA(n: number): void;
