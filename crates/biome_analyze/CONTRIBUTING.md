@@ -17,10 +17,10 @@ The analyzer allows implementors to create **four different** types of rules:
   - [Guideline: Explain a rule to the user](#guideline-explain-a-rule-to-the-user)
   - [Guideline: Placement of new rules](#guideline-placement-of-new-rules)
   - [Creating and implementing the rule](#creating-and-implementing-the-rule)
-  - [Rule options](#rule-options)
   - [Coding the rule](#coding-the-rule)
     - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
     - [`rule_category!` macro](#rule_category-macro)
+    - [Rule Options](#rule-options)
     - [Navigating the CST](#navigating-the-cst)
     - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
     - [Semantic Model](#semantic-model)
@@ -169,116 +169,6 @@ Don't forget to format your code with `just f` and lint with `just l`.
 
 That's it! Now, let's [test the rule](#testing-the-rule).
 
-### Rule options
-
-Some rules may allow customization using options.
-We try to keep rule options to a minimum and only when needed.
-Before adding an option, it's worth a discussion.
-Options should follow our [technical philosophy](https://biomejs.dev/internals/philosophy/#technical).
-
-Let's assume that the rule we want to implement supports the following options:
-
-- `behavior`: a string among `"A"`, `"B"`, and `"C"`;
-- `threshold`: an integer between 0 and 255;
-- `behaviorExceptions`: an array of strings.
-
-We would like to set the options in the `biome.json` configuration file:
-
-```json
-{
-  "linter": {
-    "rules": {
-      "recommended": true,
-      "nursery": {
-        "my-rule": {
-          "behavior": "A",
-          "threshold": 30,
-          "behaviorExceptions": ["f"],
-        }
-      }
-    }
-  }
-}
-```
-
-The first step is to create the Rust data representation of the rule's options.
-
-```rust
-use biome_deserialize_macros::Deserializable;
-
-#[derive(Clone, Debug, Default, Deserializable)]
-pub struct MyRuleOptions {
-    behavior: Behavior,
-    threshold: u8,
-    behavior_exceptions: Box<[Box<str>]>
-}
-
-#[derive(Clone, Debug, Default, Deserializable)]
-pub enum Behavior {
-    #[default]
-    A,
-    B,
-    C,
-}
-```
-
-Note that we use a boxed slice `Box<[Box<str>]>` instead of `Vec<String>`.
-This allows saving memory: [boxed slices and boxed str use 2 words instead of three words](https://nnethercote.github.io/perf-book/type-sizes.html#boxed-slices).
-
-To allow deserializing instances of the types `MyRuleOptions` and `Behavior`,
-they have to implement the `Deserializable` trait from the `biome_deserialize` crate.
-This is what the `Deserializable` keyword in the `#[derive]` statements above did.
-It's a so-called derive macros, which generates the implementation for the `Deserializable` trait
-for you.
-
-With these types in place, you can set the associated type `Options` of the rule:
-
-```rust
-impl Rule for MyRule {
-    type Query = Semantic<JsCallExpression>;
-    type State = Fix;
-    type Signals = Vec<Self::State>;
-    type Options = MyRuleOptions;
-}
-```
-
-A rule can retrieve its options with:
-
-```rust
-let options = ctx.options();
-```
-
-The compiler should warn you that `MyRuleOptions` does not implement some required types.
-We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
-
-Also, we use other `serde` macros to adjust the JSON configuration:
-- `rename_all = "camelCase"`: it renames all fields in camel-case, so they are in line with the naming style of the `biome.json`.
-- `deny_unknown_fields`: it raises an error if the configuration contains extraneous fields.
-- `default`: it uses the `Default` value when the field is missing from `biome.json`. This macro makes the field optional.
-
-You can simply use a derive macros:
-
-```rust
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
-pub struct MyRuleOptions {
-    #[serde(default, skip_serializing_if = "is_default")]
-    main_behavior: Behavior,
-
-    #[serde(default, skip_serializing_if = "is_default")]
-    extra_behaviors: Vec<Behavior>,
-}
-
-#[derive(Debug, Default, Clone)]
-#[cfg_attr(feature = "schemars", derive(JsonSchema))]
-pub enum Behavior {
-    #[default]
-    A,
-    B,
-    C,
-}
-```
 
 ### Coding the rule
 
@@ -375,6 +265,138 @@ impl Rule for ExampleRule {
             "message",
         ))
     }
+}
+```
+
+#### Rule Options
+
+Some rules may allow customization using options.
+
+> [!NOTE]
+> We try to keep rule options to a minimum and only provide them when needed.
+> Before adding an option, it's worth a discussion.
+>
+> If provided, options should follow our [technical philosophy](https://biomejs.dev/internals/philosophy/#technical).
+
+##### Options for our example rule
+
+Let's assume that the rule we want to implement supports the following options:
+
+- `behavior`: a string among `"A"`, `"B"`, and `"C"`;
+- `threshold`: an integer between 0 and 255;
+- `behaviorExceptions`: an array of strings.
+
+We would like to set the options in the `biome.json` configuration file:
+
+```json
+{
+  "linter": {
+    "rules": {
+      "recommended": true,
+      "nursery": {
+        "my-rule": {
+          "behavior": "A",
+          "threshold": 30,
+          "behaviorExceptions": ["f"],
+        }
+      }
+    }
+  }
+}
+```
+
+##### Representing the rule options in Rust
+
+The first step is to create the Rust data representation of the rule's options.
+
+```rust
+use biome_deserialize_macros::Deserializable;
+
+#[derive(Clone, Debug, Default, Deserializable)]
+pub struct MyRuleOptions {
+    behavior: Behavior,
+    threshold: u8,
+    behavior_exceptions: Box<[Box<str>]>
+}
+
+#[derive(Clone, Debug, Default, Deserializable)]
+pub enum Behavior {
+    #[default]
+    A,
+    B,
+    C,
+}
+```
+
+Note that we use a boxed slice `Box<[Box<str>]>` instead of `Vec<String>`.
+This allows saving memory: [boxed slices and boxed str use 2 words instead of three words](https://nnethercote.github.io/perf-book/type-sizes.html#boxed-slices).
+
+To allow deserializing instances of the types `MyRuleOptions` and `Behavior`,
+they have to implement the `Deserializable` trait from the `biome_deserialize` crate.
+This is what the `Deserializable` keyword in the `#[derive]` statements above did.
+It's a so-called derive macros, which generates the implementation for the `Deserializable` trait
+for you.
+
+With these types in place, you can set the associated type `Options` of the rule:
+
+```rust
+impl Rule for MyRule {
+    type Query = Semantic<JsCallExpression>;
+    type State = Fix;
+    type Signals = Vec<Self::State>;
+    type Options = MyRuleOptions;
+}
+```
+
+##### Retrieving the rule options within a Rule
+
+A rule can retrieve the options that apply to the location of the currently matched node with:
+
+```rust
+let options = ctx.options();
+```
+
+Modifications of the configuration via e.g. [_`extends`_](https://biomejs.dev/reference/configuration/#extends)
+and [_`overrides`_](https://biomejs.dev/reference/configuration/#overrides) (in `biome.json`)
+that apply only to a subset of files are automatically taken into account,
+and do not need to be handled by the rule itself.
+
+##### Implementing JSON deserialization/serialization support
+
+> [!WARNING]
+> Although we use `serde`s attribute syntax, we do not actually use the `serde` crate for (de)serialization.
+>
+> We instead provide a ***`serde`-inspired*** implementation in `biome_deserialize` and `biome_deserialize_macros` that [differs in some aspects](../biome_deserialize/README.md), like being fault-tolerant.
+
+The compiler should warn you that `MyRuleOptions` does not implement some required types.
+We currently require implementing _serde_'s traits `Deserialize`/`Serialize`.
+
+Also, we use other `serde` macros to adjust the JSON configuration:
+- `rename_all = "camelCase"`: it renames all fields in camel-case, so they are in line with the naming style of the `biome.json`.
+- `deny_unknown_fields`: it raises an error if the configuration contains extraneous fields.
+- `default`: it uses the `Default` value when the field is missing from `biome.json`. This macro makes the field optional.
+
+You can simply use a derive macros:
+
+```rust
+#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+#[serde(rename_all = "camelCase", deny_unknown_fields, default)]
+pub struct MyRuleOptions {
+    #[serde(default, skip_serializing_if = "is_default")]
+    main_behavior: Behavior,
+
+    #[serde(default, skip_serializing_if = "is_default")]
+    extra_behaviors: Vec<Behavior>,
+}
+
+#[derive(Debug, Default, Clone)]
+#[cfg_attr(feature = "schemars", derive(JsonSchema))]
+pub enum Behavior {
+    #[default]
+    A,
+    B,
+    C,
 }
 ```
 
