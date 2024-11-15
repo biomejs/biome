@@ -1848,14 +1848,14 @@ impl Scope {
     /// Returns the scope of `node` or `None` if the scope cannot be determined or
     /// if the scope is an external module.
     fn from_declaration(node: &AnyJsBindingDeclaration) -> Option<Scope> {
-        let control_flow_root = node
-            .syntax()
-            .ancestors()
-            .skip(1)
-            .find(|x| AnyJsControlFlowRoot::can_cast(x.kind()))?;
+        let control_flow_root = node.syntax().ancestors().skip(1).find(|x| {
+            AnyJsControlFlowRoot::can_cast(x.kind())
+                || x.kind() == JsSyntaxKind::TS_DECLARATION_MODULE
+        })?;
         match control_flow_root.kind() {
             JsSyntaxKind::JS_MODULE
             | JsSyntaxKind::JS_SCRIPT
+            | JsSyntaxKind::TS_DECLARATION_MODULE
             | JsSyntaxKind::TS_MODULE_DECLARATION => Some(Scope::Global),
             // Ignore declarations in an external module declaration
             JsSyntaxKind::TS_EXTERNAL_MODULE_DECLARATION => None,

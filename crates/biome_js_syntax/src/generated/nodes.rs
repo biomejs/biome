@@ -8850,6 +8850,61 @@ pub struct TsConstructorTypeFields {
     pub return_type: SyntaxResult<AnyTsType>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TsDeclarationModule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TsDeclarationModule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TsDeclarationModuleFields {
+        TsDeclarationModuleFields {
+            bom_token: self.bom_token(),
+            interpreter_token: self.interpreter_token(),
+            directives: self.directives(),
+            items: self.items(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn directives(&self) -> JsDirectiveList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn items(&self) -> JsModuleItemList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for TsDeclarationModule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TsDeclarationModuleFields {
+    pub bom_token: Option<SyntaxToken>,
+    pub interpreter_token: Option<SyntaxToken>,
+    pub directives: JsDirectiveList,
+    pub items: JsModuleItemList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TsDeclareFunctionDeclaration {
     pub(crate) syntax: SyntaxNode,
 }
@@ -15077,6 +15132,7 @@ pub enum AnyJsRoot {
     JsExpressionSnipped(JsExpressionSnipped),
     JsModule(JsModule),
     JsScript(JsScript),
+    TsDeclarationModule(TsDeclarationModule),
 }
 impl AnyJsRoot {
     pub fn as_js_expression_snipped(&self) -> Option<&JsExpressionSnipped> {
@@ -15094,6 +15150,12 @@ impl AnyJsRoot {
     pub fn as_js_script(&self) -> Option<&JsScript> {
         match &self {
             AnyJsRoot::JsScript(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_ts_declaration_module(&self) -> Option<&TsDeclarationModule> {
+        match &self {
+            AnyJsRoot::TsDeclarationModule(item) => Some(item),
             _ => None,
         }
     }
@@ -25073,6 +25135,54 @@ impl From<TsConstructorType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for TsDeclarationModule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TS_DECLARATION_MODULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TS_DECLARATION_MODULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TsDeclarationModule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TsDeclarationModule")
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
+            .field(
+                "interpreter_token",
+                &support::DebugOptionalElement(self.interpreter_token()),
+            )
+            .field("directives", &self.directives())
+            .field("items", &self.items())
+            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+            .finish()
+    }
+}
+impl From<TsDeclarationModule> for SyntaxNode {
+    fn from(n: TsDeclarationModule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<TsDeclarationModule> for SyntaxElement {
+    fn from(n: TsDeclarationModule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for TsDeclareFunctionDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -34204,19 +34314,29 @@ impl From<JsScript> for AnyJsRoot {
         AnyJsRoot::JsScript(node)
     }
 }
+impl From<TsDeclarationModule> for AnyJsRoot {
+    fn from(node: TsDeclarationModule) -> AnyJsRoot {
+        AnyJsRoot::TsDeclarationModule(node)
+    }
+}
 impl AstNode for AnyJsRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsExpressionSnipped::KIND_SET
         .union(JsModule::KIND_SET)
-        .union(JsScript::KIND_SET);
+        .union(JsScript::KIND_SET)
+        .union(TsDeclarationModule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_EXPRESSION_SNIPPED | JS_MODULE | JS_SCRIPT)
+        matches!(
+            kind,
+            JS_EXPRESSION_SNIPPED | JS_MODULE | JS_SCRIPT | TS_DECLARATION_MODULE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_EXPRESSION_SNIPPED => AnyJsRoot::JsExpressionSnipped(JsExpressionSnipped { syntax }),
             JS_MODULE => AnyJsRoot::JsModule(JsModule { syntax }),
             JS_SCRIPT => AnyJsRoot::JsScript(JsScript { syntax }),
+            TS_DECLARATION_MODULE => AnyJsRoot::TsDeclarationModule(TsDeclarationModule { syntax }),
             _ => return None,
         };
         Some(res)
@@ -34226,6 +34346,7 @@ impl AstNode for AnyJsRoot {
             AnyJsRoot::JsExpressionSnipped(it) => &it.syntax,
             AnyJsRoot::JsModule(it) => &it.syntax,
             AnyJsRoot::JsScript(it) => &it.syntax,
+            AnyJsRoot::TsDeclarationModule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -34233,6 +34354,7 @@ impl AstNode for AnyJsRoot {
             AnyJsRoot::JsExpressionSnipped(it) => it.syntax,
             AnyJsRoot::JsModule(it) => it.syntax,
             AnyJsRoot::JsScript(it) => it.syntax,
+            AnyJsRoot::TsDeclarationModule(it) => it.syntax,
         }
     }
 }
@@ -34242,6 +34364,7 @@ impl std::fmt::Debug for AnyJsRoot {
             AnyJsRoot::JsExpressionSnipped(it) => std::fmt::Debug::fmt(it, f),
             AnyJsRoot::JsModule(it) => std::fmt::Debug::fmt(it, f),
             AnyJsRoot::JsScript(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsRoot::TsDeclarationModule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -34251,6 +34374,7 @@ impl From<AnyJsRoot> for SyntaxNode {
             AnyJsRoot::JsExpressionSnipped(it) => it.into(),
             AnyJsRoot::JsModule(it) => it.into(),
             AnyJsRoot::JsScript(it) => it.into(),
+            AnyJsRoot::TsDeclarationModule(it) => it.into(),
         }
     }
 }
@@ -38833,6 +38957,11 @@ impl std::fmt::Display for TsConstructorSignatureClassMember {
     }
 }
 impl std::fmt::Display for TsConstructorType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TsDeclarationModule {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

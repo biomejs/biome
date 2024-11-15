@@ -6,6 +6,7 @@ pub(crate) mod asserts_condition;
 pub(crate) mod call_signature_type_member;
 pub(crate) mod const_modifier;
 pub(crate) mod construct_signature_type_member;
+pub(crate) mod declaration_module;
 pub(crate) mod declare_modifier;
 pub(crate) mod default_type_clause;
 pub(crate) mod definite_property_annotation;
