@@ -171,15 +171,15 @@ impl AnalyzerSuppressionDiagnostic {
         }
     }
 
-    pub(crate) fn note(mut self, message: impl Into<String>, range: impl Into<TextRange>) -> Self {
-        self.advice.messages.push((message.into(), range.into()));
+    pub(crate) fn note(mut self, message: MarkupBuf, range: impl Into<TextRange>) -> Self {
+        self.advice.messages.push((message, range.into()));
         self
     }
 }
 
 #[derive(Debug, Default, Clone)]
 struct SuppressionAdvice {
-    messages: Vec<(String, TextRange)>,
+    messages: Vec<(MarkupBuf, TextRange)>,
 }
 
 impl Advices for SuppressionAdvice {

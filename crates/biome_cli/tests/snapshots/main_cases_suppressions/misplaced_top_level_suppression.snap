@@ -1,0 +1,47 @@
+---
+source: crates/biome_cli/tests/snap_test.rs
+expression: content
+snapshot_kind: text
+---
+## `file.js`
+
+```js
+
+let foo = 2;
+/**
+* biome-ignore-all lint/style/useConst: reason
+*/
+let bar = 33;
+```
+
+# Emitted Messages
+
+```block
+file.js:3:1 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Top level suppressions can only be used at the beginning of the file.
+  
+    2 │ let foo = 2;
+  > 3 │ /**
+      │ ^^^
+  > 4 │ * biome-ignore-all lint/style/useConst: reason
+  > 5 │ */
+      │ ^^
+    6 │ let bar = 33;
+  
+  i Rename this to biome-ignore
+  
+    2 │ let foo = 2;
+    3 │ /**
+  > 4 │ * biome-ignore-all lint/style/useConst: reason
+      │   ^^^^^^^^^^^^^^^^
+    5 │ */
+    6 │ let bar = 33;
+  
+
+```
+
+```block
+Checked 1 file in <TIME>. No fixes applied.
+Found 1 warning.
+```

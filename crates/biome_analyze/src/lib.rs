@@ -1,5 +1,6 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
+use biome_console::markup;
 use biome_parser::AnyParse;
 use rustc_hash::{FxHashMap, FxHashSet};
 use std::cmp::Ordering;
@@ -55,6 +56,7 @@ use biome_rowan::{
     AstNode, BatchMutation, Direction, Language, SyntaxElement, SyntaxToken, TextRange, TextSize,
     TokenAtOffset, TriviaPieceKind, WalkEvent,
 };
+use biome_suppression::Suppression;
 pub use suppression_action::{ApplySuppression, SuppressionAction};
 
 /// The analyzer is the main entry point into the `biome_analyze` infrastructure.
@@ -77,7 +79,7 @@ pub struct Analyzer<'analyzer, L: Language, Matcher, Break, Diag> {
     /// Executor for the query matches emitted by the visitors
     query_matcher: Matcher,
     /// Language-specific suppression comment parsing function
-    parse_suppression_comment: SuppressionParser<L, Diag>,
+    parse_suppression_comment: SuppressionParser<Diag>,
     /// Language-specific suppression comment emitter
     suppression_action: Box<dyn SuppressionAction<Language = L>>,
     /// Handles analyzer signals emitted by individual rules
@@ -102,7 +104,7 @@ where
     pub fn new(
         metadata: &'analyzer MetadataRegistry,
         query_matcher: Matcher,
-        parse_suppression_comment: SuppressionParser<L, Diag>,
+        parse_suppression_comment: SuppressionParser<Diag>,
         suppression_action: Box<dyn SuppressionAction<Language = L>>,
         emit_signal: SignalHandler<'analyzer, L, Break>,
     ) -> Self {
@@ -201,6 +203,29 @@ where
         }
 
         for suppression in line_suppressions {
+            if suppression.misplaced {
+                let signal = DiagnosticSignal::new(|| {
+                    let mut diagnostic = AnalyzerSuppressionDiagnostic::new(
+                        category!("suppressions/incorrect"),
+                        suppression.comment_span,
+                        "Top level suppressions can only be used at the beginning of the file.",
+                    );
+
+                    for ignore_range in &suppression.ignore_ranges {
+                        diagnostic = diagnostic.note(
+                            markup! {"Rename this to "<Emphasis>"biome-ignore"</Emphasis>}
+                                .to_owned(),
+                            *ignore_range,
+                        );
+                    }
+
+                    diagnostic
+                });
+                if let ControlFlow::Break(br) = (emit_signal)(&signal) {
+                    return Some(br);
+                }
+                continue;
+            }
             if suppression.did_suppress_signal {
                 continue;
             }
@@ -212,7 +237,7 @@ where
                         suppression.comment_span,
                         "Suppression comment has no effect because another suppression comment suppresses the same rule.",
                     ).note(
-                        "This is the suppression comment that was used.",
+                        markup!{"This is the suppression comment that was used."}.to_owned(),
                         top_level_suppressions.range.unwrap_or_default()
                     )
                 } else {
@@ -246,7 +271,7 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     /// Queue for pending analyzer signals
     signal_queue: BinaryHeap<SignalEntry<'phase, L>>,
     /// Language-specific suppression comment parsing function
-    parse_suppression_comment: SuppressionParser<L, Diag>,
+    parse_suppression_comment: SuppressionParser<Diag>,
     /// Language-specific suppression comment emitter
     suppression_action: &'phase dyn SuppressionAction<Language = L>,
     /// Line index at the current position of the traversal
@@ -317,6 +342,10 @@ struct LineSuppression {
     did_suppress_signal: bool,
     /// Set to `true` when this line suppresses a signal that was already suppressed by another entity e.g. top-level suppression
     already_suppressed: bool,
+    /// Whether this line suppression is misplaced
+    misplaced: bool,
+    /// The range of the "biome-ignore"
+    ignore_ranges: FxHashSet<TextRange>,
 }
 
 impl<'a, 'phase, L, Matcher, Break, Diag> PhaseRunner<'a, 'phase, L, Matcher, Break, Diag>
@@ -531,11 +560,13 @@ where
         let mut suppress_all = false;
         let mut suppressed_rules = FxHashSet::default();
         let mut suppressed_instances = FxHashMap::default();
+        let mut ignore_ranges = FxHashSet::default();
         let mut is_top_level_suppression = false;
         let mut already_suppressed = false;
+        let mut misplaced = false;
 
-        for result in (self.parse_suppression_comment)(text, token) {
-            let kind = match result {
+        for result in (self.parse_suppression_comment)(text, range) {
+            let suppression = match result {
                 Ok(kind) => kind,
                 Err(diag) => {
                     // Emit the suppression parser diagnostic
@@ -550,14 +581,24 @@ where
                 }
             };
 
-            let (rule, instance) = match kind {
-                SuppressionKind::Everything => (None, None),
-                SuppressionKind::Rule(rule) => (Some(rule), None),
-                SuppressionKind::RuleInstance(rule, instance) => (Some(rule), Some(instance)),
-                SuppressionKind::TopLevel(rule) => (Some(rule), None),
+            let (rule, instance) = match suppression.kind {
+                AnalyzerSuppressionKind::Everything => (None, None),
+                AnalyzerSuppressionKind::Rule(rule) => (Some(rule), None),
+                AnalyzerSuppressionKind::RuleInstance(rule, instance) => {
+                    (Some(rule), Some(instance))
+                }
+                AnalyzerSuppressionKind::TopLevel(rule) => (Some(rule), None),
             };
 
-            is_top_level_suppression |= kind.is_top_level();
+            // We use `text_range` because we want to check the extended range with trivia, comments in particular
+            if suppression.is_top_level() && token.text_range().start() > TextSize::from(0) {
+                misplaced = true;
+            }
+            if let Some(ignore_range) = suppression.ignore_range {
+                ignore_ranges.insert(ignore_range);
+            }
+
+            is_top_level_suppression |= suppression.is_top_level();
 
             if let Some(rule) = rule {
                 let group_rule = rule.split_once('/');
@@ -572,7 +613,7 @@ where
                 match (key, instance) {
                     (Some(key), Some(value)) => {
                         suppressed_instances.insert(value.to_owned(), key);
-                        if kind.is_top_level() {
+                        if suppression.is_top_level() {
                             self.top_level_suppressions.insert(key);
                         }
                         if self.top_level_suppressions.has_filter(&key) {
@@ -580,7 +621,7 @@ where
                         }
                     }
                     (Some(key), None) => {
-                        if kind.is_top_level() {
+                        if suppression.is_top_level() {
                             self.top_level_suppressions.insert(key);
                         }
                         if self.top_level_suppressions.has_filter(&key) {
@@ -621,7 +662,7 @@ where
             }
         }
 
-        if is_top_level_suppression {
+        if is_top_level_suppression && !misplaced {
             self.top_level_suppressions.expand_range(range);
             return ControlFlow::Continue(());
         }
@@ -664,6 +705,8 @@ where
             suppressed_instances,
             did_suppress_signal: false,
             already_suppressed,
+            misplaced,
+            ignore_ranges,
         };
 
         self.line_suppressions.push(entry);
@@ -723,13 +766,55 @@ fn range_match(filter: Option<TextRange>, range: TextRange) -> bool {
 /// - `// biome-ignore lint/style/useWhile(foo)` -> `vec![RuleWithValue("style/useWhile", "foo")]`
 /// - `// biome-ignore lint/style/useWhile lint/nursery/noUnreachable` -> `vec![Rule("style/useWhile"), Rule("nursery/noUnreachable")]`
 /// - `/** biome-ignore lint/style/useWhile */` if the comment is top-level -> `vec![TopLevel("style/useWhile")]`
-type SuppressionParser<L, D> =
-    for<'a> fn(&'a str, &'a SyntaxToken<L>) -> Vec<Result<SuppressionKind<'a>, D>>;
+type SuppressionParser<D> =
+    for<'a> fn(&'a str, TextRange) -> Vec<Result<AnalyzerSuppression<'a>, D>>;
 
 #[derive(Debug, Clone)]
 /// This enum is used to categorize what is disabled by a suppression comment and with what syntax
-pub enum SuppressionKind<'a> {
-    // TODO: docs
+pub struct AnalyzerSuppression<'a> {
+    /// The kind of suppression
+    pub(crate) kind: AnalyzerSuppressionKind<'a>,
+
+    /// The range where the `biome-ignore` comment is placed inside the whole text
+    pub(crate) ignore_range: Option<TextRange>,
+}
+
+impl<'a> AnalyzerSuppression<'a> {
+    pub fn everything() -> Self {
+        Self {
+            kind: AnalyzerSuppressionKind::Everything,
+            ignore_range: None,
+        }
+    }
+    pub fn top_level(rule: &'a str) -> Self {
+        Self {
+            kind: AnalyzerSuppressionKind::TopLevel(rule),
+            ignore_range: None,
+        }
+    }
+
+    pub fn rule_instance(rule: &'a str, instance: &'a str) -> Self {
+        Self {
+            kind: AnalyzerSuppressionKind::RuleInstance(rule, instance),
+            ignore_range: None,
+        }
+    }
+    pub fn rule(rule: &'a str) -> Self {
+        Self {
+            kind: AnalyzerSuppressionKind::Rule(rule),
+            ignore_range: None,
+        }
+    }
+
+    #[must_use]
+    pub fn with_ignore_range(mut self, ignore_range: TextRange) -> Self {
+        self.ignore_range = Some(ignore_range);
+        self
+    }
+}
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum AnalyzerSuppressionKind<'a> {
+    // A suppression disabling all lints for the entire document/file
     TopLevel(&'a str),
     /// A suppression disabling all lints eg. `// biome-ignore lint`
     Everything,
@@ -739,9 +824,43 @@ pub enum SuppressionKind<'a> {
     RuleInstance(&'a str, &'a str),
 }
 
-impl<'a> SuppressionKind<'a> {
+/// Takes a [Suppression] and returns a [AnalyzerSuppression]
+pub fn to_analyzer_suppressions(
+    suppression: Suppression,
+    piece_range: TextRange,
+) -> Vec<AnalyzerSuppression> {
+    let mut result = Vec::with_capacity(suppression.categories.len());
+    let ignore_range = TextRange::new(
+        piece_range.add_start(suppression.range().start()).start(),
+        piece_range.add_start(suppression.range().end()).start(),
+    );
+    for (key, value) in suppression.categories {
+        if key == category!("lint") {
+            result.push(AnalyzerSuppression::everything());
+        } else {
+            let category = key.name();
+            if let Some(rule) = category.strip_prefix("lint/") {
+                if suppression.kind == biome_suppression::SuppressionKind::All {
+                    result
+                        .push(AnalyzerSuppression::top_level(rule).with_ignore_range(ignore_range));
+                } else if let Some(instance) = value {
+                    result.push(
+                        AnalyzerSuppression::rule_instance(rule, instance)
+                            .with_ignore_range(ignore_range),
+                    );
+                } else {
+                    result.push(AnalyzerSuppression::rule(rule).with_ignore_range(ignore_range));
+                }
+            }
+        }
+    }
+
+    result
+}
+
+impl<'a> AnalyzerSuppression<'a> {
     pub const fn is_top_level(&self) -> bool {
-        matches!(self, SuppressionKind::TopLevel(_))
+        matches!(self.kind, AnalyzerSuppressionKind::TopLevel(_))
     }
 }
 

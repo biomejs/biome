@@ -1,12 +1,13 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `file.js`
 
 ```js
 /**
-* biome-ignore lint/style/useConst: reason
+* biome-ignore-all lint/style/useConst: reason
 */
 
 
@@ -36,7 +37,7 @@ file.js:7:1 suppressions/unused ━━━━━━━━━━━━━━━━
   
   > 1 │ /**
       │ ^^^
-  > 2 │ * biome-ignore lint/style/useConst: reason
+  > 2 │ * biome-ignore-all lint/style/useConst: reason
   > 3 │ */
       │ ^^
     4 │ 

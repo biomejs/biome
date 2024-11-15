@@ -2,15 +2,15 @@
 
 use crate::suppression_action::JsSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions, AnalyzerPlugin, AnalyzerSignal,
-    ControlFlow, InspectMatcher, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction,
-    RuleRegistry, SuppressionKind,
+    to_analyzer_suppressions, AnalysisFilter, Analyzer, AnalyzerContext, AnalyzerOptions,
+    AnalyzerPlugin, AnalyzerSignal, AnalyzerSuppression, ControlFlow, InspectMatcher, LanguageRoot,
+    MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
 };
 use biome_aria::AriaRoles;
-use biome_diagnostics::{category, Error as DiagnosticError};
-use biome_js_syntax::{JsFileSource, JsLanguage, JsSyntaxToken};
+use biome_diagnostics::Error as DiagnosticError;
+use biome_js_syntax::{JsFileSource, JsLanguage};
 use biome_project::PackageJson;
-use biome_rowan::TextSize;
+use biome_rowan::TextRange;
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
 use std::sync::{Arc, LazyLock};
@@ -60,45 +60,27 @@ where
     F: FnMut(&dyn AnalyzerSignal<JsLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment<'a>(
-        text: &'a str,
-        token: &'_ JsSyntaxToken,
-    ) -> Vec<Result<SuppressionKind<'a>, SuppressionDiagnostic>> {
+    fn parse_linter_suppression_comment(
+        text: &str,
+        piece_range: TextRange,
+    ) -> Vec<Result<AnalyzerSuppression, SuppressionDiagnostic>> {
         let mut result = Vec::new();
 
         for comment in parse_suppression_comment(text) {
-            let categories = match comment {
-                Ok(comment) => comment.categories,
+            let suppression = match comment {
+                Ok(suppression) => suppression,
                 Err(err) => {
                     result.push(Err(err));
                     continue;
                 }
             };
 
-            for (key, value) in categories {
-                if key == category!("lint") {
-                    result.push(Ok(SuppressionKind::Everything));
-                } else {
-                    let category = key.name();
-                    if let Some(rule) = category.strip_prefix("lint/") {
-                        let is_top_level = {
-                            let mut trivia = token.leading_trivia().pieces().rev();
-                            match (trivia.next(), trivia.next()) {
-                                (Some(a), Some(b)) => a.is_newline() && b.is_newline(),
-                                _ => false,
-                            }
-                        };
+            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
+                .into_iter()
+                .map(Ok)
+                .collect();
 
-                        if is_top_level && token.text_range().start() == TextSize::from(0) {
-                            result.push(Ok(SuppressionKind::TopLevel(rule)));
-                        } else if let Some(instance) = value {
-                            result.push(Ok(SuppressionKind::RuleInstance(rule, instance)));
-                        } else {
-                            result.push(Ok(SuppressionKind::Rule(rule)));
-                        }
-                    }
-                }
-            }
+            result.extend(analyzer_suppressions)
         }
 
         result
@@ -398,7 +380,7 @@ let bar = 33;
     fn top_level_suppression_simple() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/style/useConst: reason
+* biome-ignore-all lint/style/useConst: reason
 */
 
 
@@ -444,11 +426,11 @@ let bar = 33;
     fn top_level_suppression_multiple() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/style/useConst: reason
+* biome-ignore-all lint/style/useConst: reason
 */
 
 /**
-* biome-ignore lint/suspicious/noDebugger: reason2
+* biome-ignore-all lint/suspicious/noDebugger: reason2
 */
 
 
@@ -495,8 +477,8 @@ debugger;
     fn top_level_suppression_multiple2() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/style/useConst: reason
-* biome-ignore lint/suspicious/noDebugger: reason2
+* biome-ignore-all lint/style/useConst: reason
+* biome-ignore-all lint/suspicious/noDebugger: reason2
 */
 
 
