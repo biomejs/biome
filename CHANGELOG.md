@@ -47,6 +47,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Fix [#4121](https://github.com/biomejs/biome/issues/4326), don't ident a CSS selector when has leading comments. Contributed by @fireairforce
 - Fix [#4334](https://github.com/biomejs/biome/issues/4334), don't insert trailing comma on type import statement. Contributed by @fireairforce
 - Fix [#3229](https://github.com/biomejs/biome/issues/3229), where Biome wasn't idempotent when block comments were placed inside compound selectors. Contributed by @ematipico
+- Fix [#4026](https://github.com/biomejs/biome/issues/4026), don't move comments in `grid-template`. Contributed by @fireairforce
+
 ### JavaScript APIs
 
 ### Linter

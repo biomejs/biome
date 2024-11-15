@@ -12,12 +12,14 @@ mod language {
 #[test]
 // use this test check if your snippet prints as you wish, without using a snapshot
 fn quick_test() {
-    let src = r#"foo
-  /* a comment */
-
-  .aRule {
-  color: red;
-}
+    let src = r#"
+#grid {
+	grid-template-columns:
+	  1fr /* first comment */
+	  auto /* second comment */
+      60px /* fourth comment */
+	  2fr /* third comment */  
+  }
 "#;
     let parse = parse_css(src, CssParserOptions::default());
     println!("{parse:#?}");
