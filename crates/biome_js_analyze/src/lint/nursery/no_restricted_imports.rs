@@ -5,13 +5,16 @@ use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic,
 };
 use biome_js_syntax::{
-    inner_string_text, AnyJsCombinedSpecifier, AnyJsImportLike, AnyJsNamedImportSpecifier,
-    JsDefaultImportSpecifier, JsImportBareClause, JsImportCombinedClause, JsImportDefaultClause,
-    JsImportNamedClause, JsImportNamespaceClause, JsLanguage, JsModuleSource,
-    JsNamedImportSpecifier, JsNamedImportSpecifiers, JsNamespaceImportSpecifier,
-    JsShorthandNamedImportSpecifier, JsSyntaxKind,
+    inner_string_text, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier,
+    AnyJsExpression, AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember,
+    JsCallExpression, JsDefaultImportSpecifier, JsIdentifierBinding, JsImportBareClause,
+    JsImportCallExpression, JsImportCombinedClause, JsImportDefaultClause, JsImportNamedClause,
+    JsImportNamespaceClause, JsLanguage, JsModuleSource, JsNamedImportSpecifier,
+    JsNamedImportSpecifiers, JsNamespaceImportSpecifier, JsObjectBindingPattern,
+    JsObjectBindingPatternProperty, JsObjectBindingPatternShorthandProperty,
+    JsShorthandNamedImportSpecifier, JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator,
 };
-use biome_rowan::{SyntaxToken, TextRange};
+use biome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
@@ -185,6 +188,166 @@ impl RestrictedImportVisitor {
     pub const NAMESPACE_IMPORT_ALIAS: &str = "*";
     pub const DEFAULT_IMPORT_ALIAS: &str = "default";
 
+    /// Analyze the context of an `import(...)` call to find the imported names,
+    /// then validate that each of the names is allowed to be imported.
+    pub fn visit_import_call(&mut self, import_call: &JsImportCallExpression) -> Option<()> {
+        // An import() call can appear by itself, but might also appear within
+        // the following contexts, where we can infer more details about what is
+        // being imported, and thus better target our emitted diagnostics:
+        //
+        //     import("imported-module")
+        //     import("imported-module").then((namespaceImport) => /* ... */)
+        //     import("imported-module").then(({ import1, import2: localName2 }) => /* ... */)
+        //     import("imported-module").then(function(namespaceImport) { /* ... */ })
+        //     import("imported-module").then(function({ import1, import2: localName2 }) { /* ... */ })
+        //     const namespaceImport = await import("imported-module")
+        //     const { default: localName1, import1, import2: localName2, "import3": localName3 } = await import("imported-module")
+        //
+        // To make this diagnostic a bit tolerant to other errors in the source code,
+        // we also allow the "await" keyword to be missing, and just act as if it was
+        // there in that case. We also try to ignore parentheses and thus treat "(expr)"
+        // the same as "expr".
+        //
+        // Given the import_call node, we navigate up the parent chain to see
+        // whether we are in one of the mentioned contexts:
+        if let Some(bindings) = Self::get_context_for_import_call(import_call) {
+            match bindings {
+                AnyJsBindingPattern::AnyJsBinding(namespace_binding) => match namespace_binding {
+                    // const ... = import(...)
+                    biome_js_syntax::AnyJsBinding::JsIdentifierBinding(namespace_binding) => {
+                        // const namespaceImport = import(...)
+                        return self.visit_namespace_binding(namespace_binding);
+                    }
+                    _ => {
+                        // Use fallback instead
+                    }
+                },
+                AnyJsBindingPattern::JsObjectBindingPattern(named_bindings) => {
+                    // const { ... } = await import(...)
+                    return self.visit_named_bindings(named_bindings);
+                }
+                AnyJsBindingPattern::JsArrayBindingPattern(_) => {
+                    // const [ ... ] = await import(...)
+                    //
+                    // Array binding patterns do not really make sense for an import,
+                    // so discard the additonal information and use fallback instead.
+                }
+            }
+        };
+
+        // We failed to find any additional context, and are therefore
+        // restricted to analyzing "import(...)" as a namespace import,
+        // because that what is returned by "import(...)".
+        //
+        // The diagnostic will be associated with "import('module-name')"
+        // instead of just "'module_name'" to indicate that not the
+        // imported module itself is forbidden, but the ways in which
+        // it can be imported are restricted.
+        self.visit_special_import_node(import_call.syntax(), Self::NAMESPACE_IMPORT_ALIAS)
+    }
+
+    fn get_context_for_import_call(
+        import_call: &JsImportCallExpression,
+    ) -> Option<AnyJsBindingPattern> {
+        let mut current = import_call.syntax().parent()?;
+
+        while current.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+            // #1: const { ... } = (await **(import(""))**)
+            // #2: **(import(""))**.then(...)
+            current = current.parent()?;
+        }
+
+        if current.kind() == JsSyntaxKind::JS_AWAIT_EXPRESSION {
+            // #1: const { ... } = (**await (import(""))**)
+            current = current.parent()?;
+
+            while current.kind() == JsSyntaxKind::JS_PARENTHESIZED_EXPRESSION {
+                // #1: const { ... } = **(await (import("")))**
+                current = current.parent()?;
+            }
+        } else if current.kind() == JsSyntaxKind::JS_STATIC_MEMBER_EXPRESSION {
+            // #2: **(import("")).then**(...)
+            let static_member_expr = current.cast::<JsStaticMemberExpression>()?;
+            let member_name = static_member_expr.member().ok()?;
+            if member_name.as_js_name()?.text() != "then" {
+                return None;
+            }
+            current = static_member_expr.syntax().parent()?;
+
+            if current.kind() == JsSyntaxKind::JS_CALL_EXPRESSION {
+                // #2: **(import("")).then(...)**
+                let then_call_expr = current.cast::<JsCallExpression>()?;
+                let then_call_arg = then_call_expr
+                    .arguments()
+                    .ok()?
+                    .args()
+                    .into_iter()
+                    .next()?
+                    .ok()?
+                    .as_any_js_expression()?
+                    .clone()
+                    .omit_parentheses();
+
+                return match then_call_arg {
+                    // then(... => ...)
+                    AnyJsExpression::JsArrowFunctionExpression(arrow_expr) => {
+                        match arrow_expr.parameters().ok()? {
+                            // then(arg => ...)
+                            AnyJsArrowFunctionParameters::AnyJsBinding(binding) => {
+                                Some(AnyJsBindingPattern::AnyJsBinding(binding))
+                            }
+                            // then ({ ... } => ...)
+                            AnyJsArrowFunctionParameters::JsParameters(parameters) => Some(
+                                parameters
+                                    .items()
+                                    .into_iter()
+                                    .next()?
+                                    .ok()?
+                                    .as_any_js_formal_parameter()?
+                                    .as_js_formal_parameter()?
+                                    .binding()
+                                    .ok()?,
+                            ),
+                        }
+                    }
+                    // then(function(...) { ... })
+                    AnyJsExpression::JsFunctionExpression(function_expr) => Some(
+                        function_expr
+                            .parameters()
+                            .ok()?
+                            .items()
+                            .into_iter()
+                            .next()?
+                            .ok()?
+                            .as_any_js_formal_parameter()?
+                            .as_js_formal_parameter()?
+                            .binding()
+                            .ok()?,
+                    ),
+                    _ => None,
+                };
+            }
+        }
+
+        // #1: const { ... } = **(await (import("")))**
+        if current.kind() == JsSyntaxKind::JS_INITIALIZER_CLAUSE {
+            // #1: const { ... } **= (await (import("")))**
+            current = current.parent()?;
+        } else {
+            return None;
+        }
+
+        if current.kind() == JsSyntaxKind::JS_VARIABLE_DECLARATOR {
+            // #1: const **{ ... } = (await (import("")))**
+            let variable_declarator = current.cast::<JsVariableDeclarator>()?;
+
+            // #1: const **{ ... }** = (await (import("")))
+            return Some(variable_declarator.id().ok()?);
+        } else {
+            return None;
+        }
+    }
+
     /// Analyze a static `import ... from ...` declaration (including all the different variants of `import`)
     /// to find the names that are being imported, then validate that each of the names is allowed to be imported.
     pub fn visit_import(&mut self, module_source_node: &JsModuleSource) -> Option<()> {
@@ -248,6 +411,16 @@ impl RestrictedImportVisitor {
         Some(())
     }
 
+    fn visit_named_bindings(&mut self, named_imports: JsObjectBindingPattern) -> Option<()> {
+        let import_bindings = named_imports.properties();
+        for import_binding_maybe in import_bindings.into_iter() {
+            if let Some(import_binding) = import_binding_maybe.ok() {
+                self.visit_named_or_shorthand_binding(import_binding);
+            }
+        }
+        Some(())
+    }
+
     fn visit_named_or_shorthand_import(
         &mut self,
         import_specifier: AnyJsNamedImportSpecifier,
@@ -260,6 +433,21 @@ impl RestrictedImportVisitor {
                 self.visit_named_import(named_import)
             }
             AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(_) => None,
+        }
+    }
+
+    fn visit_named_or_shorthand_binding(
+        &mut self,
+        import_binding: AnyJsObjectBindingPatternMember,
+    ) -> Option<()> {
+        match import_binding {
+            AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
+                shorthand_import,
+            ) => self.visit_shorthand_binding(shorthand_import),
+            AnyJsObjectBindingPatternMember::JsObjectBindingPatternProperty(named_import) => {
+                self.visit_named_binding(named_import)
+            }
+            _ => None,
         }
     }
 
@@ -296,6 +484,12 @@ impl RestrictedImportVisitor {
         )
     }
 
+    /// Checks whether this import of the form `const local_name = import(...)` is allowed.
+    fn visit_namespace_binding(&mut self, namespace_import: JsIdentifierBinding) -> Option<()> {
+        return self
+            .visit_special_import_node(&namespace_import.syntax(), Self::NAMESPACE_IMPORT_ALIAS);
+    }
+
     /// Checks whether this import of the form `{ imported_name }` is allowed.
     fn visit_shorthand_import(
         &mut self,
@@ -311,20 +505,71 @@ impl RestrictedImportVisitor {
         )
     }
 
+    /// Checks whether this import of the form `{ imported_name }` is allowed.
+    fn visit_shorthand_binding(
+        &mut self,
+        shorthand_import: JsObjectBindingPatternShorthandProperty,
+    ) -> Option<()> {
+        self.visit_imported_identifier(
+            shorthand_import
+                .identifier()
+                .ok()?
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok()?,
+        )
+    }
+
     /// Checks whether this import of the form `{ imported_name as local_name }`
     /// (including `{ default as local_name }`) is allowed.
     fn visit_named_import(&mut self, named_import: JsNamedImportSpecifier) -> Option<()> {
         self.visit_imported_identifier(named_import.name().ok()?.value().ok()?)
     }
 
+    /// Checks whether this import of the form `{ imported_name: local_name }`
+    /// (including `{ default: local_name }` and `{ "imported name": local_name `) is allowed.
+    fn visit_named_binding(&mut self, named_import: JsObjectBindingPatternProperty) -> Option<()> {
+        self.visit_imported_identifier(
+            named_import
+                .member()
+                .ok()?
+                .as_js_literal_member_name()?
+                .value()
+                .ok()?,
+        )
+    }
+
     /// Checks whether the import specified by `name_token` is allowed,
     /// and records a diagnostic for `name_token.text_trimmed_range()` if not.
+    ///
+    /// `name_token` can be either a string literal or an identifier.
     fn visit_imported_identifier(&mut self, name_token: SyntaxToken<JsLanguage>) -> Option<()> {
-        self.visit_special_import_token(&name_token, name_token.text())
+        // TODO: inner_string_text removes quotes but does not e.g. decode escape sequences.
+        //       If the imported name uses e.g. Unicode escape sequences, this may cause
+        //       problems because restricted_import.(allow_)import_names contains decoded
+        //       strings, while inner_string_text(name_token) returns encoded strings.
+        self.visit_special_import_token(&name_token, inner_string_text(&name_token).text())
     }
 
     /// Checks whether the import specified by `name_or_alias` is allowed.
-    /// and records a diagnostic for `name_token.text_trimmed_range()` if not.
+    /// and records a diagnostic for `import_node.text_trimmed_range()` if not.
+    fn visit_special_import_node(
+        &mut self,
+        import_node: &SyntaxNode<JsLanguage>,
+        name_or_alias: &str,
+    ) -> Option<()> {
+        if self.restricted_import.is_import_allowed(name_or_alias) {
+            return None;
+        }
+        self.results.push((
+            import_node.text_trimmed_range(),
+            self.restricted_import.message.to_string(),
+        ));
+        return Some(());
+    }
+
+    /// Checks whether the import specified by `name_or_alias` is allowed.
+    /// and records a diagnostic for `import_token.text_trimmed_range()` if not.
     fn visit_special_import_token(
         &mut self,
         import_token: &SyntaxToken<JsLanguage>,
@@ -380,20 +625,24 @@ impl Rule for NoRestrictedImports {
                     visitor.results
                 }
             }
-            AnyJsImportLike::JsImportCallExpression(_import_call) => {
+            AnyJsImportLike::JsImportCallExpression(import_call) => {
                 // TODO: We have to parse the context of the import() call to determine
                 // which exports are being used/whether this should be considered a
                 // namespace import, a sideeffect import (the two of which may
                 // be difficult to distinguish) or a collection of named imports.
-                if !restricted_import
-                    .is_import_allowed(RestrictedImportVisitor::NAMESPACE_IMPORT_ALIAS)
-                {
+                if !restricted_import.has_import_name_patterns() {
+                    // All imports disallowed, add diagnostic to the import source
                     vec![(
                         module_name.text_trimmed_range(),
                         restricted_import.message.to_string(),
                     )]
                 } else {
-                    vec![]
+                    let mut visitor = RestrictedImportVisitor {
+                        restricted_import,
+                        results: Vec::new(),
+                    };
+                    visitor.visit_import_call(import_call);
+                    visitor.results
                 }
             }
             AnyJsImportLike::JsCallExpression(_expression) => {
