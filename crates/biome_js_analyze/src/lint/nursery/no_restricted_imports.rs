@@ -4,8 +4,14 @@ use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic,
 };
-use biome_js_syntax::{inner_string_text, AnyJsImportLike};
-use biome_rowan::TextRange;
+use biome_js_syntax::{
+    inner_string_text, AnyJsCombinedSpecifier, AnyJsImportLike, AnyJsNamedImportSpecifier,
+    JsDefaultImportSpecifier, JsImportBareClause, JsImportCombinedClause, JsImportDefaultClause,
+    JsImportNamedClause, JsImportNamespaceClause, JsLanguage, JsModuleSource,
+    JsNamedImportSpecifier, JsNamedImportSpecifiers, JsNamespaceImportSpecifier,
+    JsShorthandNamedImportSpecifier, JsSyntaxKind,
+};
+use biome_rowan::{SyntaxToken, TextRange};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::borrow::Borrow;
@@ -169,10 +175,176 @@ impl Deserializable for CustomRestrictedImport {
     }
 }
 
+struct RestrictedImportVisitor {
+    restricted_import: CustomRestrictedImportOptions,
+    results: Vec<(TextRange, String)>,
+}
+
+impl RestrictedImportVisitor {
+    pub const BARE_IMPORT_ALIAS: &str = "";
+    pub const NAMESPACE_IMPORT_ALIAS: &str = "*";
+    pub const DEFAULT_IMPORT_ALIAS: &str = "default";
+
+    /// Analyze a static `import ... from ...` declaration (including all the different variants of `import`)
+    /// to find the names that are being imported, then validate that each of the names is allowed to be imported.
+    pub fn visit_import(&mut self, module_source_node: &JsModuleSource) -> Option<()> {
+        // Only certain imports are allowed/disallowed, add diagnostic to each disallowed import
+        let clause = module_source_node.syntax().parent()?;
+        match clause.kind() {
+            JsSyntaxKind::JS_IMPORT_BARE_CLAUSE => {
+                let sideeffect_import: JsImportBareClause = clause.cast()?;
+                self.visit_sideeffect_import(sideeffect_import)
+            }
+            JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE => {
+                let import_combined_clause: JsImportCombinedClause = clause.cast()?;
+                if let Ok(default_specifier) = import_combined_clause.default_specifier() {
+                    self.visit_default_import(default_specifier);
+                }
+                if let Ok(combined_specifier) = import_combined_clause.specifier() {
+                    self.visit_combined_specifier(combined_specifier);
+                }
+                Some(())
+            }
+            JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE => {
+                let import_named_clause: JsImportNamedClause = clause.cast()?;
+                let import_specifiers = import_named_clause.named_specifiers().ok()?;
+                self.visit_named_imports(import_specifiers)
+            }
+            JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE => {
+                let import_default_clause: JsImportDefaultClause = clause.cast()?;
+                let default_specifier = import_default_clause.default_specifier().ok()?;
+                self.visit_default_import(default_specifier)
+            }
+            JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE => {
+                let import_namespace_clause: JsImportNamespaceClause = clause.cast()?;
+                let namespace_specifier = import_namespace_clause.namespace_specifier().ok()?;
+                self.visit_namespace_import(namespace_specifier)
+            }
+            _ => None,
+        }
+    }
+
+    fn visit_combined_specifier(
+        &mut self,
+        combined_specifier: AnyJsCombinedSpecifier,
+    ) -> Option<()> {
+        match combined_specifier {
+            AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_imports) => {
+                self.visit_named_imports(named_imports)
+            }
+            AnyJsCombinedSpecifier::JsNamespaceImportSpecifier(namespace_import) => {
+                self.visit_namespace_import(namespace_import)
+            }
+        }
+    }
+
+    fn visit_named_imports(&mut self, named_imports: JsNamedImportSpecifiers) -> Option<()> {
+        let import_specifiers = named_imports.specifiers();
+        for import_specifier_maybe in import_specifiers.into_iter() {
+            if let Some(import_specifier) = import_specifier_maybe.ok() {
+                self.visit_named_or_shorthand_import(import_specifier);
+            }
+        }
+        Some(())
+    }
+
+    fn visit_named_or_shorthand_import(
+        &mut self,
+        import_specifier: AnyJsNamedImportSpecifier,
+    ) -> Option<()> {
+        match import_specifier {
+            AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(shorthand_import) => {
+                self.visit_shorthand_import(shorthand_import)
+            }
+            AnyJsNamedImportSpecifier::JsNamedImportSpecifier(named_import) => {
+                self.visit_named_import(named_import)
+            }
+            AnyJsNamedImportSpecifier::JsBogusNamedImportSpecifier(_) => None,
+        }
+    }
+
+    /// Checks whether this bare import of the form `import from 'source'` is allowed.
+    fn visit_sideeffect_import(&mut self, sideeffect_import: JsImportBareClause) -> Option<()> {
+        let source_token = sideeffect_import
+            .source()
+            .ok()?
+            .as_js_module_source()?
+            .value_token()
+            .ok()?;
+        self.visit_special_import_token(&source_token, Self::BARE_IMPORT_ALIAS)
+    }
+
+    /// Checks whether this import of the form `local_name` (as in `import local_name from 'source'`) is allowed.
+    fn visit_default_import(&mut self, default_import: JsDefaultImportSpecifier) -> Option<()> {
+        let local_name = default_import
+            .local_name()
+            .ok()?
+            .as_js_identifier_binding()?
+            .name_token()
+            .ok()?;
+        self.visit_special_import_token(&local_name, Self::DEFAULT_IMPORT_ALIAS)
+    }
+
+    /// Checks whether this import of the form `* as local_name` is allowed.
+    fn visit_namespace_import(
+        &mut self,
+        namespace_import: JsNamespaceImportSpecifier,
+    ) -> Option<()> {
+        self.visit_special_import_token(
+            &namespace_import.star_token().ok()?,
+            Self::NAMESPACE_IMPORT_ALIAS,
+        )
+    }
+
+    /// Checks whether this import of the form `{ imported_name }` is allowed.
+    fn visit_shorthand_import(
+        &mut self,
+        shorthand_import: JsShorthandNamedImportSpecifier,
+    ) -> Option<()> {
+        self.visit_imported_identifier(
+            shorthand_import
+                .local_name()
+                .ok()?
+                .as_js_identifier_binding()?
+                .name_token()
+                .ok()?,
+        )
+    }
+
+    /// Checks whether this import of the form `{ imported_name as local_name }`
+    /// (including `{ default as local_name }`) is allowed.
+    fn visit_named_import(&mut self, named_import: JsNamedImportSpecifier) -> Option<()> {
+        self.visit_imported_identifier(named_import.name().ok()?.value().ok()?)
+    }
+
+    /// Checks whether the import specified by `name_token` is allowed,
+    /// and records a diagnostic for `name_token.text_trimmed_range()` if not.
+    fn visit_imported_identifier(&mut self, name_token: SyntaxToken<JsLanguage>) -> Option<()> {
+        self.visit_special_import_token(&name_token, name_token.text())
+    }
+
+    /// Checks whether the import specified by `name_or_alias` is allowed.
+    /// and records a diagnostic for `name_token.text_trimmed_range()` if not.
+    fn visit_special_import_token(
+        &mut self,
+        import_token: &SyntaxToken<JsLanguage>,
+        name_or_alias: &str,
+    ) -> Option<()> {
+        if self.restricted_import.is_import_allowed(name_or_alias) {
+            return None;
+        }
+        self.results.push((
+            import_token.text_trimmed_range(),
+            self.restricted_import.message.to_string(),
+        ));
+        return Some(());
+    }
+}
+
 impl Rule for NoRestrictedImports {
     type Query = Ast<AnyJsImportLike>;
     type State = (TextRange, String);
-    type Signals = Box<[Self::State]>;
+    type Signals = Vec<Self::State>;
     type Options = Box<RestrictedImportsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
@@ -180,22 +352,62 @@ impl Rule for NoRestrictedImports {
         if node.is_in_ts_module_declaration() {
             return [].into();
         }
-        if let Some(module_name) = node.module_name_token() {
-            let inner_text = inner_string_text(&module_name);
+        let Some(module_name) = node.module_name_token() else {
+            return vec![];
+        };
+        let inner_text = inner_string_text(&module_name);
 
-            let signals = ctx.options()
-                .paths
-                .get(inner_text.text())
-                .into_iter()
-                .flat_map(|restricted_import| {
-                    let restricted_import_options: CustomRestrictedImportOptions = restricted_import.clone().into();
-                    [(module_name.text_trimmed_range(), restricted_import_options.message.to_string())]
-                })
-                .collect::<Vec<_>>();
+        let Some(restricted_import_settings) = ctx.options().paths.get(inner_text.text()) else {
+            return vec![];
+        };
+        let restricted_import: CustomRestrictedImportOptions =
+            restricted_import_settings.clone().into();
 
-            signals.into_boxed_slice()
-        } else {
-            [].into()
+        match node {
+            AnyJsImportLike::JsModuleSource(module_source) => {
+                if !restricted_import.has_import_name_patterns() {
+                    // All imports disallowed, add diagnostic to the import source
+                    vec![(
+                        module_name.text_trimmed_range(),
+                        restricted_import.message.to_string(),
+                    )]
+                } else {
+                    let mut visitor = RestrictedImportVisitor {
+                        restricted_import,
+                        results: Vec::new(),
+                    };
+                    visitor.visit_import(module_source);
+                    visitor.results
+                }
+            }
+            AnyJsImportLike::JsImportCallExpression(_import_call) => {
+                // TODO: We have to parse the context of the import() call to determine
+                // which exports are being used/whether this should be considered a
+                // namespace import, a sideeffect import (the two of which may
+                // be difficult to distinguish) or a collection of named imports.
+                if !restricted_import
+                    .is_import_allowed(RestrictedImportVisitor::NAMESPACE_IMPORT_ALIAS)
+                {
+                    vec![(
+                        module_name.text_trimmed_range(),
+                        restricted_import.message.to_string(),
+                    )]
+                } else {
+                    vec![]
+                }
+            }
+            AnyJsImportLike::JsCallExpression(_expression) => {
+                if !restricted_import
+                    .is_import_allowed(RestrictedImportVisitor::DEFAULT_IMPORT_ALIAS)
+                {
+                    vec![(
+                        module_name.text_trimmed_range(),
+                        restricted_import.message.to_string(),
+                    )]
+                } else {
+                    vec![]
+                }
+            }
         }
     }
 
