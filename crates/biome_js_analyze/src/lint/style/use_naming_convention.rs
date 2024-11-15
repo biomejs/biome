@@ -280,7 +280,48 @@ declare_lint_rule! {
     ///
     /// - Declarations inside an external TypeScript module
     ///
-    ///   ```ts
+    ///   :::caution
+    ///   **Bug:** Declarations inside external TypeScript modules are currently not ignored.
+    ///   This is a bug, and is tracked under [#4545](https://github.com/biomejs/biome/issues/4545).
+    ///
+    ///   Until the bug is fixed, we recommend one of the following workarounds:
+    ///
+    ///   - Move the type declarations for external modules into separate `.d.ts` files,
+    ///     and use [overrides](https://biomejs.dev/reference/configuration/#overrides)
+    ///     in your [`biome.json`](https://biomejs.dev/reference/configuration/)
+    ///     to disable the `useNamingConvention` rule for those files:
+    ///
+    ///     ```jsonc,full_options
+    ///     {
+    ///       "linter": {
+    ///         "rules": {
+    ///           "style": {
+    ///             "useNamingConvention": "warn"
+    ///           }
+    ///           // ...
+    ///         }
+    ///       },
+    ///       // ...
+    ///       "overrides": [
+    ///         {
+    ///           "include": ["typings/*.d.ts"],
+    ///           "linter": {
+    ///             "rules": {
+    ///               "style": {
+    ///                 "useNamingConvention": "off"
+    ///               }
+    ///             }
+    ///           }
+    ///         }
+    ///       ]
+    ///     }
+    ///     ```
+    ///
+    ///   - Use [`// biome-ignore lint/style/useNamingConvention: <explanation>`](https://biomejs.dev/linter/#ignore-code)
+    ///     to ignore the problematic lines.
+    ///   :::
+    ///
+    ///   ```ts,ignore
     ///   declare module "myExternalModule" {
     ///     export interface my_INTERFACE {}
     ///   }
