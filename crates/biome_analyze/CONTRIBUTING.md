@@ -33,6 +33,11 @@ The analyzer allows implementors to create **four different** types of rules:
     - [Snapshot Tests](#snapshot-tests)
     - [Run the snapshot tests](#run-the-snapshot-tests)
   - [Documenting the rule](#documenting-the-rule)
+    - [General Structure](#general-structure)
+    - [Associated Language(s)](#associated-languages)
+    - [Code Blocks](#code-blocks)
+    - [Using Rule Options](#using-rule-options)
+    - [Full Documentation Example](#full-documentation-example)
   - [Code generation](#code-generation)
   - [Commiting your work](#commiting-your-work)
   - [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
@@ -295,9 +300,11 @@ We would like to set the options in the `biome.json` configuration file:
       "recommended": true,
       "nursery": {
         "my-rule": {
-          "behavior": "A",
-          "threshold": 30,
-          "behaviorExceptions": ["f"],
+          "options": {
+            "behavior": "A",
+            "threshold": 30,
+            "behaviorExceptions": ["f"],
+          }
         }
       }
     }
@@ -404,6 +411,10 @@ pub enum Behavior {
     C,
 }
 ```
+
+##### Testing & Documenting Rule Options
+
+As with every other user-facing aspect of a rule, the effect that options have on a rule's operation should be both documented and tested, as explained in more detail in the section [Documenting the rule](#documenting-the-rule).
 
 #### Navigating the CST
 
@@ -774,6 +785,9 @@ Check our main [contribution document](https://github.com/biomejs/biome/blob/mai
 ### Documenting the rule
 
 The documentation needs to adhere to the following rules:
+
+#### General Structure
+
 - The **first** paragraph of the documentation is used as a brief description of the rule,
   and it **must** be written in one single line. Breaking the paragraph into multiple lines
   will break the table contents of the rules overview page.
@@ -781,19 +795,197 @@ The documentation needs to adhere to the following rules:
 - The documentation must have a `## Examples` header, followed by two headers: `### Invalid` and `### Valid`.
   `### Invalid` must go first because we need to show when the rule is triggered.
 - Rule options if any, must be documented in the `## Options` section.
-- Each code block must have a _language_ defined.
-- When adding _invalid_ snippets in the `### Invalid` section, you must use the
-  `expect_diagnostic` code block property. We use this property to generate a diagnostic
-  and attach it to the snippet. A given snippet **must emit only ONE diagnostic**.
-- When adding _valid_ snippets in the `### Valid` section, you can use one single snippet for all different valid cases.
-- You can use the code block property `ignore` to tell the code generation script to **not generate a diagnostic for an invalid snippet**.
-- You can use the code block property `options` to tell the code generation script that this is a configuration options example.
-- You can use the code block property `use_options` to tell the code generation script to use the options from the most recent `options` block while linting.
+
+#### Associated Language(s)
+
 - Update the `language` field in the `declare_lint_rule!` macro to the language the rule primarily applies to.
   - If your rule applies to any JavaScript, you can leave it as `js`.
   - If your rule only makes sense in a specific JavaScript dialect, you should set it to `jsx`, `ts`, or `tsx`, whichever is most appropriate.
 
-Here's an example of how the documentation could look like:
+#### Code Blocks
+
+> [!TIP]
+> The build process will automatically check each (properly marked) code block in a rule's documentation comment to ensure that:
+>
+> 1. The `### Valid` examples contain valid, parseable code, and the rule
+>    does not report any diagnostics for them.
+> 2. Each `### Invalid` example reports _exactly one_ diagnostic.
+>    The output of the diagnostic will also be shown in the [generated documentation
+>    for that rule](https://biomejs.dev/linter/rules/no-header-scope/#invalid) at [biomejs.dev](https://biomejs.dev/).
+>
+> To make this work, all code blocks must adhere to a few rules, as listed below:
+
+- **Language**
+
+  Each code block must have a _language_ defined (so that the correct syntax highlighting and analyzer options are applied).
+
+- **Valid/Invalid snippets**
+
+  When adding _invalid_ snippets in the `### Invalid` section, you must use the
+  `expect_diagnostic` code block property. We use this property to generate a diagnostic
+  and attach it to the snippet. A given snippet **must emit only ONE diagnostic**.
+
+  When adding _valid_ snippets in the `### Valid` section, you can use one single snippet for all different valid cases.
+
+- **Ignoring snippets**
+
+  You can use the code block property `ignore` to tell the code generation script to **not generate a diagnostic for an invalid snippet** and **exclude it from the automatic validation** described above.
+
+  Please use this sparingly and prefer automatically validated snippets, as this avoids out-of-date documentation when the implementation is changed.
+
+- **Hiding lines**
+
+  Although usually not necessary, it is possible to prevent code lines from being shown in the output by prefixing them with `# `.
+
+  You should usually prefer to show a concise but complete sample snippet instead.
+
+- **Ordering of code block properties**
+
+  In addition to the language, a code block can be tagged with a few additional properties like `expect_diagnostic`, `options`, `full_options`, `use_options` and/or `ignore`.
+
+  The parser does not care about the order, but for consistency, modifiers should always be ordered as follows:
+
+  ````rust
+  /// ```<language>[,expect_diagnostic][,(options|full_options|use_options)][,ignore]
+  /// ```
+  ````
+
+  e.g.
+
+  ````rust
+  /// ```tsx,expect_diagnostic,use_options,ignore
+  /// ```
+  ````
+
+#### Using Rule Options
+
+All code blocks are interpreted as sample code that should be analyzed using the rule's default options by default, unless the codeblock is marked with `options`, `full_options` or `use_options`.
+Codeblocks can therefore be of one of three types:
+
+- Valid/Invalid **example snippets** using the **default settings** are marked as described above:
+
+  ````rust
+  /// ### Valid
+  ///
+  /// ```js
+  /// var some_valid_example = true;
+  /// ```
+  ````
+
+  ````rust
+  /// ### Invalid
+  ///
+  /// ```ts,expect_diagnostic
+  /// const some_invalid_example: UndeclaredType = false;
+  /// ```
+  ````
+
+- Valid **configuration option snippets** that contain only the settings for the rule itself should be written in `json` or `jsonc` together with the code block property `options`:
+
+  ````rust
+  /// ### Valid
+  ///
+  /// ```json,options
+  /// {
+  ///     "options": {
+  ///         "behavior": "A",
+  ///         "threshold": 30,
+  ///         "behaviorExceptions": ["f"]
+  ///     }
+  /// }
+  /// ```
+  ````
+
+  Although usually not needed, you can show syntactically or semantically invalid configuration option snippets by adding `expect_diagnostic` in addition to `options`. As for normal snippets, a given snippet **must emit only ONE diagnostic**:
+
+  ````rust
+  /// ### Invalid
+  ///
+  /// ```json,expect_diagnostic,options
+  /// {
+  ///     "options": {
+  ///         "behavior": "invalid-value"
+  ///     }
+  /// }
+  /// ```
+  ````
+
+- Usually, the shown configuration option snippets only need to change rule-specific options.
+
+  If you need to show off a **full `biome.json` configuration** instead, you can use `full_options` instead of `options` to change the parsing mode.
+
+  ````rust
+  /// ```jsonc,full_options
+  /// {
+  ///   "linter": {
+  ///     "rules": {
+  ///       "style": {
+  ///         "useNamingConvention": "warn"
+  ///       }
+  ///     }
+  ///   },
+  ///   // ...
+  ///   "overrides": [
+  ///     {
+  ///       // Override useNamingConvention for external module typing declarations
+  ///       "include": ["typings/*.d.ts"],
+  ///       "linter": {
+  ///         "rules": {
+  ///           "style": {
+  ///             "useNamingConvention": "off"
+  ///           }
+  ///         }
+  ///       }
+  ///     }
+  ///   ]
+  /// }
+  /// ```
+  ````
+
+  Although probably never needed, it is possible to define an expected-to-be-invalid full configuration snippet as follows:
+
+  ````rust
+  /// ```jsonc,expect_diagnostic,full_options
+  /// {
+  ///   "linter": {
+  ///     // ...
+  ///   }
+  /// }
+  /// ```
+  ````
+
+- A **valid** configuration option example can be followed by one or more valid/invalid code snippets that use these options, possibly with interleaving text.
+  Those code snippets have to be marked with `use_options`:
+
+  ````rust
+  /// ### Valid/Invalid
+  ///
+  /// A configuration could look like this:
+  ///
+  /// ```json,options
+  /// {
+  ///     "options": {
+  ///       "your-custom-option": "..."
+  ///     }
+  /// }
+  /// ```
+  ///
+  /// And a usage looks like this:
+  ///
+  /// ```js,use_options
+  /// var some_valid_example = true;
+  /// ```
+  ///
+  /// And an "invalid" usage that triggers the rule looks like this:
+  ///
+  /// ```js,expect_diagnostic,use_options
+  /// var this_should_trigger_the_rule = true;
+  /// ```
+  ````
+
+#### Full Documentation Example
+
+Here's an example of how the final documentation could look like:
 
 ```rust
 use biome_analyze::declare_lint_rule;
@@ -802,7 +994,7 @@ declare_lint_rule! {
     ///
     /// _ES2015_ allows to create variables with block scope instead of function scope
     /// using the `let` and `const` keywords.
-    /// Block scope is common in many other programming languages and help to avoid mistakes.
+    /// Block scope is common in many other programming languages and helps to avoid mistakes.
     ///
     /// Source: https://eslint.org/docs/latest/rules/no-var
     ///
@@ -832,10 +1024,6 @@ declare_lint_rule! {
     }
 }
 ```
-
-This will cause the documentation generator to ensure the rule does emit
-exactly one diagnostic for this code, and to include a snapshot for the
-diagnostic in the resulting documentation page.
 
 ### Code generation
 
