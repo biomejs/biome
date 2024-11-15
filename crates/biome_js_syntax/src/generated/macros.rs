@@ -819,6 +819,10 @@ macro_rules! map_syntax_node {
                     let $pattern = unsafe { $crate::TsConstructorType::new_unchecked(node) };
                     $body
                 }
+                $crate::JsSyntaxKind::TS_DECLARATION_MODULE => {
+                    let $pattern = unsafe { $crate::TsDeclarationModule::new_unchecked(node) };
+                    $body
+                }
                 $crate::JsSyntaxKind::TS_DECLARE_FUNCTION_DECLARATION => {
                     let $pattern =
                         unsafe { $crate::TsDeclareFunctionDeclaration::new_unchecked(node) };

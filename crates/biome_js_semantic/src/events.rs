@@ -300,7 +300,7 @@ impl SemanticEventExtractor {
                 self.enter_identifier_usage(AnyJsIdentifierUsage::unwrap_cast(node.clone()));
             }
 
-            JS_MODULE => {
+            JS_MODULE | TS_DECLARATION_MODULE => {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
