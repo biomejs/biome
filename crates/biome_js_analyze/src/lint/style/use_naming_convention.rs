@@ -340,7 +340,7 @@ declare_lint_rule! {
     ///         "conventions": [
     ///             {
     ///                 "selector": {
-    ///                     "kind": "memberLike",
+    ///                     "kind": "classMember",
     ///                     "modifiers": ["private"]
     ///                 },
     ///                 "match": "_(.+)",
