@@ -175,7 +175,7 @@ impl Rule for NoUnknownPseudoClass {
         let is_valid_class = match pseudo_type {
             PseudoClassType::PagePseudoClass => is_page_pseudo_class(lower_name),
             PseudoClassType::WebkitScrollbarPseudoClass => {
-                WEBKIT_SCROLLBAR_PSEUDO_CLASSES.contains(&lower_name)
+                WEBKIT_SCROLLBAR_PSEUDO_CLASSES.contains(&lower_name) || is_known_pseudo_class(lower_name)
             }
             PseudoClassType::Other => {
                 is_custom_selector(lower_name)
