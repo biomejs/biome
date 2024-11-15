@@ -157,6 +157,7 @@ pub struct SemanticEventExtractor {
     bindings: FxHashMap<BindingName, BindingInfo>,
     /// Type parameters bound in a `infer T` clause.
     infers: Vec<TsTypeParameterName>,
+    is_ambient_context: bool,
 }
 
 /// A binding name is either a type or a value.
@@ -280,6 +281,16 @@ struct Scope {
     /// If this scope allows declarations to be hoisted to parent scope or not.
     hoisting: ScopeHoisting,
     is_in_strict_mode: bool,
+    is_ambient: bool,
+}
+
+#[derive(Debug, Default)]
+struct ScopeOptions {
+    /// Is the scope a closure (function-like)?
+    is_closure: bool,
+    /// Does the scope imply the strict mode?
+    /// For example, it is the case for classes.
+    implies_strict_mode: bool,
 }
 
 impl SemanticEventExtractor {
@@ -289,6 +300,9 @@ impl SemanticEventExtractor {
         // IMPORTANT: If you push a scope for a given node type, don't forget to
         // update `Self::leave`. You should also edit [SemanticModelBuilder::push_node].
         match node.kind() {
+            TS_DECLARE_STATEMENT | TS_EXPORT_DECLARE_CLAUSE => {
+                self.is_ambient_context = true;
+            }
             JS_IDENTIFIER_BINDING
             | TS_IDENTIFIER_BINDING
             | TS_TYPE_PARAMETER_NAME
@@ -300,12 +314,26 @@ impl SemanticEventExtractor {
                 self.enter_identifier_usage(AnyJsIdentifierUsage::unwrap_cast(node.clone()));
             }
 
-            JS_MODULE | TS_DECLARATION_MODULE => {
+            JS_MODULE => {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
-                    false,
-                    true,
+                    ScopeOptions {
+                        is_closure: false,
+                        implies_strict_mode: true,
+                    },
+                );
+            }
+
+            TS_DECLARATION_MODULE => {
+                self.is_ambient_context = true;
+                self.push_scope(
+                    node.text_trimmed_range(),
+                    ScopeHoisting::DontHoistDeclarationsToParent,
+                    ScopeOptions {
+                        is_closure: false,
+                        implies_strict_mode: true,
+                    },
                 );
             }
 
@@ -313,8 +341,10 @@ impl SemanticEventExtractor {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
-                    false,
-                    false,
+                    ScopeOptions {
+                        is_closure: false,
+                        implies_strict_mode: false,
+                    },
                 );
             }
 
@@ -346,8 +376,11 @@ impl SemanticEventExtractor {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
-                    true,
-                    true, // classes are in strict mode
+                    ScopeOptions {
+                        is_closure: true,
+                        // classes are in strict mode
+                        implies_strict_mode: true,
+                    },
                 );
             }
 
@@ -360,8 +393,10 @@ impl SemanticEventExtractor {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
-                    true,
-                    false,
+                    ScopeOptions {
+                        is_closure: true,
+                        implies_strict_mode: false,
+                    },
                 );
             }
 
@@ -369,8 +404,10 @@ impl SemanticEventExtractor {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
-                    true,
-                    false,
+                    ScopeOptions {
+                        is_closure: true,
+                        implies_strict_mode: false,
+                    },
                 );
             }
 
@@ -378,8 +415,10 @@ impl SemanticEventExtractor {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
-                    false,
-                    false,
+                    ScopeOptions {
+                        is_closure: false,
+                        implies_strict_mode: false,
+                    },
                 );
             }
 
@@ -388,9 +427,20 @@ impl SemanticEventExtractor {
             | JS_CLASS_EXPRESSION
             | JS_STATIC_INITIALIZATION_BLOCK_CLASS_MEMBER
             | TS_MODULE_DECLARATION
-            | TS_EXTERNAL_MODULE_DECLARATION
+            | TS_ENUM_DECLARATION => {
+                self.push_scope(
+                    node.text_trimmed_range(),
+                    ScopeHoisting::DontHoistDeclarationsToParent,
+                    ScopeOptions {
+                        is_closure: false,
+                        // classes and TypeScript imply strict mode
+                        implies_strict_mode: true,
+                    },
+                );
+            }
+
+            TS_EXTERNAL_MODULE_DECLARATION
             | TS_INTERFACE_DECLARATION
-            | TS_ENUM_DECLARATION
             | TS_TYPE_ALIAS_DECLARATION
             | TS_DECLARE_FUNCTION_DECLARATION
             | TS_DECLARE_FUNCTION_EXPORT_DEFAULT_DECLARATION
@@ -399,11 +449,15 @@ impl SemanticEventExtractor {
             | TS_METHOD_SIGNATURE_TYPE_MEMBER
             | TS_INDEX_SIGNATURE_CLASS_MEMBER
             | TS_INDEX_SIGNATURE_TYPE_MEMBER => {
+                self.is_ambient_context = true;
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::DontHoistDeclarationsToParent,
-                    false,
-                    true, // classes and TypeScript imply strict mode
+                    ScopeOptions {
+                        is_closure: false,
+                        // classes and TypeScript imply strict mode
+                        implies_strict_mode: true,
+                    },
                 );
             }
 
@@ -412,13 +466,13 @@ impl SemanticEventExtractor {
                 self.push_scope(
                     node.text_trimmed_range(),
                     ScopeHoisting::HoistDeclarationsToParent,
-                    false,
-                    false,
+                    ScopeOptions::default(),
                 );
             }
 
             _ => {
                 if let Some(node) = AnyTsType::cast_ref(node) {
+                    self.is_ambient_context = true;
                     self.enter_any_type(&node);
                 }
             }
@@ -430,8 +484,11 @@ impl SemanticEventExtractor {
             self.push_scope(
                 node.syntax().text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
-                false,
-                true, // TypeScript implies strict mode
+                ScopeOptions {
+                    is_closure: false,
+                    // TypeScript implies strict mode
+                    implies_strict_mode: true,
+                },
             );
             self.push_infers_in_scope();
             return;
@@ -446,8 +503,11 @@ impl SemanticEventExtractor {
             self.push_scope(
                 node.text_trimmed_range(),
                 ScopeHoisting::DontHoistDeclarationsToParent,
-                false,
-                true, // TypeScript implies strict mode
+                ScopeOptions {
+                    is_closure: false,
+                    // TypeScript implies strict mode
+                    implies_strict_mode: true,
+                },
             );
         }
     }
@@ -636,7 +696,14 @@ impl SemanticEventExtractor {
         match node {
             AnyJsIdentifierUsage::JsReferenceIdentifier(node) => {
                 let Some(parent) = node.syntax().parent() else {
-                    self.push_reference(BindingName::Value(name), Reference::Read(range));
+                    self.push_reference(
+                        BindingName::Value(name),
+                        if self.is_ambient_context {
+                            Reference::AmbientRead(range)
+                        } else {
+                            Reference::Read(range)
+                        },
+                    );
                     return;
                 };
                 match parent.kind() {
@@ -649,7 +716,14 @@ impl SemanticEventExtractor {
                     }
                     JS_IDENTIFIER_EXPRESSION => {
                         let Some(grand_parent) = parent.parent() else {
-                            self.push_reference(BindingName::Value(name), Reference::Read(range));
+                            self.push_reference(
+                                BindingName::Value(name),
+                                if self.is_ambient_context {
+                                    Reference::AmbientRead(range)
+                                } else {
+                                    Reference::Read(range)
+                                },
+                            );
                             return;
                         };
                         match grand_parent.kind() {
@@ -663,36 +737,14 @@ impl SemanticEventExtractor {
                                     Reference::Export(range),
                                 );
                             }
-                            JS_COMPUTED_MEMBER_NAME => {
-                                if matches!(
-                                    grand_parent.parent().kind(),
-                                    Some(
-                                        TS_PROPERTY_SIGNATURE_CLASS_MEMBER
-                                            | TS_INITIALIZED_PROPERTY_SIGNATURE_CLASS_MEMBER
-                                            | TS_PROPERTY_SIGNATURE_TYPE_MEMBER
-                                            | TS_METHOD_SIGNATURE_CLASS_MEMBER
-                                            | TS_METHOD_SIGNATURE_TYPE_MEMBER
-                                            | TS_GETTER_SIGNATURE_CLASS_MEMBER
-                                            | TS_GETTER_SIGNATURE_TYPE_MEMBER
-                                            | TS_SETTER_SIGNATURE_CLASS_MEMBER
-                                            | TS_SETTER_SIGNATURE_TYPE_MEMBER
-                                    )
-                                ) {
-                                    self.push_reference(
-                                        BindingName::Value(name.clone()),
-                                        Reference::AmbientRead(range),
-                                    );
-                                } else {
-                                    self.push_reference(
-                                        BindingName::Value(name.clone()),
-                                        Reference::Read(range),
-                                    );
-                                }
-                            }
                             _ => {
                                 self.push_reference(
-                                    BindingName::Value(name),
-                                    Reference::Read(range),
+                                    BindingName::Value(name.clone()),
+                                    if self.is_ambient_context {
+                                        Reference::AmbientRead(range)
+                                    } else {
+                                        Reference::Read(range)
+                                    },
                                 );
                             }
                         }
@@ -759,6 +811,11 @@ impl SemanticEventExtractor {
     #[inline]
     pub fn leave(&mut self, node: &JsSyntaxNode) {
         match node.kind() {
+            TS_DECLARE_STATEMENT | TS_EXPORT_DECLARE_CLAUSE => {
+                if let Some(current_scope) = self.scopes.last() {
+                    self.is_ambient_context = current_scope.is_ambient;
+                }
+            }
             JS_MODULE
             | JS_SCRIPT
             | JS_FUNCTION_DECLARATION
@@ -796,10 +853,16 @@ impl SemanticEventExtractor {
             | TS_MODULE_DECLARATION
             | TS_EXTERNAL_MODULE_DECLARATION => {
                 self.pop_scope(node.text_trimmed_range());
+                if let Some(current_scope) = self.scopes.last() {
+                    self.is_ambient_context = current_scope.is_ambient;
+                }
             }
             _ => {
                 if let Some(node) = AnyTsType::cast_ref(node) {
                     self.leave_any_type(&node);
+                    if let Some(current_scope) = self.scopes.last() {
+                        self.is_ambient_context = current_scope.is_ambient;
+                    }
                 }
             }
         }
@@ -853,19 +916,13 @@ impl SemanticEventExtractor {
         }
     }
 
-    fn push_scope(
-        &mut self,
-        range: TextRange,
-        hoisting: ScopeHoisting,
-        is_closure: bool,
-        implies_strict_mode: bool,
-    ) {
+    fn push_scope(&mut self, range: TextRange, hoisting: ScopeHoisting, options: ScopeOptions) {
         let scope_id = ScopeId::new(self.scope_count);
         self.scope_count += 1;
         self.stash.push_back(SemanticEvent::ScopeStarted {
             range,
             parent_scope_id: self.scopes.iter().last().map(|x| x.scope_id),
-            is_closure,
+            is_closure: options.is_closure,
         });
         self.scopes.push(Scope {
             scope_id,
@@ -873,11 +930,12 @@ impl SemanticEventExtractor {
             references: FxHashMap::default(),
             shadowed: vec![],
             hoisting,
-            is_in_strict_mode: implies_strict_mode
+            is_in_strict_mode: options.implies_strict_mode
                 || self
                     .scopes
                     .last()
                     .is_some_and(|scope| scope.is_in_strict_mode),
+            is_ambient: self.is_ambient_context,
         });
     }
 
