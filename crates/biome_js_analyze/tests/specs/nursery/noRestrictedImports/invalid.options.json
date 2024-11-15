@@ -9,7 +9,71 @@
 					"options": {
 						"paths": {
 							"eslint": "Importing Eslint is forbidden",
-							"lodash": "It's not recommended to use lodash"
+							"lodash": "It's not recommended to use lodash",
+							"bare-forbidden": {
+								"message": "Importing bare-forbidden is not allowed",
+								"importNames": [
+									""
+								]
+							},
+							"default-forbidden": {
+								"message": "Importing default-forbidden is not allowed",
+								"importNames": [
+									"default"
+								]
+							},
+							"namespace-forbidden": {
+								"message": "Importing namespace-forbidden is not allowed",
+								"importNames": [
+									"*"
+								]
+							},
+							"member-forbidden": {
+								"message": "Importing member-forbidden is not allowed",
+								"importNames": [
+									"forbidden1",
+									"forbidden2",
+									"forbidden3",
+									"forbidden4",
+									"forbidden5",
+									"forbidden6",
+									"forbidden7",
+									"forbidden8",
+									"forbidden9"
+								]
+							},
+							"bare-allowed": {
+								"message": "Importing bare-forbidden is not allowed",
+								"allowImportNames": [
+									""
+								]
+							},
+							"default-allowed": {
+								"message": "Importing default-allowed is not allowed",
+								"allowImportNames": [
+									"default"
+								]
+							},
+							"namespace-allowed": {
+								"message": "Importing namespace-allowed is not allowed",
+								"allowImportNames": [
+									"*"
+								]
+							},
+							"member-allowed": {
+								"message": "Importing member-allowed is not allowed",
+								"allowImportNames": [
+									"allowed1",
+									"allowed2",
+									"allowed3",
+									"allowed4",
+									"allowed5",
+									"allowed6",
+									"allowed7",
+									"allowed8",
+									"allowed9"
+								]
+							}
 						}
 					}
 				}
