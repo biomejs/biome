@@ -142,7 +142,7 @@ impl Rule for NoAriaHiddenOnFocusable {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Remove the aria-hidden attribute from the element." }.to_owned(),
+            markup! { "Remove the "<Emphasis>"aria-hidden"</Emphasis>" attribute from the element." }.to_owned(),
             mutation,
         ))
     }
