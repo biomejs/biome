@@ -126,7 +126,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Add the tabIndex attribute." }.to_owned(),
+            markup! { "Add the "<Emphasis>"tabIndex"</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))
     }
