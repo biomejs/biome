@@ -3,6 +3,7 @@
 	"title": "Configuration",
 	"description": "The configuration that is contained inside the file `biome.json`",
 	"type": "object",
+	"allowTrailingCommas": true,
 	"properties": {
 		"$schema": {
 			"description": "A field for the [JSON schema](https://json-schema.org/) specification",
