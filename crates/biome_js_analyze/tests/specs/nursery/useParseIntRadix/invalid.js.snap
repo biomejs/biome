@@ -158,7 +158,7 @@ invalid.js:13:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━
 ```
 invalid.js:15:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing parameters
+  ! This call to parseInt has no arguments, it will always return NaN
   
     13 │ var num = parseInt("071", undefined);
     14 │ 
@@ -167,7 +167,7 @@ invalid.js:15:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━
     16 │ 
     17 │ var num = Number.parseInt("10");
   
-  i Will always return NaN
+  i Add arguments to this function call
   
 
 ```

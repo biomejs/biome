@@ -116,8 +116,8 @@ impl Rule for UseParseIntRadix {
 
         let (title, note) = match state {
             State::MissingParameters => (
-                markup!("Missing parameters"),
-                markup!("Will always return "<Emphasis>"NaN"</Emphasis>),
+                markup!("This call to "<Emphasis>"parseInt"</Emphasis>" has no arguments, it will always return "<Emphasis>"NaN"</Emphasis>),
+                markup!("Add arguments to this function call"),
             ),
             State::MissingRadix => (
                 markup!("Missing radix parameter"),
