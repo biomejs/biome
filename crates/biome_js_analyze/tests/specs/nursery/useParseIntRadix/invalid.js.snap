@@ -15,6 +15,10 @@ var num = parseInt("071", "8");
 
 var num = parseInt("071", 37);
 
+var num = parseInt("071", 1);
+
+var num = parseInt("071", undefined);
+
 var num = parseInt();
 
 var num = Number.parseInt("10");
@@ -110,7 +114,7 @@ invalid.js:9:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━�
    > 9 │ var num = parseInt("071", 37);
        │           ^^^^^^^^^^^^^^^^^^^
     10 │ 
-    11 │ var num = parseInt();
+    11 │ var num = parseInt("071", 1);
   
   i Radix must be a non-fractional number between 2 and 36
   
@@ -120,52 +124,14 @@ invalid.js:9:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━�
 ```
 invalid.js:11:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Missing parameters
+  ! Invalid radix parameter
   
      9 │ var num = parseInt("071", 37);
     10 │ 
-  > 11 │ var num = parseInt();
-       │           ^^^^^^^^^^
+  > 11 │ var num = parseInt("071", 1);
+       │           ^^^^^^^^^^^^^^^^^^
     12 │ 
-    13 │ var num = Number.parseInt("10");
-  
-  i Will always return NaN
-  
-
-```
-
-```
-invalid.js:13:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Missing radix parameter
-  
-    11 │ var num = parseInt();
-    12 │ 
-  > 13 │ var num = Number.parseInt("10");
-       │           ^^^^^^^^^^^^^^^^^^^^^
-    14 │ 
-    15 │ var num = parseInt("0xF", 16n);
-  
-  i Add a non-fractional number between 2 and 36
-  
-  i Unsafe fix: Add a radix of 10
-  
-    13 │ var·num·=·Number.parseInt("10",·10);
-       │                               ++++  
-
-```
-
-```
-invalid.js:15:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Invalid radix parameter
-  
-    13 │ var num = Number.parseInt("10");
-    14 │ 
-  > 15 │ var num = parseInt("0xF", 16n);
-       │           ^^^^^^^^^^^^^^^^^^^^
-    16 │ 
-    17 │ var num = parseInt("071", "abc", 3);
+    13 │ var num = parseInt("071", undefined);
   
   i Radix must be a non-fractional number between 2 and 36
   
@@ -173,15 +139,87 @@ invalid.js:15:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━
 ```
 
 ```
-invalid.js:17:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:13:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Invalid radix parameter
   
-    15 │ var num = parseInt("0xF", 16n);
+    11 │ var num = parseInt("071", 1);
+    12 │ 
+  > 13 │ var num = parseInt("071", undefined);
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ var num = parseInt();
+  
+  i Radix must be a non-fractional number between 2 and 36
+  
+
+```
+
+```
+invalid.js:15:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing parameters
+  
+    13 │ var num = parseInt("071", undefined);
+    14 │ 
+  > 15 │ var num = parseInt();
+       │           ^^^^^^^^^^
     16 │ 
-  > 17 │ var num = parseInt("071", "abc", 3);
-       │           ^^^^^^^^^^^^^^^^^^^^^^^^^
+    17 │ var num = Number.parseInt("10");
+  
+  i Will always return NaN
+  
+
+```
+
+```
+invalid.js:17:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing radix parameter
+  
+    15 │ var num = parseInt();
+    16 │ 
+  > 17 │ var num = Number.parseInt("10");
+       │           ^^^^^^^^^^^^^^^^^^^^^
     18 │ 
+    19 │ var num = parseInt("0xF", 16n);
+  
+  i Add a non-fractional number between 2 and 36
+  
+  i Unsafe fix: Add a radix of 10
+  
+    17 │ var·num·=·Number.parseInt("10",·10);
+       │                               ++++  
+
+```
+
+```
+invalid.js:19:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Invalid radix parameter
+  
+    17 │ var num = Number.parseInt("10");
+    18 │ 
+  > 19 │ var num = parseInt("0xF", 16n);
+       │           ^^^^^^^^^^^^^^^^^^^^
+    20 │ 
+    21 │ var num = parseInt("071", "abc", 3);
+  
+  i Radix must be a non-fractional number between 2 and 36
+  
+
+```
+
+```
+invalid.js:21:11 lint/nursery/useParseIntRadix ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Invalid radix parameter
+  
+    19 │ var num = parseInt("0xF", 16n);
+    20 │ 
+  > 21 │ var num = parseInt("071", "abc", 3);
+       │           ^^^^^^^^^^^^^^^^^^^^^^^^^
+    22 │ 
   
   i Radix must be a non-fractional number between 2 and 36
   

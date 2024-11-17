@@ -8,6 +8,10 @@ var num = parseInt("071", "8");
 
 var num = parseInt("071", 37);
 
+var num = parseInt("071", 1);
+
+var num = parseInt("071", undefined);
+
 var num = parseInt();
 
 var num = Number.parseInt("10");
