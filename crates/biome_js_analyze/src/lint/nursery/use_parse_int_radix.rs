@@ -166,7 +166,7 @@ impl Rule for UseParseIntRadix {
                     ),
                 );
 
-                (args, markup! { "Remove add a radix of 10" })
+                (args, markup! { "Add a radix of 10" })
             }
         };
 

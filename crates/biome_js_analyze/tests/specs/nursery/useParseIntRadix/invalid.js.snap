@@ -38,7 +38,7 @@ invalid.js:1:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━
   
   i Add a non-fractional number between 2 and 36
   
-  i Unsafe fix: Remove add a radix of 10
+  i Unsafe fix: Add a radix of 10
   
     1 │ var·num·=·parseInt("071",·10);
       │                         ++++  
@@ -59,7 +59,7 @@ invalid.js:3:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━
   
   i Add a non-fractional number between 2 and 36
   
-  i Unsafe fix: Remove add a radix of 10
+  i Unsafe fix: Add a radix of 10
   
     3 │ var·num·=·parseInt(someValue,·10);
       │                             ++++  
@@ -148,7 +148,7 @@ invalid.js:13:11 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━�
   
   i Add a non-fractional number between 2 and 36
   
-  i Unsafe fix: Remove add a radix of 10
+  i Unsafe fix: Add a radix of 10
   
     13 │ var·num·=·Number.parseInt("10",·10);
        │                               ++++  
