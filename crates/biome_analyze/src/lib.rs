@@ -213,7 +213,7 @@ where
 
                     for ignore_range in &suppression.ignore_ranges {
                         diagnostic = diagnostic.note(
-                            markup! {"Rename this to "<Emphasis>"biome-ignore"</Emphasis>}
+                            markup! {"Rename this to "<Emphasis>"biome-ignore"</Emphasis>" or move it to the top of the file"}
                                 .to_owned(),
                             *ignore_range,
                         );
