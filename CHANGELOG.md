@@ -305,6 +305,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @denbezrukov
 
+- Don't panic when a multi-byte character is found in a unicode escape sequence ([#4564](https://github.com/biomejs/biome/issues/4564)). Contributed by @Conaclos
 
 ## v1.9.4 (2024-10-17)
 
