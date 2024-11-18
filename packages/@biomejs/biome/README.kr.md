@@ -1,43 +1,41 @@
-<p align="center">
-    <picture>
-        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
-        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
-        <img alt="Biome의 로고와 'Biome - Toolchain of the web'이라는 문구가 들어 있는 Biome의 배너를 표시합니다." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
-    </picture>
-</p>
-
 <div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-dark-transparent.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg">
+    <img alt="Shows the banner of Biome, with its logo and the phrase 'Biome - Toolchain of the web'." src="https://raw.githubusercontent.com/biomejs/resources/main/svg/slogan-light-transparent.svg" width="700">
+  </picture>
 
-[![CI on main][ci-badge]][ci-url]
-[![Discord chat][discord-badge]][discord-url]
-[![npm version][npm-badge]][npm-url]
-[![VSCode version][vscode-badge]][vscode-url]
-[![Open VSX version][open-vsx-badge]][open-vsx-url]
-[![Polar bounties][polar-badge]][polar-url]
+  <br>
+  <br>
 
-[ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
-[ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
-[discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
-[discord-url]: https://biomejs.dev/chat
-[npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
-[npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
-[vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=60a5fa
-[vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
-[open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=60a5fa
-[open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
-[polar-badge]: https://polar.sh/embed/seeks-funding-shield.svg?org=biomejs
-[polar-url]: https://polar.sh/biomejs
+  [![CI on main][ci-badge]][ci-url]
+  [![Discord chat][discord-badge]][discord-url]
+  [![npm version][npm-badge]][npm-url]
+  [![VSCode version][vscode-badge]][vscode-url]
+  [![Open VSX version][open-vsx-badge]][open-vsx-url]
+  [![Polar bounties][polar-badge]][polar-url]
+  
+  [ci-badge]: https://github.com/biomejs/biome/actions/workflows/main.yml/badge.svg
+  [ci-url]: https://github.com/biomejs/biome/actions/workflows/main.yml
+  [discord-badge]: https://badgen.net/discord/online-members/BypW39g6Yc?icon=discord&label=discord&color=60a5fa
+  [discord-url]: https://biomejs.dev/chat
+  [npm-badge]: https://badgen.net/npm/v/@biomejs/biome?icon=npm&color=60a5fa&label=%40biomejs%2Fbiome
+  [npm-url]: https://www.npmjs.com/package/@biomejs/biome/v/latest
+  [vscode-badge]: https://badgen.net/vs-marketplace/v/biomejs.biome?label=vscode&icon=visualstudio&color=60a5fa
+  [vscode-url]: https://marketplace.visualstudio.com/items?itemName=biomejs.biome
+  [open-vsx-badge]: https://badgen.net/open-vsx/version/biomejs/biome?label=open-vsx&color=60a5fa
+  [open-vsx-url]: https://open-vsx.org/extension/biomejs/biome
+  [polar-badge]: https://polar.sh/embed/seeks-funding-shield.svg?org=biomejs
+  [polar-url]: https://polar.sh/biomejs
 
-</div>
-
-<!-- Insert new entries lexicographically by language code.
+  <!-- Insert new entries lexicographically by language code.
      For example given below is the same order as these files appear on page:
-     https://github.com/biomejs/biome/tree/main/packages/%40biomejs/biome -->
-<div align="center">
+     https://github.com/biomejs/biome/tree/main/packages/@biomejs/biome -->
 
-[हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md) | 한국어
-
+  [हिन्दी](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.hi.md) | [English](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.md) | [繁體中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-TW.md) | [简体中文](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.zh-CN.md) | [日本語](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.ja.md) | [Português do Brasil](https://github.com/biomejs/biome/blob/main/packages/%40biomejs/biome/README.pt-br.md) | 한국어
 </div>
+
+<br>
 
 **Biome**은 웹 프로젝트를 위한 고성능 툴체인으로, 프로젝트의 품질을 유지하기 위한 개발자 도구를 제공하는 것을 목표로 합니다.
 
