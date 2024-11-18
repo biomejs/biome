@@ -19,10 +19,11 @@ use biome_js_semantic::{CanBeImportedExported, SemanticModel};
 use biome_js_syntax::{
     binding_ext::AnyJsBindingDeclaration, AnyJsClassMember, AnyJsObjectMember,
     AnyJsVariableDeclaration, AnyTsTypeMember, JsFileSource, JsIdentifierBinding,
-    JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList, JsPrivateClassMemberName,
-    JsPropertyModifierList, JsSyntaxKind, JsSyntaxToken, JsVariableDeclarator, JsVariableKind,
-    Modifier, TsIdentifierBinding, TsIndexSignatureModifierList, TsLiteralEnumMemberName,
-    TsMethodSignatureModifierList, TsPropertySignatureModifierList, TsTypeParameterName,
+    JsLiteralExportName, JsLiteralMemberName, JsMethodModifierList, JsModuleItemList,
+    JsPrivateClassMemberName, JsPropertyModifierList, JsSyntaxKind, JsSyntaxToken,
+    JsVariableDeclarator, JsVariableKind, Modifier, TsDeclarationModule, TsIdentifierBinding,
+    TsIndexSignatureModifierList, TsLiteralEnumMemberName, TsMethodSignatureModifierList,
+    TsPropertySignatureModifierList, TsTypeParameterName,
 };
 use biome_rowan::{
     declare_node_union, AstNode, BatchMutationExt, SyntaxResult, TextRange, TextSize,
@@ -866,23 +867,28 @@ impl Rule for UseNamingConvention {
         else {
             return None;
         };
-        let model = ctx.model();
-        // A declaration file without exports and imports is a global declaration file.
-        // All types are available in every files of the project.
-        // Thus, it is not safe to suggest renaming.
-        //
-        // Note that we don't check if the file has imports.
-        // Indeed, it is a fair assumption to assume that a declaration file without exports,
-        // is certainly a file without imports.
-        let is_global_declaration_file = !model.has_exports()
-            && ctx
-                .source_type::<JsFileSource>()
-                .language()
-                .is_definition_file();
-        if is_global_declaration_file {
-            return None;
-        }
         let node = ctx.query();
+        let is_declaration_file = ctx
+            .source_type::<JsFileSource>()
+            .language()
+            .is_definition_file();
+        if is_declaration_file {
+            if let Some(items) = node
+                .syntax()
+                .ancestors()
+                .skip(1)
+                .find_map(JsModuleItemList::cast)
+            {
+                // A declaration file without exports and imports is a global declaration file.
+                // All types are available in every files of the project.
+                // Thus, it is ok if types are not used locally.
+                let is_top_level = items.parent::<TsDeclarationModule>().is_some();
+                if is_top_level && items.into_iter().all(|x| x.as_any_js_statement().is_some()) {
+                    return None;
+                }
+            }
+        }
+        let model = ctx.model();
         if let Some(renamable) = renamable(node, model) {
             let node = ctx.query();
             let name_token = &node.name_token().ok()?;
