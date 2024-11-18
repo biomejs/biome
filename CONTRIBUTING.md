@@ -458,12 +458,12 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 ### Lead team
 
+- [Arend van Beelen @arendjr](https://github.com/arendjr)
 - [Emanuele Stoppa @ematipico](https://github.com/ematipico)
 - [Victorien Elvinger @Conaclos](https://github.com/Conaclos)
 
 ### Core Contributors team
 
-- [Arend van Beelen @arendjr](https://github.com/arendjr)
 - [Denis Bezrukov @denbezrukov](https://github.com/denbezrukov)
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
 - [Jon Egeland @faultyserver](https://github.com/faultyserver)
