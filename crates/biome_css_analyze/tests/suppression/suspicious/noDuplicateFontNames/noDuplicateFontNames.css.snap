@@ -1,6 +1,7 @@
 ---
 source: crates/biome_css_analyze/tests/spec_tests.rs
 expression: noDuplicateFontNames.css
+snapshot_kind: text
 ---
 # Input
 ```css
@@ -35,7 +36,7 @@ noDuplicateFontNames.css:1:56 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
-      1 │ + /**·biome-ignore·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
+      1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
       2 │ + 
     1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
@@ -67,7 +68,7 @@ noDuplicateFontNames.css:2:44 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
-      1 │ + /**·biome-ignore·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
+      1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
       2 │ + 
     1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
@@ -101,7 +102,7 @@ noDuplicateFontNames.css:3:35 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
-      1 │ + /**·biome-ignore·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
+      1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
       2 │ + 
     1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
@@ -135,7 +136,7 @@ noDuplicateFontNames.css:4:27 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
-      1 │ + /**·biome-ignore·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
+      1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
       2 │ + 
     1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
@@ -167,7 +168,7 @@ noDuplicateFontNames.css:5:39 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
-      1 │ + /**·biome-ignore·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
+      1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
       2 │ + 
     1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
@@ -197,7 +198,7 @@ noDuplicateFontNames.css:6:75 lint/suspicious/noDuplicateFontNames  FIXABLE  ━
   
   i Safe fix: Suppress rule lint/suspicious/noDuplicateFontNames for the whole file.
   
-      1 │ + /**·biome-ignore·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
+      1 │ + /**·biome-ignore-all·lint/suspicious/noDuplicateFontNames:·<explanation>·*/
       2 │ + 
     1 3 │   a { font-family: "Lucida Grande", 'Arial', sans-serif, sans-serif; }
     2 4 │   a { font-family: 'Arial', "Lucida Grande", Arial, sans-serif; }
