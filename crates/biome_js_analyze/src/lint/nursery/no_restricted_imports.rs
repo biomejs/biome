@@ -190,7 +190,11 @@ impl CustomRestrictedImportOptions {
                     format!("Do not import '{import_source}'.")
                 }
                 ImportRestrictionCause::ImportNames | ImportRestrictionCause::AllowImportNames => {
-                    format!("Do not import '{imported_name}' from '{import_source}'.")
+                    if imported_name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
+                        format!("Do not import '{import_source}' through a side-effect import.")
+                    } else {
+                        format!("Do not import '{imported_name}' from '{import_source}'.")
+                    }
                 }
             }
         }

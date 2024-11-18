@@ -46,7 +46,7 @@ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed'
 ```
 invalid.ts:1:8 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not import '' from 'bare-forbidden'.
+  ! Do not import 'bare-forbidden' through a side-effect import.
   
   > 1 │ import 'bare-forbidden';
       │        ^^^^^^^^^^^^^^^^
@@ -59,7 +59,7 @@ invalid.ts:1:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:2:8 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not import '' from 'default-allowed'.
+  ! Do not import 'default-allowed' through a side-effect import.
   
     1 │ import 'bare-forbidden';
   > 2 │ import 'default-allowed';
@@ -75,7 +75,7 @@ invalid.ts:2:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:4:8 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not import '' from 'namespace-allowed'.
+  ! Do not import 'namespace-allowed' through a side-effect import.
   
     2 │ import 'default-allowed';
     3 │ import 'default-forbidden';
@@ -92,7 +92,7 @@ invalid.ts:4:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.ts:6:8 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not import '' from 'member-allowed'.
+  ! Do not import 'member-allowed' through a side-effect import.
   
     4 │ import 'namespace-allowed';
     5 │ import 'namespace-forbidden';

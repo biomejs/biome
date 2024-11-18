@@ -157,7 +157,7 @@ invalid.js:2:19 lint/nursery/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.js:4:8 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not import '' from 'bare-forbidden'.
+  ! Do not import 'bare-forbidden' through a side-effect import.
   
     2 │ const l = require('lodash');
     3 │ 
@@ -172,7 +172,7 @@ invalid.js:4:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.js:5:8 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not import '' from 'namespace-allowed'.
+  ! Do not import 'namespace-allowed' through a side-effect import.
   
     4 │ import 'bare-forbidden';
   > 5 │ import 'namespace-allowed';
@@ -188,7 +188,7 @@ invalid.js:5:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
 ```
 invalid.js:6:8 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! Do not import '' from 'default-allowed'.
+  ! Do not import 'default-allowed' through a side-effect import.
   
     4 │ import 'bare-forbidden';
     5 │ import 'namespace-allowed';
