@@ -39,9 +39,9 @@
 
 **Biome** это производительный инструментарий для веб-проектов, цель которого - предоставить разработчикам инструменты для поддержания их работоспособности.
 
-**Biome это [быстрый форматер](./benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ and _GraphQL_, который достигает **[97% совместимости с _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome это [быстрый форматер](./benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ и _GraphQL_, который достигает **[97% совместимости с _Prettier_](https://console.algora.io/challenges/prettier)**.
 
-**Biome это [производительный линтер](https://github.com/biomejs/biome/tree/main/benchmark#linting)** для _JavaScript_, _TypeScript_, _JSX_, _CSS_ and _GraphQL_, в котором есть **[более 270 правил](https://biomejs.dev/linter/rules/)** из ESLint, typescript-eslint, и [других источников](https://github.com/biomejs/biome/discussions/3).
+**Biome это [производительный линтер](https://github.com/biomejs/biome/tree/main/benchmark#linting)** для _JavaScript_, _TypeScript_, _JSX_, _CSS_ и _GraphQL_, в котором есть **[более 270 правил](https://biomejs.dev/linter/rules/)** из ESLint, typescript-eslint, и [других источников](https://github.com/biomejs/biome/discussions/3).
 Он **предоставляет подробную диагностику с контекстом**, которая поможет вам улучшить ваш код и стать более лучшим программистом!
 
 **Biome** с самого начала был разработан, чтобы использоваться [в интерактивном режиме редактора кода](https://biomejs.dev/guides/integrate-in-editor/).
