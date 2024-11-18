@@ -98,6 +98,21 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
 
 ### Patrocinadores Ouro
 
+### Patrocinadores Prata
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="middle">
+        <a href="https://l2beat.com/" target="_blank"><img src="https://images.opencollective.com/l2beat/c2b2a27/logo/256.png" height="100"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://www.phoenixlabs.dev/" target="_blank"><img src="https://images.opencollective.com/phoenix-labs/2824ed4/logo/100.png?height=100" height="100"></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ### Patrocinadores Bronze
 
 <table>
@@ -108,6 +123,18 @@ Leia mais sobre nossa [filosofia de projeto][biome-philosophy].
       </td>
       <td align="center" valign="middle">
         <a href="https://nanabit.dev/" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://vital.io/" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://coderabbit.ai/" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://forge42.dev/" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://forge42.dev/" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80"></a>
       </td>
     </tr>
   </tbody>

@@ -105,6 +105,18 @@ Biome についてもっと知るために[ホームページ][biomejs]をチェ
       <td align="center" valign="middle">
         <a href="https://nanabit.dev/" target="_blank"><img src="https://images.opencollective.com/nanabit/d15fd98/logo/256.png?height=80" width="80"></a>
       </td>
+      <td align="center" valign="middle">
+        <a href="https://vital.io/" target="_blank"><img src="https://avatars.githubusercontent.com/u/25357309?s=200" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://coderabbit.ai/" target="_blank"><img src="https://avatars.githubusercontent.com/u/132028505?s=200&v=4" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://forge42.dev/" target="_blank"><img src="https://avatars.githubusercontent.com/u/161314831?s=200&v=4" width="80"></a>
+      </td>
+      <td align="center" valign="middle">
+        <a href="https://forge42.dev/" target="_blank"><img src="https://avatars.githubusercontent.com/u/513560?s=200&v=4" width="80"></a>
+      </td>
     </tr>
   </tbody>
 </table>
