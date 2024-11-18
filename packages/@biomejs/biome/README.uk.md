@@ -37,15 +37,14 @@
 
 <br>
 
-**Biome** - це високопродуктивний інструментарій для веб-проєктів, який має на меті надавати інструменти розробникам для підтримки здоров'я цих проєктів.
+**Biome** - це високопродуктивний інструментарій для веб-проєктів, який має на меті надавати інструменти розробникам для підтримки здоров'я проєктів.
 
-**Biome - це [швидкий форматувач](./benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ та _GraphQL_, який досягає **[97% сумісності з _Prettier_](https://console.algora.io/challenges/prettier)**.
+**Biome - це [швидкий форматувальник](./benchmark#formatting)** для _JavaScript_, _TypeScript_, _JSX_, _JSON_, _CSS_ та _GraphQL_, який досягає **[97% сумісності з _Prettier_](https://console.algora.io/challenges/prettier)**.
 
 **Biome - це [високопродуктивний лінтер](https://github.com/biomejs/biome/tree/main/benchmark#linting)** для _JavaScript_, _TypeScript_, _JSX_, _CSS_ та _GraphQL_, який містить **[понад 270 правил](https://biomejs.dev/linter/rules/)** з ESLint, typescript-eslint та [інших джерел](https://github.com/biomejs/biome/discussions/3).
 Він **виводить детальні та контекстуалізовані діагностичні дані**, які допомагають вам покращити ваш код та стати кращим програмістом!
 
-**Biome** з самого початку розроблений для використання [інтерактивно в редакторі](https://biomejs.dev/guides/integrate-in-editor/).
-Він може форматувати та лінтити некоректний код під час його написання.
+**Biome** з самого початку розроблений для [інтерактивного використання в редакторі](https://biomejs.dev/guides/integrate-in-editor/). Він може форматувати та лінтити некоректний код під час його написання.
 
 ### Встановлення
 
