@@ -255,6 +255,10 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer reports top-level variables in a global declaration file as unused. Contributed by @Conaclos
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) no longer suggests renaming top-level variables in a global declaration file. Contributed by @Conaclos
+
 ### Parser
 
 #### Bug fixes
