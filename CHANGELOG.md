@@ -42,6 +42,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+- Fix [#4413](https://github.com/biomejs/biome/issues/4413), where the GraphQL formatter adds a new line at the start of block comments on Windows. Contributed by @vohoanglong0107
+
 ### Bug fixes
 
 - Fix [#4121](https://github.com/biomejs/biome/issues/4326), don't ident a CSS selector when has leading comments. Contributed by @fireairforce
