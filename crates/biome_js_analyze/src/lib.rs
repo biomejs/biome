@@ -395,7 +395,8 @@ let bar = 33;
         );
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
             ..AnalysisFilter::default()
         };
 
@@ -446,7 +447,55 @@ debugger;
         );
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            Vec::new(),
+            JsFileSource::js_module(),
+            None,
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    let error = diag
+                        .with_file_path("dummyFile")
+                        .with_file_source_code(SOURCE);
+                    let text = print_diagnostic_to_string(&error);
+                    eprintln!("{text}");
+                    panic!("Unexpected diagnostic");
+                }
+
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+    }
+
+    #[test]
+    fn top_level_suppression_all() {
+        const SOURCE: &str = "
+/**
+* biome-ignore-all lint: reason
+*/
+
+let foo = 2;
+let bar = 33;
+debugger;
+        ";
+
+        let parsed = parse(
+            SOURCE,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
             ..AnalysisFilter::default()
         };
 
@@ -494,7 +543,8 @@ debugger;
         );
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
             ..AnalysisFilter::default()
         };
 
@@ -525,7 +575,7 @@ debugger;
     fn top_level_suppression_with_unused() {
         const SOURCE: &str = "
 /**
-* biome-ignore lint/style/useConst: reason
+* biome-ignore-all lint/style/useConst: reason
 */
 
 
@@ -543,7 +593,8 @@ let bar = 33;
         );
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
             ..AnalysisFilter::default()
         };
 
@@ -590,7 +641,8 @@ let bar = 33;
         );
 
         let filter = AnalysisFilter {
-            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("style", "useConst")]),
             ..AnalysisFilter::default()
         };
 
@@ -615,5 +667,209 @@ let bar = 33;
                 ControlFlow::<Never>::Continue(())
             },
         );
+    }
+
+    #[test]
+    fn suppression_range_should_report_after_end() {
+        const SOURCE: &str = "
+// biome-ignore-start lint/suspicious/noDoubleEquals: single rule
+// biome-ignore-start lint/style/useConst: single rule
+a == b;
+let c;
+// biome-ignore-end lint/suspicious/noDoubleEquals: single rule
+a == b;
+let c;
+
+        ";
+
+        let parsed = parse(
+            SOURCE,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[
+                RuleFilter::Rule("suspicious", "noDoubleEquals"),
+                RuleFilter::Rule("style", "useConst"),
+            ]),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            Vec::new(),
+            JsFileSource::js_module(),
+            None,
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    let code = diag.category().unwrap();
+                    if code != category!("lint/suspicious/noDoubleEquals") {
+                        panic!("unexpected diagnostic {code:?}");
+                    }
+                }
+
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+    }
+
+    #[test]
+    fn suppression_range_should_report_after_end_v2() {
+        const SOURCE: &str = "
+// biome-ignore-start lint/suspicious/noDoubleEquals: single rule
+// biome-ignore-start lint/style/useConst: single rule
+a == b;
+let c;
+// biome-ignore-end lint/suspicious/noDoubleEquals: single rule
+a === b;
+let f;
+// biome-ignore-end lint/style/useConst: single rule
+let d;
+
+        ";
+
+        let parsed = parse(
+            SOURCE,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[
+                RuleFilter::Rule("suspicious", "noDoubleEquals"),
+                RuleFilter::Rule("style", "useConst"),
+            ]),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        let mut has_diagnostics = false;
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            Vec::new(),
+            JsFileSource::js_module(),
+            None,
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    has_diagnostics = true;
+                    let code = diag.category().unwrap();
+                    if code != category!("lint/style/useConst") {
+                        panic!("unexpected diagnostic {code:?}");
+                    }
+                }
+
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+        assert!(has_diagnostics, "must have diagnostics");
+    }
+
+    #[test]
+    fn suppression_range_should_not_report_after_end() {
+        const SOURCE: &str = "
+// biome-ignore-start lint/suspicious/noDoubleEquals: single rule
+// biome-ignore-start lint/style/useConst: single rule
+a == b;
+let c;
+// biome-ignore-end lint/suspicious/noDoubleEquals: single rule
+a === b;
+let f;
+// biome-ignore-end lint/style/useConst: single rule
+const d;
+
+        ";
+
+        let parsed = parse(
+            SOURCE,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[
+                RuleFilter::Rule("suspicious", "noDoubleEquals"),
+                RuleFilter::Rule("style", "useConst"),
+            ]),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            Vec::new(),
+            JsFileSource::js_module(),
+            None,
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    let error = diag
+                        .with_file_path("dummyFile")
+                        .with_file_source_code(SOURCE);
+                    let text = print_diagnostic_to_string(&error);
+                    eprintln!("{text}");
+                    panic!("Unexpected diagnostic");
+                }
+
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+    }
+
+    #[test]
+    fn unused_range_suppression() {
+        const SOURCE: &str = "
+// biome-ignore-all lint/suspicious/noDoubleEquals: single rule
+a == b;
+// biome-ignore-start lint/suspicious/noDoubleEquals: single rule
+a == b;
+a == b;
+// biome-ignore-end lint/suspicious/noDoubleEquals: single rule
+
+        ";
+
+        let parsed = parse(
+            SOURCE,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_lint().build(),
+            enabled_rules: Some(&[RuleFilter::Rule("suspicious", "noDoubleEquals")]),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        let mut has_diagnostics = false;
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            Vec::new(),
+            JsFileSource::js_module(),
+            None,
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    has_diagnostics = true;
+                    let code = diag.category().unwrap();
+                    if code != category!("suppressions/unused") {
+                        panic!("unexpected diagnostic {code:?}");
+                    }
+                }
+
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+        assert!(has_diagnostics, "must have diagnostics");
     }
 }

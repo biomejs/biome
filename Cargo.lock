@@ -127,6 +127,7 @@ dependencies = [
  "biome_rowan",
  "biome_suppression",
  "enumflags2",
+ "indexmap",
  "rustc-hash 2.0.0",
  "schemars",
  "serde",
