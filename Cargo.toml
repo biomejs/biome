@@ -195,7 +195,7 @@ rustc-hash         = "2.0.0"
 schemars           = { version = "0.8.21", features = ["indexmap2", "smallvec"] }
 serde              = { version = "1.0.214", features = ["derive"] }
 serde_ini          = "0.2.0"
-serde_json         = "1.0.132"
+serde_json         = "1.0.133"
 similar            = "2.6.0"
 slotmap            = "1.0.7"
 smallvec           = { version = "1.13.2", features = ["union", "const_new", "serde"] }
