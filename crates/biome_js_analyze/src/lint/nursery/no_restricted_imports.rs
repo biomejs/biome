@@ -19,7 +19,6 @@ use biome_js_syntax::{
 use biome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-use std::borrow::Borrow;
 
 declare_lint_rule! {
     /// Disallow specified modules when loaded by import or require.
@@ -102,6 +101,35 @@ pub struct RestrictedImportsOptions {
     paths: FxHashMap<Box<str>, CustomRestrictedImport>,
 }
 
+/// Specifies why a specific import is allowed or disallowed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ImportRestrictionCause {
+    /// Reason: The import source is forbidden or allowed.
+    ImportSource,
+    /// Reason: A set of forbidden import names has been defined via `importNames`.
+    ImportNames,
+    /// Reason: A set of allowed import names has been defined via `allowImportNames`.
+    AllowImportNames,
+}
+
+/// Specifies whether a specific import is (dis)allowed, and why it is allowed/disallowed.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct ImportRestrictionStatus(bool, ImportRestrictionCause);
+
+impl ImportRestrictionStatus {
+    pub fn is_allowed(&self) -> bool {
+        self.0
+    }
+
+    pub fn is_forbidden(&self) -> bool {
+        !self.0
+    }
+
+    pub fn reason(&self) -> ImportRestrictionCause {
+        self.1
+    }
+}
+
 #[derive(
     Clone,
     Debug,
@@ -125,20 +153,74 @@ impl CustomRestrictedImportOptions {
         !self.import_names.is_empty() || !self.allow_import_names.is_empty()
     }
 
-    pub fn is_import_allowed(&self, imported_name: &str) -> bool {
+    fn is_import_allowed(&self, imported_name: &str) -> ImportRestrictionStatus {
         if !self.allow_import_names.is_empty() {
             // Deny all imports except for the names specified in allow_import_names
-            self.allow_import_names
+            let is_allowed = self
+                .allow_import_names
                 .iter()
-                .any(|name| Borrow::<str>::borrow(name) == imported_name)
+                .any(|name| &**name == imported_name);
+
+            ImportRestrictionStatus(is_allowed, ImportRestrictionCause::AllowImportNames)
         } else if !self.import_names.is_empty() {
             // Allow all imports except for the names specified in import_names
-            self.import_names
+            let is_forbidden = self
+                .import_names
                 .iter()
-                .all(|name| Borrow::<str>::borrow(name) != imported_name)
+                .any(|name| &**name == imported_name);
+
+            ImportRestrictionStatus(!is_forbidden, ImportRestrictionCause::ImportNames)
         } else {
             // Deny all imports from this module
-            false
+            ImportRestrictionStatus(false, ImportRestrictionCause::ImportSource)
+        }
+    }
+
+    fn get_message_for_restriction(
+        &self,
+        import_source: &str,
+        imported_name: &str,
+        reason: ImportRestrictionCause,
+    ) -> String {
+        if !self.message.is_empty() {
+            self.message.clone()
+        } else {
+            match reason {
+                ImportRestrictionCause::ImportSource => {
+                    format!("Do not import '{import_source}'.")
+                }
+                ImportRestrictionCause::ImportNames | ImportRestrictionCause::AllowImportNames => {
+                    format!("Do not import '{imported_name}' from '{import_source}'.")
+                }
+            }
+        }
+    }
+
+    fn get_note_for_restriction(
+        &self,
+        import_source: &str,
+        _imported_name: &str,
+        reason: ImportRestrictionCause,
+    ) -> Option<String> {
+        match reason {
+            ImportRestrictionCause::ImportSource | ImportRestrictionCause::ImportNames => None,
+            ImportRestrictionCause::AllowImportNames => {
+                let mut sorted = self.allow_import_names.to_vec();
+                sorted.sort();
+                let allowed_import_names = sorted
+                    .into_iter()
+                    .map(|name| {
+                        if &**&name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
+                            "side-effect import".into()
+                        } else {
+                            name
+                        }
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ");
+
+                Some(format!("Only the following imports from '{import_source}' are allowed: {allowed_import_names}."))
+            }
         }
     }
 }
@@ -180,15 +262,16 @@ impl Deserializable for CustomRestrictedImport {
     }
 }
 
-struct RestrictedImportVisitor {
+struct RestrictedImportVisitor<'a> {
+    import_source: &'a str,
     restricted_import: CustomRestrictedImportOptions,
-    results: Vec<(TextRange, String)>,
+    results: Vec<RestrictedImportMessage>,
 }
 
-impl RestrictedImportVisitor {
-    pub const BARE_IMPORT_ALIAS: &str = "";
-    pub const NAMESPACE_IMPORT_ALIAS: &str = "*";
-    pub const DEFAULT_IMPORT_ALIAS: &str = "default";
+impl<'a> RestrictedImportVisitor<'a> {
+    pub const BARE_IMPORT_ALIAS: &'static str = "";
+    pub const NAMESPACE_IMPORT_ALIAS: &'static str = "*";
+    pub const DEFAULT_IMPORT_ALIAS: &'static str = "default";
 
     /// Analyze the context of an `import(...)` call to find the imported names,
     /// then validate that each of the names is allowed to be imported.
@@ -599,13 +682,23 @@ impl RestrictedImportVisitor {
         import_node: &SyntaxNode<JsLanguage>,
         name_or_alias: &str,
     ) -> Option<()> {
-        if self.restricted_import.is_import_allowed(name_or_alias) {
+        let status = self.restricted_import.is_import_allowed(name_or_alias);
+        if status.is_allowed() {
             return None;
         }
-        self.results.push((
-            import_node.text_trimmed_range(),
-            self.restricted_import.message.to_string(),
-        ));
+        self.results.push(RestrictedImportMessage {
+            location: import_node.text_trimmed_range(),
+            message: self.restricted_import.get_message_for_restriction(
+                self.import_source,
+                name_or_alias,
+                status.reason(),
+            ),
+            note: self.restricted_import.get_note_for_restriction(
+                self.import_source,
+                name_or_alias,
+                status.reason(),
+            ),
+        });
         return Some(());
     }
 
@@ -616,20 +709,36 @@ impl RestrictedImportVisitor {
         import_token: &SyntaxToken<JsLanguage>,
         name_or_alias: &str,
     ) -> Option<()> {
-        if self.restricted_import.is_import_allowed(name_or_alias) {
+        let status = self.restricted_import.is_import_allowed(name_or_alias);
+        if status.is_allowed() {
             return None;
         }
-        self.results.push((
-            import_token.text_trimmed_range(),
-            self.restricted_import.message.to_string(),
-        ));
+        self.results.push(RestrictedImportMessage {
+            location: import_token.text_trimmed_range(),
+            message: self.restricted_import.get_message_for_restriction(
+                self.import_source,
+                name_or_alias,
+                status.reason(),
+            ),
+            note: self.restricted_import.get_note_for_restriction(
+                self.import_source,
+                name_or_alias,
+                status.reason(),
+            ),
+        });
         return Some(());
     }
 }
 
+pub struct RestrictedImportMessage {
+    pub location: TextRange,
+    pub message: String,
+    pub note: Option<String>,
+}
+
 impl Rule for NoRestrictedImports {
     type Query = Ast<AnyJsImportLike>;
-    type State = (TextRange, String);
+    type State = RestrictedImportMessage;
     type Signals = Vec<Self::State>;
     type Options = Box<RestrictedImportsOptions>;
 
@@ -641,9 +750,10 @@ impl Rule for NoRestrictedImports {
         let Some(module_name) = node.module_name_token() else {
             return vec![];
         };
-        let inner_text = inner_string_text(&module_name);
+        let import_source_text = inner_string_text(&module_name);
+        let import_source = import_source_text.text();
 
-        let Some(restricted_import_settings) = ctx.options().paths.get(inner_text.text()) else {
+        let Some(restricted_import_settings) = ctx.options().paths.get(import_source) else {
             return vec![];
         };
         let restricted_import: CustomRestrictedImportOptions =
@@ -653,12 +763,19 @@ impl Rule for NoRestrictedImports {
             AnyJsImportLike::JsModuleSource(module_source_node) => {
                 if !restricted_import.has_import_name_patterns() {
                     // All imports disallowed, add diagnostic to the import source
-                    vec![(
-                        module_name.text_trimmed_range(),
-                        restricted_import.message.to_string(),
-                    )]
+                    vec![RestrictedImportMessage {
+                        location: module_name.text_trimmed_range(),
+                        message: restricted_import.get_message_for_restriction(
+                            import_source,
+                            "",
+                            ImportRestrictionCause::ImportSource,
+                        ),
+                        note: None,
+                    }]
                 } else {
+                    // Check (and possibly report) each imported name individually
                     let mut visitor = RestrictedImportVisitor {
+                        import_source,
                         restricted_import,
                         results: Vec::new(),
                     };
@@ -673,12 +790,19 @@ impl Rule for NoRestrictedImports {
                 // be difficult to distinguish) or a collection of named imports.
                 if !restricted_import.has_import_name_patterns() {
                     // All imports disallowed, add diagnostic to the import source
-                    vec![(
-                        module_name.text_trimmed_range(),
-                        restricted_import.message.to_string(),
-                    )]
+                    vec![RestrictedImportMessage {
+                        location: module_name.text_trimmed_range(),
+                        message: restricted_import.get_message_for_restriction(
+                            import_source,
+                            "",
+                            ImportRestrictionCause::ImportSource,
+                        ),
+                        note: None,
+                    }]
                 } else {
+                    // Check (and possibly report) each imported name individually
                     let mut visitor = RestrictedImportVisitor {
+                        import_source,
                         restricted_import,
                         results: Vec::new(),
                     };
@@ -687,13 +811,21 @@ impl Rule for NoRestrictedImports {
                 }
             }
             AnyJsImportLike::JsCallExpression(_expression) => {
-                if !restricted_import
-                    .is_import_allowed(RestrictedImportVisitor::DEFAULT_IMPORT_ALIAS)
-                {
-                    vec![(
-                        module_name.text_trimmed_range(),
-                        restricted_import.message.to_string(),
-                    )]
+                let status = restricted_import
+                    .is_import_allowed(RestrictedImportVisitor::DEFAULT_IMPORT_ALIAS);
+
+                if status.is_forbidden() {
+                    // require() calls can only import the default import, so
+                    // there are no individual import names to check or report on.
+                    vec![RestrictedImportMessage {
+                        location: module_name.text_trimmed_range(),
+                        message: restricted_import.get_message_for_restriction(
+                            import_source,
+                            "",
+                            ImportRestrictionCause::ImportSource,
+                        ),
+                        note: None,
+                    }]
                 } else {
                     vec![]
                 }
@@ -701,13 +833,17 @@ impl Rule for NoRestrictedImports {
         }
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, (span, text): &Self::State) -> Option<RuleDiagnostic> {
-        Some(RuleDiagnostic::new(
+    fn diagnostic(_ctx: &RuleContext<Self>, occurence: &Self::State) -> Option<RuleDiagnostic> {
+        let mut rule_diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            *span,
+            occurence.location,
             markup! {
-                {text}
+                {occurence.message}
             },
-        ))
+        );
+        if let Some(note) = &occurence.note {
+            rule_diagnostic = rule_diagnostic.note(note);
+        }
+        Some(rule_diagnostic)
     }
 }
