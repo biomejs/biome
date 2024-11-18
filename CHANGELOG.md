@@ -210,6 +210,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- [noControlCharactersInRegex](https://biomejs.dev/linter/rules/no-control-characters-in-regex) no longer panics when it encounters an unterminated unicode escape sequence ([#4565](https://github.com/biomejs/biome/issues/4565)). Contributed by @Conaclos
+
 - [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now reports all expressions using the `Array` constructors.
 
   Previously, the rule reported only use of the `Array` constructor in expressions statements.
