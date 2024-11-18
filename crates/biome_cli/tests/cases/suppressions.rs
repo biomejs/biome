@@ -316,7 +316,7 @@ fn unused_suppression_after_top_level() {
     fs.insert(
         file_path.into(),
         *b"/**
-* biome-ignore lint/style/useConst: reason
+* biome-ignore-all lint/style/useConst: reason
 */
 
 
@@ -338,6 +338,41 @@ let bar = 33;",
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "unused_suppression_after_top_level",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn misplaced_top_level_suppression() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("file.js");
+    fs.insert(
+        file_path.into(),
+        *b"
+let foo = 2;
+/**
+* biome-ignore-all lint/style/useConst: reason
+* biome-ignore-all lint/suspicious/noDebugger: reason
+*/
+debugger
+let bar = 33;",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "misplaced_top_level_suppression",
         fs,
         console,
         result,

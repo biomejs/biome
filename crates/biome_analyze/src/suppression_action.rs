@@ -91,7 +91,7 @@ pub trait SuppressionAction {
 
 /// Convenient type to store useful information
 pub struct ApplySuppression<L: Language> {
-    /// If the token is following by trailing comments
+    /// If the token is followed by trailing comments
     pub token_has_trailing_comments: bool,
     /// The token to attach the suppression
     pub token_to_apply_suppression: SyntaxToken<L>,

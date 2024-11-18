@@ -383,7 +383,7 @@ define_categories! {
     "suppressions/unknownGroup",
     "suppressions/unknownRule",
     "suppressions/unused",
-    "suppressions/deprecatedSuppressionComment",
+    "suppressions/incorrect",
 
     // Used in tests and examples
     "args/fileNotFound",
