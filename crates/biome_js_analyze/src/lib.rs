@@ -567,4 +567,53 @@ let bar = 33;
             },
         );
     }
+
+    #[test]
+    fn top_level_suppression_with_block_comment() {
+        const SOURCE: &str = "
+/*
+* Top level comment here. It could be a banner or a license comment
+* MIT
+*/
+/**
+* biome-ignore-all lint/style/useConst: reason
+*/
+
+let foo = 2;
+let bar = 33;
+        ";
+
+        let parsed = parse(
+            SOURCE,
+            JsFileSource::js_module(),
+            JsParserOptions::default(),
+        );
+
+        let filter = AnalysisFilter {
+            categories: RuleCategoriesBuilder::default().with_syntax().build(),
+            ..AnalysisFilter::default()
+        };
+
+        let options = AnalyzerOptions::default();
+        analyze(
+            &parsed.tree(),
+            filter,
+            &options,
+            Vec::new(),
+            JsFileSource::js_module(),
+            None,
+            |signal| {
+                if let Some(diag) = signal.diagnostic() {
+                    let error = diag
+                        .with_file_path("dummyFile")
+                        .with_file_source_code(SOURCE);
+                    let text = print_diagnostic_to_string(&error);
+                    eprintln!("{text}");
+                    panic!("Unexpected diagnostic");
+                }
+
+                ControlFlow::<Never>::Continue(())
+            },
+        );
+    }
 }
