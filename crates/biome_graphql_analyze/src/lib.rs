@@ -6,11 +6,12 @@ mod suppression_action;
 pub use crate::registry::visit_registry;
 use crate::suppression_action::GraphqlSuppressionAction;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerOptions, AnalyzerSignal, ControlFlow, LanguageRoot, MatchQueryParams,
-    MetadataRegistry, RuleAction, RuleRegistry, SuppressionKind,
+    to_analyzer_suppressions, AnalysisFilter, AnalyzerOptions, AnalyzerSignal, AnalyzerSuppression,
+    ControlFlow, LanguageRoot, MatchQueryParams, MetadataRegistry, RuleAction, RuleRegistry,
 };
-use biome_diagnostics::{category, Error};
-use biome_graphql_syntax::{GraphqlLanguage, GraphqlSyntaxToken, TextSize};
+use biome_deserialize::TextRange;
+use biome_diagnostics::Error;
+use biome_graphql_syntax::GraphqlLanguage;
 use biome_suppression::{parse_suppression_comment, SuppressionDiagnostic};
 use std::ops::Deref;
 use std::sync::LazyLock;
@@ -57,44 +58,27 @@ where
     F: FnMut(&dyn AnalyzerSignal<GraphqlLanguage>) -> ControlFlow<B> + 'a,
     B: 'a,
 {
-    fn parse_linter_suppression_comment<'a>(
-        text: &'a str,
-        token: &'_ GraphqlSyntaxToken,
-    ) -> Vec<Result<SuppressionKind<'a>, SuppressionDiagnostic>> {
+    fn parse_linter_suppression_comment(
+        text: &str,
+        piece_range: TextRange,
+    ) -> Vec<Result<AnalyzerSuppression, SuppressionDiagnostic>> {
         let mut result = Vec::new();
 
-        for comment in parse_suppression_comment(text) {
-            let categories = match comment {
-                Ok(comment) => comment.categories,
+        for suppression in parse_suppression_comment(text) {
+            let suppression = match suppression {
+                Ok(suppression) => suppression,
                 Err(err) => {
                     result.push(Err(err));
                     continue;
                 }
             };
 
-            for (key, value) in categories {
-                if key == category!("lint") {
-                    result.push(Ok(SuppressionKind::Everything));
-                } else {
-                    let category = key.name();
-                    if let Some(rule) = category.strip_prefix("lint/") {
-                        let is_top_level = {
-                            let mut trivia = token.leading_trivia().pieces().rev();
-                            match (trivia.next(), trivia.next()) {
-                                (Some(a), Some(b)) => a.is_newline() && b.is_newline(),
-                                _ => false,
-                            }
-                        };
-                        if is_top_level && token.text_range().start() == TextSize::from(0) {
-                            result.push(Ok(SuppressionKind::TopLevel(rule)));
-                        } else if let Some(instance) = value {
-                            result.push(Ok(SuppressionKind::RuleInstance(rule, instance)));
-                        } else {
-                            result.push(Ok(SuppressionKind::Rule(rule)));
-                        }
-                    }
-                }
-            }
+            let analyzer_suppressions: Vec<_> = to_analyzer_suppressions(suppression, piece_range)
+                .into_iter()
+                .map(Ok)
+                .collect();
+
+            result.extend(analyzer_suppressions)
         }
 
         result

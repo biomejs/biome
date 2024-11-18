@@ -13,8 +13,8 @@ In the example, we suppress the rules `lint/style/useConst` and `lint/suspicious
 ```js
 // main.js
 /**
- * biome-ignore lint/style/useConst: i like let
- * biome-ignore lint/suspicious/noDebugger: needed now
+ * biome-ignore-all lint/style/useConst: i like let
+ * biome-ignore-all lint/suspicious/noDebugger: needed now
  */
 
 let path = "/path";
@@ -26,9 +26,37 @@ In this other example, we suppress `lint/suspicious/noEmptyBlock` for a whole CS
 
 ```css
 /**
-/* biome-ignore lint/suspicious/noEmptyBlock: it's fine to have empty blocks 
+/* biome-ignore-all lint/suspicious/noEmptyBlock: it's fine to have empty blocks 
 */
 
 a {}
 span {}
+```
+
+A new diagnostic is emitted if `biome-ignore-all` suppression isn't placed at the top of the file:
+
+
+```block
+file.js:3:1 suppressions/incorrect ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Top level suppressions can only be used at the beginning of the file.
+  
+    2 │ let foo = 2;
+  > 3 │ /**
+      │ ^^^
+  > 4 │ * biome-ignore-all lint/style/useConst: reason
+  > 5 │ */
+      │ ^^
+    6 │ let bar = 33;
+  
+  i Rename this to biome-ignore
+  
+    2 │ let foo = 2;
+    3 │ /**
+  > 4 │ * biome-ignore-all lint/style/useConst: reason
+      │   ^^^^^^^^^^^^^^^^
+    5 │ */
+    6 │ let bar = 33;
+  
+
 ```

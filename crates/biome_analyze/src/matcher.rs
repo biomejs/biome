@@ -204,7 +204,7 @@ mod tests {
         ControlFlow, MetadataRegistry, Never, Phases, QueryMatcher, RuleKey, ServiceBag,
         SignalEntry, SuppressionAction, SyntaxVisitor,
     };
-    use crate::{AnalyzerOptions, SuppressionKind};
+    use crate::{AnalyzerOptions, AnalyzerSuppression};
     use biome_diagnostics::{category, DiagnosticExt};
     use biome_diagnostics::{Diagnostic, Severity};
     use biome_rowan::{
@@ -349,14 +349,14 @@ mod tests {
             ControlFlow::Continue(())
         };
 
-        fn parse_suppression_comment<'a>(
-            comment: &'a str,
-            _token: &'_ SyntaxToken<RawLanguage>,
-        ) -> Vec<Result<SuppressionKind<'a>, Infallible>> {
+        fn parse_suppression_comment(
+            comment: &str,
+            _piece_range: TextRange,
+        ) -> Vec<Result<AnalyzerSuppression, Infallible>> {
             comment
                 .trim_start_matches("//")
                 .split(' ')
-                .map(SuppressionKind::Rule)
+                .map(AnalyzerSuppression::rule)
                 .map(Ok)
                 .collect()
         }

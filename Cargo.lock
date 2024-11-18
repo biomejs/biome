@@ -125,6 +125,7 @@ dependencies = [
  "biome_diagnostics",
  "biome_parser",
  "biome_rowan",
+ "biome_suppression",
  "enumflags2",
  "rustc-hash 2.0.0",
  "schemars",

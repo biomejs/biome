@@ -903,7 +903,7 @@ pub trait Rule: RuleMeta + Sized {
                 <Self::Group as RuleGroup>::NAME,
                 Self::METADATA.name
             );
-            let suppression_text = format!("biome-ignore {rule_category}");
+            let suppression_text = format!("biome-ignore-all {rule_category}");
             let root = ctx.root();
 
             if let Some(first_token) = root.syntax().first_token() {

@@ -3279,7 +3279,7 @@ export type Category =
 	| "suppressions/unknownGroup"
 	| "suppressions/unknownRule"
 	| "suppressions/unused"
-	| "suppressions/deprecatedSuppressionComment"
+	| "suppressions/incorrect"
 	| "args/fileNotFound"
 	| "flags/invalid"
 	| "semanticTests";
