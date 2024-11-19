@@ -163,7 +163,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
 
      _→ The `Ast<>` query type for example allows you to query the AST/CST of a program._
 
-     _→ For more advanced use cases it is also possible to define [custom query types](#custom-syntax-tree-visitors)._
+     _→ For more advanced use cases, it is also possible to define [custom query types](#custom-syntax-tree-visitors)._
 
    - The **`run`** function will be invoked for each match of `Query`.
      It should return either `Some` to report a diagnostic for that match, or `None`.
