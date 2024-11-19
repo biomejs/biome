@@ -259,6 +259,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) no longer suggests renaming top-level variables in a global declaration file. Contributed by @Conaclos
 
+- [noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class/) no longer panics on malformed escape sequences that end with a multi-byte character ([#4587](https://github.com/biomejs/biome/issues/4587)). Contributed by @Conaclos
+
 ### Parser
 
 #### Bug fixes
