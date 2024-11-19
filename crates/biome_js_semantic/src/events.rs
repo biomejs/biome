@@ -183,17 +183,17 @@ impl BindingName {
 
 #[derive(Debug, Clone)]
 struct BindingInfo {
-    /// range of the name
-    range: TextRange,
+    /// range start of the name
+    range_start: TextSize,
     /// Kind of the declaration,
     /// or in the case of a bogus declaration, the kind of the name
     declaration_kind: JsSyntaxKind,
 }
 
 impl BindingInfo {
-    fn new(range: TextRange, declaration_kind: JsSyntaxKind) -> Self {
+    fn new(range_start: TextSize, declaration_kind: JsSyntaxKind) -> Self {
         Self {
-            range,
+            range_start,
             declaration_kind,
         }
     }
@@ -517,8 +517,10 @@ impl SemanticEventExtractor {
         let is_exported = if let Ok(name_token) = node.name_token() {
             let name = name_token.token_text_trimmed();
             if let Some(declaration) = node.declaration() {
-                let info =
-                    BindingInfo::new(name_token.text_trimmed_range(), declaration.syntax().kind());
+                let info = BindingInfo::new(
+                    name_token.text_trimmed_range().start(),
+                    declaration.syntax().kind(),
+                );
                 let is_exported = declaration.export().is_some();
                 match declaration {
                     AnyJsBindingDeclaration::JsArrayBindingPatternElement(_)
@@ -664,7 +666,10 @@ impl SemanticEventExtractor {
                 is_exported
             } else {
                 // Handle identifiers in bogus nodes
-                let info = BindingInfo::new(name_token.text_trimmed_range(), node.syntax().kind());
+                let info = BindingInfo::new(
+                    name_token.text_trimmed_range().start(),
+                    node.syntax().kind(),
+                );
                 self.push_binding(None, BindingName::Value(name), info);
                 false
             }
@@ -905,7 +910,8 @@ impl SemanticEventExtractor {
             if let Ok(name_token) = infer.ident_token() {
                 let name = name_token.token_text_trimmed();
                 let name_range = name_token.text_trimmed_range();
-                let binding_info = BindingInfo::new(name_range, JsSyntaxKind::TS_INFER_TYPE);
+                let binding_info =
+                    BindingInfo::new(name_range.start(), JsSyntaxKind::TS_INFER_TYPE);
                 self.push_binding(None, BindingName::Type(name), binding_info);
                 let scope_id = self.current_scope_mut().scope_id;
                 self.stash.push_back(SemanticEvent::DeclarationFound {
@@ -953,11 +959,11 @@ impl SemanticEventExtractor {
         // Bind references to declarations
         for (name, mut references) in scope.references {
             if let Some(&BindingInfo {
-                range: declaration_range,
+                range_start: declaration_range_start,
                 declaration_kind,
             }) = self.bindings.get(&name)
             {
-                let declaration_at = declaration_range.start();
+                let declaration_at = declaration_range_start;
                 // We know the declaration of these reference.
                 for reference in references {
                     let declaration_before_reference = declaration_at < reference.range().start();
@@ -1049,19 +1055,18 @@ impl SemanticEventExtractor {
                         Reference::AmbientRead(range) if info.is_imported() => {
                             // An ambient read can only read a value,
                             // but also an imported value as a type (with the `type` modifier)
-                            let declaration_at = info.range.start();
                             let declaration_before_reference =
-                                declaration_at < reference.range().start();
+                                info.range_start < reference.range().start();
                             let event = if declaration_before_reference {
                                 SemanticEvent::Read {
                                     range,
-                                    declaration_at,
+                                    declaration_at: info.range_start,
                                     scope_id: ScopeId::new(0),
                                 }
                             } else {
                                 SemanticEvent::HoistedRead {
                                     range,
-                                    declaration_at,
+                                    declaration_at: info.range_start,
                                     scope_id: ScopeId::new(0),
                                 }
                             };
