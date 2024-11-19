@@ -199,34 +199,6 @@ impl CustomRestrictedImportOptions {
             }
         }
     }
-
-    fn get_note_for_restriction(
-        &self,
-        import_source: &str,
-        _imported_name: &str,
-        reason: ImportRestrictionCause,
-    ) -> Option<String> {
-        match reason {
-            ImportRestrictionCause::ImportSource | ImportRestrictionCause::ImportNames => None,
-            ImportRestrictionCause::AllowImportNames => {
-                let mut sorted = self.allow_import_names.to_vec();
-                sorted.sort();
-                let allowed_import_names = sorted
-                    .into_iter()
-                    .map(|name| {
-                        if &**&name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
-                            "side-effect import".into()
-                        } else {
-                            name
-                        }
-                    })
-                    .collect::<Vec<_>>()
-                    .join(", ");
-
-                Some(format!("Only the following imports from '{import_source}' are allowed: {allowed_import_names}."))
-            }
-        }
-    }
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -697,11 +669,8 @@ impl<'a> RestrictedImportVisitor<'a> {
                 name_or_alias,
                 status.reason(),
             ),
-            note: self.restricted_import.get_note_for_restriction(
-                self.import_source,
-                name_or_alias,
-                status.reason(),
-            ),
+            import_source: self.import_source.to_string(),
+            allowed_import_names: self.restricted_import.allow_import_names.clone(),
         });
         return Some(());
     }
@@ -724,11 +693,8 @@ impl<'a> RestrictedImportVisitor<'a> {
                 name_or_alias,
                 status.reason(),
             ),
-            note: self.restricted_import.get_note_for_restriction(
-                self.import_source,
-                name_or_alias,
-                status.reason(),
-            ),
+            import_source: self.import_source.to_string(),
+            allowed_import_names: self.restricted_import.allow_import_names.clone(),
         });
         return Some(());
     }
@@ -737,7 +703,8 @@ impl<'a> RestrictedImportVisitor<'a> {
 pub struct RestrictedImportMessage {
     pub location: TextRange,
     pub message: String,
-    pub note: Option<String>,
+    pub import_source: String,
+    pub allowed_import_names: Box<[Box<str>]>,
 }
 
 impl Rule for NoRestrictedImports {
@@ -774,7 +741,8 @@ impl Rule for NoRestrictedImports {
                             "",
                             ImportRestrictionCause::ImportSource,
                         ),
-                        note: None,
+                        import_source: import_source.to_string(),
+                        allowed_import_names: Box::new([]),
                     }]
                 } else {
                     // Check (and possibly report) each imported name individually
@@ -801,7 +769,8 @@ impl Rule for NoRestrictedImports {
                             "",
                             ImportRestrictionCause::ImportSource,
                         ),
-                        note: None,
+                        import_source: import_source.to_string(),
+                        allowed_import_names: Box::new([]),
                     }]
                 } else {
                     // Check (and possibly report) each imported name individually
@@ -828,7 +797,8 @@ impl Rule for NoRestrictedImports {
                             "",
                             ImportRestrictionCause::ImportSource,
                         ),
-                        note: None,
+                        import_source: import_source.to_string(),
+                        allowed_import_names: Box::new([]),
                     }]
                 } else {
                     vec![]
@@ -837,16 +807,31 @@ impl Rule for NoRestrictedImports {
         }
     }
 
-    fn diagnostic(_ctx: &RuleContext<Self>, occurence: &Self::State) -> Option<RuleDiagnostic> {
+    fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let mut rule_diagnostic = RuleDiagnostic::new(
             rule_category!(),
-            occurence.location,
+            state.location,
             markup! {
-                {occurence.message}
+                {state.message}
             },
         );
-        if let Some(note) = &occurence.note {
-            rule_diagnostic = rule_diagnostic.note(note);
+        if !state.allowed_import_names.is_empty() {
+            let mut sorted = state.allowed_import_names.to_vec();
+            sorted.sort();
+            let allowed_import_names = sorted
+                .into_iter()
+                .map(|name| {
+                    if &**&name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
+                        "Side-effect only import".into()
+                    } else {
+                        name
+                    }
+                });;
+
+            rule_diagnostic = rule_diagnostic.footer_list(
+                markup! { "Only the following imports from "<Emphasis>"'"{state.import_source}"'"</Emphasis>" are allowed:" },
+                allowed_import_names,
+            );
         }
         Some(rule_diagnostic)
     }

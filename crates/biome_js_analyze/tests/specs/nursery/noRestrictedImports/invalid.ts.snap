@@ -67,7 +67,9 @@ invalid.ts:2:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
     3 │ import 'default-forbidden';
     4 │ import 'namespace-allowed';
   
-  i Only the following imports from 'default-allowed' are allowed: default.
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
   
 
 ```
@@ -84,7 +86,9 @@ invalid.ts:4:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
     5 │ import 'namespace-forbidden';
     6 │ import 'member-allowed';
   
-  i Only the following imports from 'namespace-allowed' are allowed: *.
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
   
 
 ```
@@ -101,7 +105,17 @@ invalid.ts:6:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
     7 │ import 'member-forbidden';
     8 │ 
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -132,7 +146,9 @@ invalid.ts:10:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
     11 │ import * as n3 from 'member-allowed';
     12 │ import * as n4 from 'bare-allowed';
   
-  i Only the following imports from 'default-allowed' are allowed: default.
+  i Only the following imports from 'default-allowed' are allowed:
+  
+  - default
   
 
 ```
@@ -149,7 +165,17 @@ invalid.ts:11:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
     12 │ import * as n4 from 'bare-allowed';
     13 │ 
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -166,7 +192,9 @@ invalid.ts:12:8 lint/nursery/noRestrictedImports ━━━━━━━━━━�
     13 │ 
     14 │ import type d0 from 'default-forbidden';
   
-  i Only the following imports from 'bare-allowed' are allowed: side-effect import.
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
   
 
 ```
@@ -197,7 +225,17 @@ invalid.ts:15:13 lint/nursery/noRestrictedImports ━━━━━━━━━━
     16 │ import type d2 from 'namespace-allowed';
     17 │ import type d3 from 'bare-allowed';
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -214,7 +252,9 @@ invalid.ts:16:13 lint/nursery/noRestrictedImports ━━━━━━━━━━
     17 │ import type d3 from 'bare-allowed';
     18 │ 
   
-  i Only the following imports from 'namespace-allowed' are allowed: *.
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
   
 
 ```
@@ -231,7 +271,9 @@ invalid.ts:17:13 lint/nursery/noRestrictedImports ━━━━━━━━━━
     18 │ 
     19 │ import { type default as d4, type allowed1, type allowed2 as a2 } from 'default-forbidden';
   
-  i Only the following imports from 'bare-allowed' are allowed: side-effect import.
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
   
 
 ```
@@ -262,7 +304,17 @@ invalid.ts:20:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
     21 │ import { type default as d6, type allowed3 } from 'namespace-allowed';
     22 │ import { type default as d7, type allowed4 } from 'bare-allowed';
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -279,7 +331,9 @@ invalid.ts:21:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
     22 │ import { type default as d7, type allowed4 } from 'bare-allowed';
     23 │ 
   
-  i Only the following imports from 'namespace-allowed' are allowed: *.
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
   
 
 ```
@@ -296,7 +350,9 @@ invalid.ts:21:35 lint/nursery/noRestrictedImports ━━━━━━━━━━
     22 │ import { type default as d7, type allowed4 } from 'bare-allowed';
     23 │ 
   
-  i Only the following imports from 'namespace-allowed' are allowed: *.
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
   
 
 ```
@@ -313,7 +369,9 @@ invalid.ts:22:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
     23 │ 
     24 │ import type { default as d8, allowed5, allowed6 as a6 } from 'default-forbidden';
   
-  i Only the following imports from 'bare-allowed' are allowed: side-effect import.
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
   
 
 ```
@@ -330,7 +388,9 @@ invalid.ts:22:35 lint/nursery/noRestrictedImports ━━━━━━━━━━
     23 │ 
     24 │ import type { default as d8, allowed5, allowed6 as a6 } from 'default-forbidden';
   
-  i Only the following imports from 'bare-allowed' are allowed: side-effect import.
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
   
 
 ```
@@ -361,7 +421,17 @@ invalid.ts:25:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
     26 │ import type { default as d10, allowed7 } from 'namespace-allowed';
     27 │ import type { default as d11, allowed8 } from 'bare-allowed';
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -378,7 +448,9 @@ invalid.ts:26:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
     27 │ import type { default as d11, allowed8 } from 'bare-allowed';
     28 │ 
   
-  i Only the following imports from 'namespace-allowed' are allowed: *.
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
   
 
 ```
@@ -395,7 +467,9 @@ invalid.ts:26:31 lint/nursery/noRestrictedImports ━━━━━━━━━━
     27 │ import type { default as d11, allowed8 } from 'bare-allowed';
     28 │ 
   
-  i Only the following imports from 'namespace-allowed' are allowed: *.
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
   
 
 ```
@@ -412,7 +486,9 @@ invalid.ts:27:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
     28 │ 
     29 │ import { type default as d12, type forbidden1, type forbidden2 as f2 } from 'member-forbidden';
   
-  i Only the following imports from 'bare-allowed' are allowed: side-effect import.
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
   
 
 ```
@@ -429,7 +505,9 @@ invalid.ts:27:31 lint/nursery/noRestrictedImports ━━━━━━━━━━
     28 │ 
     29 │ import { type default as d12, type forbidden1, type forbidden2 as f2 } from 'member-forbidden';
   
-  i Only the following imports from 'bare-allowed' are allowed: side-effect import.
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
   
 
 ```
@@ -475,7 +553,17 @@ invalid.ts:30:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
     31 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
     32 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -491,7 +579,17 @@ invalid.ts:30:32 lint/nursery/noRestrictedImports ━━━━━━━━━━
     31 │ import type { default as d13, forbidden3, forbidden4 as f4 } from 'member-forbidden';
     32 │ import type { default as d14, forbidden4, forbidden5 as f5 } from 'member-allowed';
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -538,7 +636,17 @@ invalid.ts:32:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
     33 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
     34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -555,7 +663,17 @@ invalid.ts:32:31 lint/nursery/noRestrictedImports ━━━━━━━━━━
     33 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
     34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -572,7 +690,17 @@ invalid.ts:32:43 lint/nursery/noRestrictedImports ━━━━━━━━━━
     33 │ import type { default as d15, forbidden5, forbidden6 as f6 } from 'namespace-allowed';
     34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
   
-  i Only the following imports from 'member-allowed' are allowed: allowed1, allowed2, allowed3, allowed4, allowed5, allowed6, allowed7, allowed8, allowed9.
+  i Only the following imports from 'member-allowed' are allowed:
+  
+  - allowed1
+  - allowed2
+  - allowed3
+  - allowed4
+  - allowed5
+  - allowed6
+  - allowed7
+  - allowed8
+  - allowed9
   
 
 ```
@@ -589,7 +717,9 @@ invalid.ts:33:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
     34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
     35 │ 
   
-  i Only the following imports from 'namespace-allowed' are allowed: *.
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
   
 
 ```
@@ -606,7 +736,9 @@ invalid.ts:33:31 lint/nursery/noRestrictedImports ━━━━━━━━━━
     34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
     35 │ 
   
-  i Only the following imports from 'namespace-allowed' are allowed: *.
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
   
 
 ```
@@ -623,7 +755,9 @@ invalid.ts:33:43 lint/nursery/noRestrictedImports ━━━━━━━━━━
     34 │ import type { default as d16, forbidden6, forbidden7 as f7 } from 'bare-allowed';
     35 │ 
   
-  i Only the following imports from 'namespace-allowed' are allowed: *.
+  i Only the following imports from 'namespace-allowed' are allowed:
+  
+  - *
   
 
 ```
@@ -639,7 +773,9 @@ invalid.ts:34:15 lint/nursery/noRestrictedImports ━━━━━━━━━━
        │               ^^^^^^^
     35 │ 
   
-  i Only the following imports from 'bare-allowed' are allowed: side-effect import.
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
   
 
 ```
@@ -655,7 +791,9 @@ invalid.ts:34:31 lint/nursery/noRestrictedImports ━━━━━━━━━━
        │                               ^^^^^^^^^^
     35 │ 
   
-  i Only the following imports from 'bare-allowed' are allowed: side-effect import.
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
   
 
 ```
@@ -671,7 +809,9 @@ invalid.ts:34:43 lint/nursery/noRestrictedImports ━━━━━━━━━━
        │                                           ^^^^^^^^^^
     35 │ 
   
-  i Only the following imports from 'bare-allowed' are allowed: side-effect import.
+  i Only the following imports from 'bare-allowed' are allowed:
+  
+  - Side-effect only import
   
 
 ```
