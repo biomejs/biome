@@ -161,7 +161,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
      type Query = Ast<JsIdentifierBinding>;
      ```
 
-     _→ The `Ast<>` query type for example allows you to query the AST/CST of a program._
+     _→ The `Ast<>` query type, for example, allows you to query the AST/CST of a program for nodes of a specific type._
 
      _→ For more advanced use cases, it is also possible to define [custom query types](#custom-syntax-tree-visitors)._
 
