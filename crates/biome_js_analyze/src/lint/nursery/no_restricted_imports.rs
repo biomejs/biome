@@ -51,10 +51,6 @@ declare_lint_rule! {
         version: "1.6.0",
         name: "noRestrictedImports",
         language: "js",
-        sources: &[
-            RuleSource::Eslint("no-restricted-imports"),
-            RuleSource::EslintTypeScript("no-restricted-imports"),
-        ],
         recommended: false,
     }
 }
