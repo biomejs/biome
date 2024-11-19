@@ -186,7 +186,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
      fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> { ... }
      ```
 
-   - The `State` type can be used to pass additional information for each occurence reported by `run` to the `diagnostic` function.
+   - The `State` type can be used to pass additional information for each signal reported by the `run` function to the `diagnostic` and `action` functions.
      Use `()` if you don't need to pass additional information:
 
      ```rust
