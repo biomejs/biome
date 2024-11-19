@@ -180,7 +180,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
      }
      ```
 
-   - The **`diagnostic`** function will be invoked for each occurence returned by `run`, and turns these occurences into `RuleDiagnostic` instances that define the message(s) reported to the user.
+   - The **`diagnostic`** function will be invoked for each signal returned by `run`, and turns these signals into `RuleDiagnostic` instances that define the message(s) reported to the user.
 
      ```rust
      fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> { ... }
