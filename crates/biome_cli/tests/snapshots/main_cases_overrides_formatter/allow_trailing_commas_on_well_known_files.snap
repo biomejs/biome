@@ -1,6 +1,7 @@
 ---
 source: crates/biome_cli/tests/snap_test.rs
 expression: content
+snapshot_kind: text
 ---
 ## `biome.json`
 
@@ -17,6 +18,12 @@ expression: content
     }
   ]
 }
+```
+
+## `.vscode/any.text`
+
+```text
+any text
 ```
 
 ## `.vscode/settings.json`

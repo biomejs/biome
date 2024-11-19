@@ -24,6 +24,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Don't parse the files that don't end with the json extension as JSON files in the `.vscode` directory ([#4391](https://github.com/biomejs/biome/issues/4391)). Contributed by @Conaclos
+
 - `biome migrate eslint` now correctly resolves scoped package named `eslint-config` with a path.
   Contributed by @Conaclos
 
@@ -119,7 +121,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   `noUndeclaredVariables` is inspired by the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef). It reports all references that are not bound to any declarations within a module.
   Node.js, JavaScript and TypeScript globals are ignored.
-  Bioem provides the `javascript.globals` option to list additional globals that should be ignored by the rule.
+  Biome provides the `javascript.globals` option to list additional globals that should be ignored by the rule.
 
   In TypeScript projects, developers often use global declaration files to declare global types.
   Biome is currently unable to detect these global types.
