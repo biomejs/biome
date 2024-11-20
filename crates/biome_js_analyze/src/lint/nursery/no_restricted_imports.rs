@@ -225,7 +225,7 @@ declare_lint_rule! {
     /// - **Named import:** `"someIdentifier"` (`import { someIdentifier } from 'named-import'`)
     /// - **Default import:** `"default"` (`import defaultExport from 'default-import'`)
     /// - **Namespace import:** `"*"` (`import * as alias1 from 'namespace-import'`)
-    /// - **Sideeffect/Bare import:** `""` (`import "sideeffect-import"`)
+    /// - **Side effect/Bare import:** `""` (`import "sideeffect-import"`)
     ///
     /// **Only one of `importNames` and `allowImportNames` must be specified.**
     ///
@@ -310,7 +310,7 @@ declare_lint_rule! {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct RestrictedImportsOptions {
-    /// A list of names that should trigger the rule
+    /// A list of import paths that should trigger the rule
     #[serde(skip_serializing_if = "FxHashMap::is_empty")]
     paths: FxHashMap<Box<str>, CustomRestrictedImport>,
 }
@@ -631,8 +631,8 @@ impl<'a> RestrictedImportVisitor<'a> {
         let clause = module_source_node.syntax().parent()?;
         match clause.kind() {
             JsSyntaxKind::JS_IMPORT_BARE_CLAUSE => {
-                let sideeffect_import: JsImportBareClause = clause.cast()?;
-                self.visit_sideeffect_import(sideeffect_import)
+                let side_effect_import: JsImportBareClause = clause.cast()?;
+                self.visit_side_effect_import(side_effect_import)
             }
             JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE => {
                 let import_combined_clause: JsImportCombinedClause = clause.cast()?;
@@ -749,8 +749,8 @@ impl<'a> RestrictedImportVisitor<'a> {
     }
 
     /// Checks whether this bare import of the form `import from 'source'` is allowed.
-    fn visit_sideeffect_import(&mut self, sideeffect_import: JsImportBareClause) -> Option<()> {
-        let source_token = sideeffect_import
+    fn visit_side_effect_import(&mut self, bare_import: JsImportBareClause) -> Option<()> {
+        let source_token = bare_import
             .source()
             .ok()?
             .as_js_module_source()?
@@ -972,7 +972,7 @@ impl Rule for NoRestrictedImports {
             AnyJsImportLike::JsImportCallExpression(import_call) => {
                 // TODO: We have to parse the context of the import() call to determine
                 // which exports are being used/whether this should be considered a
-                // namespace import, a sideeffect import (the two of which may
+                // namespace import, a side-effect import (the two of which may
                 // be difficult to distinguish) or a collection of named imports.
                 if !restricted_import.has_import_name_patterns() {
                     // All imports disallowed, add diagnostic to the import source
