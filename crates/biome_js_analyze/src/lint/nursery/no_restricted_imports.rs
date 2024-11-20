@@ -16,7 +16,7 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsShorthandNamedImportSpecifier,
     JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator,
 };
-use biome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 
@@ -556,7 +556,7 @@ impl<'a> RestrictedImportVisitor<'a> {
                     .arguments()
                     .ok()?
                     .args()
-                    .into_iter()
+                    .iter()
                     .next()?
                     .ok()?
                     .as_any_js_expression()?
@@ -575,7 +575,7 @@ impl<'a> RestrictedImportVisitor<'a> {
                             AnyJsArrowFunctionParameters::JsParameters(parameters) => Some(
                                 parameters
                                     .items()
-                                    .into_iter()
+                                    .iter()
                                     .next()?
                                     .ok()?
                                     .as_any_js_formal_parameter()?
@@ -591,7 +591,7 @@ impl<'a> RestrictedImportVisitor<'a> {
                             .parameters()
                             .ok()?
                             .items()
-                            .into_iter()
+                            .iter()
                             .next()?
                             .ok()?
                             .as_any_js_formal_parameter()?
@@ -688,7 +688,7 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     fn visit_named_imports(&mut self, named_imports: JsNamedImportSpecifiers) -> Option<()> {
         let import_specifiers = named_imports.specifiers();
-        for import_specifier_maybe in import_specifiers.into_iter() {
+        for import_specifier_maybe in import_specifiers.iter() {
             if let Some(import_specifier) = import_specifier_maybe.ok() {
                 self.visit_named_or_shorthand_import(import_specifier);
             }
@@ -700,7 +700,7 @@ impl<'a> RestrictedImportVisitor<'a> {
         &mut self,
         named_reexports: JsExportNamedFromSpecifierList,
     ) -> Option<()> {
-        for export_specifier_maybe in named_reexports.into_iter() {
+        for export_specifier_maybe in named_reexports.iter() {
             if let Some(export_specifier) = export_specifier_maybe.ok() {
                 self.visit_named_or_shorthand_reexport(export_specifier);
             }
@@ -710,7 +710,7 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     fn visit_named_bindings(&mut self, named_imports: JsObjectBindingPattern) -> Option<()> {
         let import_bindings = named_imports.properties();
-        for import_binding_maybe in import_bindings.into_iter() {
+        for import_binding_maybe in import_bindings.iter() {
             if let Some(import_binding) = import_binding_maybe.ok() {
                 self.visit_named_or_shorthand_binding(import_binding);
             }
