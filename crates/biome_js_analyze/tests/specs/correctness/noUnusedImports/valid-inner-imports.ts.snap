@@ -1,0 +1,12 @@
+---
+source: crates/biome_js_analyze/tests/spec_tests.rs
+expression: valid-inner-imports.ts
+snapshot_kind: text
+---
+# Input
+```ts
+declare module "mod" {
+    import type { Ns } from "other";
+    export const C: { prop: Ns.prop };
+}
+```
