@@ -35,7 +35,10 @@
       "ignoreDeps": [
         "syn",
         "quote",
-        "tower"
+        "tower",
+        "hashbrown",
+        "grit-pattern-matcher",
+        "grit-util"
       ]
     },
     {
