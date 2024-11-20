@@ -136,7 +136,6 @@ name = "biome_aria"
 version = "0.5.7"
 dependencies = [
  "biome_aria_metadata",
- "rustc-hash 2.0.0",
 ]
 
 [[package]]
@@ -853,6 +852,7 @@ dependencies = [
 name = "biome_js_syntax"
 version = "0.5.7"
 dependencies = [
+ "biome_aria",
  "biome_js_factory",
  "biome_js_parser",
  "biome_rowan",

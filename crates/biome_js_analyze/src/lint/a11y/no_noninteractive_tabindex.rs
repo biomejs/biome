@@ -7,7 +7,7 @@ use biome_console::markup;
 use biome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, AnyNumberLikeExpression, TextRange,
 };
-use biome_rowan::{AstNode, BatchMutationExt};
+use biome_rowan::{AstNode, BatchMutationExt, TokenText};
 
 declare_lint_rule! {
     /// Enforce that `tabIndex` is not assigned to non-interactive HTML elements.
@@ -58,7 +58,7 @@ declare_lint_rule! {
 
 pub struct RuleState {
     attribute_range: TextRange,
-    element_name: String,
+    element_name: TokenText,
 }
 
 impl Rule for NoNoninteractiveTabindex {
@@ -73,23 +73,26 @@ impl Rule for NoNoninteractiveTabindex {
             return None;
         }
 
-        let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-        let aria_roles = ctx.aria_roles();
-        let attributes = ctx.extract_attributes(&node.attributes());
-        let attributes = ctx.convert_all_attribute_values(attributes);
-
-        if aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes) {
+        if ctx.aria_roles().is_not_interactive_element(node) {
             let tabindex_attribute = node.find_attribute_by_name("tabIndex")?;
             let tabindex_attribute_value = tabindex_attribute.initializer()?.value().ok()?;
             if attribute_has_negative_tabindex(&tabindex_attribute_value)? {
                 return None;
             }
 
+            let element_name = node
+                .name()
+                .ok()?
+                .as_jsx_name()?
+                .value_token()
+                .ok()?
+                .token_text_trimmed();
+
             let role_attribute = node.find_attribute_by_name("role");
             let Some(role_attribute) = role_attribute else {
                 return Some(RuleState {
                     attribute_range: tabindex_attribute.range(),
-                    element_name: element_name.text_trimmed().to_string(),
+                    element_name,
                 });
             };
 
@@ -100,19 +103,20 @@ impl Rule for NoNoninteractiveTabindex {
 
             return Some(RuleState {
                 attribute_range: tabindex_attribute.range(),
-                element_name: element_name.text_trimmed().to_string(),
+                element_name,
             });
         }
         None
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
+        let element_name = state.element_name.text();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 state.attribute_range,
                 markup! {
-                "The HTML element "<Emphasis>{{&state.element_name}}</Emphasis>" is non-interactive. Do not use "<Emphasis>"tabIndex"</Emphasis>"."
+                "The HTML element "<Emphasis>{{element_name}}</Emphasis>" is non-interactive. Do not use "<Emphasis>"tabIndex"</Emphasis>"."
 
                 },
             )
