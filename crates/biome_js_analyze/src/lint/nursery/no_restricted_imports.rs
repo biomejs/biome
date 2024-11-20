@@ -193,7 +193,10 @@ declare_lint_rule! {
     /// ```
     ///
     /// ```js,expect_diagnostic,use_options
-    /// import * from 'services-deprecated';
+    /// import * as namespaceAlias from 'services-deprecated';
+    /// ```
+    ///
+    /// ```js,expect_diagnostic,use_options
     /// import { export1 } from 'constants';
     /// ```
     ///
