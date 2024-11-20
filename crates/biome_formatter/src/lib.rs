@@ -600,6 +600,54 @@ impl FromStr for BracketSpacing {
     }
 }
 
+#[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
+    serde(rename_all = "camelCase")
+)]
+pub struct SpaceInBrackets(bool);
+
+impl SpaceInBrackets {
+    /// Return the boolean value for this [SpaceInBrackets]
+    pub fn value(&self) -> bool {
+        self.0
+    }
+}
+
+impl Default for SpaceInBrackets {
+    fn default() -> Self {
+        Self(true)
+    }
+}
+
+impl From<bool> for SpaceInBrackets {
+    fn from(value: bool) -> Self {
+        Self(value)
+    }
+}
+
+impl std::fmt::Display for SpaceInBrackets {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::write!(f, "{}", self.value())
+    }
+}
+
+impl FromStr for SpaceInBrackets {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let value = bool::from_str(s);
+
+        match value {
+            Ok(value) => Ok(Self(value)),
+            Err(_) => Err(
+                "Value not supported for SpaceInBrackets. Supported values are 'true' and 'false'.",
+            ),
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
@@ -668,6 +716,9 @@ pub trait FormatOptions {
     /// Whether to insert spaces around brackets in object literals. Defaults to true.
     fn bracket_spacing(&self) -> BracketSpacing;
 
+    /// @todo
+    fn space_in_brackets(&self) -> SpaceInBrackets;
+
     /// Derives the print options from the these format options
     fn as_print_options(&self) -> PrinterOptions;
 }
@@ -718,6 +769,7 @@ pub struct SimpleFormatOptions {
     pub line_ending: LineEnding,
     pub attribute_position: AttributePosition,
     pub bracket_spacing: BracketSpacing,
+    pub space_in_brackets: SpaceInBrackets,
 }
 
 impl FormatOptions for SimpleFormatOptions {
@@ -743,6 +795,10 @@ impl FormatOptions for SimpleFormatOptions {
 
     fn bracket_spacing(&self) -> BracketSpacing {
         self.bracket_spacing
+    }
+
+    fn space_in_brackets(&self) -> SpaceInBrackets {
+        self.space_in_brackets
     }
 
     fn as_print_options(&self) -> PrinterOptions {
