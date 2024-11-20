@@ -44,7 +44,7 @@ dashmap                  = { workspace = true }
 hdrhistogram             = { version = "7.5.4", default-features = false }
 indexmap                 = { workspace = true }
 path-absolutize          = { version = "3.1.1", optional = false, features = ["use_unix_paths_on_wasm"] }
-quick-junit              = "0.5.0"
+quick-junit              = "0.5.1"
 rayon                    = { workspace = true }
 regex                    = { workspace = true }
 rustc-hash               = { workspace = true }
@@ -58,7 +58,7 @@ tracing-subscriber       = { workspace = true, features = ["env-filter", "json"]
 tracing-tree             = "0.4.0"
 
 [target.'cfg(unix)'.dependencies]
-libc  = "0.2.161"
+libc  = "0.2.164"
 tokio = { workspace = true, features = ["process"] }
 
 [target.'cfg(windows)'.dependencies]
