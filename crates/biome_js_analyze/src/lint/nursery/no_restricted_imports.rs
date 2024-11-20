@@ -496,7 +496,7 @@ impl<'a> RestrictedImportVisitor<'a> {
                     // const ... = import(...)
                     biome_js_syntax::AnyJsBinding::JsIdentifierBinding(namespace_binding) => {
                         // const namespaceImport = import(...)
-                        return self.visit_namespace_binding(namespace_binding);
+                        return self.visit_namespace_binding(&namespace_binding);
                     }
                     _ => {
                         // Use fallback instead
@@ -504,7 +504,7 @@ impl<'a> RestrictedImportVisitor<'a> {
                 },
                 AnyJsBindingPattern::JsObjectBindingPattern(named_bindings) => {
                     // const { ... } = await import(...)
-                    return self.visit_named_bindings(named_bindings);
+                    return self.visit_named_bindings(&named_bindings);
                 }
                 AnyJsBindingPattern::JsArrayBindingPattern(_) => {
                     // const [ ... ] = await import(...)
@@ -637,41 +637,41 @@ impl<'a> RestrictedImportVisitor<'a> {
         match clause.kind() {
             JsSyntaxKind::JS_IMPORT_BARE_CLAUSE => {
                 let side_effect_import: JsImportBareClause = clause.cast()?;
-                self.visit_side_effect_import(side_effect_import)
+                self.visit_side_effect_import(&side_effect_import)
             }
             JsSyntaxKind::JS_IMPORT_COMBINED_CLAUSE => {
                 let import_combined_clause: JsImportCombinedClause = clause.cast()?;
                 if let Ok(default_specifier) = import_combined_clause.default_specifier() {
-                    self.visit_default_import(default_specifier);
+                    self.visit_default_import(&default_specifier);
                 }
                 if let Ok(combined_specifier) = import_combined_clause.specifier() {
-                    self.visit_combined_specifier(combined_specifier);
+                    self.visit_combined_specifier(&combined_specifier);
                 }
                 Some(())
             }
             JsSyntaxKind::JS_IMPORT_NAMED_CLAUSE => {
                 let import_named_clause: JsImportNamedClause = clause.cast()?;
                 let import_specifiers = import_named_clause.named_specifiers().ok()?;
-                self.visit_named_imports(import_specifiers)
+                self.visit_named_imports(&import_specifiers)
             }
             JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE => {
                 let export_named_from_clause = clause.cast::<JsExportNamedFromClause>()?;
                 let import_specifiers = export_named_from_clause.specifiers();
-                self.visit_named_reexports(import_specifiers)
+                self.visit_named_reexports(&import_specifiers)
             }
             JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE => {
                 let import_default_clause: JsImportDefaultClause = clause.cast()?;
                 let default_specifier = import_default_clause.default_specifier().ok()?;
-                self.visit_default_import(default_specifier)
+                self.visit_default_import(&default_specifier)
             }
             JsSyntaxKind::JS_IMPORT_NAMESPACE_CLAUSE => {
                 let import_namespace_clause: JsImportNamespaceClause = clause.cast()?;
                 let namespace_specifier = import_namespace_clause.namespace_specifier().ok()?;
-                self.visit_namespace_import(namespace_specifier)
+                self.visit_namespace_import(&namespace_specifier)
             }
             JsSyntaxKind::JS_EXPORT_FROM_CLAUSE => {
                 let reexport_namespace_clause: JsExportFromClause = clause.cast()?;
-                self.visit_namespace_reexport(reexport_namespace_clause)
+                self.visit_namespace_reexport(&reexport_namespace_clause)
             }
             _ => None,
         }
@@ -679,7 +679,7 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     fn visit_combined_specifier(
         &mut self,
-        combined_specifier: AnyJsCombinedSpecifier,
+        combined_specifier: &AnyJsCombinedSpecifier,
     ) -> Option<()> {
         match combined_specifier {
             AnyJsCombinedSpecifier::JsNamedImportSpecifiers(named_imports) => {
@@ -691,11 +691,11 @@ impl<'a> RestrictedImportVisitor<'a> {
         }
     }
 
-    fn visit_named_imports(&mut self, named_imports: JsNamedImportSpecifiers) -> Option<()> {
+    fn visit_named_imports(&mut self, named_imports: &JsNamedImportSpecifiers) -> Option<()> {
         let import_specifiers = named_imports.specifiers();
         for import_specifier_maybe in import_specifiers.iter() {
             if let Some(import_specifier) = import_specifier_maybe.ok() {
-                self.visit_named_or_shorthand_import(import_specifier);
+                self.visit_named_or_shorthand_import(&import_specifier);
             }
         }
         Some(())
@@ -703,21 +703,21 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     fn visit_named_reexports(
         &mut self,
-        named_reexports: JsExportNamedFromSpecifierList,
+        named_reexports: &JsExportNamedFromSpecifierList,
     ) -> Option<()> {
         for export_specifier_maybe in named_reexports.iter() {
             if let Some(export_specifier) = export_specifier_maybe.ok() {
-                self.visit_named_or_shorthand_reexport(export_specifier);
+                self.visit_named_or_shorthand_reexport(&export_specifier);
             }
         }
         Some(())
     }
 
-    fn visit_named_bindings(&mut self, named_imports: JsObjectBindingPattern) -> Option<()> {
+    fn visit_named_bindings(&mut self, named_imports: &JsObjectBindingPattern) -> Option<()> {
         let import_bindings = named_imports.properties();
         for import_binding_maybe in import_bindings.iter() {
             if let Some(import_binding) = import_binding_maybe.ok() {
-                self.visit_named_or_shorthand_binding(import_binding);
+                self.visit_named_or_shorthand_binding(&import_binding);
             }
         }
         Some(())
@@ -725,7 +725,7 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     fn visit_named_or_shorthand_import(
         &mut self,
-        import_specifier: AnyJsNamedImportSpecifier,
+        import_specifier: &AnyJsNamedImportSpecifier,
     ) -> Option<()> {
         match import_specifier {
             AnyJsNamedImportSpecifier::JsShorthandNamedImportSpecifier(shorthand_import) => {
@@ -740,7 +740,7 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     fn visit_named_or_shorthand_binding(
         &mut self,
-        import_binding: AnyJsObjectBindingPatternMember,
+        import_binding: &AnyJsObjectBindingPatternMember,
     ) -> Option<()> {
         match import_binding {
             AnyJsObjectBindingPatternMember::JsObjectBindingPatternShorthandProperty(
@@ -754,7 +754,7 @@ impl<'a> RestrictedImportVisitor<'a> {
     }
 
     /// Checks whether this bare import of the form `import from 'source'` is allowed.
-    fn visit_side_effect_import(&mut self, bare_import: JsImportBareClause) -> Option<()> {
+    fn visit_side_effect_import(&mut self, bare_import: &JsImportBareClause) -> Option<()> {
         let source_token = bare_import
             .source()
             .ok()?
@@ -765,7 +765,7 @@ impl<'a> RestrictedImportVisitor<'a> {
     }
 
     /// Checks whether this import of the form `local_name` (as in `import local_name from 'source'`) is allowed.
-    fn visit_default_import(&mut self, default_import: JsDefaultImportSpecifier) -> Option<()> {
+    fn visit_default_import(&mut self, default_import: &JsDefaultImportSpecifier) -> Option<()> {
         let local_name = default_import
             .local_name()
             .ok()?
@@ -778,7 +778,7 @@ impl<'a> RestrictedImportVisitor<'a> {
     /// Checks whether this import of the form `* as local_name` is allowed.
     fn visit_namespace_import(
         &mut self,
-        namespace_import: JsNamespaceImportSpecifier,
+        namespace_import: &JsNamespaceImportSpecifier,
     ) -> Option<()> {
         self.visit_special_import_token(
             &namespace_import.star_token().ok()?,
@@ -787,7 +787,7 @@ impl<'a> RestrictedImportVisitor<'a> {
     }
 
     /// Checks whether this namespace reexport of the form `export * from ...` is allowed.
-    fn visit_namespace_reexport(&mut self, namespace_reexport: JsExportFromClause) -> Option<()> {
+    fn visit_namespace_reexport(&mut self, namespace_reexport: &JsExportFromClause) -> Option<()> {
         self.visit_special_import_token(
             &namespace_reexport.star_token().ok()?,
             Self::NAMESPACE_IMPORT_ALIAS,
@@ -795,7 +795,7 @@ impl<'a> RestrictedImportVisitor<'a> {
     }
 
     /// Checks whether this import of the form `const local_name = import(...)` is allowed.
-    fn visit_namespace_binding(&mut self, namespace_import: JsIdentifierBinding) -> Option<()> {
+    fn visit_namespace_binding(&mut self, namespace_import: &JsIdentifierBinding) -> Option<()> {
         return self
             .visit_special_import_node(&namespace_import.syntax(), Self::NAMESPACE_IMPORT_ALIAS);
     }
@@ -803,10 +803,10 @@ impl<'a> RestrictedImportVisitor<'a> {
     /// Checks whether this import of the form `{ imported_name }` is allowed.
     fn visit_shorthand_import(
         &mut self,
-        shorthand_import: JsShorthandNamedImportSpecifier,
+        shorthand_import: &JsShorthandNamedImportSpecifier,
     ) -> Option<()> {
         self.visit_imported_identifier(
-            shorthand_import
+            &shorthand_import
                 .local_name()
                 .ok()?
                 .as_js_identifier_binding()?
@@ -818,10 +818,10 @@ impl<'a> RestrictedImportVisitor<'a> {
     /// Checks whether this import of the form `{ imported_name }` is allowed.
     fn visit_shorthand_binding(
         &mut self,
-        shorthand_import: JsObjectBindingPatternShorthandProperty,
+        shorthand_import: &JsObjectBindingPatternShorthandProperty,
     ) -> Option<()> {
         self.visit_imported_identifier(
-            shorthand_import
+            &shorthand_import
                 .identifier()
                 .ok()?
                 .as_js_identifier_binding()?
@@ -832,24 +832,24 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     /// Checks whether this import of the form `{ imported_name as local_name }`
     /// (including `{ default as local_name }`) is allowed.
-    fn visit_named_import(&mut self, named_import: JsNamedImportSpecifier) -> Option<()> {
-        self.visit_imported_identifier(named_import.name().ok()?.value().ok()?)
+    fn visit_named_import(&mut self, named_import: &JsNamedImportSpecifier) -> Option<()> {
+        self.visit_imported_identifier(&named_import.name().ok()?.value().ok()?)
     }
 
     /// Checks whether this import of the form `{ imported_name }` or `{ imported_name as exported_name }`
     /// (including `{ default as exported_name }`) is allowed.
     fn visit_named_or_shorthand_reexport(
         &mut self,
-        named_reexport: JsExportNamedFromSpecifier,
+        named_reexport: &JsExportNamedFromSpecifier,
     ) -> Option<()> {
-        self.visit_imported_identifier(named_reexport.source_name().ok()?.value().ok()?)
+        self.visit_imported_identifier(&named_reexport.source_name().ok()?.value().ok()?)
     }
 
     /// Checks whether this import of the form `{ imported_name: local_name }`
     /// (including `{ default: local_name }` and `{ "imported name": local_name `) is allowed.
-    fn visit_named_binding(&mut self, named_import: JsObjectBindingPatternProperty) -> Option<()> {
+    fn visit_named_binding(&mut self, named_import: &JsObjectBindingPatternProperty) -> Option<()> {
         self.visit_imported_identifier(
-            named_import
+            &named_import
                 .member()
                 .ok()?
                 .as_js_literal_member_name()?
@@ -862,7 +862,7 @@ impl<'a> RestrictedImportVisitor<'a> {
     /// and records a diagnostic for `name_token.text_trimmed_range()` if not.
     ///
     /// `name_token` can be either a string literal or an identifier.
-    fn visit_imported_identifier(&mut self, name_token: SyntaxToken<JsLanguage>) -> Option<()> {
+    fn visit_imported_identifier(&mut self, name_token: &SyntaxToken<JsLanguage>) -> Option<()> {
         // TODO: inner_string_text removes quotes but does not e.g. decode escape sequences.
         //       If the imported name uses e.g. Unicode escape sequences, this may cause
         //       problems because restricted_import.(allow_)import_names contains decoded
