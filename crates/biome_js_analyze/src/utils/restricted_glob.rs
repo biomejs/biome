@@ -192,13 +192,56 @@ impl<'a> CandidatePath<'a> {
         I: IntoIterator<Item = &'b RestrictedGlob>,
         I::IntoIter: DoubleEndedIterator,
     {
+        self.matches_with_exceptions_or(false, globs)
+    }
+
+    /// Match against a list of globs where negated globs are handled as exceptions handling the path as a directory.
+    ///
+    /// This method is useful for implementing a file crawler that avoids traversing directories that should be ignored.
+    ///
+    /// The current implementation returns `false` only if at least one exception (negated glob) matches the path.
+    ///
+    ///
+    /// ```
+    /// use biome_js_analyze::utils::restricted_glob::{CandidatePath, RestrictedGlob};
+    ///
+    /// let globs: &[RestrictedGlob] = &[
+    ///     "a/path".parse().unwrap(),
+    ///     "!b".parse().unwrap(),
+    /// ];
+    ///
+    /// assert!(CandidatePath::new(&"a/path").matches_directory_with_exceptions(globs));
+    /// assert!(CandidatePath::new(&"a").matches_directory_with_exceptions(globs));
+    ///
+    /// assert!(!CandidatePath::new(&"b").matches_directory_with_exceptions(globs));
+    ///
+    /// // Ideally, the following cases should not match.
+    /// // The current implementation doesn't reject them.
+    /// assert!(CandidatePath::new(&"c").matches_directory_with_exceptions(globs));
+    /// assert!(CandidatePath::new(&"b/inner").matches_directory_with_exceptions(globs));
+    /// ```
+    pub fn matches_directory_with_exceptions<'b, I>(&self, globs: I) -> bool
+    where
+        I: IntoIterator<Item = &'b RestrictedGlob>,
+        I::IntoIter: DoubleEndedIterator,
+    {
+        self.matches_with_exceptions_or(true, globs)
+    }
+
+    /// Match against a list of globs where negated globs are handled as exceptions.
+    /// Returns `default` if there is no globs that match.
+    fn matches_with_exceptions_or<'b, I>(&self, default: bool, globs: I) -> bool
+    where
+        I: IntoIterator<Item = &'b RestrictedGlob>,
+        I::IntoIter: DoubleEndedIterator,
+    {
         // Iterate in reverse order to avoid unnecessary glob matching.
         for glob in globs.into_iter().rev() {
             if glob.is_raw_match_candidate(self) {
                 return !glob.is_negated();
             }
         }
-        false
+        default
     }
 }
 
