@@ -168,7 +168,7 @@ Let's say we want to create a new **lint** rule called `useMyRuleName`, follow t
    - The **`run`** function will be invoked for each match of `Query`.
      It should return either `Some` to report a diagnostic for that match, or `None`.
 
-     _→ It is also possible to report multiple diagnostics for a single `Query` match._
+     _→ It is also possible to report multiple diagnostics and/or code actions for a single `Query` match._
      _See [Multiple Signals](#multiple-signals) for instructions._
 
      ```rust
