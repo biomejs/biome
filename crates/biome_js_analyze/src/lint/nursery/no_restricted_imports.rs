@@ -7,12 +7,14 @@ use biome_deserialize::{
 use biome_js_syntax::{
     inner_string_text, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier,
     AnyJsExpression, AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember,
-    JsCallExpression, JsDefaultImportSpecifier, JsIdentifierBinding, JsImportBareClause,
-    JsImportCallExpression, JsImportCombinedClause, JsImportDefaultClause, JsImportNamedClause,
-    JsImportNamespaceClause, JsLanguage, JsModuleSource, JsNamedImportSpecifier,
-    JsNamedImportSpecifiers, JsNamespaceImportSpecifier, JsObjectBindingPattern,
-    JsObjectBindingPatternProperty, JsObjectBindingPatternShorthandProperty,
-    JsShorthandNamedImportSpecifier, JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator,
+    JsCallExpression, JsDefaultImportSpecifier, JsExportFromClause, JsExportNamedFromClause,
+    JsExportNamedFromSpecifier, JsExportNamedFromSpecifierList, JsIdentifierBinding,
+    JsImportBareClause, JsImportCallExpression, JsImportCombinedClause, JsImportDefaultClause,
+    JsImportNamedClause, JsImportNamespaceClause, JsLanguage, JsModuleSource,
+    JsNamedImportSpecifier, JsNamedImportSpecifiers, JsNamespaceImportSpecifier,
+    JsObjectBindingPattern, JsObjectBindingPatternProperty,
+    JsObjectBindingPatternShorthandProperty, JsShorthandNamedImportSpecifier,
+    JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator,
 };
 use biome_rowan::{AstNode, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
 use rustc_hash::FxHashMap;
@@ -348,8 +350,9 @@ impl RestrictedImportVisitor {
         }
     }
 
-    /// Analyze a static `import ... from ...` declaration (including all the different variants of `import`)
-    /// to find the names that are being imported, then validate that each of the names is allowed to be imported.
+    /// Analyze a static `import ... from ...` or `export ... from ...`declaration
+    /// (including all the different variants of `import` and `export`) to find the names
+    /// that are being imported, then validate that each of the names is allowed to be imported.
     pub fn visit_import(&mut self, module_source_node: &JsModuleSource) -> Option<()> {
         // Only certain imports are allowed/disallowed, add diagnostic to each disallowed import
         let clause = module_source_node.syntax().parent()?;
@@ -373,6 +376,11 @@ impl RestrictedImportVisitor {
                 let import_specifiers = import_named_clause.named_specifiers().ok()?;
                 self.visit_named_imports(import_specifiers)
             }
+            JsSyntaxKind::JS_EXPORT_NAMED_FROM_CLAUSE => {
+                let export_named_from_clause = clause.cast::<JsExportNamedFromClause>()?;
+                let import_specifiers = export_named_from_clause.specifiers();
+                self.visit_named_reexports(import_specifiers)
+            }
             JsSyntaxKind::JS_IMPORT_DEFAULT_CLAUSE => {
                 let import_default_clause: JsImportDefaultClause = clause.cast()?;
                 let default_specifier = import_default_clause.default_specifier().ok()?;
@@ -382,6 +390,10 @@ impl RestrictedImportVisitor {
                 let import_namespace_clause: JsImportNamespaceClause = clause.cast()?;
                 let namespace_specifier = import_namespace_clause.namespace_specifier().ok()?;
                 self.visit_namespace_import(namespace_specifier)
+            }
+            JsSyntaxKind::JS_EXPORT_FROM_CLAUSE => {
+                let reexport_namespace_clause: JsExportFromClause = clause.cast()?;
+                self.visit_namespace_reexport(reexport_namespace_clause)
             }
             _ => None,
         }
@@ -406,6 +418,18 @@ impl RestrictedImportVisitor {
         for import_specifier_maybe in import_specifiers.into_iter() {
             if let Some(import_specifier) = import_specifier_maybe.ok() {
                 self.visit_named_or_shorthand_import(import_specifier);
+            }
+        }
+        Some(())
+    }
+
+    fn visit_named_reexports(
+        &mut self,
+        named_reexports: JsExportNamedFromSpecifierList,
+    ) -> Option<()> {
+        for export_specifier_maybe in named_reexports.into_iter() {
+            if let Some(export_specifier) = export_specifier_maybe.ok() {
+                self.visit_named_or_shorthand_reexport(export_specifier);
             }
         }
         Some(())
@@ -484,6 +508,14 @@ impl RestrictedImportVisitor {
         )
     }
 
+    /// Checks whether this namespace reexport of the form `export * from ...` is allowed.
+    fn visit_namespace_reexport(&mut self, namespace_reexport: JsExportFromClause) -> Option<()> {
+        self.visit_special_import_token(
+            &namespace_reexport.star_token().ok()?,
+            Self::NAMESPACE_IMPORT_ALIAS,
+        )
+    }
+
     /// Checks whether this import of the form `const local_name = import(...)` is allowed.
     fn visit_namespace_binding(&mut self, namespace_import: JsIdentifierBinding) -> Option<()> {
         return self
@@ -524,6 +556,15 @@ impl RestrictedImportVisitor {
     /// (including `{ default as local_name }`) is allowed.
     fn visit_named_import(&mut self, named_import: JsNamedImportSpecifier) -> Option<()> {
         self.visit_imported_identifier(named_import.name().ok()?.value().ok()?)
+    }
+
+    /// Checks whether this import of the form `{ imported_name }` or `{ imported_name as exported_name }`
+    /// (including `{ default as exported_name }`) is allowed.
+    fn visit_named_or_shorthand_reexport(
+        &mut self,
+        named_reexport: JsExportNamedFromSpecifier,
+    ) -> Option<()> {
+        self.visit_imported_identifier(named_reexport.source_name().ok()?.value().ok()?)
     }
 
     /// Checks whether this import of the form `{ imported_name: local_name }`
@@ -609,7 +650,7 @@ impl Rule for NoRestrictedImports {
             restricted_import_settings.clone().into();
 
         match node {
-            AnyJsImportLike::JsModuleSource(module_source) => {
+            AnyJsImportLike::JsModuleSource(module_source_node) => {
                 if !restricted_import.has_import_name_patterns() {
                     // All imports disallowed, add diagnostic to the import source
                     vec![(
@@ -621,7 +662,7 @@ impl Rule for NoRestrictedImports {
                         restricted_import,
                         results: Vec::new(),
                     };
-                    visitor.visit_import(module_source);
+                    visitor.visit_import(module_source_node);
                     visitor.results
                 }
             }
