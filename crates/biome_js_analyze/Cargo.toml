@@ -19,6 +19,7 @@ biome_control_flow       = { workspace = true }
 biome_deserialize        = { workspace = true, features = ["smallvec"] }
 biome_deserialize_macros = { workspace = true }
 biome_diagnostics        = { workspace = true }
+biome_glob               = { workspace = true, features = ["biome_deserialize", "schemars", "serde"] }
 biome_js_factory         = { workspace = true }
 biome_js_semantic        = { workspace = true }
 biome_js_syntax          = { workspace = true }
