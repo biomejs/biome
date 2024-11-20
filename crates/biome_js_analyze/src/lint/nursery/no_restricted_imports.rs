@@ -622,9 +622,9 @@ impl<'a> RestrictedImportVisitor<'a> {
             let variable_declarator = current.cast::<JsVariableDeclarator>()?;
 
             // #1: const **{ ... }** = (await (import("")))
-            return Some(variable_declarator.id().ok()?);
+            variable_declarator.id().ok()
         } else {
-            return None;
+            None
         }
     }
 
@@ -694,7 +694,7 @@ impl<'a> RestrictedImportVisitor<'a> {
     fn visit_named_imports(&mut self, named_imports: &JsNamedImportSpecifiers) -> Option<()> {
         let import_specifiers = named_imports.specifiers();
         for import_specifier_maybe in import_specifiers.iter() {
-            if let Some(import_specifier) = import_specifier_maybe.ok() {
+            if let Ok(import_specifier) = import_specifier_maybe {
                 self.visit_named_or_shorthand_import(&import_specifier);
             }
         }
@@ -706,7 +706,7 @@ impl<'a> RestrictedImportVisitor<'a> {
         named_reexports: &JsExportNamedFromSpecifierList,
     ) -> Option<()> {
         for export_specifier_maybe in named_reexports.iter() {
-            if let Some(export_specifier) = export_specifier_maybe.ok() {
+            if let Ok(export_specifier) = export_specifier_maybe {
                 self.visit_named_or_shorthand_reexport(&export_specifier);
             }
         }
@@ -716,7 +716,7 @@ impl<'a> RestrictedImportVisitor<'a> {
     fn visit_named_bindings(&mut self, named_imports: &JsObjectBindingPattern) -> Option<()> {
         let import_bindings = named_imports.properties();
         for import_binding_maybe in import_bindings.iter() {
-            if let Some(import_binding) = import_binding_maybe.ok() {
+            if let Ok(import_binding) = import_binding_maybe {
                 self.visit_named_or_shorthand_binding(&import_binding);
             }
         }
@@ -891,7 +891,7 @@ impl<'a> RestrictedImportVisitor<'a> {
             import_source: self.import_source.to_string(),
             allowed_import_names: self.restricted_import.allow_import_names.clone(),
         });
-        return Some(());
+        Some(())
     }
 
     /// Checks whether the import specified by `name_or_alias` is allowed.
@@ -915,7 +915,7 @@ impl<'a> RestrictedImportVisitor<'a> {
             import_source: self.import_source.to_string(),
             allowed_import_names: self.restricted_import.allow_import_names.clone(),
         });
-        return Some(());
+        Some(())
     }
 }
 
@@ -1038,7 +1038,7 @@ impl Rule for NoRestrictedImports {
             let mut sorted = state.allowed_import_names.to_vec();
             sorted.sort();
             let allowed_import_names = sorted.into_iter().map(|name| {
-                if &**&name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
+                if &*name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
                     "Side-effect only import".into()
                 } else {
                     name
