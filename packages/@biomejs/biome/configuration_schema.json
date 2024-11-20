@@ -2796,7 +2796,7 @@
 			"type": "object",
 			"properties": {
 				"paths": {
-					"description": "A list of import paths that should trigger the rule",
+					"description": "A list of import paths that should trigger the rule.",
 					"type": "object",
 					"additionalProperties": {
 						"$ref": "#/definitions/CustomRestrictedImport"

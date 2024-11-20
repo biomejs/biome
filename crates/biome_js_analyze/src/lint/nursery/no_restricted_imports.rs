@@ -313,7 +313,7 @@ declare_lint_rule! {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct RestrictedImportsOptions {
-    /// A list of import paths that should trigger the rule
+    /// A list of import paths that should trigger the rule.
     #[serde(skip_serializing_if = "FxHashMap::is_empty")]
     paths: FxHashMap<Box<str>, CustomRestrictedImport>,
 }
