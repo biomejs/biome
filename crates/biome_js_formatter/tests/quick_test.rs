@@ -1,4 +1,4 @@
-use biome_formatter::{AttributePosition, IndentStyle, LineWidth, QuoteStyle};
+use biome_formatter::{AttributePosition, IndentStyle, LineWidth, QuoteStyle, SpaceInsideStuff};
 use biome_formatter_test::check_reformat::CheckReformat;
 use biome_js_formatter::context::{ArrowParentheses, JsFormatOptions, Semicolons};
 use biome_js_formatter::{format_node, JsFormatLanguage};
@@ -17,6 +17,7 @@ fn quick_test() {
 export let shim: typeof import("./foo2") = {
     Bar: Bar2
 };
+    if (true) {}
     "#;
     let source_type = JsFileSource::tsx();
     let tree = parse(
@@ -31,7 +32,8 @@ export let shim: typeof import("./foo2") = {
         .with_quote_style(QuoteStyle::Double)
         .with_jsx_quote_style(QuoteStyle::Single)
         .with_arrow_parentheses(ArrowParentheses::AsNeeded)
-        .with_attribute_position(AttributePosition::Multiline);
+        .with_attribute_position(AttributePosition::Multiline)
+        .with_space_inside_stuff(SpaceInsideStuff::from(false));
 
     let doc = format_node(options.clone(), &tree.syntax()).unwrap();
     let result = doc.print().unwrap();
