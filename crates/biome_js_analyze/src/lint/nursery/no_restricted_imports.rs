@@ -68,7 +68,7 @@ declare_lint_rule! {
     ///
     /// All of the following import syntaxes are supported:
     ///
-    /// ### Static `import` declaration
+    /// ### Static `import` (and re-`export`) declarations
     ///
     /// Normal static [ESM `import` declarations](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import) are supported:
     ///
@@ -82,6 +82,9 @@ declare_lint_rule! {
     /// import defaultExport from "default-import";
     /// import defaultExport, * as alias5 from "default+namespace-import";
     /// import defaultExport, { export1 /* … */ } from "default+named-import";
+    ///
+    /// export * from "namespace-import";
+    /// export { export1, export2 as alias2, "string-name" as alias3, default as defaultExport /* … */ } from "named-import";
     /// ```
     ///
     /// The TypeScript-specific [type-only imports](https://www.typescriptlang.org/docs/handbook/modules/reference.html#type-only-imports-and-exports) are also supported:
