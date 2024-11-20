@@ -274,6 +274,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - [noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class/) no longer panics on malformed escape sequences that end with a multi-byte character ([#4587](https://github.com/biomejs/biome/issues/4587)). Contributed by @Conaclos
 
+- [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/) no longer reports used values imported as types in an external module ([#3895])(https://github.com/biomejs/biome/issues/3895). Contributed by @Conaclos
+
 - Fixed a panic related to bogus import statements in `useExhaustiveDependencies` ([#4568](https://github.com/biomejs/biome/issues/4568)) Contributed by @dyc3
 
 ### Parser
