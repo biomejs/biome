@@ -693,10 +693,8 @@ impl<'a> RestrictedImportVisitor<'a> {
 
     fn visit_named_imports(&mut self, named_imports: &JsNamedImportSpecifiers) -> Option<()> {
         let import_specifiers = named_imports.specifiers();
-        for import_specifier_maybe in import_specifiers.iter() {
-            if let Ok(import_specifier) = import_specifier_maybe {
-                self.visit_named_or_shorthand_import(&import_specifier);
-            }
+        for import_specifier in import_specifiers.iter().flatten() {
+            self.visit_named_or_shorthand_import(&import_specifier);
         }
         Some(())
     }
@@ -705,20 +703,16 @@ impl<'a> RestrictedImportVisitor<'a> {
         &mut self,
         named_reexports: &JsExportNamedFromSpecifierList,
     ) -> Option<()> {
-        for export_specifier_maybe in named_reexports.iter() {
-            if let Ok(export_specifier) = export_specifier_maybe {
-                self.visit_named_or_shorthand_reexport(&export_specifier);
-            }
+        for export_specifier in named_reexports.iter().flatten() {
+            self.visit_named_or_shorthand_reexport(&export_specifier);
         }
         Some(())
     }
 
     fn visit_named_bindings(&mut self, named_imports: &JsObjectBindingPattern) -> Option<()> {
         let import_bindings = named_imports.properties();
-        for import_binding_maybe in import_bindings.iter() {
-            if let Ok(import_binding) = import_binding_maybe {
-                self.visit_named_or_shorthand_binding(&import_binding);
-            }
+        for import_binding in import_bindings.iter().flatten() {
+            self.visit_named_or_shorthand_binding(&import_binding);
         }
         Some(())
     }
@@ -867,7 +861,7 @@ impl<'a> RestrictedImportVisitor<'a> {
         //       If the imported name uses e.g. Unicode escape sequences, this may cause
         //       problems because restricted_import.(allow_)import_names contains decoded
         //       strings, while inner_string_text(name_token) returns encoded strings.
-        self.visit_special_import_token(&name_token, inner_string_text(&name_token).text())
+        self.visit_special_import_token(name_token, inner_string_text(name_token).text())
     }
 
     /// Checks whether the import specified by `name_or_alias` is allowed.
