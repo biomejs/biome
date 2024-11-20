@@ -357,8 +357,11 @@ impl ImportRestrictionStatus {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct CustomRestrictedImportOptions {
+    /// The message to display when this module is imported.
     message: String,
+    /// Names of the exported members that should not be used.
     import_names: Box<[Box<str>]>,
+    /// Names of the exported members that allowed to be not be used.
     allow_import_names: Box<[Box<str>]>,
 }
 
@@ -419,7 +422,9 @@ impl CustomRestrictedImportOptions {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum CustomRestrictedImport {
+    /// The message to display when this module is imported.
     Plain(String),
+    /// Additional options to configure the message and allowed/disallowed import names.
     WithOptions(CustomRestrictedImportOptions),
 }
 
