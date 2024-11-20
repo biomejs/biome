@@ -143,6 +143,8 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
+    /// Use the options to specify the import paths and/or specific import names within them that you want to restrict in your source code.
+    ///
     /// ```json,options
     /// {
     ///     "options": {
@@ -164,35 +166,39 @@ declare_lint_rule! {
     ///
     /// ### `paths`
     ///
-    /// Specifies the import paths that are either wholly or partially restricted.
+    /// An object that lists the import paths that are either wholly or partially restricted.
     ///
-    /// ### `paths.<import>`
+    /// The keys of the object are the import paths to restrict, and the values can be:
+    /// - A string with a custom message to show in the diagnostic when any
+    /// - An object with additional options, as explained [below](#pathsimportimportnames).
     ///
-    /// The message be shown when this import is used and/or additional options that configure which import names are restricted.
-    ///
-    /// Can be either a `"message string"` or an object with one or more of the following properties:
-    ///
-    /// ### `paths.<import>.message`
-    ///
-    /// Specifies the message to be shown when the restricted import is used.
+    /// In the example below, we restrict the two paths `services-deprecated` and `constants`, with two particular messages.
+    /// Importing `services-deprecated` will emit the message `Use services instead.`.
+    /// Importing `constants` will emit the message `This file will be deleted soon.`:
     ///
     /// ```json,options
     /// {
     ///     "options": {
     ///         "paths": {
-    ///             "import-foo": {
-    ///                 "message": "Please use import-bar instead."
-    ///             }
+    ///             "services-deprecated": {
+    ///                 "message": "Use services instead."
+    ///             },
+    ///	            "constants": "This file will be deleted soon."
     ///         }
     ///     }
     /// }
     /// ```
     ///
     /// ```js,expect_diagnostic,use_options
-    /// import { export1 } from 'import-foo';
+    /// import * from 'services-deprecated';
+    /// import { export1 } from 'constants';
     /// ```
     ///
-    /// A default message will be generated if `message` is empty or not specified.
+    /// ### `paths.<import>.message`
+    ///
+    /// Specifies the message to be shown when the restricted import is used.
+    ///
+    /// A default message will be generated if `message` is empty or not specified:
     ///
     /// ```json,options
     /// {
