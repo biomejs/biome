@@ -10,29 +10,30 @@ The analyzer allows implementors to create **four different** types of rules:
 - **Assist**: This rule detects refactoring opportunities and emits code action signals.
 - **Transformation**: This rule detects transformations that should be applied to the code.
 
-### Contents
+### Table of Contents
 
-- [Creating a rule](#creating-a-rule)
-  - [Guideline: Naming Convention for rules](#guideline-naming-convention-for-rules)
-  - [Guideline: Explain a rule to the user](#guideline-explain-a-rule-to-the-user)
-  - [Guideline: Placement of new rules](#guideline-placement-of-new-rules)
-  - [Creating and implementing the rule](#creating-and-implementing-the-rule)
-  - [Coding the rule](#coding-the-rule)
+- [Creating a Rule](#creating-a-rule)
+  - [Guidelines](#guidelines)
+    - [Naming Conventions for Rules](#naming-conventions-for-rules)
+    - [What a Rule should say to the User](#what-a-rule-should-say-to-the-user)
+    - [Placement of New Rules](#placement-of-new-rules)
+  - [Creating and Implementing the Rule](#creating-and-implementing-the-rule)
+  - [Coding Tips for Rules](#coding-tips-for-rules)
     - [`declare_lint_rule!` macro](#declare_lint_rule-macro)
     - [`rule_category!` macro](#rule_category-macro)
     - [Rule Options](#rule-options)
-    - [Navigating the CST](#navigating-the-cst)
+    - [Navigating the CST (Concrete Syntax Tree)](#navigating-the-cst-concrete-syntax-tree)
     - [Querying multiple node types via `declare_node_union!`](#querying-multiple-node-types-via-declare_node_union)
     - [Semantic Model](#semantic-model)
-    - [Multiple signals](#multiple-signals)
+    - [Multiple Signals](#multiple-signals)
     - [Code Actions](#code-actions)
     - [Custom Syntax Tree Visitors](#custom-syntax-tree-visitors)
     - [Common Logic Mistakes](#common-logic-mistakes)
-  - [Testing the rule](#testing-the-rule)
+  - [Testing the Rule](#testing-the-rule)
     - [Quick Test](#quick-test)
     - [Snapshot Tests](#snapshot-tests)
-    - [Run the snapshot tests](#run-the-snapshot-tests)
-  - [Documenting the rule](#documenting-the-rule)
+    - [Run the Snapshot Tests](#run-the-snapshot-tests)
+  - [Documenting the Rule](#documenting-the-rule)
     - [General Structure](#general-structure)
     - [Associated Language(s)](#associated-languages)
     - [Code Blocks](#code-blocks)
@@ -42,7 +43,7 @@ The analyzer allows implementors to create **four different** types of rules:
   - [Commiting your work](#commiting-your-work)
   - [Sidenote: Deprecating a rule](#sidenote-deprecating-a-rule)
 
-## Creating a rule
+## Creating a Rule
 
 When creating or updating a lint rule, you need to be aware that there's a lot of generated code inside our toolchain.
 Our CI ensures that this code is not out of sync and fails otherwise.
@@ -52,8 +53,9 @@ To create a new rule, you have to create and update several files.
 Because it is a bit tedious, _Biome_ provides an easy way to create and test your rule using [Just](https://just.systems/man/en/).
 _Just_ is not part of the rust toolchain, you have to install it with [a package manager](https://just.systems/man/en/chapter_4.html).
 
+### Guidelines
 
-### Guideline: Naming Convention for rules
+#### Naming Conventions for Rules
 
 _Biome_ follows a naming convention according to what the rule does:
 
@@ -79,7 +81,7 @@ _Biome_ follows a naming convention according to what the rule does:
    > [!NOTE]
    > For example, the rule to mandating the use valid values for the HTML `lang` attribute is named `useValidLang`.
 
-### Guideline: Explain a rule to the user
+#### What a Rule should say to the User
 
 A rule should be informative to the user, and give as much explanation as possible.
 
@@ -94,7 +96,7 @@ When writing a rule, you must adhere to the following **pillars**:
 3. Tell the user **what** they **should do**. Generally, this is implemented using a [code action](#code-actions).
    If a code action is not applicable a note should tell the user what they should do to fix the error.
 
-### Guideline: Placement of new rules
+#### Placement of New Rules
 
 New rules **must** be placed inside the `nursery` group. This group is meant as an incubation space, exempt from semantic versioning. Once a rule is stable, it's promoted to a group that fits it. This is done in a minor/major release.
 
@@ -103,54 +105,154 @@ New rules **must** be placed inside the `nursery` group. This group is meant as 
 >
 > If you aren't familiar with Biome's APIs, this is an option that you have. If you decide to use this option, you should make sure to describe your plan in an issue.
 
-### Creating and implementing the rule
+### Creating and Implementing the Rule
 
 Let's say we want to create a new **lint** rule called `useMyRuleName`, follow these steps:
 
-1. Run the command
+1. **Generate the code for your rule** by running this command
+   _(Hint: Replace `useMyRuleName` with your custom name as recommended by the [naming convention](#guideline-naming-convention-for-rules))_:
 
    ```shell
+   # Example: Create a new JS lint rule
    just new-js-lintrule useMyRuleName
+
+   # Or, to create a new lint/assist rule for JSON/CSS/GraphQL/..:
+   # $ just new-css-lintrule useMyRuleName
+   # $ just new-graphql-lintrule useMyRuleName
+   # $ just new-js-assistrule useMyRuleName
+   # $ just new-json-assistrule useMyRuleName
    ```
-   The script will generate a bunch of files for the _JavaScript_ language, inside the `biome_js_analyze` crate.
-   Among the other files, you'll find a file called `use_my_new_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
+   The script `just new-js-lintrule` script will generate a bunch of files for the _JavaScript_ language inside the `biome_js_analyze` crate.
+   Among the other files, you'll find a file called `use_my_rule_name.rs` inside the `biome_js_analyze/lib/src/lint/nursery` folder. You'll implement your rule in this file.
 
-   If you want to create a _CSS_ lint rule, run this script. It will generate a new lint rule in `biome_css_analyze`
+2. Let's have a look at the generated code in  `use_my_rule_name.rs`:
 
-   ```shell
-   just new-css-lintrule useMyRuleName
-   ```
-
-1. The `Ast` query type allows you to query the CST of a program.
-1. The `State` type doesn't have to be used, so it can be considered optional. However, it has to be defined as `type State = ()`.
-1. Implement the `run` function:
-
-   This function is called every time the analyzer finds a match for the query specified by the rule, and may return zero or more "signals".
-
-1. Implement the `diagnostic` function. Follow the [pillars](#explain-a-rule-to-the-user) when writing the message of a diagnostic:
 
    ```rust
-   impl Rule for UseAwesomeTricks {
-       // .. code
-       fn diagnostic(_ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {}
+   ...
+   impl Rule for UseMyRuleName {
+       type Query = Ast<JsIdentifierBinding>;
+       type State = ();
+       type Signals = Option<Self::State>;
+       type Options = ();
+
+       fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+           ...
+       }
+
+       fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
+           ...
+       }
    }
    ```
 
-   While implementing the diagnostic, please keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind.
+   We can observe a few details from this snippet:
 
-1. Implement the optional `action` function, if we are able to provide a code action:
+   - The **`Options`** type can be used to define [additional options](#rule-options) for your rule:
+
+     ```rust
+     type Options = ();
+     ```
+
+     Use `()` if your rule does not have additional options.
+
+   - The **`Query`** type defines the entities for which your your rule's `UseMyRuleName::run` function will be invoked:
+     ```rust
+     type Query = Ast<JsIdentifierBinding>;
+     ```
+
+     _→ The `Ast<>` query type, for example, allows you to query the AST/CST of a program for nodes of a specific type._
+
+     _→ For more advanced use cases, it is also possible to define [custom query types](#custom-syntax-tree-visitors)._
+
+   - The **`run`** function will be invoked for each match of `Query`.
+     It should return either `Some` to report a diagnostic for that match, or `None`.
+
+     _→ It is also possible to report multiple diagnostics and/or code actions for a single `Query` match._
+     _See [Multiple Signals](#multiple-signals) for instructions._
+
+     ```rust
+     type Signals = Option<Self::State>;
+
+     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+       let matched_node = ctx.query();
+       ...
+     }
+     ```
+
+   - The **`diagnostic`** function will be invoked for each signal returned by `run`, and turns these signals into `RuleDiagnostic` instances that define the message(s) reported to the user.
+
+     ```rust
+     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> { ... }
+     ```
+
+   - The `State` type can be used to pass additional information for each signal reported by the `run` function to the `diagnostic` and `action` functions.
+     Use `()` if you don't need to pass additional information:
+
+     ```rust
+     type State = ();
+     ```
+
+3. Optional: Use `Options` to [define custom options](#rule-options) for your rule.
+   We'll leave it as `()` for now.
+
+4. Use `Query` to define the node type that you want to analyze.
+   We'll leave it as `Ast<JsIdentifierBinding>` for our example:
+
+   ```rust
+   type Query = Ast<JsIdentifierBinding>;
+   ```
+
+5. Implement the `run` function. This function is called every time the analyzer finds a match for the query specified by the rule, and may return zero or more "signals":
+
+   ```rust
+   fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+       let binding = ctx.query();
+
+       if binding.name_token().ok()?.text() == "prohibited_identifier" {
+           Some(())
+       } else {
+           None
+       }
+   }
+   ```
+
+6. Implement the `diagnostic` function to define what the user will see.
+
+   Follow the [guidelines & pillars](#explain-a-rule-to-the-user) when writing the messages.
+   Please also keep [Biome's technical principals](https://biomejs.dev/internals/philosophy/#technical) in mind when writing those messages and implementing your diagnostic rule.
+
+   ```rust
+   fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic>
+       let node = ctx.query();
+       Some(
+           RuleDiagnostic::new(
+               rule_category!(),
+               node.range(),
+               markup! {
+                   "Use of a prohibited identifier name"
+               },
+           )
+           .note(markup! {
+               "This note will give you more information."
+           }),
+       )
+   }
+   ```
+
+
+6. Optional: Implement the `action` function if your rule is able to provide a [code action](#code-actions):
 
    ```rust
    impl Rule for UseAwesomeTricks {
-       // .. code
        fn action(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<JsRuleAction> {
-         let mut mutation = ctx.root().mutation();
-         Some(JsRuleAction::new(
-           ctx.action_category(ctx.category(), ctx.group()),
-           ctx.metadata().applicability(),
-           markup! { "<MESSAGE>" }.to_owned(),
-           mutation,
-         ))
+           let mut mutation = ctx.root().mutation();
+           Some(JsRuleAction::new(
+               ctx.action_category(ctx.category(), ctx.group()),
+               ctx.metadata().applicability(),
+               markup! { "<MESSAGE>" }.to_owned(),
+               mutation,
+           ))
        }
    }
    ```
@@ -175,7 +277,7 @@ Don't forget to format your code with `just f` and lint with `just l`.
 That's it! Now, let's [test the rule](#testing-the-rule).
 
 
-### Coding the rule
+### Coding Tips for Rules
 
 Below, there are many tips and guidelines on how to create a lint rule using Biome infrastructure.
 
@@ -416,7 +518,7 @@ pub enum Behavior {
 
 As with every other user-facing aspect of a rule, the effect that options have on a rule's operation should be both documented and tested, as explained in more detail in the section [Documenting the rule](#documenting-the-rule).
 
-#### Navigating the CST
+#### Navigating the CST (Concrete Syntax Tree)
 
 When navigating the nodes and tokens of certain nodes, you will notice straight away that the majority of those methods will return a `Result` (`SyntaxResult`).
 
@@ -510,7 +612,7 @@ impl Rule for ForLoopCountReferences {
 }
 ```
 
-#### Multiple signals
+#### Multiple Signals
 
 Some rules require you to find all possible cases upfront in `run` function.
 To achieve that you can change Signals type from `Option<Self::State>` to an iterable data structure such as `Vec<Self::State>` or `Box<[Self::State]>`.
@@ -716,7 +818,7 @@ console.log(); // <-- This should not be reported because `console` is redeclare
 
 To avoid this, you should consult the semantic model to check if the variable is global or not.
 
-### Testing the rule
+### Testing the Rule
 
 #### Quick Test
 
@@ -745,6 +847,13 @@ The test is designed to **show** diagnostics and code actions if the rule correc
 
 #### Snapshot Tests
 
+> [!TIP]
+> Most of the testing of the rules themselves is done by snapshot tests using the [`insta`](https://docs.rs/insta/latest/insta/) library.
+>
+> A rule is run against a set of known inputs, and its diagnostic output (in text form) is compared against a known-good example output.
+> Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#testing) for additional information on how to deal with the snapshot tests.
+
+
 Inside the `tests/specs/` folder, rules are divided by group and rule name.
 The test infrastructure is rigid around the association of the pair "group/rule name", which means that _**if your test cases are placed inside the wrong group, you won't see any diagnostics**_.
 
@@ -770,7 +879,7 @@ For instance, for the rule `noVar`, the file `invalidScript.jsonc` contains:
 Note that the code in those `.jsonc` files is interpreted in a _script environment_.
 This means that you cannot use syntax that belongs to _ECMAScript modules_ such as `import` and `export`.
 
-#### Run the snapshot tests
+#### Run the Snapshot Tests
 
 Run the command:
 
@@ -782,7 +891,7 @@ and if you've done everything correctly, you should see some snapshots emitted w
 
 Check our main [contribution document](https://github.com/biomejs/biome/blob/main/CONTRIBUTING.md#testing) to know how to deal with the snapshot tests.
 
-### Documenting the rule
+### Documenting the Rule
 
 The documentation needs to adhere to the following rules:
 
