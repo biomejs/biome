@@ -2,7 +2,7 @@ use crate::globals::is_node_builtin_module;
 use crate::services::manifest::Manifest;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportClause, AnyJsImportLike};
+use biome_js_syntax::{inner_string_text, AnyJsImportClause, AnyJsImportSourceLike};
 use biome_rowan::AstNode;
 use biome_rowan::TextRange;
 
@@ -47,7 +47,7 @@ declare_lint_rule! {
 }
 
 impl Rule for NoNodejsModules {
-    type Query = Manifest<AnyJsImportLike>;
+    type Query = Manifest<AnyJsImportSourceLike>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -57,7 +57,7 @@ impl Rule for NoNodejsModules {
         if node.is_in_ts_module_declaration() {
             return None;
         }
-        if let AnyJsImportLike::JsModuleSource(module_source) = &node {
+        if let AnyJsImportSourceLike::JsModuleSource(module_source) = &node {
             if let Some(import_clause) = module_source.parent::<AnyJsImportClause>() {
                 if import_clause.type_token().is_some() {
                     // Ignore type-only imports

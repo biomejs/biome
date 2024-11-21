@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic};
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
+use biome_js_syntax::{inner_string_text, AnyJsImportSourceLike, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::BatchMutationExt;
 
 declare_lint_rule! {
@@ -33,7 +33,7 @@ declare_lint_rule! {
 }
 
 impl Rule for UseNodeAssertStrict {
-    type Query = Ast<AnyJsImportLike>;
+    type Query = Ast<AnyJsImportSourceLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = ();

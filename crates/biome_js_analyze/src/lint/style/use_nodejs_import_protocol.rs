@@ -2,7 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
-use biome_js_syntax::{inner_string_text, AnyJsImportLike, JsSyntaxKind, JsSyntaxToken};
+use biome_js_syntax::{inner_string_text, AnyJsImportSourceLike, JsSyntaxKind, JsSyntaxToken};
 use biome_rowan::BatchMutationExt;
 
 use crate::services::manifest::Manifest;
@@ -58,7 +58,7 @@ declare_lint_rule! {
 }
 
 impl Rule for UseNodejsImportProtocol {
-    type Query = Manifest<AnyJsImportLike>;
+    type Query = Manifest<AnyJsImportSourceLike>;
     type State = JsSyntaxToken;
     type Signals = Option<Self::State>;
     type Options = ();

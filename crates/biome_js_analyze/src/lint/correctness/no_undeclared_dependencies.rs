@@ -4,7 +4,7 @@ use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_deserialize::{Deserializable, DeserializableType};
 use biome_deserialize_macros::Deserializable;
-use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
+use biome_js_syntax::{AnyJsImportClause, AnyJsImportSourceLike};
 use biome_rowan::AstNode;
 
 use crate::utils::restricted_glob::{CandidatePath, RestrictedGlob};
@@ -199,7 +199,7 @@ pub struct RuleState {
 }
 
 impl Rule for NoUndeclaredDependencies {
-    type Query = Manifest<AnyJsImportLike>;
+    type Query = Manifest<AnyJsImportSourceLike>;
     type State = RuleState;
     type Signals = Option<Self::State>;
     type Options = NoUndeclaredDependenciesOptions;
@@ -223,7 +223,7 @@ impl Rule for NoUndeclaredDependencies {
                 || (is_optional_dependency_available && ctx.is_optional_dependency(package_name))
         };
 
-        let token_text = node.inner_string_text()?;
+        let token_text = node.module_source_text()?;
         let package_name = parse_package_name(token_text.text())?;
         if is_available(package_name)
             // Self package imports
