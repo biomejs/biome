@@ -1214,19 +1214,16 @@
 			"properties": {
 				"allowImportNames": {
 					"description": "Names of the exported members that allowed to be not be used.",
-					"default": [],
 					"type": "array",
 					"items": { "type": "string" }
 				},
 				"importNames": {
 					"description": "Names of the exported members that should not be used.",
-					"default": [],
 					"type": "array",
 					"items": { "type": "string" }
 				},
 				"message": {
 					"description": "The message to display when this module is imported.",
-					"default": "",
 					"type": "string"
 				}
 			},
