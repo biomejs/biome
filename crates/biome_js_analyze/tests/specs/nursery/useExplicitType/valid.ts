@@ -43,10 +43,10 @@ const func = () => x as const;
 // check allow expressions
 node.addEventListener("click", () => {});
 node.addEventListener("click", function () {});
-const foo = arr.map((i) => i * i);
+const foo = arr.map((i: number) => i * i);
 fn(() => {});
 fn(function () {});
-new Promise((resolve) => {});
+new Promise((resolve: () => void) => {});
 new Foo(1, () => {});
 [function () {}, () => {}];
 (function () {
@@ -128,4 +128,19 @@ declare namespace myLib {
 
 declare module "foo" {
 	export default function bar(): string;
+}
+
+export default function test(obj: { a: string }): void {
+	return;
+}
+export function add(a: number, b: number): number {
+	return a + b;
+}
+
+class Human {
+	private name: string;
+
+	public toString(this: Human): string {
+		return `Name ${this.name}`;
+	}
 }

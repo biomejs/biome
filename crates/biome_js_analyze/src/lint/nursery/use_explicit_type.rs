@@ -1,7 +1,7 @@
 use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
-use biome_console::markup;
+use biome_console::{markup, MarkupBuf};
 use biome_js_semantic::HasClosureAstNode;
 use biome_js_syntax::{
     AnyJsBinding, AnyJsExpression, AnyJsFunctionBody, AnyJsStatement, AnyTsType, JsCallExpression,
@@ -11,23 +11,23 @@ use biome_js_syntax::{
 };
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
-    JsMethodObjectMember, TsCallSignatureTypeMember, TsDeclareFunctionDeclaration,
+    JsMethodObjectMember, JsRestParameter, TsCallSignatureTypeMember, TsDeclareFunctionDeclaration,
     TsDeclareFunctionExportDefaultDeclaration, TsGetterSignatureClassMember,
-    TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
+    TsMethodSignatureClassMember, TsMethodSignatureTypeMember, TsThisParameter,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange};
 
 declare_lint_rule! {
-    /// Require explicit return types on functions and class methods.
+    /// Require explicit argument and return types on functions and class methods.
     ///
     /// Functions in TypeScript often don't need to be given an explicit return type annotation.
     /// Leaving off the return type is less code to read or write and allows the compiler to infer it from the contents of the function.
     ///
-    /// However, explicit return types do make it visually more clear what type is returned by a function.
+    /// However, explicit argument and return types make it visually more clear what types a function accepts and returns.
     /// They can also speed up TypeScript type checking performance in large codebases with many large functions.
-    /// Explicit return types also reduce the chance of bugs by asserting the return type, and it avoids surprising "action at a distance," where changing the body of one function may cause failures inside another function.
+    /// Explicit types also reduce the chance of bugs by asserting both input and output types, and it avoids surprising "action at a distance," where changing the body of one function may cause failures inside another function.
     ///
-    /// This rule enforces that functions do have an explicit return type annotation.
+    /// This rule enforces that functions have explicit type annotations for both their arguments and return type.
     ///
     /// ## Examples
     ///
@@ -156,6 +156,45 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
+    /// The following pattern is considered incorrect code for missing an argument type on an function:
+    ///
+    /// ```ts,expect_diagnostic
+    /// export function test(a: number, b): void {
+    ///   return;
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// export const test = (a): void => {
+    ///   return;
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// export default function test(a): void {
+    ///   return;
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// export default (a): void => {
+    ///   return;
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// class Test {
+    ///     constructor(a) {}
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic
+    /// declare module "foo" {
+    ///     export default function bar(a): string;
+    /// }
+    /// ```
+    ///
+    ///
     /// ### Valid
     /// ```ts
     /// // No return value should be expected (void)
@@ -258,12 +297,12 @@ declare_lint_rule! {
         name: "useExplicitType",
         language: "ts",
         recommended: false,
-        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type")],
+        sources: &[RuleSource::EslintTypeScript("explicit-function-return-type"), RuleSource::EslintTypeScript("explicit-module-boundary-types")],
     }
 }
 
 declare_node_union! {
-    pub AnyCallableWithReturn =
+    pub FunctionSignaturePart =
         AnyJsFunction
         | JsMethodClassMember
         | JsMethodObjectMember
@@ -275,11 +314,60 @@ declare_node_union! {
         | TsGetterSignatureClassMember
         | TsDeclareFunctionDeclaration
         | TsDeclareFunctionExportDefaultDeclaration
+        | JsFormalParameter
+        | JsRestParameter
+        | TsThisParameter
+}
+
+pub enum UseExplicitTypeState {
+    MissingReturnType(TextRange),
+    MissingArgumentnType(TextRange, String),
+}
+
+impl UseExplicitTypeState {
+    fn range(&self) -> &TextRange {
+        match &self {
+            UseExplicitTypeState::MissingReturnType(range) => range,
+            UseExplicitTypeState::MissingArgumentnType(range, _) => range,
+        }
+    }
+    fn title(&self) -> MarkupBuf {
+        match &self {
+            UseExplicitTypeState::MissingReturnType(_) => {
+                (markup! {"Missing return type on function."}).to_owned()
+            }
+            UseExplicitTypeState::MissingArgumentnType(_, name) => {
+                (markup! {"Argument '"{name}"' should be typed."}).to_owned()
+            }
+        }
+    }
+
+    fn note_reason(&self) -> MarkupBuf {
+        match &self {
+            UseExplicitTypeState::MissingReturnType(_) => {
+                (markup! {"Declaring the return type makes the code self-documenting and can speed up TypeScript type checking."}).to_owned()
+            }
+            UseExplicitTypeState::MissingArgumentnType(_, _) => {
+                (markup! {"Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking."}).to_owned()
+            }
+        }
+    }
+
+    fn note_action(&self) -> MarkupBuf {
+        match &self {
+            UseExplicitTypeState::MissingReturnType(_) => {
+                (markup! {"Add a return type annotation."}).to_owned()
+            }
+            UseExplicitTypeState::MissingArgumentnType(_, _) => {
+                (markup! {"Add type annotations to the function arguments."}).to_owned()
+            }
+        }
+    }
 }
 
 impl Rule for UseExplicitType {
-    type Query = Ast<AnyCallableWithReturn>;
-    type State = TextRange;
+    type Query = Ast<FunctionSignaturePart>;
+    type State = UseExplicitTypeState;
     type Signals = Option<Self::State>;
     type Options = ();
 
@@ -291,7 +379,7 @@ impl Rule for UseExplicitType {
 
         let node = ctx.query();
         match node {
-            AnyCallableWithReturn::AnyJsFunction(func) => {
+            FunctionSignaturePart::AnyJsFunction(func) => {
                 if func.return_type_annotation().is_some() {
                     return None;
                 }
@@ -318,97 +406,122 @@ impl Rule for UseExplicitType {
 
                 let func_range = func.syntax().text_range();
                 if let Ok(Some(AnyJsBinding::JsIdentifierBinding(id))) = func.id() {
-                    return Some(TextRange::new(
+                    return Some(UseExplicitTypeState::MissingReturnType(TextRange::new(
                         func_range.start(),
                         id.syntax().text_range().end(),
-                    ));
+                    )));
                 }
 
-                Some(func_range)
+                Some(UseExplicitTypeState::MissingReturnType(func_range))
             }
-            AnyCallableWithReturn::JsMethodClassMember(method) => {
+            FunctionSignaturePart::JsMethodClassMember(method) => {
                 if method.return_type_annotation().is_some() {
                     return None;
                 }
 
-                Some(method.node_text_range())
+                Some(UseExplicitTypeState::MissingReturnType(
+                    method.node_text_range(),
+                ))
             }
-            AnyCallableWithReturn::JsGetterClassMember(getter) => {
+            FunctionSignaturePart::JsGetterClassMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
-                Some(getter.node_text_range())
+                Some(UseExplicitTypeState::MissingReturnType(
+                    getter.node_text_range(),
+                ))
             }
-            AnyCallableWithReturn::JsMethodObjectMember(method) => {
+            FunctionSignaturePart::JsMethodObjectMember(method) => {
                 if method.return_type_annotation().is_some() {
                     return None;
                 }
 
-                Some(method.node_text_range())
+                Some(UseExplicitTypeState::MissingReturnType(
+                    method.node_text_range(),
+                ))
             }
-            AnyCallableWithReturn::JsGetterObjectMember(getter) => {
+            FunctionSignaturePart::JsGetterObjectMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
-                Some(getter.node_text_range())
+                Some(UseExplicitTypeState::MissingReturnType(
+                    getter.node_text_range(),
+                ))
             }
-            AnyCallableWithReturn::TsMethodSignatureTypeMember(member) => {
+            FunctionSignaturePart::TsMethodSignatureTypeMember(member) => {
                 if member.return_type_annotation().is_some() {
                     return None;
                 }
 
-                Some(member.range())
+                Some(UseExplicitTypeState::MissingReturnType(member.range()))
             }
-            AnyCallableWithReturn::TsCallSignatureTypeMember(member) => {
+            FunctionSignaturePart::TsCallSignatureTypeMember(member) => {
                 if member.return_type_annotation().is_some() {
                     return None;
                 }
-                Some(member.range())
+                Some(UseExplicitTypeState::MissingReturnType(member.range()))
             }
-            AnyCallableWithReturn::TsMethodSignatureClassMember(member) => {
+            FunctionSignaturePart::TsMethodSignatureClassMember(member) => {
                 if member.return_type_annotation().is_some() {
                     return None;
                 }
-                Some(member.range())
+                Some(UseExplicitTypeState::MissingReturnType(member.range()))
             }
-            AnyCallableWithReturn::TsGetterSignatureClassMember(member) => {
+            FunctionSignaturePart::TsGetterSignatureClassMember(member) => {
                 if member.return_type().is_some() {
                     return None;
                 }
-                Some(member.range())
+                Some(UseExplicitTypeState::MissingReturnType(member.range()))
             }
-            AnyCallableWithReturn::TsDeclareFunctionDeclaration(decl) => {
+            FunctionSignaturePart::TsDeclareFunctionDeclaration(decl) => {
                 if decl.return_type_annotation().is_some() {
                     return None;
                 }
-                Some(decl.range())
+                Some(UseExplicitTypeState::MissingReturnType(decl.range()))
             }
-            AnyCallableWithReturn::TsDeclareFunctionExportDefaultDeclaration(decl) => {
+            FunctionSignaturePart::TsDeclareFunctionExportDefaultDeclaration(decl) => {
                 if decl.return_type_annotation().is_some() {
                     return None;
                 }
-                Some(decl.range())
+                Some(UseExplicitTypeState::MissingReturnType(decl.range()))
+            }
+            FunctionSignaturePart::JsFormalParameter(param) => {
+                if param.type_annotation().is_some() {
+                    return None;
+                }
+                Some(UseExplicitTypeState::MissingArgumentnType(
+                    param.range(),
+                    param.text(),
+                ))
+            }
+            FunctionSignaturePart::JsRestParameter(param) => {
+                if param.type_annotation().is_some() {
+                    return None;
+                }
+                Some(UseExplicitTypeState::MissingArgumentnType(
+                    param.range(),
+                    param.text(),
+                ))
+            }
+            FunctionSignaturePart::TsThisParameter(param) => {
+                if param.type_annotation().is_some() {
+                    return None;
+                }
+                Some(UseExplicitTypeState::MissingArgumentnType(
+                    param.range(),
+                    param.text(),
+                ))
             }
         }
     }
 
     fn diagnostic(_: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                state,
-                markup! {
-                    "Missing return type on function."
-                },
-            )
-            .note(markup! {
-                "Declaring the return type makes the code self-documenting and can speed up TypeScript type checking."
-            })
-            .note(markup! {
-                "Add a return type annotation."
-            }),
+            RuleDiagnostic::new(rule_category!(), state.range(), state.title())
+                .note(state.note_reason())
+                .note(state.note_action()),
         )
     }
 }

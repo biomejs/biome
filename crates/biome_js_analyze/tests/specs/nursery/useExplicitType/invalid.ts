@@ -121,3 +121,47 @@ declare namespace myLib {
 declare module "foo" {
 	export default function bar();
 }
+
+export default (a): void => {
+	return;
+};
+export function test(a: number, b) {
+	return;
+}
+
+class Human {
+	private name: string;
+
+	public toString(this): string {
+		return `Name ${this.name}`;
+	}
+}
+
+interface Array<Type> {
+	pop(): Type | undefined;
+	push(...items): number;
+}
+
+type MyObject = {
+	(input);
+	propertyName: string;
+};
+
+export function test({ a, b }): string {
+	return;
+}
+
+declare module "foo" {
+	export default function bar(a): string;
+}
+
+declare namespace myLib {
+	function makeGreeting(s): string;
+}
+
+export class Test {
+	constructor(a) {}
+	method(a): void {
+		return;
+	}
+}

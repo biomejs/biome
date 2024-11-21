@@ -129,6 +129,50 @@ declare module "foo" {
 	export default function bar();
 }
 
+export default (a): void => {
+	return;
+};
+export function test(a: number, b) {
+	return;
+}
+
+class Human {
+	private name: string;
+
+	public toString(this): string {
+		return `Name ${this.name}`;
+	}
+}
+
+interface Array<Type> {
+	pop(): Type | undefined;
+	push(...items): number;
+}
+
+type MyObject = {
+	(input);
+	propertyName: string;
+};
+
+export function test({ a, b }): string {
+	return;
+}
+
+declare module "foo" {
+	export default function bar(a): string;
+}
+
+declare namespace myLib {
+	function makeGreeting(s): string;
+}
+
+export class Test {
+	constructor(a) {}
+	method(a): void {
+		return;
+	}
+}
+
 ```
 
 # Diagnostics
@@ -704,6 +748,229 @@ invalid.ts:122:17 lint/nursery/useExplicitType ━━━━━━━━━━━
   i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
   
   i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:125:17 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'a' should be typed.
+  
+    123 │ }
+    124 │ 
+  > 125 │ export default (a): void => {
+        │                 ^
+    126 │ 	return;
+    127 │ };
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:128:8 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    126 │ 	return;
+    127 │ };
+  > 128 │ export function test(a: number, b) {
+        │        ^^^^^^^^^^^^^
+    129 │ 	return;
+    130 │ }
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:128:33 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'b' should be typed.
+  
+    126 │ 	return;
+    127 │ };
+  > 128 │ export function test(a: number, b) {
+        │                                 ^
+    129 │ 	return;
+    130 │ }
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:135:18 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'this' should be typed.
+  
+    133 │ 	private name: string;
+    134 │ 
+  > 135 │ 	public toString(this): string {
+        │ 	                ^^^^
+    136 │ 		return `Name ${this.name}`;
+    137 │ 	}
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:142:7 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument '...items' should be typed.
+  
+    140 │ interface Array<Type> {
+    141 │ 	pop(): Type | undefined;
+  > 142 │ 	push(...items): number;
+        │ 	     ^^^^^^^^
+    143 │ }
+    144 │ 
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:146:2 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Missing return type on function.
+  
+    145 │ type MyObject = {
+  > 146 │ 	(input);
+        │ 	^^^^^^^^
+    147 │ 	propertyName: string;
+    148 │ };
+  
+  i Declaring the return type makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add a return type annotation.
+  
+
+```
+
+```
+invalid.ts:146:3 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'input' should be typed.
+  
+    145 │ type MyObject = {
+  > 146 │ 	(input);
+        │ 	 ^^^^^
+    147 │ 	propertyName: string;
+    148 │ };
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:150:22 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument '{ a, b }' should be typed.
+  
+    148 │ };
+    149 │ 
+  > 150 │ export function test({ a, b }): string {
+        │                      ^^^^^^^^
+    151 │ 	return;
+    152 │ }
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:155:30 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'a' should be typed.
+  
+    154 │ declare module "foo" {
+  > 155 │ 	export default function bar(a): string;
+        │ 	                            ^
+    156 │ }
+    157 │ 
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:159:24 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 's' should be typed.
+  
+    158 │ declare namespace myLib {
+  > 159 │ 	function makeGreeting(s): string;
+        │ 	                      ^
+    160 │ }
+    161 │ 
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:163:14 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'a' should be typed.
+  
+    162 │ export class Test {
+  > 163 │ 	constructor(a) {}
+        │ 	            ^
+    164 │ 	method(a): void {
+    165 │ 		return;
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
+  
+
+```
+
+```
+invalid.ts:164:9 lint/nursery/useExplicitType ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument 'a' should be typed.
+  
+    162 │ export class Test {
+    163 │ 	constructor(a) {}
+  > 164 │ 	method(a): void {
+        │ 	       ^
+    165 │ 		return;
+    166 │ 	}
+  
+  i Declaring the argument types makes the code self-documenting and can speed up TypeScript type checking.
+  
+  i Add type annotations to the function arguments.
   
 
 ```
