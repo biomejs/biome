@@ -361,8 +361,8 @@ impl ImportRestrictionStatus {
 #[serde(rename_all = "camelCase", deny_unknown_fields, default)]
 pub struct CustomRestrictedImportOptions {
     /// The message to display when this module is imported.
-    #[serde(skip_serializing_if = "String::is_empty")]
-    message: String,
+    #[serde(skip_serializing_if = "str::is_empty")]
+    message: Box<str>,
 
     /// Names of the exported members that should not be used.
     #[serde(skip_serializing_if = "<[_]>::is_empty")]
@@ -408,7 +408,7 @@ impl CustomRestrictedImportOptions {
         reason: ImportRestrictionCause,
     ) -> String {
         if !self.message.is_empty() {
-            self.message.clone()
+            self.message.to_string()
         } else {
             match reason {
                 ImportRestrictionCause::ImportSource => {
@@ -430,8 +430,8 @@ impl CustomRestrictedImportOptions {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(untagged)]
 pub enum CustomRestrictedImport {
-    /// The message to display when this module is imported.pattern
-    Plain(String),
+    /// The message to display when this module is imported.
+    Plain(Box<str>),
     /// Additional options to configure the message and allowed/disallowed import names.
     WithOptions(CustomRestrictedImportOptions),
 }
