@@ -1,6 +1,7 @@
 ---
 source: crates/biome_graphql_analyze/tests/spec_tests.rs
 expression: invalid.graphql
+snapshot_kind: text
 ---
 # Input
 ```graphql
@@ -12,7 +13,7 @@ enum Status {
 
 # Diagnostics
 ```
-invalid.graphql:2:2 lint/nursery/noLowerCaseEnum ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.graphql:2:2 lint/nursery/useNamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Enum values should be in all caps.
   

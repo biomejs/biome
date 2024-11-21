@@ -1,6 +1,6 @@
-use biome_analyze::RuleSource;
 use biome_analyze::RuleSourceKind;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{RuleMeta, RuleSource};
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlEnumValueDefinition;
 use biome_rowan::AstNode;
@@ -28,17 +28,17 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    pub NoLowerCaseEnum {
+    pub UseNamingConvention {
         version: "next",
-        name: "noLowerCaseEnum",
+        name: "useNamingConvention",
         language: "graphql",
         recommended: false,
         sources: &[RuleSource::EslintGraphqlSchemaLinter("enum-values-all-caps")],
-        source_kind: RuleSourceKind::SameLogic,
+        source_kind: RuleSourceKind::Inspired,
     }
 }
 
-impl Rule for NoLowerCaseEnum {
+impl Rule for UseNamingConvention {
     type Query = Ast<GraphqlEnumValueDefinition>;
     type State = ();
     type Signals = Option<Self::State>;

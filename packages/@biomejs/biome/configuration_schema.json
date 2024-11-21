@@ -2253,13 +2253,6 @@
 						{ "type": "null" }
 					]
 				},
-				"noLowerCaseEnum": {
-					"description": "Validates that all enum values are capitalized.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
 				"noMissingVarFunction": {
 					"description": "Disallow missing var function for css variables.",
 					"anyOf": [
@@ -2482,6 +2475,13 @@
 					"description": "Enforce specifying the name of GraphQL operations.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
+				"useNamingConvention": {
+					"description": "Validates that all enum values are capitalized.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
 					]
 				},
