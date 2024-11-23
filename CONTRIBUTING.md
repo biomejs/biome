@@ -464,6 +464,7 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 ### Core Contributors team
 
+- [Carson McManus @dyc3](https://github.com/dyc3)
 - [Denis Bezrukov @denbezrukov](https://github.com/denbezrukov)
 - [Hiroki Ihoriya @unvalley](https://github.com/unvalley)
 - [Jon Egeland @faultyserver](https://github.com/faultyserver)
@@ -472,7 +473,6 @@ Members are listed in alphabetical order. Members are free to use the full name,
 
 ### Maintainers team
 
-- [Carson McManus @dyc3](https://github.com/dyc3)
 - [Dani Guardiola @DaniGuardiola](https://github.com/DaniGuardiola)
 - [Justinas Delinda @minht11](https://github.com/minht11)
 - [Madeline Gurriarán @SuperchupuDev](https://github.com/SuperchupuDev)
