@@ -188,6 +188,7 @@ indexmap             = { version = "2.6.0" }
 insta                = "1.41.1"
 natord               = "1.0.9"
 oxc_resolver         = "1.12.0"
+papaya               = { git = "https://github.com/ibraheemdev/papaya" }
 proc-macro2          = "1.0.86"
 quickcheck           = "1.0.3"
 quickcheck_macros    = "1.0.0"

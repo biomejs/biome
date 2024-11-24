@@ -1179,13 +1179,13 @@ dependencies = [
  "biome_string_case",
  "biome_text_edit",
  "bpaf",
- "dashmap 6.1.0",
  "enumflags2",
  "getrandom 0.2.15",
  "ignore",
  "indexmap",
  "insta",
  "oxc_resolver",
+ "papaya",
  "regex",
  "rustc-hash 2.0.0",
  "schemars",
@@ -2806,6 +2806,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "papaya"
+version = "0.1.4"
+source = "git+https://github.com/ibraheemdev/papaya#14351ec7059b8a98f8e41262b4f2db6fb396cd6b"
+dependencies = [
+ "seize",
+]
+
+[[package]]
 name = "parking_lot"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3418,6 +3426,12 @@ name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
+
+[[package]]
+name = "seize"
+version = "0.4.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d659fa6f19e82a52ab8d3fff3c380bd8cc16462eaea411395618a38760eb85bc"
 
 [[package]]
 name = "serde"
