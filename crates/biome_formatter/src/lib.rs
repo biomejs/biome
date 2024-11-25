@@ -552,7 +552,7 @@ impl From<QuoteStyle> for Quote {
     }
 }
 
-#[derive(Clone, Copy, Debug, Deserializable, Eq, Hash, Merge, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Deserializable, Eq, Hash, Merge, PartialEq)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Serialize, serde::Deserialize, schemars::JsonSchema),
@@ -564,12 +564,6 @@ impl SpaceInsideStuff {
     /// Return the boolean value for this [SpaceInsideStuff]
     pub fn value(&self) -> bool {
         self.0
-    }
-}
-
-impl Default for SpaceInsideStuff {
-    fn default() -> Self {
-        Self(true)
     }
 }
 
