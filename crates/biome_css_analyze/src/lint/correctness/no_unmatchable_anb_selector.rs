@@ -5,6 +5,7 @@ use biome_console::markup;
 use biome_css_syntax::{
     AnyCssPseudoClassNth, CssPseudoClassFunctionSelectorList, CssPseudoClassNthSelector,
 };
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast};
 
 declare_lint_rule! {
@@ -57,6 +58,7 @@ declare_lint_rule! {
         name: "noUnmatchableAnbSelector",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("selector-anb-no-unmatchable")],
     }
 }

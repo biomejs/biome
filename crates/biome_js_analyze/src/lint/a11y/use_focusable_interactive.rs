@@ -1,6 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_aria::AriaRoles;
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttributeValue};
 use biome_rowan::AstNode;
 
@@ -43,6 +44,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("interactive-supports-focus")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

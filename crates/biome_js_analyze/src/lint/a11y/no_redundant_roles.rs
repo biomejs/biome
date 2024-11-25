@@ -4,6 +4,7 @@ use biome_analyze::{
 };
 use biome_aria::{roles::AriaRoleDefinition, AriaRoles};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     jsx_ext::AnyJsxElement, AnyJsxAttributeValue, JsxAttribute, JsxAttributeList,
 };
@@ -48,6 +49,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("no-redundant-roles")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

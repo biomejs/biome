@@ -6,6 +6,7 @@ use biome_css_syntax::{
     AnyCssAtRule, AnyCssGenericComponentValue, AnyCssValue, CssAtRule,
     CssGenericComponentValueList, CssGenericProperty, CssSyntaxKind,
 };
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, SyntaxNodeCast, TextRange};
 use biome_string_case::StrLikeExtension;
 
@@ -65,6 +66,7 @@ declare_lint_rule! {
         name: "useGenericFontNames",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("font-family-no-missing-generic-family-keyword")],
     }
 }

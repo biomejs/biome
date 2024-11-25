@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsStatement, JsForStatement, T};
 use biome_rowan::{trim_leading_trivia_pieces, AstNode, BatchMutationExt};
@@ -42,6 +43,7 @@ declare_lint_rule! {
         name: "useWhile",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::EslintSonarJs("prefer-while")],
         fix_kind: FixKind::Safe,
     }

@@ -6,6 +6,7 @@ use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandlerKind, InstructionKind,
 };
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsDefaultClause, JsLanguage, JsSwitchStatement, JsSyntaxNode};
 use biome_rowan::{AstNode, AstNodeList, TextRange, WalkEvent};
 use roaring::RoaringBitmap;
@@ -60,6 +61,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-fallthrough")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

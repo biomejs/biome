@@ -3,6 +3,7 @@ use crate::services::semantic::Semantic;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{RuleSource, RuleSourceKind};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsObjectMember, AnyJsxAttribute,
@@ -42,6 +43,7 @@ declare_lint_rule! {
         sources: &[RuleSource::EslintReact("jsx-key")],
         source_kind: RuleSourceKind::SameLogic,
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

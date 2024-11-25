@@ -13,6 +13,7 @@ use biome_css_syntax::{
     CssPseudoClassFunctionSelector, CssPseudoClassFunctionSelectorList,
     CssPseudoClassFunctionValueList, CssPseudoClassIdentifier, CssPseudoElementSelector,
 };
+use biome_diagnostics::Severity;
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 use biome_string_case::StrLikeExtension;
 
@@ -62,6 +63,7 @@ declare_lint_rule! {
         name: "noUnknownPseudoClass",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("selector-pseudo-class-no-unknown")],
     }
 }

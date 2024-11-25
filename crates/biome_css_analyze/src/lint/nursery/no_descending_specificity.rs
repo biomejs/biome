@@ -4,6 +4,7 @@ use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnosti
 use biome_console::markup;
 use biome_css_semantic::model::{Rule as CssSemanticRule, RuleId, SemanticModel, Specificity};
 use biome_css_syntax::{AnyCssSelector, CssRoot};
+use biome_diagnostics::Severity;
 use biome_rowan::TextRange;
 
 use biome_rowan::AstNode;
@@ -76,6 +77,7 @@ declare_lint_rule! {
         name: "noDescendingSpecificity",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("no-descending-specificity")],
     }
 }

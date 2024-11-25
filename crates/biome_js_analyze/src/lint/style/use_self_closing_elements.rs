@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsxTag, JsSyntaxToken, JsxElement, JsxOpeningElementFields, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt, TriviaPiece};
@@ -89,6 +90,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintStylistic("jsx-self-closing-comp")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

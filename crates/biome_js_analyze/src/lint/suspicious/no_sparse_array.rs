@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsArrayElement, AnyJsExpression, JsArrayExpression, TriviaPieceKind};
 use biome_rowan::{AstNode, AstNodeExt, AstSeparatedList, BatchMutationExt};
@@ -24,6 +25,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-sparse-arrays")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

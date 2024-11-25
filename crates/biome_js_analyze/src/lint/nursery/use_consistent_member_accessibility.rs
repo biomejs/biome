@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsClassMemberName, JsConstructorClassMember, JsGetterClassMember, JsMethodClassMember,
     JsPropertyClassMember, JsSetterClassMember, TsAccessibilityModifier,
@@ -217,6 +218,7 @@ declare_lint_rule! {
         name: "useConsistentMemberAccessibility",
         language: "ts",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::EslintTypeScript("explicit-member-accessibility")],
     }
 }
