@@ -56,7 +56,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#4026](https://github.com/biomejs/biome/issues/4026), don't move comments in `grid-template`. Contributed by @fireairforce
 
-- Fix [#4533](URL_ADDRESS.com/biomejs/biome/issues/4533), don't throw error when pseudeo class after a webkit scrollbar pseudeo element.
+- Fix [#4533](https://github.com/biomejs/biome/issues/4533), don't throw error when pseudeo class after a webkit scrollbar pseudeo element.
 
   The follow code will not report:
 
@@ -65,6 +65,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @fireairforce
+
+- Fix [#4575](https://github.com/biomejs/biome/issues/4575), don't wrap selector identation after css comments. Contributed by @fireairforce
 
 ### JavaScript APIs
 
