@@ -90,7 +90,7 @@ pub struct JavascriptFormatter {
     pub quote_style: QuoteStyle,
 
     /// @todo
-    #[partial(bpaf(long("space_inside_stuff"), argument("true|false"), optional))]
+    #[partial(bpaf(long("space-inside-stuff"), argument("true|false"), optional))]
     pub space_inside_stuff: SpaceInsideStuff,
 
     // it's also a top-level configurable property.

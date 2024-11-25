@@ -1656,6 +1656,13 @@
 					"description": "Whether the formatter prints semicolons for all statements or only in for statements where it is necessary because of ASI.",
 					"anyOf": [{ "$ref": "#/definitions/Semicolons" }, { "type": "null" }]
 				},
+				"spaceInsideStuff": {
+					"description": "@todo",
+					"anyOf": [
+						{ "$ref": "#/definitions/SpaceInsideStuff" },
+						{ "type": "null" }
+					]
+				},
 				"trailingComma": {
 					"description": "Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to \"all\".",
 					"anyOf": [
@@ -3367,6 +3374,7 @@
 			},
 			"additionalProperties": false
 		},
+		"SpaceInsideStuff": { "type": "boolean" },
 		"StableHookResult": {
 			"oneOf": [
 				{

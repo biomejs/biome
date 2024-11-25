@@ -522,6 +522,10 @@ export interface PartialJavascriptFormatter {
 	 */
 	semicolons?: Semicolons;
 	/**
+	 * @todo
+	 */
+	spaceInsideStuff?: SpaceInsideStuff;
+	/**
 	 * Print trailing commas wherever possible in multi-line comma-separated syntactic structures. Defaults to "all".
 	 */
 	trailingComma?: TrailingCommas;
@@ -698,6 +702,7 @@ export type QuoteStyle = "double" | "single";
 export type ArrowParentheses = "always" | "asNeeded";
 export type QuoteProperties = "asNeeded" | "preserve";
 export type Semicolons = "always" | "asNeeded";
+export type SpaceInsideStuff = boolean;
 /**
  * Print trailing commas wherever possible in multi-line comma-separated syntactic structures.
  */
