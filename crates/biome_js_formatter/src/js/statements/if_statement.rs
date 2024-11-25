@@ -24,6 +24,7 @@ impl FormatNodeRule<JsIfStatement> for FormatJsIfStatement {
         let l_paren_token = l_paren_token?;
         let r_paren_token = r_paren_token?;
         let consequent = consequent?;
+        let should_insert_space_inside_parens = f.options().space_inside_stuff().value();
 
         write!(
             f,
@@ -33,7 +34,7 @@ impl FormatNodeRule<JsIfStatement> for FormatJsIfStatement {
                 l_paren_token.format(),
                 group(&soft_block_indent_with_maybe_space(
                     &test.format(),
-                    f.options().space_inside_stuff().value()
+                    should_insert_space_inside_parens
                 )),
                 r_paren_token.format(),
                 FormatStatementBody::new(&consequent),
