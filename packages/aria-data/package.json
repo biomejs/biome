@@ -6,7 +6,7 @@
   "license": "MIT OR Apache-2.0",
   "author": "Victorien Elvinger",
   "engines": {
-    "node": ">=20.18.1"
+    "node": ">=22.11.0"
   },
   "type": "module",
   "dependencies": {

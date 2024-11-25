@@ -32,14 +32,14 @@
     "toolchain"
   ],
   "engines": {
-    "node": ">=14.21.3"
+    "node": ">=22.11.0"
   },
   "license": "MIT OR Apache-2.0",
   "devDependencies": {
-    "@types/node": "20.17.7",
+    "@types/node": "22.9.3",
     "typescript": "5.7.2",
     "vite": "5.4.11",
-    "vitest": "1.6.0"
+    "vitest": "2.1.5"
   },
   "publishConfig": {
     "provenance": true
