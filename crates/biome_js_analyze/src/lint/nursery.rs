@@ -2,7 +2,7 @@
 
 use biome_analyze::declare_lint_group;
 
-pub mod no_bind;
+pub mod no_jsx_props_bind;
 pub mod no_common_js;
 pub mod no_document_cookie;
 pub mod no_document_import_in_page;
@@ -48,7 +48,7 @@ declare_lint_group! {
     pub Nursery {
         name : "nursery" ,
         rules : [
-            self :: no_bind :: NoBind ,
+            self :: no_jsx_props_bind :: NoJsxPropsBind ,
             self :: no_common_js :: NoCommonJs ,
             self :: no_document_cookie :: NoDocumentCookie ,
             self :: no_document_import_in_page :: NoDocumentImportInPage ,

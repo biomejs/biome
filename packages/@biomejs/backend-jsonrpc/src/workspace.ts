@@ -1229,7 +1229,7 @@ export interface Nursery {
 	/**
 	 * Succinct description of the rule.
 	 */
-	noBind?: RuleConfiguration_for_Null;
+	noJsxPropsBind?: RuleConfiguration_for_Null;
 	/**
 	 * Disallow use of CommonJs module system in favor of ESM style imports.
 	 */
@@ -3050,7 +3050,7 @@ export type Category =
 	| "lint/correctness/useValidForDirection"
 	| "lint/correctness/useYield"
 	| "lint/nursery/colorNoInvalidHex"
-	| "lint/nursery/noBind"
+	| "lint/nursery/noJsxPropsBind"
 	| "lint/nursery/noColorInvalidHex"
 	| "lint/nursery/noCommonJs"
 	| "lint/nursery/noConsole"

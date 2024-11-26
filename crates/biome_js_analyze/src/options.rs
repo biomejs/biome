@@ -18,7 +18,7 @@ pub type NoBannedTypes =
     <lint::complexity::no_banned_types::NoBannedTypes as biome_analyze::Rule>::Options;
 pub type NoBarrelFile =
     <lint::performance::no_barrel_file::NoBarrelFile as biome_analyze::Rule>::Options;
-pub type NoBind = <lint::nursery::no_bind::NoBind as biome_analyze::Rule>::Options;
+pub type NoJsxPropsBind = <lint::nursery::no_jsx_props_bind::NoJsxPropsBind as biome_analyze::Rule>::Options;
 pub type NoBlankTarget =
     <lint::a11y::no_blank_target::NoBlankTarget as biome_analyze::Rule>::Options;
 pub type NoCatchAssign =
