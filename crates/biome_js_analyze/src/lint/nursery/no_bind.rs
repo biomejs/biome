@@ -29,7 +29,7 @@ declare_lint_rule! {
     pub NoBind {
         version: "next",
         name: "noBind",
-        language: "js",
+        language: "jsx",
         recommended: false,
     }
 }
