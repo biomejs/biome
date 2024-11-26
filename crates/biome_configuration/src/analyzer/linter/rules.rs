@@ -3273,7 +3273,7 @@ pub struct Nursery {
     pub all: Option<bool>,
     #[doc = "Succinct description of the rule."]
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub no_bind: Option<RuleConfiguration<biome_js_analyze::options::NoBind>>,
+    pub no_jsx_props_bind: Option<RuleConfiguration<biome_js_analyze::options::NoJsxPropsBind>>,
     #[doc = "Disallow use of CommonJs module system in favor of ESM style imports."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_common_js: Option<RuleConfiguration<biome_js_analyze::options::NoCommonJs>>,
@@ -3636,7 +3636,7 @@ impl Nursery {
     }
     pub(crate) fn get_enabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.no_bind.as_ref() {
+        if let Some(rule) = self.no_jsx_props_bind.as_ref() {
             if rule.is_enabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
@@ -3900,7 +3900,7 @@ impl Nursery {
     }
     pub(crate) fn get_disabled_rules(&self) -> FxHashSet<RuleFilter<'static>> {
         let mut index_set = FxHashSet::default();
-        if let Some(rule) = self.no_bind.as_ref() {
+        if let Some(rule) = self.no_jsx_props_bind.as_ref() {
             if rule.is_disabled() {
                 index_set.insert(RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[0]));
             }
@@ -4196,8 +4196,8 @@ impl Nursery {
         rule_name: &str,
     ) -> Option<(RulePlainConfiguration, Option<RuleOptions>)> {
         match rule_name {
-            "noBind" => self
-                .no_bind
+            "noJsxPropsBind" => self
+                .no_jsx_props_bind
                 .as_ref()
                 .map(|conf| (conf.level(), conf.get_options())),
             "noCommonJs" => self
