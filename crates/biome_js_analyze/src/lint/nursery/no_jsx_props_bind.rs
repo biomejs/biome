@@ -30,6 +30,7 @@ declare_lint_rule! {
         version: "next",
         name: "noJsxPropsBind",
         language: "jsx",
+        sources: &[RuleSource::EslintReact("jsx-no-bind")],
         recommended: false,
     }
 }
