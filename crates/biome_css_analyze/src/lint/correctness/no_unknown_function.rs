@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::CssFunction;
+use biome_diagnostics::Severity;
 use biome_rowan::{AstNode, TextRange};
 
 use crate::utils::{is_custom_function, is_function_keyword};
@@ -36,6 +37,7 @@ declare_lint_rule! {
         name: "noUnknownFunction",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("function-no-unknown")],
     }
 }

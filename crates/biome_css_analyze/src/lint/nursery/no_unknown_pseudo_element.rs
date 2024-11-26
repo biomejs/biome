@@ -3,6 +3,7 @@ use biome_analyze::{
 };
 use biome_console::markup;
 use biome_css_syntax::{AnyCssPseudoElement, CssPseudoElementSelector};
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 use biome_string_case::StrLikeExtension;
 
@@ -54,6 +55,7 @@ declare_lint_rule! {
         name: "noUnknownPseudoElement",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("selector-pseudo-element-no-unknown")],
     }
 }

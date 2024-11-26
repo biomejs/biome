@@ -3,6 +3,7 @@ use crate::{ast_utils, JsRuleAction};
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
@@ -59,6 +60,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("prefer-numeric-literals")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

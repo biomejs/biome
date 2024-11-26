@@ -1,5 +1,6 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsFileSource, JsVariableDeclaration, JsVariableDeclarator};
 
 declare_lint_rule! {
@@ -38,6 +39,7 @@ declare_lint_rule! {
         name: "noImplicitAnyLet",
         language: "ts",
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

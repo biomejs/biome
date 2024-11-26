@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::{fmt::Display, fmt::Formatter, markup};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, static_value::StaticValue, TextRange};
 use biome_rowan::AstNode;
 
@@ -51,6 +52,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("alt-text")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

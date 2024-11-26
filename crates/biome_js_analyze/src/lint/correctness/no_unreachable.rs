@@ -1,10 +1,12 @@
 use std::{cmp::Ordering, collections::VecDeque, num::NonZeroU32, vec::IntoIter};
 
+use crate::services::control_flow::{ControlFlowGraph, JsControlFlowGraph};
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_control_flow::{
     builder::{BlockId, ROOT_BLOCK_ID},
     ExceptionHandler, ExceptionHandlerKind, Instruction, InstructionKind,
 };
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     JsBlockStatement, JsCaseClause, JsDefaultClause, JsDoWhileStatement, JsForInStatement,
     JsForOfStatement, JsForStatement, JsFunctionBody, JsIfStatement, JsLabeledStatement,
@@ -14,8 +16,6 @@ use biome_js_syntax::{
 use biome_rowan::{declare_node_union, AstNode, NodeOrToken};
 use roaring::bitmap::RoaringBitmap;
 use rustc_hash::FxHashMap;
-
-use crate::services::control_flow::{ControlFlowGraph, JsControlFlowGraph};
 
 declare_lint_rule! {
     /// Disallow unreachable code
@@ -53,6 +53,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-unreachable")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

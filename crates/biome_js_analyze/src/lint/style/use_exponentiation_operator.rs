@@ -3,6 +3,7 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::{make, syntax::T};
 use biome_js_syntax::{
     global_identifier, AnyJsCallArgument, AnyJsExpression, AnyJsMemberExpression, JsBinaryOperator,
@@ -58,6 +59,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("prefer-exponentiation-operator")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxElement};
 use biome_rowan::AstNode;
 
@@ -61,6 +62,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("heading-has-content")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

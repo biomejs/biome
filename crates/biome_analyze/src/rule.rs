@@ -8,11 +8,11 @@ use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
 use biome_diagnostics::location::AsSpan;
-use biome_diagnostics::Applicability;
 use biome_diagnostics::{
     Advices, Category, Diagnostic, DiagnosticTags, Location, LogCategory, MessageAndDescription,
     Visit,
 };
+use biome_diagnostics::{Applicability, Severity};
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
 use std::borrow::Cow;
 use std::cmp::Ordering;
@@ -41,6 +41,8 @@ pub struct RuleMetadata {
     pub sources: &'static [RuleSource],
     /// The source kind of the rule
     pub source_kind: Option<RuleSourceKind>,
+    /// The default severity of the rule
+    pub severity: Severity,
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -328,6 +330,7 @@ impl RuleMetadata {
             fix_kind: FixKind::None,
             sources: &[],
             source_kind: None,
+            severity: Severity::Information,
         }
     }
 
@@ -361,6 +364,11 @@ impl RuleMetadata {
 
     pub const fn language(mut self, language: &'static str) -> Self {
         self.language = language;
+        self
+    }
+
+    pub const fn severity(mut self, severity: Severity) -> Self {
+        self.severity = severity;
         self
     }
 

@@ -3,6 +3,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{
     global_identifier, static_value::StaticValue, AnyJsExpression, JsUnaryExpression,
@@ -70,6 +71,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintUnicorn("prefer-number-properties")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }

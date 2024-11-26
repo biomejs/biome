@@ -1,6 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic};
 use biome_analyze::{Ast, RuleSource};
 use biome_console::{markup, MarkupBuf};
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsAssignment, AnyJsAssignmentPattern, AnyJsCallArgument,
     AnyJsDeclarationClause, AnyJsExportClause, AnyJsExportNamedSpecifier, AnyJsExpression,
@@ -88,6 +89,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::EslintUnicorn("no-thenable")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

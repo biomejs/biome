@@ -1,6 +1,7 @@
 use crate::{services::semantic::Semantic, utils::rename::RenamableNode};
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::SemanticModel;
 use biome_js_syntax::{
     AnyJsArrayElement, AnyJsExpression, AnyJsLiteralExpression, AnyJsStatement,
@@ -85,6 +86,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-constant-condition")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 
