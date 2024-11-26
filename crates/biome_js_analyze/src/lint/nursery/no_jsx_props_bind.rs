@@ -26,15 +26,15 @@ declare_lint_rule! {
     /// // var a = 1;
     /// ```
     ///
-    pub NoBind {
+    pub NoJsxPropsBind {
         version: "next",
-        name: "noBind",
+        name: "noJsxPropsBind",
         language: "jsx",
         recommended: false,
     }
 }
 
-impl Rule for NoBind {
+impl Rule for NoJsxPropsBind {
     type Query = Ast<JsIdentifierBinding>;
     type State = ();
     type Signals = Option<Self::State>;
