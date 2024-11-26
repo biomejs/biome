@@ -2,6 +2,7 @@ use crate::services::aria::Aria;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::jsx_ext::AnyJsxElement;
 use biome_js_syntax::JsxAttribute;
 use biome_rowan::AstNode;
@@ -44,6 +45,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintJsxA11y("role-has-required-aria-props")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

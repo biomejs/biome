@@ -2,6 +2,7 @@ use crate::services::semantic::SemanticServices;
 use biome_analyze::{context::RuleContext, Rule, RuleDiagnostic};
 use biome_analyze::{declare_lint_rule, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_semantic::Scope;
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
 use biome_js_syntax::{JsSyntaxKind, TextRange};
@@ -67,6 +68,7 @@ declare_lint_rule! {
             RuleSource::EslintTypeScript("no-redeclare"),
         ],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

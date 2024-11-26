@@ -5,6 +5,7 @@ use biome_analyze::{
     RuleSourceKind,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{AnyJsStatement, JsIfStatement, JsStatementList, JsSyntaxKind};
 use biome_rowan::{
@@ -94,6 +95,7 @@ declare_lint_rule! {
         ],
         source_kind: RuleSourceKind::Inspired,
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

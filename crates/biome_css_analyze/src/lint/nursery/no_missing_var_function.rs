@@ -1,6 +1,7 @@
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_css_syntax::{AnyCssProperty, CssDashedIdentifier, CssDeclaration, CssSyntaxKind};
+use biome_diagnostics::Severity;
 use biome_rowan::AstNode;
 
 use crate::services::semantic::Semantic;
@@ -117,6 +118,7 @@ declare_lint_rule! {
         name: "noMissingVarFunction",
         language: "css",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Stylelint("custom-property-no-missing-var-function")],
     }
 }

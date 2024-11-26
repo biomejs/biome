@@ -3,6 +3,7 @@ use biome_analyze::{
     RuleDiagnostic, RuleSource, RuleSourceKind, ServiceBag, Visitor,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     assign_ext::AnyJsMemberAssignment, AnyJsExpression, AnyJsRoot, JsAssignmentExpression,
     JsCallExpression, JsExport, JsLanguage,
@@ -41,6 +42,7 @@ declare_lint_rule! {
         name: "noExportsInTest",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::EslintJest("no-export")],
         source_kind: RuleSourceKind::Inspired,
     }

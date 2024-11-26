@@ -4,6 +4,7 @@ use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{
     js_string_literal_expression, jsx_expression_child, jsx_string, jsx_string_literal,
     jsx_tag_expression, token, JsxExpressionChildBuilder,
@@ -64,6 +65,7 @@ declare_lint_rule! {
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-useless-fragment")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Unsafe,
     }
 }

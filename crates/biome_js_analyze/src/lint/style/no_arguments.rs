@@ -1,6 +1,7 @@
 use crate::services::semantic::SemanticServices;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::TextRange;
 
 declare_lint_rule! {
@@ -30,6 +31,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("prefer-rest-params")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

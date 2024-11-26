@@ -4,6 +4,7 @@ use biome_analyze::{
     RuleDiagnostic,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{JsScript, JsSyntaxKind, JsSyntaxToken, T};
 use biome_rowan::{AstNode, AstNodeList, BatchMutationExt};
@@ -39,6 +40,7 @@ declare_lint_rule! {
         name: "useStrictMode",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }

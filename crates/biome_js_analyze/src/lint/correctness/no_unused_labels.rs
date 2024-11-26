@@ -4,6 +4,7 @@ use biome_analyze::{
     RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{
     AnyJsStatement, JsBreakStatement, JsContinueStatement, JsFileSource, JsLabeledStatement,
     JsLanguage, TextRange, WalkEvent,
@@ -64,6 +65,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("no-unused-labels")],
         recommended: true,
+        severity: Severity::Error,
         fix_kind: FixKind::Safe,
     }
 }

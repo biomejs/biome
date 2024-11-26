@@ -4,6 +4,7 @@ use biome_analyze::{
     ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{AnyFunctionLike, JsLanguage, JsYieldExpression, TextRange, WalkEvent};
 use biome_rowan::{AstNode, AstNodeList, Language, SyntaxNode, TextSize};
 
@@ -42,6 +43,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[RuleSource::Eslint("require-yield")],
         recommended: true,
+        severity: Severity::Error,
     }
 }
 

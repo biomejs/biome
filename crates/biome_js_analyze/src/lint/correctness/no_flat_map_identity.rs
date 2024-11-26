@@ -2,6 +2,7 @@ use biome_analyze::{
     context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make::{ident, js_call_argument_list, js_call_arguments, js_name, token};
 use biome_js_syntax::{
     AnyJsExpression, AnyJsFunctionBody, AnyJsMemberExpression, AnyJsName, AnyJsStatement,
@@ -39,6 +40,7 @@ declare_lint_rule! {
         name: "noFlatMapIdentity",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::Clippy("flat_map_identity")],
         fix_kind: FixKind::Safe,
     }

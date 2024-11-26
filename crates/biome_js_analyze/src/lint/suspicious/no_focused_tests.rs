@@ -4,6 +4,7 @@ use biome_analyze::{
     RuleSourceKind,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_factory::make;
 use biome_js_syntax::{JsCallExpression, TextRange};
 use biome_rowan::{AstNode, BatchMutationExt, NodeOrToken};
@@ -36,6 +37,7 @@ declare_lint_rule! {
         name: "noFocusedTests",
         language: "js",
         recommended: true,
+        severity: Severity::Error,
         sources: &[RuleSource::EslintJest("no-focused-tests")],
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Unsafe,
