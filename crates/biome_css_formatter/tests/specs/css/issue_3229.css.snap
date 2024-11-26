@@ -84,17 +84,17 @@ foo
 
 /* input */
 foo
-	/* a comment */
+/* a comment */
 
-	.aRule {
+.aRule {
 	color: red;
 }
 
 /* first format */
 foo
-	/* a comment */
+/* a comment */
 
-	.aRule {
+.aRule {
 	color: red;
 }
 ```
