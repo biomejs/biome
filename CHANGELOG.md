@@ -68,6 +68,22 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Fix [#4575](https://github.com/biomejs/biome/issues/4575), don't wrap selector identation after css comments. Contributed by @fireairforce
 
+- Fix [#4553](https://github.com/biomejs/biome/issues/4553), `noUselessFragments` fix result has invalid syntax for JSX attribute, the follow code will fix:
+
+  ```jsx
+  <Suspense fallback={<><span>Loading...</span></>}>
+	  {children}
+  </Suspense>;
+  ```
+
+  it will fix as:
+
+  ```jsx
+  <Suspense fallback={<span>Loading...</span>}>
+	  {children}
+  </Suspense>;
+  ```
+
 ### JavaScript APIs
 
 ### Linter
