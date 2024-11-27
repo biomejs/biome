@@ -100,7 +100,7 @@ impl Rule for NoTsIgnore {
                 },
             )
             .note(markup! {
-                "The directive "<Emphasis>"@ts-ignore"</Emphasis>" suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself."
+                "The "<Emphasis>"@ts-ignore"</Emphasis>" directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself."
             }),
         )
     }
@@ -136,7 +136,7 @@ impl Rule for NoTsIgnore {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Use the directive "<Emphasis>"@ts-expect-error"</Emphasis>" instead." }
+            markup! { "Use the "<Emphasis>"@ts-expect-error"</Emphasis>" directive instead." }
                 .to_owned(),
             mutation,
         ))

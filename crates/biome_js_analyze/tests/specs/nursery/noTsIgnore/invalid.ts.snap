@@ -47,9 +47,9 @@ invalid.ts:2:4 lint/nursery/noTsIgnore  FIXABLE  ━━━━━━━━━━�
     4 │ 
     5 │ /**
   
-  i The directive @ts-ignore suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
   
-  i Safe fix: Use the directive @ts-expect-error instead.
+  i Safe fix: Use the @ts-expect-error directive instead.
   
      1  1 │   
      2    │ - //·@ts-ignore
@@ -82,9 +82,9 @@ invalid.ts:6:4 lint/nursery/noTsIgnore  FIXABLE  ━━━━━━━━━━�
        │ ^^^
     10 │ 
   
-  i The directive @ts-ignore suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
   
-  i Safe fix: Use the directive @ts-expect-error instead.
+  i Safe fix: Use the @ts-expect-error directive instead.
   
      4  4 │   
      5  5 │   /**
@@ -115,9 +115,9 @@ invalid.ts:13:4 lint/nursery/noTsIgnore  FIXABLE  ━━━━━━━━━━
        │ ^^^
     16 │ 
   
-  i The directive @ts-ignore suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
   
-  i Safe fix: Use the directive @ts-expect-error instead.
+  i Safe fix: Use the @ts-expect-error directive instead.
   
     11 11 │   
     12 12 │   // Some comment
@@ -148,9 +148,9 @@ invalid.ts:19:4 lint/nursery/noTsIgnore  FIXABLE  ━━━━━━━━━━
        │ ^^^
     21 │ 
   
-  i The directive @ts-ignore suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
+  i The @ts-ignore directive suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself.
   
-  i Safe fix: Use the directive @ts-expect-error instead.
+  i Safe fix: Use the @ts-expect-error directive instead.
   
     17 17 │   
     18 18 │   // Some comment
