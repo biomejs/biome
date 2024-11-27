@@ -10,7 +10,7 @@ use biome_rowan::{AstNode, BatchMutationExt, Direction, TextRange, TextSize, Tri
 declare_lint_rule! {
     /// Prevents the use of the TypeScript directive `@ts-ignore`.
     ///
-    /// The directive `@ts-ignore` shuts down all compilation errors, even ones that could be considered bugs
+    /// The directive `@ts-ignore` suppresses all compilation errors, even ones that could be considered bugs
     /// coming from an upstream library or the compiler itself. If you use `@ts-ignore`, it won't be possible to know
     /// when and if the bug is fixed.
     ///
