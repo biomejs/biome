@@ -8,7 +8,7 @@ use crate::{
     settings::{ServiceLanguage, Settings, WorkspaceSettingsHandle},
     WorkspaceError,
 };
-use biome_analyze::AnalyzerOptions;
+use biome_analyze::{AnalyzerOptions, QueryMatch};
 use biome_diagnostics::{Diagnostic, Severity};
 use biome_formatter::{FormatError, IndentStyle, IndentWidth, LineEnding, LineWidth, Printed};
 use biome_fs::BiomePath;

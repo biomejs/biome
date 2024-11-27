@@ -15,7 +15,7 @@ impl FormatNodeRule<JsImportNamedClause> for FormatJsImportNamedClause {
             named_specifiers,
             from_token,
             source,
-            attribute,
+            assertion,
         } = node.as_fields();
 
         if let Some(type_token) = type_token {
@@ -88,8 +88,8 @@ impl FormatNodeRule<JsImportNamedClause> for FormatJsImportNamedClause {
 
         write![f, [space(), from_token.format(), space(), source.format(),]]?;
 
-        if let Some(attribute) = attribute {
-            write!(f, [attribute.format()])?;
+        if let Some(assertion) = assertion {
+            write!(f, [assertion.format()])?;
         }
 
         Ok(())

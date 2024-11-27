@@ -1,9 +1,11 @@
+use crate::lint::nursery::no_restricted_imports::NoRestrictedImportsState::RestrictedImportMessage;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{
-    Deserializable, DeserializableType, DeserializableValue, DeserializationDiagnostic,
+    Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
+use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     inner_string_text, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier,
     AnyJsExpression, AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember,
@@ -16,11 +18,11 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsShorthandNamedImportSpecifier,
     JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator,
 };
-use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange, TokenText};
-use biome_deserialize_macros::Deserializable;
+use biome_rowan::{
+    AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange, TokenText,
+};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-use crate::lint::nursery::no_restricted_imports::NoRestrictedImportsState::RestrictedImportMessage;
 
 const INDEX_BASENAMES: &[&str] = &["index", "mod"];
 
@@ -412,8 +414,6 @@ enum ImportRestrictionCause {
     AllowImportNames,
 }
 
-
-
 /// Specifies whether a specific import is (dis)allowed, and why it is allowed/disallowed.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 struct ImportRestrictionStatus(bool, ImportRestrictionCause);
@@ -536,16 +536,14 @@ impl From<CustomRestrictedImport> for CustomRestrictedImportOptions {
 
 impl Deserializable for CustomRestrictedImport {
     fn deserialize(
-        ctx,
+        ctx: &mut impl DeserializationContext,
         value: &impl DeserializableValue,
         name: &str,
     ) -> Option<Self> {
         if value.visitable_type()? == DeserializableType::Str {
-            biome_deserialize::Deserializable::deserialize(ctx, value, name,)
-                .map(Self::Plain)
+            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::Plain)
         } else {
-            biome_deserialize::Deserializable::deserialize(ctx,value, name)
-                .map(Self::WithOptions)
+            biome_deserialize::Deserializable::deserialize(ctx, value, name).map(Self::WithOptions)
         }
     }
 }
@@ -642,7 +640,7 @@ impl<'a> RestrictedImportVisitor<'a> {
             // #2: **(import("")).then**(...)
             let static_member_expr = current.cast::<JsStaticMemberExpression>()?;
             let member_name = static_member_expr.member().ok()?;
-            if member_name.as_js_name()?.text() != "then" {
+            if member_name.as_js_name()?.syntax().text_trimmed() != "then" {
                 return None;
             }
             current = static_member_expr.syntax().parent()?;
@@ -968,16 +966,17 @@ impl<'a> RestrictedImportVisitor<'a> {
         if status.is_allowed() {
             return None;
         }
-        self.results.push(NoRestrictedImportsState::RestrictedImportMessage {
-            location: import_node.text_trimmed_range(),
-            message: self.restricted_import.get_message_for_restriction(
-                self.import_source,
-                name_or_alias,
-                status.reason(),
-            ),
-            import_source: self.import_source.to_string(),
-            allowed_import_names: self.restricted_import.allow_import_names.clone(),
-        });
+        self.results
+            .push(NoRestrictedImportsState::RestrictedImportMessage {
+                location: import_node.text_trimmed_range(),
+                message: self.restricted_import.get_message_for_restriction(
+                    self.import_source,
+                    name_or_alias,
+                    status.reason(),
+                ),
+                import_source: self.import_source.to_string(),
+                allowed_import_names: self.restricted_import.allow_import_names.clone(),
+            });
         Some(())
     }
 
@@ -1063,7 +1062,6 @@ impl Rule for NoRestrictedImports {
 
         get_restricted_import(module_name.text_trimmed_range(), &import_source_text);
 
-
         match node {
             AnyJsImportLike::JsModuleSource(module_source_node) => {
                 if !restricted_import.has_import_name_patterns() {
@@ -1143,13 +1141,18 @@ impl Rule for NoRestrictedImports {
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         match state {
-            NoRestrictedImportsState::RestrictedImportMessage { import_source, allowed_import_names, location, message } => {
+            NoRestrictedImportsState::RestrictedImportMessage {
+                import_source,
+                allowed_import_names,
+                location,
+                message,
+            } => {
                 let mut rule_diagnostic = RuleDiagnostic::new(
                     rule_category!(),
                     location,
                     markup! {
-                {message}
-            },
+                        {message}
+                    },
                 );
                 if !allowed_import_names.is_empty() {
                     let mut sorted = allowed_import_names.to_vec();
@@ -1168,7 +1171,7 @@ impl Rule for NoRestrictedImports {
                     );
                 }
                 Some(rule_diagnostic)
-            },
+            }
             NoRestrictedImportsState::PackagePrivate {
                 range,
                 path,
@@ -1189,81 +1192,78 @@ impl Rule for NoRestrictedImports {
                 Some(diagnostic)
             }
         }
-
-
     }
 }
 
+fn get_restricted_import(
+    range: TextRange,
+    module_path: &TokenText,
+) -> Option<NoRestrictedImportsState> {
+    if !module_path.starts_with('.') {
+        return None;
+    }
 
-            fn get_restricted_import(
-                range: TextRange,
-                module_path: &TokenText,
-            ) -> Option<NoRestrictedImportsState> {
-            if !module_path.starts_with('.') {
-            return None;
-            }
+    let mut path_parts: Vec<_> = module_path.text().split('/').collect();
+    let mut index_filename = None;
 
-            let mut path_parts: Vec<_> = module_path.text().split('/').collect();
-            let mut index_filename = None;
-
-            // TODO. The implementation could be optimized further by using
-            // `Path::new(module_path.text())` for further inspiration see `use_import_extensions` rule.
-            if let Some(extension) = get_extension(&path_parts) {
-            if !SOURCE_EXTENSIONS.contains(&extension) {
+    // TODO. The implementation could be optimized further by using
+    // `Path::new(module_path.text())` for further inspiration see `use_import_extensions` rule.
+    if let Some(extension) = get_extension(&path_parts) {
+        if !SOURCE_EXTENSIONS.contains(&extension) {
             return None; // Resource files are exempt.
-            }
+        }
 
-            if let Some(basename) = get_basename(&path_parts) {
+        if let Some(basename) = get_basename(&path_parts) {
             if INDEX_BASENAMES.contains(&basename) {
-            // We pop the index file because it shouldn't count as a path,
-            // component, but we store the file name so we can add it to
-            // both the reported path and the suggestion.
-            index_filename = path_parts.last().copied();
-            path_parts.pop();
+                // We pop the index file because it shouldn't count as a path,
+                // component, but we store the file name so we can add it to
+                // both the reported path and the suggestion.
+                index_filename = path_parts.last().copied();
+                path_parts.pop();
             }
-            }
-            }
+        }
+    }
 
-            let is_restricted = path_parts
-            .iter()
-            .filter(|&&part| part != "." && part != "..")
-            .count()
-            > 1;
-            if !is_restricted {
-            return None;
-            }
+    let is_restricted = path_parts
+        .iter()
+        .filter(|&&part| part != "." && part != "..")
+        .count()
+        > 1;
+    if !is_restricted {
+        return None;
+    }
 
-            let mut suggestion_parts = path_parts[..path_parts.len() - 1].to_vec();
+    let mut suggestion_parts = path_parts[..path_parts.len() - 1].to_vec();
 
-            // Push the index file if it exists. This makes sure the reported path
-            // matches the import path exactly.
-            if let Some(index_filename) = index_filename {
-            path_parts.push(index_filename);
+    // Push the index file if it exists. This makes sure the reported path
+    // matches the import path exactly.
+    if let Some(index_filename) = index_filename {
+        path_parts.push(index_filename);
 
-            // Assumes the user probably wants to use an index file that has the
-            // same name as the original.
-            suggestion_parts.push(index_filename);
-            }
+        // Assumes the user probably wants to use an index file that has the
+        // same name as the original.
+        suggestion_parts.push(index_filename);
+    }
 
-            Some(NoRestrictedImportsState::PackagePrivate {
-            range,
-            path: path_parts.join("/"),
-            suggestion: suggestion_parts.join("/"),
-            })
-            }
+    Some(NoRestrictedImportsState::PackagePrivate {
+        range,
+        path: path_parts.join("/"),
+        suggestion: suggestion_parts.join("/"),
+    })
+}
 
-            fn get_basename<'a>(path_parts: &'_ [&'a str]) -> Option<&'a str> {
-                path_parts.last().map(|&part| match part.find('.') {
-                    Some(dot_index) if dot_index > 0 && dot_index < part.len() - 1 => &part[..dot_index],
-                    _ => part,
-                })
-            }
+fn get_basename<'a>(path_parts: &'_ [&'a str]) -> Option<&'a str> {
+    path_parts.last().map(|&part| match part.find('.') {
+        Some(dot_index) if dot_index > 0 && dot_index < part.len() - 1 => &part[..dot_index],
+        _ => part,
+    })
+}
 
-            fn get_extension<'a>(path_parts: &'_ [&'a str]) -> Option<&'a str> {
-                path_parts.last().and_then(|part| match part.find('.') {
-                    Some(dot_index) if dot_index > 0 && dot_index < part.len() - 1 => {
-                        Some(&part[dot_index + 1..])
-                    }
-                    _ => None,
-                })
-            }
+fn get_extension<'a>(path_parts: &'_ [&'a str]) -> Option<&'a str> {
+    path_parts.last().and_then(|part| match part.find('.') {
+        Some(dot_index) if dot_index > 0 && dot_index < part.len() - 1 => {
+            Some(&part[dot_index + 1..])
+        }
+        _ => None,
+    })
+}

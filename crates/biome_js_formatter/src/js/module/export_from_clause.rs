@@ -17,7 +17,7 @@ impl FormatNodeRule<JsExportFromClause> for FormatJsExportFromClause {
             export_as,
             from_token,
             source,
-            attribute,
+            assertion,
             semicolon_token,
         } = node.as_fields();
 
@@ -33,8 +33,8 @@ impl FormatNodeRule<JsExportFromClause> for FormatJsExportFromClause {
 
         write!(f, [from_token.format(), space(), source.format()])?;
 
-        if let Some(attribute) = attribute {
-            write!(f, [attribute.format()])?;
+        if let Some(assertion) = assertion {
+            write!(f, [assertion.format()])?;
         }
 
         FormatStatementSemicolon::new(semicolon_token.as_ref()).fmt(f)

@@ -56,11 +56,11 @@ impl Rule for NoTypeOnlyImportAttributes {
                 | AnyJsExportClause::TsExportAssignmentClause(_)
                 | AnyJsExportClause::TsExportDeclareClause(_) => None,
                 AnyJsExportClause::JsExportFromClause(clause) => Some(RuleState {
-                    assertion_range: clause.attribute()?.range(),
+                    assertion_range: clause.assertion()?.range(),
                     type_token_range: clause.type_token()?.text_trimmed_range(),
                 }),
                 AnyJsExportClause::JsExportNamedFromClause(clause) => {
-                    let assertion_range = clause.attribute()?.range();
+                    let assertion_range = clause.assertion()?.range();
                     let type_token = clause.type_token().or_else(|| {
                         clause
                             .specifiers()
@@ -77,7 +77,7 @@ impl Rule for NoTypeOnlyImportAttributes {
             AnyJsModuleItem::JsImport(import) => match import.import_clause().ok()? {
                 AnyJsImportClause::JsImportBareClause(_) => None,
                 AnyJsImportClause::JsImportCombinedClause(clause) => {
-                    let assertion_range = clause.attribute()?.range();
+                    let assertion_range = clause.assertion()?.range();
                     let type_token = find_first_type_token(
                         clause.specifier().ok()?.as_js_named_import_specifiers()?,
                     )?;
@@ -87,11 +87,11 @@ impl Rule for NoTypeOnlyImportAttributes {
                     })
                 }
                 AnyJsImportClause::JsImportDefaultClause(clause) => Some(RuleState {
-                    assertion_range: clause.attribute()?.range(),
+                    assertion_range: clause.assertion()?.range(),
                     type_token_range: clause.type_token()?.text_trimmed_range(),
                 }),
                 AnyJsImportClause::JsImportNamedClause(clause) => {
-                    let assertion_range = clause.attribute()?.range();
+                    let assertion_range = clause.assertion()?.range();
                     let type_token = clause
                         .type_token()
                         .or_else(|| find_first_type_token(&clause.named_specifiers().ok()?))?;
@@ -101,7 +101,7 @@ impl Rule for NoTypeOnlyImportAttributes {
                     })
                 }
                 AnyJsImportClause::JsImportNamespaceClause(clause) => Some(RuleState {
-                    assertion_range: clause.attribute()?.range(),
+                    assertion_range: clause.assertion()?.range(),
                     type_token_range: clause.type_token()?.text_trimmed_range(),
                 }),
             },

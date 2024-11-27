@@ -561,7 +561,7 @@ fn parse_import_attribute(p: &mut JsParser) -> ParsedSyntax {
     ImportAssertionList::default().parse_list(p);
     p.expect(T!['}']);
 
-    Present(m.complete(p, JS_IMPORT_ATTRIBUTE))
+    Present(m.complete(p, JS_IMPORT_ASSERTION))
 }
 
 #[derive(Default)]
@@ -573,7 +573,7 @@ impl ParseSeparatedList for ImportAssertionList {
     type Kind = JsSyntaxKind;
     type Parser<'source> = JsParser<'source>;
 
-    const LIST_KIND: Self::Kind = JS_IMPORT_ATTRIBUTE_ENTRY_LIST;
+    const LIST_KIND: Self::Kind = JS_IMPORT_ASSERTION_ENTRY_LIST;
 
     fn parse_element(&mut self, p: &mut JsParser) -> ParsedSyntax {
         parse_import_attribute_entry(p, &mut self.assertion_keys)
@@ -587,7 +587,7 @@ impl ParseSeparatedList for ImportAssertionList {
         parsed_element.or_recover_with_token_set(
             p,
             &ParseRecoveryTokenSet::new(
-                JS_BOGUS_IMPORT_ATTRIBUTE_ENTRY,
+                JS_BOGUS_IMPORT_ASSERTION_ENTRY,
                 STMT_RECOVERY_SET.union(token_set![T![,], T!['}']]),
             )
             .enable_recovery_on_line_break(),
@@ -655,7 +655,7 @@ fn parse_import_attribute_entry(
     p.expect(T![:]);
     p.expect(JS_STRING_LITERAL);
 
-    let mut entry = m.complete(p, JS_IMPORT_ATTRIBUTE_ENTRY);
+    let mut entry = m.complete(p, JS_IMPORT_ASSERTION_ENTRY);
 
     if !valid {
         entry.change_to_bogus(p);

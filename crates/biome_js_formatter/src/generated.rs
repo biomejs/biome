@@ -2572,83 +2572,83 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImport {
         FormatOwnedWithRule::new(self, crate::js::module::import::FormatJsImport::default())
     }
 }
-impl FormatRule<biome_js_syntax::JsImportAttribute>
-    for crate::js::module::import_attribute::FormatJsImportAttribute
+impl FormatRule<biome_js_syntax::JsImportAssertion>
+    for crate::js::module::import_assertion::FormatJsImportAssertion
 {
     type Context = JsFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_js_syntax::JsImportAttribute,
+        node: &biome_js_syntax::JsImportAssertion,
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_js_syntax::JsImportAttribute>::fmt(self, node, f)
+        FormatNodeRule::<biome_js_syntax::JsImportAssertion>::fmt(self, node, f)
     }
 }
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAttribute {
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertion {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportAttribute,
-        crate::js::module::import_attribute::FormatJsImportAttribute,
+        biome_js_syntax::JsImportAssertion,
+        crate::js::module::import_assertion::FormatJsImportAssertion,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::import_attribute::FormatJsImportAttribute::default(),
+            crate::js::module::import_assertion::FormatJsImportAssertion::default(),
         )
     }
 }
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAttribute {
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAssertion {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportAttribute,
-        crate::js::module::import_attribute::FormatJsImportAttribute,
+        biome_js_syntax::JsImportAssertion,
+        crate::js::module::import_assertion::FormatJsImportAssertion,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::import_attribute::FormatJsImportAttribute::default(),
+            crate::js::module::import_assertion::FormatJsImportAssertion::default(),
         )
     }
 }
-impl FormatRule<biome_js_syntax::JsImportAttributeEntry>
-    for crate::js::module::import_attribute_entry::FormatJsImportAttributeEntry
+impl FormatRule<biome_js_syntax::JsImportAssertionEntry>
+    for crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry
 {
     type Context = JsFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_js_syntax::JsImportAttributeEntry,
+        node: &biome_js_syntax::JsImportAssertionEntry,
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
-        FormatNodeRule::<biome_js_syntax::JsImportAttributeEntry>::fmt(self, node, f)
+        FormatNodeRule::<biome_js_syntax::JsImportAssertionEntry>::fmt(self, node, f)
     }
 }
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAttributeEntry {
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntry {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportAttributeEntry,
-        crate::js::module::import_attribute_entry::FormatJsImportAttributeEntry,
+        biome_js_syntax::JsImportAssertionEntry,
+        crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::module::import_attribute_entry::FormatJsImportAttributeEntry::default(),
+            crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry::default(),
         )
     }
 }
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAttributeEntry {
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntry {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportAttributeEntry,
-        crate::js::module::import_attribute_entry::FormatJsImportAttributeEntry,
+        biome_js_syntax::JsImportAssertionEntry,
+        crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::module::import_attribute_entry::FormatJsImportAttributeEntry::default(),
+            crate::js::module::import_assertion_entry::FormatJsImportAssertionEntry::default(),
         )
     }
 }
@@ -10861,25 +10861,25 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsExportNamedSpecifierList
         FormatOwnedWithRule :: new (self , crate :: js :: lists :: export_named_specifier_list :: FormatJsExportNamedSpecifierList :: default ())
     }
 }
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAttributeEntryList {
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntryList {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsImportAttributeEntryList,
-        crate::js::lists::import_attribute_entry_list::FormatJsImportAttributeEntryList,
+        biome_js_syntax::JsImportAssertionEntryList,
+        crate::js::lists::import_assertion_entry_list::FormatJsImportAssertionEntryList,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule :: new (self , crate :: js :: lists :: import_attribute_entry_list :: FormatJsImportAttributeEntryList :: default ())
+        FormatRefWithRule :: new (self , crate :: js :: lists :: import_assertion_entry_list :: FormatJsImportAssertionEntryList :: default ())
     }
 }
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAttributeEntryList {
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsImportAssertionEntryList {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsImportAttributeEntryList,
-        crate::js::lists::import_attribute_entry_list::FormatJsImportAttributeEntryList,
+        biome_js_syntax::JsImportAssertionEntryList,
+        crate::js::lists::import_assertion_entry_list::FormatJsImportAssertionEntryList,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule :: new (self , crate :: js :: lists :: import_attribute_entry_list :: FormatJsImportAttributeEntryList :: default ())
+        FormatOwnedWithRule :: new (self , crate :: js :: lists :: import_assertion_entry_list :: FormatJsImportAssertionEntryList :: default ())
     }
 }
 impl AsFormat<JsFormatContext> for biome_js_syntax::JsMethodModifierList {
@@ -11709,38 +11709,38 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusExpression {
         )
     }
 }
-impl FormatRule<biome_js_syntax::JsBogusImportAttributeEntry>
-    for crate::js::bogus::bogus_import_attribute_entry::FormatJsBogusImportAttributeEntry
+impl FormatRule<biome_js_syntax::JsBogusImportAssertionEntry>
+    for crate::js::bogus::bogus_import_assertion_entry::FormatJsBogusImportAssertionEntry
 {
     type Context = JsFormatContext;
     #[inline(always)]
     fn fmt(
         &self,
-        node: &biome_js_syntax::JsBogusImportAttributeEntry,
+        node: &biome_js_syntax::JsBogusImportAssertionEntry,
         f: &mut JsFormatter,
     ) -> FormatResult<()> {
-        FormatBogusNodeRule::<biome_js_syntax::JsBogusImportAttributeEntry>::fmt(self, node, f)
+        FormatBogusNodeRule::<biome_js_syntax::JsBogusImportAssertionEntry>::fmt(self, node, f)
     }
 }
-impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusImportAttributeEntry {
+impl AsFormat<JsFormatContext> for biome_js_syntax::JsBogusImportAssertionEntry {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::JsBogusImportAttributeEntry,
-        crate::js::bogus::bogus_import_attribute_entry::FormatJsBogusImportAttributeEntry,
+        biome_js_syntax::JsBogusImportAssertionEntry,
+        crate::js::bogus::bogus_import_assertion_entry::FormatJsBogusImportAssertionEntry,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatRefWithRule :: new (self , crate :: js :: bogus :: bogus_import_attribute_entry :: FormatJsBogusImportAttributeEntry :: default ())
+        FormatRefWithRule :: new (self , crate :: js :: bogus :: bogus_import_assertion_entry :: FormatJsBogusImportAssertionEntry :: default ())
     }
 }
-impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusImportAttributeEntry {
+impl IntoFormat<JsFormatContext> for biome_js_syntax::JsBogusImportAssertionEntry {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::JsBogusImportAttributeEntry,
-        crate::js::bogus::bogus_import_attribute_entry::FormatJsBogusImportAttributeEntry,
+        biome_js_syntax::JsBogusImportAssertionEntry,
+        crate::js::bogus::bogus_import_assertion_entry::FormatJsBogusImportAssertionEntry,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
-        FormatOwnedWithRule :: new (self , crate :: js :: bogus :: bogus_import_attribute_entry :: FormatJsBogusImportAttributeEntry :: default ())
+        FormatOwnedWithRule :: new (self , crate :: js :: bogus :: bogus_import_assertion_entry :: FormatJsBogusImportAssertionEntry :: default ())
     }
 }
 impl FormatRule<biome_js_syntax::JsBogusMember>
@@ -12596,30 +12596,30 @@ impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsFunctionBody {
         )
     }
 }
-impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAttributeEntry {
+impl AsFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAssertionEntry {
     type Format<'a> = FormatRefWithRule<
         'a,
-        biome_js_syntax::AnyJsImportAttributeEntry,
-        crate::js::any::import_attribute_entry::FormatAnyJsImportAttributeEntry,
+        biome_js_syntax::AnyJsImportAssertionEntry,
+        crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry,
     >;
     fn format(&self) -> Self::Format<'_> {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatRefWithRule::new(
             self,
-            crate::js::any::import_attribute_entry::FormatAnyJsImportAttributeEntry::default(),
+            crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry::default(),
         )
     }
 }
-impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAttributeEntry {
+impl IntoFormat<JsFormatContext> for biome_js_syntax::AnyJsImportAssertionEntry {
     type Format = FormatOwnedWithRule<
-        biome_js_syntax::AnyJsImportAttributeEntry,
-        crate::js::any::import_attribute_entry::FormatAnyJsImportAttributeEntry,
+        biome_js_syntax::AnyJsImportAssertionEntry,
+        crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry,
     >;
     fn into_format(self) -> Self::Format {
         #![allow(clippy::default_constructed_unit_structs)]
         FormatOwnedWithRule::new(
             self,
-            crate::js::any::import_attribute_entry::FormatAnyJsImportAttributeEntry::default(),
+            crate::js::any::import_assertion_entry::FormatAnyJsImportAssertionEntry::default(),
         )
     }
 }

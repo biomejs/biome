@@ -5,7 +5,7 @@ pub(crate) mod bogus;
 pub(crate) mod bogus_assignment;
 pub(crate) mod bogus_binding;
 pub(crate) mod bogus_expression;
-pub(crate) mod bogus_import_attribute_entry;
+pub(crate) mod bogus_import_assertion_entry;
 pub(crate) mod bogus_member;
 pub(crate) mod bogus_named_import_specifier;
 pub(crate) mod bogus_parameter;

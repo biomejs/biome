@@ -1043,7 +1043,7 @@ pub fn js_export_from_clause(
         source,
         type_token: None,
         export_as: None,
-        attribute: None,
+        assertion: None,
         semicolon_token: None,
     }
 }
@@ -1053,7 +1053,7 @@ pub struct JsExportFromClauseBuilder {
     source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
     export_as: Option<JsExportAsClause>,
-    attribute: Option<JsImportAttribute>,
+    assertion: Option<JsImportAssertion>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl JsExportFromClauseBuilder {
@@ -1065,8 +1065,8 @@ impl JsExportFromClauseBuilder {
         self.export_as = Some(export_as);
         self
     }
-    pub fn with_attribute(mut self, attribute: JsImportAttribute) -> Self {
-        self.attribute = Some(attribute);
+    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
+        self.assertion = Some(assertion);
         self
     }
     pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
@@ -1083,7 +1083,7 @@ impl JsExportFromClauseBuilder {
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
-                self.attribute
+                self.assertion
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.semicolon_token
                     .map(|token| SyntaxElement::Token(token)),
@@ -1148,7 +1148,7 @@ pub fn js_export_named_from_clause(
         from_token,
         source,
         type_token: None,
-        attribute: None,
+        assertion: None,
         semicolon_token: None,
     }
 }
@@ -1159,7 +1159,7 @@ pub struct JsExportNamedFromClauseBuilder {
     from_token: SyntaxToken,
     source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
-    attribute: Option<JsImportAttribute>,
+    assertion: Option<JsImportAssertion>,
     semicolon_token: Option<SyntaxToken>,
 }
 impl JsExportNamedFromClauseBuilder {
@@ -1167,8 +1167,8 @@ impl JsExportNamedFromClauseBuilder {
         self.type_token = Some(type_token);
         self
     }
-    pub fn with_attribute(mut self, attribute: JsImportAttribute) -> Self {
-        self.attribute = Some(attribute);
+    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
+        self.assertion = Some(assertion);
         self
     }
     pub fn with_semicolon_token(mut self, semicolon_token: SyntaxToken) -> Self {
@@ -1185,7 +1185,7 @@ impl JsExportNamedFromClauseBuilder {
                 Some(SyntaxElement::Token(self.r_curly_token)),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
-                self.attribute
+                self.assertion
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
                 self.semicolon_token
                     .map(|token| SyntaxElement::Token(token)),
@@ -1987,29 +1987,29 @@ impl JsImportBuilder {
         ))
     }
 }
-pub fn js_import_attribute(
+pub fn js_import_assertion(
     with_token: SyntaxToken,
     l_curly_token: SyntaxToken,
-    attributes: JsImportAttributeEntryList,
+    assertions: JsImportAssertionEntryList,
     r_curly_token: SyntaxToken,
-) -> JsImportAttribute {
-    JsImportAttribute::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_IMPORT_ATTRIBUTE,
+) -> JsImportAssertion {
+    JsImportAssertion::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_IMPORT_ASSERTION,
         [
             Some(SyntaxElement::Token(with_token)),
             Some(SyntaxElement::Token(l_curly_token)),
-            Some(SyntaxElement::Node(attributes.into_syntax())),
+            Some(SyntaxElement::Node(assertions.into_syntax())),
             Some(SyntaxElement::Token(r_curly_token)),
         ],
     ))
 }
-pub fn js_import_attribute_entry(
+pub fn js_import_assertion_entry(
     key_token: SyntaxToken,
     colon_token: SyntaxToken,
     value_token: SyntaxToken,
-) -> JsImportAttributeEntry {
-    JsImportAttributeEntry::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_IMPORT_ATTRIBUTE_ENTRY,
+) -> JsImportAssertionEntry {
+    JsImportAssertionEntry::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY,
         [
             Some(SyntaxElement::Token(key_token)),
             Some(SyntaxElement::Token(colon_token)),
@@ -2020,16 +2020,16 @@ pub fn js_import_attribute_entry(
 pub fn js_import_bare_clause(source: AnyJsModuleSource) -> JsImportBareClauseBuilder {
     JsImportBareClauseBuilder {
         source,
-        attribute: None,
+        assertion: None,
     }
 }
 pub struct JsImportBareClauseBuilder {
     source: AnyJsModuleSource,
-    attribute: Option<JsImportAttribute>,
+    assertion: Option<JsImportAssertion>,
 }
 impl JsImportBareClauseBuilder {
-    pub fn with_attribute(mut self, attribute: JsImportAttribute) -> Self {
-        self.attribute = Some(attribute);
+    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
+        self.assertion = Some(assertion);
         self
     }
     pub fn build(self) -> JsImportBareClause {
@@ -2037,7 +2037,7 @@ impl JsImportBareClauseBuilder {
             JsSyntaxKind::JS_IMPORT_BARE_CLAUSE,
             [
                 Some(SyntaxElement::Node(self.source.into_syntax())),
-                self.attribute
+                self.assertion
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
@@ -2068,7 +2068,7 @@ pub fn js_import_combined_clause(
         specifier,
         from_token,
         source,
-        attribute: None,
+        assertion: None,
     }
 }
 pub struct JsImportCombinedClauseBuilder {
@@ -2077,11 +2077,11 @@ pub struct JsImportCombinedClauseBuilder {
     specifier: AnyJsCombinedSpecifier,
     from_token: SyntaxToken,
     source: AnyJsModuleSource,
-    attribute: Option<JsImportAttribute>,
+    assertion: Option<JsImportAssertion>,
 }
 impl JsImportCombinedClauseBuilder {
-    pub fn with_attribute(mut self, attribute: JsImportAttribute) -> Self {
-        self.attribute = Some(attribute);
+    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
+        self.assertion = Some(assertion);
         self
     }
     pub fn build(self) -> JsImportCombinedClause {
@@ -2093,7 +2093,7 @@ impl JsImportCombinedClauseBuilder {
                 Some(SyntaxElement::Node(self.specifier.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
-                self.attribute
+                self.assertion
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
@@ -2109,7 +2109,7 @@ pub fn js_import_default_clause(
         from_token,
         source,
         type_token: None,
-        attribute: None,
+        assertion: None,
     }
 }
 pub struct JsImportDefaultClauseBuilder {
@@ -2117,15 +2117,15 @@ pub struct JsImportDefaultClauseBuilder {
     from_token: SyntaxToken,
     source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
-    attribute: Option<JsImportAttribute>,
+    assertion: Option<JsImportAssertion>,
 }
 impl JsImportDefaultClauseBuilder {
     pub fn with_type_token(mut self, type_token: SyntaxToken) -> Self {
         self.type_token = Some(type_token);
         self
     }
-    pub fn with_attribute(mut self, attribute: JsImportAttribute) -> Self {
-        self.attribute = Some(attribute);
+    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
+        self.assertion = Some(assertion);
         self
     }
     pub fn build(self) -> JsImportDefaultClause {
@@ -2136,7 +2136,7 @@ impl JsImportDefaultClauseBuilder {
                 Some(SyntaxElement::Node(self.default_specifier.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
-                self.attribute
+                self.assertion
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
@@ -2166,7 +2166,7 @@ pub fn js_import_named_clause(
         from_token,
         source,
         type_token: None,
-        attribute: None,
+        assertion: None,
     }
 }
 pub struct JsImportNamedClauseBuilder {
@@ -2174,15 +2174,15 @@ pub struct JsImportNamedClauseBuilder {
     from_token: SyntaxToken,
     source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
-    attribute: Option<JsImportAttribute>,
+    assertion: Option<JsImportAssertion>,
 }
 impl JsImportNamedClauseBuilder {
     pub fn with_type_token(mut self, type_token: SyntaxToken) -> Self {
         self.type_token = Some(type_token);
         self
     }
-    pub fn with_attribute(mut self, attribute: JsImportAttribute) -> Self {
-        self.attribute = Some(attribute);
+    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
+        self.assertion = Some(assertion);
         self
     }
     pub fn build(self) -> JsImportNamedClause {
@@ -2193,7 +2193,7 @@ impl JsImportNamedClauseBuilder {
                 Some(SyntaxElement::Node(self.named_specifiers.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
-                self.attribute
+                self.assertion
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
@@ -2209,7 +2209,7 @@ pub fn js_import_namespace_clause(
         from_token,
         source,
         type_token: None,
-        attribute: None,
+        assertion: None,
     }
 }
 pub struct JsImportNamespaceClauseBuilder {
@@ -2217,15 +2217,15 @@ pub struct JsImportNamespaceClauseBuilder {
     from_token: SyntaxToken,
     source: AnyJsModuleSource,
     type_token: Option<SyntaxToken>,
-    attribute: Option<JsImportAttribute>,
+    assertion: Option<JsImportAssertion>,
 }
 impl JsImportNamespaceClauseBuilder {
     pub fn with_type_token(mut self, type_token: SyntaxToken) -> Self {
         self.type_token = Some(type_token);
         self
     }
-    pub fn with_attribute(mut self, attribute: JsImportAttribute) -> Self {
-        self.attribute = Some(attribute);
+    pub fn with_assertion(mut self, assertion: JsImportAssertion) -> Self {
+        self.assertion = Some(assertion);
         self
     }
     pub fn build(self) -> JsImportNamespaceClause {
@@ -2236,7 +2236,7 @@ impl JsImportNamespaceClauseBuilder {
                 Some(SyntaxElement::Node(self.namespace_specifier.into_syntax())),
                 Some(SyntaxElement::Token(self.from_token)),
                 Some(SyntaxElement::Node(self.source.into_syntax())),
-                self.attribute
+                self.assertion
                     .map(|token| SyntaxElement::Node(token.into_syntax())),
             ],
         ))
@@ -5155,7 +5155,7 @@ impl TsImportTypeArgumentsBuilder {
     }
 }
 pub fn ts_import_type_assertion(
-    assertion_kind_token: SyntaxToken,
+    with_token: SyntaxToken,
     colon_token: SyntaxToken,
     l_curly_token: SyntaxToken,
     assertions: JsImportAssertionEntryList,
@@ -5164,7 +5164,7 @@ pub fn ts_import_type_assertion(
     TsImportTypeAssertion::unwrap_cast(SyntaxNode::new_detached(
         JsSyntaxKind::TS_IMPORT_TYPE_ASSERTION,
         [
-            Some(SyntaxElement::Token(assertion_kind_token)),
+            Some(SyntaxElement::Token(with_token)),
             Some(SyntaxElement::Token(colon_token)),
             Some(SyntaxElement::Token(l_curly_token)),
             Some(SyntaxElement::Node(assertions.into_syntax())),
@@ -6901,9 +6901,9 @@ where
         }),
     ))
 }
-pub fn js_import_attribute_entry_list<I, S>(items: I, separators: S) -> JsImportAttributeEntryList
+pub fn js_import_assertion_entry_list<I, S>(items: I, separators: S) -> JsImportAssertionEntryList
 where
-    I: IntoIterator<Item = AnyJsImportAttributeEntry>,
+    I: IntoIterator<Item = AnyJsImportAssertionEntry>,
     I::IntoIter: ExactSizeIterator,
     S: IntoIterator<Item = JsSyntaxToken>,
     S::IntoIter: ExactSizeIterator,
@@ -6911,8 +6911,8 @@ where
     let mut items = items.into_iter();
     let mut separators = separators.into_iter();
     let length = items.len() + separators.len();
-    JsImportAttributeEntryList::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_IMPORT_ATTRIBUTE_ENTRY_LIST,
+    JsImportAssertionEntryList::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_IMPORT_ASSERTION_ENTRY_LIST,
         (0..length).map(|index| {
             if index % 2 == 0 {
                 Some(items.next()?.into_syntax().into())
@@ -7421,13 +7421,13 @@ where
         slots,
     ))
 }
-pub fn js_bogus_import_attribute_entry<I>(slots: I) -> JsBogusImportAttributeEntry
+pub fn js_bogus_import_assertion_entry<I>(slots: I) -> JsBogusImportAssertionEntry
 where
     I: IntoIterator<Item = Option<SyntaxElement>>,
     I::IntoIter: ExactSizeIterator,
 {
-    JsBogusImportAttributeEntry::unwrap_cast(SyntaxNode::new_detached(
-        JsSyntaxKind::JS_BOGUS_IMPORT_ATTRIBUTE_ENTRY,
+    JsBogusImportAssertionEntry::unwrap_cast(SyntaxNode::new_detached(
+        JsSyntaxKind::JS_BOGUS_IMPORT_ASSERTION_ENTRY,
         slots,
     ))
 }
