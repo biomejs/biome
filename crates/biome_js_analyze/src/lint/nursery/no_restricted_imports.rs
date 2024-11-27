@@ -1,11 +1,9 @@
-use crate::lint::nursery::no_restricted_imports::NoRestrictedImportsState::RestrictedImportMessage;
 use biome_analyze::context::RuleContext;
 use biome_analyze::{declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_deserialize::{
     Deserializable, DeserializableType, DeserializableValue, DeserializationContext,
 };
-use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
     inner_string_text, AnyJsArrowFunctionParameters, AnyJsBindingPattern, AnyJsCombinedSpecifier,
     AnyJsExpression, AnyJsImportLike, AnyJsNamedImportSpecifier, AnyJsObjectBindingPatternMember,
@@ -18,15 +16,9 @@ use biome_js_syntax::{
     JsObjectBindingPatternShorthandProperty, JsShorthandNamedImportSpecifier,
     JsStaticMemberExpression, JsSyntaxKind, JsVariableDeclarator,
 };
-use biome_rowan::{
-    AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange, TokenText,
-};
+use biome_rowan::{AstNode, AstSeparatedList, SyntaxNode, SyntaxNodeCast, SyntaxToken, TextRange};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-
-const INDEX_BASENAMES: &[&str] = &["index", "mod"];
-
-const SOURCE_EXTENSIONS: &[&str] = &["js", "ts", "cjs", "cts", "mjs", "mts", "jsx", "tsx"];
 
 declare_lint_rule! {
     /// Disallow specified modules when loaded by import or require.
@@ -285,77 +277,6 @@ declare_lint_rule! {
     /// }
     /// ```
     ///
-    /// ### `paths`
-    ///
-    /// A map where every key represents a path that is not allowed to be
-    /// imported. The corresponding value is the message to use when reporting
-    /// violations.
-    ///
-    /// ### `restrictPackagePrivate`
-    ///
-    /// Whether imports of "package private" exports should be restricted.
-    ///
-    /// Allowed values are `"all"` and `"none"`:
-    ///
-    /// If `"all"` is specified, all exported symbols, such as types, functions
-    /// or other things that may be exported, are considered to be "package
-    /// private". This means that modules that reside in the same directory, as
-    /// well as submodules of those "sibling" modules, are allowed to import
-    /// them, while any other modules that are further away in the file system
-    /// are restricted from importing them. A symbol's visibility may be
-    /// extended by re-exporting from an index file.
-    ///
-    /// If `"none"` is used (the default), no restrictions are applied.
-    ///
-    /// Notes:
-    ///
-    /// * This option only applies to relative imports. External dependencies
-    ///   as well as TypeScript aliases are exempted.
-    /// * This option only applies to imports for JavaScript and TypeScript
-    ///   files. Imports for resources such as images or CSS files are exempted.
-    ///
-    /// Source: https://github.com/uhyo/eslint-plugin-import-access
-    ///
-    /// #### Examples (Invalid)
-    ///
-    /// ```js,expect_diagnostic
-    /// // Attempt to import from `foo.js` from outside its `sub` module.
-    /// import { fooPackageVariable } from "./sub/foo.js";
-    /// ```
-    /// ```js,expect_diagnostic
-    /// // Attempt to import from `bar.ts` from outside its `aunt` module.
-    /// import { barPackageVariable } from "../aunt/bar.ts";
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// // Assumed to resolve to a JS/TS file.
-    /// import { fooPackageVariable } from "./sub/foo";
-    /// ```
-    ///
-    /// ```js,expect_diagnostic
-    /// // If the `sub/foo` module is inaccessible, so is its index file.
-    /// import { fooPackageVariable } from "./sub/foo/index.js";
-    /// ```
-    ///
-    /// #### Examples (Valid)
-    ///
-    /// ```js
-    /// // Imports within the same module are always allowed.
-    /// import { fooPackageVariable } from "./foo.js";
-    ///
-    /// // Resources (anything other than JS/TS files) are exempt.
-    /// import { barResource } from "../aunt/bar.png";
-    ///
-    /// // A parent index file is accessible like other modules.
-    /// import { internal } from "../../index.js";
-    ///
-    /// // If the `sub` module is accessible, so is its index file.
-    /// import { subPackageVariable } from "./sub/index.js";
-    ///
-    /// // Library imports are exempt.
-    /// import useAsync from "react-use/lib/useAsync";
-    /// ```
-    ///
     /// #### Invalid
     ///
     /// ```js,expect_diagnostic,use_options
@@ -373,8 +294,7 @@ declare_lint_rule! {
         language: "js",
         sources: &[
             RuleSource::Eslint("no-restricted-imports"),
-            RuleSource::EslintTypeScript("no-restricted-imports"),
-            RuleSource::EslintImportAccess("eslint-plugin-import-access")
+            RuleSource::EslintTypeScript("no-restricted-imports")
         ],
         recommended: false,
     }
@@ -397,10 +317,6 @@ pub struct RestrictedImportsOptions {
     /// A list of import paths that should trigger the rule.
     #[serde(skip_serializing_if = "FxHashMap::is_empty")]
     paths: FxHashMap<Box<str>, CustomRestrictedImport>,
-
-    /// Whether to place restrictions on the importing of "package private"
-    /// symbols.
-    restrict_package_private: PackagePrivateRestriction,
 }
 
 /// Specifies why a specific import is allowed or disallowed.
@@ -551,7 +467,7 @@ impl Deserializable for CustomRestrictedImport {
 struct RestrictedImportVisitor<'a> {
     import_source: &'a str,
     restricted_import: CustomRestrictedImportOptions,
-    results: Vec<NoRestrictedImportsState>,
+    results: Vec<RestrictedImportMessage>,
 }
 
 impl<'a> RestrictedImportVisitor<'a> {
@@ -966,17 +882,16 @@ impl<'a> RestrictedImportVisitor<'a> {
         if status.is_allowed() {
             return None;
         }
-        self.results
-            .push(NoRestrictedImportsState::RestrictedImportMessage {
-                location: import_node.text_trimmed_range(),
-                message: self.restricted_import.get_message_for_restriction(
-                    self.import_source,
-                    name_or_alias,
-                    status.reason(),
-                ),
-                import_source: self.import_source.to_string(),
-                allowed_import_names: self.restricted_import.allow_import_names.clone(),
-            });
+        self.results.push(RestrictedImportMessage {
+            location: import_node.text_trimmed_range(),
+            message: self.restricted_import.get_message_for_restriction(
+                self.import_source,
+                name_or_alias,
+                status.reason(),
+            ),
+            import_source: self.import_source.to_string(),
+            allowed_import_names: self.restricted_import.allow_import_names.clone(),
+        });
         Some(())
     }
 
@@ -1005,68 +920,41 @@ impl<'a> RestrictedImportVisitor<'a> {
     }
 }
 
-/// Allowed values for the `restrictPackagePrivate` option.
-#[derive(Clone, Copy, Debug, Default, Deserialize, Deserializable, Eq, PartialEq, Serialize)]
-#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub enum PackagePrivateRestriction {
-    /// All exported symbols are assumed to be package private and may only be
-    /// imported from sibling modules and their submodules.
-    All,
-
-    /// No restrictions are applied on importing package private symbols.
-    #[default]
-    None,
-}
-
-pub enum NoRestrictedImportsState {
-    RestrictedImportMessage {
-        location: TextRange,
-        message: String,
-        import_source: String,
-        allowed_import_names: Box<[Box<str>]>,
-    },
-    PackagePrivate {
-        range: TextRange,
-
-        /// The path that is being restricted.
-        path: String,
-
-        /// Suggestion from which to import instead.
-        suggestion: String,
-    },
+pub struct RestrictedImportMessage {
+    location: TextRange,
+    message: String,
+    import_source: String,
+    allowed_import_names: Box<[Box<str>]>,
 }
 
 impl Rule for NoRestrictedImports {
     type Query = Ast<AnyJsImportLike>;
-    type State = NoRestrictedImportsState;
+    type State = RestrictedImportMessage;
     type Signals = Vec<Self::State>;
     type Options = Box<RestrictedImportsOptions>;
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         if node.is_in_ts_module_declaration() {
-            return [].into();
+            return Vec::new();
         }
         let Some(module_name) = node.module_name_token() else {
-            return vec![];
+            return Vec::new();
         };
         let import_source_text = inner_string_text(&module_name);
         let import_source = import_source_text.text();
 
         let Some(restricted_import_settings) = ctx.options().paths.get(import_source) else {
-            return vec![];
+            return Vec::new();
         };
         let restricted_import: CustomRestrictedImportOptions =
             restricted_import_settings.clone().into();
-
-        get_restricted_import(module_name.text_trimmed_range(), &import_source_text);
 
         match node {
             AnyJsImportLike::JsModuleSource(module_source_node) => {
                 if !restricted_import.has_import_name_patterns() {
                     // All imports disallowed, add diagnostic to the import source
-                    vec![NoRestrictedImportsState::RestrictedImportMessage {
+                    vec![RestrictedImportMessage {
                         location: module_name.text_trimmed_range(),
                         message: restricted_import.get_message_for_restriction(
                             import_source,
@@ -1094,7 +982,7 @@ impl Rule for NoRestrictedImports {
                 // be difficult to distinguish) or a collection of named imports.
                 if !restricted_import.has_import_name_patterns() {
                     // All imports disallowed, add diagnostic to the import source
-                    vec![NoRestrictedImportsState::RestrictedImportMessage {
+                    vec![RestrictedImportMessage {
                         location: module_name.text_trimmed_range(),
                         message: restricted_import.get_message_for_restriction(
                             import_source,
@@ -1122,7 +1010,7 @@ impl Rule for NoRestrictedImports {
                 if status.is_forbidden() {
                     // require() calls can only import the default import, so
                     // there are no individual import names to check or report on.
-                    vec![NoRestrictedImportsState::RestrictedImportMessage {
+                    vec![RestrictedImportMessage {
                         location: module_name.text_trimmed_range(),
                         message: restricted_import.get_message_for_restriction(
                             import_source,
@@ -1140,130 +1028,36 @@ impl Rule for NoRestrictedImports {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
-        match state {
-            NoRestrictedImportsState::RestrictedImportMessage {
-                import_source,
-                allowed_import_names,
-                location,
-                message,
-            } => {
-                let mut rule_diagnostic = RuleDiagnostic::new(
-                    rule_category!(),
-                    location,
-                    markup! {
-                        {message}
-                    },
-                );
-                if !allowed_import_names.is_empty() {
-                    let mut sorted = allowed_import_names.to_vec();
-                    sorted.sort();
-                    let allowed_import_names = sorted.into_iter().map(|name| {
-                        if &*name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
-                            "Side-effect only import".into()
-                        } else {
-                            name
-                        }
-                    });
+        let RestrictedImportMessage {
+            import_source,
+            allowed_import_names,
+            location,
+            message,
+        } = state;
 
-                    rule_diagnostic = rule_diagnostic.footer_list(
+        let mut rule_diagnostic = RuleDiagnostic::new(
+            rule_category!(),
+            location,
+            markup! {
+                {message}
+            },
+        );
+        if !allowed_import_names.is_empty() {
+            let mut sorted = allowed_import_names.to_vec();
+            sorted.sort();
+            let allowed_import_names = sorted.into_iter().map(|name| {
+                if &*name == RestrictedImportVisitor::BARE_IMPORT_ALIAS {
+                    "Side-effect only import".into()
+                } else {
+                    name
+                }
+            });
+
+            rule_diagnostic = rule_diagnostic.footer_list(
                         markup! { "Only the following imports from "<Emphasis>"'"{import_source}"'"</Emphasis>" are allowed:" },
                         allowed_import_names,
                     );
-                }
-                Some(rule_diagnostic)
-            }
-            NoRestrictedImportsState::PackagePrivate {
-                range,
-                path,
-                suggestion,
-            } => {
-                let diagnostic = RuleDiagnostic::new(
-                    rule_category!(),
-                    *range,
-                    markup! {
-                        "Importing package private symbols is disallowed from outside the module directory."
-                    },
-                )
-                    .note(markup! {
-                    "Please import from "<Emphasis>{suggestion}</Emphasis>" instead "
-                    "(you may need to re-export the symbol(s) from "<Emphasis>{path}</Emphasis>")."
-                });
-
-                Some(diagnostic)
-            }
         }
+        Some(rule_diagnostic)
     }
-}
-
-fn get_restricted_import(
-    range: TextRange,
-    module_path: &TokenText,
-) -> Option<NoRestrictedImportsState> {
-    if !module_path.starts_with('.') {
-        return None;
-    }
-
-    let mut path_parts: Vec<_> = module_path.text().split('/').collect();
-    let mut index_filename = None;
-
-    // TODO. The implementation could be optimized further by using
-    // `Path::new(module_path.text())` for further inspiration see `use_import_extensions` rule.
-    if let Some(extension) = get_extension(&path_parts) {
-        if !SOURCE_EXTENSIONS.contains(&extension) {
-            return None; // Resource files are exempt.
-        }
-
-        if let Some(basename) = get_basename(&path_parts) {
-            if INDEX_BASENAMES.contains(&basename) {
-                // We pop the index file because it shouldn't count as a path,
-                // component, but we store the file name so we can add it to
-                // both the reported path and the suggestion.
-                index_filename = path_parts.last().copied();
-                path_parts.pop();
-            }
-        }
-    }
-
-    let is_restricted = path_parts
-        .iter()
-        .filter(|&&part| part != "." && part != "..")
-        .count()
-        > 1;
-    if !is_restricted {
-        return None;
-    }
-
-    let mut suggestion_parts = path_parts[..path_parts.len() - 1].to_vec();
-
-    // Push the index file if it exists. This makes sure the reported path
-    // matches the import path exactly.
-    if let Some(index_filename) = index_filename {
-        path_parts.push(index_filename);
-
-        // Assumes the user probably wants to use an index file that has the
-        // same name as the original.
-        suggestion_parts.push(index_filename);
-    }
-
-    Some(NoRestrictedImportsState::PackagePrivate {
-        range,
-        path: path_parts.join("/"),
-        suggestion: suggestion_parts.join("/"),
-    })
-}
-
-fn get_basename<'a>(path_parts: &'_ [&'a str]) -> Option<&'a str> {
-    path_parts.last().map(|&part| match part.find('.') {
-        Some(dot_index) if dot_index > 0 && dot_index < part.len() - 1 => &part[..dot_index],
-        _ => part,
-    })
-}
-
-fn get_extension<'a>(path_parts: &'_ [&'a str]) -> Option<&'a str> {
-    path_parts.last().and_then(|part| match part.find('.') {
-        Some(dot_index) if dot_index > 0 && dot_index < part.len() - 1 => {
-            Some(&part[dot_index + 1..])
-        }
-        _ => None,
-    })
 }
