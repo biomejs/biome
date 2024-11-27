@@ -146,9 +146,6 @@ where
         } = self;
 
         let mut line_index = 0;
-        // let mut line_suppressions = Vec::new();
-        // let mut top_level_suppressions = TopLevelSuppression::default();
-        // let mut range_suppressions = RangeSuppressions::default();
         let mut suppressions = Suppressions::new(self.metadata);
 
         for (index, (phase, mut visitors)) in phases.into_iter().enumerate() {
@@ -222,13 +219,6 @@ where
                     return Some(br);
                 }
             }
-            //         AnalyzerSuppressionDiagnostic::new(
-            //             category!("suppressions/unused"),
-            //             range_suppression.start_comment_range,
-            //             "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
-            //         )
-            //     }
-            //
         }
 
         for suppression in suppressions.line_suppressions {
@@ -280,8 +270,6 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     suppression_action: &'phase dyn SuppressionAction<Language = L>,
     /// Line index at the current position of the traversal
     line_index: &'phase mut usize,
-    /// Track active suppression comments per-line, ordered by line index
-    // line_suppressions: &'phase mut Vec<LineSuppression>,
     /// Handles analyzer signals emitted by individual rules
     emit_signal: &'phase mut SignalHandler<'analyzer, L, Break>,
     /// Root node of the file being analyzed
@@ -292,10 +280,7 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     range: Option<TextRange>,
     /// Analyzer options
     options: &'phase AnalyzerOptions,
-    /// Tracks the top level suppressions
-    // top_level_suppressions: &'phase mut TopLevelSuppression,
-    /// Tracks the range suppressions of the document
-    // range_suppressions: &'phase mut RangeSuppressions,
+    /// Tracks all suppressions during the analyzer phase
     suppressions: &'phase mut Suppressions<'analyzer>,
 }
 
@@ -526,10 +511,6 @@ where
         range: TextRange,
     ) -> ControlFlow<Break> {
         let mut has_suppressions = false;
-        // let mut suppressed_rules = FxHashSet::default();
-        // let mut suppressed_instances = FxHashMap::default();
-        // let mut is_top_level_suppression = false;
-        // let mut already_suppressed = false;
 
         for result in (self.parse_suppression_comment)(text, range) {
             let suppression = match result {
@@ -557,153 +538,7 @@ where
             }
 
             has_suppressions |= true;
-
-            // let (rule, instance) = match suppression.kind {
-            //     AnalyzerSuppressionKind::Everything => (None, None),
-            //     AnalyzerSuppressionKind::Rule(rule) => (Some(rule), None),
-            //     AnalyzerSuppressionKind::RuleInstance(rule, instance) => {
-            //         (Some(rule), Some(instance))
-            //     }
-            // };
-            //
-            // let filter = rule.and_then(|rule| {
-            //     let group_rule = rule.split_once('/');
-            //
-            //     match group_rule {
-            //         None => self.metadata.find_group(rule).map(RuleFilter::from),
-            //         Some((group, rule)) => {
-            //             self.metadata.find_rule(group, rule).map(RuleFilter::from)
-            //         }
-            //     }
-            // });
-            //
-            // // We use `text_range` because we want to check the extended range with trivia, comments in particular
-            // if suppression.is_top_level() && token.text_range().start() > TextSize::from(0) {
-            //     let signal = DiagnosticSignal::new(|| {
-            //         let mut diagnostic = AnalyzerSuppressionDiagnostic::new(
-            //             category!("suppressions/incorrect"),
-            //             range,
-            //             "Top level suppressions can only be used at the beginning of the file.",
-            //         );
-            //         if let Some(ignore_range) = suppression.ignore_range {
-            //             diagnostic = diagnostic.note(
-            //                 markup! {"Rename this to "<Emphasis>"biome-ignore"</Emphasis>" or move it to the top of the file"}
-            //                     .to_owned(),
-            //                 ignore_range,
-            //             );
-            //         }
-            //
-            //         diagnostic
-            //     });
-            //
-            //     (self.emit_signal)(&signal)?;
-            //     continue;
-            // }
-            // is_top_level_suppression |= suppression.is_top_level();
-            //
-            // if let Some(rule) = rule {
-            //     let group_rule = rule.split_once('/');
-            //
-            //     let key = match group_rule {
-            //         None => self.metadata.find_group(rule).map(RuleFilter::from),
-            //         Some((group, rule)) => {
-            //             self.metadata.find_rule(group, rule).map(RuleFilter::from)
-            //         }
-            //     };
-            //
-            //     match (key, instance) {
-            //         (Some(key), Some(value)) => {
-            //             // suppression instances are valid only for simple ignore `biome-ignore`, other kinds of suppressions don't support them.
-            //             if !suppression.is_classic() {
-            //                 let signal = DiagnosticSignal::new(|| {
-            //                     let diagnostic = AnalyzerSuppressionDiagnostic::new(
-            //                         category!("suppressions/incorrect"),
-            //                         range,
-            //                         "The current suppression doesn't support instances.",
-            //                     );
-            //
-            //                     diagnostic
-            //                 });
-            //
-            //                 (self.emit_signal)(&signal)?;
-            //                 continue;
-            //             } else {
-            //                 suppressed_instances.insert(value.to_owned(), key);
-            //             }
-            //         }
-            //         (Some(key), None) => {
-            //             if suppression.is_top_level() {
-            //                 self.top_level_suppressions.insert(key);
-            //             }
-            //             if suppression.is_range_start() {
-            //                 self.range_suppressions.insert(key, token.text_range());
-            //             }
-            //             if suppression.is_range_end() {
-            //                 self.range_suppressions.remove(&key);
-            //             }
-            //             if self.top_level_suppressions.has_filter(&key)
-            //                 || self
-            //                     .range_suppressions
-            //                     .has_filter_in_range(&key, &token.text_range())
-            //             {
-            //                 already_suppressed = true
-            //             }
-            //
-            //             if self.top_level_suppressions.has_filter(&key) {
-            //                 self.range_suppressions.already_suppressed(&key);
-            //             }
-            //
-            //             suppressed_rules.insert(key);
-            //         }
-            //         _ if range_match(self.range, range) => {
-            //             // Emit a warning for the unknown rule
-            //             let signal = DiagnosticSignal::new(move || match group_rule {
-            //                 Some((group, rule)) => AnalyzerSuppressionDiagnostic::new(
-            //                     category!("suppressions/unknownRule"),
-            //                     range,
-            //                     format_args!(
-            //                         "Unknown lint rule {group}/{rule} in suppression comment"
-            //                     ),
-            //                 ),
-            //
-            //                 None => AnalyzerSuppressionDiagnostic::new(
-            //                     category!("suppressions/unknownGroup"),
-            //                     range,
-            //                     format_args!(
-            //                         "Unknown lint rule group {rule} in suppression comment"
-            //                     ),
-            //                 ),
-            //             });
-            //
-            //             (self.emit_signal)(&signal)?;
-            //         }
-            //         _ => {}
-            //     }
-            // } else {
-            //     suppressed_rules.clear();
-            //     suppress_all = true;
-            //     // If this if a "suppress all lints" comment, no need to
-            //     // parse anything else
-            //     break;
-            // }
         }
-
-        // if suppress_all {
-        //     if is_top_level_suppression {
-        //         self.top_level_suppressions.suppress_all = true;
-        //         self.top_level_suppressions.filters.clear();
-        //         return ControlFlow::Continue(());
-        //     }
-        // }
-        //
-        // if is_top_level_suppression {
-        //     self.top_level_suppressions.expand_range(range);
-        //     return ControlFlow::Continue(());
-        // }
-        //
-        // if !suppress_all && suppressed_rules.is_empty() && suppressed_instances.is_empty() {
-        //     return ControlFlow::Continue(());
-        // }
 
         // Suppression comments apply to the next line
         if has_suppressions {
@@ -712,41 +547,6 @@ where
             self.suppressions
                 .overlap_last_suppression(line_index, range);
         }
-
-        // If the last suppression was on the same or previous line, extend its
-        // range and set of suppressed rules with the content for the new suppression
-        // if let Some(last_suppression) = self.line_suppressions.last_mut() {
-        //     if last_suppression.line_index == line_index
-        //         || last_suppression.line_index + 1 == line_index
-        //     {
-        //         last_suppression.line_index = line_index;
-        //         last_suppression.text_range = last_suppression.text_range.cover(range);
-        //         last_suppression.suppress_all |= suppress_all;
-        //         if !last_suppression.suppress_all {
-        //             last_suppression.suppressed_rules.extend(suppressed_rules);
-        //             last_suppression
-        //                 .suppressed_instances
-        //                 .extend(suppressed_instances);
-        //         } else {
-        //             last_suppression.suppressed_rules.clear();
-        //             last_suppression.suppressed_instances.clear();
-        //         }
-        //         return ControlFlow::Continue(());
-        //     }
-        // }
-        //
-        // let entry = LineSuppression {
-        //     line_index,
-        //     comment_span: range,
-        //     text_range: range,
-        //     suppress_all,
-        //     suppressed_rules,
-        //     suppressed_instances,
-        //     did_suppress_signal: false,
-        //     already_suppressed,
-        // };
-        //
-        // self.line_suppressions.push(entry);
 
         ControlFlow::Continue(())
     }
@@ -768,11 +568,6 @@ where
 
         if !did_match {
             self.suppressions.expand_range(range, *self.line_index);
-            // if let Some(last_suppression) = self.line_suppressions.last_mut() {
-            //     if last_suppression.line_index == *self.line_index {
-            //         last_suppression.text_range = last_suppression.text_range.cover(range);
-            //     }
-            // }
         }
     }
 }
