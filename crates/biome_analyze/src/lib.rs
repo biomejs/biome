@@ -2,8 +2,6 @@
 
 use biome_console::markup;
 use biome_parser::AnyParse;
-use indexmap::{IndexMap, IndexSet};
-use rustc_hash::{FxHashMap, FxHashSet};
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
@@ -51,7 +49,7 @@ pub use crate::services::{FromServices, MissingServicesDiagnostic, ServiceBag};
 pub use crate::signals::{
     AnalyzerAction, AnalyzerSignal, AnalyzerTransformation, DiagnosticSignal,
 };
-use crate::suppressions::{LineSuppression, RangeSuppressions, Suppressions, TopLevelSuppression};
+use crate::suppressions::Suppressions;
 pub use crate::syntax::{Ast, SyntaxVisitor};
 pub use crate::visitor::{NodeVisitor, Visitor, VisitorContext, VisitorFinishContext};
 use biome_diagnostics::{category, Diagnostic, DiagnosticExt};
@@ -140,37 +138,33 @@ where
         let Self {
             phases,
             plugins,
-            metadata,
             mut query_matcher,
             parse_suppression_comment,
             mut emit_signal,
             suppression_action,
+            metadata: _,
         } = self;
 
         let mut line_index = 0;
-        let mut line_suppressions = Vec::new();
-        let mut top_level_suppressions = TopLevelSuppression::default();
-        let mut range_suppressions = RangeSuppressions::default();
+        // let mut line_suppressions = Vec::new();
+        // let mut top_level_suppressions = TopLevelSuppression::default();
+        // let mut range_suppressions = RangeSuppressions::default();
         let mut suppressions = Suppressions::new(self.metadata);
 
         for (index, (phase, mut visitors)) in phases.into_iter().enumerate() {
             let runner = PhaseRunner {
                 phase,
                 visitors: &mut visitors,
-                metadata,
                 query_matcher: &mut query_matcher,
                 signal_queue: BinaryHeap::new(),
                 parse_suppression_comment,
                 line_index: &mut line_index,
-                line_suppressions: &mut line_suppressions,
                 emit_signal: &mut emit_signal,
                 root: &ctx.root,
                 services: &ctx.services,
                 range: ctx.range,
                 suppression_action: suppression_action.as_ref(),
                 options: ctx.options,
-                top_level_suppressions: &mut top_level_suppressions,
-                range_suppressions: &mut range_suppressions,
                 suppressions: &mut suppressions,
             };
 
@@ -209,43 +203,55 @@ where
             }
         }
 
-        for (position, range_suppression) in range_suppressions.suppressions {
-            if range_suppression.already_suppressed {
+        for range_suppression in suppressions.range_suppressions.suppressions {
+            if range_suppression.did_suppress_signal {
+                continue;
+            }
+            if let Some(range) = range_suppression.already_suppressed {
                 let signal = DiagnosticSignal::new(|| {
                     AnalyzerSuppressionDiagnostic::new(
                         category!("suppressions/unused"),
-                        position,
-                        "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
+                        range_suppression.start_comment_range,
+                        "Suppression comment has no effect because another suppression comment suppresses the same rule.",
+                    ).note(
+                        markup!{"This is the suppression comment that was used."}.to_owned(),
+                        range
                     )
                 });
-
                 if let ControlFlow::Break(br) = (emit_signal)(&signal) {
                     return Some(br);
                 }
             }
+            //         AnalyzerSuppressionDiagnostic::new(
+            //             category!("suppressions/unused"),
+            //             range_suppression.start_comment_range,
+            //             "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
+            //         )
+            //     }
+            //
         }
 
-        for suppression in line_suppressions {
+        for suppression in suppressions.line_suppressions {
             if suppression.did_suppress_signal {
                 continue;
             }
 
             let signal = DiagnosticSignal::new(|| {
-                if suppression.already_suppressed {
+                if let Some(range) = suppression.already_suppressed {
                     AnalyzerSuppressionDiagnostic::new(
                         category!("suppressions/unused"),
                         suppression.comment_span,
                         "Suppression comment has no effect because another suppression comment suppresses the same rule.",
                     ).note(
                         markup!{"This is the suppression comment that was used."}.to_owned(),
-                        top_level_suppressions.range.unwrap_or_default()
+                        range
                     )
                 } else {
                     AnalyzerSuppressionDiagnostic::new(
                     category!("suppressions/unused"),
                     suppression.comment_span,
                     "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
-                )
+                 )
                 }
             });
 
@@ -264,8 +270,6 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     phase: Phases,
     /// List of visitors being run by this instance of the analyzer for each phase
     visitors: &'phase mut [Box<dyn Visitor<Language = L> + 'analyzer>],
-    /// Holds the metadata for all the rules statically known to the analyzer
-    metadata: &'analyzer MetadataRegistry,
     /// Executor for the query matches emitted by the visitors
     query_matcher: &'phase mut Matcher,
     /// Queue for pending analyzer signals
@@ -277,7 +281,7 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     /// Line index at the current position of the traversal
     line_index: &'phase mut usize,
     /// Track active suppression comments per-line, ordered by line index
-    line_suppressions: &'phase mut Vec<LineSuppression>,
+    // line_suppressions: &'phase mut Vec<LineSuppression>,
     /// Handles analyzer signals emitted by individual rules
     emit_signal: &'phase mut SignalHandler<'analyzer, L, Break>,
     /// Root node of the file being analyzed
@@ -289,10 +293,9 @@ struct PhaseRunner<'analyzer, 'phase, L: Language, Matcher, Break, Diag> {
     /// Analyzer options
     options: &'phase AnalyzerOptions,
     /// Tracks the top level suppressions
-    top_level_suppressions: &'phase mut TopLevelSuppression,
+    // top_level_suppressions: &'phase mut TopLevelSuppression,
     /// Tracks the range suppressions of the document
-    range_suppressions: &'phase mut RangeSuppressions,
-
+    // range_suppressions: &'phase mut RangeSuppressions,
     suppressions: &'phase mut Suppressions<'analyzer>,
 }
 
@@ -372,7 +375,7 @@ where
 
     /// Process the text for a single token, parsing suppression comments and
     /// handling line breaks, then flush all pending query signals in the queue
-    /// whose position is less then the end of the token within the file
+    /// whose position is less than the end of the token within the file
     fn handle_token(&mut self, token: SyntaxToken<L>) -> ControlFlow<Break> {
         // Process the content of the token for comments and newline
         for (index, piece) in token.leading_trivia().pieces().enumerate() {
@@ -423,15 +426,18 @@ where
                 }
             }
 
-            // The rule is suppressed by a top level suppression
-            if self.top_level_suppressions.suppressed_rule(&entry.rule)
-                || self.top_level_suppressions.suppress_all
+            if self
+                .suppressions
+                .top_level_suppression
+                .suppressed_rule(&entry.rule)
+                || self.suppressions.top_level_suppression.suppress_all
             {
                 self.signal_queue.pop();
                 break;
             }
 
             if self
+                .suppressions
                 .range_suppressions
                 .suppressed_rule(&entry.rule, &entry.text_range)
             {
@@ -444,25 +450,34 @@ where
             // if it matches the current line index, otherwise perform a binary
             // search over all the previously seen suppressions to find one
             // with a matching range
-            let suppression = self.line_suppressions.last_mut().filter(|suppression| {
-                suppression.line_index == *self.line_index
-                    && suppression.text_range.start() <= start
-            });
+            let suppression =
+                self.suppressions
+                    .line_suppressions
+                    .last_mut()
+                    .filter(|suppression| {
+                        suppression.line_index == *self.line_index
+                            && suppression.text_range.start() <= start
+                    });
 
             let suppression = match suppression {
                 Some(suppression) => Some(suppression),
                 None => {
-                    let index = self.line_suppressions.binary_search_by(|suppression| {
-                        if suppression.text_range.end() < entry.text_range.start() {
-                            Ordering::Less
-                        } else if entry.text_range.end() < suppression.text_range.start() {
-                            Ordering::Greater
-                        } else {
-                            Ordering::Equal
-                        }
-                    });
+                    let index =
+                        self.suppressions
+                            .line_suppressions
+                            .binary_search_by(|suppression| {
+                                if suppression.text_range.end() < entry.text_range.start() {
+                                    Ordering::Less
+                                } else if entry.text_range.end() < suppression.text_range.start() {
+                                    Ordering::Greater
+                                } else {
+                                    Ordering::Equal
+                                }
+                            });
 
-                    index.ok().map(|index| &mut self.line_suppressions[index])
+                    index
+                        .ok()
+                        .map(|index| &mut self.suppressions.line_suppressions[index])
                 }
             };
 
@@ -470,25 +485,19 @@ where
                 if suppression.suppress_all {
                     return true;
                 }
-
-                if suppression
-                    .suppressed_rules
-                    .iter()
-                    .any(|filter| *filter == entry.rule)
-                {
-                    return true;
-                }
-
-                if entry.instances.is_empty() {
-                    return false;
-                }
-
-                entry.instances.iter().all(|value| {
+                if suppression.suppressed_instances.is_empty() {
                     suppression
-                        .suppressed_instances
+                        .suppressed_rules
                         .iter()
-                        .any(|(v, filter)| *filter == entry.rule && v == value.as_ref())
-                })
+                        .any(|filter| *filter == entry.rule)
+                } else {
+                    entry.instances.iter().all(|value| {
+                        suppression
+                            .suppressed_instances
+                            .iter()
+                            .any(|(v, filter)| *filter == entry.rule && v == value.as_ref())
+                    })
+                }
             });
 
             // If the signal is being suppressed, mark the line suppression as
@@ -516,7 +525,7 @@ where
         text: &str,
         range: TextRange,
     ) -> ControlFlow<Break> {
-        // let mut suppress_all = false;
+        let mut has_suppressions = false;
         // let mut suppressed_rules = FxHashSet::default();
         // let mut suppressed_instances = FxHashMap::default();
         // let mut is_top_level_suppression = false;
@@ -538,11 +547,16 @@ where
                 }
             };
 
-            if let Err(diagnostic) = self.suppressions.push_suppression(&suppression, range) {
+            if let Err(diagnostic) =
+                self.suppressions
+                    .push_suppression(&suppression, range, token.text_range())
+            {
                 let signal = DiagnosticSignal::new(|| diagnostic.clone());
                 (self.emit_signal)(&signal)?;
                 continue;
             }
+
+            has_suppressions |= true;
 
             // let (rule, instance) = match suppression.kind {
             //     AnalyzerSuppressionKind::Everything => (None, None),
@@ -692,9 +706,12 @@ where
         // }
 
         // Suppression comments apply to the next line
-        let line_index = *self.line_index + 1;
+        if has_suppressions {
+            let line_index = *self.line_index + 1;
 
-        self.suppressions.update_line_index(line_index, range);
+            self.suppressions
+                .overlap_last_suppression(line_index, range);
+        }
 
         // If the last suppression was on the same or previous line, extend its
         // range and set of suppressed rules with the content for the new suppression
@@ -739,20 +756,18 @@ where
     /// current suppression as required
     fn bump_line_index(&mut self, text: &str, range: TextRange) {
         let mut did_match = false;
-        for (index, _) in text.match_indices(['\n', '\r']) {
-            if self.suppressions.line_index == *self.line_index {
-                let index = TextSize::try_from(index)
-                    .expect("integer overflow while converting a suppression line to `TextSize`");
-                let range = TextRange::at(range.start(), index);
-                self.suppressions.cover(range);
-                did_match = true;
-            }
+        for (index, _) in text.match_indices(['\n']) {
+            let index = TextSize::try_from(index)
+                .expect("integer overflow while converting a suppression line to `TextSize`");
+            let range = TextRange::at(range.start(), index);
+            did_match = self.suppressions.expand_range(range, *self.line_index);
 
             *self.line_index += 1;
+            self.suppressions.bump_line_index(*self.line_index);
         }
 
         if !did_match {
-            self.suppressions.cover(range);
+            self.suppressions.expand_range(range, *self.line_index);
             // if let Some(last_suppression) = self.line_suppressions.last_mut() {
             //     if last_suppression.line_index == *self.line_index {
             //         last_suppression.text_range = last_suppression.text_range.cover(range);

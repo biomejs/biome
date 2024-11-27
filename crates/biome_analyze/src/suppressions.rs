@@ -5,14 +5,13 @@ use crate::{
 use biome_console::markup;
 use biome_diagnostics::category;
 use biome_rowan::{TextRange, TextSize};
-use indexmap::IndexMap;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 #[derive(Debug, Default)]
 pub struct TopLevelSuppression {
     pub(crate) suppress_all: bool,
     pub(crate) filters: FxHashSet<RuleFilter<'static>>,
-    pub(crate) range: Option<TextRange>,
+    pub(crate) comment_range: TextRange,
 }
 
 impl TopLevelSuppression {
@@ -20,12 +19,13 @@ impl TopLevelSuppression {
         &mut self,
         suppression: &AnalyzerSuppression,
         filter: Option<RuleFilter<'static>>,
-        current_range: TextRange,
+        token_range: TextRange,
+        comment_range: TextRange,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        if suppression.is_top_level() && current_range.start() > TextSize::from(0) {
+        if suppression.is_top_level() && token_range.start() > TextSize::from(0) {
             let mut diagnostic = AnalyzerSuppressionDiagnostic::new(
                 category!("suppressions/incorrect"),
-                current_range,
+                comment_range,
                 "Top level suppressions can only be used at the beginning of the file.",
             );
             if let Some(ignore_range) = suppression.ignore_range {
@@ -43,7 +43,7 @@ impl TopLevelSuppression {
             None => self.suppress_all = true,
             Some(filter) => self.insert(filter),
         }
-        self.range = Some(current_range);
+        self.comment_range = comment_range;
 
         Ok(())
     }
@@ -57,11 +57,7 @@ impl TopLevelSuppression {
     }
 
     pub(crate) fn expand_range(&mut self, range: TextRange) {
-        if let Some(current_range) = self.range.as_mut() {
-            current_range.cover(range);
-        } else {
-            self.range = Some(range);
-        }
+        self.comment_range.cover(range);
     }
 
     pub(crate) fn has_filter(&self, filter: &RuleFilter) -> bool {
@@ -90,83 +86,145 @@ pub(crate) struct LineSuppression {
     /// suppressed
     pub(crate) did_suppress_signal: bool,
     /// Set to `true` when this line suppresses a signal that was already suppressed by another entity e.g. top-level suppression
-    pub(crate) already_suppressed: bool,
+    pub(crate) already_suppressed: Option<TextRange>,
 }
 
 #[derive(Debug, Default)]
 pub(crate) struct RangeSuppressions {
-    pub(crate) suppressions: IndexMap<TextRange, RangeSuppression>,
-}
-impl RangeSuppressions {
-    pub(crate) fn push_suppression(
-        &mut self,
-        suppression: &AnalyzerSuppression,
-        text_range: TextRange,
-    ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        Ok(())
-    }
-    pub(crate) fn expand_range(&mut self, text_range: TextRange) {}
+    pub(crate) suppressions: Vec<RangeSuppression>,
 }
 
 #[derive(Debug, Default)]
 pub(crate) struct RangeSuppression {
-    pub(crate) line_index: usize,
+    /// Whether the current suppression should suppress all signals
+    pub(crate) suppress_all: bool,
 
-    /// A range that indicates the span
-    pub(crate) range: TextRange,
+    /// The range of the `biome-ignore-start` suppressions
+    pub(crate) start_comment_range: TextRange,
+
+    /// A range that indicates how long this suppression has effect
+    pub(crate) suppression_range: TextRange,
 
     /// Set to `true` when this line suppresses a signal that was already suppressed by another entity e.g. top-level suppression
-    pub(crate) already_suppressed: bool,
+    pub(crate) already_suppressed: Option<TextRange>,
+
+    /// Whether this suppression has suppressed a signal
+    pub(crate) did_suppress_signal: bool,
 
     /// The rules to suppress
     pub(crate) filters: FxHashSet<RuleFilter<'static>>,
 }
 
 impl RangeSuppressions {
-    pub(crate) fn insert(&mut self, filter: RuleFilter<'static>, position: TextRange) {
-        self.suppressions
-            .entry(position)
-            .and_modify(|range_suppression| {
-                range_suppression.filters.insert(filter);
-            })
-            .or_insert_with(|| {
-                let mut range_suppression = RangeSuppression::default();
-                range_suppression.filters.insert(filter);
-                range_suppression
-            });
-    }
-
-    pub(crate) fn remove(&mut self, filter: &RuleFilter<'static>) {
-        if let Some((_, range_suppression)) = self.suppressions.iter_mut().last() {
-            range_suppression.filters.remove(filter);
-        }
-    }
-
-    pub(crate) fn already_suppressed(&mut self, filter: &RuleFilter<'static>) {
-        for (_, range_suppression) in self.suppressions.iter_mut() {
-            if range_suppression.filters.contains(filter) {
-                range_suppression.already_suppressed = true
+    /// Expands the range of all range suppressions
+    pub(crate) fn expand_range(&mut self, text_range: TextRange) {
+        for range_suppression in self.suppressions.iter_mut() {
+            if !range_suppression.filters.is_empty() {
+                range_suppression.suppression_range =
+                    range_suppression.suppression_range.cover(text_range);
             }
         }
     }
+    pub(crate) fn push_suppression(
+        &mut self,
+        suppression: &AnalyzerSuppression,
+        filter: Option<RuleFilter<'static>>,
+        text_range: TextRange,
+        already_suppressed: Option<TextRange>,
+    ) -> Result<(), AnalyzerSuppressionDiagnostic> {
+        if suppression.is_range_start() {
+            if let Some(range_suppression) = self.suppressions.last_mut() {
+                match filter {
+                    None => {
+                        range_suppression.suppress_all = true;
+                        range_suppression.already_suppressed = already_suppressed;
+                    }
+                    Some(filter) => {
+                        range_suppression.filters.insert(filter);
+                        range_suppression.already_suppressed = already_suppressed;
+                    }
+                }
+            } else {
+                let mut range_suppression = RangeSuppression::default();
+                match filter {
+                    None => range_suppression.suppress_all = true,
+                    Some(filter) => {
+                        range_suppression.filters.insert(filter);
+                    }
+                }
+                range_suppression.suppression_range = text_range;
+                range_suppression.already_suppressed = already_suppressed;
+                self.suppressions.push(range_suppression);
+            }
+        } else if suppression.is_range_end() {
+            if self.suppressions.is_empty() {
+                // This an error. We found a range end suppression without having a range start
+                return Err(AnalyzerSuppressionDiagnostic::new(
+                    category!("suppressions/incorrect"),
+                    text_range,
+                    "Found a range-end suppression without a range-start suppression. This is invalid."
+                ));
+            }
 
-    pub(crate) fn suppressed_rule(&self, filter: &RuleKey, position: &TextRange) -> bool {
-        self.suppressions
-            .iter()
-            .filter(|(p, _)| p.contains_range(*position))
-            .any(|(_, range_suppression)| range_suppression.filters.iter().any(|f| f == filter))
-    }
-
-    pub(crate) fn has_filter_in_range(&self, filter: &RuleFilter, position: &TextRange) -> bool {
-        for (range_position, range_suppression) in self.suppressions.iter().rev() {
-            if range_position.contains_range(*position) {
-                if range_suppression.filters.contains(filter) {
-                    return true;
+            match filter {
+                None => {
+                    self.suppressions.pop();
+                }
+                Some(filter) => {
+                    // SAFETY: we checked if the vector isn't empty at the beginning
+                    let range_suppression = self.suppressions.last_mut().unwrap();
+                    let present = range_suppression.filters.remove(&filter);
+                    // the user tried to remove a filter that wasn't added, let's fire a diagnostic
+                    if !present {
+                        // This an error. We found a range end suppression without having a range start
+                        return Err(AnalyzerSuppressionDiagnostic::new(
+                            category!("suppressions/incorrect"),
+                            text_range,
+                            "Found a range-end suppression without a range-start suppression. This is invalid."
+                        ));
+                    }
                 }
             }
         }
+        Ok(())
+    }
 
-        false
+    pub(crate) fn suppressed_rule(&mut self, filter: &RuleKey, position: &TextRange) -> bool {
+        let range_suppression = self
+            .suppressions
+            .iter_mut()
+            .rev()
+            .find(|range_suppression| {
+                range_suppression
+                    .suppression_range
+                    .contains_range(*position)
+            });
+        let range_suppression = range_suppression
+            .filter(|range_suppression| range_suppression.filters.iter().any(|f| f == filter));
+        if let Some(range_suppression) = range_suppression {
+            range_suppression.did_suppress_signal = true;
+            true
+        } else {
+            false
+        }
+    }
+
+    pub(crate) fn has_filter_in_range(
+        &self,
+        filter: &RuleFilter,
+        position: &TextRange,
+    ) -> Option<TextRange> {
+        for range_suppression in self.suppressions.iter().rev() {
+            if range_suppression
+                .suppression_range
+                .contains_range(*position)
+                && range_suppression.filters.contains(filter)
+            {
+                return Some(range_suppression.suppression_range);
+            }
+        }
+
+        None
     }
 }
 
@@ -192,47 +250,54 @@ impl<'analyzer> Suppressions<'analyzer> {
         }
     }
 
-    pub(crate) fn cover(&mut self, text_range: TextRange) {
-        if let Some(last_suppression) = self.line_suppressions.last_mut() {
-            last_suppression.text_range = last_suppression.text_range.cover(text_range)
-        }
-    }
-
     fn push_line_suppression(
         &mut self,
         filter: Option<RuleFilter<'static>>,
         instance: Option<String>,
         current_range: TextRange,
+        already_suppressed: Option<TextRange>,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
         if let Some(suppression) = self.line_suppressions.last_mut() {
-            match filter {
-                None => {
-                    suppression.suppress_all = true;
-                }
-                Some(filter) => {
-                    suppression.suppressed_rules.insert(filter);
-                    if let Some(instance) = instance {
-                        suppression.suppressed_instances.insert(instance, filter);
+            if (suppression.line_index) == (self.line_index) {
+                suppression.already_suppressed = already_suppressed;
+
+                match filter {
+                    None => {
+                        suppression.suppress_all = true;
+                        suppression.suppressed_rules.clear();
+                        suppression.suppressed_instances.clear();
+                    }
+                    Some(filter) => {
+                        suppression.suppressed_rules.insert(filter);
+                        if let Some(instance) = instance {
+                            suppression.suppressed_instances.insert(instance, filter);
+                        }
+                        suppression.suppress_all = false;
                     }
                 }
+                return Ok(());
             }
-        } else {
-            let mut suppression = LineSuppression::default();
-            suppression.comment_span = current_range;
-            suppression.text_range = current_range;
-            match filter {
-                None => {
-                    suppression.suppress_all = true;
-                }
-                Some(filter) => {
-                    suppression.suppressed_rules.insert(filter);
-                    if let Some(instance) = instance {
-                        suppression.suppressed_instances.insert(instance, filter);
-                    }
-                }
-            }
-            self.line_suppressions.push(suppression);
         }
+
+        let mut suppression = LineSuppression {
+            comment_span: current_range,
+            text_range: current_range,
+            line_index: self.line_index,
+            already_suppressed,
+            ..Default::default()
+        };
+        match filter {
+            None => {
+                suppression.suppress_all = true;
+            }
+            Some(filter) => {
+                suppression.suppressed_rules.insert(filter);
+                if let Some(instance) = instance {
+                    suppression.suppressed_instances.insert(instance, filter);
+                }
+            }
+        }
+        self.line_suppressions.push(suppression);
 
         Ok(())
     }
@@ -272,59 +337,73 @@ impl<'analyzer> Suppressions<'analyzer> {
         }
     }
 
-    fn rule_to_instance(
+    fn suppression_to_instances(
         &self,
         suppression_kind: &AnalyzerSuppressionKind,
-        text_range: TextRange,
-    ) -> Result<Option<String>, AnalyzerSuppressionDiagnostic> {
+    ) -> Option<String> {
         match suppression_kind {
-            AnalyzerSuppressionKind::Everything | AnalyzerSuppressionKind::Rule(_) => {
-                Err(AnalyzerSuppressionDiagnostic::new(
-                    category!("suppressions/incorrect"),
-                    text_range,
-                    "The current suppression doesn't support instances.",
-                ))
-            }
-            AnalyzerSuppressionKind::RuleInstance(_, instances) => Ok(Some(instances.to_string())),
+            AnalyzerSuppressionKind::Everything | AnalyzerSuppressionKind::Rule(_) => None,
+            AnalyzerSuppressionKind::RuleInstance(_, instances) => Some((*instances).to_string()),
         }
     }
 
     pub(crate) fn push_suppression(
         &mut self,
         suppression: &AnalyzerSuppression,
-        current_range: TextRange,
+        comment_range: TextRange,
+        token_range_not_trimmed: TextRange,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        let filter = self.rule_to_filter(&suppression.kind, current_range)?;
-        let instances = self.rule_to_instance(&suppression.kind, current_range)?;
+        let filter = self.rule_to_filter(&suppression.kind, comment_range)?;
+        let instances = self.suppression_to_instances(&suppression.kind);
         self.last_suppression = Some(suppression.variant.clone());
-
+        let already_suppressed = self.already_suppressed(filter.as_ref(), &comment_range);
         match suppression.variant {
             AnalyzerSuppressionVariant::Classic => {
-                self.push_line_suppression(filter, instances, current_range)
+                self.push_line_suppression(filter, instances, comment_range, already_suppressed)
             }
-            AnalyzerSuppressionVariant::TopLevel => {
-                self.top_level_suppression
-                    .push_suppression(suppression, filter, current_range)
-            }
-            AnalyzerSuppressionVariant::RangeStart => self
+            AnalyzerSuppressionVariant::TopLevel => self.top_level_suppression.push_suppression(
+                suppression,
+                filter,
+                token_range_not_trimmed,
+                comment_range,
+            ),
+            AnalyzerSuppressionVariant::RangeStart | AnalyzerSuppressionVariant::RangeEnd => self
                 .range_suppressions
-                .push_suppression(suppression, current_range),
-            AnalyzerSuppressionVariant::RangeEnd => self
-                .range_suppressions
-                .push_suppression(suppression, current_range),
+                .push_suppression(suppression, filter, comment_range, already_suppressed),
         }
     }
 
-    pub(crate) fn update_line_index(&mut self, new_line_index: usize, text_range: TextRange) {
-        self.line_index = new_line_index;
+    pub(crate) fn expand_range(&mut self, text_range: TextRange, line_index: usize) -> bool {
+        self.top_level_suppression.expand_range(text_range);
+        self.range_suppressions.expand_range(text_range);
+        if let Some(last_suppression) = self.line_suppressions.last_mut() {
+            if last_suppression.line_index == line_index {
+                last_suppression.text_range = last_suppression.text_range.cover(text_range);
+                self.line_index = line_index;
+                return true;
+            }
+        }
+        false
+    }
+
+    pub(crate) fn bump_line_index(&mut self, line_index: usize) {
+        self.line_index = line_index;
+    }
+
+    /// If the last suppression was on the same or previous line, extend its range.
+    pub(crate) fn overlap_last_suppression(
+        &mut self,
+        next_line_index: usize,
+        text_range: TextRange,
+    ) {
         if let Some(variant) = &self.last_suppression {
             match variant {
                 AnalyzerSuppressionVariant::Classic => {
                     if let Some(last_suppression) = self.line_suppressions.last_mut() {
-                        if last_suppression.line_index == new_line_index
-                            || last_suppression.line_index + 1 == new_line_index
+                        if last_suppression.line_index == next_line_index
+                            || last_suppression.line_index + 1 == next_line_index
                         {
-                            last_suppression.line_index = new_line_index;
+                            last_suppression.line_index = next_line_index;
                             last_suppression.text_range =
                                 last_suppression.text_range.cover(text_range);
                         }
@@ -341,5 +420,18 @@ impl<'analyzer> Suppressions<'analyzer> {
                 }
             }
         }
+    }
+
+    fn already_suppressed(
+        &self,
+        filter: Option<&RuleFilter>,
+        range: &TextRange,
+    ) -> Option<TextRange> {
+        filter.and_then(|filter| {
+            self.top_level_suppression
+                .has_filter(filter)
+                .then_some(self.top_level_suppression.comment_range)
+                .or(self.range_suppressions.has_filter_in_range(filter, range))
+        })
     }
 }
