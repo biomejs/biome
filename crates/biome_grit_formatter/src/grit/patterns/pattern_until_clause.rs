@@ -1,10 +1,13 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritPatternUntilClause;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritPatternUntilClause, GritPatternUntilClauseFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritPatternUntilClause;
 impl FormatNodeRule<GritPatternUntilClause> for FormatGritPatternUntilClause {
     fn fmt_fields(&self, node: &GritPatternUntilClause, f: &mut GritFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritPatternUntilClauseFields { until, until_token } = node.as_fields();
+
+        write!(f, [until_token.format(), space(), until.format()])
     }
 }
