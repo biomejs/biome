@@ -65,7 +65,8 @@ impl Rule for NoTsIgnore {
                 .pieces()
                 .filter_map(|trivia| {
                     if let Some(comment) = trivia.as_comments() {
-                        for (index, _) in comment.text().match_indices("@ts-ignore") {
+                        if let Some((index, _)) = comment.text().match_indices("@ts-ignore").next()
+                        {
                             return Some((
                                 token.clone(),
                                 comment.text_range().add_start(TextSize::from(index as u32)),
@@ -110,7 +111,7 @@ impl Rule for NoTsIgnore {
         let token = token.clone();
         let mut mutation = ctx.root().begin();
         let mut new_trivia = vec![];
-        let mut text = String::from("");
+        let mut text = String::new();
         for trivia in token.clone().leading_trivia().pieces() {
             let kind = trivia.kind();
             if let Some(comment) = trivia.as_comments() {

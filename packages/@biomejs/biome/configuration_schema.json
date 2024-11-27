@@ -2359,9 +2359,9 @@
 					]
 				},
 				"noTsIgnore": {
-					"description": "Succinct description of the rule.",
+					"description": "Prevents the use of the TypeScript directive @ts-ignore.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }
 					]
 				},

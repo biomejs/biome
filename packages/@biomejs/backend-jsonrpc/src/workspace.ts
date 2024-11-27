@@ -1324,9 +1324,9 @@ export interface Nursery {
 	 */
 	noTemplateCurlyInString?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Prevents the use of the TypeScript directive @ts-ignore.
 	 */
-	noTsIgnore?: RuleConfiguration_for_Null;
+	noTsIgnore?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
