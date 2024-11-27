@@ -4,6 +4,7 @@ use biome_analyze::{
     RuleSourceKind,
 };
 use biome_console::markup;
+use biome_diagnostics::Severity;
 use biome_js_syntax::{JsModule, JsSyntaxToken, TextLen};
 use biome_rowan::{AstNode, BatchMutationExt, Direction, TextRange, TextSize, TriviaPiece};
 
@@ -26,6 +27,13 @@ declare_lint_rule! {
     /// let foo;
     /// ```
     ///
+    /// ### Valid
+    ///
+    /// ```ts
+    /// // @ts-expect-error
+    /// let foo;
+    /// ```
+    ///
     pub NoTsIgnore {
         version: "next",
         name: "noTsIgnore",
@@ -34,6 +42,7 @@ declare_lint_rule! {
         recommended: true,
         source_kind: RuleSourceKind::Inspired,
         fix_kind: FixKind::Safe,
+        severity: Severity::Warning,
     }
 }
 
