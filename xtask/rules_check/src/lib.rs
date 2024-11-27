@@ -3,7 +3,10 @@
 //!
 use anyhow::{bail, ensure};
 use biome_analyze::options::JsxRuntime;
-use biome_analyze::{AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata};
+use biome_analyze::{
+    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Queryable,
+    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
+};
 use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Console};
 use biome_css_parser::CssParserOptions;
@@ -387,24 +390,25 @@ fn assert_lint(
                 };
 
                 let options = {
-                    let mut o = create_analyzer_options::<JsLanguage>(&settings, &file_path, test);
+                    let o = create_analyzer_options::<JsLanguage>(&settings, &file_path, test);
                     o.with_configuration(
                         AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::default()),
                     )
                 };
+
                 biome_js_analyze::analyze(
                     &root,
                     filter,
                     &options,
-                    Vec::new(),
+                    vec![],
                     file_source,
                     None,
                     |signal| {
                         if let Some(mut diag) = signal.diagnostic() {
                             let category = diag.category().expect("linter diagnostic has no code");
                             let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                                "If you see this error, it means you need to run cargo codegen-configuration",
-                            );
+                            "If you see this error, it means you need to run cargo codegen-configuration",
+                        );
 
                             for action in signal.actions() {
                                 if !action.is_suppression() {
@@ -448,12 +452,13 @@ fn assert_lint(
                 };
 
                 let options = create_analyzer_options::<JsonLanguage>(&settings, &file_path, test);
+
                 biome_json_analyze::analyze(&root, filter, &options, file_source, |signal| {
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
                         let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                                "If you see this error, it means you need to run cargo codegen-configuration",
-                            );
+                            "If you see this error, it means you need to run cargo codegen-configuration",
+                        );
 
                         for action in signal.actions() {
                             if !action.is_suppression() {
@@ -501,8 +506,8 @@ fn assert_lint(
                     if let Some(mut diag) = signal.diagnostic() {
                         let category = diag.category().expect("linter diagnostic has no code");
                         let severity = settings.get_current_settings().expect("project").get_severity_from_rule_code(category).expect(
-                                "If you see this error, it means you need to run cargo codegen-configuration",
-                            );
+                            "If you see this error, it means you need to run cargo codegen-configuration",
+                        );
 
                         for action in signal.actions() {
                             if !action.is_suppression() {
