@@ -91,7 +91,7 @@ impl Rule for NoTsIgnore {
                 },
             )
             .note(markup! {
-                "The directive "<Emphasis>"@ts-ignore"</Emphasis>" shuts down any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself."
+                "The directive "<Emphasis>"@ts-ignore"</Emphasis>" suppresses any kind of error, even possible errors that might be fixed by upstream libraries or the compiler itself."
             }),
         )
     }
