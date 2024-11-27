@@ -181,6 +181,7 @@ impl Rule for NoUnknownPseudoClass {
             PseudoClassType::PagePseudoClass => is_page_pseudo_class(lower_name),
             PseudoClassType::WebkitScrollbarPseudoClass => {
                 WEBKIT_SCROLLBAR_PSEUDO_CLASSES.contains(&lower_name)
+                    || is_known_pseudo_class(lower_name)
             }
             PseudoClassType::Other => {
                 is_custom_selector(lower_name)

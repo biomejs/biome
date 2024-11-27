@@ -65,9 +65,8 @@ declare_lint_rule! {
     ///
     /// The rule provides several options that are detailed in the following subsections.
     ///
-    /// ```json5
+    /// ```jsonc,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "strictCase": false,
     ///         "requireAscii": true,

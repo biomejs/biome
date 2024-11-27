@@ -611,6 +611,9 @@ fn handle_root_comments(comment: DecoratedComment<JsLanguage>) -> CommentPlaceme
             AnyJsRoot::JsScript(script) => {
                 script.directives().is_empty() && script.statements().is_empty()
             }
+            AnyJsRoot::TsDeclarationModule(module) => {
+                module.directives().is_empty() && module.items().is_empty()
+            }
         };
 
         if is_blank {

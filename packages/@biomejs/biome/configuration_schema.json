@@ -1204,6 +1204,38 @@
 			},
 			"additionalProperties": false
 		},
+		"CustomRestrictedImport": {
+			"anyOf": [
+				{
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				},
+				{
+					"description": "Additional options to configure the message and allowed/disallowed import names.",
+					"allOf": [{ "$ref": "#/definitions/CustomRestrictedImportOptions" }]
+				}
+			]
+		},
+		"CustomRestrictedImportOptions": {
+			"type": "object",
+			"properties": {
+				"allowImportNames": {
+					"description": "Names of the exported members that allowed to be not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"importNames": {
+					"description": "Names of the exported members that should not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				}
+			},
+			"additionalProperties": false
+		},
 		"CustomRestrictedType": {
 			"anyOf": [
 				{ "type": "string" },
@@ -2214,6 +2246,13 @@
 						{ "type": "null" }
 					]
 				},
+				"noGlobalDirnameFilename": {
+					"description": "Disallow the use of __dirname and __filename in the global scope.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleFixConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"noHeadElement": {
 					"description": "Prevent usage of \\<head> element in a Next.js project.",
 					"anyOf": [
@@ -2307,13 +2346,6 @@
 				},
 				"noTemplateCurlyInString": {
 					"description": "Disallow template literal placeholder syntax in regular strings.",
-					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
-						{ "type": "null" }
-					]
-				},
-				"noTsIgnore": {
-					"description": "Succinct description of the rule.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2770,9 +2802,11 @@
 			"type": "object",
 			"properties": {
 				"paths": {
-					"description": "A list of names that should trigger the rule",
+					"description": "A list of import paths that should trigger the rule.",
 					"type": "object",
-					"additionalProperties": { "type": "string" }
+					"additionalProperties": {
+						"$ref": "#/definitions/CustomRestrictedImport"
+					}
 				},
 				"restrictPackagePrivate": {
 					"description": "Whether to place restrictions on the importing of \"package private\" symbols.",
@@ -4256,7 +4290,7 @@
 					]
 				},
 				"useValidTypeof": {
-					"description": "This rule verifies the result of typeof $expr unary expressions is being compared to valid values, either string literals containing valid type names or other typeof expressions",
+					"description": "This rule checks that the result of a `typeof' expression is compared to a valid value.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleFixConfiguration" },
 						{ "type": "null" }

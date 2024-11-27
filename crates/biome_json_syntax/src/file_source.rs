@@ -161,15 +161,18 @@ impl JsonFileSource {
         }
     }
 
+    #[must_use]
     pub fn with_allow_trailing_commas(mut self) -> Self {
         self.allow_trailing_commas = true;
         self
     }
 
+    #[must_use]
     pub fn allow_trailing_commas(&self) -> bool {
         self.allow_trailing_commas
     }
 
+    #[must_use]
     pub fn with_allow_comments(mut self) -> Self {
         self.allow_comments = true;
         self
@@ -212,7 +215,9 @@ impl JsonFileSource {
             return Ok(Self::json_allow_comments());
         }
         if let Some(Component::Normal(parent_dir)) = path.components().rev().nth(1) {
-            if Self::is_well_known_json_allow_comments_directory(parent_dir) {
+            if Self::is_well_known_json_allow_comments_directory(parent_dir)
+                && file_name.as_encoded_bytes().ends_with(b".json")
+            {
                 return Ok(Self::json_allow_comments());
             }
         }

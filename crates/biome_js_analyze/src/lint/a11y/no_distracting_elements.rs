@@ -56,7 +56,7 @@ impl Rule for NoDistractingElements {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let name = element.name_value_token()?;
+        let name = element.name_value_token().ok()?;
         match name.text_trimmed() {
             "marquee" | "blink" => Some(name),
             _ => None,

@@ -565,7 +565,7 @@ fn parse_import_attribute(p: &mut JsParser) -> ParsedSyntax {
 }
 
 #[derive(Default)]
-struct ImportAssertionList {
+pub(crate) struct ImportAssertionList {
     assertion_keys: FxHashMap<String, TextRange>,
 }
 

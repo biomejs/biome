@@ -109,7 +109,7 @@ impl Rule for NoUnknownPseudoElement {
                 markup! {
                     "Use a known pseudo-elements instead, such as:"
                 },
-                &["after", "backdrop", "before", "etc."],
+                ["after", "backdrop", "before", "etc."],
             ),
         )
     }

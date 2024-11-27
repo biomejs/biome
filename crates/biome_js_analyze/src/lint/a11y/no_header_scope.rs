@@ -58,7 +58,7 @@ impl Rule for NoHeaderScope {
         let element = ctx.query();
 
         if element.is_element()
-            && element.name_value_token()?.text_trimmed() != "th"
+            && element.name_value_token().ok()?.text_trimmed() != "th"
             && element.has_truthy_attribute("scope")
         {
             return Some(());

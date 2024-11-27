@@ -71,9 +71,8 @@ declare_lint_rule! {
     ///
     /// Some tools, such as [Vite], allow exporting constants along with components. By enabling the following, the rule will support the pattern.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options":{
     ///         "allowConstantExport" : true
     ///     }
@@ -85,9 +84,8 @@ declare_lint_rule! {
     /// If you use a framework that handles [Hot Module Replacement(HMR)] of some specific exports, you can use this option to avoid warning for them.
     ///
     /// Example for [Remix](https://remix.run/docs/en/main/discussion/hot-module-replacement#supported-exports):
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options":{
     ///         "allowExportNames": ["json", "loader", "headers", "meta", "links", "scripts"]
     ///     }

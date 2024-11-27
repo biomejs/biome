@@ -1,4 +1,6 @@
-include!(concat!(env!("OUT_DIR"), "/roles_and_properties.rs"));
+use std::str::FromStr;
+
+include!(concat!(env!("OUT_DIR"), "/roles_and_attributes.rs"));
 
 pub const ISO_COUNTRIES: [&str; 233] = [
     "AF", "AL", "DZ", "AS", "AD", "AO", "AI", "AQ", "AG", "AR", "AM", "AW", "AU", "AT", "AZ", "BS",
@@ -31,7 +33,33 @@ pub const ISO_LANGUAGES: [&str; 150] = [
     "wa", "cy", "wo", "xh", "yi", "ji", "yo", "zu",
 ];
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+/// Returns a list of valid ISO countries
+pub fn is_valid_country(country: &str) -> bool {
+    IsoCountries::from_str(country).is_ok()
+}
+
+/// Returns a list of valid ISO languages
+pub fn is_valid_language(language: &str) -> bool {
+    IsoLanguages::from_str(language).is_ok()
+}
+
+/// An array of all available countries
+pub fn countries() -> &'static [&'static str] {
+    &ISO_COUNTRIES
+}
+
+/// An array of all available languages
+pub fn languages() -> &'static [&'static str] {
+    &ISO_LANGUAGES
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub enum AriaAttributeKind {
+    Property,
+    State,
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum AriaValueType {
     /// `false`/`true`
     Boolean,
@@ -98,4 +126,137 @@ impl AriaValueType {
 /// See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/id#syntax
 fn is_valid_html_id(id: &str) -> bool {
     !id.is_empty() && !id.bytes().any(|b| b.is_ascii_whitespace())
+}
+
+impl AriaRole {
+    /// Returns the first valid role from `values`, a space-separated list of roles.
+    ///
+    /// If a role attribute has multiple values, the first valid role (specified role) will be used.
+    /// See <https://www.w3.org/TR/2014/REC-wai-aria-implementation-20140320/#mapping_role>
+    ///
+    /// ```
+    /// use biome_aria_metadata::AriaRole;
+    /// assert_eq!(AriaRole::from_roles("INVALID main FALLBACK"), Some(AriaRole::Main));
+    /// ```
+    pub fn from_roles(roles: &str) -> Option<AriaRole> {
+        roles
+            .split_ascii_whitespace()
+            .find_map(|value| value.parse().ok())
+    }
+
+    /// Returns `true` if the given role inherits of `AriaAbstractRole::Widget` and is not `Self::Progressbar`.
+    ///
+    /// This corresponds to a role that defines a user interface widget (slider, tree control, ...)
+    pub fn is_interactive(self) -> bool {
+        // `progressbar` inherits of `widget`, but its value is always `readonly`.
+        // So we treat it as a non-interactive role.
+        self != Self::Progressbar
+            && self
+                .inherited_abstract_roles()
+                .contains(&AriaAbstractRole::Widget)
+    }
+
+    /// Returns `true` if the given role is not interactive and is not `Self::Toolbar`.
+    pub fn is_non_interactive(self) -> bool {
+        // FIXME: could we make `Self""is_non_interactive` the negation of `Self""is_interactive`?
+        //
+        // This current asymetry is ported from  ESLint JSX A11y:
+        // https://github.com/jsx-eslint/eslint-plugin-jsx-a11y/blob/main/src/util/isNonInteractiveElement.js#L30
+        // We should assess if this asymetry is intended.
+        //
+        // `toolbar` doesn't inherit of `widget`, but it does support  `aria-activedescendant`.
+        // So, we treat it as a interactive role.
+        self != Self::Toolbar && !self.is_interactive()
+    }
+
+    /// Returns `true` if the given role inherits of `AriaAbstractRole::Structure`.
+    ///
+    /// This corresponds to a role that defines the page structure (section, navigation, ...).
+    pub fn is_presentational(self) -> bool {
+        self.inherited_abstract_roles()
+            .contains(&AriaAbstractRole::Structure)
+    }
+
+    /// Returns `true` if the given role inherits of `AriaAbstractRole::Composite`.
+    pub fn is_composite(self) -> bool {
+        self.inherited_abstract_roles()
+            .contains(&AriaAbstractRole::Composite)
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct AriaAttributes(&'static [AriaAttribute]);
+impl AriaAttributes {
+    // Same as `Self::default`, but usable in `const` context.
+    pub const fn empty() -> Self {
+        Self(&[])
+    }
+
+    pub fn contains(self, value: &AriaAttribute) -> bool {
+        self.0.contains(value)
+    }
+
+    pub fn iter(self) -> impl Iterator<Item = AriaAttribute> {
+        self.0.iter().copied()
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct AriaAbstractRoles(&'static [AriaAbstractRole]);
+impl AriaAbstractRoles {
+    // Same as `Self::default`, but usable in `const` context.
+    pub const fn empty() -> Self {
+        Self(&[])
+    }
+
+    pub fn contains(self, value: &AriaAbstractRole) -> bool {
+        self.0.contains(value)
+    }
+
+    pub fn iter(self) -> impl Iterator<Item = AriaAbstractRole> {
+        self.0.iter().copied()
+    }
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+pub struct AriaRoles(&'static [AriaRole]);
+impl AriaRoles {
+    // Same as `Self::default`, but usable in `const` context.
+    pub const fn empty() -> Self {
+        Self(&[])
+    }
+
+    pub fn contains(self, value: &AriaRole) -> bool {
+        self.0.contains(value)
+    }
+
+    pub fn iter(self) -> impl Iterator<Item = AriaRole> {
+        self.0.iter().copied()
+    }
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct HtmlElementInstance {
+    pub element: HtmlElement,
+    pub attributes: &'static [HtmlAttributeInstance],
+}
+impl std::fmt::Display for HtmlElementInstance {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "<{}", self.element)?;
+        for attribute in self.attributes {
+            write!(f, " {attribute}")?;
+        }
+        write!(f, ">")
+    }
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct HtmlAttributeInstance {
+    pub attribute: HtmlAttribute,
+    pub value: &'static str,
+}
+impl std::fmt::Display for HtmlAttributeInstance {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}=\"{}\"", self.attribute, self.value)
+    }
 }

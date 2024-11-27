@@ -140,6 +140,16 @@ where
     }
 }
 
+// Blanket implementations of Display for boxed values
+impl<T> Display for Box<T>
+where
+    T: Display + ?Sized,
+{
+    fn fmt(&self, fmt: &mut Formatter) -> io::Result<()> {
+        T::fmt(&**self, fmt)
+    }
+}
+
 impl<T> Display for Cow<'_, T>
 where
     T: Display + ToOwned + ?Sized,

@@ -307,10 +307,17 @@ fn load_eslint_extends_config(
         } else {
             EslintPackage::Config.resolve_name(name)
         };
+        // Try to load `module_name` or else try to load diretcly `name`.
         let node::Resolution {
             content,
             resolved_path,
-        } = node::load_config(&module_name)?;
+        } = node::load_config(&module_name).or_else(|err| {
+            if module_name != name {
+                node::load_config(name)
+            } else {
+                Err(err)
+            }
+        })?;
         let deserialized = deserialize_from_json_str::<eslint_eslint::LegacyConfigData>(
             &content,
             JsonParserOptions::default(),

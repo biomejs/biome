@@ -999,7 +999,7 @@ impl JsExportFromClause {
                 .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_attribute(self, element: Option<JsImportAttribute>) -> Self {
+    pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             5usize..=5usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -1081,7 +1081,7 @@ impl JsExportNamedFromClause {
                 .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_attribute(self, element: Option<JsImportAttribute>) -> Self {
+    pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             6usize..=6usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -1758,7 +1758,7 @@ impl JsImport {
         )
     }
 }
-impl JsImportAttribute {
+impl JsImportAssertion {
     pub fn with_with_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -1771,7 +1771,7 @@ impl JsImportAttribute {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_attributes(self, element: JsImportAttributeEntryList) -> Self {
+    pub fn with_assertions(self, element: JsImportAssertionEntryList) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -1784,7 +1784,7 @@ impl JsImportAttribute {
         )
     }
 }
-impl JsImportAttributeEntry {
+impl JsImportAssertionEntry {
     pub fn with_key_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
@@ -1811,7 +1811,7 @@ impl JsImportBareClause {
                 .splice_slots(0usize..=0usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_attribute(self, element: Option<JsImportAttribute>) -> Self {
+    pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             1usize..=1usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -1863,7 +1863,7 @@ impl JsImportCombinedClause {
                 .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_attribute(self, element: Option<JsImportAttribute>) -> Self {
+    pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             5usize..=5usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -1895,7 +1895,7 @@ impl JsImportDefaultClause {
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_attribute(self, element: Option<JsImportAttribute>) -> Self {
+    pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -1947,7 +1947,7 @@ impl JsImportNamedClause {
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_attribute(self, element: Option<JsImportAttribute>) -> Self {
+    pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -1979,7 +1979,7 @@ impl JsImportNamespaceClause {
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
-    pub fn with_attribute(self, element: Option<JsImportAttribute>) -> Self {
+    pub fn with_assertion(self, element: Option<JsImportAssertion>) -> Self {
         Self::unwrap_cast(self.syntax.splice_slots(
             4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
@@ -4110,6 +4110,38 @@ impl TsConstructorType {
         )
     }
 }
+impl TsDeclarationModule {
+    pub fn with_bom_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_interpreter_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_directives(self, element: JsDirectiveList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_items(self, element: JsModuleItemList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+}
 impl TsDeclareFunctionDeclaration {
     pub fn with_async_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
@@ -4637,7 +4669,7 @@ impl TsImportType {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
-    pub fn with_arguments(self, element: JsCallArguments) -> Self {
+    pub fn with_arguments(self, element: TsImportTypeArguments) -> Self {
         Self::unwrap_cast(
             self.syntax
                 .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
@@ -4654,6 +4686,93 @@ impl TsImportType {
             4usize..=4usize,
             once(element.map(|element| element.into_syntax().into())),
         ))
+    }
+}
+impl TsImportTypeArguments {
+    pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_argument(self, element: AnyTsType) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_comma_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_ts_import_type_assertion_block(
+        self,
+        element: Option<TsImportTypeAssertionBlock>,
+    ) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+}
+impl TsImportTypeAssertion {
+    pub fn with_with_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_assertions(self, element: JsImportAssertionEntryList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+}
+impl TsImportTypeAssertionBlock {
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_type_assertion(self, element: TsImportTypeAssertion) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
     }
 }
 impl TsImportTypeQualifier {

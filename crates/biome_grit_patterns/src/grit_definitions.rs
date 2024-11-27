@@ -92,7 +92,7 @@ pub fn scan_definitions(
                     name.to_owned(),
                     DefinitionInfo {
                         index: pattern_index,
-                        parameters: collect_variables(node.args()?.grit_variable_list())?,
+                        parameters: collect_variables(node.args())?,
                     },
                 );
 
@@ -109,7 +109,7 @@ pub fn scan_definitions(
                     name.to_owned(),
                     DefinitionInfo {
                         index: predicate_index,
-                        parameters: collect_variables(node.args()?.grit_variable_list())?,
+                        parameters: collect_variables(node.args())?,
                     },
                 );
 

@@ -124,11 +124,13 @@ fn collect_control_characters(
                                 continue;
                             };
                             (decode_hex(&bytes[hex_index..end]), end + 1)
-                        } else {
+                        } else if (hex_index + 4) <= bytes.len() {
                             (
                                 decode_hex(&bytes[hex_index..(hex_index + 4)]),
                                 hex_index + 4,
                             )
+                        } else {
+                            continue;
                         }
                     }
                     b'u' if (hex_index + 4) <= bytes.len() => (

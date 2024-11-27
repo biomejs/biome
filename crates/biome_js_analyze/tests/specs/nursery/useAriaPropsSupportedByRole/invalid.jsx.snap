@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid.jsx
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -22,19 +23,8 @@ expression: invalid.jsx
 <tbody aria-expanded />
 <tfoot aria-expanded />
 <thead aria-expanded />
-<input type="radio" aria-invalid />
 <input type="radio" aria-selected />
-<input type="radio" aria-haspopup />
-<input type="checkbox" aria-haspopup />
-<input type="reset" aria-invalid />
-<input type="submit" aria-invalid />
-<input type="image" aria-invalid />
-<input type="button" aria-invalid />
-<menu type="toolbar" aria-haspopup />
-<menu type="toolbar" aria-invalid />
 <menu type="toolbar" aria-expanded />
-<area href="#" aria-invalid />
-<a href="#" aria-invalid />
 </>
 
 ```
@@ -304,7 +294,7 @@ invalid.jsx:17:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
   > 17 │ <tfoot aria-expanded />
        │ ^^^^^^^^^^^^^^^^^^^^^^^
     18 │ <thead aria-expanded />
-    19 │ <input type="radio" aria-invalid />
+    19 │ <input type="radio" aria-selected />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -320,8 +310,8 @@ invalid.jsx:18:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
     17 │ <tfoot aria-expanded />
   > 18 │ <thead aria-expanded />
        │ ^^^^^^^^^^^^^^^^^^^^^^^
-    19 │ <input type="radio" aria-invalid />
-    20 │ <input type="radio" aria-selected />
+    19 │ <input type="radio" aria-selected />
+    20 │ <menu type="toolbar" aria-expanded />
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -331,14 +321,14 @@ invalid.jsx:18:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:19:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-invalid' is not supported by this element.
+  ! The ARIA attribute 'aria-selected' is not supported by this element.
   
     17 │ <tfoot aria-expanded />
     18 │ <thead aria-expanded />
-  > 19 │ <input type="radio" aria-invalid />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    20 │ <input type="radio" aria-selected />
-    21 │ <input type="radio" aria-haspopup />
+  > 19 │ <input type="radio" aria-selected />
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    20 │ <menu type="toolbar" aria-expanded />
+    21 │ </>
   
   i Ensure that ARIA attributes are valid for the role of the element.
   
@@ -348,201 +338,14 @@ invalid.jsx:19:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━�
 ```
 invalid.jsx:20:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! The ARIA attribute 'aria-selected' is not supported by this element.
-  
-    18 │ <thead aria-expanded />
-    19 │ <input type="radio" aria-invalid />
-  > 20 │ <input type="radio" aria-selected />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    21 │ <input type="radio" aria-haspopup />
-    22 │ <input type="checkbox" aria-haspopup />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:21:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-haspopup' is not supported by this element.
-  
-    19 │ <input type="radio" aria-invalid />
-    20 │ <input type="radio" aria-selected />
-  > 21 │ <input type="radio" aria-haspopup />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    22 │ <input type="checkbox" aria-haspopup />
-    23 │ <input type="reset" aria-invalid />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:22:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-haspopup' is not supported by this element.
-  
-    20 │ <input type="radio" aria-selected />
-    21 │ <input type="radio" aria-haspopup />
-  > 22 │ <input type="checkbox" aria-haspopup />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    23 │ <input type="reset" aria-invalid />
-    24 │ <input type="submit" aria-invalid />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:23:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-invalid' is not supported by this element.
-  
-    21 │ <input type="radio" aria-haspopup />
-    22 │ <input type="checkbox" aria-haspopup />
-  > 23 │ <input type="reset" aria-invalid />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    24 │ <input type="submit" aria-invalid />
-    25 │ <input type="image" aria-invalid />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:24:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-invalid' is not supported by this element.
-  
-    22 │ <input type="checkbox" aria-haspopup />
-    23 │ <input type="reset" aria-invalid />
-  > 24 │ <input type="submit" aria-invalid />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    25 │ <input type="image" aria-invalid />
-    26 │ <input type="button" aria-invalid />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:25:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-invalid' is not supported by this element.
-  
-    23 │ <input type="reset" aria-invalid />
-    24 │ <input type="submit" aria-invalid />
-  > 25 │ <input type="image" aria-invalid />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    26 │ <input type="button" aria-invalid />
-    27 │ <menu type="toolbar" aria-haspopup />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:26:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-invalid' is not supported by this element.
-  
-    24 │ <input type="submit" aria-invalid />
-    25 │ <input type="image" aria-invalid />
-  > 26 │ <input type="button" aria-invalid />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    27 │ <menu type="toolbar" aria-haspopup />
-    28 │ <menu type="toolbar" aria-invalid />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:27:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-haspopup' is not supported by this element.
-  
-    25 │ <input type="image" aria-invalid />
-    26 │ <input type="button" aria-invalid />
-  > 27 │ <menu type="toolbar" aria-haspopup />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    28 │ <menu type="toolbar" aria-invalid />
-    29 │ <menu type="toolbar" aria-expanded />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:28:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-invalid' is not supported by this element.
-  
-    26 │ <input type="button" aria-invalid />
-    27 │ <menu type="toolbar" aria-haspopup />
-  > 28 │ <menu type="toolbar" aria-invalid />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    29 │ <menu type="toolbar" aria-expanded />
-    30 │ <area href="#" aria-invalid />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:29:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
   ! The ARIA attribute 'aria-expanded' is not supported by this element.
   
-    27 │ <menu type="toolbar" aria-haspopup />
-    28 │ <menu type="toolbar" aria-invalid />
-  > 29 │ <menu type="toolbar" aria-expanded />
+    18 │ <thead aria-expanded />
+    19 │ <input type="radio" aria-selected />
+  > 20 │ <menu type="toolbar" aria-expanded />
        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    30 │ <area href="#" aria-invalid />
-    31 │ <a href="#" aria-invalid />
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:30:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-invalid' is not supported by this element.
-  
-    28 │ <menu type="toolbar" aria-invalid />
-    29 │ <menu type="toolbar" aria-expanded />
-  > 30 │ <area href="#" aria-invalid />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    31 │ <a href="#" aria-invalid />
-    32 │ </>
-  
-  i Ensure that ARIA attributes are valid for the role of the element.
-  
-
-```
-
-```
-invalid.jsx:31:1 lint/nursery/useAriaPropsSupportedByRole ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! The ARIA attribute 'aria-invalid' is not supported by this element.
-  
-    29 │ <menu type="toolbar" aria-expanded />
-    30 │ <area href="#" aria-invalid />
-  > 31 │ <a href="#" aria-invalid />
-       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    32 │ </>
-    33 │ 
+    21 │ </>
+    22 │ 
   
   i Ensure that ARIA attributes are valid for the role of the element.
   

@@ -502,6 +502,7 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             .skip(offset + 3)
             .find(|(_, &c)| c == b'}')?;
         Some(UnicodeEscape {
+            // SAFETY: slicing is safe because `{` is at `offset + 2` and `}` is at `end`.
             codepoint: u32::from_str_radix(&s[offset + 3..end], 16).ok()?,
             kind: if is_regex_escape {
                 UnicodeEscapeKind::RegexBraced
@@ -510,9 +511,10 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             },
             len: end + 1,
         })
-    } else if (offset + 6) <= bytes.len() {
+    } else {
         Some(UnicodeEscape {
-            codepoint: u32::from_str_radix(&s[offset + 2..offset + 6], 16).ok()?,
+            // We use `get` for slicing to handle malformed escape sequence that end with a multi-byte char.
+            codepoint: u32::from_str_radix(s.get(offset + 2..offset + 6)?, 16).ok()?,
             kind: if is_regex_escape {
                 UnicodeEscapeKind::RegexPlain
             } else {
@@ -520,8 +522,6 @@ fn decode_unicode_escape_sequence(s: &str, is_in_string: bool) -> Option<Unicode
             },
             len: offset + 6,
         })
-    } else {
-        None
     }
 }
 

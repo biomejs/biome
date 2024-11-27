@@ -97,10 +97,9 @@ impl Rule for UseKeyWithClickEvents {
         }
 
         let attributes = element.attributes();
-        let on_click_attribute = attributes.find_by_name("onClick").ok()?;
 
-        #[allow(clippy::question_mark)]
-        if on_click_attribute.is_none() {
+        #[expect(clippy::question_mark)]
+        if attributes.find_by_name("onClick").is_none() {
             return None;
         }
 

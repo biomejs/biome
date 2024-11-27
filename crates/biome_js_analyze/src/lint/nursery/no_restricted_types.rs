@@ -28,9 +28,8 @@ declare_lint_rule! {
     /// Use the options to specify additional types that you want to restrict in your
     /// source code.
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "types": {
     ///            "Foo": {

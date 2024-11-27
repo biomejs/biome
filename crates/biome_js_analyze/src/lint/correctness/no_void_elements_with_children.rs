@@ -196,11 +196,10 @@ impl Rule for NoVoidElementsWithChildren {
                 let name = name.as_jsx_name()?.value_token().ok()?;
                 let name = name.text_trimmed();
                 if is_void_dom_element(name) {
-                    let dangerous_prop = opening_element
-                        .find_attribute_by_name("dangerouslySetInnerHTML")
-                        .ok()?;
+                    let dangerous_prop =
+                        opening_element.find_attribute_by_name("dangerouslySetInnerHTML");
                     let has_children = !element.children().is_empty();
-                    let children_prop = opening_element.find_attribute_by_name("children").ok()?;
+                    let children_prop = opening_element.find_attribute_by_name("children");
                     if dangerous_prop.is_some() || has_children || children_prop.is_some() {
                         let cause = NoVoidElementsWithChildrenCause::Jsx {
                             children_prop,
@@ -217,10 +216,8 @@ impl Rule for NoVoidElementsWithChildren {
                 let name = name.as_jsx_name()?.value_token().ok()?;
                 let name = name.text_trimmed();
                 if is_void_dom_element(name) {
-                    let dangerous_prop = element
-                        .find_attribute_by_name("dangerouslySetInnerHTML")
-                        .ok()?;
-                    let children_prop = element.find_attribute_by_name("children").ok()?;
+                    let dangerous_prop = element.find_attribute_by_name("dangerouslySetInnerHTML");
+                    let children_prop = element.find_attribute_by_name("children");
                     if dangerous_prop.is_some() || children_prop.is_some() {
                         let cause = NoVoidElementsWithChildrenCause::Jsx {
                             children_prop,

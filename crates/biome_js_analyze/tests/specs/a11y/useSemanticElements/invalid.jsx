@@ -7,14 +7,14 @@
     <div role="separator" ></div>
     <div role="button" ></div>
     <div role="article" ></div>
-    <div role="dialog" ></div>
+
     <div role="cell" ></div>
     <div role="columnheader" ></div>
-    <div role="definition" ></div>
+
     <div role="figure" ></div>
     <div role="form" ></div>
-    <div role="graphics-document" ></div>
-    <div role="graphics-object" ></div>
+
+
     <div role="grid" ></div>
     <div role="gridcell" ></div>
     <div role="group" ></div>
@@ -35,10 +35,9 @@
     <div role="caption" ></div>
     <div role="main" ></div>
     <div role="time" ></div>
-    <div role="p" ></div>
-    <div role="aside" ></div>
+    <div role="paragraph" ></div>
+    <div role="complementary" ></div>
     <div role="blockquote" ></div>
-    <div role="associationlist" ></div>
     <div role="status" ></div>
     <div role="contentinfo" ></div>
     <div role="region" ></div>

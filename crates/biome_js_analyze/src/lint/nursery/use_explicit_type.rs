@@ -11,7 +11,9 @@ use biome_js_syntax::{
 };
 use biome_js_syntax::{
     AnyJsFunction, JsGetterClassMember, JsGetterObjectMember, JsMethodClassMember,
-    JsMethodObjectMember,
+    JsMethodObjectMember, TsCallSignatureTypeMember, TsDeclareFunctionDeclaration,
+    TsDeclareFunctionExportDefaultDeclaration, TsGetterSignatureClassMember,
+    TsMethodSignatureClassMember, TsMethodSignatureTypeMember,
 };
 use biome_rowan::{declare_node_union, AstNode, SyntaxNode, SyntaxNodeOptionExt, TextRange};
 
@@ -102,6 +104,55 @@ declare_lint_rule! {
     ///   return (): string => {
     ///     str;
     ///   }
+    /// }
+    /// ```
+    ///
+    /// The following pattern is considered incorrect code for an interface method without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// interface Array<Type> {
+    ///   method();
+    /// }
+    /// ```
+    ///
+    /// The following pattern is considered incorrect code for a type declaration of a function without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// type MyObject = {
+    ///   (input: string);
+    ///   propertyName: string;
+    /// };
+    /// ```
+    ///
+    /// The following pattern is considered incorrect code for an abstract class method without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// abstract class MyClass {
+    ///   public abstract method();
+    /// }
+    /// ```
+    ///
+    /// The following pattern is considered incorrect code for an abstract class getter without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// abstract class P<T> {
+    ///   abstract get poke();
+    /// }
+    /// ```
+    ///
+    /// The following pattern is considered incorrect code for a function declaration in a namespace without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// declare namespace myLib {
+    ///   function makeGreeting(s: string);
+    /// }
+    /// ```
+    ///
+    /// The following pattern is considered incorrect code for a module function export without a return type:
+    ///
+    /// ```ts,expect_diagnostic
+    /// declare module "foo" {
+    ///   export default function bar();
     /// }
     /// ```
     ///
@@ -212,11 +263,22 @@ declare_lint_rule! {
 }
 
 declare_node_union! {
-    pub AnyJsFunctionWithReturnType = AnyJsFunction | JsMethodClassMember | JsMethodObjectMember | JsGetterClassMember | JsGetterObjectMember
+    pub AnyCallableWithReturn =
+        AnyJsFunction
+        | JsMethodClassMember
+        | JsMethodObjectMember
+        | JsGetterClassMember
+        | JsGetterObjectMember
+        | TsMethodSignatureTypeMember
+        | TsCallSignatureTypeMember
+        | TsMethodSignatureClassMember
+        | TsGetterSignatureClassMember
+        | TsDeclareFunctionDeclaration
+        | TsDeclareFunctionExportDefaultDeclaration
 }
 
 impl Rule for UseExplicitType {
-    type Query = Ast<AnyJsFunctionWithReturnType>;
+    type Query = Ast<AnyCallableWithReturn>;
     type State = TextRange;
     type Signals = Option<Self::State>;
     type Options = ();
@@ -229,7 +291,7 @@ impl Rule for UseExplicitType {
 
         let node = ctx.query();
         match node {
-            AnyJsFunctionWithReturnType::AnyJsFunction(func) => {
+            AnyCallableWithReturn::AnyJsFunction(func) => {
                 if func.return_type_annotation().is_some() {
                     return None;
                 }
@@ -264,33 +326,70 @@ impl Rule for UseExplicitType {
 
                 Some(func_range)
             }
-            AnyJsFunctionWithReturnType::JsMethodClassMember(method) => {
+            AnyCallableWithReturn::JsMethodClassMember(method) => {
                 if method.return_type_annotation().is_some() {
                     return None;
                 }
 
                 Some(method.node_text_range())
             }
-            AnyJsFunctionWithReturnType::JsGetterClassMember(getter) => {
+            AnyCallableWithReturn::JsGetterClassMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
                 Some(getter.node_text_range())
             }
-            AnyJsFunctionWithReturnType::JsMethodObjectMember(method) => {
+            AnyCallableWithReturn::JsMethodObjectMember(method) => {
                 if method.return_type_annotation().is_some() {
                     return None;
                 }
 
                 Some(method.node_text_range())
             }
-            AnyJsFunctionWithReturnType::JsGetterObjectMember(getter) => {
+            AnyCallableWithReturn::JsGetterObjectMember(getter) => {
                 if getter.return_type().is_some() {
                     return None;
                 }
 
                 Some(getter.node_text_range())
+            }
+            AnyCallableWithReturn::TsMethodSignatureTypeMember(member) => {
+                if member.return_type_annotation().is_some() {
+                    return None;
+                }
+
+                Some(member.range())
+            }
+            AnyCallableWithReturn::TsCallSignatureTypeMember(member) => {
+                if member.return_type_annotation().is_some() {
+                    return None;
+                }
+                Some(member.range())
+            }
+            AnyCallableWithReturn::TsMethodSignatureClassMember(member) => {
+                if member.return_type_annotation().is_some() {
+                    return None;
+                }
+                Some(member.range())
+            }
+            AnyCallableWithReturn::TsGetterSignatureClassMember(member) => {
+                if member.return_type().is_some() {
+                    return None;
+                }
+                Some(member.range())
+            }
+            AnyCallableWithReturn::TsDeclareFunctionDeclaration(decl) => {
+                if decl.return_type_annotation().is_some() {
+                    return None;
+                }
+                Some(decl.range())
+            }
+            AnyCallableWithReturn::TsDeclareFunctionExportDefaultDeclaration(decl) => {
+                if decl.return_type_annotation().is_some() {
+                    return None;
+                }
+                Some(decl.range())
             }
         }
     }

@@ -104,7 +104,7 @@ impl Rule for UseValidAriaValues {
                     markup!{
                         "The only supported values for the "<Emphasis>{attribute_name}</Emphasis>" property is one of the following:"
                     },
-                    &["false", "true"]
+                    ["false", "true"]
                 )
             }
             AriaValueType::OptionalBoolean => {
@@ -112,7 +112,7 @@ impl Rule for UseValidAriaValues {
                     markup!{
                         "The only supported values for the "<Emphasis>{attribute_name}</Emphasis>" property is one of the following:"
                     },
-                    &["undefined", "false", "true"]
+                    ["undefined", "false", "true"]
                 )
             }
             AriaValueType::Integer => {
@@ -171,7 +171,7 @@ impl Rule for UseValidAriaValues {
                     markup!{
                         "The only supported value for the "<Emphasis>{attribute_name}</Emphasis>" property one of the following:"
                     },
-                    &["false", "true", "mixed"]
+                    ["false", "true", "mixed"]
                 )
             }
         };

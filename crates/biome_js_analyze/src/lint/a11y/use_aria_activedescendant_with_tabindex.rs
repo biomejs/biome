@@ -67,13 +67,9 @@ impl Rule for UseAriaActivedescendantWithTabindex {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let aria_roles = ctx.aria_roles();
-        let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-        let attributes = ctx.extract_attributes(&node.attributes());
-        let attributes = ctx.convert_all_attribute_values(attributes);
 
         if node.is_element()
-            && aria_roles.is_not_interactive_element(element_name.text_trimmed(), attributes)
+            && ctx.aria_roles().is_not_interactive_element(node)
             && node
                 .find_attribute_by_name("aria-activedescendant")
                 .is_some()
@@ -128,7 +124,7 @@ impl Rule for UseAriaActivedescendantWithTabindex {
         Some(JsRuleAction::new(
             ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
-            markup! { "Add the tabIndex attribute." }.to_owned(),
+            markup! { "Add the "<Emphasis>"tabIndex"</Emphasis>" attribute." }.to_owned(),
             mutation,
         ))
     }

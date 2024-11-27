@@ -771,6 +771,9 @@ fn allow_trailing_commas_on_well_known_files() {
 }"#,
     );
 
+    let vscode_text_file = Path::new(".vscode/any.text");
+    fs.insert(vscode_text_file.into(), "any text");
+
     let other_json = Path::new("other.json");
     fs.insert(
         other_json.into(),
@@ -787,7 +790,7 @@ fn allow_trailing_commas_on_well_known_files() {
                 "check",
                 other_json.as_os_str().to_str().unwrap(),
                 tsconfig.as_os_str().to_str().unwrap(),
-                vscode_settings.as_os_str().to_str().unwrap(),
+                ".vscode/",
             ]
             .as_slice(),
         ),

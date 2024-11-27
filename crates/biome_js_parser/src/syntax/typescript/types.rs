@@ -5,21 +5,20 @@ use crate::prelude::*;
 use crate::state::{EnterType, SignatureFlags};
 use crate::syntax::expr::{
     is_at_binary_operator, is_at_expression, is_at_identifier, is_nth_at_identifier,
-    is_nth_at_identifier_or_keyword, parse_assignment_expression_or_higher,
-    parse_big_int_literal_expression, parse_identifier, parse_literal_expression, parse_name,
-    parse_number_literal_expression, parse_reference_identifier, parse_template_elements,
-    ExpressionContext,
+    is_nth_at_identifier_or_keyword, parse_big_int_literal_expression, parse_identifier,
+    parse_literal_expression, parse_name, parse_number_literal_expression,
+    parse_reference_identifier, parse_template_elements, ExpressionContext,
 };
 use crate::syntax::function::{
     parse_formal_parameter, parse_parameter_list, skip_parameter_start, ParameterContext,
 };
-use crate::syntax::js_parse_error;
 use crate::syntax::js_parse_error::{
     decorators_not_allowed, expected_identifier, expected_object_member_name, expected_parameter,
     expected_parameters, expected_property_or_signature, modifier_already_seen,
     modifier_must_precede_modifier,
 };
 use crate::syntax::metavariable::parse_metavariable;
+use crate::syntax::module::ImportAssertionList;
 use crate::syntax::object::{
     is_at_object_member_name, is_nth_at_type_member_name, parse_object_member_name,
 };
@@ -31,7 +30,6 @@ use crate::syntax::typescript::ts_parse_error::{
     ts_in_out_modifier_cannot_appear_on_a_type_parameter,
 };
 use biome_parser::parse_lists::{ParseNodeList, ParseSeparatedList};
-use biome_parser::ParserProgress;
 use enumflags2::{bitflags, make_bitflags, BitFlags};
 use smallvec::SmallVec;
 
@@ -1166,42 +1164,8 @@ fn parse_ts_import_type(p: &mut JsParser, context: TypeContext) -> ParsedSyntax 
     let m = p.start();
     p.eat(T![typeof]);
     p.expect(T![import]);
-    let args = p.start();
-    p.expect(T!['(']);
-    let args_list = p.start();
 
-    let mut progress = ParserProgress::default();
-    let mut error_range_start = p.cur_range().start();
-    let mut args_count = 0;
-
-    while !p.at(EOF) && !p.at(T![')']) {
-        progress.assert_progressing(p);
-        args_count += 1;
-
-        if args_count == 3 {
-            error_range_start = p.cur_range().start();
-        }
-
-        parse_assignment_expression_or_higher(p, ExpressionContext::default())
-            .or_add_diagnostic(p, js_parse_error::expected_expression_assignment);
-
-        if p.at(T![,]) {
-            p.bump_any();
-        } else {
-            break;
-        }
-    }
-    args_list.complete(p, JS_CALL_ARGUMENT_LIST);
-
-    if args_count == 0 || args_count > 2 {
-        let err = p.err_builder(
-            "`typeof import()` requires exactly one or two arguments. ",
-            error_range_start..p.cur_range().end(),
-        );
-        p.error(err);
-    }
-    p.expect(T![')']);
-    args.complete(p, JS_CALL_ARGUMENTS);
+    parse_ts_import_type_arguments(p, context).ok();
 
     if p.at(T![.]) {
         let qualifier = p.start();
@@ -1707,6 +1671,88 @@ fn parse_ts_constructor_type(p: &mut JsParser, context: TypeContext) -> ParsedSy
     p.expect(T![=>]);
     parse_ts_type(p, context).or_add_diagnostic(p, expected_ts_type);
     Present(m.complete(p, TS_CONSTRUCTOR_TYPE))
+}
+
+fn parse_ts_import_type_assertion(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T![assert]) && !p.at(T![with]) {
+        return Absent;
+    }
+
+    let m = p.start();
+    match p.cur() {
+        T![assert] => {
+            p.expect(T![assert]);
+        }
+        T![with] => {
+            p.expect(T![with]);
+        }
+        _ => {
+            m.abandon(p);
+            return Absent;
+        }
+    };
+
+    // bump assert or with
+    p.expect(T![:]);
+    p.expect(T!['{']);
+    ImportAssertionList::default().parse_list(p);
+
+    p.expect(T!['}']);
+
+    Present(m.complete(p, TS_IMPORT_TYPE_ASSERTION))
+}
+
+fn parse_ts_import_type_assertion_block(p: &mut JsParser) -> ParsedSyntax {
+    if !p.at(T!['{']) {
+        return Absent;
+    }
+
+    let m = p.start();
+
+    if p.at(T!['{']) {
+        p.bump(T!['{']);
+        if p.at(T!['}']) {
+            p.error(
+                p.err_builder(
+                    "Missing import type assertion keyword 'with'",
+                    p.cur_range(),
+                )
+                .with_detail(p.cur_range(), "'with' expected."),
+            );
+        }
+    }
+
+    parse_ts_import_type_assertion(p).ok();
+
+    p.expect(T!['}']);
+
+    Present(m.complete(p, TS_IMPORT_TYPE_ASSERTION_BLOCK))
+}
+
+fn parse_ts_import_type_arguments(p: &mut JsParser, context: TypeContext) -> ParsedSyntax {
+    if !p.at(T!['(']) {
+        return Absent;
+    }
+    let m = p.start();
+    p.bump(T!('('));
+    parse_ts_type(p, context).or_add_diagnostic(p, expected_ts_type);
+    if p.at(T![,]) {
+        if p.nth_at(1, T![')']) {
+            p.error(
+                p.err_builder(
+                    "ts import type may not have a trailing comma",
+                    p.cur_range(),
+                )
+                .with_detail(p.cur_range(), "Remove the trailing comma here"),
+            );
+        }
+        p.bump(T![,]);
+        parse_ts_import_type_assertion_block(p).ok();
+    }
+
+    p.expect(T![')']);
+
+    Present(m.complete(p, TS_IMPORT_TYPE_ARGUMENTS))
 }
 
 fn is_at_constructor_type(p: &mut JsParser) -> bool {

@@ -18,24 +18,26 @@ use biome_rowan::{AstNode, SyntaxNodeCast};
 use biome_string_case::{StrLikeExtension, StrOnlyExtension};
 
 pub fn is_font_family_keyword(value: &str) -> bool {
-    BASIC_KEYWORDS.contains(&value) || FONT_FAMILY_KEYWORDS.contains(&value)
+    BASIC_KEYWORDS.binary_search(&value).is_ok()
+        || FONT_FAMILY_KEYWORDS.binary_search(&value).is_ok()
 }
 
 pub fn is_system_family_name_keyword(value: &str) -> bool {
-    BASIC_KEYWORDS.contains(&value) || SYSTEM_FAMILY_NAME_KEYWORDS.contains(&value)
+    BASIC_KEYWORDS.binary_search(&value).is_ok()
+        || SYSTEM_FAMILY_NAME_KEYWORDS.binary_search(&value).is_ok()
 }
 
 // check if the value is a shorthand keyword used in `font` property
 pub fn is_font_shorthand_keyword(value: &str) -> bool {
-    BASIC_KEYWORDS.contains(&value)
-        || FONT_STYLE_KEYWORDS.contains(&value)
-        || FONT_VARIANTS_KEYWORDS.contains(&value)
-        || FONT_WEIGHT_ABSOLUTE_KEYWORDS.contains(&value)
-        || FONT_WEIGHT_NUMERIC_KEYWORDS.contains(&value)
-        || FONT_STRETCH_KEYWORDS.contains(&value)
-        || FONT_SIZE_KEYWORDS.contains(&value)
-        || LINE_HEIGHT_KEYWORDS.contains(&value)
-        || FONT_FAMILY_KEYWORDS.contains(&value)
+    BASIC_KEYWORDS.binary_search(&value).is_ok()
+        || FONT_STYLE_KEYWORDS.binary_search(&value).is_ok()
+        || FONT_VARIANTS_KEYWORDS.binary_search(&value).is_ok()
+        || FONT_WEIGHT_ABSOLUTE_KEYWORDS.binary_search(&value).is_ok()
+        || FONT_WEIGHT_NUMERIC_KEYWORDS.binary_search(&value).is_ok()
+        || FONT_STRETCH_KEYWORDS.binary_search(&value).is_ok()
+        || FONT_SIZE_KEYWORDS.binary_search(&value).is_ok()
+        || LINE_HEIGHT_KEYWORDS.binary_search(&value).is_ok()
+        || FONT_FAMILY_KEYWORDS.binary_search(&value).is_ok()
 }
 
 pub fn is_css_variable(value: &str) -> bool {
@@ -132,10 +134,12 @@ pub fn vender_prefix(prop: &str) -> &str {
 }
 
 pub fn is_pseudo_elements(prop: &str) -> bool {
-    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS.contains(&prop)
-        || VENDOR_SPECIFIC_PSEUDO_ELEMENTS.contains(&prop)
-        || SHADOW_TREE_PSEUDO_ELEMENTS.contains(&prop)
-        || OTHER_PSEUDO_ELEMENTS.contains(&prop)
+    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS
+        .binary_search(&prop)
+        .is_ok()
+        || VENDOR_SPECIFIC_PSEUDO_ELEMENTS.binary_search(&prop).is_ok()
+        || SHADOW_TREE_PSEUDO_ELEMENTS.binary_search(&prop).is_ok()
+        || OTHER_PSEUDO_ELEMENTS.binary_search(&prop).is_ok()
 }
 
 /// Check if the input string is custom selector
@@ -145,17 +149,25 @@ pub fn is_custom_selector(prop: &str) -> bool {
 }
 
 pub fn is_page_pseudo_class(prop: &str) -> bool {
-    AT_RULE_PAGE_PSEUDO_CLASSES.contains(&prop)
+    AT_RULE_PAGE_PSEUDO_CLASSES.binary_search(&prop).is_ok()
 }
 
 pub fn is_known_pseudo_class(prop: &str) -> bool {
-    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS.contains(&prop)
-        || A_NPLUS_BNOTATION_PSEUDO_CLASSES.contains(&prop)
-        || A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES.contains(&prop)
-        || LINGUISTIC_PSEUDO_CLASSES.contains(&prop)
-        || LOGICAL_COMBINATIONS_PSEUDO_CLASSES.contains(&prop)
-        || RESOURCE_STATE_PSEUDO_CLASSES.contains(&prop)
-        || OTHER_PSEUDO_CLASSES.contains(&prop)
+    LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS
+        .binary_search(&prop)
+        .is_ok()
+        || A_NPLUS_BNOTATION_PSEUDO_CLASSES
+            .binary_search(&prop)
+            .is_ok()
+        || A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES
+            .binary_search(&prop)
+            .is_ok()
+        || LINGUISTIC_PSEUDO_CLASSES.binary_search(&prop).is_ok()
+        || LOGICAL_COMBINATIONS_PSEUDO_CLASSES
+            .binary_search(&prop)
+            .is_ok()
+        || RESOURCE_STATE_PSEUDO_CLASSES.binary_search(&prop).is_ok()
+        || OTHER_PSEUDO_CLASSES.binary_search(&prop).is_ok()
 }
 
 pub fn is_known_properties(prop: &str) -> bool {

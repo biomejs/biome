@@ -1,8 +1,12 @@
+use std::str::FromStr;
+
 use crate::services::aria::Aria;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Rule, RuleDiagnostic, RuleSource};
+use biome_aria_metadata::AriaAttribute;
+use biome_aria_metadata::AriaRole;
 use biome_console::markup;
 use biome_diagnostics::Severity;
-use biome_js_syntax::jsx_ext::AnyJsxElement;
+use biome_js_syntax::{jsx_ext::AnyJsxElement, AnyJsxAttribute};
 use biome_rowan::AstNode;
 
 declare_lint_rule! {
@@ -44,29 +48,49 @@ declare_lint_rule! {
 
 impl Rule for UseAriaPropsSupportedByRole {
     type Query = Aria<AnyJsxElement>;
-    type State = String;
+    type State = AriaAttribute;
     type Signals = Option<Self::State>;
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-        let element_name = element_name.text_trimmed();
-        let aria_roles = ctx.aria_roles();
-        let attributes = ctx.extract_attributes(&node.attributes());
-        let attributes = ctx.convert_all_attribute_values(attributes);
 
-        if let Some(attributes) = &attributes {
-            let role_name = aria_roles.get_role_by_element_name(element_name, attributes)?;
-            for attribute in attributes.keys() {
-                if attribute.starts_with("aria-")
-                    && !is_valid_aria_props_supported_by_role(
-                        role_name.type_name(),
-                        attribute.as_str(),
-                    )
-                {
-                    return Some(attribute.clone());
-                }
+        if !node.name().is_ok_and(|name| name.as_jsx_name().is_some()) {
+            // Ignore custom components and namespaced elements
+            return None;
+        }
+
+        let role = node
+            .find_attribute_by_name("role")
+            .and_then(|attribute| attribute.as_static_value())
+            .and_then(|value| AriaRole::from_roles(value.text()))
+            .or_else(|| ctx.aria_roles().get_implicit_role(node));
+
+        let role_attributes = role.map_or(Default::default(), |role| role.attributes());
+        let role_prohibited_attributes =
+            role.map_or(Default::default(), |role| role.prohibited_attributes());
+
+        for attribute in node.attributes() {
+            let AnyJsxAttribute::JsxAttribute(attribute) = attribute else {
+                continue;
+            };
+            let aria_attribute = attribute.name().ok().and_then(|x| {
+                AriaAttribute::from_str(x.as_jsx_name()?.value_token().ok()?.text_trimmed()).ok()
+            });
+            let Some(aria_attribute) = aria_attribute else {
+                continue;
+            };
+            // Allow null/undefined values regardless of the role
+            if attribute
+                .as_static_value()
+                .is_some_and(|value| matches!(value.text(), "null" | "undefined"))
+            {
+                continue;
+            }
+            if role_prohibited_attributes.contains(&aria_attribute)
+                || (!aria_attribute.is_global() && !role_attributes.contains(&aria_attribute))
+            {
+                return Some(aria_attribute);
             }
         }
 
@@ -75,8 +99,7 @@ impl Rule for UseAriaPropsSupportedByRole {
 
     fn diagnostic(ctx: &RuleContext<Self>, state: &Self::State) -> Option<RuleDiagnostic> {
         let node = ctx.query();
-        let invalid_aria_prop = state;
-
+        let invalid_aria_prop = state.as_str();
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
@@ -89,73 +112,5 @@ impl Rule for UseAriaPropsSupportedByRole {
                 "Ensure that ARIA attributes are valid for the role of the element."
             }),
         )
-    }
-}
-
-fn is_valid_aria_props_supported_by_role(role_name: &'static str, aria_attribute: &str) -> bool {
-    if is_global_aria(aria_attribute) {
-        return true;
-    }
-
-    match role_name {
-        "biome_aria::roles::LinkRole" => {
-            matches!(
-                aria_attribute,
-                "aria-expanded" | "aria-haspopup" | "aria-current"
-            )
-        }
-        "biome_aria::roles::ButtonRole" => {
-            matches!(aria_attribute, "aria-expanded" | "aria-pressed")
-        }
-        "biome_aria::roles::CheckboxRole"
-        | "biome_aria::roles::RadioRole"
-        | "biome_aria::roles::MenuItemCheckboxRole"
-        | "biome_aria::roles::MenuItemRadioRole" => {
-            matches!(aria_attribute, "aria-checked")
-        }
-        "biome_aria::roles::ComboBoxRole" => {
-            matches!(aria_attribute, "aria-expanded")
-        }
-        "biome_aria::roles::SliderRole" => {
-            matches!(
-                aria_attribute,
-                "aria-valuemax" | "aria-valuemin" | "aria-valuenow"
-            )
-        }
-        "biome_aria::roles::ListRole" => {
-            matches!(aria_attribute, "aria-activedescendant")
-        }
-        "biome_aria::roles::HeadingRole" => matches!(aria_attribute, "aria-level"),
-        // This rule is not concerned with the abstract role
-        "biome_aria::roles::PresentationRole" | "biome_aria::roles::GenericRole" => true,
-        _ => false,
-    }
-}
-
-/// Check if the aria attribute is global
-/// https://www.w3.org/TR/wai-aria-1.1/#global_states
-///
-/// However, aria-invalid and aria-haspopup are not included this list
-/// Because every elements cannot have These attributes.
-/// https://www.w3.org/TR/wai-aria-1.1/#aria-invalid
-/// https://www.w3.org/TR/wai-aria-1.1/#aria-haspopup
-fn is_global_aria(aria_attribute: &str) -> bool {
-    matches! {
-        aria_attribute,
-        "aria-atomic"
-            | "aria-busy"
-            | "aria-controls"
-            | "aria-describedby"
-            | "aria-disabled"
-            | "aria-dropeffect"
-            | "aria-flowto"
-            | "aria-grabbed"
-            | "aria-hidden"
-            | "aria-label"
-            | "aria-labelledby"
-            | "aria-live"
-            | "aria-owns"
-            | "aria-relevant"
-            | "aria-roledescription"
     }
 }

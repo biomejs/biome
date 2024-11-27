@@ -53,6 +53,12 @@ impl<K: Hash + Eq, V: Merge, S: Default + BuildHasher> Merge
     }
 }
 
+impl<V: Ord> Merge for std::collections::BTreeSet<V> {
+    fn merge_with(&mut self, other: Self) {
+        self.extend(other);
+    }
+}
+
 impl<K: Ord, V: Merge> Merge for std::collections::BTreeMap<K, V> {
     fn merge_with(&mut self, other: Self) {
         for (k, v) in other {

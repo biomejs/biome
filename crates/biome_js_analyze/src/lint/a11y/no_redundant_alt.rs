@@ -59,7 +59,7 @@ impl Rule for NoRedundantAlt {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.name_value_token()?.text_trimmed() != "img" {
+        if node.name_value_token().ok()?.text_trimmed() != "img" {
             return None;
         }
         let aria_hidden_attribute = node.find_attribute_by_name("aria-hidden");

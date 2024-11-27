@@ -185,7 +185,7 @@ impl Rule for NoUnknownUnit {
                 markup! {
                     "Use a known unit instead, such as:"
                 },
-                &["px", "em", "rem", "etc."],
+                ["px", "em", "rem", "etc."],
             ),
 
         )

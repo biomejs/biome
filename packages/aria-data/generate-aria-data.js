@@ -151,13 +151,16 @@ function parseAriaSpec(doc, { url, version }) {
 	};
 }
 
-const DESCRIPTION_REGEX = /(?:\[Deprecated in ARIA ([\d.]+)\])?[ ]?(.+)/;
+const DESCRIPTION_REGEX = /(?:\[Deprecated in ARIA ([\d.]+)\])?[ ]?(.+)/s;
 
 function parseDescription(node) {
 	const text = node?.textContent;
 	if (text != null) {
 		const [_, deprecatedInVersion, description] = text.match(DESCRIPTION_REGEX);
-		return { deprecatedInVersion, description };
+		return {
+			deprecatedInVersion,
+			description: description.trim().replace(/\n[ ]*/g, ""),
+		};
 	}
 	return {};
 }
@@ -324,18 +327,19 @@ function textContents(nodeList) {
 	}
 }
 
-const DEFAULT_ARIA_SSPEC_VERSION = "1.2";
+const DEFAULT_ARIA_SSPEC = "wai-aria-1.2";
 
-const VERSION_REGEX = /^\d+(?:\.\d+)*$/;
+const SPEC_REGEX = /^[a-z_-]+(\d+(?:\.\d+)*)$/;
 
-async function run({ positionals: [version = DEFAULT_ARIA_SSPEC_VERSION] }) {
-	if (!VERSION_REGEX.test(version)) {
+async function run({ positionals: [spec = DEFAULT_ARIA_SSPEC] }) {
+	if (!SPEC_REGEX.test(spec)) {
 		console.error(
-			`"${version}" is not a valid version. default: "${DEFAULT_ARIA_SSPEC_VERSION}"`,
+			`"${spec}" is not a valid spec name. default: "${DEFAULT_ARIA_SSPEC}"`,
 		);
 		process.exit(1);
 	}
-	const url = `https://www.w3.org/TR/wai-aria-${version}/`;
+	const [_, version] = spec.match(SPEC_REGEX);
+	const url = `https://www.w3.org/TR/${spec}/`;
 
 	const browser = new Browser({
 		settings: { errorCapture: BrowserErrorCaptureEnum.processLevel },

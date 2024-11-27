@@ -140,7 +140,7 @@ impl Rule for UseGenericFontNames {
                 markup! {
                     "For examples and more information, see" <Hyperlink href="https://developer.mozilla.org/en-US/docs/Web/CSS/generic-family">" the MDN Web Docs"</Hyperlink>
                 },
-                &["serif", "sans-serif", "monospace", "etc."],
+                ["serif", "sans-serif", "monospace", "etc."],
             ),
         )
     }

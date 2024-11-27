@@ -55,7 +55,7 @@ impl Rule for NoAccessKey {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.name_value_token()?.text_trimmed() != "accessKey" {
+        if node.name_value_token().ok()?.text_trimmed() != "accessKey" {
             return None;
         }
 

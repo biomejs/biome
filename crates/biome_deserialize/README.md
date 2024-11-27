@@ -6,7 +6,7 @@ It provides a framework by which these two groups interact with each other,
 allowing any supported data structure to be deserialized using any supported data format.
 
 This crate inspired by [serde](https://serde.rs/).
-0ne of the main difference is the fault-tolerant behavior of `biome_deserialize`.
+One of the main difference is the fault-tolerant behavior of `biome_deserialize`.
 _Serde_ uses a fast-fail strategy, while `biome_deserialize` deserialize as much as possible
 and report several diagnostics (errors, warning, deprecation messages, ...).
 Also, `biome_deserialize` is intended to deserialize textual data formats.

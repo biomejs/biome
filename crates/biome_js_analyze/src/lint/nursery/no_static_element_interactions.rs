@@ -92,9 +92,6 @@ impl Rule for NoStaticElementInteractions {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
         let element_name = node.name().ok()?.as_jsx_name()?.value_token().ok()?;
-        let aria_roles = ctx.aria_roles();
-        let attributes = ctx.extract_attributes(&node.attributes());
-        let attributes = ctx.convert_all_attribute_values(attributes);
         let element_name = element_name.text_trimmed();
 
         // Check if the element is hidden from screen readers.
@@ -102,31 +99,31 @@ impl Rule for NoStaticElementInteractions {
             return None;
         }
 
-        if let Some(attributes) = &attributes {
-            if aria_roles.is_not_static_element(element_name, attributes) {
-                return None;
-            }
+        if ctx.aria_roles().is_not_static_element(node) {
+            return None;
+        }
 
-            // Check if the element has any interactive event handlers.
-            if !CATEGORIES_TO_CHECK.iter().any(|&category| {
-                if let Some(handlers) = EVENT_TO_HANDLERS
-                    .iter()
-                    .find(|&&(cat, _)| cat == category)
-                    .map(|&(_, handlers)| handlers)
-                {
-                    handlers.iter().any(|&handler| {
-                        if let Some(values) = &attributes.get(handler) {
-                            values.iter().any(|value| value != "null")
-                        } else {
-                            false
-                        }
-                    })
-                } else {
-                    false
-                }
-            }) {
-                return None;
+        // Check if the element has any interactive event handlers.
+        if !CATEGORIES_TO_CHECK.iter().any(|&category| {
+            if let Some(handlers) = EVENT_TO_HANDLERS
+                .iter()
+                .find(|&&(cat, _)| cat == category)
+                .map(|&(_, handlers)| handlers)
+            {
+                handlers.iter().any(|&handler| {
+                    if let Some(value) = node.find_attribute_by_name(handler) {
+                        value
+                            .as_static_value()
+                            .map_or(true, |value| value.text() != "null")
+                    } else {
+                        false
+                    }
+                })
+            } else {
+                false
             }
+        }) {
+            return None;
         }
 
         Some(())

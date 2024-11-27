@@ -120,7 +120,7 @@ invalid.jsx:6:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━�
     7 │ var a = <span aria-relevant="fancy"></span>;
     8 │ var a = <span aria-labelledby=""></span>;
   
-  i The only supported value is an HTML identifier.
+  i The only supported value is a space-separated list of HTML identifiers.
   
 
 ```
@@ -211,7 +211,7 @@ invalid.jsx:11:15 lint/a11y/useValidAriaValues ━━━━━━━━━━━
     12 │ var a = <span aria-setsize="hey"></span>;
     13 │ var a = <span aria-valuemax="hey"></span>;
   
-  i The only supported value is an HTML identifier.
+  i The only supported value is a space-separated list of HTML identifiers.
   
 
 ```

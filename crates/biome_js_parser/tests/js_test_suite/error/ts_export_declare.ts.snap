@@ -8,6 +8,7 @@ expression: snapshot
 export declare @decorator class D {}
 export declare @decorator abstract class D {}
 
+declare@
 ```
 
 
@@ -93,19 +94,32 @@ JsModule {
                 },
             ],
         },
+        JsBogusStatement {
+            items: [
+                DECLARE_KW@82..91 "declare" [Newline("\n"), Newline("\n")] [],
+                JsBogusStatement {
+                    items: [
+                        JsDecorator {
+                            at_token: AT@91..92 "@" [] [],
+                            expression: missing (required),
+                        },
+                    ],
+                },
+            ],
+        },
     ],
-    eof_token: EOF@82..83 "" [Newline("\n")] [],
+    eof_token: EOF@92..92 "" [] [],
 }
 ```
 
 ## CST
 
 ```
-0: JS_MODULE@0..83
+0: JS_MODULE@0..92
   0: (empty)
   1: (empty)
   2: JS_DIRECTIVE_LIST@0..0
-  3: JS_MODULE_ITEM_LIST@0..82
+  3: JS_MODULE_ITEM_LIST@0..92
     0: JS_BOGUS_STATEMENT@0..36
       0: JS_DECORATOR_LIST@0..0
       1: EXPORT_KW@0..7 "export" [] [Whitespace(" ")]
@@ -152,7 +166,13 @@ JsModule {
           7: L_CURLY@80..81 "{" [] []
           8: JS_CLASS_MEMBER_LIST@81..81
           9: R_CURLY@81..82 "}" [] []
-  4: EOF@82..83 "" [Newline("\n")] []
+    2: JS_BOGUS_STATEMENT@82..92
+      0: DECLARE_KW@82..91 "declare" [Newline("\n"), Newline("\n")] []
+      1: JS_BOGUS_STATEMENT@91..92
+        0: JS_DECORATOR@91..92
+          0: AT@91..92 "@" [] []
+          1: (empty)
+  4: EOF@92..92 "" [] []
 
 ```
 
@@ -178,7 +198,51 @@ ts_export_declare.ts:2:16 parse ━━━━━━━━━━━━━━━━
   > 2 │ export declare @decorator abstract class D {}
       │                ^^^^^^^^^^
     3 │ 
+    4 │ declare@
   
   i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_export_declare.ts:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression but instead found the end of the file.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │         
+  
+  i Expected an expression here.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │         
+  
+ts_export_declare.ts:4:8 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Decorators are not valid here.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │        ^
+  
+  i Decorators are only valid on class declarations, class expressions, and class methods.
+  
+ts_export_declare.ts:4:9 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a declare statement but instead found the end of the file.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │         
+  
+  i Expected a declare statement here.
+  
+    2 │ export declare @decorator abstract class D {}
+    3 │ 
+  > 4 │ declare@
+      │         
   
 ```

@@ -44,12 +44,12 @@ JsBogusMember = SyntaxElement*
 JsBogusBinding = SyntaxElement*
 JsBogusAssignment = SyntaxElement*
 JsBogusParameter = SyntaxElement*
-JsBogusImportAttributeEntry = SyntaxElement*
+JsBogusImportAssertionEntry = SyntaxElement*
 JsBogusNamedImportSpecifier = SyntaxElement*
 TsBogusType = SyntaxElement*
 
 AnyJsRoot =
-	JsScript | JsModule | JsExpressionSnipped
+	JsScript | JsModule | JsExpressionSnipped | TsDeclarationModule
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -59,6 +59,13 @@ JsScript =
 	eof: 'EOF'
 
 JsModule =
+	bom: 'UNICODE_BOM'?
+	interpreter: 'js_shebang'?
+	directives: JsDirectiveList
+	items: JsModuleItemList
+	eof: 'EOF'
+
+TsDeclarationModule =
 	bom: 'UNICODE_BOM'?
 	interpreter: 'js_shebang'?
 	directives: JsDirectiveList
@@ -1237,7 +1244,7 @@ AnyJsImportClause =
 // import "abcd" assert ...
 JsImportBareClause =
 	source: AnyJsModuleSource
-	attribute: JsImportAttribute?
+	assertion: JsImportAssertion?
 
 // import foo from "mod"
 // import type foo from "mod"
@@ -1246,7 +1253,7 @@ JsImportDefaultClause =
 	default_specifier: JsDefaultImportSpecifier
 	'from'
 	source: AnyJsModuleSource
-	attribute: JsImportAttribute?
+	assertion: JsImportAssertion?
 
 // import * as foo from "mod";
 // import type * as foo from "mod";
@@ -1255,7 +1262,7 @@ JsImportNamespaceClause =
 	namespace_specifier: JsNamespaceImportSpecifier
 	'from'
 	source: AnyJsModuleSource
-	attribute: JsImportAttribute?
+	assertion: JsImportAssertion?
 
 // import { a, b: c } from "d";
 //        ^^^^^^^^^^^^^^^^^^^^
@@ -1268,7 +1275,7 @@ JsImportNamedClause =
 	named_specifiers: JsNamedImportSpecifiers
     'from'
     source: AnyJsModuleSource
-    attribute: JsImportAttribute?
+    assertion: JsImportAssertion?
 
 // import c, { b } from "c"
 //        ^^^^^^^^^^^^^^^^^
@@ -1282,7 +1289,7 @@ JsImportCombinedClause =
 	specifier: AnyJsCombinedSpecifier
 	'from'
 	source: AnyJsModuleSource
-	attribute: JsImportAttribute?
+	assertion: JsImportAssertion?
 
 AnyJsCombinedSpecifier = JsNamedImportSpecifiers | JsNamespaceImportSpecifier
 
@@ -1329,22 +1336,22 @@ JsShorthandNamedImportSpecifier =
     local_name: AnyJsBinding
 
 // import a from "mod" with { type: "json" }
-//                     ^^^^^^^^^^^^^^^^^^^^^
-JsImportAttribute =
+//                     ^^^^^^^^^^^^^^^^^^^^^^^
+JsImportAssertion =
     'with'
     '{'
-    attributes: JsImportAttributeEntryList
+    assertions: JsImportAssertionEntryList
     '}'
 
-JsImportAttributeEntryList = (AnyJsImportAttributeEntry (',' AnyJsImportAttributeEntry)* ','?)
+JsImportAssertionEntryList = (AnyJsImportAssertionEntry (',' AnyJsImportAssertionEntry)* ','?)
 
-AnyJsImportAttributeEntry =
-	JsImportAttributeEntry
-	| JsBogusImportAttributeEntry
+AnyJsImportAssertionEntry =
+	JsImportAssertionEntry
+	| JsBogusImportAssertionEntry
 
 // import a from "mod" with { type: "json" }
-//                            ^^^^^^^^^^^^
-JsImportAttributeEntry =
+//                              ^^^^^^^^^^^^
+JsImportAssertionEntry =
     key: ('ident' | 'js_string_literal')
     ':'
     value: 'js_string_literal'
@@ -1483,7 +1490,7 @@ JsExportFromClause =
 	export_as: JsExportAsClause?
 	'from'
 	source: AnyJsModuleSource
-	attribute: JsImportAttribute?
+	assertion: JsImportAssertion?
 	';'?
 
 // export { a } from "b";
@@ -1497,7 +1504,7 @@ JsExportNamedFromClause =
 	'}'
 	'from'
 	source: AnyJsModuleSource
-	attribute: JsImportAttribute?
+	assertion: JsImportAssertion?
 	';'?
 
 AnyJsModuleSource =
@@ -2125,14 +2132,40 @@ TsMappedTypeReadonlyModifierClause =
 	operator_token: ('+' | '-')?
 	'readonly'
 
+// a: typeof import("mod", { with: { "resolution-mode": "import" } })
+//                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TsImportTypeAssertion =
+  'with'
+  ':'
+  '{'
+  assertions: JsImportAssertionEntryList
+  '}'
+
+// a: typeof import("mod", { with: { "resolution-mode": "import" } })
+//                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TsImportTypeAssertionBlock = 
+	'{'
+	type_assertion: TsImportTypeAssertion
+	'}'
+
+// a: typeof import("mod", { with: { "resolution-mode": "import" } })
+//                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TsImportTypeArguments = 
+    '(' 
+    argument: AnyTsType 
+	(',' TsImportTypeAssertionBlock )?
+	')'
+
 // a: import("./test").T<typeof X>
 //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // a: import("./test")<string>
 //    ^^^^^^^^^^^^^^^^^^^^^^^^^
+// a: typeof import("./test", { with: { "resolution-mode": "import" } })
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 TsImportType =
 	'typeof'?
 	'import'
-	arguments: JsCallArguments
+	arguments: TsImportTypeArguments
 	qualifier_clause: TsImportTypeQualifier?
 	type_arguments: TsTypeArguments?
 
