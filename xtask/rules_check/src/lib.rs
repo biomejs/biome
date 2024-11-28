@@ -2,10 +2,9 @@
 //!
 //!
 use anyhow::{bail, ensure};
-use biome_analyze::options::JsxRuntime;
 use biome_analyze::{
-    AnalysisFilter, AnalyzerConfiguration, AnalyzerOptions, ControlFlow, GroupCategory, Queryable,
-    RegistryVisitor, Rule, RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
+    AnalysisFilter, AnalyzerOptions, ControlFlow, GroupCategory, Queryable, RegistryVisitor, Rule,
+    RuleCategory, RuleFilter, RuleGroup, RuleMetadata,
 };
 use biome_configuration::PartialConfiguration;
 use biome_console::{markup, Console};
