@@ -350,7 +350,7 @@ Please use the template provided.
 
 This repository uses [knope](https://knope.tech/) to automate the releases of Biome's binaries, the Rust crates, the JavaScript libraries and the creation of the `CHANGELOG.md` for each library/crate.
 
-If the PR you're about to open is a bugfix/feature visible to Biome users, you are encouraged to provide a **changeset** . To *create* a changeset, use the following command (*don't create it manually*):
+If the PR you're about to open is a bugfix/feature visible to users of the Biome toolchain or of the published Biome crates, you are encouraged to provide a **changeset** . To *create* a changeset, use the following command (*don't create it manually*):
 
 ```shell
 just new-changeset
@@ -361,7 +361,7 @@ The command will create the changeset(s) in the `.changeset` folder. You're free
 
 #### Choose the correct packages
 
-In the vast majority of cases, you want to choose the `cli` library, which represent the main binary (AKA the npm package `@biomejs/biome`). If your PR also changes any *public* crate that is published, you'll have to select it too.
+In the vast majority of cases, you want to choose the `cli` library, which represents the main binary (AKA the npm package `@biomejs/biome`). If your PR also changes any *public* crate that is published, you'll have to select it too.
 
 For example, if your PR fixes a *JavaScript* lint rule and changes a public of the crate `biome_js_syntax`, you'll select:
 - `cli`
@@ -375,17 +375,17 @@ We are very strict about `major` changes in the `cli` package. To better underst
 - `minor`: new features available to the users.
 - `major`: a change that breaks a user API.
 
-We are very liberal for the `biome_` crates, so don't be afraid to break the user face APIs, as long as the change is properly described.
+We are very liberal for the `biome_` crates, so don't be afraid to break the developer-facing APIs, as long as the change is properly described.
 
 #### Writing a changeset
 
 `knope` allows to generate two types of changesets, and you can use the one that you see fit:
 1. A changeset with a single header (`#`). When there's a single header, `knope` will transform it into a single bullet point inside the `CHANGELOG.md`.
-2. A changeset wit ha single header (`#`) and a paragraph beneath. `knope` will transform it into specialised header inside the `CHANGELOG.md`.
+2. A changeset with a single header (`#`) and a paragraph beneath. `knope` will transform it into a specialised header inside the `CHANGELOG.md`.
 
 For example, you have a PR that ships a bug fix, and a new feature, and you want to document both of them. The bugfix doesn't require a long description, while the feature might need some explanation. So create two changesets, that might look like this:
 
-This the changeset for the bugfix:
+This is the changeset for the bugfix:
 ```markdown 
 ---
 biome_js_syntax: patch
@@ -394,7 +394,7 @@ biome_js_syntax: patch
 # Fix [#000](https://path/to/000), where the parameter `foo` wasn't read by the function `apply_foo()` 
 ```
 
-This is the changeset for the feature, where show the feature usage by having an example of configuration, with the shell result:
+This is the changeset for the feature, where you show the feature usage by having an example of configuration, with the shell result:
 ``````markdown
 ---
 cli: minor
@@ -451,7 +451,7 @@ Regarding the description of the changeset, try to follow the these guidelines:
   rule you might want to show an invalid case, for the formatter you might want to show
   how the new formatting changes, and so on.
 
-If in doubt, take a look to existing or past changesets.
+If in doubt, take a look at existing or past changesets.
 
 ### Documentation
 
