@@ -1292,6 +1292,10 @@ export interface Nursery {
 	 */
 	noOctalEscape?: RuleConfiguration_for_Null;
 	/**
+	 * Succinct description of the rule.
+	 */
+	noPackagePrivateImports?: RuleConfiguration_for_Null;
+	/**
 	 * Disallow the use of process.env.
 	 */
 	noProcessEnv?: RuleConfiguration_for_Null;
@@ -3074,6 +3078,7 @@ export type Category =
 	| "lint/nursery/noMissingVarFunction"
 	| "lint/nursery/noNestedTernary"
 	| "lint/nursery/noOctalEscape"
+	| "lint/nursery/noPackagePrivateImports"
 	| "lint/nursery/noProcessEnv"
 	| "lint/nursery/noReactSpecificProps"
 	| "lint/nursery/noRestrictedImports"

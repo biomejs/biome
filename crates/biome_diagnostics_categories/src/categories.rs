@@ -161,6 +161,7 @@ define_categories! {
     "lint/nursery/noMissingVarFunction": "https://biomejs.dev/linter/rules/no-missing-var-function",
     "lint/nursery/noNestedTernary": "https://biomejs.dev/linter/rules/no-nested-ternary",
     "lint/nursery/noOctalEscape": "https://biomejs.dev/linter/rules/no-octal-escape",
+    "lint/nursery/noPackagePrivateImports": "https://biomejs.dev/linter/rules/no-package-private-imports",
     "lint/nursery/noProcessEnv": "https://biomejs.dev/linter/rules/no-process-env",
     "lint/nursery/noReactSpecificProps": "https://biomejs.dev/linter/rules/no-react-specific-props",
     "lint/nursery/noRestrictedImports": "https://biomejs.dev/linter/rules/no-restricted-imports",

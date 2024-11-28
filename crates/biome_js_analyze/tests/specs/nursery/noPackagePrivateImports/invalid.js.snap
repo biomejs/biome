@@ -1,6 +1,6 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
-expression: invalidPackagePrivateImports.js
+expression: invalid.js
 ---
 # Input
 ```jsx
@@ -20,7 +20,7 @@ import { fooPackageVariable } from "./sub/foo/index.js";
 
 # Diagnostics
 ```
-invalidPackagePrivateImports.js:2:36 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:2:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Importing package private symbols is disallowed from outside the module directory.
   
@@ -36,7 +36,7 @@ invalidPackagePrivateImports.js:2:36 lint/nursery/noRestrictedImports ━━━�
 ```
 
 ```
-invalidPackagePrivateImports.js:5:36 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:5:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Importing package private symbols is disallowed from outside the module directory.
   
@@ -52,7 +52,7 @@ invalidPackagePrivateImports.js:5:36 lint/nursery/noRestrictedImports ━━━�
 ```
 
 ```
-invalidPackagePrivateImports.js:8:36 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:8:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Importing package private symbols is disallowed from outside the module directory.
   
@@ -68,7 +68,7 @@ invalidPackagePrivateImports.js:8:36 lint/nursery/noRestrictedImports ━━━�
 ```
 
 ```
-invalidPackagePrivateImports.js:11:36 lint/nursery/noRestrictedImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+invalid.js:11:36 lint/nursery/noPackagePrivateImports ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Importing package private symbols is disallowed from outside the module directory.
   
