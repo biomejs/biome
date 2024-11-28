@@ -2303,7 +2303,7 @@
 					]
 				},
 				"noPackagePrivateImports": {
-					"description": "Succinct description of the rule.",
+					"description": "Restricts imports of \"package private\" exports.",
 					"anyOf": [
 						{ "$ref": "#/definitions/RuleConfiguration" },
 						{ "type": "null" }
@@ -2710,21 +2710,6 @@
 			"type": "array",
 			"items": { "$ref": "#/definitions/OverridePattern" }
 		},
-		"PackagePrivateRestriction": {
-			"description": "Allowed values for the `restrictPackagePrivate` option.",
-			"oneOf": [
-				{
-					"description": "All exported symbols are assumed to be package private and may only be imported from sibling modules and their submodules.",
-					"type": "string",
-					"enum": ["all"]
-				},
-				{
-					"description": "No restrictions are applied on importing package private symbols.",
-					"type": "string",
-					"enum": ["none"]
-				}
-			]
-		},
 		"Performance": {
 			"description": "A list of rules that belong to this group",
 			"type": "object",
@@ -2821,11 +2806,6 @@
 					"additionalProperties": {
 						"$ref": "#/definitions/CustomRestrictedImport"
 					}
-				},
-				"restrictPackagePrivate": {
-					"description": "Whether to place restrictions on the importing of \"package private\" symbols.",
-					"default": "none",
-					"allOf": [{ "$ref": "#/definitions/PackagePrivateRestriction" }]
 				}
 			},
 			"additionalProperties": false

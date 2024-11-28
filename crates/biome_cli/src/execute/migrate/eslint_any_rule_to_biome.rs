@@ -491,7 +491,7 @@ pub(crate) fn migrate_eslint_any_rule(
             }
             let group = rules.nursery.get_or_insert_with(Default::default);
             let rule = group
-                .no_restricted_imports
+                .no_package_private_imports
                 .get_or_insert(Default::default());
             rule.set_level(rule.level().max(rule_severity.into()));
         }
