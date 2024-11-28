@@ -2,7 +2,7 @@
 biome_deserialize: minor
 ---
 
-## Add the `indexmap` Cargo feature
+# Add the `indexmap` Cargo feature
 
 This is a **breaking change**.
 

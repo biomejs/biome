@@ -348,62 +348,110 @@ Please use the template provided.
 
 ### Changelog
 
-If the PR you're about to open is a bugfix/feature visible to Biome users, you CAN add a new bullet point to [CHANGELOG.md](./CHANGELOG.md). Although **not required**, we appreciate the effort.
+This repository uses [knope](https://knope.tech/) to automate the releases of Biome's binaries, the Rust crates, the JavaScript libraries and the creation of the `CHANGELOG.md` for each library/crate.
 
-At the top of the file you will see a `Unreleased` section.
-The headings divide the sections by "scope"; you should be able to identify the scope that belongs to your change. If the change belongs to multiple scopes, you can copy the same sentence under those scopes.
+If the PR you're about to open is a bugfix/feature visible to Biome users, you are encouraged to provide a **changeset** . To *create* a changeset, use the following command (*don't create it manually*):
 
-Here's a sample of the headings:
+```shell
+just new-changeset
+```
+The command will present a prompt where you need to choose the libraries involved by the PR, the type of change (`major`, `minor` or `patch`) for each library, and a description of the change. The description will be used as name of the file.
 
-```markdown
-## Unreleased
+The command will create the changeset(s) in the `.changeset` folder. You're free to open the file, and add more information in it.
 
-### Analyzer
+#### Choose the correct packages
 
-### CLI
+In the vast majority of cases, you want to choose the `cli` library, which represent the main binary (AKA the npm package `@biomejs/biome`). If your PR also changes any *public* crate that is published, you'll have to select it too.
 
-### Configuration
+For example, if your PR fixes a *JavaScript* lint rule and changes a public of the crate `biome_js_syntax`, you'll select:
+- `cli`
+- `biome_js_analyze`
+- `biome_js_syntax`
 
-### Editors
+#### Choose the correct type of change
 
-### Formatter
+We are very strict about `major` changes in the `cli` package. To better understand type of your change *for this package*, please refer to our [versioning page](https://biomejs.dev/internals/versioning/). Generally:
+- `patch`: any sort of change that fixes a bug.
+- `minor`: new features available to the users.
+- `major`: a change that breaks a user API.
 
-### JavaScript APIs
+We are very liberal for the `biome_` crates, so don't be afraid to break the user face APIs, as long as the change is properly described.
 
-### Linter
+#### Writing a changeset
 
-### Parser
+`knope` allows to generate two types of changesets, and you can use the one that you see fit:
+1. A changeset with a single header (`#`). When there's a single header, `knope` will transform it into a single bullet point inside the `CHANGELOG.md`.
+2. A changeset wit ha single header (`#`) and a paragraph beneath. `knope` will transform it into specialised header inside the `CHANGELOG.md`.
+
+For example, you have a PR that ships a bug fix, and a new feature, and you want to document both of them. The bugfix doesn't require a long description, while the feature might need some explanation. So create two changesets, that might look like this:
+
+This the changeset for the bugfix:
+```markdown 
+---
+biome_js_syntax: patch
+---
+
+# Fix [#000](https://path/to/000), where the parameter `foo` wasn't read by the function `apply_foo()` 
 ```
 
-When you edit a blank section:
+This is the changeset for the feature, where show the feature usage by having an example of configuration, with the shell result:
+``````markdown
+---
+cli: minor
+---
 
-- If your PR adds a **breaking change**, create a new heading called `#### BREAKING CHANGES` and add
-  bullet point that explains the breaking changes; provide a migration path if possible.
-  Read [how we version Biome](https://biomejs.dev/internals/versioning/) to determine if your change is breaking. A breaking change results in a major release.
-- If your PR adds a new feature, enhances an existing feature, or fixes a bug, create a new heading called `#### New features`, `#### Enhancements`, or `#### Bug fixes`. Ultimately, add a bullet point that explains the change.
+# Add the X feature
 
-Make sure that the created subsections are ordered in the following order:
+This feature does wonders, and you can use it with this configuration:
 
-```md
-#### BREAKING CHANGES
-
-#### New features
-
-#### Enhancements
-
-#### Bug fixes
+```json
+{
+    "configuration": "here"
+}
 ```
 
-#### Writing a changelog line
+And this happens: 
+
+```shell
+
+```
+``````
+
+These two changesets will be compiled by `knope`, and the final result in the `CHANGELOG.md` will be as follows:
+
+``````markdown
+### Patches
+
+- Fix [#000](https://path/to/000), where the parameter `foo` wasn't read by the function `apply_foo()`
+
+### Features
+
+#### Add the X feature
+
+This feature does wonders, and you can use it with this configuration:
+
+```json
+{
+    "configuration": "here"
+}
+```
+
+And this happens:
+
+```shell
+
+```
+``````
+
+#### Writing a changeset
 
 - Use the present tense, e.g. "Add new feature", "Fix edge case".
 - If you fix a bug, please add the link to the issue, e.g. "Fix edge case [#4444]()".
-- You can add a mention `@user` for every contributor of the change.
 - Whenever applicable, add a code block to show your new changes. For example, for a new
   rule you might want to show an invalid case, for the formatter you might want to show
   how the new formatting changes, and so on.
 
-If in doubt, take a look to existing changelog lines.
+If in doubt, take a look to existing or past changesets.
 
 ### Documentation
 

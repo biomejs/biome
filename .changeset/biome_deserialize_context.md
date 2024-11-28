@@ -3,7 +3,7 @@ biome_deserialize: minor
 biome_deserialize_macros: minor
 ---
 
-## Replace `diagnostics` with `context`
+# Replace `diagnostics` with `context`
 
 This is a **breaking change**.
 You have to update all manual implementations of the `Deserializable` trait.
