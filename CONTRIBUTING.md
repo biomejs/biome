@@ -27,7 +27,6 @@ We can use help in a bunch of areas and any help is greatly appreciated!
       - [Choose the correct packages](#choose-the-correct-packages)
       - [Choose the correct type of change](#choose-the-correct-type-of-change)
       - [Writing a changeset](#writing-a-changeset)
-      - [Writing a changeset](#writing-a-changeset-1)
     + [Documentation](#documentation)
     + [Versioning](#versioning)
   * [Releasing](#releasing)
@@ -444,7 +443,7 @@ And this happens:
 ```
 ``````
 
-#### Writing a changeset
+Regarding the description of the changeset, try to follow the these guidelines:
 
 - Use the present tense, e.g. "Add new feature", "Fix edge case".
 - If you fix a bug, please add the link to the issue, e.g. "Fix edge case [#4444]()".
