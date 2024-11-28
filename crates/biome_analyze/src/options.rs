@@ -95,7 +95,7 @@ impl AnalyzerConfiguration {
 #[derive(Debug, Default)]
 pub struct AnalyzerOptions {
     /// A data structured derived from the [`biome.json`] file
-    configuration: AnalyzerConfiguration,
+    pub(crate) configuration: AnalyzerConfiguration,
 
     /// The file that is being analyzed
     pub(crate) file_path: PathBuf,

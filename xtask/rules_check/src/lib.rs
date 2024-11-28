@@ -389,13 +389,9 @@ fn assert_lint(
                     ..AnalysisFilter::default()
                 };
 
-                let options = {
-                    let o = create_analyzer_options::<JsLanguage>(&settings, &file_path, test);
-                    o.with_configuration(
-                        AnalyzerConfiguration::default().with_jsx_runtime(JsxRuntime::default()),
-                    )
-                };
+                let options = create_analyzer_options::<JsLanguage>(&settings, &file_path, test);
 
+                // dbg!(&options);
                 biome_js_analyze::analyze(
                     &root,
                     filter,
