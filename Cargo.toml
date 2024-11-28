@@ -115,6 +115,7 @@ biome_diagnostics_categories = { version = "0.5.7", path = "./crates/biome_diagn
 biome_diagnostics_macros     = { version = "0.5.7", path = "./crates/biome_diagnostics_macros" }
 biome_formatter              = { version = "0.5.7", path = "./crates/biome_formatter" }
 biome_fs                     = { version = "0.5.7", path = "./crates/biome_fs" }
+biome_glob                   = { version = "0.1.0", path = "./crates/biome_glob" }
 biome_graphql_analyze        = { version = "0.0.1", path = "./crates/biome_graphql_analyze" }
 biome_graphql_factory        = { version = "0.1.0", path = "./crates/biome_graphql_factory" }
 biome_graphql_formatter      = { version = "0.1.0", path = "./crates/biome_graphql_formatter" }

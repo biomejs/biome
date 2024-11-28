@@ -500,6 +500,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_glob"
+version = "0.1.0"
+dependencies = [
+ "biome_deserialize",
+ "biome_text_size",
+ "globset",
+ "schemars",
+ "serde",
+]
+
+[[package]]
 name = "biome_graphql_analyze"
 version = "0.0.1"
 dependencies = [
@@ -741,6 +752,7 @@ dependencies = [
  "biome_deserialize",
  "biome_deserialize_macros",
  "biome_diagnostics",
+ "biome_glob",
  "biome_js_factory",
  "biome_js_parser",
  "biome_js_semantic",

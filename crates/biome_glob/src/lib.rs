@@ -1,31 +1,146 @@
-use biome_rowan::{TextRange, TextSize};
+//! `biome_glob` provides globbing functionality. When listing the globs to match,
+//! it also possible to provide globs that function as "exceptions" by prefixing the globs with `!`.
+//!
+//! A glob is primarlly used to select or filter a set of file paths by matching every file paths against the glob.
+//! A file path either matches or doesn't match a glob.
+//! For example, the path `lib.rs` matches the glob `*.rs`.
+//!
+//! Biome globs are case-sensitive. This means that `lib.RS` doesn't match `*.rs`.
+//!
+//! You have to understand the structure of a path to understand which path match a glob.
+//! A path is divided in path segments.
+//! Every path segment is delimited by the path separator `/` or the start/end of the path.
+//! For instance `src/lib.rs` cosnists of two path segments: `src` and `lib.rs`.
+//! A Biome glob supports the following patterns:
+//!
+//! - star `*` that matches zero or more characters inside a path segment
+//!
+//!   `lib.rs` matches `*.rs`.
+//!   Conversely, `src/lib.rs` doesn't match `*.rs`
+//!
+//! - globstar `**` that matches zero or more path segments
+//!   `**` must be enclosed by path separators `/` or the start/end of the glob.
+//!   For example, `**a` is not a valid glob.
+//!
+//!   `lib.rs` and `src/lib.rs` match `**` and `**/*.rs`
+//!   Conversely, `README.txt` doesn't match `**/*.rs` because the pat hends with `.txt`.
+//!
+//! - Use `\*` to escape `*`
+//!
+//!   the path `*` matches `\*`.
+//!
+//! - `?`, `[`, `]`, `{`, and `}` must be escaped using `\`.
+//!   These characters are reserved for future use.
+//!
+//! - Use `!` as first character to negate a glob
+//!
+//!   `README.txt` matches `!*.rs`.
+//!   `src/lib.rs` matches `!*.rs` because the path contains several segments.
+//!
+//! ## Matching a path against a glob
+//!
+//! You can create a glob from a string using the `parse` method.
+//! Use [Glob::is_match] to match against anything that can be turned into a [std::path::Path], such as a string.
+//!
+//! In the following example we parse the string `"*.rs"` into a glob and we match against two strings.
+//! `lib.rs` matches the glob because the path has a single path segment that ends with `.rs`.
+//! Conversely, `src/lib.rs` doesn't match because it has two path segments (`src` and `lib.rs`).
+//!
+//! ```
+//! use biome_glob::Glob;
+//!
+//! let glob: Glob = "*.rs".parse().expect("correct glob");
+//! assert!(glob.is_match("lib.rs"));
+//! assert!(!glob.is_match("src/lib.rs"));
+//! ```
+//!
+//! ## Matching against multiple globs
+//!
+//! When a path is expected to be matched against several globs,
+//! you should compile the path into a [CandidatePath] using [CandidatePath::new].
+//! [CandidatePath] may speed up matching against several globs.
+//! To get adavantage of the speed-up, you have to use the [CandidatePath::matches] method instead of [Glob::is_match].
+//!
+//! In the following example, we create a list of two globs and we match them against a path compiled into a candidate path.
+//! The path matches the second glob of the list.
+//!
+//! ```
+//! use biome_glob::{CandidatePath, Glob};
+//!
+//! let globs: &[Glob] = &[
+//!     "**/*.rs".parse().expect("correct glob"),
+//!     "**/*.txt".parse().expect("correct glob"),
+//! ];
+//!
+//! let path = CandidatePath::new(&"a/path/to/file.txt");
+//!
+//! assert!(globs.iter().any(|glob| path.matches(glob)));
+//! ```
+//!
+//! ## Matching against multiple globs and exceptions
+//!
+//! Negated globs are particularly useful to denote exceptions in a list of globs.
+//! To interpret negated globs as exceptions, use [CandidatePath::matches_with_exceptions].
+//! This semantic is taken from the [.gitignore](https://git-scm.com/docs/gitignore#_pattern_format) format.
+//!
+//! In the following example we accept all files in the `src` directory, except the ones ending with the `txt` extension.
+//!
+//! ```
+//! use biome_glob::{CandidatePath, Glob};
+//!
+//! let globs: &[Glob] = &[
+//!     "**/*.rs".parse().expect("correct glob"),
+//!     "!**/*.txt".parse().expect("correct glob"),
+//! ];
+//!
+//! let path = CandidatePath::new(&"a/path/to/file.txt");
+//!
+//! assert!(!path.matches_with_exceptions(globs));
+//! ```
+//!
+//! ## Matching a directory path against multiple globs and exceptions
+//!
+//! Taking the previous example, the directory path `a/path` doesn't match `**/*.rs` the list of glob,
+//! because the path doesn't end with the `.rs` extension.
+//! This behavior is porblematic when you write a file crawler that traverse the file hierarchy and
+//! ignore directories with files that never match the list of globs.
+//! Biome provides a deidcated method [CandidatePath::matches_directory_with_exceptions] for this purpose.
+//! The method only check if the directory is not excluded by an exception.
+//!
+//! In the following example, `dir1` matches the list of globs, while `dir2` doesn't.
+//!
+//! ```
+//! use biome_glob::{CandidatePath, Glob};
+//!
+//! let globs: &[Glob] = &[
+//!     "**/*.rs".parse().expect("correct glob"),
+//!     "!test".parse().expect("correct glob"),
+//! ];
+//!
+//! let dir1 = CandidatePath::new(&"src");
+//! let dir2 = CandidatePath::new(&"test");
+//!
+//! assert!(dir1.matches_directory_with_exceptions(globs));
+//! assert!(!dir2.matches_directory_with_exceptions(globs));
+//! ```
+//!
 
-/// A restricted glob pattern only supports the following syntaxes:
-///
-/// - star `*` that matches zero or more characters inside a path segment
-/// - globstar `**` that matches zero or more path segments
-/// - Use `\*` to escape `*`
-/// - `?`, `[`, `]`, `{`, and `}` must be escaped using `\`.
-///   These characters are reserved for future use.
-/// - Use `!` as first character to negate the glob
-///
-/// A path segment is delimited by path separator `/` or the start/end of the path.
-#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
-#[serde(try_from = "String", into = "String")]
-pub struct RestrictedGlob {
+/// A Biome glob pattern.
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(try_from = "String", into = "String"))]
+pub struct Glob {
     is_negated: bool,
     glob: globset::GlobMatcher,
 }
-impl RestrictedGlob {
+impl Glob {
     /// Returns `true` if this glob is negated.
     ///
     /// ```
-    /// use biome_js_analyze::utils::restricted_glob::RestrictedGlob;
-    ///
-    /// let glob = "!*.js".parse::<RestrictedGlob>().unwrap();
+    /// let glob = "!*.js".parse::<biome_glob::Glob>().unwrap();
     /// assert!(glob.is_negated());
     ///
-    /// let glob = "*.js".parse::<RestrictedGlob>().unwrap();
+    /// let glob = "*.js".parse::<biome_glob::Glob>().unwrap();
     /// assert!(!glob.is_negated());
     /// ```
     pub fn is_negated(&self) -> bool {
@@ -43,7 +158,7 @@ impl RestrictedGlob {
     }
 
     /// Tests whether the given path matches this pattern.
-    pub fn is_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
+    fn is_match_candidate(&self, path: &CandidatePath<'_>) -> bool {
         self.is_raw_match_candidate(path) != self.is_negated
     }
 
@@ -52,31 +167,31 @@ impl RestrictedGlob {
         self.glob.is_match_candidate(&path.0)
     }
 }
-impl PartialEq for RestrictedGlob {
+impl PartialEq for Glob {
     fn eq(&self, other: &Self) -> bool {
         self.is_negated == other.is_negated && self.glob.glob() == other.glob.glob()
     }
 }
-impl Eq for RestrictedGlob {}
-impl std::hash::Hash for RestrictedGlob {
+impl Eq for Glob {}
+impl std::hash::Hash for Glob {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.is_negated.hash(state);
         self.glob.glob().hash(state);
     }
 }
-impl std::fmt::Display for RestrictedGlob {
+impl std::fmt::Display for Glob {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let repr = self.glob.glob();
         let negation = if self.is_negated { "!" } else { "" };
         write!(f, "{negation}{repr}")
     }
 }
-impl From<RestrictedGlob> for String {
-    fn from(value: RestrictedGlob) -> Self {
+impl From<Glob> for String {
+    fn from(value: Glob) -> Self {
         value.to_string()
     }
 }
-impl std::str::FromStr for RestrictedGlob {
+impl std::str::FromStr for Glob {
     type Err = RestrictedGlobError;
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         let (is_negated, value) = if let Some(stripped) = value.strip_prefix('!') {
@@ -84,14 +199,14 @@ impl std::str::FromStr for RestrictedGlob {
         } else {
             (false, value)
         };
-        validate_restricted_glob(value)?;
+        validate_glob(value)?;
         let mut glob_builder = globset::GlobBuilder::new(value);
         // Allow escaping with `\` on all platforms.
         glob_builder.backslash_escape(true);
         // Only `**` can match `/`
         glob_builder.literal_separator(true);
         match glob_builder.build() {
-            Ok(glob) => Ok(RestrictedGlob {
+            Ok(glob) => Ok(Glob {
                 is_negated,
                 glob: glob.compile_matcher(),
             }),
@@ -101,14 +216,15 @@ impl std::str::FromStr for RestrictedGlob {
         }
     }
 }
-impl TryFrom<String> for RestrictedGlob {
+impl TryFrom<String> for Glob {
     type Error = RestrictedGlobError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
         value.parse()
     }
 }
 // We use a custom impl to precisely report the location of the error.
-impl biome_deserialize::Deserializable for RestrictedGlob {
+#[cfg(feature = "biome_deserialize")]
+impl biome_deserialize::Deserializable for Glob {
     fn deserialize(
         value: &impl biome_deserialize::DeserializableValue,
         name: &str,
@@ -120,7 +236,10 @@ impl biome_deserialize::Deserializable for RestrictedGlob {
             Err(error) => {
                 let range = value.range();
                 let range = error.index().map_or(range, |index| {
-                    TextRange::at(range.start() + TextSize::from(1 + index), 1u32.into())
+                    biome_text_size::TextRange::at(
+                        range.start() + biome_text_size::TextSize::from(1 + index),
+                        1u32.into(),
+                    )
                 });
                 diagnostics.push(
                     biome_deserialize::DeserializationDiagnostic::new(format_args!("{error}"))
@@ -132,7 +251,7 @@ impl biome_deserialize::Deserializable for RestrictedGlob {
     }
 }
 #[cfg(feature = "schemars")]
-impl schemars::JsonSchema for RestrictedGlob {
+impl schemars::JsonSchema for Glob {
     fn schema_name() -> String {
         "Regex".to_string()
     }
@@ -156,7 +275,7 @@ impl<'a> CandidatePath<'a> {
     }
 
     /// Tests whether the current path matches `glob`.
-    pub fn matches(&self, glob: &RestrictedGlob) -> bool {
+    pub fn matches(&self, glob: &Glob) -> bool {
         glob.is_match_candidate(self)
     }
 
@@ -165,9 +284,9 @@ impl<'a> CandidatePath<'a> {
     /// Let's take an example:
     ///
     /// ```
-    /// use biome_js_analyze::utils::restricted_glob::{CandidatePath, RestrictedGlob};
+    /// use biome_glob::{CandidatePath, Glob};
     ///
-    /// let globs: &[RestrictedGlob] = &[
+    /// let globs: &[Glob] = &[
     ///     "*".parse().unwrap(),
     ///     "!a*".parse().unwrap(),
     ///     "a".parse().unwrap(),
@@ -189,7 +308,7 @@ impl<'a> CandidatePath<'a> {
     ///
     pub fn matches_with_exceptions<'b, I>(&self, globs: I) -> bool
     where
-        I: IntoIterator<Item = &'b RestrictedGlob>,
+        I: IntoIterator<Item = &'b Glob>,
         I::IntoIter: DoubleEndedIterator,
     {
         self.matches_with_exceptions_or(false, globs)
@@ -203,9 +322,9 @@ impl<'a> CandidatePath<'a> {
     ///
     ///
     /// ```
-    /// use biome_js_analyze::utils::restricted_glob::{CandidatePath, RestrictedGlob};
+    /// use biome_glob::{CandidatePath, Glob};
     ///
-    /// let globs: &[RestrictedGlob] = &[
+    /// let globs: &[Glob] = &[
     ///     "a/path".parse().unwrap(),
     ///     "!b".parse().unwrap(),
     /// ];
@@ -222,7 +341,7 @@ impl<'a> CandidatePath<'a> {
     /// ```
     pub fn matches_directory_with_exceptions<'b, I>(&self, globs: I) -> bool
     where
-        I: IntoIterator<Item = &'b RestrictedGlob>,
+        I: IntoIterator<Item = &'b Glob>,
         I::IntoIter: DoubleEndedIterator,
     {
         self.matches_with_exceptions_or(true, globs)
@@ -232,7 +351,7 @@ impl<'a> CandidatePath<'a> {
     /// Returns `default` if there is no globs that match.
     fn matches_with_exceptions_or<'b, I>(&self, default: bool, globs: I) -> bool
     where
-        I: IntoIterator<Item = &'b RestrictedGlob>,
+        I: IntoIterator<Item = &'b Glob>,
         I::IntoIter: DoubleEndedIterator,
     {
         // Iterate in reverse order to avoid unnecessary glob matching.
@@ -306,7 +425,7 @@ impl std::fmt::Display for RestrictedGlobErrorKind {
 }
 
 /// Returns an error if `pattern` doesn't follow the restricted glob syntax.
-fn validate_restricted_glob(pattern: &str) -> Result<(), RestrictedGlobError> {
+fn validate_glob(pattern: &str) -> Result<(), RestrictedGlobError> {
     let mut it = pattern.bytes().enumerate();
     while let Some((i, c)) = it.next() {
         match c {
@@ -361,33 +480,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_validate_restricted_glob() {
-        assert!(validate_restricted_glob("*.[jt]s").is_err());
-        assert!(validate_restricted_glob("*.{js,ts}").is_err());
-        assert!(validate_restricted_glob("?*.js").is_err());
-        assert!(validate_restricted_glob(r"\").is_err());
-        assert!(validate_restricted_glob(r"\n").is_err());
-        assert!(validate_restricted_glob(r"\😀").is_err());
+    fn test_validate_glob() {
+        assert!(validate_glob("*.[jt]s").is_err());
+        assert!(validate_glob("*.{js,ts}").is_err());
+        assert!(validate_glob("?*.js").is_err());
+        assert!(validate_glob(r"\").is_err());
+        assert!(validate_glob(r"\n").is_err());
+        assert!(validate_glob(r"\😀").is_err());
 
-        assert!(validate_restricted_glob("!*.js").is_ok());
-        assert!(validate_restricted_glob("!").is_ok());
-        assert!(validate_restricted_glob("*.js").is_ok());
-        assert!(validate_restricted_glob("**/*.js").is_ok());
-        assert!(validate_restricted_glob(r"\*").is_ok());
-        assert!(validate_restricted_glob(r"\!").is_ok());
+        assert!(validate_glob("!*.js").is_ok());
+        assert!(validate_glob("!").is_ok());
+        assert!(validate_glob("*.js").is_ok());
+        assert!(validate_glob("**/*.js").is_ok());
+        assert!(validate_glob(r"\*").is_ok());
+        assert!(validate_glob(r"\!").is_ok());
     }
 
     #[test]
-    fn test_restricted_regex() {
-        assert!(!"*.js"
-            .parse::<RestrictedGlob>()
-            .unwrap()
-            .is_match("file/path.js"));
+    fn test_is_match() {
+        assert!("*.rs".parse::<Glob>().unwrap().is_match("lib.rs"));
+        assert!(!"*.rs".parse::<Glob>().unwrap().is_match("src/lib.rs"));
 
-        assert!("**/*.js"
-            .parse::<RestrictedGlob>()
-            .unwrap()
-            .is_match("file/path.js"));
+        assert!("**/*.rs".parse::<Glob>().unwrap().is_match("src/lib.rs"));
     }
 
     #[test]
@@ -395,29 +509,23 @@ mod tests {
         let a = CandidatePath::new(&"a");
 
         assert!(a.matches_with_exceptions(&[
-            RestrictedGlob::from_str("*").unwrap(),
-            RestrictedGlob::from_str("!b").unwrap(),
+            Glob::from_str("*").unwrap(),
+            Glob::from_str("!b").unwrap(),
         ]));
         assert!(!a.matches_with_exceptions(&[
-            RestrictedGlob::from_str("*").unwrap(),
-            RestrictedGlob::from_str("!a*").unwrap(),
+            Glob::from_str("*").unwrap(),
+            Glob::from_str("!a*").unwrap(),
         ]));
         assert!(a.matches_with_exceptions(&[
-            RestrictedGlob::from_str("*").unwrap(),
-            RestrictedGlob::from_str("!a*").unwrap(),
-            RestrictedGlob::from_str("a").unwrap(),
+            Glob::from_str("*").unwrap(),
+            Glob::from_str("!a*").unwrap(),
+            Glob::from_str("a").unwrap(),
         ]));
     }
 
     #[test]
     fn test_to_string() {
-        assert_eq!(
-            RestrictedGlob::from_str("**/*.js").unwrap().to_string(),
-            "**/*.js"
-        );
-        assert_eq!(
-            RestrictedGlob::from_str("!**/*.js").unwrap().to_string(),
-            "!**/*.js"
-        );
+        assert_eq!(Glob::from_str("**/*.rs").unwrap().to_string(), "**/*.rs");
+        assert_eq!(Glob::from_str("!**/*.rs").unwrap().to_string(), "!**/*.rs");
     }
 }
