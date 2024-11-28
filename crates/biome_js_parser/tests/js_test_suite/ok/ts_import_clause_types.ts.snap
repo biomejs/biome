@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 
@@ -35,7 +36,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@17..24 "\"./mod\"" [] [],
                 },
-                attribute: missing (optional),
+                assertion: missing (optional),
             },
             semicolon_token: SEMICOLON@24..39 ";" [] [Whitespace(" "), Comments("// not a type")],
         },
@@ -52,7 +53,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@61..68 "\"./mod\"" [] [],
                 },
-                attribute: missing (optional),
+                assertion: missing (optional),
             },
             semicolon_token: SEMICOLON@68..69 ";" [] [],
         },
@@ -71,7 +72,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@97..104 "\"./mod\"" [] [],
                 },
-                attribute: missing (optional),
+                assertion: missing (optional),
             },
             semicolon_token: SEMICOLON@104..105 ";" [] [],
         },
@@ -95,7 +96,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@132..137 "\"mod\"" [] [],
                 },
-                attribute: missing (optional),
+                assertion: missing (optional),
             },
             semicolon_token: SEMICOLON@137..138 ";" [] [],
         },
@@ -112,7 +113,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@161..168 "\"./mod\"" [] [],
                 },
-                attribute: missing (optional),
+                assertion: missing (optional),
             },
             semicolon_token: SEMICOLON@168..169 ";" [] [],
         },

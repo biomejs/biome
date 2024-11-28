@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 
@@ -33,7 +34,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@15..18 "\"a\"" [] [],
                 },
-                attribute: missing (optional),
+                assertion: missing (optional),
             },
             semicolon_token: SEMICOLON@18..19 ";" [] [],
         },
@@ -72,7 +73,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@45..48 "\"b\"" [] [],
                 },
-                attribute: missing (optional),
+                assertion: missing (optional),
             },
             semicolon_token: SEMICOLON@48..49 ";" [] [],
         },
@@ -122,7 +123,7 @@ JsModule {
                 source: JsModuleSource {
                     value_token: JS_STRING_LITERAL@101..104 "\"b\"" [] [],
                 },
-                attribute: missing (optional),
+                assertion: missing (optional),
             },
             semicolon_token: SEMICOLON@104..105 ";" [] [],
         },

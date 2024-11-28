@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_parser/tests/spec_test.rs
 expression: snapshot
+snapshot_kind: text
 ---
 ## Input
 
@@ -68,7 +69,7 @@ JsModule {
                     ts_import_type_assertion_block: TsImportTypeAssertionBlock {
                         l_curly_token: L_CURLY@69..70 "{" [] [],
                         type_assertion: TsImportTypeAssertion {
-                            assertion_kind: WITH_KW@70..74 "with" [] [],
+                            with_token: WITH_KW@70..74 "with" [] [],
                             colon_token: COLON@74..75 ":" [] [],
                             l_curly_token: L_CURLY@75..76 "{" [] [],
                             assertions: JsImportAssertionEntryList [
@@ -112,7 +113,7 @@ JsModule {
                     ts_import_type_assertion_block: TsImportTypeAssertionBlock {
                         l_curly_token: L_CURLY@120..121 "{" [] [],
                         type_assertion: TsImportTypeAssertion {
-                            assertion_kind: WITH_KW@121..125 "with" [] [],
+                            with_token: WITH_KW@121..125 "with" [] [],
                             colon_token: COLON@125..126 ":" [] [],
                             l_curly_token: L_CURLY@126..127 "{" [] [],
                             assertions: JsImportAssertionEntryList [],
@@ -306,7 +307,7 @@ import_type_error.ts:1:34 parse ━━━━━━━━━━━━━━━━
   
 import_type_error.ts:2:40 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Expected an import assertion entry but instead found '[a]:"1"'.
+  × Expected an import attribute entry but instead found '[a]:"1"'.
   
     1 │ type A = typeof import("a.json",{});
   > 2 │ type B = typeof import("a.json",{with:{[a]:"1"}});
@@ -314,7 +315,7 @@ import_type_error.ts:2:40 parse ━━━━━━━━━━━━━━━━
     3 │ type C = typeof import("a.json",{with:{}}, 1);
     4 │ type D = import("a",);
   
-  i Expected an import assertion entry here.
+  i Expected an import attribute entry here.
   
     1 │ type A = typeof import("a.json",{});
   > 2 │ type B = typeof import("a.json",{with:{[a]:"1"}});
