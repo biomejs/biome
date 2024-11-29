@@ -148,10 +148,11 @@ impl WorkspaceSettings {
         }
     }
 
-    /// Checks if the current path belongs to a registered project.
+    /// Checks whether the current path belongs to another registered project.
     ///
-    /// If there's a match, and the match **isn't** the current project, it returns the new key.
-    pub fn path_belongs_to_current_workspace(&self, path: &BiomePath) -> Option<ProjectKey> {
+    /// If there's a match, and the match is for a project **other than** the current project, it
+    /// returns the new key.
+    pub fn path_belongs_to_other_project(&self, path: &BiomePath) -> Option<ProjectKey> {
         if self.data.is_empty() {
             return None;
         }
