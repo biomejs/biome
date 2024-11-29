@@ -1,0 +1,24 @@
+[package]
+authors.workspace    = true
+categories.workspace = true
+description          = "Biome utility to codegen a grammar for the parser"
+edition.workspace    = true
+homepage.workspace   = true
+keywords.workspace   = true
+license.workspace    = true
+name                 = "biome_syntax_codegen"
+repository.workspace = true
+version              = "0.1.0"
+
+[dependencies]
+anyhow            = { workspace = true }
+biome_string_case = { workspace = true }
+biome_ungrammar   = { workspace = true }
+proc-macro2       = { workspace = true, features = ["span-locations"] }
+quote             = { workspace = true }
+
+[lints]
+workspace = true
+
+[[example]]
+name = "minigrammar"
