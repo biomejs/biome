@@ -21,6 +21,8 @@
 //! - globstar `**` that matches zero or more path segments
 //!   `**` must be enclosed by path separators `/` or the start/end of the glob.
 //!   For example, `**a` is not a valid glob.
+//!   Also, `**` must not be followed by another globstar.
+//!   For example, `**/**` is not a valid glob.
 //!
 //!   `lib.rs` and `src/lib.rs` match `**` and `**/*.rs`
 //!   Conversely, `README.txt` doesn't match `**/*.rs` because the pat hends with `.txt`.
@@ -30,7 +32,7 @@
 //!   the path `*` matches `\*`.
 //!
 //! - `?`, `[`, `]`, `{`, and `}` must be escaped using `\`.
-//!   These characters are reserved for future use.
+//!   These characters are reserved for possible future use.
 //!
 //! - Use `!` as first character to negate a glob
 //!
@@ -192,7 +194,7 @@ impl From<Glob> for String {
     }
 }
 impl std::str::FromStr for Glob {
-    type Err = RestrictedGlobError;
+    type Err = GlobError;
     fn from_str(value: &str) -> Result<Self, Self::Err> {
         let (is_negated, value) = if let Some(stripped) = value.strip_prefix('!') {
             (true, stripped)
@@ -210,14 +212,14 @@ impl std::str::FromStr for Glob {
                 is_negated,
                 glob: glob.compile_matcher(),
             }),
-            Err(error) => Err(RestrictedGlobError::Generic(
+            Err(error) => Err(GlobError::Generic(
                 error.kind().to_string().into_boxed_str(),
             )),
         }
     }
 }
 impl TryFrom<String> for Glob {
-    type Error = RestrictedGlobError;
+    type Error = GlobError;
     fn try_from(value: String) -> Result<Self, Self::Error> {
         value.parse()
     }
@@ -364,16 +366,16 @@ impl<'a> CandidatePath<'a> {
     }
 }
 
-#[derive(Debug)]
-pub enum RestrictedGlobError {
+#[derive(Debug, Eq, PartialEq)]
+pub enum GlobError {
     Regular {
-        kind: RestrictedGlobErrorKind,
+        kind: GlobErrorKind,
         index: u32,
     },
     /// Error caused by a a third-party module.
     Generic(Box<str>),
 }
-impl RestrictedGlobError {
+impl GlobError {
     /// Returns the index in the glob where the error is located.
     pub fn index(&self) -> Option<u32> {
         match self {
@@ -382,8 +384,8 @@ impl RestrictedGlobError {
         }
     }
 }
-impl std::error::Error for RestrictedGlobError {}
-impl std::fmt::Display for RestrictedGlobError {
+impl std::error::Error for GlobError {}
+impl std::fmt::Display for GlobError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Regular { kind, .. } => write!(f, "{kind}"),
@@ -393,22 +395,27 @@ impl std::fmt::Display for RestrictedGlobError {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub enum RestrictedGlobErrorKind {
+pub enum GlobErrorKind {
     /// Occurs when an unescaped '\' is found at the end of a glob.
     DanglingEscape,
     /// Occurs when an invalid escape is found.
-    /// If the character is not set, then it is an invalid UTF-8 character.
-    InvalidEscape(char),
+    InvalidEscape,
+    /// Occurs when `**` isn't enclosed by the path separator `/` or the start/end of the glob.
+    InvalidGlobStar,
+    /// `{}` is not supported.
     UnsupportedAlternates,
+    /// `[]` is not supported.
     UnsupportedCharacterClass,
+    /// `?` is not supported.
     UnsupportedAnyCharacter,
 }
-impl std::fmt::Display for RestrictedGlobErrorKind {
+impl std::fmt::Display for GlobErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let desc = match self {
             Self::DanglingEscape => "Unterminated escape sequence.",
-            Self::InvalidEscape(c) => {
-                return write!(f, "The escape sequence `\\{c}` is not supported.");
+            Self::InvalidEscape => "Invalid escape sequence.",
+            Self::InvalidGlobStar => {
+                r"`**` must be enclosed by the path separator `/`, or the start/end of the glob and mustn't be followed by `/**`."
             }
             Self::UnsupportedAlternates => {
                 r"Alternates `{}` are not supported. Use `\{` and `\}` to escape the characters."
@@ -424,51 +431,64 @@ impl std::fmt::Display for RestrictedGlobErrorKind {
     }
 }
 
-/// Returns an error if `pattern` doesn't follow the restricted glob syntax.
-fn validate_glob(pattern: &str) -> Result<(), RestrictedGlobError> {
+/// Returns an error if `pattern` doesn't follow the supported glob syntax.
+fn validate_glob(pattern: &str) -> Result<(), GlobError> {
     let mut it = pattern.bytes().enumerate();
+    let mut allow_globstar = true;
     while let Some((i, c)) = it.next() {
         match c {
+            b'*' => {
+                let mut lookahead = it.clone();
+                if matches!(lookahead.next(), Some((_, b'*'))) {
+                    if !allow_globstar || !matches!(lookahead.next(), None | Some((_, b'/'))) {
+                        return Err(GlobError::Regular {
+                            kind: GlobErrorKind::InvalidGlobStar,
+                            index: i as u32,
+                        });
+                    }
+                    // Eat `*`
+                    it.next();
+                    // Eat `/`
+                    it.next();
+                }
+            }
             b'\\' => {
                 // Accept a restrictive set of escape sequence
-                if let Some((j, c)) = it.next() {
+                if let Some((_, c)) = it.next() {
                     if !matches!(c, b'!' | b'*' | b'?' | b'{' | b'}' | b'[' | b']' | b'\\') {
-                        return Err(RestrictedGlobError::Regular {
-                            kind: RestrictedGlobErrorKind::InvalidEscape(
-                                // SAFETY: the index `j` starts a new character
-                                // because it is preceded by the character `\\`.
-                                pattern[j..].chars().next().expect("valid character"),
-                            ),
+                        return Err(GlobError::Regular {
+                            kind: GlobErrorKind::InvalidEscape,
                             index: i as u32,
                         });
                     }
                 } else {
-                    return Err(RestrictedGlobError::Regular {
-                        kind: RestrictedGlobErrorKind::DanglingEscape,
+                    return Err(GlobError::Regular {
+                        kind: GlobErrorKind::DanglingEscape,
                         index: i as u32,
                     });
                 }
             }
             b'?' => {
-                return Err(RestrictedGlobError::Regular {
-                    kind: RestrictedGlobErrorKind::UnsupportedAnyCharacter,
+                return Err(GlobError::Regular {
+                    kind: GlobErrorKind::UnsupportedAnyCharacter,
                     index: i as u32,
                 });
             }
             b'[' | b']' => {
-                return Err(RestrictedGlobError::Regular {
-                    kind: RestrictedGlobErrorKind::UnsupportedCharacterClass,
+                return Err(GlobError::Regular {
+                    kind: GlobErrorKind::UnsupportedCharacterClass,
                     index: i as u32,
                 });
             }
             b'{' | b'}' => {
-                return Err(RestrictedGlobError::Regular {
-                    kind: RestrictedGlobErrorKind::UnsupportedAlternates,
+                return Err(GlobError::Regular {
+                    kind: GlobErrorKind::UnsupportedAlternates,
                     index: i as u32,
                 });
             }
             _ => {}
         }
+        allow_globstar = c == b'/';
     }
     Ok(())
 }
@@ -481,12 +501,69 @@ mod tests {
 
     #[test]
     fn test_validate_glob() {
-        assert!(validate_glob("*.[jt]s").is_err());
-        assert!(validate_glob("*.{js,ts}").is_err());
-        assert!(validate_glob("?*.js").is_err());
-        assert!(validate_glob(r"\").is_err());
-        assert!(validate_glob(r"\n").is_err());
-        assert!(validate_glob(r"\😀").is_err());
+        assert_eq!(
+            validate_glob("*.[jt]s"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::UnsupportedCharacterClass,
+                index: 2
+            })
+        );
+        assert_eq!(
+            validate_glob("?*.js"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::UnsupportedAnyCharacter,
+                index: 0
+            })
+        );
+        assert_eq!(
+            validate_glob(r"\"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::DanglingEscape,
+                index: 0
+            })
+        );
+        assert_eq!(
+            validate_glob(r"\n"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::InvalidEscape,
+                index: 0
+            })
+        );
+        assert_eq!(
+            validate_glob(r"\😀"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::InvalidEscape,
+                index: 0
+            })
+        );
+        assert_eq!(
+            validate_glob(r"***"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::InvalidGlobStar,
+                index: 0
+            })
+        );
+        assert_eq!(
+            validate_glob(r"a**"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::InvalidGlobStar,
+                index: 1
+            })
+        );
+        assert_eq!(
+            validate_glob(r"**a"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::InvalidGlobStar,
+                index: 0
+            })
+        );
+        assert_eq!(
+            validate_glob(r"**/**"),
+            Err(GlobError::Regular {
+                kind: GlobErrorKind::InvalidGlobStar,
+                index: 3
+            })
+        );
 
         assert!(validate_glob("!*.js").is_ok());
         assert!(validate_glob("!").is_ok());
@@ -494,6 +571,10 @@ mod tests {
         assert!(validate_glob("**/*.js").is_ok());
         assert!(validate_glob(r"\*").is_ok());
         assert!(validate_glob(r"\!").is_ok());
+        assert!(validate_glob(r"**").is_ok());
+        assert!(validate_glob(r"/**/").is_ok());
+        assert!(validate_glob(r"**/").is_ok());
+        assert!(validate_glob(r"/**").is_ok());
     }
 
     #[test]
@@ -505,7 +586,7 @@ mod tests {
     }
 
     #[test]
-    fn test_match_with_exceptions() {
+    fn test_matches_with_exceptions() {
         let a = CandidatePath::new(&"a");
 
         assert!(a.matches_with_exceptions(&[
