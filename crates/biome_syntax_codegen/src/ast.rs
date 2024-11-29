@@ -1,31 +1,30 @@
 //! Generate SyntaxKind definitions as well as typed AST definitions for nodes and tokens.
 //! This is derived from rust-analyzer/xtask/codegen
 
-use anyhow::Result;
-use std::collections::{HashMap, HashSet, VecDeque};
-use std::{fs, vec};
-
 use crate::generate_node_factory::generate_node_factory;
 use crate::generate_nodes_mut::generate_nodes_mut;
 use crate::generate_syntax_factory::generate_syntax_factory;
-use crate::kind::{
-    AstEnumSrc, AstListSeparatorConfiguration, AstListSrc, AstNodeSrc, AstSrc, Field, KindsSrc,
-    TokenKind,
-};
+use crate::language_src::LanguageSrc;
 use crate::{
     generate_macros::generate_macros, generate_nodes::generate_nodes,
-    generate_syntax_kinds::generate_syntax_kinds, Options,
+    generate_syntax_kinds::generate_syntax_kinds, GrammarOptions,
 };
+use anyhow::{Context, Result};
 use biome_string_case::Case;
 use biome_ungrammar::{Grammar, Rule, Token};
+use quote::format_ident;
+use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 use std::fmt::Write;
 use std::path::Path;
+use std::process::Command;
+use std::{fs, vec};
 
 // these node won't generate any code
 pub const SYNTAX_ELEMENT_TYPE: &str = "SyntaxElement";
 
 pub(crate) fn load_ungrammar_file(path: &Path, should_check_unions: bool) -> Result<AstSrc> {
-    let grammar_src = fs::read_to_string(path)?;
+    let grammar_src = fs::read_to_string(path)
+        .with_context(|| format!("Tried to load the path {}", { path.display() }))?;
     let grammar: Grammar = grammar_src.parse().unwrap();
     let mut ast: AstSrc = make_ast(&grammar);
     if should_check_unions {
@@ -35,41 +34,44 @@ pub(crate) fn load_ungrammar_file(path: &Path, should_check_unions: bool) -> Res
     Ok(ast)
 }
 
-pub(crate) fn generate_syntax<'a, K>(ast: AstSrc, options: Options<K>) -> Result<()>
+pub(crate) fn generate_syntax<K>(
+    language_src: K,
+    ast: AstSrc,
+    options: GrammarOptions,
+) -> Result<()>
 where
-    K: KindsSrc<'a>,
+    K: LanguageSrc,
 {
-    let Options {
-        language_kind,
-        syntax_path,
-        syntax_factory_path,
+    let GrammarOptions {
+        syntax_dir_path: syntax_path,
+        factory_dir_path: syntax_factory_path,
         syntax_crate_name,
         ..
     } = options;
 
     let ast_nodes_file = syntax_path.join("nodes.rs");
-    let contents = generate_nodes(&ast, &language_kind)?;
-    fs::write(ast_nodes_file, contents)?;
+    let contents = generate_nodes(&ast, &language_src)?;
+    write_and_format(contents, ast_nodes_file.as_path())?;
 
     let ast_nodes_mut_file = syntax_path.join("nodes_mut.rs");
-    let contents = generate_nodes_mut(&ast, &language_kind)?;
-    fs::write(ast_nodes_mut_file, contents)?;
+    let contents = generate_nodes_mut(&ast, &language_src)?;
+    write_and_format(contents, ast_nodes_mut_file.as_path())?;
 
     let syntax_kinds_file = syntax_path.join("kind.rs");
-    let contents = generate_syntax_kinds(&language_kind)?;
-    fs::write(syntax_kinds_file, contents)?;
+    let contents = generate_syntax_kinds(&language_src)?;
+    write_and_format(contents, syntax_kinds_file.as_path())?;
 
     let syntax_factory_file = syntax_factory_path.join("syntax_factory.rs");
-    let contents = generate_syntax_factory(&ast, syntax_crate_name.as_str(), &language_kind)?;
-    fs::write(syntax_factory_file, contents)?;
+    let contents = generate_syntax_factory(&ast, syntax_crate_name.as_str(), &language_src)?;
+    write_and_format(contents, syntax_factory_file.as_path())?;
 
     let node_factory_file = syntax_factory_path.join("node_factory.rs");
-    let contents = generate_node_factory(&ast, syntax_crate_name.as_str(), &language_kind)?;
-    fs::write(node_factory_file, contents)?;
+    let contents = generate_node_factory(&ast, syntax_crate_name.as_str(), &language_src)?;
+    write_and_format(contents, node_factory_file.as_path())?;
 
     let ast_macros_file = syntax_path.join("macros.rs");
-    let contents = generate_macros(&ast, &language_kind)?;
-    fs::write(ast_macros_file, contents)?;
+    let contents = generate_macros(&ast, &language_src)?;
+    write_and_format(contents, ast_macros_file.as_path())?;
 
     Ok(())
 }
@@ -123,6 +125,18 @@ fn check_unions(unions: &[AstEnumSrc]) {
             }
         }
     }
+}
+
+fn write_and_format(contents: String, path: &Path) -> Result<()> {
+    let mut rustfmt = Command::new("rustfmt");
+    fs::write(path, contents)
+        .with_context(|| format!("Tried to load the path {}", { path.display() }))?;
+    rustfmt
+        .args([path.as_os_str()])
+        .output()
+        .expect("format the file");
+
+    Ok(())
 }
 
 pub(crate) fn append_css_property_value_implied_alternatives(variants: Vec<String>) -> Vec<String> {
@@ -486,4 +500,153 @@ fn handle_tokens_in_unions(
     };
     fields.push(field);
     true
+}
+
+#[derive(Default, Debug)]
+pub struct AstSrc {
+    pub nodes: Vec<AstNodeSrc>,
+    pub unions: Vec<AstEnumSrc>,
+    pub lists: BTreeMap<String, AstListSrc>,
+    pub bogus: Vec<String>,
+}
+
+impl AstSrc {
+    pub fn push_list(&mut self, name: &str, src: AstListSrc) {
+        self.lists.insert(String::from(name), src);
+    }
+
+    pub fn lists(&self) -> std::collections::btree_map::Iter<String, AstListSrc> {
+        self.lists.iter()
+    }
+
+    pub fn is_list(&self, name: &str) -> bool {
+        self.lists.contains_key(name)
+    }
+
+    /// Sorts all nodes, enums, etc. for a stable code gen result
+    pub fn sort(&mut self) {
+        // No need to sort lists, they're stored in a btree
+        self.nodes.sort_unstable_by(|a, b| a.name.cmp(&b.name));
+        self.unions.sort_unstable_by(|a, b| a.name.cmp(&b.name));
+        self.bogus.sort_unstable();
+
+        for union in self.unions.iter_mut() {
+            union.variants.sort_unstable();
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct AstListSrc {
+    pub element_name: String,
+    pub separator: Option<AstListSeparatorConfiguration>,
+}
+
+#[derive(Debug)]
+pub struct AstListSeparatorConfiguration {
+    /// Name of the separator token
+    pub separator_token: String,
+    /// Whatever the list allows a trailing comma or not
+    pub allow_trailing: bool,
+}
+
+#[derive(Debug)]
+pub struct AstNodeSrc {
+    #[allow(dead_code)]
+    pub documentation: Vec<String>,
+    pub name: String,
+    // pub traits: Vec<String>,
+    pub fields: Vec<Field>,
+    /// Whether the fields of the node should be ordered dynamically using a
+    /// slot map for accesses.
+    pub dynamic: bool,
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum TokenKind {
+    Single(String),
+    Many(Vec<String>),
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum Field {
+    Token {
+        name: String,
+        kind: TokenKind,
+        optional: bool,
+        unordered: bool,
+    },
+    Node {
+        name: String,
+        ty: String,
+        optional: bool,
+        unordered: bool,
+    },
+}
+
+#[derive(Debug, Clone)]
+pub struct AstEnumSrc {
+    #[allow(dead_code)]
+    pub documentation: Vec<String>,
+    pub name: String,
+    // pub traits: Vec<String>,
+    pub variants: Vec<String>,
+}
+
+impl Field {
+    pub fn method_name<K>(&self, kind_source: &K) -> proc_macro2::Ident
+    where
+        K: LanguageSrc,
+    {
+        match self {
+            Field::Token { name, .. } => {
+                let name = kind_source.to_method_name(name);
+
+                // we need to replace "-" with "_" for the keywords
+                // e.g. we have `color-profile` in css but it's an invalid ident in rust code
+                if kind_source.keywords().contains(&name) {
+                    format_ident!("{}_token", name.replace('-', "_"))
+                } else {
+                    format_ident!("{}_token", name)
+                }
+            }
+            Field::Node { name, .. } => {
+                let (prefix, tail) = name.split_once('_').unwrap_or(("", name));
+                let final_name = if kind_source.prefixes().contains(&prefix) {
+                    tail
+                } else {
+                    name.as_str()
+                };
+
+                // this check here is to avoid emitting methods called "type()",
+                // where "type" is a reserved word
+                if final_name == "type" {
+                    format_ident!("ty")
+                } else {
+                    format_ident!("{}", final_name)
+                }
+            }
+        }
+    }
+    #[allow(dead_code)]
+    pub fn ty(&self) -> proc_macro2::Ident {
+        match self {
+            Field::Token { .. } => format_ident!("SyntaxToken"),
+            Field::Node { ty, .. } => format_ident!("{}", ty),
+        }
+    }
+
+    pub fn is_optional(&self) -> bool {
+        match self {
+            Field::Node { optional, .. } => *optional,
+            Field::Token { optional, .. } => *optional,
+        }
+    }
+
+    pub fn is_unordered(&self) -> bool {
+        match self {
+            Field::Node { unordered, .. } => *unordered,
+            Field::Token { unordered, .. } => *unordered,
+        }
+    }
 }

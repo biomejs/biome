@@ -1,16 +1,17 @@
-use crate::kind::{AstSrc, Field, KindsSrc};
+use crate::ast::{AstSrc, Field};
+use crate::LanguageSrc;
 use anyhow::Result;
 use biome_string_case::Case;
 use proc_macro2::{Ident, Span};
 use quote::{format_ident, quote};
 
-pub fn generate_node_factory<'a, K>(
+pub fn generate_node_factory<K>(
     ast: &AstSrc,
     syntax_crate_name: &str,
     language_kind: &K,
 ) -> Result<String>
 where
-    K: KindsSrc<'a>,
+    K: LanguageSrc,
 {
     let syntax_crate = Ident::new(syntax_crate_name, Span::call_site());
     let syntax_kind = language_kind.syntax_kind();

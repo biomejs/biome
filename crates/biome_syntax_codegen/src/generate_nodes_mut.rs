@@ -1,10 +1,11 @@
-use crate::kind::{AstSrc, Field, KindsSrc};
+use crate::ast::{AstSrc, Field};
+use crate::LanguageSrc;
 use anyhow::Result;
 use quote::{format_ident, quote};
 
-pub fn generate_nodes_mut<'a, K>(ast: &AstSrc, kind_source: &K) -> Result<String>
+pub fn generate_nodes_mut<K>(ast: &AstSrc, kind_source: &K) -> Result<String>
 where
-    K: KindsSrc<'a>,
+    K: LanguageSrc,
 {
     let node_boilerplate_impls: Vec<_> = ast
         .nodes

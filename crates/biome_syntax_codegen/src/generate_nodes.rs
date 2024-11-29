@@ -1,13 +1,14 @@
-use crate::kind::{AstNodeSrc, AstSrc, Field, KindsSrc, TokenKind};
+use crate::ast::{AstNodeSrc, AstSrc, Field, TokenKind};
+use crate::LanguageSrc;
 use anyhow::Result;
 use biome_string_case::Case;
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
 use std::collections::HashMap;
 
-pub fn generate_nodes<'a, K>(ast: &AstSrc, language_kind: &K) -> Result<String>
+pub fn generate_nodes<K>(ast: &AstSrc, language_kind: &K) -> Result<String>
 where
-    K: KindsSrc<'a>,
+    K: LanguageSrc,
 {
     let (node_defs, node_boilerplate_impls): (Vec<_>, Vec<_>) = ast
         .nodes
@@ -951,9 +952,9 @@ where
     Ok(ast)
 }
 
-pub(crate) fn token_kind_to_code<'a, K>(name: &str, kind_source: &K) -> TokenStream
+pub(crate) fn token_kind_to_code<K>(name: &str, kind_source: &K) -> TokenStream
 where
-    K: KindsSrc<'a>,
+    K: LanguageSrc,
 {
     let kind_variant_name = Case::Constant.convert(name);
 
@@ -1002,9 +1003,9 @@ where
 ///     current child does not match any of the fields.
 ///   - The `slot_map` entry for the defined grammar node is filled with the
 ///     index of the current child.
-fn get_slot_map_builder_impl<'a, K>(node: &AstNodeSrc, language_kind: &K) -> TokenStream
+fn get_slot_map_builder_impl<K>(node: &AstNodeSrc, language_kind: &K) -> TokenStream
 where
-    K: KindsSrc<'a>,
+    K: LanguageSrc,
 {
     let slot_count = node.fields.len();
 
@@ -1098,9 +1099,9 @@ where
     }
 }
 
-pub(crate) fn get_field_predicate<'a, K>(field: &Field, language_kind: &K) -> TokenStream
+pub(crate) fn get_field_predicate<K>(field: &Field, language_kind: &K) -> TokenStream
 where
-    K: KindsSrc<'a>,
+    K: LanguageSrc,
 {
     match field {
         Field::Node { ty, .. } => {

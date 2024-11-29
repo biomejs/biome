@@ -1,11 +1,12 @@
-use crate::kind::{AstSrc, KindsSrc};
+use crate::ast::AstSrc;
+use crate::LanguageSrc;
 use anyhow::Result;
 use biome_string_case::Case;
 use quote::{format_ident, quote};
 
-pub fn generate_macros<'a, K>(ast: &AstSrc, language_kind: &K) -> Result<String>
+pub fn generate_macros<K>(ast: &AstSrc, language_kind: &K) -> Result<String>
 where
-    K: KindsSrc<'a>,
+    K: LanguageSrc,
 {
     let syntax_kind = language_kind.syntax_kind();
     let syntax_node = language_kind.syntax_node();

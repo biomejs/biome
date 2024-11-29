@@ -1,12 +1,11 @@
-use crate::kind::KindsSrc;
-use crate::Result;
+use crate::{LanguageSrc, Result};
 use biome_string_case::Case;
 use proc_macro2::{Literal, Punct, Spacing};
 use quote::{format_ident, quote};
 
-pub fn generate_syntax_kinds<'a, K>(language_kind: &K) -> Result<String>
+pub fn generate_syntax_kinds<K>(language_kind: &K) -> Result<String>
 where
-    K: KindsSrc<'a>,
+    K: LanguageSrc,
 {
     let syntax_kind = language_kind.syntax_kind();
     let punctuation_values = language_kind.punct().iter().map(|(token, _name)| {
@@ -95,12 +94,13 @@ where
         })
         .collect::<Vec<_>>();
 
+    let string_ident = language_kind.string_literal();
     let syntax_kind_impl = quote! {
         pub const fn to_string(&self) -> Option<&'static str> {
             let tok = match self {
                 #(#punctuation => #punctuation_strings,)*
                 #(#full_keywords => #all_keyword_to_strings,)*
-                STRING_LITERAL => "string literal",
+                #string_ident => "string literal",
                 _ => return None,
             };
             Some(tok)
