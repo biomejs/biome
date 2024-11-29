@@ -2,7 +2,7 @@
 biome_deserialize: minor
 ---
 
-## Remove `biome_deserialize::StringSet`
+# Remove `biome_deserialize::StringSet`
 
 This is a **breaking change**.
 
