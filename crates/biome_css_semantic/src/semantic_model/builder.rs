@@ -188,9 +188,8 @@ impl SemanticModelBuilder {
 
 fn resolve_selector(current: &str, parent: &[Selector]) -> Vec<String> {
     let mut resolved = Vec::new();
-    let parent = parent.iter().rev();
 
-    if parent.len() == 0 {
+    if parent.is_empty() {
         return vec![current.to_string()];
     }
 
