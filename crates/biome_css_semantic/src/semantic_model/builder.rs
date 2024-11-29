@@ -108,14 +108,26 @@ impl SemanticModelBuilder {
                     .map(|parent| parent.specificity.clone())
                     .unwrap_or_default();
 
-                if let Some(current_rule) = self.current_rule_stack.last() {
-                    let current_rule = self.rules_by_id.get_mut(current_rule).unwrap();
-                    current_rule.selectors.push(Selector {
-                        name,
-                        range,
-                        original,
-                        specificity: parent_specificity + specificity.clone(),
-                    });
+                let parent_selectors = self
+                    .current_rule_stack
+                    .last()
+                    .and_then(|rule_id| self.rules_by_id.get(rule_id))
+                    .and_then(|rule| rule.parent_id)
+                    .and_then(|parent_id| self.rules_by_id.get(&parent_id))
+                    .map(|parent| parent.selectors.clone())
+                    .unwrap_or_default();
+
+                if let Some(current_rule_id) = self.current_rule_stack.last() {
+                    let resolved_selectors = resolve_selector(&name, &parent_selectors);
+                    let current_rule = self.rules_by_id.get_mut(current_rule_id).unwrap();
+                    for name in resolved_selectors.iter() {
+                        current_rule.selectors.push(Selector {
+                            name: name.to_string(),
+                            range,
+                            original: original.clone(),
+                            specificity: parent_specificity.clone() + specificity.clone(),
+                        });
+                    }
 
                     current_rule.specificity += specificity;
                 }
@@ -172,4 +184,25 @@ impl SemanticModelBuilder {
             }
         }
     }
+}
+
+fn resolve_selector(current: &str, parent: &[Selector]) -> Vec<String> {
+    let mut resolved = Vec::new();
+    let parent = parent.iter().rev();
+
+    if parent.len() == 0 {
+        return vec![current.to_string()];
+    }
+
+    for parent in parent {
+        let parent = parent.name.to_string();
+        if current.contains('&') {
+            let current = current.replace('&', &parent);
+            resolved.push(current);
+        } else {
+            resolved.push(format!("{} {}", parent, current));
+        }
+    }
+
+    resolved
 }

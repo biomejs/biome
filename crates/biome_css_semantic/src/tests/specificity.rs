@@ -306,9 +306,8 @@ fn test_specificity_nested_selector_lists() {
         Specificity(0, 1, 0), // ".class"
         Specificity(1, 0, 0), // "#id"
         Specificity(0, 1, 1), // "a:hover"
-        Specificity(1, 0, 3),
+        Specificity(1, 0, 3), // "ul li a#link"
     ];
-
     for (selector, expected_specificity) in rule.selectors.iter().zip(expected_specificities.iter())
     {
         let specificity = &selector.specificity;
@@ -362,7 +361,7 @@ fn test_specificity_deeply_nested_rules() {
 
     // 'a div'
     let div_selector = &div_rule.selectors[0];
-    assert_eq!(&div_selector.name, "div");
+    assert_eq!(&div_selector.name, "a div");
     assert_eq!(&div_selector.specificity, &Specificity(0, 0, 2));
 
     // TODO: Bug. It should be (0, 1, 2) instead of (0, 1, 1)
