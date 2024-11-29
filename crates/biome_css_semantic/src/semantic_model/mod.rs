@@ -193,14 +193,88 @@ mod tests {
         assert!(item_size);
     }
 
+    #[test]
+    fn test_get_rule_by_range() {
+        let parse = parse_css(
+            r#"p {color: red; font-size: 12px;}"#,
+            CssParserOptions::default(),
+        );
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+
+        // range of the declaration 'red'
+        let range = TextRange::new(10.into(), 13.into());
+        let rule = model.get_rule_by_range(range).unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 2);
+
+        assert_eq!(rule.selectors[0].name, "p");
+        assert_eq!(rule.declarations[0].property.name, "color");
+        assert_eq!(rule.declarations[0].value.text, "red");
+
+        assert_eq!(rule.declarations[1].property.name, "font-size");
+        assert_eq!(rule.declarations[1].value.text, "12px");
+
+        let range = TextRange::new(0.into(), 1.into());
+        let rule = model.get_rule_by_range(range).unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 2);
+
+        assert_eq!(rule.selectors[0].name, "p");
+        assert_eq!(rule.declarations[0].property.name, "color");
+        assert_eq!(rule.declarations[0].value.text, "red");
+
+        assert_eq!(rule.declarations[1].property.name, "font-size");
+        assert_eq!(rule.declarations[1].value.text, "12px");
+    }
+
+    #[test]
+    fn test_nested_get_rule_by_range() {
+        let parse = parse_css(
+            r#"p { --foo: red; font-size: 12px;
+            .child { color: var(--foo)}
+            }"#,
+            CssParserOptions::default(),
+        );
+        let root = parse.tree();
+        let model = super::semantic_model(&root);
+
+        // range of the declaration 'blue' in '.child'
+        let range = TextRange::new(60.into(), 64.into());
+        let rule = model.get_rule_by_range(range).unwrap();
+
+        assert_eq!(rule.selectors.len(), 1);
+        assert_eq!(rule.declarations.len(), 1);
+
+        assert_eq!(rule.selectors[0].name, "p .child");
+
+        assert_eq!(rule.declarations[0].property.name, "color");
+        assert_eq!(rule.declarations[0].value.text, "var(--foo)");
+
+        let parent = model.get_rule_by_id(rule.parent_id.unwrap()).unwrap();
+        assert_eq!(parent.selectors.len(), 1);
+        assert_eq!(parent.declarations.len(), 2);
+
+        assert_eq!(parent.selectors[0].name, "p");
+        assert_eq!(parent.declarations[0].property.name, "--foo");
+        assert_eq!(parent.declarations[0].value.text, "red");
+
+        assert_eq!(parent.declarations[1].property.name, "font-size");
+        assert_eq!(parent.declarations[1].value.text, "12px");
+    }
+
     #[ignore]
     #[test]
     fn quick_test() {
         let parse = parse_css(
-            r#"@property --item-size {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 40%;
+            r#".parent {
+  color: blue;
+
+  .child {
+    color: red;
+  }
 }"#,
             CssFileSource::css(),
             CssParserOptions::default(),
