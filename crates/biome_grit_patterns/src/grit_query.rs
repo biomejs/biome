@@ -212,13 +212,6 @@ pub struct GritQueryResult {
     pub logs: AnalysisLogs,
 }
 
-#[derive(Debug)]
-pub struct GritQueryResult {
-    pub effects: Vec<GritQueryEffect>,
-    pub diagnostics: Vec<RuleDiagnostic>,
-    pub logs: AnalysisLogs,
-}
-
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum GritQueryEffect {
     Match(Match),

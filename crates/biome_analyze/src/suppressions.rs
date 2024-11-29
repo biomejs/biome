@@ -9,9 +9,16 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 #[derive(Debug, Default)]
 pub struct TopLevelSuppression {
+    /// Whether this suppression suppresses all filters
     pub(crate) suppress_all: bool,
+    /// Filters for the current suppression
     pub(crate) filters: FxHashSet<RuleFilter<'static>>,
+    /// The range of the comment
     pub(crate) comment_range: TextRange,
+
+    /// The range covered by the current suppression.
+    /// Eventually, it should hit the entire document
+    pub(crate) range: TextRange,
 }
 
 impl TopLevelSuppression {
@@ -57,7 +64,7 @@ impl TopLevelSuppression {
     }
 
     pub(crate) fn expand_range(&mut self, range: TextRange) {
-        self.comment_range.cover(range);
+        self.range.cover(range);
     }
 
     pub(crate) fn has_filter(&self, filter: &RuleFilter) -> bool {
@@ -162,8 +169,10 @@ impl RangeSuppressions {
                 return Err(AnalyzerSuppressionDiagnostic::new(
                     category!("suppressions/incorrect"),
                     text_range,
-                    "Found a range-end suppression without a range-start suppression. This is invalid."
-                ));
+                    markup!{"Found a "<Emphasis>"biome-range-end"</Emphasis>" suppression without a "<Emphasis>"biome-range-start"</Emphasis>" suppression. This is invalid"}
+                ).hint(markup!{
+                    "Remove this suppression."
+                }.to_owned()));
             }
 
             match filter {
@@ -180,8 +189,10 @@ impl RangeSuppressions {
                         return Err(AnalyzerSuppressionDiagnostic::new(
                             category!("suppressions/incorrect"),
                             text_range,
-                            "Found a range-end suppression without a range-start suppression. This is invalid."
-                        ));
+                            markup!{"Found a "<Emphasis>"biome-range-end"</Emphasis>" suppression without a "<Emphasis>"biome-range-start"</Emphasis>" suppression. This is invalid"}
+                        ).hint(markup!{
+                            "Remove this suppression."
+                        }.to_owned()));
                     }
                 }
             }
@@ -189,6 +200,7 @@ impl RangeSuppressions {
         Ok(())
     }
 
+    /// Checks if there's suppression that suppresses the current rule in the range provided
     pub(crate) fn suppressed_rule(&mut self, filter: &RuleKey, position: &TextRange) -> bool {
         let range_suppression = self
             .suppressions
@@ -209,7 +221,8 @@ impl RangeSuppressions {
         }
     }
 
-    pub(crate) fn has_filter_in_range(
+    /// Whether if the provided `filter` matches ones, given a range.
+    pub(crate) fn matches_filter_in_range(
         &self,
         filter: &RuleFilter,
         position: &TextRange,
@@ -230,8 +243,11 @@ impl RangeSuppressions {
 
 #[derive(Debug)]
 pub struct Suppressions<'analyzer> {
+    /// Current line index
     pub(crate) line_index: usize,
+    /// Registry metadata, used to find match the rules
     metadata: &'analyzer MetadataRegistry,
+    /// Used to track the last suppression pushed.
     last_suppression: Option<AnalyzerSuppressionVariant>,
     pub(crate) line_suppressions: Vec<LineSuppression>,
     pub(crate) top_level_suppression: TopLevelSuppression,
@@ -302,7 +318,8 @@ impl<'analyzer> Suppressions<'analyzer> {
         Ok(())
     }
 
-    fn rule_to_filter(
+    /// Maps a [suppression](AnalyzerSuppressionKind) to a [RuleFilter]
+    fn map_to_rule_filter(
         &self,
         suppression_kind: &AnalyzerSuppressionKind,
         text_range: TextRange,
@@ -337,10 +354,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         }
     }
 
-    fn suppression_to_instances(
-        &self,
-        suppression_kind: &AnalyzerSuppressionKind,
-    ) -> Option<String> {
+    fn map_to_rule_instances(&self, suppression_kind: &AnalyzerSuppressionKind) -> Option<String> {
         match suppression_kind {
             AnalyzerSuppressionKind::Everything | AnalyzerSuppressionKind::Rule(_) => None,
             AnalyzerSuppressionKind::RuleInstance(_, instances) => Some((*instances).to_string()),
@@ -353,8 +367,8 @@ impl<'analyzer> Suppressions<'analyzer> {
         comment_range: TextRange,
         token_range_not_trimmed: TextRange,
     ) -> Result<(), AnalyzerSuppressionDiagnostic> {
-        let filter = self.rule_to_filter(&suppression.kind, comment_range)?;
-        let instances = self.suppression_to_instances(&suppression.kind);
+        let filter = self.map_to_rule_filter(&suppression.kind, comment_range)?;
+        let instances = self.map_to_rule_instances(&suppression.kind);
         self.last_suppression = Some(suppression.variant.clone());
         let already_suppressed = self.already_suppressed(filter.as_ref(), &comment_range);
         match suppression.variant {
@@ -422,6 +436,8 @@ impl<'analyzer> Suppressions<'analyzer> {
         }
     }
 
+    /// Checks if there's top-level suppression or a range suppression that suppresses the given filter.
+    /// If so, it returns the text range of that suppression.
     fn already_suppressed(
         &self,
         filter: Option<&RuleFilter>,
@@ -431,7 +447,9 @@ impl<'analyzer> Suppressions<'analyzer> {
             self.top_level_suppression
                 .has_filter(filter)
                 .then_some(self.top_level_suppression.comment_range)
-                .or(self.range_suppressions.has_filter_in_range(filter, range))
+                .or(self
+                    .range_suppressions
+                    .matches_filter_in_range(filter, range))
         })
     }
 }
