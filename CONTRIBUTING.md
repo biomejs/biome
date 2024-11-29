@@ -361,12 +361,25 @@ The command will create the changeset(s) in the `.changeset` folder. You're free
 
 #### Choose the correct packages
 
-In the vast majority of cases, you want to choose the `cli` library, which represents the main binary (AKA the npm package `@biomejs/biome`). If your PR also changes any *public* crate that is published, you'll have to select it too.
+In the vast majority of cases, you want to choose the `cli` package, which represents the main binary (AKA the npm package `@biomejs/biome`). If your PR also changes any *public* crate that is published, you'll have to select it too.
 
 For example, if your PR fixes a *JavaScript* lint rule and changes a public of the crate `biome_js_syntax`, you'll select:
 - `cli`
 - `biome_js_analyze`
 - `biome_js_syntax`
+
+And the frontmatter of the changset will look like this:
+
+```markdown
+---
+cli: patch
+biome_js_analyze: patch
+biome_js_syntax: patch
+---
+```
+With this, the description will be the same for all three packages. 
+
+However, there are cases where **you don't want** that, because we want to write a specific message for `cli` and another for `biome_js_syntax`. In this case, you're free to create **multiple changesets** in the *same PR*. In the example above, you would need to run `just new-chageset` twice, select `cli` the first time, and select `biome_js_syntax` and `biome_js_analyze` the second time. 
 
 #### Choose the correct type of change
 
