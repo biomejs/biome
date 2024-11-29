@@ -1,8 +1,11 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource
+};
 use biome_console::markup;
-use biome_js_syntax::JsIdentifierBinding;
+use biome_js_syntax::{
+    AnyJsExpression, AnyJsxAttribute, AnyJsxAttributeName, JsFunctionExpression, JsxAttribute, JsxAttributeInitializerClause, JsxExpressionAttributeValue
+};
 use biome_rowan::AstNode;
-
 declare_lint_rule! {
     /// Succinct description of the rule.
     ///
@@ -36,14 +39,41 @@ declare_lint_rule! {
 }
 
 impl Rule for NoJsxPropsBind {
-    type Query = Ast<JsIdentifierBinding>;
+    type Query = Ast<JsxAttribute>;
     type State = ();
     type Signals = Option<Self::State>;
+    // TODO: Find how to use option
     type Options = ();
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let _binding = ctx.query();
-        Some(())
+        let attribute = ctx.query();
+        let attribute_name = attribute.name().ok()?;
+        
+        /*
+        TODO: Too many if, find simple way
+        rust analyzer doc: https://github.com/rust-lang/rust-analyzer/blob/master/docs/dev/syntax.md
+        biome_js_syntax doc: https://docs.rs/biome_js_syntax/latest/biome_js_syntax/index.html
+        */
+        if is_event_handler(&attribute_name) {
+            if let Some(initializer) = attribute.initializer() {
+                if let Some(attribute_value) = initializer.value().ok() {
+                    if let Some(expression_value) = attribute_value.as_jsx_expression_attribute_value() {
+                        if let Some(expression) = expression_value.expression().ok() {
+                            if matches!(expression, AnyJsExpression::JsIdentifierExpression(_)){
+                                return Some(())
+                            }
+                            // if is_arrow_or_anonymous(expression){
+                            //     return Some(())
+                            // }
+                            // if has_bind_call(){
+                            //     return Some(())
+                            // }
+                        }
+                    }
+                }
+            }
+        }
+        None
     }
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
@@ -65,4 +95,29 @@ impl Rule for NoJsxPropsBind {
             }),
         )
     }
+}
+
+fn is_event_handler(name: &AnyJsxAttributeName) -> bool {
+    match name {
+        AnyJsxAttributeName::JsxName(identifier) => {
+            if let Some(value_token) = identifier.value_token().ok() {
+                let name_text = value_token.text_trimmed();
+                name_text.starts_with("on")
+            } else {
+                false
+            }
+        }
+        _ => false,
+    }
+}
+
+fn is_arrow_or_anonymous(expression: AnyJsExpression) -> bool {
+    matches!(
+        expression,
+        AnyJsExpression::JsArrowFunctionExpression(_) | AnyJsExpression::JsFunctionExpression(_)
+    )
+}
+
+fn has_bind_call() -> bool {
+    false
 }
