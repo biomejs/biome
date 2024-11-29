@@ -1292,7 +1292,7 @@ export interface Nursery {
 	 */
 	noOctalEscape?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Restricts imports of "package private" exports.
 	 */
 	noPackagePrivateImports?: RuleConfiguration_for_Null;
 	/**
@@ -1323,6 +1323,10 @@ export interface Nursery {
 	 * Disallow template literal placeholder syntax in regular strings.
 	 */
 	noTemplateCurlyInString?: RuleConfiguration_for_Null;
+	/**
+	 * Prevents the use of the TypeScript directive @ts-ignore.
+	 */
+	noTsIgnore?: RuleFixConfiguration_for_Null;
 	/**
 	 * Disallow unknown pseudo-class selectors.
 	 */
@@ -2519,10 +2523,6 @@ export interface RestrictedImportsOptions {
 	 * A list of import paths that should trigger the rule.
 	 */
 	paths: {};
-	/**
-	 * Whether to place restrictions on the importing of "package private" symbols.
-	 */
-	restrictPackagePrivate?: PackagePrivateRestriction;
 }
 export interface NoRestrictedTypesOptions {
 	types?: {};
@@ -2667,10 +2667,6 @@ For example, for React's `useRef()` hook the value would be `true`, while for `u
 	 */
 	stableResult?: StableHookResult;
 }
-/**
- * Allowed values for the `restrictPackagePrivate` option.
- */
-export type PackagePrivateRestriction = "all" | "none";
 export type Accessibility = "noPublic" | "explicit" | "none";
 export type ConsistentArrayType = "shorthand" | "generic";
 export type FilenameCases = FilenameCase[];
@@ -3088,6 +3084,7 @@ export type Category =
 	| "lint/nursery/noStaticElementInteractions"
 	| "lint/nursery/noSubstr"
 	| "lint/nursery/noTemplateCurlyInString"
+	| "lint/nursery/noTsIgnore"
 	| "lint/nursery/noUndeclaredDependencies"
 	| "lint/nursery/noUnknownFunction"
 	| "lint/nursery/noUnknownMediaFeatureName"
