@@ -1194,6 +1194,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "biome_syntax_codegen"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "biome_string_case",
+ "biome_ungrammar",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "biome_test_utils"
 version = "0.0.0"
 dependencies = [
