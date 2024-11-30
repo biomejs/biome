@@ -2079,7 +2079,7 @@
 		"NoForEachOptions": {
 			"type": "object",
 			"properties": {
-				"validIdentifiers": {
+				"allowedIdentifiers": {
 					"description": "A list of variable names allowed for `forEach` calls.",
 					"type": "array",
 					"items": { "type": "string" }

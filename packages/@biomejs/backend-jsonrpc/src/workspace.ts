@@ -2493,7 +2493,7 @@ export interface NoForEachOptions {
 	/**
 	 * A list of variable names allowed for `forEach` calls.
 	 */
-	validIdentifiers: string[];
+	allowedIdentifiers: string[];
 }
 /**
  * Rule's options

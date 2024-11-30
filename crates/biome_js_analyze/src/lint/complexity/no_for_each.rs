@@ -65,15 +65,26 @@ declare_lint_rule! {
     ///
     /// ## Options
     ///
+    /// **Since v2.0.0**
+    ///
     /// The rule provides a `validIdentifiers` option that allows specific variable names to call `forEach`.
     /// In the following configuration, it's allowed to call `forEach` with expressions that match `Effect` or `_`:
     ///
-    /// ```json
+    /// ```json,options
     /// {
     ///     "options": {
-    ///         "validIdentifiers": ["Effect", "_"]
+    ///         "allowedIdentifiers": ["Effect", "_"]
     ///     }
     /// }
+    /// ```
+    ///
+    /// ```js,use_options
+    /// Effect.forEach((el) => {
+    ///   f(el);
+    /// })
+    /// _.forEach((el) => {
+    ///   f(el);
+    /// })
     /// ```
     ///
     /// Values with dots (e.g., "lib._") will not be accepted.
@@ -105,13 +116,13 @@ impl Rule for NoForEach {
 
         let options = ctx.options();
         // Check if `forEach` is called by a valid identifier.
-        if !options.valid_identifiers.is_empty() {
+        if !options.allowed_identifiers.is_empty() {
             let object = member_expression.object().ok()?;
             if let Some(reference) = object.as_js_reference_identifier() {
                 let value_token = reference.value_token().ok()?;
                 let name = value_token.text_trimmed();
                 if options
-                    .valid_identifiers
+                    .allowed_identifiers
                     .iter()
                     .any(|identifier| identifier.as_ref() == name)
                 {
@@ -159,7 +170,7 @@ impl Rule for NoForEach {
 pub struct NoForEachOptions {
     #[serde(skip_serializing_if = "<[_]>::is_empty")]
     /// A list of variable names allowed for `forEach` calls.
-    pub valid_identifiers: Box<[Box<str>]>,
+    pub allowed_identifiers: Box<[Box<str>]>,
 }
 
 impl DeserializableValidator for NoForEachOptions {
@@ -170,7 +181,7 @@ impl DeserializableValidator for NoForEachOptions {
         diagnostics: &mut Vec<DeserializationDiagnostic>,
     ) -> bool {
         if self
-            .valid_identifiers
+            .allowed_identifiers
             .iter()
             .any(|identifier| identifier.is_empty() || identifier.contains('.'))
         {
