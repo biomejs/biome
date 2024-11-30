@@ -7,26 +7,30 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow .bind() or arrow function in JSX props
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
+    /// Using `.bind()` on a function or declaring a function directly in props
+    /// creates a new function on every render, which is treated as a completely different function.
     ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```js,expect_diagnostic
-    /// var a = 1;
-    /// a = 2;
+    /// <Foo onClick={this._handleClick.bind(this)}></Foo>
+    /// ```
+    /// 
+    /// ```js,expect_diagnostic
+    /// <Foo onClick={() => console.log('Hello!')}></Foo>
+    /// ```
+    /// 
+    /// ```js,expect_diagnostic
+    /// <Foo onClick={function () { console.log('Hello!'); }}></Foo>
     /// ```
     ///
     /// ### Valid
     ///
     /// ```js
-    /// // var a = 1;
+    /// <Foo onClick={this._handleClick}></Foo>
     /// ```
     ///
     pub NoJsxPropsBind {
@@ -62,6 +66,11 @@ impl Rule for NoJsxPropsBind {
                             if matches!(expression, AnyJsExpression::JsIdentifierExpression(_)){
                                 return Some(())
                             }
+                            // let expression_type = match expression {
+                            //     AnyJsExpression::JsFunctionExpression(_) => "anonymous",
+                            //     AnyJsExpression::JsArrowFunctionExpression(_) => "arrow",
+                            //     _ => "bind"
+                            // };
                             // if is_arrow_or_anonymous(expression){
                             //     return Some(())
                             // }
@@ -82,12 +91,13 @@ impl Rule for NoJsxPropsBind {
         // https://docs.rs/biome_analyze/latest/biome_analyze/#what-a-rule-should-say-to-the-user
         //
         let node = ctx.query();
+        
         Some(
             RuleDiagnostic::new(
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Variable is read here."
+                    "Disallow using a callback in asynchronous tests and hooks."
                 },
             )
             .note(markup! {
