@@ -6,7 +6,7 @@
 				"noForEach": {
 					"level": "error",
 					"options": {
-						"validIdentifiers": ["Effect", "_"]
+						"allowedIdentifiers": ["Effect", "_"]
 					}
 				}
 			}

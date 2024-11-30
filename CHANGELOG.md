@@ -191,7 +191,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 					"noForEach": {
 						"level": "error",
 						"options": {
-							"validIdentifiers": ["Effect", "_"]
+							"allowedIdentifiers": ["Effect", "_"]
 						}
 					}
 				}

@@ -6,7 +6,7 @@
 				"noForEach": {
 					"level": "error",
 					"options": {
-						"validIdentifiers": ["lib._"]
+						"allowedIdentifiers": ["lib._"]
 					}
 				}
 			}

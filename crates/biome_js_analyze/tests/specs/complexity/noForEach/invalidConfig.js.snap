@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalidConfig.js
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -14,13 +15,13 @@ lib._.forEach([1, 2], function (value) {
 ```
 invalidConfig.options:8:17 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × 'validIdentifiers' does not accept empty values or values with dots.
+  × 'allowedIdentifiers' does not accept empty values or values with dots.
   
      6 │ 				"noForEach": {
      7 │ 					"level": "error",
    > 8 │ 					"options": {
        │ 					           ^
-   > 9 │ 						"validIdentifiers": ["lib._"]
+   > 9 │ 						"allowedIdentifiers": ["lib._"]
   > 10 │ 					}
        │ 					^
     11 │ 				}
