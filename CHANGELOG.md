@@ -24,6 +24,8 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 #### Bug fixes
 
+- Don't parse the files that don't end with the json extension as JSON files in the `.vscode` directory ([#4391](https://github.com/biomejs/biome/issues/4391)). Contributed by @Conaclos
+
 - `biome migrate eslint` now correctly resolves scoped package named `eslint-config` with a path.
   Contributed by @Conaclos
 
@@ -42,11 +44,46 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 ### Formatter
 
+- Fix [#4413](https://github.com/biomejs/biome/issues/4413), where the GraphQL formatter adds a new line at the start of block comments on Windows. Contributed by @vohoanglong0107
+
 ### Bug fixes
 
 - Fix [#4121](https://github.com/biomejs/biome/issues/4326), don't ident a CSS selector when has leading comments. Contributed by @fireairforce
+
 - Fix [#4334](https://github.com/biomejs/biome/issues/4334), don't insert trailing comma on type import statement. Contributed by @fireairforce
+
 - Fix [#3229](https://github.com/biomejs/biome/issues/3229), where Biome wasn't idempotent when block comments were placed inside compound selectors. Contributed by @ematipico
+
+- Fix [#4026](https://github.com/biomejs/biome/issues/4026), don't move comments in `grid-template`. Contributed by @fireairforce
+
+- Fix [#4533](https://github.com/biomejs/biome/issues/4533), don't throw error when pseudeo class after a webkit scrollbar pseudeo element.
+
+  The follow code will not report:
+
+  ```css
+  ::-webkit-scrollbar-thumb:hover {}
+  ```
+
+  Contributed by @fireairforce
+
+- Fix [#4575](https://github.com/biomejs/biome/issues/4575), don't wrap selector identation after css comments. Contributed by @fireairforce
+
+- Fix [#4553](https://github.com/biomejs/biome/issues/4553), `noUselessFragments` fix result has invalid syntax for JSX attribute, the follow code will fix:
+
+  ```jsx
+  <Suspense fallback={<><span>Loading...</span></>}>
+	  {children}
+  </Suspense>;
+  ```
+
+  it will fix as:
+
+  ```jsx
+  <Suspense fallback={<span>Loading...</span>}>
+	  {children}
+  </Suspense>;
+  ```
+
 ### JavaScript APIs
 
 ### Linter
@@ -102,7 +139,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   `noUndeclaredVariables` is inspired by the [no-undef ESLint rule](https://eslint.org/docs/latest/rules/no-undef). It reports all references that are not bound to any declarations within a module.
   Node.js, JavaScript and TypeScript globals are ignored.
-  Bioem provides the `javascript.globals` option to list additional globals that should be ignored by the rule.
+  Biome provides the `javascript.globals` option to list additional globals that should be ignored by the rule.
 
   In TypeScript projects, developers often use global declaration files to declare global types.
   Biome is currently unable to detect these global types.
@@ -216,7 +253,20 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @Conaclos
 
+- [noUnknownProperty](https://biomejs.dev/linter/rules/no-unknown-property/) now accepts more known CSS properties ([#4549](https://github.com/biomejs/biome/issues/4549)).
+
+  ```diff
+  - ['anchor-default', 'anchor-scroll', 'inset-area', 'position-animation', 'position-fallback', 'position-fallback-bounds', 'position-try-options']
+  + ['anchor-scope', 'interpolate-size', 'line-fit-edge', 'masonry', 'masonry-auto-tracks', 'masonry-direction', 'masonry-fill', 'masonry-flow', 'masonry-slack', 'masonry-template-areas', 'masonry-template-tracks', 'position-anchor', 'position-area', 'position-try-fallbacks', 'position-visibility', 'scroll-start-target', 'text-box', 'view-transition-class', 'view-transition-group']
+  ```
+
+  This change replaces deprecated properties, improving CSS validation.
+
+  Contributed by @lucasweng
+
 #### Bug fixes
+
+- [noControlCharactersInRegex](https://biomejs.dev/linter/rules/no-control-characters-in-regex) no longer panics when it encounters an unterminated unicode escape sequence ([#4565](https://github.com/biomejs/biome/issues/4565)). Contributed by @Conaclos
 
 - [useArrayLiterals](https://biomejs.dev/linter/rules/use-array-literals/) now reports all expressions using the `Array` constructors.
 
@@ -245,6 +295,29 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
   ```
 
   Contributed by @Conaclos
+
+- [noUndeclaredVariables](https://biomejs.dev/linter/rules/no-undeclared-variables/) is now able to bind read of value to a type-only import in ambient contexts ([#4526](https://github.com/biomejs/biome/issues/4526)).
+
+  In the following code, `A` is now correctly bound to the type-only import.
+  Previously, `A` was reported as an undeclared variable.
+
+  ```ts
+  import type { A } from "mod";
+
+  declare class B extends A {}
+  ```
+
+  Contributed by @Conaclos
+
+- [noUnusedVariables](https://biomejs.dev/linter/rules/no-unused-variables/) no longer reports top-level variables in a global declaration file as unused. Contributed by @Conaclos
+
+- [useNamingConvention](https://biomejs.dev/linter/rules/use-naming-convention/) no longer suggests renaming top-level variables in a global declaration file. Contributed by @Conaclos
+
+- [noMisleadingCharacterClass](https://biomejs.dev/linter/rules/no-misleading-character-class/) no longer panics on malformed escape sequences that end with a multi-byte character ([#4587](https://github.com/biomejs/biome/issues/4587)). Contributed by @Conaclos
+
+- [noUnusedImports](https://biomejs.dev/linter/rules/no-unused-imports/) no longer reports used values imported as types in an external module ([#3895])(https://github.com/biomejs/biome/issues/3895). Contributed by @Conaclos
+
+- Fixed a panic related to bogus import statements in `useExhaustiveDependencies` ([#4568](https://github.com/biomejs/biome/issues/4568)) Contributed by @dyc3
 
 ### Parser
 
@@ -298,7 +371,9 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
   Contributed by @denbezrukov
 
+- Don't panic when a multi-byte character is found in a unicode escape sequence ([#4564](https://github.com/biomejs/biome/issues/4564)). Contributed by @Conaclos
 
+- Don't panic when a declare statement is followed by an unexpected token.([#4562](https://github.com/biomejs/biome/issues/4562)). Contributed by @fireairforce
 ## v1.9.4 (2024-10-17)
 
 ### Analyzer

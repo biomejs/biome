@@ -185,6 +185,7 @@ pub const JS_KINDS_SRC: KindsSrc = KindsSrc {
         "JS_MODULE",
         "JS_MODULE_ITEM_LIST",
         "JS_SCRIPT",
+        "TS_DECLARATION_MODULE",
         "JS_EXPRESSION_SNIPPED",
         "JS_DIRECTIVE",
         "JS_DIRECTIVE_LIST",

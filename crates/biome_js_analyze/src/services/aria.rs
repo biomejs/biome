@@ -3,9 +3,8 @@ use biome_analyze::{
     RuleKey, ServiceBag, SyntaxVisitor,
 };
 use biome_aria::AriaRoles;
-use biome_js_syntax::{AnyJsRoot, AnyJsxAttribute, JsLanguage, JsSyntaxNode, JsxAttributeList};
+use biome_js_syntax::{AnyJsRoot, JsLanguage, JsSyntaxNode};
 use biome_rowan::AstNode;
-use rustc_hash::FxHashMap;
 use std::sync::Arc;
 
 #[derive(Debug, Clone)]
@@ -17,72 +16,6 @@ impl AriaServices {
     pub fn aria_roles(&self) -> &AriaRoles {
         &self.roles
     }
-
-    /// Parses a [JsxAttributeList] and extracts the names and values of each [JsxAttribute],
-    /// returning them as a [FxHashMap]. Attributes with no specified value are given a value of "true".
-    /// If an attribute has multiple values, each value is stored as a separate item in the
-    /// [FxHashMap] under the same attribute name. Returns [None] if the parsing fails.
-    pub fn extract_attributes(
-        &self,
-        attribute_list: &JsxAttributeList,
-    ) -> Option<FxHashMap<String, Vec<AttributeValue>>> {
-        let mut defined_attributes: FxHashMap<String, Vec<AttributeValue>> = FxHashMap::default();
-        for attribute in attribute_list {
-            if let AnyJsxAttribute::JsxAttribute(attr) = attribute {
-                let name = attr.name().ok()?.syntax().text_trimmed().to_string();
-                let values = if let Some(initializer) = attr.initializer() {
-                    let initializer = initializer.value().ok()?;
-                    if let Some(static_value) = initializer.as_static_value() {
-                        static_value
-                            .text()
-                            .split_ascii_whitespace()
-                            .map(|s| AttributeValue::StaticValue(s.to_string()))
-                            .collect()
-                    } else {
-                        vec![AttributeValue::DynamicValue(
-                            initializer.syntax().text_trimmed().to_string(),
-                        )]
-                    }
-                } else {
-                    vec![AttributeValue::StaticValue("true".to_string())]
-                };
-
-                defined_attributes.entry(name).or_insert(values);
-            }
-        }
-        Some(defined_attributes)
-    }
-
-    pub fn convert_all_attribute_values(
-        &self,
-        attributes: Option<FxHashMap<String, Vec<AttributeValue>>>,
-    ) -> Option<FxHashMap<String, Vec<String>>> {
-        attributes.map(|attr_map| {
-            attr_map
-                .into_iter()
-                .map(|(key, values)| {
-                    let string_values = self.convert_attribute_values(values);
-                    (key, string_values)
-                })
-                .collect()
-        })
-    }
-
-    pub fn convert_attribute_values(&self, values: Vec<AttributeValue>) -> Vec<String> {
-        values
-            .into_iter()
-            .map(|value| match value {
-                AttributeValue::StaticValue(s) => s,
-                AttributeValue::DynamicValue(s) => s,
-            })
-            .collect()
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
-pub enum AttributeValue {
-    StaticValue(String),
-    DynamicValue(String),
 }
 
 impl FromServices for AriaServices {
@@ -129,59 +62,5 @@ where
 
     fn unwrap_match(_: &ServiceBag, node: &Self::Input) -> Self::Output {
         N::unwrap_cast(node.clone())
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::services::aria::{AriaServices, AttributeValue};
-    use biome_aria::AriaRoles;
-    use biome_js_factory::make::{
-        ident, jsx_attribute, jsx_attribute_initializer_clause, jsx_attribute_list, jsx_name,
-        jsx_string, jsx_string_literal, token,
-    };
-    use biome_js_syntax::{AnyJsxAttribute, AnyJsxAttributeName, AnyJsxAttributeValue, T};
-    use std::sync::Arc;
-
-    #[test]
-    fn test_extract_attributes() {
-        // Assume attributes of `<div class="wrapper document" role="article"></div>`
-        let attribute_list = jsx_attribute_list(vec![
-            AnyJsxAttribute::JsxAttribute(
-                jsx_attribute(AnyJsxAttributeName::JsxName(jsx_name(ident("class"))))
-                    .with_initializer(jsx_attribute_initializer_clause(
-                        token(T![=]),
-                        AnyJsxAttributeValue::JsxString(jsx_string(jsx_string_literal(
-                            "wrapper document",
-                        ))),
-                    ))
-                    .build(),
-            ),
-            AnyJsxAttribute::JsxAttribute(
-                jsx_attribute(AnyJsxAttributeName::JsxName(jsx_name(ident("role"))))
-                    .with_initializer(jsx_attribute_initializer_clause(
-                        token(T![=]),
-                        AnyJsxAttributeValue::JsxString(jsx_string(jsx_string_literal("article"))),
-                    ))
-                    .build(),
-            ),
-        ]);
-        let services = AriaServices {
-            roles: Arc::new(AriaRoles {}),
-        };
-
-        let attribute_name_to_values = services.extract_attributes(&attribute_list).unwrap();
-
-        assert_eq!(
-            attribute_name_to_values["class"],
-            vec![
-                AttributeValue::StaticValue("wrapper".to_string()),
-                AttributeValue::StaticValue("document".to_string())
-            ]
-        );
-        assert_eq!(
-            attribute_name_to_values["role"],
-            vec![AttributeValue::StaticValue("article".to_string())]
-        );
     }
 }

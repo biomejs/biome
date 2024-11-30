@@ -2550,7 +2550,7 @@ export interface UseImportExtensionsOptions {
  */
 export interface RestrictedImportsOptions {
 	/**
-	 * A list of names that should trigger the rule
+	 * A list of import paths that should trigger the rule.
 	 */
 	paths: {};
 }

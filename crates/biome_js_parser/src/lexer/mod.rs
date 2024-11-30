@@ -15,8 +15,6 @@
 
 #![allow(clippy::or_fun_call)]
 
-#[rustfmt::skip]
-mod errors;
 mod tests;
 
 use std::ops::{BitOr, BitOrAssign};
@@ -36,8 +34,6 @@ use biome_unicode_table::{
 use enumflags2::{bitflags, make_bitflags, BitFlags};
 
 use crate::JsParserOptions;
-
-use self::errors::invalid_digits_after_unicode_escape_sequence;
 
 // The first utf8 byte of every valid unicode whitespace char, used for short circuiting whitespace checks
 const UNICODE_WHITESPACE_STARTS: [u8; 5] = [
@@ -633,23 +629,32 @@ impl<'src> JsLexer<'src> {
     /// This returns a `u32` since not all escape sequences produce valid
     /// Unicode characters.
     fn read_unicode_escape(&mut self) -> Result<u32, ()> {
+        let start = self.position - 1;
         self.assert_byte(b'u');
 
         for _ in 0..4 {
             match self.next_byte_bounded() {
                 None => {
-                    let err = invalid_digits_after_unicode_escape_sequence(
-                        self.position - 1,
-                        self.position + 1,
-                    );
+                    let err = ParseDiagnostic::new(
+                        "Unterminated unicode escape sequence.",
+                        start..(self.position + 1),
+                    )
+                    .with_hint("Expected a valid unicode escape sequence.");
                     self.push_diagnostic(err);
                     return Err(());
                 }
                 Some(b) if !b.is_ascii_hexdigit() => {
-                    let err = invalid_digits_after_unicode_escape_sequence(
-                        self.position - 1,
-                        self.position + 1,
-                    );
+                    let start = self.position;
+                    // `b` can be a unicode character.
+                    // To have a correct range, we have to eat the whole character.
+                    if !b.is_ascii() {
+                        self.advance_char_unchecked();
+                    }
+                    let err = ParseDiagnostic::new(
+                        "Invalid digit in unicode escape sequence.",
+                        start..self.position,
+                    )
+                    .with_hint("Expected a valid unicode escape sequence.");
                     self.push_diagnostic(err);
                     return Err(());
                 }

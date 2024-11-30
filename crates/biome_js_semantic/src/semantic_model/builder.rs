@@ -66,6 +66,7 @@ impl SemanticModelBuilder {
             // Accessible from scopes, closures
             JS_MODULE
             | JS_SCRIPT
+            | TS_DECLARATION_MODULE
             | JS_FUNCTION_DECLARATION
             | JS_FUNCTION_EXPRESSION
             | JS_ARROW_FUNCTION_EXPRESSION

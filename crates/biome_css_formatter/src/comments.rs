@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use biome_css_syntax::{
-    AnyCssDeclarationName, CssComplexSelector, CssFunction, CssIdentifier, CssLanguage, TextLen,
+    AnyCssDeclarationName, CssComplexSelector, CssFunction, CssIdentifier, CssLanguage,
+    CssSyntaxKind, TextLen,
 };
 use biome_diagnostics::category;
 use biome_formatter::comments::{
@@ -109,7 +110,13 @@ fn handle_declaration_name_comment(
 ) -> CommentPlacement<CssLanguage> {
     match comment.preceding_node() {
         Some(following_node) if AnyCssDeclarationName::can_cast(following_node.kind()) => {
-            CommentPlacement::leading(following_node.clone(), comment)
+            if following_node.parent().map_or(false, |p| {
+                p.kind() == CssSyntaxKind::CSS_GENERIC_COMPONENT_VALUE_LIST
+            }) {
+                CommentPlacement::Default(comment)
+            } else {
+                CommentPlacement::leading(following_node.clone(), comment)
+            }
         }
         _ => CommentPlacement::Default(comment),
     }
