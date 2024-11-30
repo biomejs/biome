@@ -18,14 +18,16 @@ a == b;
 # Emitted Messages
 
 ```block
-file.js:1:1 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+file.js:4:1 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   ! Suppression comment has no effect because another suppression comment suppresses the same rule.
   
-  > 1 │ 
-      │ 
     2 │ // biome-ignore-all lint/suspicious/noDoubleEquals: single rule
     3 │ a == b;
+  > 4 │ // biome-ignore-start lint/suspicious/noDoubleEquals: single rule
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    5 │ a == b;
+    6 │ a == b;
   
   i This is the suppression comment that was used.
   

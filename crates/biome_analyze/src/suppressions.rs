@@ -161,6 +161,7 @@ impl RangeSuppressions {
                 }
                 range_suppression.suppression_range = text_range;
                 range_suppression.already_suppressed = already_suppressed;
+                range_suppression.start_comment_range = text_range;
                 self.suppressions.push(range_suppression);
             }
         } else if suppression.is_range_end() {
