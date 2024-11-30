@@ -62,14 +62,14 @@ impl Rule for UseExportsLast {
     }
 
     fn diagnostic(_ctx: &RuleContext<Self>, range: &Self::State) -> Option<RuleDiagnostic> {
-        Some(
-            RuleDiagnostic::new(
-                rule_category!(),
-                range,
-                markup! {
-                    "All exports should be at the end of the file."
-                },
-            ),
-        )
+        Some(RuleDiagnostic::new(
+            rule_category!(),
+            range,
+            markup! {
+                "All exports should be declared after all non-export statements."
+            },
+        ).note(markup!{
+            "Move this statement before the export statements to keep all exports at the end of the module."
+        }))
     }
 }

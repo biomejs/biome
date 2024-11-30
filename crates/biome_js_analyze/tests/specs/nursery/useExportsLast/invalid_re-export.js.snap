@@ -1,6 +1,7 @@
 ---
 source: crates/biome_js_analyze/tests/spec_tests.rs
 expression: invalid_re-export.js
+snapshot_kind: text
 ---
 # Input
 ```jsx
@@ -14,12 +15,14 @@ const foo = 1;
 ```
 invalid_re-export.js:1:1 lint/nursery/useExportsLast ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  ! All exports should be at the end of the file.
+  ! All exports should be declared after all non-export statements.
   
   > 1 │ export * from "./foo";
       │ ^^^^^^^^^^^^^^^^^^^^^^
     2 │ 
     3 │ const foo = 1;
+  
+  i Move this statement before the export statements to keep all exports at the end of the module.
   
 
 ```
