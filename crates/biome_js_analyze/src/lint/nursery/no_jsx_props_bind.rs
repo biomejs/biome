@@ -1,5 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource, RuleSourceKind
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -7,7 +7,7 @@ use biome_js_syntax::{
 };
 use biome_rowan::AstNode;
 declare_lint_rule! {
-    /// Disallow .bind() or arrow function in JSX props
+    /// Disallow .bind() or function declaration in JSX props
     ///
     /// Using `.bind()` on a function or declaring a function directly in props
     /// creates a new function on every render, which is treated as a completely different function.
@@ -38,6 +38,7 @@ declare_lint_rule! {
         name: "noJsxPropsBind",
         language: "jsx",
         sources: &[RuleSource::EslintReact("jsx-no-bind")],
+        source_kind: RuleSourceKind::Inspired,
         recommended: false,
     }
 }
@@ -49,41 +50,34 @@ impl Rule for NoJsxPropsBind {
     // TODO: Find how to use option
     type Options = ();
 
-    fn run(ctx: &RuleContext<Self>) -> Self::Signals {
-        let attribute = ctx.query();
-        let attribute_name = attribute.name().ok()?;
-        
-        /*
-        TODO: Too many if, find simple way
-        rust analyzer doc: https://github.com/rust-lang/rust-analyzer/blob/master/docs/dev/syntax.md
-        biome_js_syntax doc: https://docs.rs/biome_js_syntax/latest/biome_js_syntax/index.html
-        */
-        if is_event_handler(&attribute_name) {
-            if let Some(initializer) = attribute.initializer() {
-                if let Some(attribute_value) = initializer.value().ok() {
-                    if let Some(expression_value) = attribute_value.as_jsx_expression_attribute_value() {
-                        if let Some(expression) = expression_value.expression().ok() {
-                            if matches!(expression, AnyJsExpression::JsIdentifierExpression(_)){
-                                return Some(())
+fn run(ctx: &RuleContext<Self>) -> Self::Signals {
+    let attribute = ctx.query();
+    let attribute_name = attribute.name().ok()?;
+    
+    /*
+    TODO: Too many if, find simple way
+    rust analyzer doc: https://github.com/rust-lang/rust-analyzer/blob/master/docs/dev/syntax.md
+    biome_js_syntax doc: https://docs.rs/biome_js_syntax/latest/biome_js_syntax/index.html
+    */
+    if is_event_handler(&attribute_name) {
+        if let Some(initializer) = attribute.initializer() {
+            if let Some(attribute_value) = initializer.value().ok() {
+                if let Some(expression_value) = attribute_value.as_jsx_expression_attribute_value() {
+                    if let Some(expression) = expression_value.expression().ok() {
+                            match expression {
+                                AnyJsExpression::JsArrowFunctionExpression(_) => return Some(()),
+                                AnyJsExpression::JsFunctionExpression(_) => return Some(()),
+                                AnyJsExpression::JsCallExpression(_) => return Some(()),
+                                _ => {}
                             }
-                            // let expression_type = match expression {
-                            //     AnyJsExpression::JsFunctionExpression(_) => "anonymous",
-                            //     AnyJsExpression::JsArrowFunctionExpression(_) => "arrow",
-                            //     _ => "bind"
-                            // };
-                            // if is_arrow_or_anonymous(expression){
-                            //     return Some(())
-                            // }
-                            // if has_bind_call(){
-                            //     return Some(())
-                            // }
-                        }
+                        
                     }
                 }
             }
         }
-        None
     }
+    None
+}
 
     fn diagnostic(ctx: &RuleContext<Self>, _state: &Self::State) -> Option<RuleDiagnostic> {
         //
@@ -97,7 +91,7 @@ impl Rule for NoJsxPropsBind {
                 rule_category!(),
                 node.range(),
                 markup! {
-                    "Disallow using a callback in asynchronous tests and hooks."
+                    "Disallow .bind() or function declaration in JSX props"
                 },
             )
             .note(markup! {
