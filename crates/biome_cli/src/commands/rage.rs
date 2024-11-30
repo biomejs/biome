@@ -302,7 +302,6 @@ impl Display for RageConfiguration<'_> {
                             {KeyValuePair("CSS enabled", markup!({DebugDisplay(css_linter.enabled)}))}
                             {KeyValuePair("GraphQL enabled", markup!({DebugDisplay(graphq_linter.enabled)}))}
                             {KeyValuePair("Recommended", markup!({DebugDisplay(linter_configuration.recommended.unwrap_or_default())}))}
-                            {KeyValuePair("All", markup!({DebugDisplay(linter_configuration.all.unwrap_or_default())}))}
                             {RageConfigurationLintRules("Enabled rules", linter_configuration)}
                         ).fmt(fmt)?;
                     }

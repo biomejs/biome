@@ -62,7 +62,6 @@ fn extends_config_ok_linter_not_formatter() {
         r#"{
   "linter": {
     "rules": {
-      "all": false,
       "suspicious": {
         "noDebugger": "warn"
       }
