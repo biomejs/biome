@@ -188,7 +188,7 @@ impl DeserializableValidator for NoForEachOptions {
             diagnostics
                 .push(
                     DeserializationDiagnostic::new(markup!(
-                        <Emphasis>"'validIdentifiers'"</Emphasis>" does not accept empty values or values with dots."
+                        <Emphasis>"'allowedIdentifiers'"</Emphasis>" does not accept empty values or values with dots."
                     ))
                     .with_range(range)
                 );
