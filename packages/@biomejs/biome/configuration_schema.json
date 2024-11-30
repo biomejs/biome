@@ -440,7 +440,7 @@
 				"noForEach": {
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoForEachConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -2070,6 +2070,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoForEachConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoForEachOptions" }
+			]
+		},
+		"NoForEachOptions": {
+			"type": "object",
+			"properties": {
+				"allowedIdentifiers": {
+					"description": "A list of variable names allowed for `forEach` calls.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelWithoutControlConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -3030,6 +3047,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoDoubleEqualsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoForEachOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoForEachOptions" }]
 				}
 			},
 			"additionalProperties": false

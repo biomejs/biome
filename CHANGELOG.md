@@ -179,6 +179,29 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 
 - Add [noGlobalDirnameFilename](https://biomejs.dev/linter/rules/no-global-dirname-filename/). Contributed by @unvalley
 
+- [noForEach](https://biomejs.dev/linter/rules/no-for-each/) now provides a new option `validIdentifiers` ([#3351](https://github.com/biomejs/biome/issues/3351)) to specify which variable names are allowed to call `forEach`.
+
+  Identifiers containing dots (e.g., "lib._") or empty strings are not allowed. Invalid configurations will produce a diagnostic warning.
+
+  ```json
+  {
+		"linter": {
+			"rules": {
+				"complexity": {
+					"noForEach": {
+						"level": "error",
+						"options": {
+							"validIdentifiers": ["Effect", "_"]
+						}
+					}
+				}
+			}
+		}
+	}
+  ```
+
+  Contributed by @lucasweng
+
 #### Enhancements
 
 - `useExportType` and `useImportType` now ignore TypeScript declaration files ([#4416](https://github.com/biomejs/biome/pull/4416)). Contributed by @Conaclos
