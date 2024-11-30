@@ -1,6 +1,6 @@
+use biome_analyze::RuleSource;
 use biome_analyze::RuleSourceKind;
 use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
-use biome_analyze::{RuleMeta, RuleSource};
 use biome_console::markup;
 use biome_graphql_syntax::GraphqlEnumValueDefinition;
 use biome_rowan::AstNode;
