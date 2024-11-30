@@ -440,7 +440,7 @@
 				"noForEach": {
 					"description": "Prefer for...of statement instead of Array.forEach.",
 					"anyOf": [
-						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "$ref": "#/definitions/NoForEachConfiguration" },
 						{ "type": "null" }
 					]
 				},
@@ -1193,6 +1193,38 @@
 				"cssModules": {
 					"description": "Enables parsing of CSS Modules specific features.",
 					"type": ["boolean", "null"]
+				}
+			},
+			"additionalProperties": false
+		},
+		"CustomRestrictedImport": {
+			"anyOf": [
+				{
+					"description": "The message to display when this module is imported.",
+					"type": "string"
+				},
+				{
+					"description": "Additional options to configure the message and allowed/disallowed import names.",
+					"allOf": [{ "$ref": "#/definitions/CustomRestrictedImportOptions" }]
+				}
+			]
+		},
+		"CustomRestrictedImportOptions": {
+			"type": "object",
+			"properties": {
+				"allowImportNames": {
+					"description": "Names of the exported members that allowed to be not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"importNames": {
+					"description": "Names of the exported members that should not be used.",
+					"type": "array",
+					"items": { "type": "string" }
+				},
+				"message": {
+					"description": "The message to display when this module is imported.",
+					"type": "string"
 				}
 			},
 			"additionalProperties": false
@@ -2038,6 +2070,23 @@
 			},
 			"additionalProperties": false
 		},
+		"NoForEachConfiguration": {
+			"anyOf": [
+				{ "$ref": "#/definitions/RulePlainConfiguration" },
+				{ "$ref": "#/definitions/RuleWithNoForEachOptions" }
+			]
+		},
+		"NoForEachOptions": {
+			"type": "object",
+			"properties": {
+				"allowedIdentifiers": {
+					"description": "A list of variable names allowed for `forEach` calls.",
+					"type": "array",
+					"items": { "type": "string" }
+				}
+			},
+			"additionalProperties": false
+		},
 		"NoLabelWithoutControlConfiguration": {
 			"anyOf": [
 				{ "$ref": "#/definitions/RulePlainConfiguration" },
@@ -2443,6 +2492,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExportsLast": {
+					"description": "Require that all exports are declared after all non-export statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGoogleFontDisplay": {
 					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
 					"anyOf": [
@@ -2768,9 +2824,11 @@
 			"type": "object",
 			"properties": {
 				"paths": {
-					"description": "A list of names that should trigger the rule",
+					"description": "A list of import paths that should trigger the rule.",
 					"type": "object",
-					"additionalProperties": { "type": "string" }
+					"additionalProperties": {
+						"$ref": "#/definitions/CustomRestrictedImport"
+					}
 				}
 			},
 			"additionalProperties": false
@@ -3003,6 +3061,21 @@
 				"options": {
 					"description": "Rule's options",
 					"allOf": [{ "$ref": "#/definitions/NoDoubleEqualsOptions" }]
+				}
+			},
+			"additionalProperties": false
+		},
+		"RuleWithNoForEachOptions": {
+			"type": "object",
+			"required": ["level"],
+			"properties": {
+				"level": {
+					"description": "The severity of the emitted diagnostics by the rule",
+					"allOf": [{ "$ref": "#/definitions/RulePlainConfiguration" }]
+				},
+				"options": {
+					"description": "Rule's options",
+					"allOf": [{ "$ref": "#/definitions/NoForEachOptions" }]
 				}
 			},
 			"additionalProperties": false

@@ -7,7 +7,6 @@ use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{AnyJsImportClause, AnyJsImportLike};
 use biome_rowan::AstNode;
 
-use crate::utils::restricted_glob::{CandidatePath, RestrictedGlob};
 use crate::{globals::is_node_builtin_module, services::manifest::Manifest};
 
 declare_lint_rule! {
@@ -95,7 +94,7 @@ enum DependencyAvailability {
     Bool(bool),
 
     /// Dependencies are available in files that matches any of the globs.
-    Patterns(Box<[RestrictedGlob]>),
+    Patterns(Box<[biome_glob::Glob]>),
 }
 
 impl Default for DependencyAvailability {
@@ -166,7 +165,9 @@ impl DependencyAvailability {
     fn is_available(&self, path: &Path) -> bool {
         match self {
             Self::Bool(b) => *b,
-            Self::Patterns(globs) => CandidatePath::new(&path).matches_with_exceptions(globs),
+            Self::Patterns(globs) => {
+                biome_glob::CandidatePath::new(&path).matches_with_exceptions(globs)
+            }
         }
     }
 }

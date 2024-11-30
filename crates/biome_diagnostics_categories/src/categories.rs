@@ -200,6 +200,7 @@ define_categories! {
     "lint/nursery/useExplicitType": "https://biomejs.dev/linter/rules/use-explicit-function-return-type",
     "lint/nursery/useGoogleFontDisplay": "https://biomejs.dev/linter/rules/use-google-font-display",
     "lint/nursery/useGoogleFontPreconnect": "https://biomejs.dev/linter/rules/use-google-font-preconnect",
+    "lint/nursery/useExportsLast": "https://biomejs.dev/linter/rules/use-exports-last",
     "lint/nursery/useGuardForIn": "https://biomejs.dev/linter/rules/use-guard-for-in",
     "lint/nursery/useImportRestrictions": "https://biomejs.dev/linter/rules/use-import-restrictions",
     "lint/nursery/useJsxCurlyBraceConvention": "https://biomejs.dev/linter/rules/use-jsx-curly-brace-convention",

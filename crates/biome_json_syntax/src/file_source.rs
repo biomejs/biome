@@ -214,7 +214,9 @@ impl JsonFileSource {
             return Ok(Self::json_allow_comments());
         }
         if let Some(Component::Normal(parent_dir)) = path.components().rev().nth(1) {
-            if Self::is_well_known_json_allow_comments_directory(parent_dir) {
+            if Self::is_well_known_json_allow_comments_directory(parent_dir)
+                && file_name.as_encoded_bytes().ends_with(b".json")
+            {
                 return Ok(Self::json_allow_comments());
             }
         }

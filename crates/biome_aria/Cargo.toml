@@ -14,7 +14,6 @@ version              = "0.5.7"
 
 [dependencies]
 biome_aria_metadata = { workspace = true }
-rustc-hash          = { workspace = true }
 
 [lints]
 workspace = true

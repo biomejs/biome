@@ -883,7 +883,7 @@ export interface Complexity {
 	/**
 	 * Prefer for...of statement instead of Array.forEach.
 	 */
-	noForEach?: RuleConfiguration_for_Null;
+	noForEach?: RuleConfiguration_for_NoForEachOptions;
 	/**
 	 * Disallow unclear usage of consecutive space characters in regular expression literals
 	 */
@@ -1398,6 +1398,10 @@ export interface Nursery {
 	 * Require explicit return types on functions and class methods.
 	 */
 	useExplicitType?: RuleConfiguration_for_Null;
+	/**
+	 * Require that all exports are declared after all non-export statements.
+	 */
+	useExportsLast?: RuleConfiguration_for_Null;
 	/**
 	 * Enforces the use of a recommended display strategy with Google Fonts.
 	 */
@@ -2066,6 +2070,9 @@ export type RuleFixConfiguration_for_ValidAriaRoleOptions =
 export type RuleConfiguration_for_ComplexityOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_ComplexityOptions;
+export type RuleConfiguration_for_NoForEachOptions =
+	| RulePlainConfiguration
+	| RuleWithOptions_for_NoForEachOptions;
 export type RuleConfiguration_for_NoUndeclaredDependenciesOptions =
 	| RulePlainConfiguration
 	| RuleWithOptions_for_NoUndeclaredDependenciesOptions;
@@ -2216,6 +2223,16 @@ export interface RuleWithOptions_for_ComplexityOptions {
 	 * Rule's options
 	 */
 	options: ComplexityOptions;
+}
+export interface RuleWithOptions_for_NoForEachOptions {
+	/**
+	 * The severity of the emitted diagnostics by the rule
+	 */
+	level: RulePlainConfiguration;
+	/**
+	 * Rule's options
+	 */
+	options: NoForEachOptions;
 }
 export interface RuleWithOptions_for_NoUndeclaredDependenciesOptions {
 	/**
@@ -2480,6 +2497,12 @@ export interface ComplexityOptions {
 	 */
 	maxAllowedComplexity?: number;
 }
+export interface NoForEachOptions {
+	/**
+	 * A list of variable names allowed for `forEach` calls.
+	 */
+	allowedIdentifiers: string[];
+}
 /**
  * Rule's options
  */
@@ -2535,7 +2558,7 @@ export interface UseImportExtensionsOptions {
  */
 export interface RestrictedImportsOptions {
 	/**
-	 * A list of names that should trigger the rule
+	 * A list of import paths that should trigger the rule.
 	 */
 	paths: {};
 }
@@ -3117,6 +3140,7 @@ export type Category =
 	| "lint/nursery/useExplicitType"
 	| "lint/nursery/useGoogleFontDisplay"
 	| "lint/nursery/useGoogleFontPreconnect"
+	| "lint/nursery/useExportsLast"
 	| "lint/nursery/useGuardForIn"
 	| "lint/nursery/useImportRestrictions"
 	| "lint/nursery/useJsxCurlyBraceConvention"

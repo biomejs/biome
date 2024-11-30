@@ -1,23 +1,16 @@
 use biome_aria_metadata::AriaRole;
-use rustc_hash::FxHashMap;
 use std::fmt::Debug;
+
+use crate::{Attribute, Element};
 
 /// Convenient type to retrieve metadata regarding ARIA roles
 #[derive(Debug, Default)]
 pub struct AriaRoles;
 
 impl AriaRoles {
-    /// Given a element and attributes, it returns the metadata of the element's implicit role.
-    ///
-    /// Check: https://www.w3.org/TR/html-aria/#docconformance
-    pub fn get_implicit_role(
-        &self,
-        element: &str,
-        // To generate `attributes`, you can use `biome_js_analyze::services::aria::AriaServices::extract_defined_attributes`
-        attributes: &FxHashMap<String, Vec<String>>,
-    ) -> Option<AriaRole> {
+    pub fn get_implicit_role(&self, elt: &impl Element) -> Option<AriaRole> {
         // See https://www.w3.org/TR/html-aria/
-        Some(match element {
+        Some(match elt.name()?.as_ref() {
             "article" => AriaRole::Article,
             "aside" => AriaRole::Complementary,
             "blockquote" => AriaRole::Blockquote,
@@ -48,10 +41,15 @@ impl AriaRoles {
             "math" => AriaRole::Math,
             "menu" => AriaRole::List,
             "menuitem" => {
-                let type_values = attributes.get("type")?;
-                match type_values.first()?.as_str() {
-                    "checkbox" => AriaRole::Menuitemcheckbox,
-                    "radio" => AriaRole::Menuitemradio,
+                match elt
+                    .find_attribute_by_name(|n| n == "type")
+                    .as_ref()
+                    .and_then(|a| a.value())
+                    .as_ref()
+                    .map(|v| v.as_ref())
+                {
+                    Some("checkbox") => AriaRole::Menuitemcheckbox,
+                    Some("radio") => AriaRole::Menuitemradio,
                     _ => AriaRole::Menuitem,
                 }
             }
@@ -82,10 +80,12 @@ impl AriaRoles {
             //
             // ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/th
             "th" => {
-                match attributes
-                    .get("scope")
-                    .and_then(|xs| xs.first())
-                    .map(|x| x.as_ref())
+                match elt
+                    .find_attribute_by_name(|n| n == "scope")
+                    .as_ref()
+                    .and_then(|a| a.value())
+                    .as_ref()
+                    .map(|v| v.as_ref())
                 {
                     Some("col") => AriaRole::Columnheader,
                     Some("row") => AriaRole::Rowheader,
@@ -97,17 +97,19 @@ impl AriaRoles {
             "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => AriaRole::Heading,
             "tbody" | "tfoot" | "thead" => AriaRole::Rowgroup,
             "input" => {
-                match attributes
-                    .get("type")
-                    .and_then(|xs| xs.first())
-                    .map(|x| x.as_ref())
+                match elt
+                    .find_attribute_by_name(|n| n == "type")
+                    .as_ref()
+                    .and_then(|a| a.value())
+                    .as_ref()
+                    .map(|v| v.as_ref())
                 {
                     Some("checkbox") => AriaRole::Checkbox,
                     Some("number") => AriaRole::Spinbutton,
                     Some("radio") => AriaRole::Radio,
                     Some("range") => AriaRole::Slider,
                     Some("button" | "image" | "reset" | "submit") => AriaRole::Button,
-                    Some("search") => match attributes.get("list") {
+                    Some("search") => match elt.find_attribute_by_name(|n| n == "list") {
                         Some(_) => AriaRole::Combobox,
                         _ => AriaRole::Searchbox,
                     },
@@ -117,7 +119,7 @@ impl AriaRoles {
                     ) => {
                         return None;
                     }
-                    _ => match attributes.get("list") {
+                    _ => match elt.find_attribute_by_name(|n| n == "list") {
                         Some(_) => AriaRole::Combobox,
                         _ => AriaRole::Textbox,
                     },
@@ -125,18 +127,26 @@ impl AriaRoles {
             }
             // FIXME: `link` has no corresponding roles in https://www.w3.org/TR/html-aria/
             // Should we remove it?
-            "a" | "area" | "link" => match attributes.get("href") {
+            "a" | "area" | "link" => match elt.find_attribute_by_name(|n| n == "href") {
                 Some(_) => AriaRole::Link,
                 _ => AriaRole::Generic,
             },
-            "img" => match attributes.get("alt") {
-                Some(values) => {
-                    if values.iter().any(|x| !x.is_empty()) {
+            "img" => match elt
+                .find_attribute_by_name(|n| n == "alt")
+                .as_ref()
+                .and_then(|a| a.value())
+                .as_ref()
+                .map(|v| v.as_ref())
+            {
+                Some(value) => {
+                    if !value.trim_ascii().is_empty() {
                         AriaRole::Img
                     } else {
-                        let has_accessible_name = attributes.get("aria-labelledby").is_some()
-                            || attributes.get("aria-label").is_some()
-                            || attributes.get("title").is_some();
+                        let has_accessible_name = elt
+                            .find_attribute_by_name(|n| {
+                                matches!(n, "aria-labelledby" | "aria-label" | "title")
+                            })
+                            .is_some();
                         if has_accessible_name {
                             AriaRole::Img
                         } else {
@@ -147,9 +157,11 @@ impl AriaRoles {
                 None => AriaRole::Img,
             },
             "section" => {
-                let has_accessible_name = attributes.get("aria-labelledby").is_some()
-                    || attributes.get("aria-label").is_some()
-                    || attributes.get("title").is_some();
+                let has_accessible_name = elt
+                    .find_attribute_by_name(|n| {
+                        matches!(n, "aria-labelledby" | "aria-label" | "title")
+                    })
+                    .is_some();
                 if has_accessible_name {
                     AriaRole::Region
                 } else {
@@ -157,16 +169,15 @@ impl AriaRoles {
                 }
             }
             "select" => {
-                let size = match attributes.get("size") {
-                    Some(size) => size
-                        .first()
-                        .unwrap_or(&"0".to_string())
-                        .parse::<i32>()
-                        .ok()?,
+                let size = match elt
+                    .find_attribute_by_name(|n| n == "size")
+                    .as_ref()
+                    .and_then(|a| a.value())
+                {
+                    Some(size) => size.as_ref().parse::<i32>().ok()?,
                     None => 0,
                 };
-                let multiple = attributes.get("multiple");
-                if multiple.is_none() && size <= 1 {
+                if elt.find_attribute_by_name(|n| n == "multiple").is_none() && size <= 1 {
                     AriaRole::Combobox
                 } else {
                     AriaRole::Listbox
@@ -184,178 +195,79 @@ impl AriaRoles {
         })
     }
 
-    /// Given the name of element, the function tells whether it's interactive
-    pub fn is_not_interactive_element(
-        &self,
-        element_name: &str,
-        attributes: Option<FxHashMap<String, Vec<String>>>,
-    ) -> bool {
-        // <header> elements do not technically have semantics, unless the
-        // element is a direct descendant of <body>, and this crate cannot
-        // reliably test that.
-        //
-        // Check: https://www.w3.org/TR/wai-aria-practices/examples/landmarks/banner.html
-        if element_name == "header" {
-            return false;
-        }
-
-        // FIXME: this differs from `get_implicit_role`, is it intentional?
-        //
-        // Always consider `a` and `area` as interactive even if `href` is not set.
-        if matches!(element_name, "a" | "area") {
-            return false;
-        }
-
-        // SVG elements, by default, do not have interactive semantics.
-        // They are primarily used for graphics and visual rendering. While they can be made interactive with additional
-        // attributes and JavaScript, inherently they don't provide user interaction capabilities.
-        // Hence, we classify them as non-interactive elements similar to other non-interactive
-        // elements like <img> or <progress>.
-        //
-        // Check: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role#svg_and_roleimg
-        if element_name == "svg" {
-            return true;
-        }
-
-        let elements_no_concept_info = [
-            "body", "br", "details", "dir", "frame", "iframe", "label", "mark", "marquee", "menu",
-            "meter", "optgroup", "pre", "progress", "ruby",
-        ];
-        if elements_no_concept_info.contains(&element_name) {
-            return true;
-        }
-
-        // `<input type="hidden">` is not interactive.
-        // `type=hidden` is not represented as concept information.
-        //
-        // Other `<input>` are considered interactive.
-        if element_name == "input" {
-            return attributes
+    /// Given the element, the function tells whether it's interactive
+    pub fn is_not_interactive_element(&self, element: &impl Element) -> bool {
+        match element.name().as_ref().map(|name| name.as_ref()) {
+            // <header> elements do not technically have semantics, unless the
+            // element is a direct descendant of <body>, and this crate cannot
+            // reliably test that.
+            //
+            // Check: https://www.w3.org/TR/wai-aria-practices/examples/landmarks/banner.html
+            Some("header") => false,
+            // FIXME: this differs from `get_implicit_role`, is it intentional?
+            //
+            // Always consider `a` and `area` as interactive even if `href` is not set.
+            Some("a" | "area") => false,
+            // SVG elements, by default, do not have interactive semantics.
+            // They are primarily used for graphics and visual rendering. While they can be made interactive with additional
+            // attributes and JavaScript, inherently they don't provide user interaction capabilities.
+            // Hence, we classify them as non-interactive elements similar to other non-interactive
+            // elements like <img> or <progress>.
+            //
+            // Check: https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/img_role#svg_and_roleimg
+            Some("svg") => true,
+            // Elements without any concept
+            Some(
+                "body" | "br" | "details" | "dir" | "frame" | "iframe" | "label" | "mark"
+                | "marquee" | "menu" | "meter" | "optgroup" | "pre" | "progress" | "ruby",
+            ) => true,
+            // `<input type="hidden">` is not interactive.
+            // `type=hidden` is not represented as concept information.
+            //
+            // Other `<input>` are considered interactive.
+            Some("input") => element
+                .find_attribute_by_name(|n| n == "type")
                 .as_ref()
-                .and_then(|attributes| attributes.get("type"))
-                .map_or(false, |values| values.iter().any(|x| x == "hidden"));
+                .and_then(|attr| attr.value())
+                .map_or(false, |value| value.as_ref() == "hidden"),
+            _ => self
+                .get_implicit_role(element)
+                .map_or(false, |implicit_role| implicit_role.is_non_interactive()),
         }
-
-        if let Some(implicit_role) = self.get_implicit_role(
-            element_name,
-            attributes.as_ref().unwrap_or(&FxHashMap::default()),
-        ) {
-            if implicit_role.is_non_interactive() {
-                return true;
-            }
-        }
-
-        false
     }
 
     /// Given an element name and attributes, it returns the role associated with that element.
     /// If no explicit role attribute is present, an implicit role is returned.
-    pub fn get_role_by_element_name(
-        &self,
-        element_name: &str,
-        attributes: &FxHashMap<String, Vec<String>>,
-    ) -> Option<AriaRole> {
-        attributes
-            .get("role")
-            .and_then(|role| role.first())
-            .map_or_else(
-                || self.get_implicit_role(element_name, attributes),
-                |r| AriaRole::from_roles(r),
-            )
+    fn get_role_by_element_name(&self, element: &impl Element) -> Option<AriaRole> {
+        element
+            .find_attribute_by_name(|name| name == "role")
+            .as_ref()
+            .and_then(|role| AriaRole::from_roles(role.value()?.as_ref()))
+            .or_else(|| self.get_implicit_role(element))
     }
 
-    pub fn is_not_static_element(
-        &self,
-        element_name: &str,
-        attributes: &FxHashMap<String, Vec<String>>,
-    ) -> bool {
-        if match element_name {
+    pub fn is_not_static_element(&self, element: &impl Element) -> bool {
+        match element.name().as_ref().map(|name| name.as_ref()) {
             // embedded content
             // ref: https://html.spec.whatwg.org/multipage/semantics.html#embedded-content
-            "canvas" | "embed" | "iframe" | "video" | "audio" => true,
-            // metadata content
+            Some("canvas" | "embed" | "iframe" | "video" | "audio") => true,
+            // No corresponding role
+            Some("input" | "dl" | "label" | "legend" | "ruby" | "pre" | "figcaption" | "br") => {
+                true
+            }
+            Some("s" | "hgroup") => false,
+            // FIXME: should we add `link`?
+            //
+            // metadata content, except `link`
             // ref: https://html.spec.whatwg.org/multipage/semantics.html#document-metadata
-            "meta" | "link" | "base" | "title" | "basefont" | "head" => false,
+            Some("meta" | "base" | "title" | "basefont" | "head") => false,
             // scripting content
             // ref: https://html.spec.whatwg.org/multipage/semantics.html#scripting-content
-            "script" | "noscript" | "template" | "style" => false,
-            // No corresponding role
-            "input" | "dl" | "label" | "legend" | "ruby" | "pre" | "figcaption" | "br" => true,
-            _ => false,
-        } {
-            return true;
+            Some("script" | "noscript" | "template" | "style") => false,
+            _ => match self.get_role_by_element_name(element) {
+                None | Some(AriaRole::Presentation | AriaRole::Generic) => false,
+                Some(_) => true,
+            },
         }
-
-        if matches!(element_name, "s" | "hgroup") {
-            return false;
-        }
-
-        let role = self.get_role_by_element_name(element_name, attributes);
-
-        match role {
-            None | Some(AriaRole::Presentation | AriaRole::Generic) => false,
-            Some(_) => true,
-        }
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use rustc_hash::FxHashMap;
-
-    use crate::AriaRoles;
-    use biome_aria_metadata::AriaRole;
-
-    #[test]
-    fn should_be_interactive() {
-        let aria_roles = AriaRoles {};
-        assert!(!aria_roles.is_not_interactive_element("header", None));
-        assert!(!aria_roles.is_not_interactive_element("input", {
-            let mut attributes = FxHashMap::default();
-            attributes.insert("type".to_string(), vec!["search".to_string()]);
-            Some(attributes)
-        }));
-    }
-
-    #[test]
-    fn should_not_be_interactive() {
-        let aria_roles = AriaRoles {};
-        assert!(aria_roles.is_not_interactive_element("h1", None));
-        assert!(aria_roles.is_not_interactive_element("h2", None));
-        assert!(aria_roles.is_not_interactive_element("h3", None));
-        assert!(aria_roles.is_not_interactive_element("h4", None));
-        assert!(aria_roles.is_not_interactive_element("h5", None));
-        assert!(aria_roles.is_not_interactive_element("h6", None));
-        assert!(aria_roles.is_not_interactive_element("body", None));
-        assert!(aria_roles.is_not_interactive_element("input", {
-            let mut attributes = FxHashMap::default();
-            attributes.insert("type".to_string(), vec!["hidden".to_string()]);
-            Some(attributes)
-        }));
-    }
-
-    #[test]
-    fn test_get_implicit_role() {
-        let aria_roles = AriaRoles {};
-
-        // No attributes
-        let implicit_role = aria_roles
-            .get_implicit_role("button", &FxHashMap::default())
-            .unwrap();
-        assert_eq!(implicit_role, AriaRole::Button);
-
-        // <input type="search">
-        let mut attributes = FxHashMap::default();
-        attributes.insert("type".to_string(), vec!["search".to_string()]);
-        let implicit_role = aria_roles.get_implicit_role("input", &attributes).unwrap();
-        assert_eq!(implicit_role, AriaRole::Searchbox);
-
-        // <select name="animals" multiple size="4">
-        let mut attributes = FxHashMap::default();
-        attributes.insert("name".to_string(), vec!["animals".to_string()]);
-        attributes.insert("multiple".to_string(), vec![String::new()]);
-        attributes.insert("size".to_string(), vec!["4".to_string()]);
-        let implicit_role = aria_roles.get_implicit_role("select", &attributes).unwrap();
-        assert_eq!(implicit_role, AriaRole::Listbox);
     }
 }

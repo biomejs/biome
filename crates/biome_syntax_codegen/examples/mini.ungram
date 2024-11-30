@@ -1,0 +1,83 @@
+// This grammar specifies the structure of Rust's concrete syntax tree.
+// It does not specify parsing rules (ambiguities, precedence, etc are out of scope).
+// Tokens are processed -- contextual keywords are recognised, compound operators glued.
+//
+// Legend:
+//
+//   //          				-- comment
+//   Name =      				-- non-terminal definition
+//   'ident'     				-- token (terminal)
+//   A B         				-- sequence
+//   A | B       				-- alternation
+//   A*          				-- zero or more repetition
+//   (A (',' A)* ','?)	-- repetition of node A separated by ',' and allowing a trailing comma
+//   (A (',' A)*)	      -- repetition of node A separated by ',' without a trailing comma
+//   A?          				-- zero or one repetition
+//   (A)         				-- same as A
+//   label:A     				-- suggested name for field of AST node
+
+// NOTES
+//
+// - SyntaxNode, SyntaxToken and SyntaxElement will be stripped from the codegen
+// - Bogus nodes are special nodes used to keep track of broken code; they are
+//   not part of the grammar but they will appear inside the green tree
+//
+//
+// Every node specified in this grammar must have a corresponding entry in LanguageSrc::nodes. For example:
+// - MiniRoot -> "MIN_ROOT" 
+// - MiniNodeList -> "MINI_NODE_LIST" 
+// - MiniBogus -> "MINI_BOGUS"
+// 
+// `Any*` nodes don't need to be tracked.
+
+
+
+// SyntaxElement is a generic data structure that is meant to track nodes and tokens
+// in cases where we care about both types
+//
+// As Bogus* node will need to yield both tokens and nodes without discrimination,
+// and their children will need to yield nodes and tokens as well.
+// For this reason, SyntaxElement = SyntaxElement
+SyntaxElement = SyntaxElement
+
+// A generic bogus node inside the grammar. A bogus node is used when the parser can't parse a broken syntax
+// You're free to create many bogus nodes, based on how fine-grained will be the parsing recovery logic.
+MiniBogus = SyntaxElement*
+
+// Grammar specification
+
+// Usually, you'd want to add `*Root` for the first node of the CST
+MiniRoot = AnyMiniNode
+
+// Nodes that have the `Any*` prefix are **special** nodes and they are used to handle cases where a certain node can
+// have multiple variants.
+// These nodes won't appear in the CST, but they are visible and can be used in the APIs provided by the syntax types.
+AnyMiniNode =
+    MiniSimpleNode
+    | MiniComplexNode
+
+// The codegen will generate a type called `MiniSimpleNode` that will contain three fields:
+// - `(` will be called `l_bracket`, because what was implemented in LanguageSrc::to_method_name
+// - `ident`, which is mapped to a type called `MiniString`
+// - `)` will be called `l_bracket`, because what was implemented in LanguageSrc::to_method_name
+MiniSimpleNode =
+    'simple'
+    '('
+    ident: MiniString
+    ')'
+
+// The codegen will generate a type called `MiniSimpleNode` that will contain three fields:
+// - `(` will be called `l_bracket`, because what was implemented in LanguageSrc::to_method_name
+// - `list`, which is mapped to a type called `MiniNodeList`
+// - `)` will be called `l_bracket`, because what was implemented in LanguageSrc::to_method_name
+MiniComplexNode =
+    'complex'
+    '('
+     list: MiniNodeList
+    ')'
+
+// Nodes that have the `*List` postfix are special nodes in Biome. The codegen will generate specific Rust types that
+// can be looped over using the iterator syntax.
+MiniNodeList = AnyMiniNode*
+
+MiniString = value: 'mini_string_literal'

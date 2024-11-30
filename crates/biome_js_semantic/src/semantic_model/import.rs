@@ -6,8 +6,14 @@ use biome_js_syntax::{
 use biome_rowan::AstNode;
 
 pub(crate) fn is_imported(node: &JsSyntaxNode) -> bool {
-    node.ancestors()
-        .any(|x| matches!(x.kind(), JsSyntaxKind::JS_IMPORT))
+    node.ancestors().any(|x| {
+        matches!(
+            x.kind(),
+            JsSyntaxKind::JS_IMPORT
+                | JsSyntaxKind::JS_NAMED_IMPORT_SPECIFIERS
+                | JsSyntaxKind::JS_DEFAULT_IMPORT_SPECIFIER
+        )
+    })
 }
 
 /// Marker trait that groups all "AstNode" that can be imported or

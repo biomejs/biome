@@ -15,3 +15,27 @@ h1, h2     , h3
 
 
 , h4,    h5,      h6 {}
+
+
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+.line1 selector {
+  background: red;
+}
+
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+div selector {
+  background: blue;
+}
+
+/* 1some medium long comment */
+.line1 selector,
+/* 2some medium long comment */
+.line1 selector,
+/* 3some medium long comment */
+div selector {
+  background: green;
+}
