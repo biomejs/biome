@@ -6,6 +6,7 @@ on:
     types: [ opened, synchronize ]
     branches:
       - main
+      - next
     paths:
       - 'Cargo.lock'
       - 'crates/**_parser/**/*.rs'
@@ -15,6 +16,7 @@ on:
   push:
     branches:
       - main
+      - next
     paths:
       - 'Cargo.lock'
       - 'crates/**_parser/**/*.rs'
@@ -35,7 +37,7 @@ jobs:
     steps:
 
       - name: Checkout PR Branch
-        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ steps.sha.outputs.result }}
 
@@ -53,7 +55,7 @@ jobs:
         run: cargo codspeed build --features codspeed -p xtask_bench
 
       - name: Run the benchmarks
-        uses: CodSpeedHQ/action@ab07afd34cbbb7a1306e8d14b7cc44e029eee37a # v3
+        uses: CodSpeedHQ/action@fa1dcde8d58f2ab0b407a6a24d6cc5a8c1444a8c # v3.1.0
         timeout-minutes: 30
         with:
           run: cargo codspeed run

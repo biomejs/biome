@@ -2869,16 +2869,22 @@ impl JsSetterClassMember {
                 .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
         )
     }
+    pub fn with_comma_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
+        )
+    }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into()))),
+                .splice_slots(6usize..=6usize, once(Some(element.into()))),
         )
     }
     pub fn with_body(self, element: JsFunctionBody) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(7usize..=7usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -2907,16 +2913,22 @@ impl JsSetterObjectMember {
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
+    pub fn with_comma_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
+        )
+    }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(5usize..=5usize, once(Some(element.into()))),
         )
     }
     pub fn with_body(self, element: JsFunctionBody) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into_syntax().into()))),
+                .splice_slots(6usize..=6usize, once(Some(element.into_syntax().into()))),
         )
     }
 }
@@ -4098,6 +4110,38 @@ impl TsConstructorType {
         )
     }
 }
+impl TsDeclarationModule {
+    pub fn with_bom_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_interpreter_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_directives(self, element: JsDirectiveList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_items(self, element: JsModuleItemList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_eof_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+}
 impl TsDeclareFunctionDeclaration {
     pub fn with_async_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
@@ -4625,17 +4669,52 @@ impl TsImportType {
                 .splice_slots(1usize..=1usize, once(Some(element.into()))),
         )
     }
+    pub fn with_arguments(self, element: TsImportTypeArguments) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_qualifier_clause(self, element: Option<TsImportTypeQualifier>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+    pub fn with_type_arguments(self, element: Option<TsTypeArguments>) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            4usize..=4usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
+    }
+}
+impl TsImportTypeArguments {
     pub fn with_l_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
         )
     }
-    pub fn with_argument_token(self, element: SyntaxToken) -> Self {
+    pub fn with_argument(self, element: AnyTsType) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(3usize..=3usize, once(Some(element.into()))),
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
         )
+    }
+    pub fn with_comma_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(element.map(|element| element.into()))),
+        )
+    }
+    pub fn with_ts_import_type_assertion_block(
+        self,
+        element: Option<TsImportTypeAssertionBlock>,
+    ) -> Self {
+        Self::unwrap_cast(self.syntax.splice_slots(
+            3usize..=3usize,
+            once(element.map(|element| element.into_syntax().into())),
+        ))
     }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
@@ -4643,17 +4722,57 @@ impl TsImportType {
                 .splice_slots(4usize..=4usize, once(Some(element.into()))),
         )
     }
-    pub fn with_qualifier_clause(self, element: Option<TsImportTypeQualifier>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            5usize..=5usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+}
+impl TsImportTypeAssertion {
+    pub fn with_assertion_kind_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
     }
-    pub fn with_type_arguments(self, element: Option<TsTypeArguments>) -> Self {
-        Self::unwrap_cast(self.syntax.splice_slots(
-            6usize..=6usize,
-            once(element.map(|element| element.into_syntax().into())),
-        ))
+    pub fn with_colon_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_assertions(self, element: JsImportAssertionEntryList) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+        )
+    }
+}
+impl TsImportTypeAssertionBlock {
+    pub fn with_l_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(0usize..=0usize, once(Some(element.into()))),
+        )
+    }
+    pub fn with_type_assertion(self, element: TsImportTypeAssertion) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(1usize..=1usize, once(Some(element.into_syntax().into()))),
+        )
+    }
+    pub fn with_r_curly_token(self, element: SyntaxToken) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(2usize..=2usize, once(Some(element.into()))),
+        )
     }
 }
 impl TsImportTypeQualifier {
@@ -5628,16 +5747,22 @@ impl TsSetterSignatureClassMember {
                 .splice_slots(4usize..=4usize, once(Some(element.into_syntax().into()))),
         )
     }
+    pub fn with_comma_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
+        )
+    }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(Some(element.into()))),
+                .splice_slots(6usize..=6usize, once(Some(element.into()))),
         )
     }
     pub fn with_semicolon_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(6usize..=6usize, once(element.map(|element| element.into()))),
+                .splice_slots(7usize..=7usize, once(element.map(|element| element.into()))),
         )
     }
 }
@@ -5666,16 +5791,22 @@ impl TsSetterSignatureTypeMember {
                 .splice_slots(3usize..=3usize, once(Some(element.into_syntax().into()))),
         )
     }
+    pub fn with_comma_token(self, element: Option<SyntaxToken>) -> Self {
+        Self::unwrap_cast(
+            self.syntax
+                .splice_slots(4usize..=4usize, once(element.map(|element| element.into()))),
+        )
+    }
     pub fn with_r_paren_token(self, element: SyntaxToken) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(4usize..=4usize, once(Some(element.into()))),
+                .splice_slots(5usize..=5usize, once(Some(element.into()))),
         )
     }
     pub fn with_separator_token_token(self, element: Option<SyntaxToken>) -> Self {
         Self::unwrap_cast(
             self.syntax
-                .splice_slots(5usize..=5usize, once(element.map(|element| element.into()))),
+                .splice_slots(6usize..=6usize, once(element.map(|element| element.into()))),
         )
     }
 }

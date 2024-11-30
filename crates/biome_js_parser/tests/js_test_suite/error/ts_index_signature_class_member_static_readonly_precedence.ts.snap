@@ -1,0 +1,148 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class A {
+    readonly static [a: number]: string;
+}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "A" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..9 "{" [] [],
+            members: JsClassMemberList [
+                JsBogusMember {
+                    items: [
+                        TsIndexSignatureModifierList [
+                            TsReadonlyModifier {
+                                modifier_token: READONLY_KW@9..23 "readonly" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")],
+                            },
+                            JsStaticModifier {
+                                modifier_token: STATIC_KW@23..30 "static" [] [Whitespace(" ")],
+                            },
+                        ],
+                        L_BRACK@30..31 "[" [] [],
+                        TsIndexSignatureParameter {
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@31..32 "a" [] [],
+                            },
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@32..34 ":" [] [Whitespace(" ")],
+                                ty: TsNumberType {
+                                    number_token: NUMBER_KW@34..40 "number" [] [],
+                                },
+                            },
+                        },
+                        R_BRACK@40..41 "]" [] [],
+                        TsTypeAnnotation {
+                            colon_token: COLON@41..43 ":" [] [Whitespace(" ")],
+                            ty: TsStringType {
+                                string_token: STRING_KW@43..49 "string" [] [],
+                            },
+                        },
+                        SEMICOLON@49..50 ";" [] [],
+                    ],
+                },
+            ],
+            r_curly_token: R_CURLY@50..52 "}" [Newline("\n")] [],
+        },
+    ],
+    eof_token: EOF@52..53 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..53
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..52
+    0: JS_CLASS_DECLARATION@0..52
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "A" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..9 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@9..50
+        0: JS_BOGUS_MEMBER@9..50
+          0: TS_INDEX_SIGNATURE_MODIFIER_LIST@9..30
+            0: TS_READONLY_MODIFIER@9..23
+              0: READONLY_KW@9..23 "readonly" [Newline("\n"), Whitespace("    ")] [Whitespace(" ")]
+            1: JS_STATIC_MODIFIER@23..30
+              0: STATIC_KW@23..30 "static" [] [Whitespace(" ")]
+          1: L_BRACK@30..31 "[" [] []
+          2: TS_INDEX_SIGNATURE_PARAMETER@31..40
+            0: JS_IDENTIFIER_BINDING@31..32
+              0: IDENT@31..32 "a" [] []
+            1: TS_TYPE_ANNOTATION@32..40
+              0: COLON@32..34 ":" [] [Whitespace(" ")]
+              1: TS_NUMBER_TYPE@34..40
+                0: NUMBER_KW@34..40 "number" [] []
+          3: R_BRACK@40..41 "]" [] []
+          4: TS_TYPE_ANNOTATION@41..49
+            0: COLON@41..43 ":" [] [Whitespace(" ")]
+            1: TS_STRING_TYPE@43..49
+              0: STRING_KW@43..49 "string" [] []
+          5: SEMICOLON@49..50 ";" [] []
+      9: R_CURLY@50..52 "}" [Newline("\n")] []
+  4: EOF@52..53 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_index_signature_class_member_static_readonly_precedence.ts:2:14 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × 'static' must precede 'readonly'
+  
+    1 │ class A {
+  > 2 │     readonly static [a: number]: string;
+      │              ^^^^^^
+    3 │ }
+    4 │ 
+  
+  i move this modifier
+  
+    1 │ class A {
+  > 2 │     readonly static [a: number]: string;
+      │              ^^^^^^
+    3 │ }
+    4 │ 
+  
+  i before this modifier
+  
+    1 │ class A {
+  > 2 │     readonly static [a: number]: string;
+      │     ^^^^^^^^
+    3 │ }
+    4 │ 
+  
+```

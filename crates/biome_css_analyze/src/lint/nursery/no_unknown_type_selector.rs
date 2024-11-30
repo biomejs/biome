@@ -50,7 +50,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoUnknownTypeSelector {
-        version: "next",
+        version: "1.9.4",
         name: "noUnknownTypeSelector",
         language: "css",
         recommended: true,

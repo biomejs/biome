@@ -1,0 +1,94 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```jsx
+<div id=<a/> />;
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsxTagExpression {
+                tag: JsxSelfClosingElement {
+                    l_angle_token: L_ANGLE@0..1 "<" [] [],
+                    name: JsxName {
+                        value_token: JSX_IDENT@1..5 "div" [] [Whitespace(" ")],
+                    },
+                    type_arguments: missing (optional),
+                    attributes: JsxAttributeList [
+                        JsxAttribute {
+                            name: JsxName {
+                                value_token: JSX_IDENT@5..7 "id" [] [],
+                            },
+                            initializer: JsxAttributeInitializerClause {
+                                eq_token: EQ@7..8 "=" [] [],
+                                value: JsxSelfClosingElement {
+                                    l_angle_token: L_ANGLE@8..9 "<" [] [],
+                                    name: JsxName {
+                                        value_token: JSX_IDENT@9..10 "a" [] [],
+                                    },
+                                    type_arguments: missing (optional),
+                                    attributes: JsxAttributeList [],
+                                    slash_token: SLASH@10..11 "/" [] [],
+                                    r_angle_token: R_ANGLE@11..13 ">" [] [Whitespace(" ")],
+                                },
+                            },
+                        },
+                    ],
+                    slash_token: SLASH@13..14 "/" [] [],
+                    r_angle_token: R_ANGLE@14..15 ">" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@15..16 ";" [] [],
+        },
+    ],
+    eof_token: EOF@16..17 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..17
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..16
+    0: JS_EXPRESSION_STATEMENT@0..16
+      0: JSX_TAG_EXPRESSION@0..15
+        0: JSX_SELF_CLOSING_ELEMENT@0..15
+          0: L_ANGLE@0..1 "<" [] []
+          1: JSX_NAME@1..5
+            0: JSX_IDENT@1..5 "div" [] [Whitespace(" ")]
+          2: (empty)
+          3: JSX_ATTRIBUTE_LIST@5..13
+            0: JSX_ATTRIBUTE@5..13
+              0: JSX_NAME@5..7
+                0: JSX_IDENT@5..7 "id" [] []
+              1: JSX_ATTRIBUTE_INITIALIZER_CLAUSE@7..13
+                0: EQ@7..8 "=" [] []
+                1: JSX_SELF_CLOSING_ELEMENT@8..13
+                  0: L_ANGLE@8..9 "<" [] []
+                  1: JSX_NAME@9..10
+                    0: JSX_IDENT@9..10 "a" [] []
+                  2: (empty)
+                  3: JSX_ATTRIBUTE_LIST@10..10
+                  4: SLASH@10..11 "/" [] []
+                  5: R_ANGLE@11..13 ">" [] [Whitespace(" ")]
+          4: SLASH@13..14 "/" [] []
+          5: R_ANGLE@14..15 ">" [] []
+      1: SEMICOLON@15..16 ";" [] []
+  4: EOF@16..17 "" [Newline("\n")] []
+
+```

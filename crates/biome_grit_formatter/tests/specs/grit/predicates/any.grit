@@ -1,0 +1,5 @@
+`console.$method('$message');` => `console.warn('$message');` where {
+  any {
+
+  $message <: r"Hello, .*!",     $method <: `log` }
+}

@@ -49,7 +49,7 @@ JsBogusNamedImportSpecifier = SyntaxElement*
 TsBogusType = SyntaxElement*
 
 AnyJsRoot =
-	JsScript | JsModule | JsExpressionSnipped
+	JsScript | JsModule | JsExpressionSnipped | TsDeclarationModule
 
 JsScript =
 	bom: 'UNICODE_BOM'?
@@ -59,6 +59,13 @@ JsScript =
 	eof: 'EOF'
 
 JsModule =
+	bom: 'UNICODE_BOM'?
+	interpreter: 'js_shebang'?
+	directives: JsDirectiveList
+	items: JsModuleItemList
+	eof: 'EOF'
+
+TsDeclarationModule =
 	bom: 'UNICODE_BOM'?
 	interpreter: 'js_shebang'?
 	directives: JsDirectiveList
@@ -561,7 +568,7 @@ JsSetterObjectMember =
 	'set'
 	name: AnyJsObjectMemberName
 	'('
-	parameter: AnyJsFormalParameter
+	parameter: AnyJsFormalParameter','?
 	')'
 	body: JsFunctionBody
 
@@ -842,7 +849,7 @@ JsSetterClassMember =
 	'set'
 	name: AnyJsClassMemberName
 	'('
-	parameter: AnyJsFormalParameter
+	parameter: AnyJsFormalParameter','?
 	')'
 	body: JsFunctionBody
 
@@ -851,7 +858,7 @@ TsSetterSignatureClassMember =
 	'set'
 	name: AnyJsClassMemberName
 	'('
-	parameter: AnyJsFormalParameter
+	parameter: AnyJsFormalParameter','?
 	')'
 	';'?
 
@@ -2077,7 +2084,7 @@ TsSetterSignatureTypeMember =
 	'set'
 	name: AnyJsObjectMemberName
 	'('
-	parameter: AnyJsFormalParameter
+	parameter: AnyJsFormalParameter','?
 	')'
 	separator_token: (',' | ';')?
 
@@ -2125,16 +2132,40 @@ TsMappedTypeReadonlyModifierClause =
 	operator_token: ('+' | '-')?
 	'readonly'
 
+// a: typeof import("mod", { with: { "resolution-mode": "import" } })
+//                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TsImportTypeAssertion = 
+  assertion_kind: ('assert' | 'with')
+  ':'
+  '{'
+  assertions: JsImportAssertionEntryList
+  '}'
+
+// a: typeof import("mod", { with: { "resolution-mode": "import" } })
+//                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TsImportTypeAssertionBlock = 
+	'{'
+	type_assertion: TsImportTypeAssertion
+	'}'
+
+// a: typeof import("mod", { with: { "resolution-mode": "import" } })
+//                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TsImportTypeArguments = 
+    '(' 
+    argument: AnyTsType 
+	(',' TsImportTypeAssertionBlock )?
+	')'
+
 // a: import("./test").T<typeof X>
 //    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 // a: import("./test")<string>
 //    ^^^^^^^^^^^^^^^^^^^^^^^^^
+// a: typeof import("./test", { with: { "resolution-mode": "import" } })
+//    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 TsImportType =
 	'typeof'?
 	'import'
-	'('
-	argument: 'js_string_literal'
-	')'
+	arguments: TsImportTypeArguments
 	qualifier_clause: TsImportTypeQualifier?
 	type_arguments: TsTypeArguments?
 

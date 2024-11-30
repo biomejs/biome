@@ -2,7 +2,7 @@ use super::parse_error::{expected_definition, too_many_patterns};
 use super::patterns::{parse_pattern, PatternList};
 use super::predicates::PredicateList;
 use super::{
-    parse_language_declaration, parse_name, parse_pattern_arg_list, GritParser, VariableList,
+    parse_language_declaration, parse_name, parse_variable_list, GritParser, VariableList,
 };
 use crate::constants::*;
 use biome_grit_syntax::GritSyntaxKind::{self, *};
@@ -103,7 +103,7 @@ fn parse_curly_predicate_list(p: &mut GritParser) -> ParsedSyntax {
     PredicateList.parse_list(p);
     p.expect(T!['}']);
 
-    Present(m.complete(p, GRIT_CURLY_PREDICATE_LIST))
+    Present(m.complete(p, GRIT_PREDICATE_CURLY))
 }
 
 #[inline]
@@ -118,7 +118,7 @@ fn parse_pattern_definition(p: &mut GritParser) -> ParsedSyntax {
     p.bump(PATTERN_KW);
     parse_name(p).ok();
     p.expect(T!['(']);
-    parse_pattern_arg_list(p).ok();
+    parse_variable_list(p);
     p.expect(T![')']);
     parse_language_declaration(p).ok();
     parse_pattern_definition_body(p).ok();
@@ -152,7 +152,7 @@ fn parse_predicate_definition(p: &mut GritParser) -> ParsedSyntax {
     p.bump(PREDICATE_KW);
     parse_name(p).ok();
     p.expect(T!['(']);
-    parse_pattern_arg_list(p).ok();
+    parse_variable_list(p);
     p.expect(T![')']);
     parse_curly_predicate_list(p).ok();
 

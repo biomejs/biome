@@ -52,7 +52,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoImgElement {
-        version: "next",
+        version: "1.9.4",
         name: "noImgElement",
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-img-element")],
@@ -70,7 +70,7 @@ impl Rule for NoImgElement {
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
 
-        if node.name().ok()?.name_value_token()?.text_trimmed() != "img"
+        if node.name().ok()?.name_value_token().ok()?.text_trimmed() != "img"
             || node.attributes().is_empty()
         {
             return None;
@@ -86,7 +86,7 @@ impl Rule for NoImgElement {
             let Some(opening_element) = parent.opening_element().ok() else {
                 return Some(());
             };
-            let name = opening_element.name().ok()?.name_value_token()?;
+            let name = opening_element.name().ok()?.name_value_token().ok()?;
 
             if name.text_trimmed() == "picture" {
                 return None;

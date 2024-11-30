@@ -308,10 +308,17 @@ fn load_eslint_extends_config(
         } else {
             EslintPackage::Config.resolve_name(name)
         };
+        // Try to load `module_name` or else try to load diretcly `name`.
         let node::Resolution {
             content,
             resolved_path,
-        } = node::load_config(&module_name)?;
+        } = node::load_config(&module_name).or_else(|err| {
+            if module_name != name {
+                node::load_config(name)
+            } else {
+                Err(err)
+            }
+        })?;
         let deserialized = deserialize_from_json_str::<eslint_eslint::LegacyConfigData>(
             &content,
             JsonParserOptions::default(),
@@ -377,12 +384,13 @@ impl EslintPackage {
             EslintPackage::Plugin => "eslint-plugin-",
         };
         if name.starts_with('@') {
-            // handle scoped module
-            if let Some((scope, scoped)) = name.split_once('/') {
-                if scoped.starts_with(artifact) || scoped == artifact.trim_end_matches('-') {
+            // handle scoped package
+            if let Some((scope, rest)) = name.split_once('/') {
+                let package = rest.split('/').next().unwrap_or(rest);
+                if rest.starts_with(artifact) || package == artifact.trim_end_matches('-') {
                     Cow::Borrowed(name)
                 } else {
-                    Cow::Owned(format!("{scope}/{artifact}{scoped}"))
+                    Cow::Owned(format!("{scope}/{artifact}{rest}"))
                 }
             } else {
                 let artifact = artifact.trim_end_matches('-');
@@ -393,5 +401,48 @@ impl EslintPackage {
         } else {
             Cow::Owned(format!("{artifact}{name}"))
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn eslint_package_resolve_name() {
+        assert_eq!(
+            EslintPackage::Config.resolve_name("@scope/package"),
+            "@scope/eslint-config-package"
+        );
+        assert_eq!(
+            EslintPackage::Config.resolve_name("@scope/eslint-config-package"),
+            "@scope/eslint-config-package"
+        );
+        assert_eq!(
+            EslintPackage::Config.resolve_name("@scope/eslint-config"),
+            "@scope/eslint-config"
+        );
+
+        assert_eq!(
+            EslintPackage::Config.resolve_name("@scope/package/path"),
+            "@scope/eslint-config-package/path"
+        );
+        assert_eq!(
+            EslintPackage::Config.resolve_name("@scope/eslint-config-package/path"),
+            "@scope/eslint-config-package/path"
+        );
+        assert_eq!(
+            EslintPackage::Config.resolve_name("@scope/eslint-config/path"),
+            "@scope/eslint-config/path"
+        );
+
+        assert_eq!(
+            EslintPackage::Config.resolve_name("package"),
+            "eslint-config-package"
+        );
+        assert_eq!(
+            EslintPackage::Config.resolve_name("eslint-config-package"),
+            "eslint-config-package"
+        );
     }
 }

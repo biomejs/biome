@@ -1,0 +1,104 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+@test(--a)
+class Test {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [
+                JsDecorator {
+                    at_token: AT@0..1 "@" [] [],
+                    expression: JsCallExpression {
+                        callee: JsIdentifierExpression {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@1..5 "test" [] [],
+                            },
+                        },
+                        optional_chain_token: missing (optional),
+                        type_arguments: missing (optional),
+                        arguments: JsCallArguments {
+                            l_paren_token: L_PAREN@5..6 "(" [] [],
+                            args: JsCallArgumentList [
+                                JsPreUpdateExpression {
+                                    operator_token: MINUS2@6..8 "--" [] [],
+                                    operand: JsIdentifierAssignment {
+                                        name_token: IDENT@8..9 "a" [] [],
+                                    },
+                                },
+                            ],
+                            r_paren_token: R_PAREN@9..10 ")" [] [],
+                        },
+                    },
+                },
+            ],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@10..17 "class" [Newline("\n")] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@17..22 "Test" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@22..23 "{" [] [],
+            members: JsClassMemberList [],
+            r_curly_token: R_CURLY@23..24 "}" [] [],
+        },
+    ],
+    eof_token: EOF@24..25 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..25
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..24
+    0: JS_CLASS_DECLARATION@0..24
+      0: JS_DECORATOR_LIST@0..10
+        0: JS_DECORATOR@0..10
+          0: AT@0..1 "@" [] []
+          1: JS_CALL_EXPRESSION@1..10
+            0: JS_IDENTIFIER_EXPRESSION@1..5
+              0: JS_REFERENCE_IDENTIFIER@1..5
+                0: IDENT@1..5 "test" [] []
+            1: (empty)
+            2: (empty)
+            3: JS_CALL_ARGUMENTS@5..10
+              0: L_PAREN@5..6 "(" [] []
+              1: JS_CALL_ARGUMENT_LIST@6..9
+                0: JS_PRE_UPDATE_EXPRESSION@6..9
+                  0: MINUS2@6..8 "--" [] []
+                  1: JS_IDENTIFIER_ASSIGNMENT@8..9
+                    0: IDENT@8..9 "a" [] []
+              2: R_PAREN@9..10 ")" [] []
+      1: (empty)
+      2: CLASS_KW@10..17 "class" [Newline("\n")] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@17..22
+        0: IDENT@17..22 "Test" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@22..23 "{" [] []
+      8: JS_CLASS_MEMBER_LIST@23..23
+      9: R_CURLY@23..24 "}" [] []
+  4: EOF@24..25 "" [Newline("\n")] []
+
+```

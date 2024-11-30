@@ -18,7 +18,7 @@ pub(crate) fn check_file<'ctx>(
     tracing::info_span!("Process check", path =? workspace_file.path.display()).in_scope(
         move || {
             if file_features.supports_lint() {
-                let lint_result = lint_with_guard(ctx, &mut workspace_file);
+                let lint_result = lint_with_guard(ctx, &mut workspace_file, false, None);
                 match lint_result {
                     Ok(status) => {
                         if status.is_changed() {

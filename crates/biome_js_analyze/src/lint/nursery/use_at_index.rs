@@ -1,7 +1,7 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource, RuleSourceKind,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
+    RuleSourceKind,
 };
 use biome_console::{markup, MarkupBuf};
 use biome_js_factory::make::{self};
@@ -20,7 +20,7 @@ declare_lint_rule! {
     /// A more convenient way to achieve the same thing is to use the `at()` method with a negative index.
     /// To access the last element of an array or a string just write `array.at(-1)`.
     ///
-    /// This rule enforces the usage of `at()` over index access, `chatAt()`, and `slice()[0]` when `at()` is more convenient.
+    /// This rule enforces the usage of `at()` over index access, `charAt()`, and `slice()[0]` when `at()` is more convenient.
     ///
     ///
     /// ## Examples
@@ -73,7 +73,7 @@ declare_lint_rule! {
     /// array[array.length - 1] = foo;
     /// ```
     pub UseAtIndex {
-        version: "next",
+        version: "1.9.4",
         name: "useAtIndex",
         language: "js",
         recommended: false,
@@ -184,7 +184,7 @@ impl Rule for UseAtIndex {
         );
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Use "<Emphasis>".at()"</Emphasis>"." }.to_owned(),
             mutation,

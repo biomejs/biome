@@ -1,10 +1,12 @@
 use crate::prelude::*;
-use biome_grit_syntax::GritDoubleLiteral;
-use biome_rowan::AstNode;
+use biome_formatter::write;
+use biome_grit_syntax::{GritDoubleLiteral, GritDoubleLiteralFields};
+
 #[derive(Debug, Clone, Default)]
 pub(crate) struct FormatGritDoubleLiteral;
 impl FormatNodeRule<GritDoubleLiteral> for FormatGritDoubleLiteral {
     fn fmt_fields(&self, node: &GritDoubleLiteral, f: &mut GritFormatter) -> FormatResult<()> {
-        format_verbatim_node(node.syntax()).fmt(f)
+        let GritDoubleLiteralFields { value_token } = node.as_fields();
+        write!(f, [value_token.format()])
     }
 }

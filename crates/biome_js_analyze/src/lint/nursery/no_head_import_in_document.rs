@@ -43,7 +43,7 @@ declare_lint_rule! {
     /// ```
     ///
     pub NoHeadImportInDocument {
-        version: "next",
+        version: "1.9.4",
         name: "noHeadImportInDocument",
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-head-import-in-document")],

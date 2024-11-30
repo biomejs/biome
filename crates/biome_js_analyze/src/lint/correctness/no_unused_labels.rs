@@ -1,7 +1,7 @@
 use biome_analyze::context::RuleContext;
 use biome_analyze::{
-    declare_lint_rule, ActionCategory, AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule,
-    RuleDiagnostic, RuleSource, ServiceBag, Visitor, VisitorContext,
+    declare_lint_rule, AddVisitor, FixKind, Phases, QueryMatch, Queryable, Rule, RuleDiagnostic,
+    RuleSource, ServiceBag, Visitor, VisitorContext,
 };
 use biome_console::markup;
 use biome_js_syntax::{
@@ -196,7 +196,7 @@ impl Rule for NoUnusedLabels {
         let mut mutation = ctx.root().begin();
         mutation.replace_node(unused_label.clone().into(), body);
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Remove the unused "<Emphasis>"label"</Emphasis>"."}.to_owned(),
             mutation,

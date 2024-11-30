@@ -1,0 +1,94 @@
+---
+source: crates/biome_grit_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+```grit
+`console.warn($_)` as $warn where {
+  $warn <: after `console.log($_)`
+}
+
+```
+
+## AST
+
+```
+GritRoot {
+    bom_token: missing (optional),
+    version: missing (optional),
+    language: missing (optional),
+    definitions: GritDefinitionList [
+        GritPatternWhere {
+            pattern: GritPatternAs {
+                pattern: GritCodeSnippet {
+                    source: GritBacktickSnippetLiteral {
+                        value_token: GRIT_BACKTICK_SNIPPET@0..19 "`console.warn($_)`" [] [Whitespace(" ")],
+                    },
+                },
+                as_token: AS_KW@19..22 "as" [] [Whitespace(" ")],
+                variable: GritVariable {
+                    value_token: GRIT_VARIABLE@22..28 "$warn" [] [Whitespace(" ")],
+                },
+            },
+            where_token: WHERE_KW@28..34 "where" [] [Whitespace(" ")],
+            side_condition: GritPredicateAnd {
+                and_token: missing (optional),
+                l_curly_token: L_CURLY@34..35 "{" [] [],
+                predicates: GritPredicateList [
+                    GritPredicateMatch {
+                        left: GritVariable {
+                            value_token: GRIT_VARIABLE@35..44 "$warn" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")],
+                        },
+                        match_token: MATCH@44..47 "<:" [] [Whitespace(" ")],
+                        right: GritPatternAfter {
+                            after_token: AFTER_KW@47..53 "after" [] [Whitespace(" ")],
+                            pattern: GritCodeSnippet {
+                                source: GritBacktickSnippetLiteral {
+                                    value_token: GRIT_BACKTICK_SNIPPET@53..70 "`console.log($_)`" [] [],
+                                },
+                            },
+                        },
+                    },
+                ],
+                r_curly_token: R_CURLY@70..72 "}" [Newline("\n")] [],
+            },
+        },
+    ],
+    eof_token: EOF@72..73 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: GRIT_ROOT@0..73
+  0: (empty)
+  1: (empty)
+  2: (empty)
+  3: GRIT_DEFINITION_LIST@0..72
+    0: GRIT_PATTERN_WHERE@0..72
+      0: GRIT_PATTERN_AS@0..28
+        0: GRIT_CODE_SNIPPET@0..19
+          0: GRIT_BACKTICK_SNIPPET_LITERAL@0..19
+            0: GRIT_BACKTICK_SNIPPET@0..19 "`console.warn($_)`" [] [Whitespace(" ")]
+        1: AS_KW@19..22 "as" [] [Whitespace(" ")]
+        2: GRIT_VARIABLE@22..28
+          0: GRIT_VARIABLE@22..28 "$warn" [] [Whitespace(" ")]
+      1: WHERE_KW@28..34 "where" [] [Whitespace(" ")]
+      2: GRIT_PREDICATE_AND@34..72
+        0: (empty)
+        1: L_CURLY@34..35 "{" [] []
+        2: GRIT_PREDICATE_LIST@35..70
+          0: GRIT_PREDICATE_MATCH@35..70
+            0: GRIT_VARIABLE@35..44
+              0: GRIT_VARIABLE@35..44 "$warn" [Newline("\n"), Whitespace("  ")] [Whitespace(" ")]
+            1: MATCH@44..47 "<:" [] [Whitespace(" ")]
+            2: GRIT_PATTERN_AFTER@47..70
+              0: AFTER_KW@47..53 "after" [] [Whitespace(" ")]
+              1: GRIT_CODE_SNIPPET@53..70
+                0: GRIT_BACKTICK_SNIPPET_LITERAL@53..70
+                  0: GRIT_BACKTICK_SNIPPET@53..70 "`console.log($_)`" [] []
+        3: R_CURLY@70..72 "}" [Newline("\n")] []
+  4: EOF@72..73 "" [Newline("\n")] []
+
+```

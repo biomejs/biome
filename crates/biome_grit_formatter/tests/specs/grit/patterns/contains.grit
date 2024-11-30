@@ -1,0 +1,3 @@
+`function ($args) { $body }` where { $args <: contains `x` }
+
+`console.$_($content)` where { $content <: contains `secret` until `sanitized($_)` }

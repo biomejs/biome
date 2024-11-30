@@ -11,7 +11,6 @@ pub(crate) mod pattern_accumulate;
 pub(crate) mod pattern_after;
 pub(crate) mod pattern_and;
 pub(crate) mod pattern_any;
-pub(crate) mod pattern_arg_list;
 pub(crate) mod pattern_as;
 pub(crate) mod pattern_before;
 pub(crate) mod pattern_contains;

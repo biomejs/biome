@@ -131,6 +131,10 @@ pub(crate) fn expected_namespace_import(p: &JsParser, range: TextRange) -> Parse
     expected_any(&["namespace imports"], range, p)
 }
 
+pub(crate) fn expected_declare_statement(p: &JsParser, range: TextRange) -> ParseDiagnostic {
+    expected_node("declare statement", range, p)
+}
+
 pub(crate) fn expected_namespace_or_named_import(
     p: &JsParser,
     range: TextRange,

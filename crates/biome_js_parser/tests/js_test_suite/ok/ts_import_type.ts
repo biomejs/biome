@@ -1,0 +1,10 @@
+type A = typeof import("test");
+type B = import("test");
+type C = typeof import("test").a.b.c.d.e.f;
+type D = import("test")<string>;
+type E = import("test").C<string>;
+type F = typeof import("test", { with: { "resolution-mode": "import" } });
+type G = import("test", { with: { "resolution-mode": "import" } }).TypeFromImport;
+type H = import("test", { with: { "resolution-mode": "import" } })<string>;
+type I = import("test", { with: { "resolution-mode": "require" } }).C<string>;
+type J = typeof import("test", { with: { "resolution-mode": "require" } }).a.b.c.d.e.f;

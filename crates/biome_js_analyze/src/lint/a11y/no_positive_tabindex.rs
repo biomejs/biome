@@ -194,7 +194,7 @@ impl Rule for NoPositiveTabindex {
         };
 
         Some(JsRuleAction::new(
-            biome_analyze::ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Replace the "<Emphasis>"tableIndex"</Emphasis>" prop value with 0." }
                 .to_owned(),

@@ -614,17 +614,43 @@ pub fn css_document_at_rule(
 pub fn css_document_custom_matcher(
     name_token: SyntaxToken,
     l_paren_token: SyntaxToken,
-    value: CssString,
     r_paren_token: SyntaxToken,
-) -> CssDocumentCustomMatcher {
-    CssDocumentCustomMatcher::unwrap_cast(SyntaxNode::new_detached(
-        CssSyntaxKind::CSS_DOCUMENT_CUSTOM_MATCHER,
-        [
-            Some(SyntaxElement::Token(name_token)),
-            Some(SyntaxElement::Token(l_paren_token)),
-            Some(SyntaxElement::Node(value.into_syntax())),
-            Some(SyntaxElement::Token(r_paren_token)),
-        ],
+) -> CssDocumentCustomMatcherBuilder {
+    CssDocumentCustomMatcherBuilder {
+        name_token,
+        l_paren_token,
+        r_paren_token,
+        value: None,
+    }
+}
+pub struct CssDocumentCustomMatcherBuilder {
+    name_token: SyntaxToken,
+    l_paren_token: SyntaxToken,
+    r_paren_token: SyntaxToken,
+    value: Option<AnyCssUrlValue>,
+}
+impl CssDocumentCustomMatcherBuilder {
+    pub fn with_value(mut self, value: AnyCssUrlValue) -> Self {
+        self.value = Some(value);
+        self
+    }
+    pub fn build(self) -> CssDocumentCustomMatcher {
+        CssDocumentCustomMatcher::unwrap_cast(SyntaxNode::new_detached(
+            CssSyntaxKind::CSS_DOCUMENT_CUSTOM_MATCHER,
+            [
+                Some(SyntaxElement::Token(self.name_token)),
+                Some(SyntaxElement::Token(self.l_paren_token)),
+                self.value
+                    .map(|token| SyntaxElement::Node(token.into_syntax())),
+                Some(SyntaxElement::Token(self.r_paren_token)),
+            ],
+        ))
+    }
+}
+pub fn css_empty_declaration(semicolon_token: SyntaxToken) -> CssEmptyDeclaration {
+    CssEmptyDeclaration::unwrap_cast(SyntaxNode::new_detached(
+        CssSyntaxKind::CSS_EMPTY_DECLARATION,
+        [Some(SyntaxElement::Token(semicolon_token))],
     ))
 }
 pub fn css_font_face_at_rule(

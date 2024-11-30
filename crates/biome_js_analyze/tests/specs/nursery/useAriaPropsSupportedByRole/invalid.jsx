@@ -16,17 +16,6 @@
 <tbody aria-expanded />
 <tfoot aria-expanded />
 <thead aria-expanded />
-<input type="radio" aria-invalid />
 <input type="radio" aria-selected />
-<input type="radio" aria-haspopup />
-<input type="checkbox" aria-haspopup />
-<input type="reset" aria-invalid />
-<input type="submit" aria-invalid />
-<input type="image" aria-invalid />
-<input type="button" aria-invalid />
-<menu type="toolbar" aria-haspopup />
-<menu type="toolbar" aria-invalid />
 <menu type="toolbar" aria-expanded />
-<area href="#" aria-invalid />
-<a href="#" aria-invalid />
 </>

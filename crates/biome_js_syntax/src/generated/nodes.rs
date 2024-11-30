@@ -5944,6 +5944,7 @@ impl JsSetterClassMember {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             parameter: self.parameter(),
+            comma_token: self.comma_token(),
             r_paren_token: self.r_paren_token(),
             body: self.body(),
         }
@@ -5963,11 +5964,14 @@ impl JsSetterClassMember {
     pub fn parameter(&self) -> SyntaxResult<AnyJsFormalParameter> {
         support::required_node(&self.syntax, 4usize)
     }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 5usize)
+    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+        support::required_token(&self.syntax, 6usize)
     }
     pub fn body(&self) -> SyntaxResult<JsFunctionBody> {
-        support::required_node(&self.syntax, 6usize)
+        support::required_node(&self.syntax, 7usize)
     }
 }
 impl Serialize for JsSetterClassMember {
@@ -5985,6 +5989,7 @@ pub struct JsSetterClassMemberFields {
     pub name: SyntaxResult<AnyJsClassMemberName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameter: SyntaxResult<AnyJsFormalParameter>,
+    pub comma_token: Option<SyntaxToken>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<JsFunctionBody>,
 }
@@ -6008,6 +6013,7 @@ impl JsSetterObjectMember {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             parameter: self.parameter(),
+            comma_token: self.comma_token(),
             r_paren_token: self.r_paren_token(),
             body: self.body(),
         }
@@ -6024,11 +6030,14 @@ impl JsSetterObjectMember {
     pub fn parameter(&self) -> SyntaxResult<AnyJsFormalParameter> {
         support::required_node(&self.syntax, 3usize)
     }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
+    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 5usize)
     }
     pub fn body(&self) -> SyntaxResult<JsFunctionBody> {
-        support::required_node(&self.syntax, 5usize)
+        support::required_node(&self.syntax, 6usize)
     }
 }
 impl Serialize for JsSetterObjectMember {
@@ -6045,6 +6054,7 @@ pub struct JsSetterObjectMemberFields {
     pub name: SyntaxResult<AnyJsObjectMemberName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameter: SyntaxResult<AnyJsFormalParameter>,
+    pub comma_token: Option<SyntaxToken>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub body: SyntaxResult<JsFunctionBody>,
 }
@@ -8840,6 +8850,61 @@ pub struct TsConstructorTypeFields {
     pub return_type: SyntaxResult<AnyTsType>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TsDeclarationModule {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TsDeclarationModule {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TsDeclarationModuleFields {
+        TsDeclarationModuleFields {
+            bom_token: self.bom_token(),
+            interpreter_token: self.interpreter_token(),
+            directives: self.directives(),
+            items: self.items(),
+            eof_token: self.eof_token(),
+        }
+    }
+    pub fn bom_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 0usize)
+    }
+    pub fn interpreter_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 1usize)
+    }
+    pub fn directives(&self) -> JsDirectiveList {
+        support::list(&self.syntax, 2usize)
+    }
+    pub fn items(&self) -> JsModuleItemList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn eof_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for TsDeclarationModule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TsDeclarationModuleFields {
+    pub bom_token: Option<SyntaxToken>,
+    pub interpreter_token: Option<SyntaxToken>,
+    pub directives: JsDirectiveList,
+    pub items: JsModuleItemList,
+    pub eof_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TsDeclareFunctionDeclaration {
     pub(crate) syntax: SyntaxNode,
 }
@@ -9937,9 +10002,7 @@ impl TsImportType {
         TsImportTypeFields {
             typeof_token: self.typeof_token(),
             import_token: self.import_token(),
-            l_paren_token: self.l_paren_token(),
-            argument_token: self.argument_token(),
-            r_paren_token: self.r_paren_token(),
+            arguments: self.arguments(),
             qualifier_clause: self.qualifier_clause(),
             type_arguments: self.type_arguments(),
         }
@@ -9950,20 +10013,14 @@ impl TsImportType {
     pub fn import_token(&self) -> SyntaxResult<SyntaxToken> {
         support::required_token(&self.syntax, 1usize)
     }
-    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 2usize)
-    }
-    pub fn argument_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 3usize)
-    }
-    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+    pub fn arguments(&self) -> SyntaxResult<TsImportTypeArguments> {
+        support::required_node(&self.syntax, 2usize)
     }
     pub fn qualifier_clause(&self) -> Option<TsImportTypeQualifier> {
-        support::node(&self.syntax, 5usize)
+        support::node(&self.syntax, 3usize)
     }
     pub fn type_arguments(&self) -> Option<TsTypeArguments> {
-        support::node(&self.syntax, 6usize)
+        support::node(&self.syntax, 4usize)
     }
 }
 impl Serialize for TsImportType {
@@ -9978,11 +10035,164 @@ impl Serialize for TsImportType {
 pub struct TsImportTypeFields {
     pub typeof_token: Option<SyntaxToken>,
     pub import_token: SyntaxResult<SyntaxToken>,
-    pub l_paren_token: SyntaxResult<SyntaxToken>,
-    pub argument_token: SyntaxResult<SyntaxToken>,
-    pub r_paren_token: SyntaxResult<SyntaxToken>,
+    pub arguments: SyntaxResult<TsImportTypeArguments>,
     pub qualifier_clause: Option<TsImportTypeQualifier>,
     pub type_arguments: Option<TsTypeArguments>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TsImportTypeArguments {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TsImportTypeArguments {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TsImportTypeArgumentsFields {
+        TsImportTypeArgumentsFields {
+            l_paren_token: self.l_paren_token(),
+            argument: self.argument(),
+            comma_token: self.comma_token(),
+            ts_import_type_assertion_block: self.ts_import_type_assertion_block(),
+            r_paren_token: self.r_paren_token(),
+        }
+    }
+    pub fn l_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn argument(&self) -> SyntaxResult<AnyTsType> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 2usize)
+    }
+    pub fn ts_import_type_assertion_block(&self) -> Option<TsImportTypeAssertionBlock> {
+        support::node(&self.syntax, 3usize)
+    }
+    pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for TsImportTypeArguments {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TsImportTypeArgumentsFields {
+    pub l_paren_token: SyntaxResult<SyntaxToken>,
+    pub argument: SyntaxResult<AnyTsType>,
+    pub comma_token: Option<SyntaxToken>,
+    pub ts_import_type_assertion_block: Option<TsImportTypeAssertionBlock>,
+    pub r_paren_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TsImportTypeAssertion {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TsImportTypeAssertion {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TsImportTypeAssertionFields {
+        TsImportTypeAssertionFields {
+            assertion_kind: self.assertion_kind(),
+            colon_token: self.colon_token(),
+            l_curly_token: self.l_curly_token(),
+            assertions: self.assertions(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn assertion_kind(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn colon_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 1usize)
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+    pub fn assertions(&self) -> JsImportAssertionEntryList {
+        support::list(&self.syntax, 3usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 4usize)
+    }
+}
+impl Serialize for TsImportTypeAssertion {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TsImportTypeAssertionFields {
+    pub assertion_kind: SyntaxResult<SyntaxToken>,
+    pub colon_token: SyntaxResult<SyntaxToken>,
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub assertions: JsImportAssertionEntryList,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
+}
+#[derive(Clone, PartialEq, Eq, Hash)]
+pub struct TsImportTypeAssertionBlock {
+    pub(crate) syntax: SyntaxNode,
+}
+impl TsImportTypeAssertionBlock {
+    #[doc = r" Create an AstNode from a SyntaxNode without checking its kind"]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r" This function must be guarded with a call to [AstNode::can_cast]"]
+    #[doc = r" or a match on [SyntaxNode::kind]"]
+    #[inline]
+    pub const unsafe fn new_unchecked(syntax: SyntaxNode) -> Self {
+        Self { syntax }
+    }
+    pub fn as_fields(&self) -> TsImportTypeAssertionBlockFields {
+        TsImportTypeAssertionBlockFields {
+            l_curly_token: self.l_curly_token(),
+            type_assertion: self.type_assertion(),
+            r_curly_token: self.r_curly_token(),
+        }
+    }
+    pub fn l_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 0usize)
+    }
+    pub fn type_assertion(&self) -> SyntaxResult<TsImportTypeAssertion> {
+        support::required_node(&self.syntax, 1usize)
+    }
+    pub fn r_curly_token(&self) -> SyntaxResult<SyntaxToken> {
+        support::required_token(&self.syntax, 2usize)
+    }
+}
+impl Serialize for TsImportTypeAssertionBlock {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        self.as_fields().serialize(serializer)
+    }
+}
+#[derive(Serialize)]
+pub struct TsImportTypeAssertionBlockFields {
+    pub l_curly_token: SyntaxResult<SyntaxToken>,
+    pub type_assertion: SyntaxResult<TsImportTypeAssertion>,
+    pub r_curly_token: SyntaxResult<SyntaxToken>,
 }
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TsImportTypeQualifier {
@@ -12085,6 +12295,7 @@ impl TsSetterSignatureClassMember {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             parameter: self.parameter(),
+            comma_token: self.comma_token(),
             r_paren_token: self.r_paren_token(),
             semicolon_token: self.semicolon_token(),
         }
@@ -12104,11 +12315,14 @@ impl TsSetterSignatureClassMember {
     pub fn parameter(&self) -> SyntaxResult<AnyJsFormalParameter> {
         support::required_node(&self.syntax, 4usize)
     }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 5usize)
+    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 5usize)
+        support::required_token(&self.syntax, 6usize)
     }
     pub fn semicolon_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 6usize)
+        support::token(&self.syntax, 7usize)
     }
 }
 impl Serialize for TsSetterSignatureClassMember {
@@ -12126,6 +12340,7 @@ pub struct TsSetterSignatureClassMemberFields {
     pub name: SyntaxResult<AnyJsClassMemberName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameter: SyntaxResult<AnyJsFormalParameter>,
+    pub comma_token: Option<SyntaxToken>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub semicolon_token: Option<SyntaxToken>,
 }
@@ -12149,6 +12364,7 @@ impl TsSetterSignatureTypeMember {
             name: self.name(),
             l_paren_token: self.l_paren_token(),
             parameter: self.parameter(),
+            comma_token: self.comma_token(),
             r_paren_token: self.r_paren_token(),
             separator_token: self.separator_token(),
         }
@@ -12165,11 +12381,14 @@ impl TsSetterSignatureTypeMember {
     pub fn parameter(&self) -> SyntaxResult<AnyJsFormalParameter> {
         support::required_node(&self.syntax, 3usize)
     }
+    pub fn comma_token(&self) -> Option<SyntaxToken> {
+        support::token(&self.syntax, 4usize)
+    }
     pub fn r_paren_token(&self) -> SyntaxResult<SyntaxToken> {
-        support::required_token(&self.syntax, 4usize)
+        support::required_token(&self.syntax, 5usize)
     }
     pub fn separator_token(&self) -> Option<SyntaxToken> {
-        support::token(&self.syntax, 5usize)
+        support::token(&self.syntax, 6usize)
     }
 }
 impl Serialize for TsSetterSignatureTypeMember {
@@ -12186,6 +12405,7 @@ pub struct TsSetterSignatureTypeMemberFields {
     pub name: SyntaxResult<AnyJsObjectMemberName>,
     pub l_paren_token: SyntaxResult<SyntaxToken>,
     pub parameter: SyntaxResult<AnyJsFormalParameter>,
+    pub comma_token: Option<SyntaxToken>,
     pub r_paren_token: SyntaxResult<SyntaxToken>,
     pub separator_token: Option<SyntaxToken>,
 }
@@ -14912,6 +15132,7 @@ pub enum AnyJsRoot {
     JsExpressionSnipped(JsExpressionSnipped),
     JsModule(JsModule),
     JsScript(JsScript),
+    TsDeclarationModule(TsDeclarationModule),
 }
 impl AnyJsRoot {
     pub fn as_js_expression_snipped(&self) -> Option<&JsExpressionSnipped> {
@@ -14929,6 +15150,12 @@ impl AnyJsRoot {
     pub fn as_js_script(&self) -> Option<&JsScript> {
         match &self {
             AnyJsRoot::JsScript(item) => Some(item),
+            _ => None,
+        }
+    }
+    pub fn as_ts_declaration_module(&self) -> Option<&TsDeclarationModule> {
+        match &self {
+            AnyJsRoot::TsDeclarationModule(item) => Some(item),
             _ => None,
         }
     }
@@ -21975,6 +22202,10 @@ impl std::fmt::Debug for JsSetterClassMember {
             )
             .field("parameter", &support::DebugSyntaxResult(self.parameter()))
             .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
+            .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
             )
@@ -22023,6 +22254,10 @@ impl std::fmt::Debug for JsSetterObjectMember {
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
             .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+            .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
@@ -24900,6 +25135,54 @@ impl From<TsConstructorType> for SyntaxElement {
         n.syntax.into()
     }
 }
+impl AstNode for TsDeclarationModule {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TS_DECLARATION_MODULE as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TS_DECLARATION_MODULE
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TsDeclarationModule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TsDeclarationModule")
+            .field(
+                "bom_token",
+                &support::DebugOptionalElement(self.bom_token()),
+            )
+            .field(
+                "interpreter_token",
+                &support::DebugOptionalElement(self.interpreter_token()),
+            )
+            .field("directives", &self.directives())
+            .field("items", &self.items())
+            .field("eof_token", &support::DebugSyntaxResult(self.eof_token()))
+            .finish()
+    }
+}
+impl From<TsDeclarationModule> for SyntaxNode {
+    fn from(n: TsDeclarationModule) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<TsDeclarationModule> for SyntaxElement {
+    fn from(n: TsDeclarationModule) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
 impl AstNode for TsDeclareFunctionDeclaration {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> =
@@ -26004,18 +26287,7 @@ impl std::fmt::Debug for TsImportType {
                 "import_token",
                 &support::DebugSyntaxResult(self.import_token()),
             )
-            .field(
-                "l_paren_token",
-                &support::DebugSyntaxResult(self.l_paren_token()),
-            )
-            .field(
-                "argument_token",
-                &support::DebugSyntaxResult(self.argument_token()),
-            )
-            .field(
-                "r_paren_token",
-                &support::DebugSyntaxResult(self.r_paren_token()),
-            )
+            .field("arguments", &support::DebugSyntaxResult(self.arguments()))
             .field(
                 "qualifier_clause",
                 &support::DebugOptionalElement(self.qualifier_clause()),
@@ -26034,6 +26306,163 @@ impl From<TsImportType> for SyntaxNode {
 }
 impl From<TsImportType> for SyntaxElement {
     fn from(n: TsImportType) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for TsImportTypeArguments {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TS_IMPORT_TYPE_ARGUMENTS as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TS_IMPORT_TYPE_ARGUMENTS
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TsImportTypeArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TsImportTypeArguments")
+            .field(
+                "l_paren_token",
+                &support::DebugSyntaxResult(self.l_paren_token()),
+            )
+            .field("argument", &support::DebugSyntaxResult(self.argument()))
+            .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
+            .field(
+                "ts_import_type_assertion_block",
+                &support::DebugOptionalElement(self.ts_import_type_assertion_block()),
+            )
+            .field(
+                "r_paren_token",
+                &support::DebugSyntaxResult(self.r_paren_token()),
+            )
+            .finish()
+    }
+}
+impl From<TsImportTypeArguments> for SyntaxNode {
+    fn from(n: TsImportTypeArguments) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<TsImportTypeArguments> for SyntaxElement {
+    fn from(n: TsImportTypeArguments) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for TsImportTypeAssertion {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TS_IMPORT_TYPE_ASSERTION as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TS_IMPORT_TYPE_ASSERTION
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TsImportTypeAssertion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TsImportTypeAssertion")
+            .field(
+                "assertion_kind",
+                &support::DebugSyntaxResult(self.assertion_kind()),
+            )
+            .field(
+                "colon_token",
+                &support::DebugSyntaxResult(self.colon_token()),
+            )
+            .field(
+                "l_curly_token",
+                &support::DebugSyntaxResult(self.l_curly_token()),
+            )
+            .field("assertions", &self.assertions())
+            .field(
+                "r_curly_token",
+                &support::DebugSyntaxResult(self.r_curly_token()),
+            )
+            .finish()
+    }
+}
+impl From<TsImportTypeAssertion> for SyntaxNode {
+    fn from(n: TsImportTypeAssertion) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<TsImportTypeAssertion> for SyntaxElement {
+    fn from(n: TsImportTypeAssertion) -> SyntaxElement {
+        n.syntax.into()
+    }
+}
+impl AstNode for TsImportTypeAssertionBlock {
+    type Language = Language;
+    const KIND_SET: SyntaxKindSet<Language> =
+        SyntaxKindSet::from_raw(RawSyntaxKind(TS_IMPORT_TYPE_ASSERTION_BLOCK as u16));
+    fn can_cast(kind: SyntaxKind) -> bool {
+        kind == TS_IMPORT_TYPE_ASSERTION_BLOCK
+    }
+    fn cast(syntax: SyntaxNode) -> Option<Self> {
+        if Self::can_cast(syntax.kind()) {
+            Some(Self { syntax })
+        } else {
+            None
+        }
+    }
+    fn syntax(&self) -> &SyntaxNode {
+        &self.syntax
+    }
+    fn into_syntax(self) -> SyntaxNode {
+        self.syntax
+    }
+}
+impl std::fmt::Debug for TsImportTypeAssertionBlock {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TsImportTypeAssertionBlock")
+            .field(
+                "l_curly_token",
+                &support::DebugSyntaxResult(self.l_curly_token()),
+            )
+            .field(
+                "type_assertion",
+                &support::DebugSyntaxResult(self.type_assertion()),
+            )
+            .field(
+                "r_curly_token",
+                &support::DebugSyntaxResult(self.r_curly_token()),
+            )
+            .finish()
+    }
+}
+impl From<TsImportTypeAssertionBlock> for SyntaxNode {
+    fn from(n: TsImportTypeAssertionBlock) -> SyntaxNode {
+        n.syntax
+    }
+}
+impl From<TsImportTypeAssertionBlock> for SyntaxElement {
+    fn from(n: TsImportTypeAssertionBlock) -> SyntaxElement {
         n.syntax.into()
     }
 }
@@ -28161,6 +28590,10 @@ impl std::fmt::Debug for TsSetterSignatureClassMember {
             )
             .field("parameter", &support::DebugSyntaxResult(self.parameter()))
             .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
+            .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
             )
@@ -28212,6 +28645,10 @@ impl std::fmt::Debug for TsSetterSignatureTypeMember {
                 &support::DebugSyntaxResult(self.l_paren_token()),
             )
             .field("parameter", &support::DebugSyntaxResult(self.parameter()))
+            .field(
+                "comma_token",
+                &support::DebugOptionalElement(self.comma_token()),
+            )
             .field(
                 "r_paren_token",
                 &support::DebugSyntaxResult(self.r_paren_token()),
@@ -33877,19 +34314,29 @@ impl From<JsScript> for AnyJsRoot {
         AnyJsRoot::JsScript(node)
     }
 }
+impl From<TsDeclarationModule> for AnyJsRoot {
+    fn from(node: TsDeclarationModule) -> AnyJsRoot {
+        AnyJsRoot::TsDeclarationModule(node)
+    }
+}
 impl AstNode for AnyJsRoot {
     type Language = Language;
     const KIND_SET: SyntaxKindSet<Language> = JsExpressionSnipped::KIND_SET
         .union(JsModule::KIND_SET)
-        .union(JsScript::KIND_SET);
+        .union(JsScript::KIND_SET)
+        .union(TsDeclarationModule::KIND_SET);
     fn can_cast(kind: SyntaxKind) -> bool {
-        matches!(kind, JS_EXPRESSION_SNIPPED | JS_MODULE | JS_SCRIPT)
+        matches!(
+            kind,
+            JS_EXPRESSION_SNIPPED | JS_MODULE | JS_SCRIPT | TS_DECLARATION_MODULE
+        )
     }
     fn cast(syntax: SyntaxNode) -> Option<Self> {
         let res = match syntax.kind() {
             JS_EXPRESSION_SNIPPED => AnyJsRoot::JsExpressionSnipped(JsExpressionSnipped { syntax }),
             JS_MODULE => AnyJsRoot::JsModule(JsModule { syntax }),
             JS_SCRIPT => AnyJsRoot::JsScript(JsScript { syntax }),
+            TS_DECLARATION_MODULE => AnyJsRoot::TsDeclarationModule(TsDeclarationModule { syntax }),
             _ => return None,
         };
         Some(res)
@@ -33899,6 +34346,7 @@ impl AstNode for AnyJsRoot {
             AnyJsRoot::JsExpressionSnipped(it) => &it.syntax,
             AnyJsRoot::JsModule(it) => &it.syntax,
             AnyJsRoot::JsScript(it) => &it.syntax,
+            AnyJsRoot::TsDeclarationModule(it) => &it.syntax,
         }
     }
     fn into_syntax(self) -> SyntaxNode {
@@ -33906,6 +34354,7 @@ impl AstNode for AnyJsRoot {
             AnyJsRoot::JsExpressionSnipped(it) => it.syntax,
             AnyJsRoot::JsModule(it) => it.syntax,
             AnyJsRoot::JsScript(it) => it.syntax,
+            AnyJsRoot::TsDeclarationModule(it) => it.syntax,
         }
     }
 }
@@ -33915,6 +34364,7 @@ impl std::fmt::Debug for AnyJsRoot {
             AnyJsRoot::JsExpressionSnipped(it) => std::fmt::Debug::fmt(it, f),
             AnyJsRoot::JsModule(it) => std::fmt::Debug::fmt(it, f),
             AnyJsRoot::JsScript(it) => std::fmt::Debug::fmt(it, f),
+            AnyJsRoot::TsDeclarationModule(it) => std::fmt::Debug::fmt(it, f),
         }
     }
 }
@@ -33924,6 +34374,7 @@ impl From<AnyJsRoot> for SyntaxNode {
             AnyJsRoot::JsExpressionSnipped(it) => it.into(),
             AnyJsRoot::JsModule(it) => it.into(),
             AnyJsRoot::JsScript(it) => it.into(),
+            AnyJsRoot::TsDeclarationModule(it) => it.into(),
         }
     }
 }
@@ -38510,6 +38961,11 @@ impl std::fmt::Display for TsConstructorType {
         std::fmt::Display::fmt(self.syntax(), f)
     }
 }
+impl std::fmt::Display for TsDeclarationModule {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
 impl std::fmt::Display for TsDeclareFunctionDeclaration {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
@@ -38626,6 +39082,21 @@ impl std::fmt::Display for TsImportEqualsDeclaration {
     }
 }
 impl std::fmt::Display for TsImportType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TsImportTypeArguments {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TsImportTypeAssertion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(self.syntax(), f)
+    }
+}
+impl std::fmt::Display for TsImportTypeAssertionBlock {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(self.syntax(), f)
     }

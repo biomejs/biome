@@ -30,7 +30,7 @@ ansi_rgb                  = "0.2.0"
 codspeed-criterion-compat = { version = "2.7.2", optional = true }
 criterion                 = "0.5.1"
 ureq                      = "2.10.1"
-url                       = "2.5.2"
+url                       = "2.5.3"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 mimalloc = "0.1.43"

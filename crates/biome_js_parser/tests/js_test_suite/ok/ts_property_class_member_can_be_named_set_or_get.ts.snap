@@ -1,0 +1,121 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+class B { set: String; get: Number }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsClassDeclaration {
+            decorators: JsDecoratorList [],
+            abstract_token: missing (optional),
+            class_token: CLASS_KW@0..6 "class" [] [Whitespace(" ")],
+            id: JsIdentifierBinding {
+                name_token: IDENT@6..8 "B" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            extends_clause: missing (optional),
+            implements_clause: missing (optional),
+            l_curly_token: L_CURLY@8..10 "{" [] [Whitespace(" ")],
+            members: JsClassMemberList [
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@10..13 "set" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                        ty: TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@15..21 "String" [] [],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                    },
+                    value: missing (optional),
+                    semicolon_token: SEMICOLON@21..23 ";" [] [Whitespace(" ")],
+                },
+                JsPropertyClassMember {
+                    modifiers: JsPropertyModifierList [],
+                    name: JsLiteralMemberName {
+                        value: IDENT@23..26 "get" [] [],
+                    },
+                    property_annotation: TsTypeAnnotation {
+                        colon_token: COLON@26..28 ":" [] [Whitespace(" ")],
+                        ty: TsReferenceType {
+                            name: JsReferenceIdentifier {
+                                value_token: IDENT@28..35 "Number" [] [Whitespace(" ")],
+                            },
+                            type_arguments: missing (optional),
+                        },
+                    },
+                    value: missing (optional),
+                    semicolon_token: missing (optional),
+                },
+            ],
+            r_curly_token: R_CURLY@35..36 "}" [] [],
+        },
+    ],
+    eof_token: EOF@36..37 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..37
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..36
+    0: JS_CLASS_DECLARATION@0..36
+      0: JS_DECORATOR_LIST@0..0
+      1: (empty)
+      2: CLASS_KW@0..6 "class" [] [Whitespace(" ")]
+      3: JS_IDENTIFIER_BINDING@6..8
+        0: IDENT@6..8 "B" [] [Whitespace(" ")]
+      4: (empty)
+      5: (empty)
+      6: (empty)
+      7: L_CURLY@8..10 "{" [] [Whitespace(" ")]
+      8: JS_CLASS_MEMBER_LIST@10..35
+        0: JS_PROPERTY_CLASS_MEMBER@10..23
+          0: JS_PROPERTY_MODIFIER_LIST@10..10
+          1: JS_LITERAL_MEMBER_NAME@10..13
+            0: IDENT@10..13 "set" [] []
+          2: TS_TYPE_ANNOTATION@13..21
+            0: COLON@13..15 ":" [] [Whitespace(" ")]
+            1: TS_REFERENCE_TYPE@15..21
+              0: JS_REFERENCE_IDENTIFIER@15..21
+                0: IDENT@15..21 "String" [] []
+              1: (empty)
+          3: (empty)
+          4: SEMICOLON@21..23 ";" [] [Whitespace(" ")]
+        1: JS_PROPERTY_CLASS_MEMBER@23..35
+          0: JS_PROPERTY_MODIFIER_LIST@23..23
+          1: JS_LITERAL_MEMBER_NAME@23..26
+            0: IDENT@23..26 "get" [] []
+          2: TS_TYPE_ANNOTATION@26..35
+            0: COLON@26..28 ":" [] [Whitespace(" ")]
+            1: TS_REFERENCE_TYPE@28..35
+              0: JS_REFERENCE_IDENTIFIER@28..35
+                0: IDENT@28..35 "Number" [] [Whitespace(" ")]
+              1: (empty)
+          3: (empty)
+          4: (empty)
+      9: R_CURLY@35..36 "}" [] []
+  4: EOF@36..37 "" [Newline("\n")] []
+
+```

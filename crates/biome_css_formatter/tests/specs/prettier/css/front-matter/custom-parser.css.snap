@@ -1,6 +1,7 @@
 ---
 source: crates/biome_formatter_test/src/snapshot_builder.rs
 info: css/front-matter/custom-parser.css
+snapshot_kind: text
 ---
 # Input
 
@@ -21,7 +22,7 @@ description: Description
 ```diff
 --- Prettier
 +++ Biome
-@@ -1,8 +1,6 @@
+@@ -1,8 +1,7 @@
  ---mycustomparser
 -title: Title
 -description: Description
@@ -31,7 +32,8 @@ description: Description
 -.something {
 +  title:Title
 +  description:Description
-+  --- /* comment */
++  ---
++  /* comment */
 +  .something {
  }
 ```
@@ -42,7 +44,8 @@ description: Description
 ---mycustomparser
   title:Title
   description:Description
-  --- /* comment */
+  ---
+  /* comment */
   .something {
 }
 ```

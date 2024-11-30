@@ -6,7 +6,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::{AnyCssGenericComponentValue, AnyCssValue, CssGenericProperty};
 use biome_rowan::{AstNode, TextRange};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 use crate::utils::{find_font_family, is_font_family_keyword};
 
@@ -66,7 +66,7 @@ impl Rule for NoDuplicateFontNames {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let property_name = node.name().ok()?.text();
-        let property_name = property_name.to_lowercase_cow();
+        let property_name = property_name.to_ascii_lowercase_cow();
 
         let is_font_family = property_name == "font-family";
         let is_font = property_name == "font";

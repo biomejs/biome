@@ -6,6 +6,8 @@ pub type NoDescendingSpecificity = < lint :: nursery :: no_descending_specificit
 pub type NoDuplicateAtImportRules = < lint :: suspicious :: no_duplicate_at_import_rules :: NoDuplicateAtImportRules as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateCustomProperties = < lint :: nursery :: no_duplicate_custom_properties :: NoDuplicateCustomProperties as biome_analyze :: Rule > :: Options ;
 pub type NoDuplicateFontNames = < lint :: suspicious :: no_duplicate_font_names :: NoDuplicateFontNames as biome_analyze :: Rule > :: Options ;
+pub type NoDuplicateProperties =
+    <lint::nursery::no_duplicate_properties::NoDuplicateProperties as biome_analyze::Rule>::Options;
 pub type NoDuplicateSelectorsKeyframeBlock = < lint :: suspicious :: no_duplicate_selectors_keyframe_block :: NoDuplicateSelectorsKeyframeBlock as biome_analyze :: Rule > :: Options ;
 pub type NoEmptyBlock =
     <lint::suspicious::no_empty_block::NoEmptyBlock as biome_analyze::Rule>::Options;

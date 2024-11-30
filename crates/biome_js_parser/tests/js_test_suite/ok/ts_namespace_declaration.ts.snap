@@ -1,0 +1,206 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+declare namespace a {}
+declare namespace a.b.c.d {}
+declare namespace a.b { function test(): string }
+namespace X { }
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")],
+            declaration: TsModuleDeclaration {
+                module_or_namespace: NAMESPACE_KW@8..18 "namespace" [] [Whitespace(" ")],
+                name: TsIdentifierBinding {
+                    name_token: IDENT@18..20 "a" [] [Whitespace(" ")],
+                },
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@20..21 "{" [] [],
+                    items: JsModuleItemList [],
+                    r_curly_token: R_CURLY@21..22 "}" [] [],
+                },
+            },
+        },
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@22..31 "declare" [Newline("\n")] [Whitespace(" ")],
+            declaration: TsModuleDeclaration {
+                module_or_namespace: NAMESPACE_KW@31..41 "namespace" [] [Whitespace(" ")],
+                name: TsQualifiedModuleName {
+                    left: TsQualifiedModuleName {
+                        left: TsQualifiedModuleName {
+                            left: TsIdentifierBinding {
+                                name_token: IDENT@41..42 "a" [] [],
+                            },
+                            dot_token: DOT@42..43 "." [] [],
+                            right: JsName {
+                                value_token: IDENT@43..44 "b" [] [],
+                            },
+                        },
+                        dot_token: DOT@44..45 "." [] [],
+                        right: JsName {
+                            value_token: IDENT@45..46 "c" [] [],
+                        },
+                    },
+                    dot_token: DOT@46..47 "." [] [],
+                    right: JsName {
+                        value_token: IDENT@47..49 "d" [] [Whitespace(" ")],
+                    },
+                },
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@49..50 "{" [] [],
+                    items: JsModuleItemList [],
+                    r_curly_token: R_CURLY@50..51 "}" [] [],
+                },
+            },
+        },
+        TsDeclareStatement {
+            declare_token: DECLARE_KW@51..60 "declare" [Newline("\n")] [Whitespace(" ")],
+            declaration: TsModuleDeclaration {
+                module_or_namespace: NAMESPACE_KW@60..70 "namespace" [] [Whitespace(" ")],
+                name: TsQualifiedModuleName {
+                    left: TsIdentifierBinding {
+                        name_token: IDENT@70..71 "a" [] [],
+                    },
+                    dot_token: DOT@71..72 "." [] [],
+                    right: JsName {
+                        value_token: IDENT@72..74 "b" [] [Whitespace(" ")],
+                    },
+                },
+                body: TsModuleBlock {
+                    l_curly_token: L_CURLY@74..76 "{" [] [Whitespace(" ")],
+                    items: JsModuleItemList [
+                        TsDeclareFunctionDeclaration {
+                            async_token: missing (optional),
+                            function_token: FUNCTION_KW@76..85 "function" [] [Whitespace(" ")],
+                            id: JsIdentifierBinding {
+                                name_token: IDENT@85..89 "test" [] [],
+                            },
+                            type_parameters: missing (optional),
+                            parameters: JsParameters {
+                                l_paren_token: L_PAREN@89..90 "(" [] [],
+                                items: JsParameterList [],
+                                r_paren_token: R_PAREN@90..91 ")" [] [],
+                            },
+                            return_type_annotation: TsReturnTypeAnnotation {
+                                colon_token: COLON@91..93 ":" [] [Whitespace(" ")],
+                                ty: TsStringType {
+                                    string_token: STRING_KW@93..100 "string" [] [Whitespace(" ")],
+                                },
+                            },
+                            semicolon_token: missing (optional),
+                        },
+                    ],
+                    r_curly_token: R_CURLY@100..101 "}" [] [],
+                },
+            },
+        },
+        TsModuleDeclaration {
+            module_or_namespace: NAMESPACE_KW@101..112 "namespace" [Newline("\n")] [Whitespace(" ")],
+            name: TsIdentifierBinding {
+                name_token: IDENT@112..114 "X" [] [Whitespace(" ")],
+            },
+            body: TsModuleBlock {
+                l_curly_token: L_CURLY@114..116 "{" [] [Whitespace(" ")],
+                items: JsModuleItemList [],
+                r_curly_token: R_CURLY@116..117 "}" [] [],
+            },
+        },
+    ],
+    eof_token: EOF@117..118 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..118
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..117
+    0: TS_DECLARE_STATEMENT@0..22
+      0: DECLARE_KW@0..8 "declare" [] [Whitespace(" ")]
+      1: TS_MODULE_DECLARATION@8..22
+        0: NAMESPACE_KW@8..18 "namespace" [] [Whitespace(" ")]
+        1: TS_IDENTIFIER_BINDING@18..20
+          0: IDENT@18..20 "a" [] [Whitespace(" ")]
+        2: TS_MODULE_BLOCK@20..22
+          0: L_CURLY@20..21 "{" [] []
+          1: JS_MODULE_ITEM_LIST@21..21
+          2: R_CURLY@21..22 "}" [] []
+    1: TS_DECLARE_STATEMENT@22..51
+      0: DECLARE_KW@22..31 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: TS_MODULE_DECLARATION@31..51
+        0: NAMESPACE_KW@31..41 "namespace" [] [Whitespace(" ")]
+        1: TS_QUALIFIED_MODULE_NAME@41..49
+          0: TS_QUALIFIED_MODULE_NAME@41..46
+            0: TS_QUALIFIED_MODULE_NAME@41..44
+              0: TS_IDENTIFIER_BINDING@41..42
+                0: IDENT@41..42 "a" [] []
+              1: DOT@42..43 "." [] []
+              2: JS_NAME@43..44
+                0: IDENT@43..44 "b" [] []
+            1: DOT@44..45 "." [] []
+            2: JS_NAME@45..46
+              0: IDENT@45..46 "c" [] []
+          1: DOT@46..47 "." [] []
+          2: JS_NAME@47..49
+            0: IDENT@47..49 "d" [] [Whitespace(" ")]
+        2: TS_MODULE_BLOCK@49..51
+          0: L_CURLY@49..50 "{" [] []
+          1: JS_MODULE_ITEM_LIST@50..50
+          2: R_CURLY@50..51 "}" [] []
+    2: TS_DECLARE_STATEMENT@51..101
+      0: DECLARE_KW@51..60 "declare" [Newline("\n")] [Whitespace(" ")]
+      1: TS_MODULE_DECLARATION@60..101
+        0: NAMESPACE_KW@60..70 "namespace" [] [Whitespace(" ")]
+        1: TS_QUALIFIED_MODULE_NAME@70..74
+          0: TS_IDENTIFIER_BINDING@70..71
+            0: IDENT@70..71 "a" [] []
+          1: DOT@71..72 "." [] []
+          2: JS_NAME@72..74
+            0: IDENT@72..74 "b" [] [Whitespace(" ")]
+        2: TS_MODULE_BLOCK@74..101
+          0: L_CURLY@74..76 "{" [] [Whitespace(" ")]
+          1: JS_MODULE_ITEM_LIST@76..100
+            0: TS_DECLARE_FUNCTION_DECLARATION@76..100
+              0: (empty)
+              1: FUNCTION_KW@76..85 "function" [] [Whitespace(" ")]
+              2: JS_IDENTIFIER_BINDING@85..89
+                0: IDENT@85..89 "test" [] []
+              3: (empty)
+              4: JS_PARAMETERS@89..91
+                0: L_PAREN@89..90 "(" [] []
+                1: JS_PARAMETER_LIST@90..90
+                2: R_PAREN@90..91 ")" [] []
+              5: TS_RETURN_TYPE_ANNOTATION@91..100
+                0: COLON@91..93 ":" [] [Whitespace(" ")]
+                1: TS_STRING_TYPE@93..100
+                  0: STRING_KW@93..100 "string" [] [Whitespace(" ")]
+              6: (empty)
+          2: R_CURLY@100..101 "}" [] []
+    3: TS_MODULE_DECLARATION@101..117
+      0: NAMESPACE_KW@101..112 "namespace" [Newline("\n")] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@112..114
+        0: IDENT@112..114 "X" [] [Whitespace(" ")]
+      2: TS_MODULE_BLOCK@114..117
+        0: L_CURLY@114..116 "{" [] [Whitespace(" ")]
+        1: JS_MODULE_ITEM_LIST@116..116
+        2: R_CURLY@116..117 "}" [] []
+  4: EOF@117..118 "" [Newline("\n")] []
+
+```

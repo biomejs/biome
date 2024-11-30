@@ -1,7 +1,9 @@
 use crate::categories::{ActionCategory, RuleCategory};
 use crate::context::RuleContext;
 use crate::registry::{RegistryVisitor, RuleLanguage, RuleSuppressions};
-use crate::{Phase, Phases, Queryable, SuppressionAction, SuppressionCommentEmitterPayload};
+use crate::{
+    Phase, Phases, Queryable, SourceActionKind, SuppressionAction, SuppressionCommentEmitterPayload,
+};
 use biome_console::fmt::Display;
 use biome_console::{markup, MarkupBuf};
 use biome_diagnostics::advice::CodeSuggestionAdvice;
@@ -12,6 +14,7 @@ use biome_diagnostics::{
     Visit,
 };
 use biome_rowan::{AstNode, BatchMutation, BatchMutationExt, Language, TextRange};
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -365,6 +368,18 @@ impl RuleMetadata {
         self.fix_kind
             .try_into()
             .expect("Fix kind is not set in the rule metadata")
+    }
+
+    pub fn action_category(&self, category: RuleCategory, group: &'static str) -> ActionCategory {
+        match category {
+            RuleCategory::Lint => {
+                ActionCategory::QuickFix(Cow::Owned(format!("{}.{}", group, self.name)))
+            }
+            RuleCategory::Action => {
+                ActionCategory::Source(SourceActionKind::Other(Cow::Borrowed(self.name)))
+            }
+            RuleCategory::Syntax | RuleCategory::Transformation => unimplemented!(""),
+        }
     }
 }
 
@@ -881,6 +896,7 @@ pub trait Rule: RuleMeta + Sized {
         ctx: &RuleContext<Self>,
         text_range: &TextRange,
         suppression_action: &dyn SuppressionAction<Language = RuleLanguage<Self>>,
+        suppression_reason: Option<&str>,
     ) -> Option<SuppressAction<RuleLanguage<Self>>>
     where
         Self: 'static,
@@ -901,6 +917,7 @@ pub trait Rule: RuleMeta + Sized {
                 mutation: &mut mutation,
                 token_offset: token,
                 diagnostic_text_range: text_range,
+                suppression_reason: suppression_reason.unwrap_or("<explanation>"),
             });
 
             Some(SuppressAction {
@@ -1065,17 +1082,18 @@ impl RuleDiagnostic {
 
     /// It creates a new footer note which contains a message and a list of possible suggestions.
     /// Useful when there's need to suggest a list of things inside a diagnostic.
-    pub fn footer_list(mut self, message: impl Display, list: &[impl Display]) -> Self {
-        if !list.is_empty() {
-            self.rule_advice.suggestion_list = Some(SuggestionList {
-                message: markup! { {message} }.to_owned(),
-                list: list
-                    .iter()
-                    .map(|msg| markup! { {msg} }.to_owned())
-                    .collect(),
-            });
-        }
-
+    pub fn footer_list(
+        mut self,
+        message: impl Display,
+        list: impl IntoIterator<Item = impl Display>,
+    ) -> Self {
+        self.rule_advice.suggestion_list = Some(SuggestionList {
+            message: markup! { {message} }.to_owned(),
+            list: list
+                .into_iter()
+                .map(|msg| markup! {{msg}}.to_owned())
+                .collect(),
+        });
         self
     }
 

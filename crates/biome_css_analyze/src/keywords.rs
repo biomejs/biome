@@ -1,4 +1,4 @@
-pub const BASIC_KEYWORDS: [&str; 5] = ["initial", "inherit", "revert", "revert-layer", "unset"];
+pub const BASIC_KEYWORDS: [&str; 5] = ["inherit", "initial", "revert", "revert-layer", "unset"];
 
 // https://drafts.csswg.org/css-fonts/#system-family-name-value
 pub const SYSTEM_FAMILY_NAME_KEYWORDS: [&str; 6] = [
@@ -11,81 +11,80 @@ pub const SYSTEM_FAMILY_NAME_KEYWORDS: [&str; 6] = [
 ];
 
 pub const FONT_FAMILY_KEYWORDS: [&str; 10] = [
-    "serif",
-    "sans-serif",
     "cursive",
     "fantasy",
     "monospace",
+    "sans-serif",
+    "serif",
     "system-ui",
-    "ui-serif",
-    "ui-sans-serif",
     "ui-monospace",
     "ui-rounded",
+    "ui-sans-serif",
+    "ui-serif",
 ];
 
-pub const FONT_WEIGHT_ABSOLUTE_KEYWORDS: [&str; 2] = ["normal", "bold"];
+pub const FONT_WEIGHT_ABSOLUTE_KEYWORDS: [&str; 2] = ["bold", "normal"];
 pub const FONT_WEIGHT_NUMERIC_KEYWORDS: [&str; 9] = [
     "100", "200", "300", "400", "500", "600", "700", "800", "900",
 ];
-pub const FONT_STYLE_KEYWORDS: [&str; 3] = ["normal", "italic", "oblique"];
-pub const FONT_VARIANTS_KEYWORDS: [&str; 35] = [
-    "normal",
-    "none",
-    "historical-forms",
-    "none",
-    "common-ligatures",
-    "no-common-ligatures",
-    "discretionary-ligatures",
-    "no-discretionary-ligatures",
-    "historical-ligatures",
-    "no-historical-ligatures",
-    "contextual",
-    "no-contextual",
-    "small-caps",
-    "all-small-caps",
-    "petite-caps",
+pub const FONT_STYLE_KEYWORDS: [&str; 3] = ["italic", "normal", "oblique"];
+pub const FONT_VARIANTS_KEYWORDS: [&str; 34] = [
     "all-petite-caps",
-    "unicase",
-    "titling-caps",
-    "lining-nums",
-    "oldstyle-nums",
-    "proportional-nums",
-    "tabular-nums",
+    "all-small-caps",
+    "common-ligatures",
+    "contextual",
     "diagonal-fractions",
-    "stacked-fractions",
-    "ordinal",
-    "slashed-zero",
+    "discretionary-ligatures",
+    "full-width",
+    "historical-forms",
+    "historical-ligatures",
+    "jis04",
     "jis78",
     "jis83",
     "jis90",
-    "jis04",
-    "simplified",
-    "traditional",
-    "full-width",
+    "lining-nums",
+    "no-common-ligatures",
+    "no-contextual",
+    "no-discretionary-ligatures",
+    "no-historical-ligatures",
+    "none",
+    "normal",
+    "oldstyle-nums",
+    "ordinal",
+    "petite-caps",
+    "proportional-nums",
     "proportional-width",
     "ruby",
+    "simplified",
+    "slashed-zero",
+    "small-caps",
+    "stacked-fractions",
+    "tabular-nums",
+    "titling-caps",
+    "traditional",
+    "unicase",
 ];
 
 pub const FONT_STRETCH_KEYWORDS: [&str; 8] = [
-    "semi-condensed",
     "condensed",
-    "extra-condensed",
-    "ultra-condensed",
-    "semi-expanded",
     "expanded",
+    "extra-condensed",
     "extra-expanded",
+    "semi-condensed",
+    "semi-expanded",
+    "ultra-condensed",
     "ultra-expanded",
 ];
 
 pub const FONT_SIZE_KEYWORDS: [&str; 9] = [
-    "xx-small", "x-small", "small", "medium", "large", "x-large", "xx-large", "larger", "smaller",
+    "large", "larger", "medium", "small", "smaller", "x-large", "x-small", "xx-large", "xx-small",
 ];
 
 pub const LINE_HEIGHT_KEYWORDS: [&str; 1] = ["normal"];
 
 /// List of known CSS value functions sourced from [`css-functions-list`](https://www.npmjs.com/package/css-functions-list).
 /// See the original list [here](https://github.com/niksy/css-functions-list/blob/master/index.json).
-pub const FUNCTION_KEYWORDS: [&str; 671] = [
+pub const FUNCTION_KEYWORDS: [&str; 685] = [
     "-moz-abs",
     "-moz-acos",
     "-moz-anchor",
@@ -98,6 +97,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-moz-blur",
     "-moz-brightness",
     "-moz-calc",
+    "-moz-calc-size",
     "-moz-character-variant",
     "-moz-circle",
     "-moz-clamp",
@@ -190,6 +190,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-moz-scroll",
     "-moz-selector",
     "-moz-sepia",
+    "-moz-shape",
     "-moz-sign",
     "-moz-sin",
     "-moz-skew",
@@ -233,6 +234,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-ms-blur",
     "-ms-brightness",
     "-ms-calc",
+    "-ms-calc-size",
     "-ms-character-variant",
     "-ms-circle",
     "-ms-clamp",
@@ -264,6 +266,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-ms-hwb",
     "-ms-hypot",
     "-ms-image",
+    "-ms-image-rect",
     "-ms-image-set",
     "-ms-inset",
     "-ms-invert",
@@ -324,6 +327,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-ms-scroll",
     "-ms-selector",
     "-ms-sepia",
+    "-ms-shape",
     "-ms-sign",
     "-ms-sin",
     "-ms-skew",
@@ -367,6 +371,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-o-blur",
     "-o-brightness",
     "-o-calc",
+    "-o-calc-size",
     "-o-character-variant",
     "-o-circle",
     "-o-clamp",
@@ -398,6 +403,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-o-hwb",
     "-o-hypot",
     "-o-image",
+    "-o-image-rect",
     "-o-image-set",
     "-o-inset",
     "-o-invert",
@@ -458,6 +464,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-o-scroll",
     "-o-selector",
     "-o-sepia",
+    "-o-shape",
     "-o-sign",
     "-o-sin",
     "-o-skew",
@@ -501,6 +508,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-webkit-blur",
     "-webkit-brightness",
     "-webkit-calc",
+    "-webkit-calc-size",
     "-webkit-character-variant",
     "-webkit-circle",
     "-webkit-clamp",
@@ -532,6 +540,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-webkit-hwb",
     "-webkit-hypot",
     "-webkit-image",
+    "-webkit-image-rect",
     "-webkit-image-set",
     "-webkit-inset",
     "-webkit-invert",
@@ -592,6 +601,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "-webkit-scroll",
     "-webkit-selector",
     "-webkit-sepia",
+    "-webkit-shape",
     "-webkit-sign",
     "-webkit-sin",
     "-webkit-skew",
@@ -635,6 +645,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "blur",
     "brightness",
     "calc",
+    "calc-size",
     "character-variant",
     "circle",
     "clamp",
@@ -666,6 +677,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "hwb",
     "hypot",
     "image",
+    "image-rect",
     "image-set",
     "inset",
     "invert",
@@ -726,6 +738,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
     "scroll",
     "selector",
     "sepia",
+    "shape",
     "sign",
     "sin",
     "skew",
@@ -761,7 +774,7 @@ pub const FUNCTION_KEYWORDS: [&str; 671] = [
 
 // These are the ones that can have single-colon notation
 pub const LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS: [&str; 4] =
-    ["before", "after", "first-line", "first-letter"];
+    ["after", "before", "first-letter", "first-line"];
 
 pub const VENDOR_SPECIFIC_PSEUDO_ELEMENTS: [&str; 66] = [
     "-moz-focus-inner",
@@ -787,10 +800,10 @@ pub const VENDOR_SPECIFIC_PSEUDO_ELEMENTS: [&str; 66] = [
     "-ms-tooltip",
     "-ms-track",
     "-ms-value",
-    "-webkit-color-swatch",
-    "-webkit-color-swatch-wrapper",
     "-webkit-calendar-picker-indicator",
     "-webkit-clear-button",
+    "-webkit-color-swatch",
+    "-webkit-color-swatch-wrapper",
     "-webkit-date-and-time-value",
     "-webkit-datetime-edit",
     "-webkit-datetime-edit-ampm-field",
@@ -855,9 +868,9 @@ pub const OTHER_PSEUDO_ELEMENTS: [&str; 18] = [
     "view-transition-old",
 ];
 
-pub const VENDOR_PREFIXES: [&str; 4] = ["-webkit-", "-moz-", "-ms-", "-o-"];
+pub const VENDOR_PREFIXES: [&str; 4] = ["-moz-", "-ms-", "-o-", "-webkit-"];
 
-pub const AT_RULE_PAGE_PSEUDO_CLASSES: [&str; 4] = ["first", "right", "left", "blank"];
+pub const AT_RULE_PAGE_PSEUDO_CLASSES: [&str; 4] = ["blank", "first", "left", "right"];
 
 pub const WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS: [&str; 7] = [
     "-webkit-resizer",
@@ -870,16 +883,16 @@ pub const WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS: [&str; 7] = [
 ];
 
 pub const WEBKIT_SCROLLBAR_PSEUDO_CLASSES: [&str; 11] = [
-    "horizontal",
-    "vertical",
-    "decrement",
-    "increment",
-    "start",
-    "end",
-    "double-button",
-    "single-button",
-    "no-button",
     "corner-present",
+    "decrement",
+    "double-button",
+    "end",
+    "horizontal",
+    "increment",
+    "no-button",
+    "single-button",
+    "start",
+    "vertical",
     "window-inactive",
 ];
 
@@ -898,12 +911,12 @@ pub const LOGICAL_COMBINATIONS_PSEUDO_CLASSES: [&str; 5] = ["has", "is", "matche
 
 /// See https://drafts.csswg.org/selectors/#resource-pseudos
 pub const RESOURCE_STATE_PSEUDO_CLASSES: [&str; 7] = [
-    "playing",
-    "paused",
-    "seeking",
     "buffering",
-    "stalled",
     "muted",
+    "paused",
+    "playing",
+    "seeking",
+    "stalled",
     "volume-locked",
 ];
 
@@ -930,8 +943,8 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
     "host",
     "host-context",
     "hover",
-    "indeterminate",
     "in-range",
+    "indeterminate",
     "invalid",
     "last-child",
     "last-of-type",
@@ -942,8 +955,8 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
     "optional",
     "out-of-range",
     "past",
-    "placeholder-shown",
     "picture-in-picture",
+    "placeholder-shown",
     "popover-open",
     "read-only",
     "read-write",
@@ -959,9 +972,8 @@ pub const OTHER_PSEUDO_CLASSES: [&str; 50] = [
     "visited",
     "window-inactive",
 ];
-
 // https://github.com/known-css/known-css-properties/blob/master/source/w3c.json
-pub const KNOWN_PROPERTIES: [&str; 588] = [
+pub const KNOWN_PROPERTIES: [&str; 600] = [
     "-webkit-line-clamp",
     "accent-color",
     "align-content",
@@ -969,9 +981,8 @@ pub const KNOWN_PROPERTIES: [&str; 588] = [
     "align-self",
     "alignment-baseline",
     "all",
-    "anchor-default",
     "anchor-name",
-    "anchor-scroll",
+    "anchor-scope",
     "animation",
     "animation-composition",
     "animation-delay",
@@ -1223,13 +1234,13 @@ pub const KNOWN_PROPERTIES: [&str; 588] = [
     "inline-sizing",
     "input-security",
     "inset",
-    "inset-area",
     "inset-block",
     "inset-block-end",
     "inset-block-start",
     "inset-inline",
     "inset-inline-end",
     "inset-inline-start",
+    "interpolate-size",
     "isolation",
     "justify-content",
     "justify-items",
@@ -1239,6 +1250,7 @@ pub const KNOWN_PROPERTIES: [&str; 588] = [
     "lighting-color",
     "line-break",
     "line-clamp",
+    "line-fit-edge",
     "line-grid",
     "line-height",
     "line-height-step",
@@ -1287,6 +1299,14 @@ pub const KNOWN_PROPERTIES: [&str; 588] = [
     "mask-repeat",
     "mask-size",
     "mask-type",
+    "masonry",
+    "masonry-auto-tracks",
+    "masonry-direction",
+    "masonry-fill",
+    "masonry-flow",
+    "masonry-slack",
+    "masonry-template-areas",
+    "masonry-template-tracks",
     "max-block-size",
     "max-height",
     "max-inline-size",
@@ -1369,12 +1389,12 @@ pub const KNOWN_PROPERTIES: [&str; 588] = [
     "play-during",
     "pointer-events",
     "position",
-    "position-animation",
-    "position-fallback",
-    "position-fallback-bounds",
+    "position-anchor",
+    "position-area",
     "position-try",
-    "position-try-options",
+    "position-try-fallbacks",
     "position-try-order",
+    "position-visibility",
     "print-color-adjust",
     "property-name",
     "quotes",
@@ -1419,6 +1439,7 @@ pub const KNOWN_PROPERTIES: [&str; 588] = [
     "scroll-snap-align",
     "scroll-snap-stop",
     "scroll-snap-type",
+    "scroll-start-target",
     "scroll-timeline",
     "scroll-timeline-axis",
     "scroll-timeline-name",
@@ -1467,6 +1488,7 @@ pub const KNOWN_PROPERTIES: [&str; 588] = [
     "text-align-all",
     "text-align-last",
     "text-autospace",
+    "text-box",
     "text-box-edge",
     "text-box-trim",
     "text-combine-upright",
@@ -1521,6 +1543,8 @@ pub const KNOWN_PROPERTIES: [&str; 588] = [
     "view-timeline-axis",
     "view-timeline-inset",
     "view-timeline-name",
+    "view-transition-class",
+    "view-transition-group",
     "view-transition-name",
     "visibility",
     "voice-balance",
@@ -1553,76 +1577,201 @@ pub const KNOWN_PROPERTIES: [&str; 588] = [
 ];
 // https://github.com/known-css/known-css-properties/blob/master/source/browsers/chrome-122.0.json
 pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
+    "-webkit-align-content",
+    "-webkit-align-items",
+    "-webkit-align-self",
+    "-webkit-animation",
+    "-webkit-animation-delay",
+    "-webkit-animation-direction",
+    "-webkit-animation-duration",
+    "-webkit-animation-fill-mode",
+    "-webkit-animation-iteration-count",
+    "-webkit-animation-name",
+    "-webkit-animation-play-state",
+    "-webkit-animation-timing-function",
+    "-webkit-app-region",
+    "-webkit-appearance",
+    "-webkit-backface-visibility",
+    "-webkit-background-clip",
+    "-webkit-background-origin",
+    "-webkit-background-size",
+    "-webkit-border-after",
+    "-webkit-border-after-color",
+    "-webkit-border-after-style",
+    "-webkit-border-after-width",
+    "-webkit-border-before",
+    "-webkit-border-before-color",
+    "-webkit-border-before-style",
+    "-webkit-border-before-width",
+    "-webkit-border-bottom-left-radius",
+    "-webkit-border-bottom-right-radius",
+    "-webkit-border-end",
+    "-webkit-border-end-color",
+    "-webkit-border-end-style",
+    "-webkit-border-end-width",
+    "-webkit-border-horizontal-spacing",
+    "-webkit-border-image",
+    "-webkit-border-radius",
+    "-webkit-border-start",
+    "-webkit-border-start-color",
+    "-webkit-border-start-style",
+    "-webkit-border-start-width",
+    "-webkit-border-top-left-radius",
+    "-webkit-border-top-right-radius",
+    "-webkit-border-vertical-spacing",
+    "-webkit-box-align",
+    "-webkit-box-decoration-break",
+    "-webkit-box-direction",
+    "-webkit-box-flex",
+    "-webkit-box-ordinal-group",
+    "-webkit-box-orient",
+    "-webkit-box-pack",
+    "-webkit-box-reflect",
+    "-webkit-box-shadow",
+    "-webkit-box-sizing",
+    "-webkit-clip-path",
+    "-webkit-column-break-after",
+    "-webkit-column-break-before",
+    "-webkit-column-break-inside",
+    "-webkit-column-count",
+    "-webkit-column-gap",
+    "-webkit-column-rule",
+    "-webkit-column-rule-color",
+    "-webkit-column-rule-style",
+    "-webkit-column-rule-width",
+    "-webkit-column-span",
+    "-webkit-column-width",
+    "-webkit-columns",
+    "-webkit-filter",
+    "-webkit-flex",
+    "-webkit-flex-basis",
+    "-webkit-flex-direction",
+    "-webkit-flex-flow",
+    "-webkit-flex-grow",
+    "-webkit-flex-shrink",
+    "-webkit-flex-wrap",
+    "-webkit-font-feature-settings",
+    "-webkit-font-smoothing",
+    "-webkit-hyphenate-character",
+    "-webkit-justify-content",
+    "-webkit-line-break",
+    "-webkit-line-clamp",
+    "-webkit-locale",
+    "-webkit-logical-height",
+    "-webkit-logical-width",
+    "-webkit-margin-after",
+    "-webkit-margin-before",
+    "-webkit-margin-end",
+    "-webkit-margin-start",
+    "-webkit-mask",
+    "-webkit-mask-box-image",
+    "-webkit-mask-box-image-outset",
+    "-webkit-mask-box-image-repeat",
+    "-webkit-mask-box-image-slice",
+    "-webkit-mask-box-image-source",
+    "-webkit-mask-box-image-width",
+    "-webkit-mask-clip",
+    "-webkit-mask-composite",
+    "-webkit-mask-image",
+    "-webkit-mask-origin",
+    "-webkit-mask-position",
+    "-webkit-mask-position-x",
+    "-webkit-mask-position-y",
+    "-webkit-mask-repeat",
+    "-webkit-mask-size",
+    "-webkit-max-logical-height",
+    "-webkit-max-logical-width",
+    "-webkit-min-logical-height",
+    "-webkit-min-logical-width",
+    "-webkit-opacity",
+    "-webkit-order",
+    "-webkit-padding-after",
+    "-webkit-padding-before",
+    "-webkit-padding-end",
+    "-webkit-padding-start",
+    "-webkit-perspective",
+    "-webkit-perspective-origin",
+    "-webkit-perspective-origin-x",
+    "-webkit-perspective-origin-y",
+    "-webkit-print-color-adjust",
+    "-webkit-rtl-ordering",
+    "-webkit-ruby-position",
+    "-webkit-shape-image-threshold",
+    "-webkit-shape-margin",
+    "-webkit-shape-outside",
+    "-webkit-tap-highlight-color",
+    "-webkit-text-combine",
+    "-webkit-text-decorations-in-effect",
+    "-webkit-text-emphasis",
+    "-webkit-text-emphasis-color",
+    "-webkit-text-emphasis-position",
+    "-webkit-text-emphasis-style",
+    "-webkit-text-fill-color",
+    "-webkit-text-orientation",
+    "-webkit-text-security",
+    "-webkit-text-size-adjust",
+    "-webkit-text-stroke",
+    "-webkit-text-stroke-color",
+    "-webkit-text-stroke-width",
+    "-webkit-transform",
+    "-webkit-transform-origin",
+    "-webkit-transform-origin-x",
+    "-webkit-transform-origin-y",
+    "-webkit-transform-origin-z",
+    "-webkit-transform-style",
+    "-webkit-transition",
+    "-webkit-transition-delay",
+    "-webkit-transition-duration",
+    "-webkit-transition-property",
+    "-webkit-transition-timing-function",
+    "-webkit-user-drag",
+    "-webkit-user-modify",
+    "-webkit-user-select",
+    "-webkit-writing-mode",
     "accent-color",
     "additive-symbols",
     "align-content",
-    "-webkit-align-content",
     "align-items",
-    "-webkit-align-items",
     "align-self",
-    "-webkit-align-self",
     "alignment-baseline",
     "all",
     "animation",
     "animation-composition",
     "animation-delay",
-    "-webkit-animation-delay",
     "animation-direction",
-    "-webkit-animation-direction",
     "animation-duration",
-    "-webkit-animation-duration",
     "animation-fill-mode",
-    "-webkit-animation-fill-mode",
     "animation-iteration-count",
-    "-webkit-animation-iteration-count",
     "animation-name",
-    "-webkit-animation-name",
     "animation-play-state",
-    "-webkit-animation-play-state",
     "animation-range",
     "animation-range-end",
     "animation-range-start",
     "animation-timeline",
     "animation-timing-function",
-    "-webkit-animation-timing-function",
-    "-webkit-animation",
     "app-region",
-    "-webkit-app-region",
     "appearance",
-    "-webkit-appearance",
     "ascent-override",
     "aspect-ratio",
     "backdrop-filter",
     "backface-visibility",
-    "-webkit-backface-visibility",
     "background",
     "background-attachment",
     "background-blend-mode",
     "background-clip",
-    "-webkit-background-clip",
     "background-color",
     "background-image",
     "background-origin",
-    "-webkit-background-origin",
     "background-position",
     "background-position-x",
     "background-position-y",
     "background-repeat",
     "background-size",
-    "-webkit-background-size",
     "base-palette",
     "baseline-shift",
     "baseline-source",
     "block-size",
     "border",
-    "-webkit-border-after-color",
-    "-webkit-border-after-style",
-    "-webkit-border-after",
-    "-webkit-border-after-width",
-    "-webkit-border-before-color",
-    "-webkit-border-before-style",
-    "-webkit-border-before",
-    "-webkit-border-before-width",
     "border-block",
     "border-block-color",
     "border-block-end",
@@ -1638,26 +1787,18 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "border-bottom",
     "border-bottom-color",
     "border-bottom-left-radius",
-    "-webkit-border-bottom-left-radius",
     "border-bottom-right-radius",
-    "-webkit-border-bottom-right-radius",
     "border-bottom-style",
     "border-bottom-width",
     "border-collapse",
     "border-color",
-    "-webkit-border-end-color",
     "border-end-end-radius",
     "border-end-start-radius",
-    "-webkit-border-end-style",
-    "-webkit-border-end",
-    "-webkit-border-end-width",
-    "-webkit-border-horizontal-spacing",
     "border-image",
     "border-image-outset",
     "border-image-repeat",
     "border-image-slice",
     "border-image-source",
-    "-webkit-border-image",
     "border-image-width",
     "border-inline",
     "border-inline-color",
@@ -1676,42 +1817,24 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "border-left-style",
     "border-left-width",
     "border-radius",
-    "-webkit-border-radius",
     "border-right",
     "border-right-color",
     "border-right-style",
     "border-right-width",
     "border-spacing",
-    "-webkit-border-start-color",
     "border-start-end-radius",
     "border-start-start-radius",
-    "-webkit-border-start-style",
-    "-webkit-border-start",
-    "-webkit-border-start-width",
     "border-style",
     "border-top",
     "border-top-color",
     "border-top-left-radius",
-    "-webkit-border-top-left-radius",
     "border-top-right-radius",
-    "-webkit-border-top-right-radius",
     "border-top-style",
     "border-top-width",
-    "-webkit-border-vertical-spacing",
     "border-width",
     "bottom",
-    "-webkit-box-align",
-    "-webkit-box-decoration-break",
-    "-webkit-box-direction",
-    "-webkit-box-flex",
-    "-webkit-box-ordinal-group",
-    "-webkit-box-orient",
-    "-webkit-box-pack",
-    "-webkit-box-reflect",
     "box-shadow",
-    "-webkit-box-shadow",
     "box-sizing",
-    "-webkit-box-sizing",
     "break-after",
     "break-before",
     "break-inside",
@@ -1721,35 +1844,22 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "clear",
     "clip",
     "clip-path",
-    "-webkit-clip-path",
     "clip-rule",
     "color",
     "color-interpolation",
     "color-interpolation-filters",
     "color-rendering",
     "color-scheme",
-    "-webkit-column-break-after",
-    "-webkit-column-break-before",
-    "-webkit-column-break-inside",
     "column-count",
-    "-webkit-column-count",
     "column-fill",
     "column-gap",
-    "-webkit-column-gap",
     "column-rule",
     "column-rule-color",
-    "-webkit-column-rule-color",
     "column-rule-style",
-    "-webkit-column-rule-style",
-    "-webkit-column-rule",
     "column-rule-width",
-    "-webkit-column-rule-width",
     "column-span",
-    "-webkit-column-span",
     "column-width",
-    "-webkit-column-width",
     "columns",
-    "-webkit-columns",
     "contain",
     "contain-intrinsic-block-size",
     "contain-intrinsic-height",
@@ -1778,21 +1888,13 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "fill-opacity",
     "fill-rule",
     "filter",
-    "-webkit-filter",
     "flex",
     "flex-basis",
-    "-webkit-flex-basis",
     "flex-direction",
-    "-webkit-flex-direction",
     "flex-flow",
-    "-webkit-flex-flow",
     "flex-grow",
-    "-webkit-flex-grow",
     "flex-shrink",
-    "-webkit-flex-shrink",
-    "-webkit-flex",
     "flex-wrap",
-    "-webkit-flex-wrap",
     "float",
     "flood-color",
     "flood-opacity",
@@ -1800,12 +1902,10 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "font-display",
     "font-family",
     "font-feature-settings",
-    "-webkit-font-feature-settings",
     "font-kerning",
     "font-optical-sizing",
     "font-palette",
     "font-size",
-    "-webkit-font-smoothing",
     "font-stretch",
     "font-style",
     "font-synthesis",
@@ -1843,7 +1943,6 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "grid-template-rows",
     "height",
     "hyphenate-character",
-    "-webkit-hyphenate-character",
     "hyphenate-limit-chars",
     "hyphens",
     "image-orientation",
@@ -1861,83 +1960,53 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "inset-inline-start",
     "isolation",
     "justify-content",
-    "-webkit-justify-content",
     "justify-items",
     "justify-self",
     "left",
     "letter-spacing",
     "lighting-color",
     "line-break",
-    "-webkit-line-break",
-    "-webkit-line-clamp",
     "line-gap-override",
     "line-height",
     "list-style",
     "list-style-image",
     "list-style-position",
     "list-style-type",
-    "-webkit-locale",
-    "-webkit-logical-height",
-    "-webkit-logical-width",
     "margin",
-    "-webkit-margin-after",
-    "-webkit-margin-before",
     "margin-block",
     "margin-block-end",
     "margin-block-start",
     "margin-bottom",
-    "-webkit-margin-end",
     "margin-inline",
     "margin-inline-end",
     "margin-inline-start",
     "margin-left",
     "margin-right",
-    "-webkit-margin-start",
     "margin-top",
     "marker",
     "marker-end",
     "marker-mid",
     "marker-start",
     "mask",
-    "-webkit-mask-box-image-outset",
-    "-webkit-mask-box-image-repeat",
-    "-webkit-mask-box-image-slice",
-    "-webkit-mask-box-image-source",
-    "-webkit-mask-box-image",
-    "-webkit-mask-box-image-width",
     "mask-clip",
-    "-webkit-mask-clip",
     "mask-composite",
-    "-webkit-mask-composite",
     "mask-image",
-    "-webkit-mask-image",
     "mask-mode",
     "mask-origin",
-    "-webkit-mask-origin",
     "mask-position",
-    "-webkit-mask-position",
-    "-webkit-mask-position-x",
-    "-webkit-mask-position-y",
     "mask-repeat",
-    "-webkit-mask-repeat",
     "mask-size",
-    "-webkit-mask-size",
     "mask-type",
-    "-webkit-mask",
     "math-depth",
     "math-shift",
     "math-style",
     "max-block-size",
     "max-height",
     "max-inline-size",
-    "-webkit-max-logical-height",
-    "-webkit-max-logical-width",
     "max-width",
     "min-block-size",
     "min-height",
     "min-inline-size",
-    "-webkit-min-logical-height",
-    "-webkit-min-logical-width",
     "min-width",
     "mix-blend-mode",
     "negative",
@@ -1951,9 +2020,7 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "offset-position",
     "offset-rotate",
     "opacity",
-    "-webkit-opacity",
     "order",
-    "-webkit-order",
     "orphans",
     "outline",
     "outline-color",
@@ -1975,19 +2042,15 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "overscroll-behavior-y",
     "pad",
     "padding",
-    "-webkit-padding-after",
-    "-webkit-padding-before",
     "padding-block",
     "padding-block-end",
     "padding-block-start",
     "padding-bottom",
-    "-webkit-padding-end",
     "padding-inline",
     "padding-inline-end",
     "padding-inline-start",
     "padding-left",
     "padding-right",
-    "-webkit-padding-start",
     "padding-top",
     "page",
     "page-break-after",
@@ -1997,17 +2060,12 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "paint-order",
     "perspective",
     "perspective-origin",
-    "-webkit-perspective-origin",
-    "-webkit-perspective-origin-x",
-    "-webkit-perspective-origin-y",
-    "-webkit-perspective",
     "place-content",
     "place-items",
     "place-self",
     "pointer-events",
     "position",
     "prefix",
-    "-webkit-print-color-adjust",
     "quotes",
     "r",
     "range",
@@ -2015,9 +2073,7 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "right",
     "rotate",
     "row-gap",
-    "-webkit-rtl-ordering",
     "ruby-position",
-    "-webkit-ruby-position",
     "rx",
     "ry",
     "scale",
@@ -2054,11 +2110,8 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "scrollbar-gutter",
     "scrollbar-width",
     "shape-image-threshold",
-    "-webkit-shape-image-threshold",
     "shape-margin",
-    "-webkit-shape-margin",
     "shape-outside",
-    "-webkit-shape-outside",
     "shape-rendering",
     "size",
     "size-adjust",
@@ -2081,40 +2134,26 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "system",
     "tab-size",
     "table-layout",
-    "-webkit-tap-highlight-color",
     "text-align",
     "text-align-last",
     "text-anchor",
     "text-combine-upright",
-    "-webkit-text-combine",
     "text-decoration",
     "text-decoration-color",
     "text-decoration-line",
     "text-decoration-skip-ink",
     "text-decoration-style",
     "text-decoration-thickness",
-    "-webkit-text-decorations-in-effect",
     "text-emphasis",
     "text-emphasis-color",
-    "-webkit-text-emphasis-color",
     "text-emphasis-position",
-    "-webkit-text-emphasis-position",
     "text-emphasis-style",
-    "-webkit-text-emphasis-style",
-    "-webkit-text-emphasis",
-    "-webkit-text-fill-color",
     "text-indent",
     "text-orientation",
-    "-webkit-text-orientation",
     "text-overflow",
     "text-rendering",
-    "-webkit-text-security",
     "text-shadow",
     "text-size-adjust",
-    "-webkit-text-size-adjust",
-    "-webkit-text-stroke-color",
-    "-webkit-text-stroke",
-    "-webkit-text-stroke-width",
     "text-transform",
     "text-underline-offset",
     "text-underline-position",
@@ -2125,31 +2164,17 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "transform",
     "transform-box",
     "transform-origin",
-    "-webkit-transform-origin",
-    "-webkit-transform-origin-x",
-    "-webkit-transform-origin-y",
-    "-webkit-transform-origin-z",
     "transform-style",
-    "-webkit-transform-style",
-    "-webkit-transform",
     "transition",
     "transition-behavior",
     "transition-delay",
-    "-webkit-transition-delay",
     "transition-duration",
-    "-webkit-transition-duration",
     "transition-property",
-    "-webkit-transition-property",
     "transition-timing-function",
-    "-webkit-transition-timing-function",
-    "-webkit-transition",
     "translate",
     "unicode-bidi",
     "unicode-range",
-    "-webkit-user-drag",
-    "-webkit-user-modify",
     "user-select",
-    "-webkit-user-select",
     "vector-effect",
     "vertical-align",
     "view-timeline",
@@ -2167,7 +2192,6 @@ pub const KNOWN_CHROME_PROPERTIES: [&str; 619] = [
     "word-spacing",
     "word-wrap",
     "writing-mode",
-    "-webkit-writing-mode",
     "x",
     "y",
     "z-index",
@@ -5715,19 +5739,82 @@ pub(crate) const MATH_ML_TAGS: [&str; 32] = [
 mod tests {
     use std::collections::HashSet;
 
-    use super::{
-        FUNCTION_KEYWORDS, HTML_TAGS, KNOWN_EDGE_PROPERTIES, KNOWN_EXPLORER_PROPERTIES,
-        KNOWN_FIREFOX_PROPERTIES, KNOWN_PROPERTIES, KNOWN_SAFARI_PROPERTIES,
-        KNOWN_SAMSUNG_INTERNET_PROPERTIES, KNOWN_US_BROWSER_PROPERTIES,
-        LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES, MATH_ML_TAGS, MEDIA_FEATURE_NAMES,
-        RESET_TO_INITIAL_PROPERTIES_BY_BORDER, RESET_TO_INITIAL_PROPERTIES_BY_FONT,
-        SHORTHAND_PROPERTIES, SVG_TAGS,
-    };
+    use super::*;
+
+    #[test]
+    fn test_basic_keywords_sorted() {
+        let sorted = BASIC_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(BASIC_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_system_family_name_keywords_sorted() {
+        let sorted = SYSTEM_FAMILY_NAME_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(SYSTEM_FAMILY_NAME_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_family_keywords_sorted() {
+        let sorted = FONT_FAMILY_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(FONT_FAMILY_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_weight_absolute_keywords_sorted() {
+        let sorted = FONT_WEIGHT_ABSOLUTE_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(FONT_WEIGHT_ABSOLUTE_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_weight_numeric_keywords_sorted() {
+        let sorted = FONT_WEIGHT_NUMERIC_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(FONT_WEIGHT_NUMERIC_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_style_keywords_sorted() {
+        let sorted = FONT_STYLE_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(FONT_STYLE_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_variants_keywords_sorted() {
+        let sorted = FONT_VARIANTS_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(FONT_VARIANTS_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_stretch_keywords_sorted() {
+        let sorted = FONT_STRETCH_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(FONT_STRETCH_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_font_size_keywords_sorted() {
+        let sorted = FONT_SIZE_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(FONT_SIZE_KEYWORDS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_line_height_keywords_sorted() {
+        let sorted = LINE_HEIGHT_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(LINE_HEIGHT_KEYWORDS, sorted.as_slice());
+    }
 
     #[test]
     fn test_function_keywords_sorted() {
-        let mut sorted = FUNCTION_KEYWORDS.to_vec();
-        sorted.sort_unstable();
+        let sorted = FUNCTION_KEYWORDS.to_vec();
+        let _ = sorted.is_sorted();
         assert_eq!(FUNCTION_KEYWORDS, sorted.as_slice());
     }
 
@@ -5739,10 +5826,115 @@ mod tests {
     }
 
     #[test]
+    fn test_level_one_and_two_pseudo_elements_sorted() {
+        let sorted = LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(LEVEL_ONE_AND_TWO_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_vendor_specific_pseudo_elements_sorted() {
+        let sorted = VENDOR_SPECIFIC_PSEUDO_ELEMENTS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(VENDOR_SPECIFIC_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_shadow_tree_pseudo_elements_sorted() {
+        let sorted = SHADOW_TREE_PSEUDO_ELEMENTS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(SHADOW_TREE_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_other_pseudo_elements_sorted() {
+        let sorted = OTHER_PSEUDO_ELEMENTS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(OTHER_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_vendor_prefixes_sorted() {
+        let sorted = VENDOR_PREFIXES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(VENDOR_PREFIXES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_at_rule_page_pseudo_classes_sorted() {
+        let sorted = AT_RULE_PAGE_PSEUDO_CLASSES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(AT_RULE_PAGE_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_webkit_scrollbar_pseudo_elements_sorted() {
+        let sorted = WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(WEBKIT_SCROLLBAR_PSEUDO_ELEMENTS, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_webkit_scrollbar_pseudo_classes_sorted() {
+        let sorted = WEBKIT_SCROLLBAR_PSEUDO_CLASSES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(WEBKIT_SCROLLBAR_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_a_nplus_bnotation_pseudo_classes_sorted() {
+        let sorted = A_NPLUS_BNOTATION_PSEUDO_CLASSES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(A_NPLUS_BNOTATION_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_a_nplus_bof_snotation_pseudo_classes_sorted() {
+        let sorted = A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(A_NPLUS_BOF_SNOTATION_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_linguistic_pseudo_classes_sorted() {
+        let sorted = LINGUISTIC_PSEUDO_CLASSES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(LINGUISTIC_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_logical_combinations_pseudo_classes_sorted() {
+        let sorted = LOGICAL_COMBINATIONS_PSEUDO_CLASSES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(LOGICAL_COMBINATIONS_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_resource_state_pseudo_classes_sorted() {
+        let sorted = RESOURCE_STATE_PSEUDO_CLASSES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(RESOURCE_STATE_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
+    fn test_other_pseudo_classes_sorted() {
+        let sorted = OTHER_PSEUDO_CLASSES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(OTHER_PSEUDO_CLASSES, sorted.as_slice());
+    }
+
+    #[test]
     fn test_known_properties_order() {
         for items in KNOWN_PROPERTIES.windows(2) {
             assert!(items[0] < items[1], "{} < {}", items[0], items[1]);
         }
+    }
+
+    #[test]
+    fn test_known_chrome_properties_sorted() {
+        let sorted = KNOWN_CHROME_PROPERTIES.to_vec();
+        let _ = sorted.is_sorted();
+        assert_eq!(KNOWN_CHROME_PROPERTIES, sorted.as_slice());
     }
 
     #[test]
@@ -5796,8 +5988,8 @@ mod tests {
 
     #[test]
     fn test_shorthand_properties_sorted() {
-        let mut sorted = SHORTHAND_PROPERTIES.to_vec();
-        sorted.sort_unstable();
+        let sorted = SHORTHAND_PROPERTIES.to_vec();
+        let _ = sorted.is_sorted();
         assert_eq!(SHORTHAND_PROPERTIES, sorted.as_slice());
     }
 
@@ -5811,8 +6003,8 @@ mod tests {
     #[test]
     fn test_longhand_sub_properties_of_shorthand_properties_sorted() {
         for longhand_sub_properties in LONGHAND_SUB_PROPERTIES_OF_SHORTHAND_PROPERTIES.iter() {
-            let mut sorted = longhand_sub_properties.to_vec();
-            sorted.sort_unstable();
+            let sorted = longhand_sub_properties.to_vec();
+            let _ = sorted.is_sorted();
             assert_eq!(*longhand_sub_properties, sorted.as_slice());
         }
     }
@@ -5884,8 +6076,8 @@ mod tests {
 
     #[test]
     fn test_reset_to_initial_properties_by_border_sorted() {
-        let mut sorted = RESET_TO_INITIAL_PROPERTIES_BY_BORDER.to_vec();
-        sorted.sort_unstable();
+        let sorted = RESET_TO_INITIAL_PROPERTIES_BY_BORDER.to_vec();
+        let _ = sorted.is_sorted();
         assert_eq!(RESET_TO_INITIAL_PROPERTIES_BY_BORDER, sorted.as_slice());
     }
 
@@ -5900,8 +6092,8 @@ mod tests {
 
     #[test]
     fn test_reset_to_initial_properties_by_font_sorted() {
-        let mut sorted = RESET_TO_INITIAL_PROPERTIES_BY_FONT.to_vec();
-        sorted.sort_unstable();
+        let sorted = RESET_TO_INITIAL_PROPERTIES_BY_FONT.to_vec();
+        let _ = sorted.is_sorted();
         assert_eq!(RESET_TO_INITIAL_PROPERTIES_BY_FONT, sorted.as_slice());
     }
 

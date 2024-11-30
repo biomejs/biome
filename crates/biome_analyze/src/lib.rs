@@ -1,5 +1,6 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
+use std::borrow::Cow;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BinaryHeap};
 use std::fmt::{Debug, Display, Formatter};
@@ -25,7 +26,7 @@ pub use biome_diagnostics::category_concat;
 
 pub use crate::categories::{
     ActionCategory, RefactorKind, RuleCategories, RuleCategoriesBuilder, RuleCategory,
-    SourceActionKind,
+    SourceActionKind, SUPPRESSION_ACTION_CATEGORY,
 };
 pub use crate::diagnostics::{AnalyzerDiagnostic, RuleError, SuppressionDiagnostic};
 pub use crate::matcher::{InspectMatcher, MatchQueryParams, QueryMatcher, RuleKey, SignalEntry};
@@ -677,7 +678,7 @@ fn create_suppression_comment_action<L: Language>(
     Some(AnalyzerAction {
         mutation,
         applicability: Applicability::MaybeIncorrect,
-        category: ActionCategory::QuickFix,
+        category: ActionCategory::QuickFix(Cow::Borrowed("")),
         message: markup! {
             "Use // biome-ignore instead"
         }
@@ -766,7 +767,7 @@ fn update_suppression<L: Language>(
 
     Some(AnalyzerAction {
         rule_name: None,
-        category: ActionCategory::QuickFix,
+        category: ActionCategory::QuickFix(Cow::Borrowed("")),
         applicability: Applicability::Always,
         message: markup! {
             "Rewrite suppression to use the newer syntax"
@@ -786,12 +787,14 @@ pub struct SuppressionCommentEmitterPayload<'a, L: Language> {
     pub suppression_text: &'a str,
     /// The original range of the diagnostic where the rule was triggered
     pub diagnostic_text_range: &'a TextRange,
+    /// Explanation for the suppression to be used with `--suppress` and `--reason`
+    pub suppression_reason: &'a str,
 }
 
 type SignalHandler<'a, L, Break> = &'a mut dyn FnMut(&dyn AnalyzerSignal<L>) -> ControlFlow<Break>;
 
 /// Allow filtering a single rule or group of rules by their names
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum RuleFilter<'a> {
     Group(&'a str),
     Rule(&'a str, &'a str),

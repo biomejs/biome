@@ -1,7 +1,5 @@
 use biome_analyze::context::RuleContext;
-use biome_analyze::{
-    declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
-};
+use biome_analyze::{declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_syntax::{JsFormalParameter, JsInitializerClause, JsSyntaxToken, TsPropertyParameter};
 use biome_rowan::{declare_node_union, AstNode, BatchMutationExt, Direction};
@@ -162,7 +160,7 @@ impl Rule for UseDefaultParameterLast {
             mutation.remove_node(initializer);
         }
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Turn the parameter into a "<Emphasis>"required parameter"</Emphasis>"."}
                 .to_owned(),

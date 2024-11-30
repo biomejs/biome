@@ -28,6 +28,24 @@ const Component3 = () => (
     </div>
 )
 
+const Component4 = () => {
+  return (
+      <>
+          <div />;
+      </>
+  );
+}
+
+const Component5 = () => {
+  return (
+      <>
+        <Component>
+          <div />
+        </Component>;
+      </>
+  );
+}
+
 ```
 
 # Diagnostics
@@ -86,6 +104,48 @@ invalid.jsx:21:22 lint/suspicious/noSuspiciousSemicolonInJsx ━━━━━━�
        │     
     23 │ )
     24 │ 
+  
+  i This is usually the result of a typo or some refactor gone wrong.
+  
+  i Remove the semicolon, or move it inside a JSX element.
+  
+
+```
+
+```
+invalid.jsx:28:18 lint/suspicious/noSuspiciousSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! There is a suspicious semicolon in the JSX element.
+  
+    26 │   return (
+    27 │       <>
+  > 28 │           <div />;
+       │                  ^
+  > 29 │       </>
+       │       
+    30 │   );
+    31 │ }
+  
+  i This is usually the result of a typo or some refactor gone wrong.
+  
+  i Remove the semicolon, or move it inside a JSX element.
+  
+
+```
+
+```
+invalid.jsx:38:21 lint/suspicious/noSuspiciousSemicolonInJsx ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! There is a suspicious semicolon in the JSX element.
+  
+    36 │         <Component>
+    37 │           <div />
+  > 38 │         </Component>;
+       │                     ^
+  > 39 │       </>
+       │       
+    40 │   );
+    41 │ }
   
   i This is usually the result of a typo or some refactor gone wrong.
   

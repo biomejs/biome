@@ -1,0 +1,123 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+let global;
+global // not a global declaration
+console.log("a");
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsVariableStatement {
+            declaration: JsVariableDeclaration {
+                await_token: missing (optional),
+                kind: LET_KW@0..4 "let" [] [Whitespace(" ")],
+                declarators: JsVariableDeclaratorList [
+                    JsVariableDeclarator {
+                        id: JsIdentifierBinding {
+                            name_token: IDENT@4..10 "global" [] [],
+                        },
+                        variable_annotation: missing (optional),
+                        initializer: missing (optional),
+                    },
+                ],
+            },
+            semicolon_token: SEMICOLON@10..11 ";" [] [],
+        },
+        JsExpressionStatement {
+            expression: JsIdentifierExpression {
+                name: JsReferenceIdentifier {
+                    value_token: IDENT@11..46 "global" [Newline("\n")] [Whitespace(" "), Comments("// not a global decla ...")],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+        JsExpressionStatement {
+            expression: JsCallExpression {
+                callee: JsStaticMemberExpression {
+                    object: JsIdentifierExpression {
+                        name: JsReferenceIdentifier {
+                            value_token: IDENT@46..54 "console" [Newline("\n")] [],
+                        },
+                    },
+                    operator_token: DOT@54..55 "." [] [],
+                    member: JsName {
+                        value_token: IDENT@55..58 "log" [] [],
+                    },
+                },
+                optional_chain_token: missing (optional),
+                type_arguments: missing (optional),
+                arguments: JsCallArguments {
+                    l_paren_token: L_PAREN@58..59 "(" [] [],
+                    args: JsCallArgumentList [
+                        JsStringLiteralExpression {
+                            value_token: JS_STRING_LITERAL@59..62 "\"a\"" [] [],
+                        },
+                    ],
+                    r_paren_token: R_PAREN@62..63 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@63..64 ";" [] [],
+        },
+    ],
+    eof_token: EOF@64..65 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..65
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..64
+    0: JS_VARIABLE_STATEMENT@0..11
+      0: JS_VARIABLE_DECLARATION@0..10
+        0: (empty)
+        1: LET_KW@0..4 "let" [] [Whitespace(" ")]
+        2: JS_VARIABLE_DECLARATOR_LIST@4..10
+          0: JS_VARIABLE_DECLARATOR@4..10
+            0: JS_IDENTIFIER_BINDING@4..10
+              0: IDENT@4..10 "global" [] []
+            1: (empty)
+            2: (empty)
+      1: SEMICOLON@10..11 ";" [] []
+    1: JS_EXPRESSION_STATEMENT@11..46
+      0: JS_IDENTIFIER_EXPRESSION@11..46
+        0: JS_REFERENCE_IDENTIFIER@11..46
+          0: IDENT@11..46 "global" [Newline("\n")] [Whitespace(" "), Comments("// not a global decla ...")]
+      1: (empty)
+    2: JS_EXPRESSION_STATEMENT@46..64
+      0: JS_CALL_EXPRESSION@46..63
+        0: JS_STATIC_MEMBER_EXPRESSION@46..58
+          0: JS_IDENTIFIER_EXPRESSION@46..54
+            0: JS_REFERENCE_IDENTIFIER@46..54
+              0: IDENT@46..54 "console" [Newline("\n")] []
+          1: DOT@54..55 "." [] []
+          2: JS_NAME@55..58
+            0: IDENT@55..58 "log" [] []
+        1: (empty)
+        2: (empty)
+        3: JS_CALL_ARGUMENTS@58..63
+          0: L_PAREN@58..59 "(" [] []
+          1: JS_CALL_ARGUMENT_LIST@59..62
+            0: JS_STRING_LITERAL_EXPRESSION@59..62
+              0: JS_STRING_LITERAL@59..62 "\"a\"" [] []
+          2: R_PAREN@62..63 ")" [] []
+      1: SEMICOLON@63..64 ";" [] []
+  4: EOF@64..65 "" [Newline("\n")] []
+
+```

@@ -100,11 +100,11 @@ impl SemanticEventExtractor {
                         self.stash.push_back(SemanticEvent::PropertyDeclaration {
                             property: CssProperty {
                                 name: property_name.text_trimmed().to_string(),
-                                range: property_name.text_range(),
+                                range: property_name.text_trimmed_range(),
                             },
                             value: CssValue {
                                 text: value.text_trimmed().to_string(),
-                                range: value.text_range(),
+                                range: value.text_trimmed_range(),
                             },
                             range: node.text_range(),
                         });

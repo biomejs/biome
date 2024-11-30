@@ -4,7 +4,7 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_css_syntax::CssGenericProperty;
 use biome_rowan::{AstNode, TextRange};
-use biome_string_case::StrOnlyExtension;
+use biome_string_case::StrLikeExtension;
 
 use crate::utils::{is_known_properties, vendor_prefixed};
 
@@ -74,7 +74,7 @@ impl Rule for NoUnknownProperty {
     fn run(ctx: &RuleContext<Self>) -> Option<Self::State> {
         let node = ctx.query();
         let property_name = node.name().ok()?.text();
-        let property_name_lower = property_name.to_lowercase_cow();
+        let property_name_lower = property_name.to_ascii_lowercase_cow();
         if !property_name_lower.starts_with("--")
             // Ignore `composes` property.
             // See https://github.com/css-modules/css-modules/blob/master/docs/composition.md for more details.

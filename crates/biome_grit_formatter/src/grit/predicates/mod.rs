@@ -1,12 +1,12 @@
 //! This is a generated file. Don't modify it by hand! Run 'cargo codegen formatter' to re-generate the file.
 
 pub(crate) mod bracketed_predicate;
-pub(crate) mod curly_predicate_list;
 pub(crate) mod predicate_accumulate;
 pub(crate) mod predicate_and;
 pub(crate) mod predicate_any;
 pub(crate) mod predicate_assignment;
 pub(crate) mod predicate_call;
+pub(crate) mod predicate_curly;
 pub(crate) mod predicate_definition;
 pub(crate) mod predicate_else_clause;
 pub(crate) mod predicate_equal;

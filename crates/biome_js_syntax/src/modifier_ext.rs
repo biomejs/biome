@@ -4,7 +4,8 @@ use crate::{
     AnyJsMethodModifier, AnyJsPropertyModifier, AnyTsIndexSignatureModifier,
     AnyTsMethodSignatureModifier, AnyTsPropertyParameterModifier, AnyTsPropertySignatureModifier,
     AnyTsTypeParameterModifier, JsMethodModifierList, JsPropertyModifierList, JsSyntaxKind,
-    TsAccessibilityModifier, TsMethodSignatureModifierList, TsPropertySignatureModifierList,
+    TsAccessibilityModifier, TsIndexSignatureModifierList, TsMethodSignatureModifierList,
+    TsPropertySignatureModifierList,
 };
 
 /// Helpful data structure to make the order of modifiers predictable inside the formatter
@@ -168,6 +169,14 @@ impl From<&JsMethodModifierList> for enumflags2::BitFlags<Modifier> {
 }
 impl From<&JsPropertyModifierList> for enumflags2::BitFlags<Modifier> {
     fn from(value: &JsPropertyModifierList) -> Self {
+        value
+            .into_iter()
+            .map(|m| Modifier::from(&m))
+            .fold(Self::empty(), |acc, m| acc | m)
+    }
+}
+impl From<&TsIndexSignatureModifierList> for enumflags2::BitFlags<Modifier> {
+    fn from(value: &TsIndexSignatureModifierList) -> Self {
         value
             .into_iter()
             .map(|m| Modifier::from(&m))

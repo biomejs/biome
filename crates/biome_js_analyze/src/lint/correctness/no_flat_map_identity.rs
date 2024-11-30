@@ -1,6 +1,5 @@
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_factory::make::{ident, js_call_argument_list, js_call_arguments, js_name, token};
@@ -73,7 +72,7 @@ impl Rule for NoFlatMapIdentity {
                 AnyJsExpression::JsArrowFunctionExpression(arg) => {
                     let parameter: String = match arg.parameters().ok()? {
                         biome_js_syntax::AnyJsArrowFunctionParameters::AnyJsBinding(p) => {
-                            p.text().trim_matches(&['(', ')']).to_owned()
+                            p.text().trim_matches(['(', ')']).to_owned()
                         }
                         biome_js_syntax::AnyJsArrowFunctionParameters::JsParameters(p) => {
                             if p.items().len() == 1 {
@@ -110,8 +109,7 @@ impl Rule for NoFlatMapIdentity {
                 }
                 AnyJsExpression::JsFunctionExpression(arg) => {
                     let function_parameter = arg.parameters().ok()?.text();
-                    let function_parameter =
-                        function_parameter.trim_matches(&['(', ')']).to_owned();
+                    let function_parameter = function_parameter.trim_matches(['(', ')']).to_owned();
 
                     let mut statement = arg.body().ok()?.statements().into_iter();
                     if let Some(AnyJsStatement::JsReturnStatement(body)) = statement.next() {
@@ -173,7 +171,7 @@ impl Rule for NoFlatMapIdentity {
         );
 
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! {"Replace unnecessary "<Emphasis>"flatMap"</Emphasis>" call to "<Emphasis>"flat"</Emphasis>" instead."}.to_owned(),
             mutation,

@@ -589,6 +589,7 @@ impl From<JavascriptConfiguration> for LanguageSettings<JsLanguage> {
         language_setting.formatter.indent_style = formatter.indent_style.map(Into::into);
         language_setting.parser.parse_class_parameter_decorators =
             javascript.parser.unsafe_parameter_decorators_enabled;
+        language_setting.parser.grit_metavariables = javascript.parser.grit_metavariables;
 
         language_setting.globals = Some(javascript.globals.into_index_set());
         language_setting.environment = javascript.jsx_runtime.into();
@@ -709,6 +710,7 @@ pub trait ServiceLanguage: biome_rowan::Language {
         language: Option<&Self::LinterSettings>,
         path: &BiomePath,
         file_source: &DocumentFileSource,
+        suppression_reason: Option<String>,
     ) -> AnalyzerOptions;
 }
 
@@ -848,6 +850,7 @@ impl<'a> WorkspaceSettingsHandle<'a> {
         &self,
         path: &BiomePath,
         file_source: &DocumentFileSource,
+        suppression_reason: Option<String>,
     ) -> AnalyzerOptions
     where
         L: ServiceLanguage,
@@ -865,6 +868,7 @@ impl<'a> WorkspaceSettingsHandle<'a> {
             editor_settings,
             path,
             file_source,
+            suppression_reason,
         )
     }
 }

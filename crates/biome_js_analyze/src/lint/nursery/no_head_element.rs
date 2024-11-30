@@ -44,7 +44,7 @@ declare_lint_rule! {
     /// }
     /// ```
     pub NoHeadElement {
-        version: "next",
+        version: "1.9.4",
         name: "noHeadElement",
         language: "jsx",
         sources: &[RuleSource::EslintNext("no-head-element")],
@@ -61,7 +61,7 @@ impl Rule for NoHeadElement {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let element = ctx.query();
-        let name = element.name().ok()?.name_value_token()?;
+        let name = element.name().ok()?.name_value_token().ok()?;
 
         if name.text_trimmed() == "head" {
             let is_in_app_dir = ctx

@@ -1,0 +1,73 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+0 < (0 >= 1);
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsExpressionStatement {
+            expression: JsBinaryExpression {
+                left: JsNumberLiteralExpression {
+                    value_token: JS_NUMBER_LITERAL@0..2 "0" [] [Whitespace(" ")],
+                },
+                operator_token: L_ANGLE@2..4 "<" [] [Whitespace(" ")],
+                right: JsParenthesizedExpression {
+                    l_paren_token: L_PAREN@4..5 "(" [] [],
+                    expression: JsBinaryExpression {
+                        left: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@5..7 "0" [] [Whitespace(" ")],
+                        },
+                        operator_token: GTEQ@7..10 ">=" [] [Whitespace(" ")],
+                        right: JsNumberLiteralExpression {
+                            value_token: JS_NUMBER_LITERAL@10..11 "1" [] [],
+                        },
+                    },
+                    r_paren_token: R_PAREN@11..12 ")" [] [],
+                },
+            },
+            semicolon_token: SEMICOLON@12..13 ";" [] [],
+        },
+    ],
+    eof_token: EOF@13..14 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..14
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..13
+    0: JS_EXPRESSION_STATEMENT@0..13
+      0: JS_BINARY_EXPRESSION@0..12
+        0: JS_NUMBER_LITERAL_EXPRESSION@0..2
+          0: JS_NUMBER_LITERAL@0..2 "0" [] [Whitespace(" ")]
+        1: L_ANGLE@2..4 "<" [] [Whitespace(" ")]
+        2: JS_PARENTHESIZED_EXPRESSION@4..12
+          0: L_PAREN@4..5 "(" [] []
+          1: JS_BINARY_EXPRESSION@5..11
+            0: JS_NUMBER_LITERAL_EXPRESSION@5..7
+              0: JS_NUMBER_LITERAL@5..7 "0" [] [Whitespace(" ")]
+            1: GTEQ@7..10 ">=" [] [Whitespace(" ")]
+            2: JS_NUMBER_LITERAL_EXPRESSION@10..11
+              0: JS_NUMBER_LITERAL@10..11 "1" [] []
+          2: R_PAREN@11..12 ")" [] []
+      1: SEMICOLON@12..13 ";" [] []
+  4: EOF@13..14 "" [Newline("\n")] []
+
+```

@@ -1,0 +1,6 @@
+type SomeTime {
+  """
+  Here is a string
+  """
+  id: ID!
+}

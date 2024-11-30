@@ -1,7 +1,6 @@
 use crate::JsRuleAction;
 use biome_analyze::{
-    context::RuleContext, declare_lint_rule, ActionCategory, Ast, FixKind, Rule, RuleDiagnostic,
-    RuleSource,
+    context::RuleContext, declare_lint_rule, Ast, FixKind, Rule, RuleDiagnostic, RuleSource,
 };
 use biome_console::markup;
 use biome_js_syntax::{jsx_ext::AnyJsxElement, JsxAttribute, JsxAttributeList};
@@ -54,7 +53,7 @@ impl Rule for NoAccessKey {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
-        if node.name_value_token()?.text_trimmed() != "accessKey" {
+        if node.name_value_token().ok()?.text_trimmed() != "accessKey" {
             return None;
         }
 
@@ -100,7 +99,7 @@ impl Rule for NoAccessKey {
         let mut mutation = ctx.root().begin();
         mutation.remove_node(node.clone());
         Some(JsRuleAction::new(
-            ActionCategory::QuickFix,
+            ctx.metadata().action_category(ctx.category(), ctx.group()),
             ctx.metadata().applicability(),
             markup! { "Remove the "<Emphasis>"accessKey"</Emphasis>" attribute." }.to_owned(),
             mutation,

@@ -1,0 +1,160 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+type G = <>(a: A, b: B) => string
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        TsTypeAliasDeclaration {
+            type_token: TYPE_KW@0..5 "type" [] [Whitespace(" ")],
+            binding_identifier: TsIdentifierBinding {
+                name_token: IDENT@5..7 "G" [] [Whitespace(" ")],
+            },
+            type_parameters: missing (optional),
+            eq_token: EQ@7..9 "=" [] [Whitespace(" ")],
+            ty: TsFunctionType {
+                type_parameters: TsTypeParameters {
+                    l_angle_token: L_ANGLE@9..10 "<" [] [],
+                    items: TsTypeParameterList [],
+                    r_angle_token: R_ANGLE@10..11 ">" [] [],
+                },
+                parameters: JsParameters {
+                    l_paren_token: L_PAREN@11..12 "(" [] [],
+                    items: JsParameterList [
+                        JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@12..13 "a" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@13..15 ":" [] [Whitespace(" ")],
+                                ty: TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@15..16 "A" [] [],
+                                    },
+                                    type_arguments: missing (optional),
+                                },
+                            },
+                            initializer: missing (optional),
+                        },
+                        COMMA@16..18 "," [] [Whitespace(" ")],
+                        JsFormalParameter {
+                            decorators: JsDecoratorList [],
+                            binding: JsIdentifierBinding {
+                                name_token: IDENT@18..19 "b" [] [],
+                            },
+                            question_mark_token: missing (optional),
+                            type_annotation: TsTypeAnnotation {
+                                colon_token: COLON@19..21 ":" [] [Whitespace(" ")],
+                                ty: TsReferenceType {
+                                    name: JsReferenceIdentifier {
+                                        value_token: IDENT@21..22 "B" [] [],
+                                    },
+                                    type_arguments: missing (optional),
+                                },
+                            },
+                            initializer: missing (optional),
+                        },
+                    ],
+                    r_paren_token: R_PAREN@22..24 ")" [] [Whitespace(" ")],
+                },
+                fat_arrow_token: FAT_ARROW@24..27 "=>" [] [Whitespace(" ")],
+                return_type: TsStringType {
+                    string_token: STRING_KW@27..33 "string" [] [],
+                },
+            },
+            semicolon_token: missing (optional),
+        },
+    ],
+    eof_token: EOF@33..34 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..34
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..33
+    0: TS_TYPE_ALIAS_DECLARATION@0..33
+      0: TYPE_KW@0..5 "type" [] [Whitespace(" ")]
+      1: TS_IDENTIFIER_BINDING@5..7
+        0: IDENT@5..7 "G" [] [Whitespace(" ")]
+      2: (empty)
+      3: EQ@7..9 "=" [] [Whitespace(" ")]
+      4: TS_FUNCTION_TYPE@9..33
+        0: TS_TYPE_PARAMETERS@9..11
+          0: L_ANGLE@9..10 "<" [] []
+          1: TS_TYPE_PARAMETER_LIST@10..10
+          2: R_ANGLE@10..11 ">" [] []
+        1: JS_PARAMETERS@11..24
+          0: L_PAREN@11..12 "(" [] []
+          1: JS_PARAMETER_LIST@12..22
+            0: JS_FORMAL_PARAMETER@12..16
+              0: JS_DECORATOR_LIST@12..12
+              1: JS_IDENTIFIER_BINDING@12..13
+                0: IDENT@12..13 "a" [] []
+              2: (empty)
+              3: TS_TYPE_ANNOTATION@13..16
+                0: COLON@13..15 ":" [] [Whitespace(" ")]
+                1: TS_REFERENCE_TYPE@15..16
+                  0: JS_REFERENCE_IDENTIFIER@15..16
+                    0: IDENT@15..16 "A" [] []
+                  1: (empty)
+              4: (empty)
+            1: COMMA@16..18 "," [] [Whitespace(" ")]
+            2: JS_FORMAL_PARAMETER@18..22
+              0: JS_DECORATOR_LIST@18..18
+              1: JS_IDENTIFIER_BINDING@18..19
+                0: IDENT@18..19 "b" [] []
+              2: (empty)
+              3: TS_TYPE_ANNOTATION@19..22
+                0: COLON@19..21 ":" [] [Whitespace(" ")]
+                1: TS_REFERENCE_TYPE@21..22
+                  0: JS_REFERENCE_IDENTIFIER@21..22
+                    0: IDENT@21..22 "B" [] []
+                  1: (empty)
+              4: (empty)
+          2: R_PAREN@22..24 ")" [] [Whitespace(" ")]
+        2: FAT_ARROW@24..27 "=>" [] [Whitespace(" ")]
+        3: TS_STRING_TYPE@27..33
+          0: STRING_KW@27..33 "string" [] []
+      5: (empty)
+  4: EOF@33..34 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+ts_function_type_err.ts:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a type parameter but instead found '>'.
+  
+  > 1 │ type G = <>(a: A, b: B) => string
+      │           ^
+    2 │ 
+  
+  i Expected a type parameter here.
+  
+  > 1 │ type G = <>(a: A, b: B) => string
+      │           ^
+    2 │ 
+  
+```

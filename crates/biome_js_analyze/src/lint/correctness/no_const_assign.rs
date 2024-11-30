@@ -1,7 +1,7 @@
 use crate::services::semantic::Semantic;
 use crate::JsRuleAction;
 use biome_analyze::context::RuleContext;
-use biome_analyze::{declare_lint_rule, ActionCategory, FixKind, Rule, RuleDiagnostic, RuleSource};
+use biome_analyze::{declare_lint_rule, FixKind, Rule, RuleDiagnostic, RuleSource};
 use biome_console::markup;
 use biome_js_factory::make::{self};
 use biome_js_syntax::binding_ext::AnyJsBindingDeclaration;
@@ -106,7 +106,7 @@ impl Rule for NoConstAssign {
             let let_token = make::token(JsSyntaxKind::LET_KW);
             mutation.replace_token(const_token, let_token);
             return Some(JsRuleAction::new(
-                            ActionCategory::QuickFix,
+                            ctx.metadata().action_category(ctx.category(), ctx.group()),
                             ctx.metadata().applicability(),
                              markup! { "Replace "<Emphasis>"const"</Emphasis>" with "<Emphasis>"let"</Emphasis>" if you assign it to a new value." }
                                 .to_owned(),

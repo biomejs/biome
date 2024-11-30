@@ -4,10 +4,10 @@ use biome_analyze::{
 use biome_console::markup;
 use biome_deserialize_macros::Deserializable;
 use biome_js_syntax::{
-    JsConstructorClassMember, JsGetterClassMember, JsMethodClassMember, JsPropertyClassMember,
-    JsSetterClassMember, TsAccessibilityModifier, TsConstructorSignatureClassMember,
-    TsGetterSignatureClassMember, TsMethodSignatureClassMember, TsPropertyParameter,
-    TsPropertySignatureClassMember, TsSetterSignatureClassMember,
+    AnyJsClassMemberName, JsConstructorClassMember, JsGetterClassMember, JsMethodClassMember,
+    JsPropertyClassMember, JsSetterClassMember, TsAccessibilityModifier,
+    TsConstructorSignatureClassMember, TsGetterSignatureClassMember, TsMethodSignatureClassMember,
+    TsPropertyParameter, TsPropertySignatureClassMember, TsSetterSignatureClassMember,
 };
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 use serde::{Deserialize, Serialize};
@@ -26,84 +26,163 @@ declare_lint_rule! {
     ///
     /// ### Invalid
     ///
-    /// The following patterns are considered incorrect code with the default options `noPublic`:
+    /// #### `"accessibility": "noPublic"` (default value)
     ///
-    /// ```js,ignore
+    /// Use the following configuration to disallow all explicit `public` modifiers:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "accessibility": "noPublic"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The following patterns are considered incorrect code with `noPublic`:
+    ///
+    /// ```ts,expect_diagnostic,use_options
     /// class Animal {
-    ///   public constructor(
-    ///     public breed,
-    ///     name,
-    ///   ) {
-    ///     // Parameter property and constructor
-    ///     this.animalName = name;
-    ///   }
-    ///   public animalName: string; // Property
-    ///   public get name(): string {
-    ///     // get accessor
-    ///     return this.animalName;
-    ///   }
-    ///   public set name(value: string) {
-    ///     // set accessor
-    ///     this.animalName = value;
-    ///   }
-    ///   public walk() {
-    ///     // method
+    ///   public constructor(breed, name) {
+    ///     // ...
     ///   }
     /// }
     /// ```
     ///
-    /// The following patterns are considered incorrect code with the accessibility set to `explicit`:
-    ///
-    /// ```ts,ignore
+    /// ```ts,expect_diagnostic,use_options
     /// class Animal {
-    ///   // Constructor is not set accessibility modifier
     ///   constructor(
     ///     public breed,
     ///     name,
     ///   ) {
-    ///     // Parameter property and constructor
-    ///     this.animalName = name;
-    ///   }
-    ///   private animalName: string; // Property
-    ///   public get name(): string {
-    ///     // get accessor
-    ///     return this.animalName;
-    ///   }
-    ///   public set name(value: string) {
-    ///     // set accessor
-    ///     this.animalName = value;
-    ///   }
-    ///   protected walk() {
-    ///     // method
+    ///     // ...
     ///   }
     /// }
     /// ```
     ///
-    /// The following patterns are considered incorrect code with the accessibility set to `none`:
+    /// ```ts,expect_diagnostic,use_options
+    /// class Animal {
+    ///   public animalName: string;
+    /// }
+    /// ```
     ///
-    /// ```ts,ignore
+    /// ```ts,expect_diagnostic,use_options
+    /// class Pet {
+    ///   public get name(): string {
+    ///     return this.animalName;
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// class Pet {
+    ///   public set name(value: string) {
+    ///     this.animalName = value;
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// class Dog {
+    ///   public walk() {
+    ///     // ...
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### `"accessibility": "explicit"`
+    ///
+    /// Use the following configuration to enforce the presence of explicit modifiers wherever possible:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "accessibility": "explicit"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The following patterns are considered incorrect code with `accessibility` set to `explicit`:
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// class Animal {
+    ///   constructor( // Invalid: Missing accessibility modifier
+    ///     public breed,
+    ///     name,
+    ///   ) {
+    ///     this.animalName = name;
+    ///   }
+    ///   private animalName: string; // OK: Modifier must be present
+    ///   public get name(): string { // OK: Modifier must be present
+    ///     return this.animalName;
+    ///   }
+    ///   public set name(value: string) { // OK: Modifier must be present
+    ///     this.animalName = value;
+    ///   }
+    ///   protected walk() { // OK: Modifier must be present
+    ///     // ...
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// #### `"accessibility": "none"`
+    ///
+    /// Use the following configuration to disallow all explicit visibility modifiers:
+    ///
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "accessibility": "none"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// The following patterns are considered incorrect code with `accessibility` set to `none`:
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// class Animal {
+    ///   protected constructor(breed, name) {
+    ///     // ...
+    ///   }
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
     /// class Animal {
     ///   constructor(
     ///     protected breed,
     ///     name,
     ///   ) {
-    ///     // Parameter property and constructor
-    ///     this.name = name;
+    ///     // ...
     ///   }
-    ///   // Property is set accessibility modifier
-    ///   private animalName: string; // Property
-    ///   get name(): string {
-    ///     // get accessor
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// class Animal {
+    ///   private animalName: string;
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// class Animal {
+    ///   protected get name(): string {
     ///     return this.animalName;
     ///   }
-    ///   // set accessor is set accessibility modifier
-    ///   set name(value: string) {
-    ///     // set accessor
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// class Pet {
+    ///   private set name(value: string) {
     ///     this.animalName = value;
     ///   }
-    ///   // walk() is set accessibility modifier
-    ///   protected walk() {
-    ///     // method
+    /// }
+    /// ```
+    ///
+    /// ```ts,expect_diagnostic,use_options
+    /// class Dog {
+    ///   public walk() {
+    ///     // ...
     ///   }
     /// }
     /// ```
@@ -112,13 +191,20 @@ declare_lint_rule! {
     ///
     /// The following patterns are considered correct code with the default options `noPublic`:
     ///
-    /// ```ts,ignore
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "accessibility": "noPublic"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options
     /// class Animal {
     ///   constructor(
-    ///     public breed,
+    ///     private breed,
     ///     name,
     ///   ) {
-    ///     // Parameter property and constructor
     ///     this.animalName = name;
     ///   }
     ///   private animalName: string; // Property
@@ -138,7 +224,15 @@ declare_lint_rule! {
     ///
     /// The following patterns are considered correct code with the accessibility set to `explicit`:
     ///
-    /// ```ts,ignore
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "accessibility": "explicit"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options
     /// class Animal {
     ///   public constructor(
     ///     public breed,
@@ -164,7 +258,15 @@ declare_lint_rule! {
     ///
     /// The following patterns are considered correct code with the accessibility set to `none`:
     ///
-    /// ```ts,ignore
+    /// ```json,options
+    /// {
+    ///     "options": {
+    ///         "accessibility": "none"
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```ts,use_options
     /// class Animal {
     ///   constructor(
     ///     breed,
@@ -192,9 +294,8 @@ declare_lint_rule! {
     ///
     /// The rule supports the following options:
     ///
-    /// ```json
+    /// ```json,options
     /// {
-    ///     "//": "...",
     ///     "options": {
     ///         "accessibility": "explicit"
     ///     }
@@ -210,7 +311,7 @@ declare_lint_rule! {
     /// - `explicit` - requires an accessibility modifier for every member that allows that (a safe fix will add public).
     /// - `none` - forbid all accessibility modifiers (public, protected, private).
     ///
-    /// Default: `noPublic`.
+    /// **Default:** `noPublic`
     ///
     pub UseConsistentMemberAccessibility {
         version: "1.9.0",
@@ -246,6 +347,10 @@ impl Rule for UseConsistentMemberAccessibility {
 
     fn run(ctx: &RuleContext<Self>) -> Self::Signals {
         let node = ctx.query();
+        // Ignore private class members such as `#property`
+        if node.has_private_class_member_name() {
+            return None;
+        }
         let accessibility = node.accessibility_modifier();
         let options = ctx.options();
         match &options.accessibility {
@@ -304,6 +409,25 @@ declare_node_union! {
 }
 
 impl AnyJsMemberWithAccessibility {
+    fn has_private_class_member_name(&self) -> bool {
+        let name = match self {
+            Self::JsConstructorClassMember(_)
+            | Self::TsConstructorSignatureClassMember(_)
+            | Self::TsPropertyParameter(_) => {
+                return false;
+            }
+            Self::JsPropertyClassMember(member) => member.name(),
+            Self::JsMethodClassMember(member) => member.name(),
+            Self::JsGetterClassMember(member) => member.name(),
+            Self::JsSetterClassMember(member) => member.name(),
+            Self::TsMethodSignatureClassMember(member) => member.name(),
+            Self::TsPropertySignatureClassMember(member) => member.name(),
+            Self::TsGetterSignatureClassMember(member) => member.name(),
+            Self::TsSetterSignatureClassMember(member) => member.name(),
+        };
+        matches!(name, Ok(AnyJsClassMemberName::JsPrivateClassMemberName(_)))
+    }
+
     fn accessibility_modifier(&self) -> Option<TsAccessibilityModifier> {
         match self {
             Self::JsConstructorClassMember(member) => member

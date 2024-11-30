@@ -1,0 +1,100 @@
+---
+source: crates/biome_js_parser/tests/spec_test.rs
+expression: snapshot
+---
+## Input
+
+```ts
+interface undefined {}
+interface any {}
+
+```
+
+
+## AST
+
+```
+JsModule {
+    bom_token: missing (optional),
+    interpreter_token: missing (optional),
+    directives: JsDirectiveList [],
+    items: JsModuleItemList [
+        JsBogusStatement {
+            items: [
+                INTERFACE_KW@0..10 "interface" [] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        IDENT@10..20 "undefined" [] [Whitespace(" ")],
+                    ],
+                },
+                L_CURLY@20..21 "{" [] [],
+                TsTypeMemberList [],
+                R_CURLY@21..22 "}" [] [],
+            ],
+        },
+        JsBogusStatement {
+            items: [
+                INTERFACE_KW@22..33 "interface" [Newline("\n")] [Whitespace(" ")],
+                JsBogus {
+                    items: [
+                        IDENT@33..37 "any" [] [Whitespace(" ")],
+                    ],
+                },
+                L_CURLY@37..38 "{" [] [],
+                TsTypeMemberList [],
+                R_CURLY@38..39 "}" [] [],
+            ],
+        },
+    ],
+    eof_token: EOF@39..40 "" [Newline("\n")] [],
+}
+```
+
+## CST
+
+```
+0: JS_MODULE@0..40
+  0: (empty)
+  1: (empty)
+  2: JS_DIRECTIVE_LIST@0..0
+  3: JS_MODULE_ITEM_LIST@0..39
+    0: JS_BOGUS_STATEMENT@0..22
+      0: INTERFACE_KW@0..10 "interface" [] [Whitespace(" ")]
+      1: JS_BOGUS@10..20
+        0: IDENT@10..20 "undefined" [] [Whitespace(" ")]
+      2: L_CURLY@20..21 "{" [] []
+      3: TS_TYPE_MEMBER_LIST@21..21
+      4: R_CURLY@21..22 "}" [] []
+    1: JS_BOGUS_STATEMENT@22..39
+      0: INTERFACE_KW@22..33 "interface" [Newline("\n")] [Whitespace(" ")]
+      1: JS_BOGUS@33..37
+        0: IDENT@33..37 "any" [] [Whitespace(" ")]
+      2: L_CURLY@37..38 "{" [] []
+      3: TS_TYPE_MEMBER_LIST@38..38
+      4: R_CURLY@38..39 "}" [] []
+  4: EOF@39..40 "" [Newline("\n")] []
+
+```
+
+## Diagnostics
+
+```
+interface_cannot_be_reserved_world.ts:1:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Type alias cannot be undefined
+  
+  > 1 │ interface undefined {}
+      │           ^^^^^^^^^
+    2 │ interface any {}
+    3 │ 
+  
+interface_cannot_be_reserved_world.ts:2:11 parse ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Type alias cannot be any
+  
+    1 │ interface undefined {}
+  > 2 │ interface any {}
+      │           ^^^
+    3 │ 
+  
+```

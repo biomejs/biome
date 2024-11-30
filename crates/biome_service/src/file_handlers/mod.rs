@@ -43,6 +43,7 @@ use biome_string_case::StrLikeExtension;
 use grit::GritFileHandler;
 use html::HtmlFileHandler;
 pub use javascript::JsFormatterSettings;
+use rustc_hash::FxHashSet;
 use std::borrow::Cow;
 use std::ffi::OsStr;
 use std::path::Path;
@@ -159,8 +160,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
-
-        #[cfg(feature = "experimental-grit")]
         if let Ok(file_source) = GritFileSource::try_from_extension(extension) {
             return Ok(file_source.into());
         }
@@ -191,7 +190,6 @@ impl DocumentFileSource {
         if let Ok(file_source) = HtmlFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
-        #[cfg(feature = "experimental-grit")]
         if let Ok(file_source) = GritFileSource::try_from_language_id(language_id) {
             return Ok(file_source.into());
         }
@@ -349,9 +347,9 @@ impl DocumentFileSource {
             },
             DocumentFileSource::Css(_)
             | DocumentFileSource::Graphql(_)
-            | DocumentFileSource::Json(_) => true,
+            | DocumentFileSource::Json(_)
+            | DocumentFileSource::Grit(_) => true,
             DocumentFileSource::Html(_) => cfg!(feature = "experimental-html"),
-            DocumentFileSource::Grit(_) => cfg!(feature = "experimental-grit"),
             DocumentFileSource::Unknown => false,
         }
     }
@@ -402,6 +400,7 @@ pub struct FixAllParams<'a> {
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) rule_categories: RuleCategories,
+    pub(crate) suppression_reason: Option<String>,
 }
 
 #[derive(Default)]
@@ -459,6 +458,7 @@ pub(crate) struct LintParams<'a> {
     pub(crate) skip: Vec<RuleSelector>,
     pub(crate) categories: RuleCategories,
     pub(crate) manifest: Option<PackageJson>,
+    pub(crate) suppression_reason: Option<String>,
 }
 
 pub(crate) struct LintResults {
@@ -476,6 +476,7 @@ pub(crate) struct CodeActionsParams<'a> {
     pub(crate) language: DocumentFileSource,
     pub(crate) only: Vec<RuleSelector>,
     pub(crate) skip: Vec<RuleSelector>,
+    pub(crate) suppression_reason: Option<String>,
 }
 
 type Lint = fn(LintParams) -> LintResults;
@@ -651,7 +652,7 @@ pub(crate) fn parse_lang_from_script_opening_tag(
                 .ok()?;
             let tag = expression.as_jsx_tag_expression()?.tag().ok()?;
             let opening_element = tag.as_jsx_element()?.opening_element().ok()?;
-            let lang_attribute = opening_element.attributes().find_by_name("lang").ok()??;
+            let lang_attribute = opening_element.attributes().find_by_name("lang")?;
             let attribute_value = lang_attribute.initializer()?.value().ok()?;
             let attribute_inner_string =
                 attribute_value.as_jsx_string()?.inner_string_text().ok()?;
@@ -825,25 +826,25 @@ impl<'a> RegistryVisitor<GraphqlLanguage> for SyntaxVisitor<'a> {
 ///
 #[derive(Debug)]
 struct LintVisitor<'a, 'b> {
-    pub(crate) enabled_rules: Vec<RuleFilter<'a>>,
-    pub(crate) disabled_rules: Vec<RuleFilter<'a>>,
+    pub(crate) enabled_rules: FxHashSet<RuleFilter<'a>>,
+    pub(crate) disabled_rules: FxHashSet<RuleFilter<'a>>,
     // lint_params: &'b LintParams<'a>,
-    only: &'b Vec<RuleSelector>,
-    skip: &'b Vec<RuleSelector>,
+    only: &'b [RuleSelector],
+    skip: &'b [RuleSelector],
     settings: Option<&'b Settings>,
     path: &'b Path,
 }
 
 impl<'a, 'b> LintVisitor<'a, 'b> {
     pub(crate) fn new(
-        only: &'b Vec<RuleSelector>,
-        skip: &'b Vec<RuleSelector>,
+        only: &'b [RuleSelector],
+        skip: &'b [RuleSelector],
         settings: Option<&'b Settings>,
         path: &'b Path,
     ) -> Self {
         Self {
-            enabled_rules: vec![],
-            disabled_rules: vec![],
+            enabled_rules: Default::default(),
+            disabled_rules: Default::default(),
             only,
             skip,
             settings,
@@ -851,20 +852,17 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         }
     }
 
-    fn finish(mut self) -> (Vec<RuleFilter<'a>>, Vec<RuleFilter<'a>>) {
+    fn finish(mut self) -> (FxHashSet<RuleFilter<'a>>, FxHashSet<RuleFilter<'a>>) {
         let has_only_filter = !self.only.is_empty();
-        let enabled_rules = if !has_only_filter {
-            self.settings
+        if !has_only_filter {
+            let enabled_rules = self
+                .settings
                 .and_then(|settings| settings.as_linter_rules(self.path))
                 .as_ref()
                 .map(|rules| rules.as_enabled_rules())
-                .unwrap_or_default()
-                .into_iter()
-                .collect::<Vec<_>>()
-        } else {
-            vec![]
-        };
-        self.enabled_rules.extend(enabled_rules);
+                .unwrap_or_default();
+            self.enabled_rules.extend(enabled_rules);
+        }
         (self.enabled_rules, self.disabled_rules)
     }
 
@@ -878,13 +876,13 @@ impl<'a, 'b> LintVisitor<'a, 'b> {
         for selector in self.only {
             let filter = RuleFilter::from(selector);
             if filter.match_rule::<R>() {
-                self.enabled_rules.push(filter)
+                self.enabled_rules.insert(filter);
             }
         }
         for selector in self.skip {
             let filter = RuleFilter::from(selector);
             if filter.match_rule::<R>() {
-                self.disabled_rules.push(filter)
+                self.disabled_rules.insert(filter);
             }
         }
     }
@@ -1171,8 +1169,8 @@ impl<'a, 'b> AnalyzerVisitorBuilder<'a, 'b> {
     #[must_use]
     pub(crate) fn with_linter_rules(
         mut self,
-        only: &'b Vec<RuleSelector>,
-        skip: &'b Vec<RuleSelector>,
+        only: &'b [RuleSelector],
+        skip: &'b [RuleSelector],
         path: &'b Path,
     ) -> Self {
         self.lint = Some(LintVisitor::new(only, skip, self.settings, path));

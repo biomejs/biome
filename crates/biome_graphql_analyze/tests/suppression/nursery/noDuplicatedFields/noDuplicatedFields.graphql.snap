@@ -1,0 +1,113 @@
+---
+source: crates/biome_graphql_analyze/tests/spec_tests.rs
+expression: noDuplicatedFields.graphql
+---
+# Input
+```graphql
+query test($v: String, $t: String, $v: String) {
+  id
+}
+
+query test {
+  users(first: 100, after: 10, filter: "test", first: 50) {
+    id
+  }
+}
+
+query test {
+  users {
+    id
+    name
+    email
+    name
+  }
+}
+
+query test {
+  users {
+    id
+    name
+    email
+		# biome-ignore lint/nursery/noDuplicatedFields: testing
+    email: somethingElse
+  }
+}
+
+```
+
+# Diagnostics
+```
+noDuplicatedFields.graphql:1:36 lint/nursery/noDuplicatedFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Variable `v` defined multiple times.
+  
+  > 1 │ query test($v: String, $t: String, $v: String) {
+      │                                    ^^^^^^^^^^
+    2 │   id
+    3 │ }
+  
+  i Remove the duplicated variable.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields
+  
+     1    │ - query·test($v:·String,·$t:·String,·$v:·String)·{
+        1 │ + #·biome-ignore·lint/nursery/noDuplicatedFields:·<explanation>
+        2 │ + query··test($v:·String,·$t:·String,·$v:·String)·{
+     2  3 │     id
+     3  4 │   }
+  
+
+```
+
+```
+noDuplicatedFields.graphql:6:48 lint/nursery/noDuplicatedFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Argument `first` defined multiple times.
+  
+    5 │ query test {
+  > 6 │   users(first: 100, after: 10, filter: "test", first: 50) {
+      │                                                ^^^^^^^^^
+    7 │     id
+    8 │   }
+  
+  i Remove the duplicated argument.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields
+  
+     4  4 │   
+     5  5 │   query test {
+     6    │ - ··users(first:·100,·after:·10,·filter:·"test",·first:·50)·{
+        6 │ + ··#·biome-ignore·lint/nursery/noDuplicatedFields:·<explanation>
+        7 │ + ··users(first:·100,·after:·10,·filter:·"test",·first:·50)·{
+     7  8 │       id
+     8  9 │     }
+  
+
+```
+
+```
+noDuplicatedFields.graphql:16:5 lint/nursery/noDuplicatedFields  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Field `name` defined multiple times.
+  
+    14 │     name
+    15 │     email
+  > 16 │     name
+       │     ^^^^
+    17 │   }
+    18 │ }
+  
+  i Remove the duplicated field.
+  
+  i Safe fix: Suppress rule lint/nursery/noDuplicatedFields
+  
+    14 14 │       name
+    15 15 │       email
+    16    │ - ····name
+       16 │ + ····#·biome-ignore·lint/nursery/noDuplicatedFields:·<explanation>
+       17 │ + ····name
+    17 18 │     }
+    18 19 │   }
+  
+
+```

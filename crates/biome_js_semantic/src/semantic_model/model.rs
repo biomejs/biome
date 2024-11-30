@@ -251,6 +251,17 @@ impl SemanticModel {
             })
     }
 
+    pub fn all_exported_bindings(&self) -> impl Iterator<Item = Binding> + '_ {
+        self.data
+            .exported
+            .iter()
+            .filter_map(|declared_at| self.data.bindings_by_start.get(declared_at).copied())
+            .map(|id| Binding {
+                data: self.data.clone(),
+                id,
+            })
+    }
+
     /// Returns the [Binding] of a reference.
     /// Can also be called from "binding" extension method.
     ///

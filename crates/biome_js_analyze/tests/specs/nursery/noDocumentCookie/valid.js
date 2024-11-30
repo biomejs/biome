@@ -15,8 +15,3 @@ cookieStore
 function document_is_not_global1(document){
     document.cookie = "bar=foo"
 }
-
-function document_is_not_global2(){
-    const document = "foo";
-    document.cookie = "bar=foo"
-}

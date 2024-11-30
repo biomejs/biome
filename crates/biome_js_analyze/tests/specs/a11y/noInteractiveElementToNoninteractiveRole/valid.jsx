@@ -264,4 +264,15 @@
 <Link href="http://x.y.z" role="img" />;
 <Link href="http://x.y.z" />;
 <Button onClick={doFoo} />;
+<picture>
+  <source
+    srcSet={'/assets/head.webp'}
+    role='img'
+    type='image/webp'
+  />
+  <img
+    src={'/assets/head.png'}
+    alt='An ASCII-style headshot'
+  />
+</picture>
 
