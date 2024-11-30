@@ -446,6 +446,7 @@ our [guidelines for writing a good changelog entry](https://github.com/biomejs/b
 - Add [noUselessStringRaw](https://biomejs.dev/linter/rules/no-useless-string-raw/). Contributed by @fireairforce
 - Add [nursery/useCollapsedIf](https://biomejs.dev/linter/rules/use-collapsed-if/). Contributed by @siketyan
 - Add [useGoogleFontDisplay](https://biomejs.dev/linter/rules/use-google-font-display/). Contributed by @kaioduarte
+- Add [useExportsLast](https://biomejs.dev/linter/rules/use-exports-last/). Contributed by @tommymorgan
 
 #### Bug Fixes
 

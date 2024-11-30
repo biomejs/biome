@@ -2492,6 +2492,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useExportsLast": {
+					"description": "Require that all exports are declared after all non-export statements.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useGoogleFontDisplay": {
 					"description": "Enforces the use of a recommended display strategy with Google Fonts.",
 					"anyOf": [
