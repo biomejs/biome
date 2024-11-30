@@ -2534,6 +2534,13 @@
 						{ "type": "null" }
 					]
 				},
+				"useNamingConvention": {
+					"description": "Validates that all enum values are capitalized.",
+					"anyOf": [
+						{ "$ref": "#/definitions/RuleConfiguration" },
+						{ "type": "null" }
+					]
+				},
 				"useSortedClasses": {
 					"description": "Enforce the sorting of CSS utility classes.",
 					"anyOf": [
