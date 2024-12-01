@@ -490,6 +490,7 @@ dependencies = [
  "directories",
  "enumflags2",
  "oxc_resolver",
+ "papaya",
  "parking_lot",
  "rayon",
  "rustc-hash 2.0.0",
@@ -2807,8 +2808,9 @@ dependencies = [
 
 [[package]]
 name = "papaya"
-version = "0.1.4"
-source = "git+https://github.com/ibraheemdev/papaya#14351ec7059b8a98f8e41262b4f2db6fb396cd6b"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71addb3836918693eecf8aa0f1c578798246b12c4d1171a079c53433fad72706"
 dependencies = [
  "seize",
 ]
