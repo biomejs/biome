@@ -373,7 +373,7 @@ impl<'analyzer> Suppressions<'analyzer> {
         self.last_suppression = Some(suppression.variant.clone());
         let already_suppressed = self.already_suppressed(filter.as_ref(), &comment_range);
         match suppression.variant {
-            AnalyzerSuppressionVariant::Classic => {
+            AnalyzerSuppressionVariant::Line => {
                 self.push_line_suppression(filter, instances, comment_range, already_suppressed)
             }
             AnalyzerSuppressionVariant::TopLevel => self.top_level_suppression.push_suppression(
@@ -413,7 +413,7 @@ impl<'analyzer> Suppressions<'analyzer> {
     ) {
         if let Some(variant) = &self.last_suppression {
             match variant {
-                AnalyzerSuppressionVariant::Classic => {
+                AnalyzerSuppressionVariant::Line => {
                     if let Some(last_suppression) = self.line_suppressions.last_mut() {
                         if last_suppression.line_index == next_line_index
                             || last_suppression.line_index + 1 == next_line_index

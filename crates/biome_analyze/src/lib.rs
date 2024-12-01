@@ -241,7 +241,7 @@ where
                     category!("suppressions/unused"),
                     suppression.comment_span,
                     "Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.",
-                 )
+                    )
                 }
             });
 
@@ -537,7 +537,7 @@ where
                 continue;
             }
 
-            has_suppressions |= true;
+            has_suppressions = true;
         }
 
         // Suppression comments apply to the next line
@@ -613,7 +613,7 @@ pub struct AnalyzerSuppression<'a> {
 #[derive(Debug, Clone)]
 pub enum AnalyzerSuppressionVariant {
     /// biome-ignore
-    Classic,
+    Line,
     /// biome-ignore-all
     TopLevel,
     /// biome-ignore-start
@@ -625,7 +625,7 @@ pub enum AnalyzerSuppressionVariant {
 impl From<&SuppressionKind> for AnalyzerSuppressionVariant {
     fn from(value: &SuppressionKind) -> Self {
         match value {
-            SuppressionKind::Classic => AnalyzerSuppressionVariant::Classic,
+            SuppressionKind::Classic => AnalyzerSuppressionVariant::Line,
             SuppressionKind::All => AnalyzerSuppressionVariant::TopLevel,
             SuppressionKind::RangeStart => AnalyzerSuppressionVariant::RangeStart,
             SuppressionKind::RangeEnd => AnalyzerSuppressionVariant::RangeEnd,
@@ -638,7 +638,7 @@ impl<'a> AnalyzerSuppression<'a> {
         Self {
             kind: AnalyzerSuppressionKind::Everything,
             ignore_range: None,
-            variant: AnalyzerSuppressionVariant::Classic,
+            variant: AnalyzerSuppressionVariant::Line,
         }
     }
 
@@ -646,14 +646,14 @@ impl<'a> AnalyzerSuppression<'a> {
         Self {
             kind: AnalyzerSuppressionKind::RuleInstance(rule, instance),
             ignore_range: None,
-            variant: AnalyzerSuppressionVariant::Classic,
+            variant: AnalyzerSuppressionVariant::Line,
         }
     }
     pub fn rule(rule: &'a str) -> Self {
         Self {
             kind: AnalyzerSuppressionKind::Rule(rule),
             ignore_range: None,
-            variant: AnalyzerSuppressionVariant::Classic,
+            variant: AnalyzerSuppressionVariant::Line,
         }
     }
 
@@ -720,9 +720,8 @@ impl<'a> AnalyzerSuppression<'a> {
     pub const fn is_range_end(&self) -> bool {
         matches!(self.variant, AnalyzerSuppressionVariant::RangeEnd)
     }
-
-    pub const fn is_classic(&self) -> bool {
-        matches!(self.variant, AnalyzerSuppressionVariant::Classic)
+    pub const fn is_line(&self) -> bool {
+        matches!(self.variant, AnalyzerSuppressionVariant::Line)
     }
 }
 
