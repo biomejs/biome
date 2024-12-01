@@ -72,7 +72,7 @@ impl Rule for NoUnknownAtRule {
                 rule_category!(),
                 span,
                 markup! {
-                    "Unexpected unknown at-rule "<Emphasis>{ name }</Emphasis>" "
+                    "Unexpected unknown at-rule: "<Emphasis>{ name }</Emphasis>" "
                 },
             )
             .note(markup! {
