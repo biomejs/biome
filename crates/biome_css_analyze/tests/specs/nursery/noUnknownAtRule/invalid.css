@@ -1,3 +1,6 @@
-var a = 1;
-a = 2;
-a = 3;
+@uNkNoWn {}
+@UNKNOWN {}
+@unknown-at-rule {}
+@unknown { @unknown-at-rule { font-size: 14px; } }
+@MY-other-at-rule {}
+@not-my-at-rule {}
