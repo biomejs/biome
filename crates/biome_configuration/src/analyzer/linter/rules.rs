@@ -3365,7 +3365,7 @@ pub struct Nursery {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_template_curly_in_string:
         Option<RuleConfiguration<biome_js_analyze::options::NoTemplateCurlyInString>>,
-    #[doc = "Succinct description of the rule."]
+    #[doc = "Disallow unknown at-rules."]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub no_unknown_at_rule: Option<RuleConfiguration<biome_css_analyze::options::NoUnknownAtRule>>,
     #[doc = "Disallow unknown pseudo-class selectors."]
@@ -3549,6 +3549,7 @@ impl Nursery {
         "noDuplicateProperties",
         "noDuplicatedFields",
         "noMissingVarFunction",
+        "noUnknownAtRule",
         "noUnknownPseudoClass",
         "noUnknownPseudoElement",
         "noUnknownTypeSelector",
@@ -3566,6 +3567,7 @@ impl Nursery {
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[6]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[7]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[16]),
+        RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[26]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[27]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[28]),
         RuleFilter::Rule(Self::GROUP_NAME, Self::GROUP_RULES[29]),

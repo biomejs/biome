@@ -1331,7 +1331,7 @@ export interface Nursery {
 	 */
 	noTemplateCurlyInString?: RuleConfiguration_for_Null;
 	/**
-	 * Succinct description of the rule.
+	 * Disallow unknown at-rules.
 	 */
 	noUnknownAtRule?: RuleConfiguration_for_Null;
 	/**

@@ -1,39 +1,49 @@
-use biome_analyze::{context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic};
+use biome_analyze::{
+    context::RuleContext, declare_lint_rule, Ast, Rule, RuleDiagnostic, RuleSource,
+};
 use biome_console::markup;
 use biome_css_syntax::{CssUnknownBlockAtRule, CssUnknownValueAtRule};
 use biome_rowan::{declare_node_union, AstNode, TextRange};
 
 declare_lint_rule! {
-    /// Succinct description of the rule.
+    /// Disallow unknown at-rules.
     ///
-    /// Put context and details about the rule.
-    /// As a starting point, you can take the description of the corresponding _ESLint_ rule (if any).
-    ///
-    /// Try to stay consistent with the descriptions of implemented rules.
-    ///
-    /// Add a link to the corresponding stylelint rule (if any):
+    /// This rule considers at-rules defined in the CSS Specifications, up to and including Editor's Drafts, to be known.
+    /// For details on known at-rules, see the [MDN web docs](https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule).
     ///
     /// ## Examples
     ///
     /// ### Invalid
     ///
     /// ```css,expect_diagnostic
-    /// p {}
+    /// @uNkNoWn {}
+    /// ```
+    ///
+    /// ```css,expect_diagnostic
+    /// @unknown-at-rule {
+    ///   font-size: 14px;
+    /// }
     /// ```
     ///
     /// ### Valid
     ///
     /// ```css
-    /// p {
-    ///   color: red;
-    /// }
+    /// @charset 'UTF-8';
     /// ```
     ///
+    /// ```css
+    /// @media (max-width: 960px) {
+    ///   body {
+    ///     font-size: 13px;
+    ///   }
+    /// }
+    /// ```
     pub NoUnknownAtRule {
         version: "next",
         name: "noUnknownAtRule",
         language: "css",
-        recommended: false,
+        recommended: true,
+        sources: &[RuleSource::Stylelint("at-rule-no-unknown")],
     }
 }
 
