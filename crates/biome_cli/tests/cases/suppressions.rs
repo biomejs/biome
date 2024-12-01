@@ -368,11 +368,45 @@ let bar = 33;",
         Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
     );
 
-    assert!(result.is_ok(), "run_cli returned {result:?}");
+    assert!(result.is_err(), "run_cli returned {result:?}");
 
     assert_cli_snapshot(SnapshotPayload::new(
         module_path!(),
         "misplaced_top_level_suppression",
+        fs,
+        console,
+        result,
+    ));
+}
+
+#[test]
+fn unused_range_suppression() {
+    let mut fs = MemoryFileSystem::default();
+    let mut console = BufferConsole::default();
+
+    let file_path = Path::new("file.js");
+    fs.insert(
+        file_path.into(),
+        *b"
+// biome-ignore-all lint/suspicious/noDoubleEquals: single rule
+a == b;
+// biome-ignore-start lint/suspicious/noDoubleEquals: single rule
+a == b;
+a == b;
+// biome-ignore-end lint/suspicious/noDoubleEquals: single rule",
+    );
+
+    let (fs, result) = run_cli(
+        fs,
+        &mut console,
+        Args::from(["lint", file_path.as_os_str().to_str().unwrap()].as_slice()),
+    );
+
+    assert!(result.is_ok(), "run_cli returned {result:?}");
+
+    assert_cli_snapshot(SnapshotPayload::new(
+        module_path!(),
+        "unused_range_suppression",
         fs,
         console,
         result,

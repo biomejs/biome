@@ -39,22 +39,36 @@ impl<'a> Suppression<'a> {
     // pub fn categories(&self)
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum SuppressionKind {
     /// Suppressions that start with `// biome-ignore`
     Classic,
     /// Suppressions that start with `// biome-ignore-all`
     All,
+    /// Suppressions that start with `// biome-ignore-start`
+    RangeStart,
+    /// Suppressions that start with `// biome-ignore-end`
+    RangeEnd,
 }
 
 impl SuppressionKind {
-    fn text_len(&self) -> TextSize {
+    pub fn as_str(&self) -> &str {
         match self {
-            SuppressionKind::Classic => "biome-ignore".text_len(),
-            SuppressionKind::All => "biome-ignore-all".text_len(),
+            SuppressionKind::Classic => "biome-ignore",
+            SuppressionKind::All => "biome-ignore-all",
+            SuppressionKind::RangeStart => "biome-ignore-start",
+            SuppressionKind::RangeEnd => "biome-ignore-end",
         }
     }
+
+    fn text_len(&self) -> TextSize {
+        self.as_str().text_len()
+    }
 }
+
+const ALL_PATTERNS: [&str; 2] = ["-ALL", "-all"];
+const RANGE_START_PATTERNS: [&str; 2] = ["-START", "-start"];
+const RANGE_END_PATTERNS: [&str; 2] = ["-END", "-end"];
 
 pub fn parse_suppression_comment(
     base: &str,
@@ -122,27 +136,36 @@ pub fn parse_suppression_comment(
             line = line.strip_prefix(pattern)?;
         }
 
-        if line.starts_with("-all") {
-            kind = SuppressionKind::All;
-            line = line.strip_prefix("-all")?.trim_start();
+        for all_pattern in ALL_PATTERNS {
+            if let Some(result) = line.strip_prefix(all_pattern) {
+                kind = SuppressionKind::All;
+                line = result;
+            }
         }
 
-        if line.starts_with("-ALL") {
-            kind = SuppressionKind::All;
-            line = line.strip_prefix("-ALL")?.trim_start();
+        for start_pattern in RANGE_START_PATTERNS {
+            if let Some(result) = line.strip_prefix(start_pattern) {
+                kind = SuppressionKind::RangeStart;
+                line = result;
+            }
+        }
+
+        for end_patter in RANGE_END_PATTERNS {
+            if let Some(result) = line.strip_prefix(end_patter) {
+                kind = SuppressionKind::RangeEnd;
+                line = result;
+            }
         }
 
         let line = line.trim_start();
-        let range = match kind {
-            SuppressionKind::Classic => base.find("biome-ignore"),
-            SuppressionKind::All => base.find("biome-ignore-all"),
-        }
-        .map(|start| {
-            let start = TextSize::from(start as u32);
-            let end = start.add(kind.text_len());
-            TextRange::new(start, end)
-        })
-        .expect("To find the suppression prefix");
+        let range = base
+            .find(kind.as_str())
+            .map(|start| {
+                let start = TextSize::from(start as u32);
+                let end = start.add(kind.text_len());
+                TextRange::new(start, end)
+            })
+            .expect("To find the suppression prefix");
         Some(
             parse_suppression_line(line, kind, range).map_err(|err| SuppressionDiagnostic {
                 message: err.message,
@@ -316,6 +339,69 @@ fn offset_from(base: &str, substr: &str) -> TextSize {
     // SAFETY: the conversion from `usize` to `TextSize` can fail if `offset`
     // is larger than 2^32
     TextSize::try_from(offset).expect("TextSize overflow")
+}
+
+#[cfg(test)]
+mod tests_suppression_kinds {
+    use crate::{parse_suppression_comment, Suppression, SuppressionKind};
+    use biome_diagnostics::category;
+    use biome_rowan::{TextRange, TextSize};
+
+    #[test]
+    fn classic() {
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore format lint: explanation")
+                .collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![(category!("format"), None), (category!("lint"), None)],
+                reason: "explanation",
+                kind: SuppressionKind::Classic,
+                range: TextRange::new(TextSize::from(3), TextSize::from(15))
+            })],
+        );
+    }
+
+    #[test]
+    fn all() {
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore-all format lint: explanation")
+                .collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![(category!("format"), None), (category!("lint"), None)],
+                reason: "explanation",
+                kind: SuppressionKind::All,
+                range: TextRange::new(TextSize::from(3), TextSize::from(19))
+            })],
+        );
+    }
+
+    #[test]
+    fn range_start() {
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore-start format lint: explanation")
+                .collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![(category!("format"), None), (category!("lint"), None)],
+                reason: "explanation",
+                kind: SuppressionKind::RangeStart,
+                range: TextRange::new(TextSize::from(3), TextSize::from(21))
+            })],
+        );
+    }
+
+    #[test]
+    fn range_end() {
+        assert_eq!(
+            parse_suppression_comment("// biome-ignore-end format lint: explanation")
+                .collect::<Vec<_>>(),
+            vec![Ok(Suppression {
+                categories: vec![(category!("format"), None), (category!("lint"), None)],
+                reason: "explanation",
+                kind: SuppressionKind::RangeEnd,
+                range: TextRange::new(TextSize::from(3), TextSize::from(19))
+            })],
+        );
+    }
 }
 
 #[cfg(test)]
