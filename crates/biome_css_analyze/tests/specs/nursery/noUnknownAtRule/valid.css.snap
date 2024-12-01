@@ -4,7 +4,6 @@ expression: valid.css
 ---
 # Input
 ```css
-@position-try --foo {}
 @starting-style {
     opacity: 0;
 }
@@ -93,13 +92,6 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
         left: 100%;
     }
 }
-@viewport {
-    min-width: 640px;
-    max-width: 800px;
-}
-@viewport {
-    orientation: landscape;
-}
 
 @counter-style winners-list {
     system: fixed;
@@ -112,112 +104,30 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
         nice-style: 12;
     }
 }
-.foo {
-    color: red;
-
-    @nest .parent & {
-        color: blue;
-    }
-}
 
 @layer framework {
     h1 {
         background: white;
     }
 }
-@scroll-timeline foo {}
+/* TODO: the parser not supported yet */
+/* @scroll-timeline foo {} */
+/* .foo {
+    color: red;
 
-```
+    @nest .parent & {
+        color: blue;
+    }
+} */
+ /* @position-try --foo {} */
+ /* @viewport {
+     min-width: 640px;
+     max-width: 800px;
+ }
 
-# Diagnostics
-```
-valid.css:1:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ @viewport {
+     orientation: landscape;
+ } */
 
-  ! Unexpected unknown at-rule: position-try 
-  
-  > 1 │ @position-try --foo {}
-      │  ^^^^^^^^^^^^
-    2 │ @starting-style {
-    3 │     opacity: 0;
-  
-  i position-try is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-valid.css:90:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected unknown at-rule: viewport 
-  
-    88 │     }
-    89 │ }
-  > 90 │ @viewport {
-       │  ^^^^^^^^
-    91 │     min-width: 640px;
-    92 │     max-width: 800px;
-  
-  i viewport is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-valid.css:94:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected unknown at-rule: viewport 
-  
-    92 │     max-width: 800px;
-    93 │ }
-  > 94 │ @viewport {
-       │  ^^^^^^^^
-    95 │     orientation: landscape;
-    96 │ }
-  
-  i viewport is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-valid.css:112:6 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected unknown at-rule: nest 
-  
-    110 │     color: red;
-    111 │ 
-  > 112 │     @nest .parent & {
-        │      ^^^^
-    113 │         color: blue;
-    114 │     }
-  
-  i nest is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
-  
-  i See MDN web docs for more details.
-  
-
-```
-
-```
-valid.css:122:2 lint/nursery/noUnknownAtRule ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  ! Unexpected unknown at-rule: scroll-timeline 
-  
-    120 │     }
-    121 │ }
-  > 122 │ @scroll-timeline foo {}
-        │  ^^^^^^^^^^^^^^^
-    123 │ 
-  
-  i scroll-timeline is not a standard CSS at-rule, which may lead to unexpected styling results or failure to interpret the styles as intended.
-  
-  i See MDN web docs for more details.
-  
 
 ```

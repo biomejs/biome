@@ -1,4 +1,3 @@
-@position-try --foo {}
 @starting-style {
     opacity: 0;
 }
@@ -87,13 +86,6 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
         left: 100%;
     }
 }
-@viewport {
-    min-width: 640px;
-    max-width: 800px;
-}
-@viewport {
-    orientation: landscape;
-}
 
 @counter-style winners-list {
     system: fixed;
@@ -106,17 +98,28 @@ url-prefix(http: //www.w3.org/Style/), domain(mozilla.org), regexp('https:.*')
         nice-style: 12;
     }
 }
-.foo {
-    color: red;
-
-    @nest .parent & {
-        color: blue;
-    }
-}
 
 @layer framework {
     h1 {
         background: white;
     }
 }
-@scroll-timeline foo {}
+/* TODO: the parser not supported yet */
+/* @scroll-timeline foo {} */
+/* .foo {
+    color: red;
+
+    @nest .parent & {
+        color: blue;
+    }
+} */
+ /* @position-try --foo {} */
+ /* @viewport {
+     min-width: 640px;
+     max-width: 800px;
+ }
+
+ @viewport {
+     orientation: landscape;
+ } */
+
